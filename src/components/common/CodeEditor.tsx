@@ -1,7 +1,6 @@
-import React, { useState } from 'react';
-import CodeMirror, { EditorView } from '@uiw/react-codemirror';  // Correct import
-import { oneDark } from '@codemirror/theme-one-dark';
 import { javascript } from '@codemirror/lang-javascript';
+import { oneDark } from '@codemirror/theme-one-dark';
+import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct import
 
 const CodeEditor = ({ formik, field, height, fontSize, readOnly }: any) => {
 
