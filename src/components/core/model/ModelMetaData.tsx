@@ -1,0 +1,781 @@
+import React, { useEffect, useRef, useState } from "react";
+import { useLazyGetmodulesQuery } from "@/redux/api/moduleApi";
+import { useFormik } from "formik";
+import * as Yup from "yup";
+import { InputText } from "primereact/inputtext";
+import { Button } from "primereact/button";
+import { classNames } from "primereact/utils";
+import { Message } from "primereact/message";
+import { Toast } from "primereact/toast";
+import { usePathname, useRouter } from "next/navigation";
+import qs from "qs";
+import { getSingularAndPlural } from "@/helpers/helpers";
+import { InputTextarea } from "primereact/inputtextarea";
+import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
+import { Checkbox } from "primereact/checkbox";
+import { SingleSelectAutoCompleteField } from "@/components/common/SingleSelectAutoCompleteField";
+import { Messages } from "primereact/messages";
+import { useMountEffect } from "primereact/hooks";
+import { useGetModelsQuery } from "@/redux/api/modelApi";
+
+const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allModelsNames, deleteModelFunction, nextTab, formikModelMetadataRef,params }: any, ref) => {
+
+  // const ModelMetaData = ({ modelMetaData, setModelMetaData, deleteModelFunction, nextTab, formikModelMetadataRef }: any) => {   
+
+
+
+  const router = useRouter();
+  const toast = useRef<Toast>(null);
+  const pathname = usePathname();
+
+  const [triggerGetModules, { data: moduleData, isFetching: isModuleFetching, error: moduleError }] = useLazyGetmodulesQuery();
+  const { data: fieldDefaultMetaData, isLoading, error, refetch } = useGetFieldDefaultMetaDataQuery(null);
+
+
+  const dataSourceTypes = [
+    { label: "Mysql", value: "mysql" },
+    { label: "Postgres", value: "postgres" },
+    { label: "Mssql", value: "mssql" },
+    { label: "Oracle", value: "oracle" },
+    { label: "Mariadb", value: "mariadb" },
+  ];
+
+
+
+  const initialValues = {
+    singularName: modelMetaData ? modelMetaData?.singularName : "",
+    pluralName: modelMetaData ? modelMetaData?.pluralName : "",
+    displayName: modelMetaData ? modelMetaData?.displayName : "",
+    description: modelMetaData ? modelMetaData?.description : "",
+    dataSource: modelMetaData ? modelMetaData?.dataSource : "",
+    dataSourceType: modelMetaData ? modelMetaData?.dataSourceType : "",
+    tableName: modelMetaData ? modelMetaData?.tableName : "",
+    moduleId: modelMetaData ? modelMetaData?.module?.id : "",
+    module: modelMetaData ? modelMetaData?.module : "",
+    isSystem: modelMetaData ? modelMetaData?.isSystem : false,
+    enableSoftDelete: modelMetaData ? modelMetaData?.enableSoftDelete : "",
+    enableAuditTracking: modelMetaData ? modelMetaData?.enableAuditTracking : "",
+    internationalisation: modelMetaData ? modelMetaData?.internationalisation : "",
+    isExportable: modelMetaData ? modelMetaData?.isExportable : "",
+    hasUserKey: modelMetaData ? modelMetaData?.hasUserKey : "",
+    userKeyFieldId: modelMetaData ? modelMetaData.userKeyFieldId : "",
+  };
+
+  const [showTableName, setShowTableName] = useState<any>(false);
+  const [showUserKeyField, setShowUserKeyField] = useState<any>(modelMetaData?.hasUserKey == true ? true : false);
+
+
+  useEffect(() => {
+    if (modelMetaData && modelMetaData.tableName) {
+      setShowTableName(true)
+    }
+  }, [modelMetaData])
+
+  const validationSchema = Yup.object({
+    singularName: Yup.string()
+      // .matches(
+      //   /^[a-z]+(-[a-z]+)*$/,
+      //   "Invalid format. Use lowercase letters and hyphens only."
+      // )
+      .notOneOf(allModelsNames, "Name already in use. Please choose a different name.")
+      .required("Singular Name is required."),
+    pluralName: Yup.string()
+      // .matches(
+      //   /^[a-z]+(-[a-z]+)*$/,
+      //   "Invalid format. Use lowercase letters and hyphens only."
+      // )
+      .required("Plural Name is required."),
+    tableName: Yup.string().nullable()
+      .matches(
+        /^[a-z0-9_]+$/,
+        "Table name must be in snake_case (lowercase letters, numbers, and underscores only)."
+      ),
+    displayName: Yup.string().required("Display Name is required"),
+    description: Yup.string().required("Description Name is required"),
+    dataSource: Yup.string().required("Data Source is required"),
+    dataSourceType: Yup.string().required("Data Source Type is required"),
+    moduleId: Yup.number().required("Module Id is required"),
+    module: Yup.object().required("Module is required"),
+    isSystem: Yup.boolean(),
+    enableSoftDelete: Yup.boolean(),
+    enableAuditTracking: Yup.boolean(),
+    internationalisation: Yup.boolean(),
+    isExportable: Yup.boolean(),
+  });
+
+
+
+  const isFormFieldValid = (formik: any, fieldName: string) =>
+    formik.touched[fieldName] && formik.errors[fieldName];
+
+  const formik = useFormik({
+    initialValues,
+    validationSchema,
+    validateOnChange: true, // This ensures validation runs when a field value is changed
+    enableReinitialize: true,
+    innerRef: formikModelMetadataRef,
+    onSubmit: async (values) => {
+      try {
+        const modelData = {
+          ...modelMetaData,
+          singularName: values.singularName,
+          pluralName: values.pluralName,
+          displayName: values.displayName,
+          description: values.description,
+          dataSource: values.dataSource,
+          dataSourceType: values.dataSourceType,
+          tableName: showTableName === true ? values?.tableName : null,
+          moduleId: values.moduleId,
+          module: values.module,
+          isSystem: values.isSystem ? values.isSystem === true : '',
+          enableSoftDelete: values.enableSoftDelete === true ? true : '',
+          enableAuditTracking: values.enableAuditTracking === true ? true : '',
+          internationalisation: values.internationalisation === true ? true : '',
+          isExportable: values.isExportable === true ? true : '',
+          hasUserKey: values.hasUserKey === true ? true : '',
+          // userKeyFieldId :"",
+        };
+
+        setModelMetaData(modelData);
+        nextTab()
+
+      } catch (err) {
+        console.error("Failed to create Radix Model:", err);
+      }
+    },
+  });
+
+  const showError = async () => {
+    const errors = await formik.validateForm(); // Trigger validation and get the updated errors
+    const errorMessages = Object.values(errors);
+    if (errorMessages.length > 0) {
+      toast?.current?.show({
+        severity: "error",
+        summary: "Can you send me the report?",
+        // sticky: true,
+        life: 3000,
+        //@ts-ignore
+        content: (props) => (
+          <div
+            className="flex flex-column align-items-left"
+            style={{ flex: "1" }}
+          >
+            {errorMessages.map((m, index) => (
+              <div className="flex align-items-center gap-2" key={index}>
+                <span className="font-bold text-900">{String(m)}</span>
+              </div>
+            ))}
+          </div>
+        ),
+      });
+    }
+  };
+
+
+  const searchModule = async (event: any) => {
+    try {
+      const query = event.query;
+      const queryData = {
+        limit: 10,
+        offset: 0,
+        filters: {
+          name: {
+            $containsi: query,
+          },
+        },
+      };
+
+      const queryString = qs.stringify(queryData, {
+        encodeValuesOnly: true,
+      });
+
+      const result = await triggerGetModules(queryString).unwrap();
+
+      if (result && result.records) {
+        const updatedSuggestion = [...result.records];
+        return updatedSuggestion
+      } else {
+        return []
+      }
+    } catch (error) {
+      return []
+    }
+  };
+
+
+  const serachDataSource = async (event: any) => {
+    const query = event.query;
+    try {
+      const filterredData: any = fieldDefaultMetaData.data.dataSource.filter((t: any) => t.name.toLowerCase().startsWith(query.toLowerCase()));
+      const transformedData = filterredData.map((e: any) => ({ label: e.name, value: e.name, type: e.type }));
+      return transformedData
+    } catch (error) {
+      console.error("Error fetching items:", error);
+      return []
+    }
+  };
+
+
+  const serachDataSourceType = async (event: any) => {
+    const query = event.query;
+    try {
+
+      const filterredData: any = fieldDefaultMetaData.data.dataSource.filter((t: any) => t.type.toLowerCase().startsWith(query.toLowerCase()));
+      const transformedData = filterredData.map((e: any) => ({ label: e.type, value: e.type }))
+      return transformedData;
+    } catch (error) {
+      console.error("Error fetching items:", error);
+      return [];
+
+    }
+  };
+
+
+  // useEffect(() => {
+  //   if (modelMetaData) {
+  //     setModelMetaData(modelMetaData.parentCategoryId);
+
+  //     // formik.setFieldValue("parentCategoryId", modelMetaData.parentCategoryId);
+  //   }
+  // }, [modelMetaData])
+
+
+  // Set the formik reference to the formik instance
+  // Set the formik reference to the formik instance
+  useEffect(() => {
+    if (formikModelMetadataRef) {
+      formikModelMetadataRef.current = formik; // Assign the formik instance to the ref
+    }
+  }, [formik, formikModelMetadataRef]);
+
+
+  const renderCount = useRef(0);
+
+  useEffect(() => {
+    renderCount.current += 1; // Increment count on every render
+    console.log(`Component rendered ${renderCount.current} times`);
+  });
+
+
+  useEffect(() => {
+    formik.validateForm();
+    setModelMetaData(formik.values);
+
+  }, [formik.values])
+
+  return (
+
+    <>
+
+      <div className="grid">
+        <div className="col-12 xl:col-12 mx-auto">
+          <div>
+            <Toast ref={toast} />
+            <form onSubmit={formik.handleSubmit}>
+              {params.id === "new" ? <div className="flex gap-3 justify-content-between mb-5">
+                <div className="form-wrapper-title" style={{ color: '#000' }}> Create Model</div>
+                <div>
+                  {/* <Button label="Save" size="small" onClick={() => showError()} type="submit" className="small-button" /> */}
+                </div>
+              </div> :
+                <div className="flex gap-3 justify-content-end mb-5">
+                  {/* <h3 className="m-0">Model</h3> */}
+                  <div className="gap-3 flex">
+                    {/* <div>
+                      <Button label="Save" onClick={() => showError()} type="submit" size="small" className="small-button" />
+                    </div> */}
+                    {/* <div>
+                    <Button outlined label="Delete" severity="danger" type="button" onClick={deleteModelFunction} />
+                  </div> */}
+                  </div>
+                </div>
+              }
+              {/* <div className="form-wrapper-subtitle">Name</div> */}
+              <div className="">
+                <div className="grid formgrid">
+                  <div className="md:col-6 sm:col-12">
+                    <div className="form-wrapper">
+                      <p className="form-wrapper-heading">Advanced Settings</p>
+                      <div className="field">
+                        <label htmlFor="type" className="form-label form-field-label">
+                          Module
+                        </label>
+                        <div>
+                          <SingleSelectAutoCompleteField
+                            disabled={params.id !== 'new'}
+                            key="module"
+                            formik={formik}
+                            isFormFieldValid={isFormFieldValid}
+                            relationField={true}
+                            fieldName="module"
+                            fieldNameId="moduleId"
+                            labelKey="displayName"
+                            valueKey="id"
+                            searchData={searchModule}
+                            existingData={formik.values.module}
+                          />
+                          {isFormFieldValid(formik, "module") && (
+                            <Message severity="error" text={formik?.errors?.moduleId?.toString()} />
+                          )}
+                        </div>
+                      </div>
+
+                      <div className="field mt-3">
+                        <label htmlFor="dataSource" className="form-label form-field-label">
+                          Data Source
+                        </label>
+                        <div>
+
+                          <SingleSelectAutoCompleteField
+                            disabled={params.id !== 'new'}
+                            key="dataSource"
+                            formik={formik}
+                            isFormFieldValid={isFormFieldValid}
+                            // relationField={false}
+                            fieldName="dataSource"
+                            fieldNameId={null}
+                            labelKey="label"
+                            valueKey="value"
+                            searchData={serachDataSource}
+                            existingData={formik.values.dataSource}
+                            additionalAction={(e: any) => formik.setFieldValue("dataSourceType", e.target.value.type)}
+                          />
+
+
+                          {isFormFieldValid(formik, "dataSource") && (
+                            <Message severity="error" text={formik?.errors?.dataSource?.toString()} />
+                          )}
+                        </div>
+                      </div>
+
+
+                      <div className="field mt-3">
+                        <label htmlFor="dataSourceType" className="form-label form-field-label">
+                          Data Source Type
+                        </label>
+                        <div>
+                          {/* <SingleSelectAutoCompleteField
+                            key="dataSourceType"
+                            formik={formik}
+                            isFormFieldValid={isFormFieldValid}
+                            // relationField={false}
+                            fieldName="dataSourceType"
+                            fieldNameId={null}
+                            labelKey="label"
+                            valueKey="value"
+                            searchData={serachDataSourceType}
+                            existingData={formik.values.dataSourceType}
+                          /> */}
+                          <InputText
+                            disabled
+                            type="text"
+                            id="dataSourceType"
+                            name="dataSourceType"
+                            onChange={formik.handleChange}
+                            value={formik.values.dataSourceType}
+                            className={classNames("p-inputtext-sm w-full small-input", {
+                              "p-invalid": isFormFieldValid(formik, "dataSourceType"),
+                            })}
+                          />
+
+
+                          {isFormFieldValid(formik, "dataSourceType") && (
+                            <Message severity="error" text={formik?.errors?.dataSourceType?.toString()} />
+                          )}
+                        </div>
+                      </div>
+                    </div>
+                    <div className="form-wrapper mt-4">
+                      <p className="form-wrapper-heading">Configurations</p>
+
+                      <div className="grid formgrid">
+                        {params.id === 'new' &&
+
+                          <div className="md:col-6 sm:col-12">
+                            <div className="field">
+                              <div className="flex align-items-center">
+                                <Checkbox
+                                  disabled={params.id !== 'new'}
+                                  name="isSystem"
+                                  onChange={(e) => {
+                                    formik.setFieldValue("isSystem", e.checked);
+                                  }}
+                                  checked={formik.values.isSystem}
+                                ></Checkbox>
+                                <label htmlFor="isSystem" className="form-field-label ml-2">
+                                  Is System
+                                </label>
+                              </div>
+                              {isFormFieldValid(formik, "isSystem") && (
+                                <Message
+                                  severity="error"
+                                  text={formik?.errors?.isSystem?.toString()}
+                                />
+                              )}
+                            </div>
+                          </div>}
+                        <div className="md:col-6 sm:col-12">
+                          <div className="field">
+                            <div className="flex align-items-center">
+                              <Checkbox
+                                name="enableSoftDelete"
+                                onChange={(e) => {
+                                  formik.setFieldValue("enableSoftDelete", e.checked);
+                                }}
+                                checked={formik.values.enableSoftDelete}
+                              ></Checkbox>
+                              <label htmlFor="enableSoftDelete" className="form-field-label ml-2">
+                                Enable Soft Delete
+                              </label>
+                            </div>
+                            {isFormFieldValid(formik, "enableSoftDelete") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.enableSoftDelete?.toString()}
+                              />
+                            )}
+                          </div>
+                        </div>
+                        <div className="md:col-6 sm:col-12">
+                          <div className="field">
+                            <div className="flex align-items-center">
+                              <Checkbox
+                                name="enableAuditTracking"
+                                onChange={(e) => {
+                                  formik.setFieldValue("enableAuditTracking", e.checked);
+                                }}
+                                checked={formik.values.enableAuditTracking}
+                              ></Checkbox>
+                              <label htmlFor="enableAuditTracking" className="form-field-label ml-2">
+                                Enable Audit Tracking
+                              </label>
+                            </div>
+                            {isFormFieldValid(formik, "enableAuditTracking") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.enableAuditTracking?.toString()}
+                              />
+                            )}
+                          </div>
+                        </div>
+                        <div className="md:col-6 sm:col-12">
+                          <div className="field">
+                            <div className="flex align-items-center">
+                              <Checkbox
+                                name="internationalisation"
+                                onChange={(e) => {
+                                  formik.setFieldValue("internationalisation", e.checked);
+                                }}
+                                checked={formik.values.internationalisation}
+                              ></Checkbox>
+                              <label htmlFor="internationalisation" className="form-field-label ml-2">
+                                Internationalisation
+                              </label>
+                            </div>
+                            {isFormFieldValid(formik, "internationalisation") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.internationalisation?.toString()}
+                              />
+                            )}
+                          </div>
+                        </div>
+
+                        <div className="md:col-6 sm:col-12">
+                          <div className="field">
+                            <div className="flex align-items-center">
+                              <Checkbox
+                                name="isExportable"
+                                onChange={(e) => {
+                                  formik.setFieldValue("isExportable", e.checked);
+                                }}
+                                checked={formik.values.isExportable}
+                              ></Checkbox>
+                              <label htmlFor="isExportable" className="form-field-label ml-2">
+                                Is Exportable
+                              </label>
+                            </div>
+                            {isFormFieldValid(formik, "isExportable") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.isExportable?.toString()}
+                              />
+                            )}
+                          </div>
+                        </div>
+                        <div className="md:col-6 sm:col-12">
+                          <div className="field">
+                            <div className="flex align-items-center">
+
+                              <div className="flex align-items-bottom">
+                                <Checkbox onChange={e => {
+                                  setShowUserKeyField(e.checked);
+                                  formik.setFieldValue("hasUserKey", e.checked);
+                                }} checked={showUserKeyField}></Checkbox>
+                                <label htmlFor="ingredient1" className="form-field-label ml-2">
+                                  Has User Key
+                                </label>
+                              </div>
+                            </div>
+                          </div>
+                          {showUserKeyField &&
+                            <div className="field mt-3">
+                              <label htmlFor="userKeyFieldId" className="form-label form-field-label">
+                                User Key Field
+                              </label>
+                              <InputText
+                                type="text"
+                                id="userKeyFieldId"
+                                name="userKeyFieldId"
+                                onChange={formik.handleChange}
+                                value={formik.values.userKeyFieldId}
+                                className={classNames("p-inputtext-sm w-full small-input", {
+                                  "p-invalid": isFormFieldValid(formik, "userKeyFieldId"),
+                                })}
+                              />
+                              {isFormFieldValid(formik, "userKeyFieldId") && (
+                                <Message
+                                  severity="error"
+                                  text={formik?.errors?.userKeyFieldId?.toString()}
+                                />
+                              )}
+                            </div>
+                          }
+                        </div>
+
+                      </div>
+
+                    </div>
+                  </div>
+                  <div className="md:col-6 sm:col-12">
+                    <div className="form-wrapper">
+                      <p className="form-wrapper-heading">Basic Settings</p>
+                      <div className="field">
+                        <label htmlFor="displayName" className="form-label form-field-label">
+                          Display Name
+                        </label>
+                        <InputText
+                          type="text"
+                          id="displayName"
+                          name="displayName"
+                          onChange={(e) => {
+
+                            formik.handleChange(e);
+                            const { toCamelCase, toSnakeCase, toPluralCamelCase } = getSingularAndPlural(e.target.value);
+                            if (params.id === 'new') {
+                              formik.setFieldValue("singularName", toCamelCase);
+                              formik.setFieldValue("pluralName", toPluralCamelCase);
+                            }
+                            if (showTableName == true) {
+                              if (params.id === 'new') {
+                                formik.setFieldValue("tableName", toSnakeCase);
+                              }
+                            }
+
+
+                          }}
+                          value={formik.values.displayName}
+                          className={classNames("p-inputtext-sm w-full small-input", {
+                            "p-invalid": isFormFieldValid(formik, "displayName"),
+                          })}
+
+                        />
+
+                        {isFormFieldValid(formik, "displayName") && (
+                          <Message
+                            severity="error"
+                            text={formik?.errors?.displayName?.toString()}
+                          />
+                        )}
+                      </div>
+                      <div className="field mt-3">
+                        <label htmlFor="singularName" className="form-label form-field-label">
+                          Singular Name
+                        </label>
+                        <InputText
+                          disabled={true}
+                          type="text"
+                          id="singularName"
+                          name="singularName"
+                          onChange={formik.handleChange}
+                          value={formik.values.singularName}
+                          className={classNames("p-inputtext-sm w-full small-input", {
+                            "p-invalid": isFormFieldValid(formik, "singularName"),
+                          })}
+                        />
+                        {isFormFieldValid(formik, "singularName") && (
+                          <Message
+                            severity="error"
+                            text={formik?.errors?.singularName?.toString()}
+                          />
+                        )}
+                      </div>
+                      <div className="field mt-3">
+                        <label htmlFor="pluralName" className="form-label form-field-label">
+                          Plural Name
+                        </label>
+                        <InputText
+                          disabled={true}
+                          type="text"
+                          id="pluralName"
+                          name="pluralName"
+                          onChange={formik.handleChange}
+                          value={formik.values.pluralName}
+                          className={classNames("p-inputtext-sm w-full small-input", {
+                            "p-invalid": isFormFieldValid(formik, "pluralName"),
+                          })}
+                        />
+                        {isFormFieldValid(formik, "pluralName") && (
+                          <Message severity="error" text={formik?.errors?.pluralName?.toString()} />
+                        )}
+                      </div>
+
+                      <div className="field mt-5">
+                        <div className="flex align-items-center">
+
+                          <div className="flex align-items-center">
+                            <Checkbox onChange={e => {
+                              setShowTableName(e.checked);
+                              if (e.checked === true) {
+                                const { toCamelCase, toSnakeCase, toPluralCamelCase } = getSingularAndPlural(formik.values.displayName);
+                                if (params.id === 'new') {
+                                  formik.setFieldValue("tableName", toSnakeCase);
+                                }
+                              }
+
+                            }} checked={showTableName}></Checkbox>
+                            <label htmlFor="ingredient1" className="ml-2">
+                              Set table name
+                            </label>
+                          </div>
+                        </div>
+                      </div>
+                      {showTableName &&
+                        <div className="field mt-3">
+                          <label htmlFor="tableName" className="form-label form-field-label">
+                            Table Name
+                          </label>
+                          <InputText
+                            disabled={params.id !== 'new'}
+                            type="text"
+                            id="tableName"
+                            name="tableName"
+                            onChange={formik.handleChange}
+                            value={formik.values.tableName}
+                            className={classNames("p-inputtext-sm w-full small-input", {
+                              "p-invalid": isFormFieldValid(formik, "tableName"),
+                            })}
+                          />
+                          {isFormFieldValid(formik, "tableName") && (
+                            <Message
+                              severity="error"
+                              text={formik?.errors?.tableName?.toString()}
+                            />
+                          )}
+                        </div>
+                      }
+                      <div className="field mt-3">
+                        <label htmlFor="description" className="form-label form-field-label">
+                          Description
+                        </label>
+                        {/* <InputText
+                      type="text"
+                      id="description"
+                      name="description"
+                      onChange={formik.handleChange}
+                      value={formik.values.description}
+                      className={classNames("p-inputtext-sm w-full small-input", {
+                        "p-invalid": isFormFieldValid(formik, "description"),
+                      })}
+                    /> */}
+                        <InputTextarea
+                          id="description"
+                          name="description"
+                          onChange={formik.handleChange}
+                          value={formik.values.description}
+                          className={classNames("p-inputtext-sm w-full", {
+                            "p-invalid": isFormFieldValid(formik, "description"),
+                          })}
+                          rows={5}
+                          cols={30}
+                        />
+                        {isFormFieldValid(formik, "description") && (
+                          <Message
+                            severity="error"
+                            text={formik?.errors?.description?.toString()}
+                          />
+                        )}
+                      </div>
+                    </div>
+                  </div>
+
+                  {/* <div className="md:col-6 sm:col-12">
+                  <div className="field">
+                    <label htmlFor="pluralName" className="form-label form-field-label">
+                      Plural Name
+                    </label>
+                    <InputText
+                      type="text"
+                      id="pluralName"
+                      name="pluralName"
+                      onChange={formik.handleChange}
+                      value={formik.values.pluralName}
+                      className={classNames("p-inputtext-sm w-full small-input", {
+                        "p-invalid": isFormFieldValid(formik, "pluralName"),
+                      })}
+                    />
+                    {isFormFieldValid(formik, "pluralName") && (
+                      <Message severity="error" text={formik?.errors?.pluralName?.toString()} />
+                    )}
+                  </div>
+                </div> */}
+
+
+                  {/* <div className="md:col-6 sm:col-12">
+                  <div className="field form-dropdown-select">
+                    <label htmlFor="dataSourceType" className="form-labe form-field-label">
+                      Data Source
+                    </label>
+                    <Dropdown
+                      id="dataSourceType"
+                      name="dataSourceType"
+                      value={formik.values.dataSourceType}
+                      options={dataSourceTypes}
+                      onChange={(e) => {
+                        formik.setFieldValue("dataSourceType", e.value);
+                        // if (e.value == "mariadb") {
+                        //   formik.setFieldValue("dataSourceType", "mongodb");
+                        // }
+                        // else {
+                        //   formik.setFieldValue("dataSourceType", "rdbms");
+                        // }
+                      }
+                      }
+                      placeholder="Select a Data Source"
+                      className={classNames("p-inputtext-sm w-full", {
+                        "p-invalid": isFormFieldValid(formik, "dataSource"),
+                      })}
+                    />
+                    {isFormFieldValid(formik, "dataSource") && (
+                      <Message severity="error" text={formik?.errors?.dataSource?.toString()} />
+                    )}
+                  </div>
+                </div> */}
+
+
+                </div>
+              </div>
+            </form>
+          </div>
+        </div >
+      </div >
+
+
+    </>
+
+  );
+});
+
+// };
+
+export default ModelMetaData;
