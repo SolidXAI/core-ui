@@ -1,11 +1,11 @@
-import { useAppSelector } from "@/redux/hooks";
+// import { useAppSelector } from "@/redux/hooks";
 import { signOut } from "next-auth/react";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 
 const UserProfileMenu = () => {
-  const { user } = useAppSelector((state) => state.auth);
+  // const { user } = useAppSelector((state) => state.auth);
   const [checked, setChecked] = useState(false);
   const dispatch = useDispatch();
   const op = useRef(null);
@@ -80,7 +80,7 @@ const UserProfileMenu = () => {
                   </div>
                   <div className="flex flex-column align">
                     <span className="font-bold">User Name</span>
-                    <span className="text-sm">{user?.username}</span>
+                    {/* <span className="text-sm">{user?.username}</span> */}
                   </div>
                 </button>
               </li>

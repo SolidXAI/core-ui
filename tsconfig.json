@@ -17,6 +17,7 @@
     "rootDir": "./src",               // Root directory for source files
     "declaration": true,              // Generate TypeScript declaration files (.d.ts)
     "declarationMap": true,           // Generate declaration maps for debugging
+    "emitDeclarationOnly": false,
     "sourceMap": true,                // Generate source maps for debugging
     "plugins": [
       {

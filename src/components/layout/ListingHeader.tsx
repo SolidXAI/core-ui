@@ -1,7 +1,7 @@
 import React, { useRef, useState } from "react";
 import { Menu } from "primereact/menu";
 import { useDispatch, useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
+// import { RootState } from "@/redux/store";
 import { gridView, listView } from "@/redux/features/dataViewSlice";
 import { usePathname, useRouter } from 'next/navigation';
 import FilterMenu from "./FilterMenu";
@@ -14,7 +14,7 @@ const ListingHeader = () => {
 
 
   const visibleFieldsPopup = useSelector(
-    (state: RootState) => state.popup.visibleFieldsPopup
+    (state: any) => state.popup.visibleFieldsPopup
   );
 
   const menu = useRef<Menu>(null);

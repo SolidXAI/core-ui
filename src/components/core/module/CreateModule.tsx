@@ -8,7 +8,7 @@ import { handleError } from "@/helpers/ToastContainer";
 import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
 import { useDeleteMediaMutation } from "@/redux/api/mediaApi";
 import { useCreatemoduleMutation, useDeletemoduleMutation, useUpdatemoduleMutation } from "@/redux/api/moduleApi";
-import { RootState } from "@/redux/store";
+// import { RootState } from "@/redux/store";
 import { useFormik } from "formik";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "primereact/button";
@@ -82,7 +82,7 @@ const CreateModule = ({ data }: any) => {
   };
 
   const visibleModulePopup = useSelector(
-    (state: RootState) => state.popup.visibleModulePopup
+    (state: any) => state.popup.visibleModulePopup
   );
 
   const validationSchema = Yup.object({

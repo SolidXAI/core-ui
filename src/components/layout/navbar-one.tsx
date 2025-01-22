@@ -2,26 +2,26 @@ import { ToastContainer } from "@/helpers/ToastContainer";
 import { useGetSolidMenuBasedOnRoleQuery } from "@/redux/api/solidMenuApi";
 import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 import { setIsAuthenticated, setUser } from "@/redux/features/userSlice";
-import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { RootState } from "@/redux/store.js";
+// import { useAppDispatch } from "@/redux/hooks";
+// import { RootState } from "@/redux/store.js";
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "primereact/button";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
 import { InputText } from "primereact/inputtext";
 import { useEffect, useRef, useState } from "react";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import NavbarTwoMenu from "./navbar-two-menu";
 import UserProfileMenu from "./user-profile-menu";
 // import menu from "@/helpers/menu";
 
 const NavbarOne = () => {
-    const dispatch = useAppDispatch();
+    const dispatch = useDispatch();
 
-    const { user, isAuthenticated } = useAppSelector((state) => state.auth);
+    // const { user, isAuthenticated } = useAppSelector((state) => state.auth);
     // const [show, setShow] = useState(false);
     const visibleNavbar = useSelector(
-        (state: RootState) => state.navbarState.visibleNavbar
+        (state: any) => state.navbarState.visibleNavbar
     );
     const { data: menu } = useGetSolidMenuBasedOnRoleQuery("");
 
