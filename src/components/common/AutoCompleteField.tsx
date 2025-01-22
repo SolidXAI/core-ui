@@ -1,4 +1,5 @@
-"use client";
+'use client';
+
 import { AutoComplete } from "primereact/autocomplete";
 import { useEffect, useState } from "react";
 

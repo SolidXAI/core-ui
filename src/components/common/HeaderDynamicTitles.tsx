@@ -1,4 +1,5 @@
-"use client";
+'use client';
+
 import { usePathname } from 'next/navigation';
 export const HeaderDynamicTitles = () => {
     const path = usePathname();
