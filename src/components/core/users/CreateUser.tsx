@@ -1,3 +1,4 @@
+"use client";
 import { useEffect, useRef, useState } from "react";
 import { InputText } from "primereact/inputtext";
 import { useFormik } from "formik";

@@ -1,3 +1,4 @@
+"use client";
 import { Button } from 'primereact/button'
 import { InputText } from 'primereact/inputtext'
 

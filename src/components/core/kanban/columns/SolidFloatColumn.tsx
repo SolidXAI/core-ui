@@ -1,3 +1,4 @@
+"use client";
 import { SolidKanbanViewColumnParams } from '../SolidKanbanViewSearchColumn';
 import SolidIntColumn from './SolidIntColumn';
 

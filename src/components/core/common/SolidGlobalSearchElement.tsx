@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import { Dialog } from "primereact/dialog";
 import { TabPanel, TabView } from "primereact/tabview";

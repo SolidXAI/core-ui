@@ -1,3 +1,4 @@
+"use client";
 import React from 'react';
 import { KanbanInputTypes, SolidKanbanVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 import { FilterMatchMode } from 'primereact/api';

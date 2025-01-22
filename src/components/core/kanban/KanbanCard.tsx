@@ -1,4 +1,5 @@
 // @ts-nocheck
+"use client";
 
 import React from "react";
 import { Draggable, DraggableProvided } from "@hello-pangea/dnd";

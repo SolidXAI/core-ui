@@ -1,3 +1,4 @@
+"use client";
 import { usePathname } from 'next/navigation'
 import { IconField } from 'primereact/iconfield'
 import { InputIcon } from 'primereact/inputicon'

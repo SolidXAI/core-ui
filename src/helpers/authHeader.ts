@@ -1,3 +1,4 @@
+"use client";
 import { cookies } from "next/headers";
 
 export const getAuthCookieName = () =>

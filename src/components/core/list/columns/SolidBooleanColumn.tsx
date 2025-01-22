@@ -1,3 +1,4 @@
+"use client";
 import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { Dropdown } from 'primereact/dropdown';
 import { SolidListViewColumnParams } from '../SolidListViewColumn';

@@ -1,3 +1,4 @@
+"use client";
 import { ToastContainer } from "@/helpers/ToastContainer";
 import { useGetSolidMenuBasedOnRoleQuery } from "@/redux/api/solidMenuApi";
 import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";

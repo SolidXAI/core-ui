@@ -1,3 +1,4 @@
+"use client";
 import React from 'react';
 import { FilterMatchMode } from 'primereact/api';
 import { Dropdown } from 'primereact/dropdown';

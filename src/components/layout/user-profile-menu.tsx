@@ -1,3 +1,4 @@
+"use client";
 // import { useAppSelector } from "@/redux/hooks";
 import { signOut } from "next-auth/react";
 import { OverlayPanel } from "primereact/overlaypanel";

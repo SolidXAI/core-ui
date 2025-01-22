@@ -1,3 +1,4 @@
+"use client";
 const countries = [
     { name: "+93 Afghanistan", code: "AF", numberCode: "+93" },
     { name: "Albania", code: "AL", numberCode: "+355" },

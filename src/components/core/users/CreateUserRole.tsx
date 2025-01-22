@@ -1,3 +1,4 @@
+"use client";
 import { AutoCompleteField } from "@/components/common/AutoCompleteField";
 import { CancelButton } from "@/components/common/CancelButton";
 import { useLazyGetrolesQuery } from "@/redux/api/roleApi";

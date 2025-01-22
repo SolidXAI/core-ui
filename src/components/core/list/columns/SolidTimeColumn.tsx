@@ -1,3 +1,4 @@
+"use client";
 import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { FormEvent } from "primereact/ts-helpers";
 import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewColumn';

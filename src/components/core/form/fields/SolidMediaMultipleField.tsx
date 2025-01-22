@@ -1,3 +1,4 @@
+"use client";
 import { DropzonePlaceholder } from "@/components/common/DropzonePlaceholder";
 import { DropzoneUpload } from "@/components/common/DropzoneUpload";
 import { useDeleteMediaMutation } from "@/redux/api/mediaApi";

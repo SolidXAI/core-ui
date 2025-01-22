@@ -1,3 +1,4 @@
+"use client";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { OverlayPanel } from "primereact/overlaypanel";

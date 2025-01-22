@@ -1,3 +1,4 @@
+"use client";
 import { Dialog } from "primereact/dialog";
 import { useState } from "react";
 

@@ -1,3 +1,4 @@
+"use client";
 import React from 'react';
 import { kanbanDateFilterMatchModeOptions } from './SolidDateColumn';
 import { getSolidKanbanViewNumberOfInputs, SolidKanbanViewColumnParams } from '../SolidKanbanViewSearchColumn';

@@ -1,3 +1,4 @@
+"use client";
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { SolidRelationManyToOneField } from "./relations/SolidRelationManyToOneField";

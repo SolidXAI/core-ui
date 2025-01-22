@@ -1,3 +1,4 @@
+"use client";
 import SolidShortTextColumn from './SolidShortTextColumn';
 import SolidIntColumn from './SolidIntColumn';
 import SolidDateColumn from './SolidDateColumn';

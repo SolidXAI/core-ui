@@ -1,3 +1,4 @@
+"use client";
 import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query';
 import { Toast } from 'primereact/toast';
 import React, { useRef } from 'react';

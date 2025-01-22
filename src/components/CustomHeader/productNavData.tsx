@@ -1,3 +1,4 @@
+"use client";
 import { PrimaryDataProps } from "./CustomDropdown";
 
 export const ProductNavData: PrimaryDataProps[] = [

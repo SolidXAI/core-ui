@@ -1,3 +1,4 @@
+"use client";
 import { useState } from "react";
 import { PanelMenu } from "primereact/panelmenu";
 import Link from "next/link";

@@ -1,3 +1,4 @@
+"use client";
 import { KanbanInputTypes, SolidKanbanVarInputsFilterElement } from '@/components/core/kanban/SolidVarInputsFilterElement';
 import { FilterMatchMode } from 'primereact/api';
 import { Dropdown } from 'primereact/dropdown';

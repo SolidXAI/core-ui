@@ -1,3 +1,4 @@
+"use client";
 import { SolidListView } from "@/components/core/list/SolidListView";
 import { camelCase } from "lodash";
 import { Dialog } from "primereact/dialog";

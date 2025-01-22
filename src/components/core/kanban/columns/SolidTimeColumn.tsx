@@ -1,3 +1,4 @@
+"use client";
 import { Dropdown } from 'primereact/dropdown';
 import { KanbanInputTypes, SolidKanbanVarInputsFilterElement } from '../../kanban/SolidVarInputsFilterElement';
 import { getSolidKanbanViewNumberOfInputs, SolidKanbanViewColumnParams } from '../SolidKanbanViewSearchColumn';

@@ -1,3 +1,4 @@
+"use client";
 import React, { useRef, useState } from "react";
 import { Menu } from "primereact/menu";
 import { useDispatch, useSelector } from "react-redux";

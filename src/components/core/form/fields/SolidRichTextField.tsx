@@ -1,3 +1,4 @@
+"use client";
 import { Editor } from "primereact/editor";
 import { Message } from "primereact/message";
 import { useState } from "react";

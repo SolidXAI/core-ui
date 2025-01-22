@@ -1,3 +1,4 @@
+"use client";
 import { Message } from "primereact/message";
 import { SelectButton } from "primereact/selectbutton";
 import { classNames } from "primereact/utils";

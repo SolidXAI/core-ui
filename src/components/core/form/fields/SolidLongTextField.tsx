@@ -1,3 +1,4 @@
+"use client";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Message } from "primereact/message";
 import * as Yup from 'yup';

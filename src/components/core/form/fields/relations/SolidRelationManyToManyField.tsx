@@ -1,3 +1,4 @@
+"use client";
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { camelCase, capitalize } from "lodash";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";

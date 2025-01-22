@@ -1,3 +1,4 @@
+"use client";
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import qs from "qs";

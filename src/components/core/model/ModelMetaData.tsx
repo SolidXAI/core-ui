@@ -1,3 +1,4 @@
+"use client";
 import { SingleSelectAutoCompleteField } from "@/components/common/SingleSelectAutoCompleteField";
 import { getSingularAndPlural } from "@/helpers/helpers";
 import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
