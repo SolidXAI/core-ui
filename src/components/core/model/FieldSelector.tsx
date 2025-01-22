@@ -1,5 +1,7 @@
-"use client";
-import { useState } from 'react';
+'use client';
+import React, { useState } from 'react';
+import { Card } from 'primereact/card';
+import { TabView, TabPanel } from 'primereact/tabview';
 
 const FieldSelector = ({ handleTypeSelect, modelMetaData }: any) => {
 

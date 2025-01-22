@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { Button } from "primereact/button"
 import { Calendar } from "primereact/calendar";
 import { InputNumber } from "primereact/inputnumber";

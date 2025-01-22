@@ -1,24 +1,28 @@
+'use client';
 "use client";
-import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
-import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
-import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
-import { useRouter } from "next/navigation";
-import { FilterMatchMode } from "primereact/api";
-import { Button } from "primereact/button";
-import { Column } from "primereact/column";
+import React, { useState, useEffect } from "react";
 import {
   DataTable,
   DataTableFilterMeta,
   DataTableStateEvent,
 } from "primereact/datatable";
-import { Dialog } from "primereact/dialog";
+import { Column } from "primereact/column";
+import { FilterMatchMode } from "primereact/api";
+import Link from "next/link";
 import qs from "qs";
-import { useEffect, useState } from "react";
+import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
+import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
+import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
+import { SolidListViewColumn } from "./SolidListViewColumn";
 import { SolidConfigureLayoutElement } from "../common/SolidConfigureLayoutElement";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
-import { SolidListViewColumn } from "./SolidListViewColumn";
+import { pascalCase } from "change-case";
+import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
+import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
+import { useRouter } from "next/navigation";
+import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
 
 type SolidListViewParams = {
   moduleName: string;
@@ -167,6 +171,10 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [createButtonUrl, setCreateButtonUrl] = useState<string>();
   const [editButtonUrl, setEditButtonUrl] = useState<string>();
+
+  // Custom Row Action
+  const [listViewRowActionPopupState, setListViewRowActionPopupState] = useState(false);
+  const [listViewRowActionData, setListRowActionData] = useState<any>();
 
   // Get the list view data.
   const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading, error }] = useLazyGetSolidEntitiesQuery();
@@ -471,6 +479,16 @@ export const SolidListView = (params: SolidListViewParams) => {
     });
   };
 
+  //   const handlCustomRowAction = ((i, rowData) : any) => {
+
+  // }
+
+  //Note -  Custom Row Action Popup 
+  const closeListViewRowActionPopup = () => {
+    setListViewRowActionPopupState(false)
+  }
+
+
   return (
     <>
       <div className="flex gap-3 mb-3 align-items-center justify-content-between align-items-top">
@@ -506,7 +524,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           }
 
           {solidListViewMetaData?.data?.solidView?.layout?.attrs?.enableGlobalSearch === true && params.embeded === false &&
-            <SolidGlobalSearchElement></SolidGlobalSearchElement>
+            <SolidGlobalSearchElement viewData={solidListViewMetaData} ></SolidGlobalSearchElement>
           }
         </div>
         {params.embeded === false &&
@@ -548,6 +566,30 @@ export const SolidListView = (params: SolidListViewParams) => {
         {actionsAllowed.includes(`${updatePermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.edit !== false &&
           <Column body={detailsBodyTemplate}></Column>
         }
+        {solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons &&
+          solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons.map((rowAction: any) => {
+            return (
+              <Column
+                key={rowAction}
+                body={(rowData) => (
+                  <a onClick={() => {
+                    setListRowActionData({
+                      modelName: params.modelName,
+                      moduleName: params.moduleName,
+                      rowAction: rowAction,
+                      rowData: rowData,
+                      closeListViewRowActionPopup: closeListViewRowActionPopup
+
+                    });
+                    setListViewRowActionPopupState(true)
+                  }
+                  }>
+                    <i className={rowAction?.attrs?.className ? rowAction?.attrs?.className : "pi pi-pencil"} /> {/* PrimeIcons pencil icon */}
+                  </a>
+                )}
+              />
+            );
+          })}
       </DataTable>
       <Dialog
         visible={isDialogVisible}
@@ -563,6 +605,17 @@ export const SolidListView = (params: SolidListViewParams) => {
       >
         <p>Are you sure you want to delete the selected records?</p>
       </Dialog>
+
+
+      {listViewRowActionData &&
+        <Dialog
+          visible={listViewRowActionPopupState}
+          modal
+          onHide={closeListViewRowActionPopup}
+        >
+          <ListViewRowActionPopup context={listViewRowActionData}></ListViewRowActionPopup>
+        </Dialog>
+      }
     </>
   );
 };

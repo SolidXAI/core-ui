@@ -1,14 +1,16 @@
-"use client";
-import { usePathname } from "next/navigation";
+'use client';
+import React, { useEffect, useRef, useState } from "react";
 import { Button } from "primereact/button";
-import { Column } from "primereact/column";
-import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
-import { useMountEffect } from "primereact/hooks";
-import { Messages } from "primereact/messages";
-import { Toast } from "primereact/toast";
-import { useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
+import { hideFieldsPopup } from "@/redux/features/popupSlice";
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
 import FieldMetaDataForm from "./FieldMetaDataForm";
+import { Toast } from "primereact/toast";
+import { Messages } from "primereact/messages";
+import { useMountEffect } from "primereact/hooks";
+import { usePathname } from "next/navigation";
 
 
 const FieldMetaData = ({ modelMetaData, fieldMetaData, setFieldMetaData, deleteModelFunction, nextTab, formikFieldsMetadataRef }: any) => {

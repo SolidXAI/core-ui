@@ -1,23 +1,26 @@
 "use client";
-import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
+import React, { useState, useEffect } from "react";
+import {
+  DataTable,
+  DataTableFilterMeta,
+  DataTableStateEvent,
+} from "primereact/datatable";
+import { Column } from "primereact/column";
+import { FilterMatchMode } from "primereact/api";
+import Link from "next/link";
+import qs from "qs";
+import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
-import { DropResult } from "@hello-pangea/dnd";
-import Link from "next/link";
-import { FilterMatchMode } from "primereact/api";
-import { Button } from "primereact/button";
-import {
-  DataTableFilterMeta,
-  DataTableStateEvent
-} from "primereact/datatable";
-import { Dialog } from "primereact/dialog";
-import qs from "qs";
-import { useEffect, useState } from "react";
+import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
+import KanbanBoard from "./KanbanBoard";
+import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { SolidConfigureLayoutElement } from "../common/SolidConfigureLayoutElement";
 import { SolidCreateButton } from "../common/SolidCreateButton";
-import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
-import KanbanBoard from "./KanbanBoard";
+import { DropResult } from "@hello-pangea/dnd";
+import { filter } from "lodash";
 
 type SolidKanbanViewParams = {
   moduleName: string;
@@ -220,17 +223,18 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       if (toPopulate) {
         const queryData = {
           offset: 0,
-          limit: 10,
+          limit: 2,
           fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
           groupBy: groupByFieldName,
           populate: toPopulate,
-          populateGroup: true
+          populateGroup: true,
+          groupFilter: {
+            limit: 100,
+            offset: 0
+          }
           // sort: [`id:desc`],
         };
-
         // fields=status&groupBy=status&fields=count(status)&populateGroup=true
-
-
         const queryString = qs.stringify(queryData, {
           encodeValuesOnly: true
         });
@@ -384,8 +388,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
       groupBy: groupByFieldName,
       populateGroup: true,
-      filters: formattedFilters
-
+      filters: formattedFilters,
     };
 
     // if (sortField) {
@@ -547,8 +550,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     const destinationGroupName = destination.droppableId;
 
     // Find the source and destination groups
-    const sourceGroupIndex = kanbanViewData.findIndex((group :any) => group.groupName === sourceGroupName);
-    const destinationGroupIndex = kanbanViewData.findIndex((group :any) => group.groupName === destinationGroupName);
+    const sourceGroupIndex = kanbanViewData.findIndex((group: any) => group.groupName === sourceGroupName);
+    const destinationGroupIndex = kanbanViewData.findIndex((group: any) => group.groupName === destinationGroupName);
 
     if (sourceGroupIndex === -1 || destinationGroupIndex === -1) return;
 
@@ -575,7 +578,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
     // Update the kanbanViewData state
     setKanbanViewData((prevData: typeof kanbanViewData) =>
-      prevData.map((group :any) => {
+      prevData.map((group: any) => {
         if (group.groupName === sourceGroupName) {
           return sourceGroup;
         }
@@ -597,6 +600,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     )
     console.log("filter in kanbanview", filter);
   }
+
+  
 
   return (
     <>

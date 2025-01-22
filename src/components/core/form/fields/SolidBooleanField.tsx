@@ -1,11 +1,13 @@
-"use client";
+'use client';
+import { Schema } from "yup";
+import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
+import * as Yup from 'yup';
+import { Tooltip } from "primereact/tooltip";
+import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import { SelectButton } from "primereact/selectbutton";
 import { classNames } from "primereact/utils";
 import { useEffect } from "react";
-import * as Yup from 'yup';
-import { Schema } from "yup";
-import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 
 export class SolidBooleanField implements ISolidField {
 

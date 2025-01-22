@@ -250,19 +250,11 @@ export {SolidRelationOneToManyField} from '@/components/core/form/fields/relatio
 // export * from '@/components/core/kanban/KanbanBoard';
 // export * from '@/components/core/kanban/KanbanCard';
 // export * from '@/components/core/kanban/KanbanColumn';
-export {SolidKanbanFilter} from '@/components/core/kanban/SolidKanbanFilter';
 export {SolidKanbanView} from '@/components/core/kanban/SolidKanbanView';
-export type {SolidKanbanViewColumnParams} from '@/components/core/kanban/SolidKanbanViewSearchColumn';
-export {getSolidKanbanViewNumberOfInputs, SolidKanbanViewSearchColumn} from '@/components/core/kanban/SolidKanbanViewSearchColumn';
-export {SolidKanbanManyToOneFilterElement} from '@/components/core/kanban/SolidManyToOneFilterElement';
-export {SolidKanbanSelectionDynamicFilterElement} from '@/components/core/kanban/SolidSelectionDynamicFilterElement';
-export {SolidKanbanSelectionStaticFilterElement} from '@/components/core/kanban/SolidSelectionStaticFilterElement';
-export {SolidKanbanVarInputsFilterElement, KanbanInputTypes} from '@/components/core/kanban/SolidVarInputsFilterElement';
 
 // export * from '@/components/core/kanban/columns/SolidBigintColumn';
 // export * from '@/components/core/kanban/columns/SolidBooleanColumn';
 // export * from '@/components/core/kanban/columns/SolidComputedColumn';
-export {kanbanDateFilterMatchModeOptions} from '@/components/core/kanban/columns/SolidDateColumn';
 // export * from '@/components/core/kanban/columns/SolidDatetimeColumn';
 // export * from '@/components/core/kanban/columns/SolidDecimalColumn';
 // export * from '@/components/core/kanban/columns/SolidExternalIdColumn';
@@ -486,48 +478,6 @@ export { default as KanbanBoard } from '@/components/core/kanban/KanbanBoard';
 export { default as KanbanCard } from '@/components/core/kanban/KanbanCard';
 //KanbanColumn.tsx
 export { default as KanbanColumn } from '@/components/core/kanban/KanbanColumn';
-//SolidBigintColumn.tsx
-export { default as SolidBigintKanbanColumn } from '@/components/core/kanban/columns/SolidBigintColumn';
-//SolidBooleanColumn.tsx
-export { default as SolidBooleanKanbanColumn } from '@/components/core/kanban/columns/SolidBooleanColumn';
-//SolidComputedColumn.tsx
-export { default as SolidComputedKanbanColumn } from '@/components/core/kanban/columns/SolidComputedColumn';
-//SoliDateColumn.tsx
-export { default as SolidDateKanbanColumn } from '@/components/core/kanban/columns/SolidDateColumn';
-//SolidDatetimeColumn.tsx
-export { default as SolidDatetimeKanbanColumn } from '@/components/core/kanban/columns/SolidDatetimeColumn';
-//SolidDecimalColumn.tsx
-export { default as SolidDecimalKanbanColumn } from '@/components/core/kanban/columns/SolidDecimalColumn';
-//SolidExternalIdColumn.tsx
-export { default as SolidExternalIdKanbanColumn } from '@/components/core/kanban/columns/SolidExternalIdColumn';
-//SolidFloatColumn.tsx
-export { default as SolidFloatKanbanColumn } from '@/components/core/kanban/columns/SolidFloatColumn';
-//SolidIdColumn.tsx
-export { default as SolidIdKanbanColumn } from '@/components/core/kanban/columns/SolidIdColumn';
-//SolidIntColumn.tsx
-export { default as SolidIntKanbanColumn } from '@/components/core/kanban/columns/SolidIntColumn';
-//SolidLongTextColumn.tsx
-export { default as SolidLongTextKanbanColumn } from '@/components/core/kanban/columns/SolidLongTextColumn';
-//SolidMediaMultipleColumn.tsx
-export { default as SolidMediaMultipleKanbanColumn } from '@/components/core/kanban/columns/SolidMediaMultipleColumn';
-//SolidMediaSingleColumn.tsx
-export { default as SolidMediaSingleKanbanColumn } from '@/components/core/kanban/columns/SolidMediaSingleColumn';
-//SolidRelationColumn.tsx
-export { default as SolidRelationKanbanColumn } from '@/components/core/kanban/columns/SolidRelationColumn';
-//SolidRichTextColumn.tsx
-export { default as SolidRichTextKanbanColumn } from '@/components/core/kanban/columns/SolidRichTextColumn';
-//SolidSelectionDynamicColumn.tsx
-export { default as SolidSelectionDynamicKanbanColumn } from '@/components/core/kanban/columns/SolidSelectionDynamicColumn';
-//SolidSelectionStaticColumn.tsx
-export { default as SolidSelectionStaticKanbanColumn } from '@/components/core/kanban/columns/SolidSelectionStaticColumn';
-//SolidShortTextColumn.tsx
-export { default as SolidShortTextKanbanColumn } from '@/components/core/kanban/columns/SolidShortTextColumn';
-//SolidTimeColumn.tsx
-export {default as SolidTimeKanbanColumn} from '@/components/core/kanban/columns/SolidTimeColumn';
-//SolidUuidColumn.tsx
-export {default as SolidUuidKanbanColumn} from '@/components/core/kanban/columns/SolidUuidColumn';
-//SolidRelationManyToOneColumn.tsx
-export {default as SolidRelationManyToOneKanbanColumn} from '@/components/core/kanban/columns/relations/SolidRelationManyToOneColumn';
 //SolidListingHeader.tsx
 export {default as SolidListingHeader} from '@/components/core/list/SolidListingHeader';
 //SolidBigintColumn.tsx

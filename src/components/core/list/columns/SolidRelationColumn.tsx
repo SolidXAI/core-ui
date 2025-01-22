@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import SolidRelationManyToOneColumn from './relations/SolidRelationManyToOneColumn';
 

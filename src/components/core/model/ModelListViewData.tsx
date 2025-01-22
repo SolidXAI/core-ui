@@ -1,22 +1,27 @@
 "use client";
-import { CreateButton } from "@/components/common/CreateButton";
-import {
-  useDeleteMultipleModelsMutation,
-  useGenerateCodeForModelMutation,
-  useLazyGetModelsQuery,
-} from "@/redux/api/modelApi";
-import Link from "next/link";
-import { FilterMatchMode } from "primereact/api";
-import { Button } from "primereact/button";
-import { Column } from "primereact/column";
+import React, { useState, useEffect } from "react";
 import {
   DataTable,
   DataTableFilterMeta,
   DataTableStateEvent,
 } from "primereact/datatable";
-import { Dialog } from "primereact/dialog";
+import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
+import { FilterMatchMode, FilterOperator } from "primereact/api";
+import { Dropdown, DropdownChangeEvent } from "primereact/dropdown";
+import { Calendar } from "primereact/calendar";
+import { InputNumber, InputNumberChangeEvent } from "primereact/inputnumber";
+import Link from "next/link";
+import { FilterIcon } from "@/components/modelsComponents/filterIcon";
+import { CustomTag } from "@/components/Tag/CustomTag";
+import {
+  useDeleteMultipleModelsMutation,
+  useGenerateCodeForModelMutation,
+  useLazyGetModelsQuery,
+} from "@/redux/api/modelApi";
+import { CreateButton } from "@/components/common/CreateButton";
 import qs from "qs";
-import { useEffect, useState } from "react";
+import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
 
 export interface ModelMetaData {
   id: string;

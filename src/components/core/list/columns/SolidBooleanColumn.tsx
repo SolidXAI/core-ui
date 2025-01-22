@@ -1,7 +1,12 @@
-"use client";
+'use client';
+import React from 'react';
 import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
-import { Dropdown } from 'primereact/dropdown';
+import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
+import { FormEvent } from "primereact/ts-helpers";
+import { FilterMatchMode } from 'primereact/api';
+import { classNames } from 'primereact/utils';
+import { Dropdown } from 'primereact/dropdown';
 
 const SolidBooleanColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;

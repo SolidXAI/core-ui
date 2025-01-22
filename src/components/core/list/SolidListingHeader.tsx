@@ -1,7 +1,8 @@
-"use client";
+'use client';
+import React, { } from "react";
 import { usePathname } from 'next/navigation';
+import FilterMenu from "@/components/layout/FilterMenu";
 import { plural } from "pluralize";
-import { } from "react";
 
 
 const SolidListingHeader = () => {

@@ -1,9 +1,10 @@
-"use client";
-import { FilterMatchMode } from 'primereact/api';
+'use client';
+import React from 'react';
 import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
-import { FormEvent } from "primereact/ts-helpers";
-import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
+import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewColumn';
+import { FormEvent } from "primereact/ts-helpers";
+import { FilterMatchMode } from 'primereact/api';
 
 export const dateFilterMatchModeOptions = [
     { label: 'Equals', value: FilterMatchMode.EQUALS },

@@ -1,12 +1,18 @@
-"use client";
+'use client';
+import { Schema } from "yup";
+import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
+import * as Yup from 'yup';
+import { Message } from "primereact/message";
+import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
+import qs from "qs";
+import { useEffect, useState } from "react";
+import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
+import { InputText } from "primereact/inputtext";
 import { SolidListView } from "@/components/core/list/SolidListView";
 import { camelCase } from "lodash";
+import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { useEffect, useState } from "react";
-import * as Yup from 'yup';
-import { Schema } from "yup";
 import SolidFormView from "../../SolidFormView";
-import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
 
 
 export class SolidRelationOneToManyField implements ISolidField {

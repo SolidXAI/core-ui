@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
