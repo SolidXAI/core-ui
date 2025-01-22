@@ -1,8 +1,7 @@
 "use client";
 
-import React from "react";
+import { useRouter, useSearchParams } from "next/navigation";
 import Pagination from "react-js-pagination";
-import { useSearchParams, useRouter } from "next/navigation";
 
 interface Props {
   resPerPage: number;

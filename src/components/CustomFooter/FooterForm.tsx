@@ -1,6 +1,5 @@
 import { Button } from 'primereact/button'
 import { InputText } from 'primereact/inputtext'
-import React from 'react'
 
 export const FooterForm = () => {
     return (

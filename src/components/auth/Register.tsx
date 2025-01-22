@@ -1,24 +1,22 @@
 "use client";
 
 import { useRegisterMutation } from "@/redux/api/authApi";
-import { useRouter } from "next/navigation";
-import React, { ChangeEventHandler, useEffect, useRef, useState } from "react";
-import { toast } from "react-hot-toast";
-import { ErrorMessage, Field, Form, Formik, useFormik } from "formik";
-import * as Yup from "yup";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
+import { useFormik } from "formik";
 import Link from "next/link";
-import Image from "next/image";
-import AuthBanner from "../common/AuthBanner";
-import { Divider } from "primereact/divider";
-import { SocialMediaLogin } from "../common/SocialMediaLogin";
-import { InputText } from "primereact/inputtext";
+import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
+import { Divider } from "primereact/divider";
+import { InputText } from "primereact/inputtext";
+import { Message } from "primereact/message";
 import { Password } from "primereact/password";
 import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
-import { Message } from "primereact/message";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
+import { ChangeEventHandler, useEffect, useRef, useState } from "react";
+import * as Yup from "yup";
+import AuthBanner from "../common/AuthBanner";
+import { SocialMediaLogin } from "../common/SocialMediaLogin";
 
 const Register = () => {
   const toast = useRef<Toast>(null);

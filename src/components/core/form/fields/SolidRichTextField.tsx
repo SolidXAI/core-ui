@@ -1,11 +1,9 @@
+import { Editor } from "primereact/editor";
+import { Message } from "primereact/message";
+import { useState } from "react";
+import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import * as Yup from 'yup';
-import { Tooltip } from "primereact/tooltip";
-import { InputText } from "primereact/inputtext";
-import { Message } from "primereact/message";
-import { Editor } from "primereact/editor";
-import { useEffect, useState } from "react";
 
 export class SolidRichTextField implements ISolidField {
 

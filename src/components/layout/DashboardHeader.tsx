@@ -1,6 +1,6 @@
 import { Button } from "primereact/button";
 import { Menu } from "primereact/menu";
-import React, { useRef } from "react";
+import { useRef } from "react";
 
 const DashboardHeader = () => {
 

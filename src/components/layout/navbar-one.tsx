@@ -1,18 +1,18 @@
+import { ToastContainer } from "@/helpers/ToastContainer";
+import { useGetSolidMenuBasedOnRoleQuery } from "@/redux/api/solidMenuApi";
+import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 import { setIsAuthenticated, setUser } from "@/redux/features/userSlice";
 import { useAppDispatch, useAppSelector } from "@/redux/hooks";
-import { getSession, signOut, useSession } from "next-auth/react";
-import React, { useEffect, useRef, useState } from "react";
-import NavbarTwoMenu from "./navbar-two-menu";
-import UserProfileMenu from "./user-profile-menu";
 import { RootState } from "@/redux/store.js";
-import { useSelector } from "react-redux";
-import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
-import { InputText } from "primereact/inputtext";
+import { signOut, useSession } from "next-auth/react";
 import { Button } from "primereact/button";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
-import { useGetSolidMenuBasedOnRoleQuery } from "@/redux/api/solidMenuApi";
-import { ToastContainer } from "@/helpers/ToastContainer";
+import { InputText } from "primereact/inputtext";
+import { useEffect, useRef, useState } from "react";
+import { useSelector } from "react-redux";
+import NavbarTwoMenu from "./navbar-two-menu";
+import UserProfileMenu from "./user-profile-menu";
 // import menu from "@/helpers/menu";
 
 const NavbarOne = () => {

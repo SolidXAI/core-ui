@@ -2,7 +2,6 @@ import { usePathname } from 'next/navigation'
 import { IconField } from 'primereact/iconfield'
 import { InputIcon } from 'primereact/inputicon'
 import { InputText } from 'primereact/inputtext'
-import React from 'react'
 
 export const GlobalSearch = () => {
     const path = usePathname();

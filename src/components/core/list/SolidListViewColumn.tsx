@@ -1,24 +1,23 @@
 "use client";
-import SolidIntColumn from "./columns/SolidIntColumn";
 import SolidBigintColumn from "./columns/SolidBigintColumn";
-import SolidFloatColumn from "./columns/SolidFloatColumn";
-import SolidDecimalColumn from "./columns/SolidDecimalColumn";
-import SolidShortTextColumn from "./columns/SolidShortTextColumn";
-import SolidLongTextColumn from "./columns/SolidLongTextColumn";
-import SolidRichTextColumn from "./columns/SolidRichTextColumn";
 import SolidBooleanColumn from "./columns/SolidBooleanColumn";
+import SolidComputedColumn from "./columns/SolidComputedColumn";
 import SolidDateColumn from "./columns/SolidDateColumn";
 import SolidDatetimeColumn from "./columns/SolidDatetimeColumn";
-import SolidTimeColumn from "./columns/SolidTimeColumn";
-import SolidRelationColumn from "./columns/SolidRelationColumn";
-import SolidMediaSingleColumn from "./columns/SolidMediaSingleColumn";
-import SolidMediaMultipleColumn from "./columns/SolidMediaMultipleColumn";
-import SolidSelectionStaticColumn from "./columns/SolidSelectionStaticColumn";
-import SolidSelectionDynamicColumn from "./columns/SolidSelectionDynamicColumn";
-import SolidComputedColumn from "./columns/SolidComputedColumn";
+import SolidDecimalColumn from "./columns/SolidDecimalColumn";
 import SolidExternalIdColumn from "./columns/SolidExternalIdColumn";
+import SolidFloatColumn from "./columns/SolidFloatColumn";
+import SolidIntColumn from "./columns/SolidIntColumn";
+import SolidLongTextColumn from "./columns/SolidLongTextColumn";
+import SolidMediaMultipleColumn from "./columns/SolidMediaMultipleColumn";
+import SolidMediaSingleColumn from "./columns/SolidMediaSingleColumn";
+import SolidRelationColumn from "./columns/SolidRelationColumn";
+import SolidRichTextColumn from "./columns/SolidRichTextColumn";
+import SolidSelectionDynamicColumn from "./columns/SolidSelectionDynamicColumn";
+import SolidSelectionStaticColumn from "./columns/SolidSelectionStaticColumn";
+import SolidShortTextColumn from "./columns/SolidShortTextColumn";
+import SolidTimeColumn from "./columns/SolidTimeColumn";
 import SolidUuidColumn from "./columns/SolidUuidColumn";
-import { Column } from "primereact/column";
 
 export type SolidListViewColumnParams = {
     solidListViewMetaData: any;

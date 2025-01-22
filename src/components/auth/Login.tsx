@@ -1,23 +1,21 @@
 "use client";
 
+import { Form, Formik } from "formik";
 import { signIn, useSession } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
-import React, { useEffect, useRef, useState } from "react";
-import { Toast } from "primereact/toast";
-import ButtonLoader from "../layout/ButtonLoader";
-import { ErrorMessage, Field, Form, Formik } from "formik";
-import * as Yup from "yup";
-import Image from "next/image";
-import AuthBanner from "../common/AuthBanner";
-import { InputText } from "primereact/inputtext";
-import { Password } from "primereact/password";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import { Divider } from "primereact/divider";
-import { SocialMediaLogin } from "../common/SocialMediaLogin";
+import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
+import { Password } from "primereact/password";
+import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
+import { useRef, useState } from "react";
+import * as Yup from "yup";
+import AuthBanner from "../common/AuthBanner";
+import { SocialMediaLogin } from "../common/SocialMediaLogin";
 
 
 const Login = () => {

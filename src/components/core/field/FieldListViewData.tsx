@@ -1,20 +1,20 @@
 "use client";
-import React, { useState, useEffect } from "react";
+import { useLazyGetfieldsQuery } from "@/redux/api/fieldApi";
+import {
+  useDeleteMultipleModelsMutation,
+} from "@/redux/api/modelApi";
+import Link from "next/link";
+import { FilterMatchMode } from "primereact/api";
+import { Button } from "primereact/button";
+import { Column } from "primereact/column";
 import {
   DataTable,
   DataTableFilterMeta,
   DataTableStateEvent,
 } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { FilterMatchMode } from "primereact/api";
-import Link from "next/link";
-import {
-  useDeleteMultipleModelsMutation,
-} from "@/redux/api/modelApi";
-import qs from "qs";
-import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { useLazyGetfieldsQuery } from "@/redux/api/fieldApi";
+import qs from "qs";
+import { useEffect, useState } from "react";
 
 export interface ModelMetaData {
   id: string;

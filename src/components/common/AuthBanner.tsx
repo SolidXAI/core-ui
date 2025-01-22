@@ -1,7 +1,3 @@
-import Image from "next/image";
-import { Avatar } from "primereact/avatar";
-import { AvatarGroup } from "primereact/avatargroup";
-import React from "react";
 
 const AuthBanner = () => {
   return (

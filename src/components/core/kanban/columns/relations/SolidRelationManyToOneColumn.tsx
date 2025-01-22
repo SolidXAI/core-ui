@@ -1,8 +1,7 @@
-import React from 'react';
-import { FilterMatchMode } from 'primereact/api';
-import { getSolidKanbanViewNumberOfInputs, SolidKanbanViewColumnParams } from '../../SolidKanbanViewSearchColumn';
-import { Dropdown } from 'primereact/dropdown';
 import { KanbanInputTypes, SolidKanbanVarInputsFilterElement } from '@/components/core/kanban/SolidVarInputsFilterElement';
+import { FilterMatchMode } from 'primereact/api';
+import { Dropdown } from 'primereact/dropdown';
+import { getSolidKanbanViewNumberOfInputs, SolidKanbanViewColumnParams } from '../../SolidKanbanViewSearchColumn';
 
 const SolidRelationManyToOneColumn = ({ solidKanbanViewMetaData, fieldMetadata, updateEnumValues, index, enumValue }: SolidKanbanViewColumnParams) => {
     // const filterable = column.attrs.filterable;

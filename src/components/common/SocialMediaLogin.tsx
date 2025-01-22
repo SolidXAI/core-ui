@@ -1,5 +1,4 @@
 import { Button } from 'primereact/button'
-import React from 'react'
 
 export const SocialMediaLogin = () => {
     return (

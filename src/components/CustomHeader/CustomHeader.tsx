@@ -1,13 +1,13 @@
 "use client"
 import Link from 'next/link'
+import { useRouter } from 'next/navigation'
 import { Button } from 'primereact/button'
-import React, { useState } from 'react'
+import { useState } from 'react'
 import { CallIcon } from './CallIcon'
+import { PrimaryCustomDropdown } from './CustomDropdown'
 import { EmailIcon } from './EmailIcon'
 import { HeaderCart } from './HeaderCart'
-import { PrimaryCustomDropdown } from './CustomDropdown'
 import { ProductNavData } from './productNavData'
-import { useRouter } from 'next/navigation'
 export const CustomHeader = () => {
     const [dropdownVisible, setDropdownVisible] = useState(false);
     const toggleDropdown = () => setDropdownVisible(!dropdownVisible);

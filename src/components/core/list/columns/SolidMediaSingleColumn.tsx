@@ -1,9 +1,5 @@
-import React from 'react';
-import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
-import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
+import { Column } from "primereact/column";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
-import { FormEvent } from "primereact/ts-helpers";
-import { FilterMatchMode } from 'primereact/api';
 
 const SolidMediaSingleColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     // const filterable = column.attrs.filterable;

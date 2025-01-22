@@ -1,7 +1,6 @@
 import Link from 'next/link';
 import { usePathname, useRouter } from 'next/navigation';
-import { Button } from 'primereact/button'
-import React from 'react'
+import { Button } from 'primereact/button';
 
 export const SolidCreateButton = ({ url }: any) => {
     const router = useRouter();

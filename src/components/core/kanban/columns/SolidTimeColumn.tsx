@@ -1,8 +1,7 @@
-import React from 'react';
-import { kanbanDateFilterMatchModeOptions } from './SolidDateColumn';
 import { Dropdown } from 'primereact/dropdown';
 import { KanbanInputTypes, SolidKanbanVarInputsFilterElement } from '../../kanban/SolidVarInputsFilterElement';
 import { getSolidKanbanViewNumberOfInputs, SolidKanbanViewColumnParams } from '../SolidKanbanViewSearchColumn';
+import { kanbanDateFilterMatchModeOptions } from './SolidDateColumn';
 
 const SolidTimeColumn = ({ solidKanbanViewMetaData, fieldMetadata, updateEnumValues, index, enumValue }: SolidKanbanViewColumnParams) => {
     // const filterable = column.attrs.filterable;

@@ -1,6 +1,6 @@
 "use client"
-import React, { useState } from 'react'
 import { Button } from 'primereact/button';
+import { useState } from 'react';
 import { OrderPaymentDetails } from './OrderPaymentDetails';
 import { OrderTableDetails } from './OrderTableDetails';
 

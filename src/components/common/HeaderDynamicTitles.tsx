@@ -1,5 +1,4 @@
 import { usePathname } from 'next/navigation';
-import React from 'react'
 export const HeaderDynamicTitles = () => {
     const path = usePathname();
     const getHeading = path.split('/').slice(-2, -1)[0].replace(/-/g, ' ').replace(/\b\w/g, char => char.toUpperCase());

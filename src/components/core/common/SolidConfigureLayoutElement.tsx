@@ -1,9 +1,5 @@
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
-import { InputTypes } from "../list/SolidVarInputsFilterElement"
-import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
-import { useState } from "react";
-import qs from "qs";
 import { Dialog } from "primereact/dialog";
+import { useState } from "react";
 
 
 export const SolidConfigureLayoutElement = ({}: any) => {

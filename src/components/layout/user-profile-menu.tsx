@@ -1,13 +1,8 @@
-import { signOut } from "next-auth/react";
-import React, { useRef, useState } from "react";
-import { InputSwitch } from "primereact/inputswitch";
-import { toggleTheme } from "@/redux/features/themeSlice";
-import { useDispatch } from "react-redux";
-import { Button } from "primereact/button";
-import { TieredMenu } from "primereact/tieredmenu";
-import Link from "next/link";
-import { OverlayPanel } from "primereact/overlaypanel";
 import { useAppSelector } from "@/redux/hooks";
+import { signOut } from "next-auth/react";
+import { OverlayPanel } from "primereact/overlaypanel";
+import { useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 
 const UserProfileMenu = () => {
   const { user } = useAppSelector((state) => state.auth);

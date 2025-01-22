@@ -1,9 +1,7 @@
 "use client"
 
-import { useRouter } from 'next/navigation';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
-import React from 'react'
 
 
 export const CancelButton = () => {

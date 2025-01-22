@@ -1,6 +1,5 @@
 import { usePathname, useRouter } from 'next/navigation';
-import { Button } from 'primereact/button'
-import React from 'react'
+import { Button } from 'primereact/button';
 
 export const CreateButton = () => {
     const router = useRouter();

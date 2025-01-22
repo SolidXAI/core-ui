@@ -1,4 +1,3 @@
-import React from 'react';
 import { Column } from "primereact/column";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 

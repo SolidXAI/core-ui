@@ -1,22 +1,17 @@
-import { useFormik } from "formik";
-import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Form, Formik } from "formik";
-import * as Yup from "yup";
-import { InputText } from "primereact/inputtext";
-import { Dropdown } from "primereact/dropdown";
-import { Button } from "primereact/button";
-import { classNames } from "primereact/utils";
-import { Message } from "primereact/message";
-import { AutoComplete } from "primereact/autocomplete";
-import { Toast } from "primereact/toast";
-import { Password } from "primereact/password";
-import { Divider } from "primereact/divider";
-import { usePathname, useRouter } from "next/navigation";
-import { CancelButton } from "@/components/common/CancelButton";
 import { AutoCompleteField } from "@/components/common/AutoCompleteField";
-import qs from "qs";
-import { useGetrolesQuery, useLazyGetrolesQuery } from "@/redux/api/roleApi";
+import { CancelButton } from "@/components/common/CancelButton";
+import { useLazyGetrolesQuery } from "@/redux/api/roleApi";
 import { useCreateuserroleMutation } from "@/redux/api/userApi";
+import { useFormik } from "formik";
+import { usePathname, useRouter } from "next/navigation";
+import { Button } from "primereact/button";
+import { InputText } from "primereact/inputtext";
+import { Message } from "primereact/message";
+import { Toast } from "primereact/toast";
+import { classNames } from "primereact/utils";
+import qs from "qs";
+import { useEffect, useRef } from "react";
+import * as Yup from "yup";
 
 const CreateUserRole = ({ data }: any) => {
   const toast = useRef<Toast>(null);

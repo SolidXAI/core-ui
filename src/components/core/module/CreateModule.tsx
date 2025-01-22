@@ -1,30 +1,28 @@
 "use client"
-import { useFormik } from "formik";
-import React, { useEffect, useRef, useState } from "react";
-import * as Yup from "yup";
-import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import { classNames } from "primereact/utils";
-import { Message } from "primereact/message";
-import { Toast } from "primereact/toast";
-import { Divider } from "primereact/divider";
-import { usePathname, useRouter } from "next/navigation";
 import { CancelButton } from "@/components/common/CancelButton";
-import { useSelector } from "react-redux";
-import { RootState } from "@/redux/store";
-import { useCreatemoduleMutation, useDeletemoduleMutation, useUpdatemoduleMutation } from "@/redux/api/moduleApi";
-import { InputTextarea } from "primereact/inputtextarea";
-import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
-import { SingleSelectAutoCompleteField } from "@/components/common/SingleSelectAutoCompleteField";
-import { getSingularAndPlural } from "@/helpers/helpers";
-import { Checkbox } from "primereact/checkbox";
-import { InputNumber } from "primereact/inputnumber";
-import { ProgressSpinner } from "primereact/progressspinner";
 import { DropzonePlaceholder } from "@/components/common/DropzonePlaceholder";
 import { DropzoneUpload } from "@/components/common/DropzoneUpload";
-import { useDropzone } from "react-dropzone";
-import { useDeleteMediaMutation } from "@/redux/api/mediaApi";
+import { SingleSelectAutoCompleteField } from "@/components/common/SingleSelectAutoCompleteField";
+import { getSingularAndPlural } from "@/helpers/helpers";
 import { handleError } from "@/helpers/ToastContainer";
+import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
+import { useDeleteMediaMutation } from "@/redux/api/mediaApi";
+import { useCreatemoduleMutation, useDeletemoduleMutation, useUpdatemoduleMutation } from "@/redux/api/moduleApi";
+import { RootState } from "@/redux/store";
+import { useFormik } from "formik";
+import { usePathname, useRouter } from "next/navigation";
+import { Button } from "primereact/button";
+import { Checkbox } from "primereact/checkbox";
+import { Divider } from "primereact/divider";
+import { InputText } from "primereact/inputtext";
+import { InputTextarea } from "primereact/inputtextarea";
+import { Message } from "primereact/message";
+import { Toast } from "primereact/toast";
+import { classNames } from "primereact/utils";
+import React, { useEffect, useRef, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import { useSelector } from "react-redux";
+import * as Yup from "yup";
 
 const footer = (
   <>

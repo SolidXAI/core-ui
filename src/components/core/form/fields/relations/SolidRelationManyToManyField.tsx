@@ -1,20 +1,17 @@
-import { Schema } from "yup";
-import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
-import * as Yup from 'yup';
-import { Message } from "primereact/message";
+import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
+import { camelCase, capitalize } from "lodash";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
+import { Button } from "primereact/button";
+import { Checkbox } from "primereact/checkbox";
+import { Dialog } from "primereact/dialog";
+import { Message } from "primereact/message";
+import { Panel } from "primereact/panel";
 import qs from "qs";
 import { useEffect, useState } from "react";
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
-import { InputText } from "primereact/inputtext";
-import { Checkbox } from "primereact/checkbox";
-import { Panel } from "primereact/panel";
-import { camelCase, capitalize } from "lodash";
-import { Button } from "primereact/button";
-import { original } from "@reduxjs/toolkit";
-import { Dialog } from "primereact/dialog";
+import * as Yup from 'yup';
+import { Schema } from "yup";
 import SolidFormView from "../../SolidFormView";
-import { Menu } from "primereact/menu";
+import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
 
 
 
