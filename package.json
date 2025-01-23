@@ -1,6 +1,6 @@
 {
   "name": "@solidstarters/solid-core-ui",
-  "version": "1.0.0",
+  "version": "1.0.1",
   "scripts": {
     "build": "tsc && tsc-alias",
     "clean": "rm -rf dist",
@@ -74,8 +74,6 @@
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/theme-one-dark": "^6.1.2",
     "@reduxjs/toolkit": "^1.9.5",
-    "@rollup/plugin-commonjs": "^28.0.2",
-    "@rollup/plugin-node-resolve": "^16.0.0",
     "@types/lodash": "^4.17.9",
     "@types/node": "20.5.9",
     "@types/pluralize": "^0.0.33",
