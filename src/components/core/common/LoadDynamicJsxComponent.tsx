@@ -1,5 +1,6 @@
 'use client';
 import dynamic from "next/dynamic";
+import path from "path";
 
 // Fallback component for missing components
 const FallbackComponent = ({ componentName }: any) => (
@@ -23,7 +24,7 @@ export const LoadDynamicJsxComponent = ({ context }: any) => {
                
                 const componentName = context?.rowAction?.action?.customComponent.split('/').pop();
                 const mod = await import(
-                    `@/components/${context?.rowAction?.action?.customComponent}`
+                    path.resolve(__dirname, 'src/components', context?.rowAction?.action?.customComponent)
                 );
                 // Return the default export or a named export matching the componentName
                 return mod.default || mod[componentName];
