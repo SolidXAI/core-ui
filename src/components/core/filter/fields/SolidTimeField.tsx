@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React from 'react';
 import { dateFilterMatchModeOptions } from './SolidDateField';
 import { Dropdown } from 'primereact/dropdown';
@@ -12,11 +12,11 @@ const SolidTimeField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFie
 
     // TODO: the body template to be controlled based on the format that one is expecting the date to be displayed in.
     // const header = column.attrs.label ?? fieldMetadata.displayName;
-    const numberOfInputs = getNumberOfInputs("in");
+    const numberOfInputs = getNumberOfInputs(rule.matchMode);
     return (
         <>
             <Dropdown
-                value={rule.operator}
+                value={rule.matchMode}
                 onChange={(e: any) => {
                     console.log("e", e);
                     onChange(rule.id, 'matchMode', e.value)

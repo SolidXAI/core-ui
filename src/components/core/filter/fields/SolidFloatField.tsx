@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { SolidFilterFieldsParams } from '../SolidFilterFields';
 import SolidIntField from './SolidIntField';
 

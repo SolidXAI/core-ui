@@ -1,7 +1,6 @@
 "use client";
 import { ToastContainer } from "@/helpers/ToastContainer";
 import { useGetSolidMenuBasedOnRoleQuery } from "@/redux/api/solidMenuApi";
-import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 import { setIsAuthenticated, setUser } from "@/redux/features/userSlice";
 // import { useAppDispatch } from "@/redux/hooks";
 // import { RootState } from "@/redux/store.js";
@@ -11,7 +10,7 @@ import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
 import { InputText } from "primereact/inputtext";
 import { useEffect, useRef, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch } from "react-redux";
 import NavbarTwoMenu from "./navbar-two-menu";
 import UserProfileMenu from "./user-profile-menu";
 // import menu from "@/helpers/menu";
@@ -21,9 +20,11 @@ const NavbarOne = () => {
 
     // const { user, isAuthenticated } = useAppSelector((state) => state.auth);
     // const [show, setShow] = useState(false);
-    const visibleNavbar = useSelector(
-        (state: any) => state.navbarState.visibleNavbar
-    );
+    // const visibleNavbar = useSelector(
+    //     (state: any) => state.navbarState.visibleNavbar
+    // );
+    const [visibleNavbar, setVisibleNavbar] = useState(false);
+
     const { data: menu } = useGetSolidMenuBasedOnRoleQuery("");
 
 
@@ -41,15 +42,13 @@ const NavbarOne = () => {
     const { data } = useSession();
 
     // const handleToggle = () => setShow(!show);
-    const handleToggle = () => dispatch(toggleNavbar());
+    const handleToggle = () => setVisibleNavbar(!visibleNavbar);
     const handleMenu = (m: any) => {
         // setShow(true);
-        dispatch(showNavbar());
+        setVisibleNavbar(!visibleNavbar);
         setCurrentMainMenu(m.title);
         setCurrentMenu(m.children);
     };
-
-
 
     useEffect(() => {
         if (data) {

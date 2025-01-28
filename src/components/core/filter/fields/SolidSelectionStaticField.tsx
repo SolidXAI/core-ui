@@ -1,32 +1,27 @@
-'use client';
+"use client";
 import React from 'react';
 import { FilterMatchMode } from 'primereact/api';
 import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { Dropdown } from 'primereact/dropdown';
 import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
 
-const SolidShortTextField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
+
+const SolidSelectionStaticField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
+
     // const filterable = column.attrs.filterable;
     const showFilterOperator = false;
-    const columnDataType = 'text';
+    const columnDataType = fieldMetadata.selectionValueType === 'int' ? 'numeric' : 'text';
     const filterMatchModeOptions = [
-        { label: 'Starts With', value: FilterMatchMode.STARTS_WITH },
-        { label: 'Contains', value: FilterMatchMode.CONTAINS },
-        { label: 'Not Contains', value: FilterMatchMode.NOT_CONTAINS },
-        { label: 'Ends With', value: FilterMatchMode.ENDS_WITH },
-        { label: 'Equals', value: FilterMatchMode.EQUALS },
-        { label: 'Not Equals', value: FilterMatchMode.NOT_EQUALS },
-        { label: 'In', value: FilterMatchMode.IN },
-        { label: 'Not In', value: FilterMatchMode.NOT_IN }
+        { label: 'In', value: "$in" },
+        { label: 'Not In', value: "$notIn" },
     ];
 
-    // const header = column.attrs.label ?? fieldMetadata.displayName;
-    const numberOfInputs = getNumberOfInputs("in");
+    const numberOfInputs = getNumberOfInputs(rule.matchMode);
 
     return (
         <>
             <Dropdown
-                value={rule.operator}
+                value={rule.matchMode}
                 onChange={(e: any) => {
                     console.log("e", e);
                     onChange(rule.id, 'matchMode', e.value)
@@ -39,16 +34,15 @@ const SolidShortTextField = ({ fieldMetadata, onChange, index, rule }: SolidFilt
                 values={rule.value}
                 onChange={(e: any) => {
                     console.log("e", e);
-                    onChange(rule.id, 'value', e)
+                    onChange(rule.id, 'value', e.value)
                 }}
                 numberOfInputs={numberOfInputs}
-                inputType={InputTypes.Text}
+                inputType={InputTypes.SelectionStatic}
                 fieldMetadata={fieldMetadata}
             >
             </SolidVarInputsFilterElement>
         </>
     );
-
 };
 
-export default SolidShortTextField;
+export default SolidSelectionStaticField;

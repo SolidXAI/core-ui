@@ -1,23 +1,23 @@
 "use client";
-import SolidBigintField from "./columns/SolidBigintField";
-import SolidFloatField from "./columns/SolidFloatField";
-import SolidDecimalField from "./columns/SolidDecimalField";
-import SolidShortTextField from "./columns/SolidShortTextField";
-import SolidLongTextField from "./columns/SolidLongTextField";
-import SolidRichTextField from "./columns/SolidRichTextField";
-import SolidBooleanField from "./columns/SolidBooleanField";
-import SolidDateField from "./columns/SolidDateField";
-import SolidDatetimeField from "./columns/SolidDatetimeField";
-import SolidTimeField from "./columns/SolidTimeField";
-import SolidRelationField from "./columns/SolidRelationField";
-import SolidMediaSingleField from "./columns/SolidMediaSingleField";
-import SolidMediaMultipleField from "./columns/SolidMediaMultipleField";
-import SolidSelectionStaticField from "./columns/SolidSelectionStaticField";
-import SolidSelectionDynamicField from "./columns/SolidSelectionDynamicField";
-import SolidComputedField from "./columns/SolidComputedField";
-import SolidExternalIdField from "./columns/SolidExternalIdField";
-import SolidUuidField from "./columns/SolidUuidField";
-import SolidIntField from "./columns/SolidIntField";
+import SolidBigintField from "./fields/SolidBigintField";
+import SolidFloatField from "./fields/SolidFloatField";
+import SolidDecimalField from "./fields/SolidDecimalField";
+import SolidShortTextField from "./fields/SolidShortTextField";
+import SolidLongTextField from "./fields/SolidLongTextField";
+import SolidRichTextField from "./fields/SolidRichTextField";
+import SolidBooleanField from "./fields/SolidBooleanField";
+import SolidDateField from "./fields/SolidDateField";
+import SolidDatetimeField from "./fields/SolidDatetimeField";
+import SolidTimeField from "./fields/SolidTimeField";
+import SolidRelationField from "./fields/SolidRelationField";
+import SolidMediaSingleField from "./fields/SolidMediaSingleField";
+import SolidMediaMultipleField from "./fields/SolidMediaMultipleField";
+import SolidSelectionStaticField from "./fields/SolidSelectionStaticField";
+import SolidSelectionDynamicField from "./fields/SolidSelectionDynamicField";
+import SolidComputedField from "./fields/SolidComputedField";
+import SolidExternalIdField from "./fields/SolidExternalIdField";
+import SolidUuidField from "./fields/SolidUuidField";
+import SolidIntField from "./fields/SolidIntField";
 // import SolidRelationField from "./columns/SolidRelationField";
 // import SolidMediaSingleField from "./columns/SolidMediaSingleField";
 // import SolidMediaMultipleField from "./columns/SolidMediaMultipleField";
@@ -36,26 +36,23 @@ export type SolidFilterFieldsParams = {
 };
 
 export const getNumberOfInputs = (matchMode: any): number | null => {
-    if (matchMode.label && matchMode.label === 'Not In') {
-        matchMode = 'notIn';
-    }
 
     switch (matchMode) {
-        case 'between':
+        case '$between':
             return 2;
-        case 'in':
-        case 'notIn':
+        case '$in':
+        case '$notIn':
             return null;
-        case 'startsWith':
-        case 'contains':
-        case 'notContains':
-        case 'endsWith':
-        case 'equals':
-        case 'notEquals':
-        case 'lt':
-        case 'lte':
-        case 'gt':
-        case 'gte':
+        case '$startsWith':
+        case '$contains':
+        case '$notContains':
+        case '$endsWith':
+        case '$equals':
+        case '$notEquals':
+        case '$lt':
+        case '$lte':
+        case '$gt':
+        case '$gte':
             return 1;
         default:
             return 1; // Default to single input if no specific match is found

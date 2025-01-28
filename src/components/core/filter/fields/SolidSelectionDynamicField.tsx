@@ -1,29 +1,29 @@
-'use client';
-
-import { Dropdown } from 'primereact/dropdown';
+import React from 'react';
+import { FilterMatchMode } from 'primereact/api';
 import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
+import { Dropdown } from 'primereact/dropdown';
 import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
-import { dateFilterMatchModeOptions } from './SolidDateField';
 
-const SolidDatetimeField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
-    // const filterable = column.attrs.filterable;
+const SolidSelectionDynamicField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
     const showFilterOperator = false;
-    const columnDataType = 'date';
+    const columnDataType = fieldMetadata.selectionValueType === 'int' ? 'numeric' : 'text';
+    const filterMatchModeOptions = [
+        { label: 'In', value: "$in" },
+        { label: 'Not In', value: "$notIn" },
+    ];
+    const numberOfInputs = getNumberOfInputs(rule.matchMode);
 
 
-    // TODO: the body template to be controlled based on the format that one is expecting the date to be displayed in.
-    // const header = column.attrs.label ?? fieldMetadata.displayName;
-    const numberOfInputs = getNumberOfInputs("in");
 
     return (
         <>
             <Dropdown
-                value={rule.operator}
+                value={rule.matchMode}
                 onChange={(e: any) => {
                     console.log("e", e);
                     onChange(rule.id, 'matchMode', e.value)
                 }}
-                options={dateFilterMatchModeOptions}
+                options={filterMatchModeOptions}
                 optionLabel='label'
                 optionValue='value'
                 placeholder="Select Operator" className="w-full md:w-14rem" />
@@ -31,15 +31,16 @@ const SolidDatetimeField = ({ fieldMetadata, onChange, index, rule }: SolidFilte
                 values={rule.value}
                 onChange={(e: any) => {
                     console.log("e", e);
-                    onChange(rule.id, 'value', e)
+                    onChange(rule.id, 'value', e.map((i: any) => i.value))
                 }}
                 numberOfInputs={numberOfInputs}
-                inputType={InputTypes.DateTime}
+                inputType={InputTypes.SelectionDynamic}
                 fieldMetadata={fieldMetadata}
             >
-            </SolidVarInputsFilterElement></>
+            </SolidVarInputsFilterElement>
+        </>
     );
 
 };
 
-export default SolidDatetimeField;
+export default SolidSelectionDynamicField;

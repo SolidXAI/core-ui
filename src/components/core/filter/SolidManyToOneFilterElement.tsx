@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { useState } from "react";
@@ -20,7 +20,7 @@ export const SolidManyToOneFilterElement = ({ value, updateInputs, index, fieldM
             limit: 10,
             filters: {
                 [fieldMetadata.relationModel.userKeyField.name]: {
-                    '$containsi': event.query
+                    '"$containsi"': event.query
                 }
             }
         };

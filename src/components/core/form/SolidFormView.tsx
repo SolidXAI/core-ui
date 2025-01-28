@@ -500,16 +500,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const {
         data: solidFormViewData,
         isLoading: solidFormViewDataIsLoading,
-    } = useGetSolidEntityByIdQuery({ id: params.id, qs: formViewDataQs }, { skip: !solidFormViewMetaData || params.id === 'new' });
+    } = useGetSolidEntityByIdQuery({ id: params.id, qs: formViewDataQs },
+        { skip: !solidFormViewMetaData || params.id === 'new', refetchOnMountOrArgChange: true, });
     useEffect(() => {
         if (solidFormViewData) {
             console.log(`DATA: `, solidFormViewData);
             setInitialEntityData(solidFormViewData.data);
         }
-    }, [solidFormViewData]);
+    }, [solidFormViewData, params]);
 
     let formik: FormikObject;
-
+    
     if (solidFormViewMetaDataIsLoading || solidFormViewDataIsLoading || !formViewLayout) {
         formik = useFormik({
             initialValues: {},

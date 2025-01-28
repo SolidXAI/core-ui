@@ -1,4 +1,4 @@
-'use client';
+"use client";
 import React from 'react';
 import { FilterMatchMode } from 'primereact/api';
 import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
@@ -8,21 +8,21 @@ import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilter
 const SolidIntField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
     // const filterable = column.attrs.filterable;
     const filterMatchModeOptions = [
-        { label: 'Equals', value: FilterMatchMode.EQUALS },
-        { label: 'Not Equals', value: FilterMatchMode.NOT_EQUALS },
-        { label: 'Less Than', value: FilterMatchMode.LESS_THAN },
-        { label: 'Less Than Or Equal', value: FilterMatchMode.LESS_THAN_OR_EQUAL_TO },
-        { label: 'Greater Than', value: FilterMatchMode.GREATER_THAN },
-        { label: 'Greater Than Or Equal', value: FilterMatchMode.GREATER_THAN_OR_EQUAL_TO },
-        { label: 'In', value: FilterMatchMode.IN },
-        { label: 'Not In', value: FilterMatchMode.NOT_IN },
-        { label: 'Between', value: FilterMatchMode.BETWEEN }
+        { label: 'Equals', value: "$eqi" },
+        { label: 'Not Equals', value: "$nei" },
+        { label: 'Less Than', value: "$lt" },
+        { label: 'Less Than Or Equal', value: "$lte" },
+        { label: 'Greater Than', value: "$gt" },
+        { label: 'Greater Than Or Equal', value: "$gte" },
+        { label: 'In', value: "$in" },
+        { label: 'Not In', value: "$notIn" },
+        { label: 'Between', value: "$between" }
     ];
 
 
 
     // const header = column.attrs.label ?? fieldMetadata.displayName;
-    const numberOfInputs = getNumberOfInputs("in");
+    const numberOfInputs = getNumberOfInputs(rule.matchMode);
 
     return (
         <>
