@@ -1,28 +1,25 @@
 'use client';
-"use client";
-import React, { useState, useEffect } from "react";
+import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
+import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
+import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
+import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
+import { useRouter } from "next/navigation";
+import { FilterMatchMode } from "primereact/api";
+import { Button } from "primereact/button";
+import { Column } from "primereact/column";
 import {
   DataTable,
   DataTableFilterMeta,
   DataTableStateEvent,
 } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { FilterMatchMode } from "primereact/api";
-import Link from "next/link";
-import qs from "qs";
-import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
-import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
-import { SolidListViewColumn } from "./SolidListViewColumn";
+import qs from "qs";
+import { useEffect, useState } from "react";
 import { SolidConfigureLayoutElement } from "../common/SolidConfigureLayoutElement";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
-import { pascalCase } from "change-case";
-import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
-import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
-import { useRouter } from "next/navigation";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
+import { SolidListViewColumn } from "./SolidListViewColumn";
 
 type SolidListViewParams = {
   moduleName: string;

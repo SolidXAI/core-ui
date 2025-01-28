@@ -1,6 +1,4 @@
 "use client";
-import React from 'react';
-import { FilterMatchMode } from 'primereact/api';
 import { Dropdown } from 'primereact/dropdown';
 import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';

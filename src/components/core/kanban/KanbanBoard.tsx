@@ -1,9 +1,8 @@
 // @ts-nocheck
 'use client';
 
-import React, { useState, useEffect } from "react";
-import { DragDropContext, DropResult } from "@hello-pangea/dnd";
-import axios from "axios";
+import { DragDropContext } from "@hello-pangea/dnd";
+import { useState } from "react";
 import KanbanColumn from "./KanbanColumn";
 
 // Define types for groupData and Grouped Data

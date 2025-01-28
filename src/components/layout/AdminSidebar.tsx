@@ -2,7 +2,7 @@
 
 import Link from "next/link";
 import { usePathname } from "next/navigation";
-import React, { useState } from "react";
+import { useState } from "react";
 
 const AdminSidebar = () => {
   const pathname = usePathname();

@@ -1,9 +1,9 @@
 'use client';
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
-import SolidShortTextColumn from './SolidShortTextColumn';
-import SolidIntColumn from './SolidIntColumn';
 import SolidDateColumn from './SolidDateColumn';
 import SolidDatetimeColumn from './SolidDatetimeColumn';
+import SolidIntColumn from './SolidIntColumn';
+import SolidShortTextColumn from './SolidShortTextColumn';
 
 const SolidComputedColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     if (['text', 'string'].includes(fieldMetadata.computedFieldValueType)) {

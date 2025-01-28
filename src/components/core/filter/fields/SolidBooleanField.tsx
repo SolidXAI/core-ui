@@ -1,8 +1,6 @@
 "use client";
-import React from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { SolidFilterFieldsParams } from '../SolidFilterFields';
-import { FilterMatchMode } from 'primereact/api';
 
 const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
     // const filterable = column.attrs.filterable;

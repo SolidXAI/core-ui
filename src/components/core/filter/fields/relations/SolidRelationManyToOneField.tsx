@@ -1,9 +1,7 @@
 "use client";
-import React from 'react';
-import { FilterMatchMode } from 'primereact/api';
-import { getNumberOfInputs, SolidFilterFieldsParams } from '../../SolidFilterFields';
-import { Dropdown } from 'primereact/dropdown';
 import { InputTypes, SolidVarInputsFilterElement } from '@/components/core/filter/SolidVarInputsFilterElement';
+import { Dropdown } from 'primereact/dropdown';
+import { getNumberOfInputs, SolidFilterFieldsParams } from '../../SolidFilterFields';
 
 const SolidRelationManyToOneField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
     // const filterable = column.attrs.filterable;

@@ -1,8 +1,6 @@
 "use client";
-import React from 'react';
-import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { Dropdown } from 'primereact/dropdown';
-import { FilterMatchMode } from 'primereact/api';
+import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
 
 const SolidMediaSingleField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {

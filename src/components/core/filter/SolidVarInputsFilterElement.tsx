@@ -1,11 +1,10 @@
-import { Button } from "primereact/button"
 import { Calendar } from "primereact/calendar";
 import { InputNumber } from "primereact/inputnumber";
-import { InputText } from "primereact/inputtext"
+import { InputText } from "primereact/inputtext";
 import { useEffect, useState } from "react";
 import { SolidManyToOneFilterElement } from "./SolidManyToOneFilterElement";
-import { SolidSelectionStaticFilterElement } from "./SolidSelectionStaticFilterElement";
 import { SolidSelectionDynamicFilterElement } from "./SolidSelectionDynamicFilterElement";
+import { SolidSelectionStaticFilterElement } from "./SolidSelectionStaticFilterElement";
 
 export enum InputTypes {
     Date = 'Date',

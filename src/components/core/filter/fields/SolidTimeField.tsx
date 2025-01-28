@@ -1,9 +1,8 @@
 "use client";
-import React from 'react';
-import { dateFilterMatchModeOptions } from './SolidDateField';
 import { Dropdown } from 'primereact/dropdown';
-import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
 import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
+import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
+import { dateFilterMatchModeOptions } from './SolidDateField';
 
 const SolidTimeField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
     // const filterable = column.attrs.filterable;

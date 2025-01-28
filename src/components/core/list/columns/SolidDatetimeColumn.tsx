@@ -1,9 +1,8 @@
 'use client';
-import React from 'react';
 import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
-import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
-import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewColumn';
 import { FormEvent } from "primereact/ts-helpers";
+import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewColumn';
+import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 import { dateFilterMatchModeOptions } from './SolidDateColumn';
 
 const SolidDatetimeColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {

@@ -1,7 +1,6 @@
 'use client';
-import { useState } from "react";
 import { Dialog } from "primereact/dialog";
-import dynamic from "next/dynamic";
+import { useState } from "react";
 
 
 export const SolidConfigureLayoutElement = ({ }: any) => {

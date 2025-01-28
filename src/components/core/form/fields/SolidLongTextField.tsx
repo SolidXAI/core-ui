@@ -1,10 +1,9 @@
 'use client';
+import { InputTextarea } from "primereact/inputtextarea";
+import { Message } from "primereact/message";
+import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import * as Yup from 'yup';
-import { Tooltip } from "primereact/tooltip";
-import { Message } from "primereact/message";
-import { InputTextarea } from "primereact/inputtextarea";
 
 export class SolidLongTextField implements ISolidField {
 

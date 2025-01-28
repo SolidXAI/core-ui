@@ -1,7 +1,5 @@
-import React from 'react';
-import { FilterMatchMode } from 'primereact/api';
-import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { Dropdown } from 'primereact/dropdown';
+import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
 
 const SolidSelectionDynamicField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {

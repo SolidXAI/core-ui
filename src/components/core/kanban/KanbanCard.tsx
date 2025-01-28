@@ -1,9 +1,9 @@
 // @ts-nocheck
 'use client';
 
-import React from "react";
 import { Draggable, DraggableProvided } from "@hello-pangea/dnd";
 import { Card } from "primereact/card";
+import React from "react";
 
 // Define the types for the data and props
 interface Data {

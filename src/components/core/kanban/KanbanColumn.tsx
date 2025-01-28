@@ -2,11 +2,10 @@
 'use client';
 
 
-import React, { useRef } from "react";
 import { Droppable, DroppableProvided } from "@hello-pangea/dnd";
-import { Button } from "primereact/button";
-import KanbanCard from "./KanbanCard";
 import { OverlayPanel } from "primereact/overlaypanel";
+import { useRef } from "react";
+import KanbanCard from "./KanbanCard";
 
 // Define types for props
 interface Group {
