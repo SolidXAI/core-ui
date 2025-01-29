@@ -1,6 +1,5 @@
-'use client';
+"use client";
 import { InputTypes, SolidVarInputsFilterElement } from '@/components/core/filter/SolidVarInputsFilterElement';
-import { FilterMatchMode } from 'primereact/api';
 import { Dropdown } from 'primereact/dropdown';
 import { getNumberOfInputs, SolidFilterFieldsParams } from '../../SolidFilterFields';
 
@@ -8,11 +7,11 @@ const SolidRelationManyToOneField = ({ fieldMetadata, onChange, index, rule }: S
     // const filterable = column.attrs.filterable;
     const showFilterOperator = false;
     const filterMatchModeOptions = [
-        { label: 'In', value: FilterMatchMode.IN },
-        { label: 'Not In', value: FilterMatchMode.NOT_IN },
+        { label: 'In', value: "$in" },
+        { label: 'Not In', value: "$notIn" },
     ];
     const columnDataType = undefined;
-    const numberOfInputs = getNumberOfInputs("in");
+    const numberOfInputs = getNumberOfInputs(rule.matchMode);
 
     // const filterTemplate = (options: ColumnFilterElementTemplateOptions) => {
 
@@ -51,10 +50,10 @@ const SolidRelationManyToOneField = ({ fieldMetadata, onChange, index, rule }: S
     return (
         <>
             <Dropdown
-                value={rule.operator}
+                value={rule.matchMode}
                 onChange={(e: any) => {
                     console.log("e", e);
-                    onChange(index, 'operator', e.value)
+                    onChange(rule.id, 'matchMode', e.value)
                 }}
                 options={filterMatchModeOptions}
                 optionLabel='label'

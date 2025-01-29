@@ -1,15 +1,9 @@
 'use client';
+import CodeEditor from "@/components/common/CodeEditor";
+import { Message } from "primereact/message";
+import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import * as Yup from 'yup';
-import { Tooltip } from "primereact/tooltip";
-import { InputText } from "primereact/inputtext";
-import { Message } from "primereact/message";
-import { InputNumber } from "primereact/inputnumber";
-import { Calendar } from "primereact/calendar";
-import ReactCodeMirror, { oneDark } from "@uiw/react-codemirror";
-import { javascript } from "@codemirror/lang-javascript";
-import CodeEditor from "@/components/common/CodeEditor";
 
 export class SolidJsonField implements ISolidField {
 

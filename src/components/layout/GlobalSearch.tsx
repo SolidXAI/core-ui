@@ -1,8 +1,8 @@
 "use client";
-import { usePathname } from 'next/navigation'
-import { IconField } from 'primereact/iconfield'
-import { InputIcon } from 'primereact/inputicon'
-import { InputText } from 'primereact/inputtext'
+import { usePathname } from 'next/navigation';
+import { IconField } from 'primereact/iconfield';
+import { InputIcon } from 'primereact/inputicon';
+import { InputText } from 'primereact/inputtext';
 
 export const GlobalSearch = () => {
     const path = usePathname();

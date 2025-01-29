@@ -1,9 +1,9 @@
 'use client';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
+import { SolidRelationManyToManyField } from "./relations/SolidRelationManyToManyField";
 import { SolidRelationManyToOneField } from "./relations/SolidRelationManyToOneField";
 import { SolidRelationOneToManyField } from "./relations/SolidRelationOneToManyField";
-import { SolidRelationManyToManyField } from "./relations/SolidRelationManyToManyField";
 
 
 export class SolidRelationField implements ISolidField {

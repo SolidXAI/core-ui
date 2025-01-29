@@ -1,37 +1,37 @@
 "use client";
 
-import * as Yup from "yup";
-import React, { useEffect, useRef, useState } from "react";
-import { TabView, TabPanel } from "primereact/tabview";
-import "primeflex/primeflex.css";
-import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
-import qs from "qs";
-import { useFormik } from "formik";
-import { Button } from "primereact/button";
-import { SolidShortTextField } from "./fields/SolidShortTextField";
-import { FormikObject, ISolidField, SolidFieldProps } from "./fields/ISolidField";
-import { SolidSelectionStaticField } from "./fields/SolidSelectionStaticField";
-import { SolidSelectionDynamicField } from "./fields/SolidSelectionDynamicField";
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
-import { SolidRelationField } from "./fields/SolidRelationField";
-import { SolidMediaSingleField } from "./fields/SolidMediaSingleField";
-import { SolidMediaMultipleField } from "./fields/SolidMediaMultipleField";
-import { usePathname, useRouter } from "next/navigation";
-import { CancelButton, SolidCancelButton } from "@/components/common/CancelButton";
-import { Dialog } from "primereact/dialog";
-import { SolidIntegerField } from "./fields/SolidIntegerField";
-import { SolidDateTimeField } from "./fields/SolidDateTimeField";
-import { SolidJsonField } from "./fields/SolidJsonField";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
-import { Toast } from "primereact/toast";
-import { SolidDecimalField } from "./fields/SolidDecimalField";
-import { SolidLongTextField } from "./fields/SolidLongTextField";
-import { SolidBooleanField } from "./fields/SolidBooleanField";
-import { SolidRichTextField } from "./fields/SolidRichTextField";
-import { SolidDateField } from "./fields/SolidDateField";
-import { SolidTimeField } from "./fields/SolidTimeField";
-import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
+import { SolidCancelButton } from "@/components/common/CancelButton";
 import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
+import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
+import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
+import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
+import { useFormik } from "formik";
+import { usePathname, useRouter } from "next/navigation";
+import "primeflex/primeflex.css";
+import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
+import { TabPanel, TabView } from "primereact/tabview";
+import { Toast } from "primereact/toast";
+import qs from "qs";
+import { useEffect, useRef, useState } from "react";
+import * as Yup from "yup";
+import { FormikObject, ISolidField, SolidFieldProps } from "./fields/ISolidField";
+import { SolidBooleanField } from "./fields/SolidBooleanField";
+import { SolidDateField } from "./fields/SolidDateField";
+import { SolidDateTimeField } from "./fields/SolidDateTimeField";
+import { SolidDecimalField } from "./fields/SolidDecimalField";
+import { SolidIntegerField } from "./fields/SolidIntegerField";
+import { SolidJsonField } from "./fields/SolidJsonField";
+import { SolidLongTextField } from "./fields/SolidLongTextField";
+import { SolidMediaMultipleField } from "./fields/SolidMediaMultipleField";
+import { SolidMediaSingleField } from "./fields/SolidMediaSingleField";
+import { SolidRelationField } from "./fields/SolidRelationField";
+import { SolidRichTextField } from "./fields/SolidRichTextField";
+import { SolidSelectionDynamicField } from "./fields/SolidSelectionDynamicField";
+import { SolidSelectionStaticField } from "./fields/SolidSelectionStaticField";
+import { SolidShortTextField } from "./fields/SolidShortTextField";
+import { SolidTimeField } from "./fields/SolidTimeField";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -500,16 +500,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const {
         data: solidFormViewData,
         isLoading: solidFormViewDataIsLoading,
-    } = useGetSolidEntityByIdQuery({ id: params.id, qs: formViewDataQs }, { skip: !solidFormViewMetaData || params.id === 'new' });
+    } = useGetSolidEntityByIdQuery({ id: params.id, qs: formViewDataQs },
+        { skip: !solidFormViewMetaData || params.id === 'new', refetchOnMountOrArgChange: true, });
     useEffect(() => {
         if (solidFormViewData) {
             console.log(`DATA: `, solidFormViewData);
             setInitialEntityData(solidFormViewData.data);
         }
-    }, [solidFormViewData]);
+    }, [solidFormViewData, params]);
 
     let formik: FormikObject;
-
+    
     if (solidFormViewMetaDataIsLoading || solidFormViewDataIsLoading || !formViewLayout) {
         formik = useFormik({
             initialValues: {},

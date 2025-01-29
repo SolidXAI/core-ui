@@ -1,8 +1,8 @@
 'use client';
-import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
-import { useState } from "react";
-import qs from "qs";
 import { useLazyGetSelectionDynamicValuesQuery } from "@/redux/api/fieldApi";
+import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
+import qs from "qs";
+import { useState } from "react";
 
 
 export const SolidSelectionDynamicFilterElement = ({ value, updateInputs, index, fieldMetadata }: any) => {

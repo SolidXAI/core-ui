@@ -1,21 +1,21 @@
 'use client';
-import { useEffect, useRef, useState } from "react";
-import { InputText } from "primereact/inputtext";
-import { useFormik } from "formik";
-import { classNames } from "primereact/utils";
-import { Button } from "primereact/button";
-import { useGetrolesQuery } from "@/redux/api/roleApi";
 import { CancelButton } from "@/components/common/CancelButton";
-import * as Yup from "yup";
-import { usePathname, useRouter } from "next/navigation";
 import { useRegisterPrivateMutation, useUpdateUserMutation } from "@/redux/api/authApi";
-import { Panel } from "primereact/panel";
-import { Checkbox } from "primereact/checkbox";
-import { Password } from "primereact/password";
-import { Message } from "primereact/message";
-import { Toast } from "primereact/toast";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
+import { useGetrolesQuery } from "@/redux/api/roleApi";
 import { useDeleteUserMutation } from "@/redux/api/userApi";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
+import { useFormik } from "formik";
+import { usePathname, useRouter } from "next/navigation";
+import { Button } from "primereact/button";
+import { Checkbox } from "primereact/checkbox";
+import { InputText } from "primereact/inputtext";
+import { Message } from "primereact/message";
+import { Panel } from "primereact/panel";
+import { Password } from "primereact/password";
+import { Toast } from "primereact/toast";
+import { classNames } from "primereact/utils";
+import { useEffect, useRef, useState } from "react";
+import * as Yup from "yup";
 
 
 interface ErrorResponseData {

@@ -1,16 +1,15 @@
 'use client';
-import { Schema } from "yup";
-import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import * as Yup from 'yup';
-import { Tooltip } from "primereact/tooltip";
-import { Message } from "primereact/message";
 import { DropzonePlaceholder } from "@/components/common/DropzonePlaceholder";
 import { DropzoneUpload } from "@/components/common/DropzoneUpload";
-import { Button } from "primereact/button";
-import { useDropzone } from "react-dropzone";
-import { useEffect, useState } from "react";
 import { useDeleteMediaMutation } from "@/redux/api/mediaApi";
+import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
+import { Message } from "primereact/message";
+import { useEffect, useState } from "react";
+import { useDropzone } from "react-dropzone";
+import * as Yup from 'yup';
+import { Schema } from "yup";
+import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 
 export class SolidMediaMultipleField implements ISolidField {
 

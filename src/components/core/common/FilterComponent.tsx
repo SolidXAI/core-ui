@@ -1,5 +1,5 @@
 // @ts-nocheck
-'use client';
+"use client";
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
@@ -87,28 +87,31 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
   // const applicableInputField = rule.fieldName ? fields.find(f => f.name === rule.fieldName)?.type : "";
   const [fieldName, setFieldName] = useState({ name: rule.fieldName });
   const [matchMode, setMatchMode] = useState({ name: rule.matchMode });
-  console.log("fields", fields);
+  console.log("level", level);
 
   return (
     // <div style={{ marginLeft: (level - 1) * 10 + 'px' }} className="filter-rule">
-    <div style={{ marginLeft: 5 + 'px' }} className="filter-rule">
+    <div className="filter-rule">
       <div className="filter-individual-rule">
         <div className='filter-individual-rule-form'>
-          <div className="grid align-items-center">
-            <div className="col-10 p-0">
-              <div className="filter-component-fields">
-                <Dropdown
-                  key={rule.id}
-                  value={fieldName.name}
-                  onChange={e => {
-                    setFieldName({ name: e.value, value: e.value })
-                    onChange(rule.id, 'fieldName', e.value)
-                  }}
-                  options={fields}
-                  optionLabel='name'
-                  optionValue='name'
-                  placeholder="Select Field" className="w-full  md:w-14rem" />
-
+          <div className=" flex align-items-center">
+            <div className=" p-0" style={{ flex: "10" }}>
+              {/* <div className="filter-component-fields"> */}
+              <div className='filter-component-fields'>
+                <div className='filter-component-fields-section-one' >
+                  <Dropdown
+                    key={rule.id}
+                    value={fieldName.name}
+                    onChange={e => {
+                      setFieldName({ name: e.value, value: e.value })
+                      onChange(rule.id, 'fieldName', e.value)
+                    }}
+                    options={fields}
+                    optionLabel='name'
+                    optionValue='name'
+                    style={{ marginLeft: (level - 1) * 5 + 'px', width: "100%", maxWidth: "-webkit-fill-available" }}
+                    placeholder="Select Field" className="w-full md:w-14rem" />
+                </div>
                 {/* <Dropdown
                     value={matchMode}
                     onChange={e => {
@@ -119,9 +122,28 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
                     options={applicableOperators}
                     optionLabel='name'
                     placeholder="Select Field" className="w-full filter-small-input md:w-14rem" /> */}
-                {rule.fieldName &&
-                  <SolidFilterFields viewData={viewData} fieldMetadata={viewData.data.solidFieldsMetadata[rule.fieldName]} onChange={onChange} index={rule.id} rule={rule}></SolidFilterFields>
-                }
+
+                <div className='filter-component-fields-section-two'>
+                  {!rule.fieldName &&
+                    <>
+                      <InputText
+                        disabled
+                        value={rule.value || ''}
+                        placeholder="operator"
+                        className='filter-small-input'
+                      />
+                      <InputText
+                        disabled
+                        value={rule.value || ''}
+                        placeholder="value"
+                        className='filter-small-input'
+                      />
+                    </>
+                  }
+                  {rule.fieldName &&
+                    <SolidFilterFields viewData={viewData} fieldMetadata={viewData.data.solidFieldsMetadata[rule.fieldName]} onChange={onChange} index={rule.id} rule={rule}></SolidFilterFields>
+                  }
+                </div>
 
 
                 {/* <div className="col-4">
@@ -152,7 +174,7 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
 
               </div>
             </div>
-            <div className="col-2 flex justify-content-end">
+            <div className="col-2 flex justify-content-end" style={{ flex: "2" }}>
               <button onClick={() => onAddRule(rule.parentRule)}>
                 <div className="card flex justify-content-center">
                   {/* <Tooltip target=".custom-target-icon" /> */}
@@ -198,18 +220,18 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
 
               </button>
 
-              <button onClick={() => onDelete(rule.id)}>
-                <div className="card flex justify-content-center">
+                <button onClick={() => onDelete(rule.id)}>
+                  <div className="card flex justify-content-center">
 
-                  <i className="custom-target-icon pi pi-trash p-text-secondary p-overlay-badge"
-                    data-pr-tooltip="Delete Rule"
-                    data-pr-position="right"
-                    data-pr-at="right+5 top"
-                    data-pr-my="left center-2"
-                    style={{ fontSize: '1.2rem', cursor: 'pointer' }}>
-                  </i>
-                </div>
-              </button>
+                    <i className="custom-target-icon pi pi-trash p-text-secondary p-overlay-badge"
+                      data-pr-tooltip="Delete Rule"
+                      data-pr-position="right"
+                      data-pr-at="right+5 top"
+                      data-pr-my="left center-2"
+                      style={{ fontSize: '1.2rem', cursor: 'pointer' }}>
+                    </i>
+                  </div>
+                </button>
 
             </div>
 
@@ -237,11 +259,13 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
 // Component to render a group of filter rules
 const FilterGroupComponent = ({ viewData, fields, group, onChange, onAddRule, onAddGroup, onDelete, level }) => {
   return (
-    <div style={{ marginLeft: 5 + 'px' }} className="filter-group">
+    <div className="filter-group">
       {/* <div style={{ marginLeft: (level - 1) * 10 + 'px' }} className="filter-group"> */}
 
       <div className='flex justify-content-between align-items-center'>
-        <p className='m-0 mb-2 filter-text'> Match
+        <p className='mb-1 mt-1 filter-text'
+          style={{ marginLeft: (level - 1) * 5 + 'px' }}
+        > Match
           <select className='filter-select'
             value={group.matchOperator}
             onChange={e => onChange(group.id, 'matchOperator', e.target.value)}
@@ -255,7 +279,7 @@ const FilterGroupComponent = ({ viewData, fields, group, onChange, onAddRule, on
         {/* <button onClick={() => onAddGroup(group.id)}>Add Group to Group</button> */}
 
         {/* Add Delete Button for non-root groups */}
-        {level > 0 && <button onClick={() => onDelete(group.id)}>
+        {level > 0 && <button style={{ marginRight: "8px" }} onClick={() => onDelete(group.id)}>
           <div className="card flex justify-content-center">
             <Tooltip target=".custom-target-icon" />
 
@@ -419,10 +443,11 @@ const FilterComponent = ({ viewData, fields }) => {
 
       </div>
 
-      <div>
-        <button onClick={handlePrintState}>Print State</button>
+      <div className='text-center'>
+        <Button label="Apply" size="small" onClick={handlePrintState} type="submit" className="small-button" />
+
         <br></br>
-        <textarea value={printedState} readOnly rows={20} cols={80} style={{ marginTop: '20px' }} />
+        <textarea value={printedState} readOnly rows={20} cols={100} style={{ marginTop: '20px' }} />
       </div>
     </div>
   );

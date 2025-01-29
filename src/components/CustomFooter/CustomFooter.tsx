@@ -1,6 +1,6 @@
 "use client";
-import Link from 'next/link'
-import { FooterForm } from './FooterForm'
+import Link from 'next/link';
+import { FooterForm } from './FooterForm';
 
 export const CustomFooter = () => {
     const footerLinks = [

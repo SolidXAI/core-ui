@@ -1,22 +1,21 @@
 "use client";
-import React, { useState, useEffect, useRef } from "react";
+import { useDeleteMultipleUsersMutation, useLazyGetusersQuery } from '@/redux/api/userApi';
+import Link from "next/link";
+import { FilterMatchMode } from "primereact/api";
+import { Button } from "primereact/button";
+import { Column } from "primereact/column";
 import {
     DataTable,
     DataTableFilterMeta,
     DataTableStateEvent,
 } from "primereact/datatable";
-import { Column } from "primereact/column";
-import Link from "next/link";
-import { Button } from "primereact/button";
-import { FilterMatchMode, FilterOperator } from "primereact/api";
-import { useDeleteMultipleCategorysMutation, useLazyGetcategorysQuery } from "@/redux/api/categoryApi";
-import { useDeleteMultipleUsersMutation, useGetusersQuery, useLazyGetusersQuery } from '@/redux/api/userApi';
+import { useEffect, useRef, useState } from "react";
 
-import qs from "qs";
+import { CreateButton } from "@/components/common/CreateButton";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
-import { CreateButton } from "@/components/common/CreateButton";
+import qs from "qs";
 
 interface Users {
     id: string;

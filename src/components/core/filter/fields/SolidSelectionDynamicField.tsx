@@ -1,25 +1,22 @@
-'use client';
-
-import React from 'react';
-import { FilterMatchMode } from 'primereact/api';
-import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { Dropdown } from 'primereact/dropdown';
+import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
 
-const SolidExternalIdField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
+const SolidSelectionDynamicField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
     const showFilterOperator = false;
-    const columnDataType = 'text';
+    const columnDataType = fieldMetadata.selectionValueType === 'int' ? 'numeric' : 'text';
     const filterMatchModeOptions = [
-        { label: 'In', value: FilterMatchMode.IN },
-        { label: 'Not In', value: FilterMatchMode.NOT_IN },
+        { label: 'In', value: "$in" },
+        { label: 'Not In', value: "$notIn" },
     ];
-    const numberOfInputs = getNumberOfInputs("in");
+    const numberOfInputs = getNumberOfInputs(rule.matchMode);
+
 
 
     return (
         <>
             <Dropdown
-                value={rule.operator}
+                value={rule.matchMode}
                 onChange={(e: any) => {
                     console.log("e", e);
                     onChange(rule.id, 'matchMode', e.value)
@@ -32,10 +29,10 @@ const SolidExternalIdField = ({ fieldMetadata, onChange, index, rule }: SolidFil
                 values={rule.value}
                 onChange={(e: any) => {
                     console.log("e", e);
-                    onChange(rule.id, 'value', e)
+                    onChange(rule.id, 'value', e.map((i: any) => i.value))
                 }}
                 numberOfInputs={numberOfInputs}
-                inputType={InputTypes.Text}
+                inputType={InputTypes.SelectionDynamic}
                 fieldMetadata={fieldMetadata}
             >
             </SolidVarInputsFilterElement>
@@ -44,4 +41,4 @@ const SolidExternalIdField = ({ fieldMetadata, onChange, index, rule }: SolidFil
 
 };
 
-export default SolidExternalIdField;
+export default SolidSelectionDynamicField;

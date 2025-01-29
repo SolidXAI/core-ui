@@ -1,10 +1,9 @@
 'use client';
-import React from 'react';
-import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
-import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
-import { SolidListViewColumnParams } from '../SolidListViewColumn';
-import { FormEvent } from "primereact/ts-helpers";
 import { FilterMatchMode } from 'primereact/api';
+import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
+import { FormEvent } from "primereact/ts-helpers";
+import { SolidListViewColumnParams } from '../SolidListViewColumn';
+import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 
 const SolidUuidColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;

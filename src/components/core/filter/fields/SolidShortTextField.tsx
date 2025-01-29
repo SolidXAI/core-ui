@@ -1,35 +1,30 @@
-'use client';
-import React from 'react';
-import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
+"use client";
 import { Dropdown } from 'primereact/dropdown';
-import { FilterMatchMode } from 'primereact/api';
+import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
 
-const SolidMediaSingleField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
+const SolidShortTextField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
     // const filterable = column.attrs.filterable;
-    const filterable = false;
-    // const showFilterOperator = false;
-    // const columnDataType = undefined;
+    const showFilterOperator = false;
     const columnDataType = 'text';
     const filterMatchModeOptions = [
-        { label: 'Starts With', value: FilterMatchMode.STARTS_WITH },
-        { label: 'Contains', value: FilterMatchMode.CONTAINS },
-        { label: 'Not Contains', value: FilterMatchMode.NOT_CONTAINS },
-        { label: 'Ends With', value: FilterMatchMode.ENDS_WITH },
-        { label: 'Equals', value: FilterMatchMode.EQUALS },
-        { label: 'Not Equals', value: FilterMatchMode.NOT_EQUALS },
-        { label: 'In', value: FilterMatchMode.IN },
-        { label: 'Not In', value: FilterMatchMode.NOT_IN }
+        { label: 'Starts With', value: "$startsWithi" },
+        { label: 'Contains', value: "$containsi" },
+        { label: 'Not Contains', value: "$notContains" },
+        { label: 'Ends With', value: "$endsWith" },
+        { label: 'Equals', value: "$eqi" },
+        { label: 'Not Equals', value: "$nei" },
+        { label: 'In', value: "$in" },
+        { label: 'Not In', value: "$notIn" }
     ];
-    const numberOfInputs = getNumberOfInputs("in");
 
     // const header = column.attrs.label ?? fieldMetadata.displayName;
+    const numberOfInputs = getNumberOfInputs(rule.matchMode);
 
     return (
         <>
-
             <Dropdown
-                value={rule.operator}
+                value={rule.matchMode}
                 onChange={(e: any) => {
                     console.log("e", e);
                     onChange(rule.id, 'matchMode', e.value)
@@ -54,4 +49,4 @@ const SolidMediaSingleField = ({ fieldMetadata, onChange, index, rule }: SolidFi
 
 };
 
-export default SolidMediaSingleField;
+export default SolidShortTextField;

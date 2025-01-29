@@ -1,4 +1,3 @@
-'use client';
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { useState } from "react";
 

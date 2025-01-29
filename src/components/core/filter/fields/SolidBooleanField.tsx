@@ -1,5 +1,4 @@
-'use client';
-import { FilterMatchMode } from 'primereact/api';
+"use client";
 import { Dropdown } from 'primereact/dropdown';
 import { SolidFilterFieldsParams } from '../SolidFilterFields';
 
@@ -9,11 +8,11 @@ const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilter
     const columnDataType = 'boolean';
 
     const booleanOptions = [
-        { label: 'Yes', value: true },
-        { label: 'No', value: false },
+        { label: 'true', value: true },
+        { label: 'false', value: false },
     ];
     const filterMatchModeOptions = [
-        { label: 'Equals', value: FilterMatchMode.EQUALS },
+        { label: 'Equals', value: "$eqi" },
   ];
 
 
@@ -23,7 +22,7 @@ const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilter
     return (
         <>
             <Dropdown
-                value={rule.operator}
+                value={rule.matchMode}
                 onChange={(e: any) => {
                     console.log("e", e);
                     onChange(rule.id, 'matchMode', e.value)
@@ -37,7 +36,7 @@ const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilter
                 options={booleanOptions}
                 onChange={(e: any) => {
                     console.log("e", e);
-                    onChange(rule.id, 'value', e)
+                    onChange(rule.id, 'value', e.value)
                 }}
                 placeholder="Select"
                 className="p-column-filter"

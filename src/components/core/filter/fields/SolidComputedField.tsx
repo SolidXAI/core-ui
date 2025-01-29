@@ -1,9 +1,9 @@
-'use client';
-import SolidShortTextField from './SolidShortTextField';
-import SolidIntField from './SolidIntField';
+"use client";
+import { SolidFilterFieldsParams } from '../SolidFilterFields';
 import SolidDateField from './SolidDateField';
 import SolidDatetimeField from './SolidDatetimeField';
-import { SolidFilterFieldsParams } from '../SolidFilterFields';
+import SolidIntField from './SolidIntField';
+import SolidShortTextField from './SolidShortTextField';
 
 const SolidComputedField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
     if (['text', 'string'].includes(fieldMetadata.computedFieldValueType)) {

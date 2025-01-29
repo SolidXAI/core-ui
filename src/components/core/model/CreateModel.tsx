@@ -1,18 +1,18 @@
 "use client"
 
-import React, { useEffect, useRef, useState } from "react";
-import { TabView, TabPanel } from "primereact/tabview";
+import { CancelButton } from "@/components/common/CancelButton";
+import { handleError } from "@/helpers/ToastContainer";
+import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
+import { useCreatemodelMutation, useDeletemodelMutation, useLazyGetModelsQuery, useUpdatemodelMutation } from "@/redux/api/modelApi";
+import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "primereact/button";
-import ModelMetaData from "./ModelMetaData";
-import { useCreatemodelMutation, useDeletemodelMutation, useLazyGetModelsQuery, useUpdatemodelMutation } from "@/redux/api/modelApi";
-import FieldMetaData from "./FieldMetaData";
-import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
+import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
-import { CancelButton } from "@/components/common/CancelButton";
 import qs from "qs";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
-import { handleError } from "@/helpers/ToastContainer";
+import { useEffect, useRef, useState } from "react";
+import FieldMetaData from "./FieldMetaData";
+import ModelMetaData from "./ModelMetaData";
 
 
 interface ErrorResponseData {

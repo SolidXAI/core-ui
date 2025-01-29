@@ -1,27 +1,21 @@
-'use client';
-import React from 'react';
-import { FilterMatchMode } from 'primereact/api';
-import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
+"use client";
 import { Dropdown } from 'primereact/dropdown';
+import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
 
-
-const SolidSelectionStaticField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
-
-    // const filterable = column.attrs.filterable;
+const SolidUuidField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
     const showFilterOperator = false;
-    const columnDataType = fieldMetadata.selectionValueType === 'int' ? 'numeric' : 'text';
+    const columnDataType = 'text';
     const filterMatchModeOptions = [
-        { label: 'In', value: FilterMatchMode.IN },
-        { label: 'Not In', value: FilterMatchMode.NOT_IN },
+        { label: 'In', value: "$in" },
+        { label: 'Not In', value: "$notIn" },
     ];
-
-    const numberOfInputs = getNumberOfInputs("in");
+    const numberOfInputs = getNumberOfInputs(rule.matchMode);
 
     return (
         <>
             <Dropdown
-                value={rule.operator}
+                value={rule.matchMode}
                 onChange={(e: any) => {
                     console.log("e", e);
                     onChange(rule.id, 'matchMode', e.value)
@@ -37,12 +31,13 @@ const SolidSelectionStaticField = ({ fieldMetadata, onChange, index, rule }: Sol
                     onChange(rule.id, 'value', e)
                 }}
                 numberOfInputs={numberOfInputs}
-                inputType={InputTypes.SelectionStatic}
+                inputType={InputTypes.Text}
                 fieldMetadata={fieldMetadata}
             >
             </SolidVarInputsFilterElement>
         </>
     );
+
 };
 
-export default SolidSelectionStaticField;
+export default SolidUuidField;

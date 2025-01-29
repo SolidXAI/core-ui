@@ -1,5 +1,5 @@
 'use client';
-import { FieldConfig, FieldHelperProps, FieldInputProps, FieldMetaProps, FormikConfig, FormikErrors, FormikState, FormikTouched, FormikValues } from "formik";
+import { FieldConfig, FieldHelperProps, FieldInputProps, FieldMetaProps, FormikErrors, FormikState, FormikTouched, FormikValues } from "formik";
 import { Schema } from "yup";
 
 export type SolidFieldProps = {

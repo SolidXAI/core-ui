@@ -1,6 +1,6 @@
 "use client";
-import { useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
+import { useState } from "react";
 
 const NavbarTwo = () => {
   const router = useRouter();

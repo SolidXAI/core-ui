@@ -1,8 +1,8 @@
 "use client";
-import { useState } from "react";
-import { PanelMenu } from "primereact/panelmenu";
 import Link from "next/link";
 import { usePathname } from "next/navigation";
+import { PanelMenu } from "primereact/panelmenu";
+import { useState } from "react";
 
 const NavbarTwoMenu = ({ menuItems }: any) => {
     const pathname = usePathname();
