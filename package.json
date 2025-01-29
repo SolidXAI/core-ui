@@ -1,6 +1,6 @@
 {
   "name": "@solidstarters/solid-core-ui",
-  "version": "1.0.1",
+  "version": "1.0.2",
   "scripts": {
     "build": "tsc && tsc-alias",
     "clean": "rm -rf dist",
@@ -16,7 +16,7 @@
   "private": false,
   "publishConfig": {
     "access": "public"
-   },
+  },
   "dependencies": {
     "@hello-pangea/dnd": "^17.0.0",
     "axios": "^1.7.2",
