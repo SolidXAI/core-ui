@@ -544,7 +544,7 @@ export {default as AdminSidebar} from '@/components/layout/AdminSidebar';
 //ButtonLoader.tsx
 export {default as ButtonLoader} from '@/components/layout/ButtonLoader';
 //CustomPagination.tsx
-export {default as CustomPagination} from '@/components/layout/CustomPagination';
+// export {default as CustomPagination} from '@/components/layout/CustomPagination';
 //DashboardHeader.tsx
 export {default as DashboardHeader} from '@/components/layout/DashboardHeader';
 //FilterMenu.tsx

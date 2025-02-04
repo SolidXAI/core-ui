@@ -71,6 +71,7 @@
     "react-transition-group": "^4.4.5"
   },
   "devDependencies": {
+    "@types/react-js-pagination": "^3.0.7",
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/theme-one-dark": "^6.1.2",
     "@reduxjs/toolkit": "^1.9.5",
