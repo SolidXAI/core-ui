@@ -11,7 +11,7 @@ interface Props {
     setView: (value: string) => void;
     view: string;
 }
-export default function SolidLayoutViews({ sizeOptions, setSize, size, viewModes, setView, view }: Props) {
+export const SolidLayoutViews = ({ sizeOptions, setSize, size, viewModes, setView, view }: Props) => {
     const op = useRef(null);
 
     return (

@@ -176,11 +176,11 @@ export { CustomFooter } from '@/components/CustomFooter/CustomFooter';
 export { FooterForm } from '@/components/CustomFooter/FooterForm';
 
 
-export { CustomHeader } from '@/components/CustomHeader/CustomHeader';
 export { CallIcon } from '@/components/CustomHeader/CallIcon';
+export { CustomHeader } from '@/components/CustomHeader/CustomHeader';
 
-export type { TertiaryProps, SecondaryProps, PrimaryDataProps, RootProps } from '@/components/CustomHeader/CustomDropdown';
 export { PrimaryCustomDropdown } from '@/components/CustomHeader/CustomDropdown';
+export type { PrimaryDataProps, RootProps, SecondaryProps, TertiaryProps } from '@/components/CustomHeader/CustomDropdown';
 
 export { EmailIcon } from '@/components/CustomHeader/EmailIcon';
 export { HeaderCart } from '@/components/CustomHeader/HeaderCart';
@@ -215,11 +215,11 @@ export { SingleSelectAutoCompleteField } from '@/components/common/SingleSelectA
 export { SocialMediaLogin } from '@/components/common/SocialMediaLogin';
 
 
-export { SolidListViewOptions } from '@/components/core/common/SolidListViewOptions';
+// export { SolidListViewOptions } from '@/components/core/common/SolidListViewOptions';
+export { SolidConfigureLayoutElement } from '@/components/core/common/SolidConfigureLayoutElement';
 export { SolidCreateButton } from '@/components/core/common/SolidCreateButton';
 export { SolidGlobalSearchElement } from '@/components/core/common/SolidGlobalSearchElement';
 export { SolidSearchBox } from '@/components/core/common/SolidSearchBox';
-export { SolidConfigureLayoutElement } from '@/components/core/common/SolidConfigureLayoutElement';
 
 // export type {ModelMetaData} from '@/components/core/field/FieldListViewData'; //Commenting this line for now, since it does not seem to be used anywhere
 export { FieldListViewData } from '@/components/core/field/FieldListViewData';
@@ -227,7 +227,7 @@ export { FieldListViewData } from '@/components/core/field/FieldListViewData';
 export type { SolidFormViewProps } from '@/components/core/form/SolidFormView';
 
 
-export type { SolidFieldProps, FormikObject, ISolidField } from '@/components/core/form/fields/ISolidField';
+export type { FormikObject, ISolidField, SolidFieldProps } from '@/components/core/form/fields/ISolidField';
 export { SolidBooleanField } from '@/components/core/form/fields/SolidBooleanField';
 export { SolidDateField } from '@/components/core/form/fields/SolidDateField';
 export { SolidDateTimeField } from '@/components/core/form/fields/SolidDateTimeField';
@@ -276,8 +276,8 @@ export { SolidKanbanView } from '@/components/core/kanban/SolidKanbanView';
 // export * from '@/components/core/kanban/columns/relations/SolidRelationManyToOneColumn';
 
 export { SolidListView } from '@/components/core/list/SolidListView';
+export { SolidListViewColumn, getNumberOfInputs } from '@/components/core/list/SolidListViewColumn';
 export type { SolidListViewColumnParams } from '@/components/core/list/SolidListViewColumn';
-export { getNumberOfInputs, SolidListViewColumn } from '@/components/core/list/SolidListViewColumn';
 // export * from '@/components/core/list/SolidListingHeader';
 export { SolidManyToOneFilterElement } from '@/components/core/list/SolidManyToOneFilterElement';
 export { SolidSelectionDynamicFilterElement } from '@/components/core/list/SolidSelectionDynamicFilterElement';
@@ -330,7 +330,7 @@ export { UserListView } from '@/components/core/users/UserListView';
 // export * from '@/components/layout/FilterMenu';
 // export * from '@/components/layout/Footer';
 export { GlobalSearch } from '@/components/layout/GlobalSearch';
-export { LayoutContext, LayoutProvider } from '@/components/layout/context/layoutcontext'
+export { LayoutContext, LayoutProvider } from '@/components/layout/context/layoutcontext';
 // export * from '@/components/layout/Header';
 // export * from '@/components/layout/ListingHeader';
 // export * from '@/components/layout/Loader';
@@ -345,8 +345,8 @@ export { FilterIcon } from '@/components/modelsComponents/filterIcon';
 
 export { DemoService } from '@/components/tables/DemoData';
 export { DynamicTable } from '@/components/tables/DynamicTable';
-export type { Product } from '@/components/tables/ListViewTable';
 export { ListViewTable } from '@/components/tables/ListViewTable';
+export type { Product } from '@/components/tables/ListViewTable';
 // Excluded folders
 // dashboard
 // automationComponents
@@ -362,11 +362,11 @@ export { ListViewTable } from '@/components/tables/ListViewTable';
 // └── revalidate.ts
 
 export { ToastContainer, handleError, handleSuccess } from '@/helpers/ToastContainer';
-export { getAuthHeader, getAuthCookieName } from '@/helpers/authHeader';
+export { getAuthCookieName, getAuthHeader } from '@/helpers/authHeader';
 // export * from '@/helpers/countries';
-export { calculateDaysOfStay, addCommasToAmount, getSingularAndPlural } from '@/helpers/helpers';
+export { addCommasToAmount, calculateDaysOfStay, getSingularAndPlural } from '@/helpers/helpers';
 // export * from '@/helpers/menu';
-export { createPermission, updatePermission, deletePermission } from '@/helpers/permissions';
+export { createPermission, deletePermission, updatePermission } from '@/helpers/permissions';
 export { revalidateTag } from '@/helpers/revalidate';
 
 // redux
@@ -447,12 +447,12 @@ export { solidViewsApi, useCreateSolidViewMutation, useDeleteMultipleSolidViewsM
 // export * from '@/redux/api/stateApi';
 // export * from '@/redux/api/tagApi';
 // export * from '@/redux/api/tagGroupApi';
-export { userApi, useCreateuserroleMutation, useCreateuserrolebulkMutation, useDeleteMultipleUsersMutation, useDeleteUserMutation, useGetusersByIdQuery, useGetusersQuery, useLazyCheckIfPermissionExistsQuery, useLazyGetusersByIdQuery, useLazyGetusersQuery, useLazyUpdateSessionQuery, useRegisterUserMutation, useUpdatePasswordMutation, useUpdateProfileMutation, useUpdateSessionQuery, useUploadAvatarMutation } from '@/redux/api/userApi';
+export { useCreateuserroleMutation, useCreateuserrolebulkMutation, useDeleteMultipleUsersMutation, useDeleteUserMutation, useGetusersByIdQuery, useGetusersQuery, useLazyCheckIfPermissionExistsQuery, useLazyGetusersByIdQuery, useLazyGetusersQuery, useLazyUpdateSessionQuery, useRegisterUserMutation, useUpdatePasswordMutation, useUpdateProfileMutation, useUpdateSessionQuery, useUploadAvatarMutation, userApi } from '@/redux/api/userApi';
 
-export { setToken, logout } from '@/redux/features/authSlice';
+export { logout, setToken } from '@/redux/features/authSlice';
 export { gridView, listView } from '@/redux/features/dataViewSlice';
-export { showNavbar, hideNavbar, toggleNavbar } from '@/redux/features/navbarSlice';
-export { showFieldsPopup, showModulePopup, hideFieldsPopup, hideModulePopup } from '@/redux/features/popupSlice';
+export { hideNavbar, showNavbar, toggleNavbar } from '@/redux/features/navbarSlice';
+export { hideFieldsPopup, hideModulePopup, showFieldsPopup, showModulePopup } from '@/redux/features/popupSlice';
 export { toggleTheme } from '@/redux/features/themeSlice';
 export { setIsAuthenticated, setUser } from '@/redux/features/userSlice';
 
@@ -574,8 +574,8 @@ export { default as UserSidebar } from '@/components/layout/UserSidebar';
 export { default as menu } from '@/helpers/menu';
 
 // Auth 
-export { default as SolidLogin } from '@/components/auth/SolidLogin';
 export { default as SolidForgotPassword } from '@/components/auth/SolidForgotPassword';
+export { default as SolidLogin } from '@/components/auth/SolidLogin';
 export { default as SolidOTPVerify } from '@/components/auth/SolidOTPVerify';
 export { default as SolidRegister } from '@/components/auth/SolidRegister';
 export { default as SolidResetPassword } from '@/components/auth/SolidResetPassword';
@@ -590,4 +590,4 @@ export { default as userReducer } from '@/redux/features/userSlice';
 
 
 // types
-export type { LayoutConfig } from '@/types'
+export type { LayoutConfig } from '@/types';
