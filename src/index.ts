@@ -219,6 +219,7 @@ export {SolidListViewOptions} from '@/components/core/common/SolidListViewOption
 export {SolidCreateButton} from '@/components/core/common/SolidCreateButton';
 export {SolidGlobalSearchElement} from '@/components/core/common/SolidGlobalSearchElement';
 export {SolidSearchBox} from '@/components/core/common/SolidSearchBox';
+export {SolidConfigureLayoutElement} from '@/components/core/common/SolidConfigureLayoutElement';
 
 // export type {ModelMetaData} from '@/components/core/field/FieldListViewData'; //Commenting this line for now, since it does not seem to be used anywhere
 export {FieldListViewData} from '@/components/core/field/FieldListViewData';

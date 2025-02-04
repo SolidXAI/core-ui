@@ -5,7 +5,7 @@ import { FormEvent } from "primereact/ts-helpers";
 import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 
-const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
+const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {    
     const filterable = column.attrs.filterable;
     const showFilterOperator = false;
     const columnDataType = 'text';
@@ -43,9 +43,9 @@ const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column }: 
             key={fieldMetadata.name}
             field={fieldMetadata.name}
             header={header}
-            className="text-sm"
+            // className="text-sm"
             sortable={column.attrs.sortable}
-            filter={filterable}
+            // filter={filterable}
             dataType={columnDataType}
             showFilterOperator={showFilterOperator}
             filterMatchModeOptions={filterMatchModeOptions}
@@ -53,6 +53,11 @@ const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column }: 
             filterPlaceholder={`Search by ${fieldMetadata.displayName}`}
             style={{ minWidth: "12rem" }}
             headerClassName="table-header-fs"
+            // body={(data)=>{
+            //     console.log("DAta", data);
+                
+            //     return <div className="solid-table-row">{data.name}</div>
+            // }}
         ></Column>
     );
 
