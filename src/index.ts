@@ -331,6 +331,7 @@ export { UserListView } from '@/components/core/users/UserListView';
 // export * from '@/components/layout/Footer';
 export { GlobalSearch } from '@/components/layout/GlobalSearch';
 export { LayoutContext, LayoutProvider } from '@/components/layout/context/layoutcontext';
+export { Layout } from '@/components/layout/Layout'
 // export * from '@/components/layout/Header';
 // export * from '@/components/layout/ListingHeader';
 // export * from '@/components/layout/Loader';
