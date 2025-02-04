@@ -1,5 +1,6 @@
 // @ts-nocheck
 "use client";
+
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
@@ -9,17 +10,17 @@ import React, { useEffect, useState } from 'react';
 import { SolidFilterFields } from '../filter/SolidFilterFields';
 import { Button } from 'primereact/button';
 
-enum FilterRuleType {
+export enum FilterRuleType {
   RULE = 'rule',
   RULE_GROUP = 'rule_group'
 }
 
-enum FilterOperator {
+export enum FilterOperator {
   AND = 'and',
   OR = 'or'
 }
 
-enum FilterMatchMode {
+export enum FilterMatchMode {
   STARTS_WITH = 'startsWith',
   CONTAINS = 'contains',
   EQUALS = 'equals',
@@ -27,18 +28,18 @@ enum FilterMatchMode {
   LESS_THAN = 'lt',
 }
 
-interface FilterRule {
+export interface FilterRule {
   id: number;
   type: FilterRuleType;
   matchOperator?: FilterOperator;
-  fieldName?: string;
-  matchMode?: FilterMatchMode;
+  fieldName?: string | null;
+  matchMode?: FilterMatchMode | null;
   value?: any;
   parentRule: number | null;
   children?: FilterRule[];
 }
 
-interface Field {
+export interface Field {
   name: string;
   type: 'string' | 'number' | 'date';
 }
@@ -220,18 +221,18 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
 
               </button>
 
-                <button onClick={() => onDelete(rule.id)}>
-                  <div className="card flex justify-content-center">
+              <button onClick={() => onDelete(rule.id)}>
+                <div className="card flex justify-content-center">
 
-                    <i className="custom-target-icon pi pi-trash p-text-secondary p-overlay-badge"
-                      data-pr-tooltip="Delete Rule"
-                      data-pr-position="right"
-                      data-pr-at="right+5 top"
-                      data-pr-my="left center-2"
-                      style={{ fontSize: '1.2rem', cursor: 'pointer' }}>
-                    </i>
-                  </div>
-                </button>
+                  <i className="custom-target-icon pi pi-trash p-text-secondary p-overlay-badge"
+                    data-pr-tooltip="Delete Rule"
+                    data-pr-position="right"
+                    data-pr-at="right+5 top"
+                    data-pr-my="left center-2"
+                    style={{ fontSize: '1.2rem', cursor: 'pointer' }}>
+                  </i>
+                </div>
+              </button>
 
             </div>
 
@@ -302,28 +303,28 @@ const FilterGroupComponent = ({ viewData, fields, group, onChange, onAddRule, on
 };
 
 // Main Filter component
-const FilterComponent = ({ viewData, fields }) => {
-  const initialState: FilterRule[] = [
-    {
-      id: 1,
-      type: FilterRuleType.RULE_GROUP,
-      matchOperator: FilterOperator.OR,
-      parentRule: null,
-      children: [
-        {
-          id: Date.now() + getRandomInt(1, 500),
-          type: FilterRuleType.RULE,
-          fieldName: null,
-          matchMode: null,
-          value: null,
-          parentRule: 1,
-          children: []
-        }
-      ]
-    }
-  ];
+const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, handleApplyCustomFilter }) => {
+  // const initialState: FilterRule[] = [
+  //   {
+  //     id: 1,
+  //     type: FilterRuleType.RULE_GROUP,
+  //     matchOperator: FilterOperator.OR,
+  //     parentRule: null,
+  //     children: [
+  //       {
+  //         id: Date.now() + getRandomInt(1, 500),
+  //         type: FilterRuleType.RULE,
+  //         fieldName: null,
+  //         matchMode: null,
+  //         value: null,
+  //         parentRule: 1,
+  //         children: []
+  //       }
+  //     ]
+  //   }
+  // ];
 
-  const [filterRules, setFilterRules] = useState<FilterRule[]>(initialState);
+  // const [filterRules, setFilterRules] = useState<FilterRule[]>(initialState);
   const [printedState, setPrintedState] = useState<string>('');
 
   const addChild = (rules, parentId, newChild) => {
@@ -421,7 +422,11 @@ const FilterComponent = ({ viewData, fields }) => {
 
   const handlePrintState = () => {
     setPrintedState(JSON.stringify(filterRules, null, 2)); // Pretty format the state
+    handleApplyCustomFilter()
   };
+
+
+
 
   return (
     <div className=''>

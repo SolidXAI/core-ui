@@ -3,7 +3,6 @@ import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { useRef, useState } from "react";
-import FilterComponent from "../common/FilterComponent";
 
 const FilterMenu = () => {
     const op = useRef<any>(null);
@@ -105,7 +104,7 @@ const FilterMenu = () => {
                 </div>
             </OverlayPanel>
             <Dialog header="Add Custom Filter" visible={visible} style={{ width: '50vw' }} onHide={() => { if (!visible) return; setVisible(false); }}>
-                <FilterComponent></FilterComponent>
+                {/* <FilterComponent></FilterComponent> */}
             </Dialog>
 
             {/* <Dialog

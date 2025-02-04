@@ -20,7 +20,7 @@ export const SolidManyToOneFilterElement = ({ value, updateInputs, index, fieldM
             limit: 10,
             filters: {
                 [fieldMetadata.relationModel.userKeyField.name]: {
-                    '"$containsi"': event.query
+                    $containsi: event.query
                 }
             }
         };

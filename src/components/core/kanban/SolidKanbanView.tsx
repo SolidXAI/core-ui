@@ -8,15 +8,12 @@ import Link from "next/link";
 import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
 import {
-  DataTableFilterMeta,
-  DataTableStateEvent
+  DataTableFilterMeta
 } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import qs from "qs";
 import { useEffect, useState } from "react";
-import { SolidConfigureLayoutElement } from "../common/SolidConfigureLayoutElement";
 import { SolidCreateButton } from "../common/SolidCreateButton";
-import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import KanbanBoard from "./KanbanBoard";
 
 type SolidKanbanViewParams = {
@@ -79,13 +76,13 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const kanbanViewMetaDataQs = qs.stringify({ ...params, viewType: 'kanban' }, {
     encodeValuesOnly: true,
   });
-  const [kanbanViewMetaData, setKanbanViewMetaData] = useState({});
+  const [kanbanViewMetaData, setKanbanViewMetaData] = useState<any>({});
+
   const {
     data: solidKanbanViewMetaData,
     error: solidKanbanViewMetaDataError,
     isLoading: solidKanbanViewMetaDataIsLoading,
-    isError: solidKanbanViewMetaDataIsError,
-    refetch
+    isError: solidKanbanViewMetaDataIsError
   } = useGetSolidViewLayoutQuery(kanbanViewMetaDataQs);
 
 
@@ -97,46 +94,58 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
     const initialFilters: any = {};
     const toPopulate: string[] = [];
-    // for (let i = 0; i < solidView.layout.children.length; i++) {
-    //   const column = solidView.layout.children[i];
-    //   const fieldMetadata = solidFieldsMetadata[column.attrs.name];
+    function extractFields(node: any, result: any = []) {
+      if (node.type === "field") {
+        result.push(node);
+      }
+      if (node.children) {
+        node.children.forEach((child: any) => extractFields(child, result));
+      }
+      return result;
+    }
 
-    //   // Form the initial filters after iterating over the columns and field metadata. 
-    //   if (['int', 'bigint', 'float', 'decimal'].includes(fieldMetadata.type)) {
-    //     // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] }
-    //     initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.EQUALS }
-    //   }
-    //   else if (['date', 'datetime', 'time', 'boolean'].includes(fieldMetadata.type)) {
-    //     // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }] }
-    //     initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.EQUALS }
-    //   }
-    //   else if (['relation', 'selectionStatic', 'selectionDynamic'].includes(fieldMetadata.type)) {
-    //     initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.IN }
-    //   }
-    //   else {
-    //     // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
-    //     initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.STARTS_WITH }
-    //   }
+    const data = { /* Your JSON object here */ };
+    const layoutFields = extractFields(solidView.layout);
 
-    //   if (column.attrs.name === 'id') {
-    //     initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.IN }
-    //   }
+    for (let i = 0; i < layoutFields.length; i++) {
+      const column = layoutFields[i];
+      const fieldMetadata = solidFieldsMetadata[column.attrs.name];
 
-    //   // Form the "toPopulate" array. 
-    //   if (fieldMetadata.type === 'relation' && fieldMetadata.relationType === 'many-to-one') {
-    //     toPopulate.push(fieldMetadata.name);
-    //   }
-    // }
+      // Form the initial filters after iterating over the columns and field metadata. 
+      if (['int', 'bigint', 'float', 'decimal'].includes(fieldMetadata.type)) {
+        // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] }
+        initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.EQUALS }
+      }
+      else if (['date', 'datetime', 'time', 'boolean'].includes(fieldMetadata.type)) {
+        // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }] }
+        initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.EQUALS }
+      }
+      else if (['relation', 'selectionStatic', 'selectionDynamic'].includes(fieldMetadata.type)) {
+        initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.IN }
+      }
+      else {
+        // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
+        initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.STARTS_WITH }
+      }
+
+      if (column.attrs.name === 'id') {
+        initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.IN }
+      }
+
+      // Form the "toPopulate" array. 
+      if (fieldMetadata.type === 'relation' && fieldMetadata.relationType === 'many-to-one') {
+        toPopulate.push(fieldMetadata.name);
+      }
+    }
     setFilters(initialFilters);
-    setRows(solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.defaultPageSize ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.defaultPageSize : 25)
+    setRows(kanbanViewMetaData?.data?.solidView?.layout?.attrs?.defaultPageSize ? kanbanViewMetaData?.data?.solidView?.layout?.attrs.defaultPageSize : 25)
     setToPopulate(toPopulate);
   }
 
   useEffect(() => {
-    // refetch();
+
     if (solidKanbanViewMetaData) {
       setKanbanViewMetaData(solidKanbanViewMetaData);
-
       initialFilterMethod()
     }
   }, [solidKanbanViewMetaData]);
@@ -150,13 +159,16 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [filterValues, setFilterValues] = useState([{ field: '', operator: '', value: '' }]);
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(25);
-  const [sortField, setSortField] = useState("");
-  const [sortOrder, setSortOrder] = useState(0);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [createButtonUrl, setCreateButtonUrl] = useState<string>();
   const [editButtonUrl, setEditButtonUrl] = useState<string>();
+  const [columnsCount, setColumnsCount] = useState(5);
+  const [swimLaneCurrentPageNumber, setSwimLaneCurrentPageNumber] = useState(1);
+
+  console.log("kanbanViewData", kanbanViewData);
+
 
   // Get the kanban view data.
   // const [triggerGetSolidEntitiesForKanban, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidKanbanEntitiesQuery();
@@ -183,22 +195,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     }
   }, [solidEntityKanbanViewData]);
 
-
-  useEffect(() => {
-    if (solidKanbanViewMetaData) {
-      const createActionUrl = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.type === "custom" ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.customComponent : "form/new";
-      const editActionUrl = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.type === "custom" ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.customComponent : "form";
-      if (createActionUrl) {
-        setCreateButtonUrl(createActionUrl)
-      }
-      if (editActionUrl) {
-        setEditButtonUrl(editActionUrl)
-      }
-    }
-  }, [solidKanbanViewMetaData])
-  console.log("solidKanbanViewMetaData", solidKanbanViewMetaData);
-
-
   // Delete mutation 
   const [
     deleteManySolidEntities,
@@ -213,10 +209,28 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
 
 
+
+
   // Fetch data after toPopulate has been populated...
   useEffect(() => {
+
+    if (solidKanbanViewMetaData) {
+      const createActionUrl = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.type === "custom" ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.customComponent : "form/new";
+      const editActionUrl = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.type === "custom" ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.customComponent : "form";
+      if (solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.pageSize) {
+        setColumnsCount(solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.pageSize)
+      }
+      if (createActionUrl) {
+        setCreateButtonUrl(createActionUrl)
+      }
+      if (editActionUrl) {
+        setEditButtonUrl(editActionUrl)
+      }
+    }
     if (solidKanbanViewMetaData) {
       const groupByFieldName = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.groupBy;
+      const columnsToLoadCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.pageSize || 5;
+      
       if (toPopulate) {
         const queryData = {
           offset: 0,
@@ -226,7 +240,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           populate: toPopulate,
           populateGroup: true,
           groupFilter: {
-            limit: 100,
+            limit: rows,
             offset: 0
           }
           // sort: [`id:desc`],
@@ -243,182 +257,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
   }, [isDeleteSolidEntitiesSucess, toPopulate, solidKanbanViewMetaData]);
 
-  // Handle pagination event.
-  const onPageChange = (event: any) => {
-    setFirst(event.first);
-    setRows(event.rows);
-    setQueryString(event.first, event.rows, sortField, sortOrder, filters);
-  };
 
-  // Handle sort event.
-  const onSort = (event: DataTableStateEvent) => {
-    const { sortField, sortOrder } = event;
-    const validSortOrder = sortOrder === 1 || sortOrder === -1 ? sortOrder : 0;
-    setSortField(sortField);
-    setSortOrder(validSortOrder);
-    setFirst(0);
-    setQueryString(
-      0,
-      rows,
-      sortField,
-      sortOrder === 1 || sortOrder === -1 ? sortOrder : 0,
-      filters
-    );
-  };
 
-  // handle change in the records which are currently selected...
-  const onSelectionChange = (event: any) => {
-    const value = event.value;
-    setSelectedRecords(value);
-  };
-
-  const identifySolidOperatorAndValue = (primeReactMatchMode: FilterMatchMode, value: any): { operator: string, value: string | string[] | any[] } => {
-    // @ts-ignore
-    if (primeReactMatchMode.label && primeReactMatchMode.label === 'Not In') {
-      primeReactMatchMode = FilterMatchMode.NOT_IN;
-    }
-
-    // Default value, this might not be useful as the solid server might not support these match modes. 
-    let solidOperator = '';
-    let solidValue = value[0];
-
-    switch (primeReactMatchMode) {
-      case FilterMatchMode.STARTS_WITH:
-        solidOperator = "$startsWithi";
-        break;
-      case FilterMatchMode.CONTAINS:
-        solidOperator = "$containsi";
-        break;
-      case FilterMatchMode.NOT_CONTAINS:
-        solidOperator = "$notContains";
-        break;
-      case FilterMatchMode.ENDS_WITH:
-        solidOperator = "$endsWith";
-        break;
-      case FilterMatchMode.EQUALS:
-        solidOperator = "$eqi";
-        solidValue = value;
-        break;
-      case FilterMatchMode.NOT_EQUALS:
-        solidOperator = "$nei";
-        solidValue = value;
-        break;
-      case FilterMatchMode.IN:
-        solidOperator = "$in";
-        solidValue = value;
-        break;
-      case FilterMatchMode.NOT_IN:
-        solidOperator = "$notIn";
-        solidValue = value;
-        break;
-      case FilterMatchMode.LESS_THAN:
-        solidOperator = "$lt";
-        break;
-      case FilterMatchMode.LESS_THAN_OR_EQUAL_TO:
-        solidOperator = "$lte";
-        break;
-      case FilterMatchMode.GREATER_THAN:
-        solidOperator = "$gt";
-        break;
-      case FilterMatchMode.GREATER_THAN_OR_EQUAL_TO:
-        solidOperator = "$gte";
-        break;
-      case FilterMatchMode.BETWEEN:
-        solidOperator = "$between";
-        solidValue = value;
-        break;
-    }
-
-    return { operator: solidOperator, value: solidValue };
-
-  }
-
-  // Common utility function that gets called on filter, sort & pagination events. 
-  // This function creates the query string as per the solid backend API specification 
-  const setQueryString = async (
-    offset?: number,
-    limit?: number,
-    sortField?: string,
-    sortOrder?: number,
-    filterQuery?: any
-  ) => {
-
-    const formattedFilters: any = {};
-    const solidFieldsMetadata = solidKanbanViewMetaData.data.solidFieldsMetadata;
-
-    filterQuery.forEach((fieldData: any) => {
-
-      const filterFieldMeta = solidFieldsMetadata[fieldData.field];
-
-      // Some filters will not have constraints
-      if (!fieldData.constraints) {
-        if (fieldData.value != null) {
-          const { operator, value } = identifySolidOperatorAndValue(fieldData.operator, fieldData.value);
-
-          // Massage the filter value for relation many-to-one before sending to the server. 
-          if (filterFieldMeta.type === 'relation' && filterFieldMeta.relationType === 'many-to-one') {
-            // @ts-ignore
-            const manyToOneIds = value.map(i => i.value);
-            formattedFilters[fieldData.field] = { [operator]: manyToOneIds };
-          }
-          // Massage the filter value for selectionStatic before sending to the server. 
-          else if (['selectionStatic', 'selectionDynamic'].includes(filterFieldMeta.type)) {
-            // @ts-ignore
-            const values = value.map(i => i.value);
-            formattedFilters[fieldData.field] = { [operator]: values };
-          }
-          else {
-            formattedFilters[fieldData.field] = { [operator]: value };
-          }
-        }
-      }
-      // TODO: Incase we start supporting multiple constraints in the future then we need to implement an else block here. 
-      else { }
-
-    });
-
-    const groupByFieldName = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.groupBy;
-    const queryData: any = {
-      offset: offset ?? first,
-      limit: limit ?? rows,
-      populate: toPopulate,
-      fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
-      groupBy: groupByFieldName,
-      populateGroup: true,
-      filters: formattedFilters,
-    };
-
-    // if (sortField) {
-    //   const sortFieldMetadata = solidFieldsMetadata[sortField];
-    //   if (sortFieldMetadata.type === 'relation' && sortFieldMetadata.relationType === 'many-to-one') {
-    //     sortField = `${sortField}.${sortFieldMetadata.relationModel.userKeyField.name}`;
-    //   }
-    //   queryData.sort = [
-    //     `${sortField}:${sortOrder == 0 ? null : sortOrder == 1 ? "asc" : "desc"}`,
-    //   ];
-    // }
-    // else {
-    //   queryData.sort = [`id:desc`];
-    // }
-
-    const queryString = qs.stringify(queryData, {
-      encodeValuesOnly: true,
-    });
-
-    triggerGetSolidEntities(queryString);
-  };
-
-  // handle filter...
-  const onFilter = (e: any) => {
-    setFilters(e.filters);
-    setQueryString(
-      0,
-      rows,
-      sortField,
-      sortOrder === 1 || sortOrder === -1 ? sortOrder : 0,
-      e.filters
-    );
-  };
 
   // clear Filter
   const clearFilter = () => {
@@ -587,18 +427,40 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     );
   };
 
-  const applyFilter = (filter: any) => {
-    setQueryString(
-      0,
-      rows,
-      sortField,
-      sortOrder === 1 || sortOrder === -1 ? sortOrder : 0,
-      filter
-    )
-    console.log("filter in kanbanview", filter);
+
+  const handleSwimLinPagination = async () => {
+
+    if (solidKanbanViewMetaData) {
+      const groupByFieldName = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.groupBy;
+      const columnsToLoadCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.pageSize || 5;
+      const queryData = {
+        offset: swimLaneCurrentPageNumber * 2,
+        limit: 2,
+        fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
+        groupBy: groupByFieldName,
+        populate: toPopulate,
+        populateGroup: true,
+        groupFilter: {
+          limit: rows,
+          offset: 0
+        }
+        // sort: [`id:desc`],
+      };
+      // fields=status&groupBy=status&fields=count(status)&populateGroup=true
+      const queryString = qs.stringify(queryData, {
+        encodeValuesOnly: true
+      });
+
+      const data: any = await triggerGetSolidEntities(queryString);
+      console.log("data", data);
+      if (data && data?.data?.groupRecords.length > 0) {
+        const updatedData = [...kanbanViewData, ...data.data.groupRecords];
+        setKanbanViewData(updatedData);
+      }
+      setSwimLaneCurrentPageNumber(swimLaneCurrentPageNumber + 1)
+    }
   }
 
-  
 
   return (
     <>
@@ -629,17 +491,17 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             />
           }
 
-          {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
-            <SolidGlobalSearchElement solidKanbanViewMetaData={solidKanbanViewMetaData} applyFilter={applyFilter} filterValues={filterValues} setFilterValues={setFilterValues}></SolidGlobalSearchElement>
-          }
+          {/* {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
+            // <SolidGlobalSearchElement solidKanbanViewMetaData={solidKanbanViewMetaData} applyFilter={applyFilter} filterValues={filterValues} setFilterValues={setFilterValues}></SolidGlobalSearchElement>
+          } */}
         </div>
 
-        <SolidConfigureLayoutElement></SolidConfigureLayoutElement>
+        {/* <SolidConfigureLayoutElement></SolidConfigureLayoutElement> */}
 
       </div>
       <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
       {solidKanbanViewMetaData && kanbanViewData &&
-        <KanbanBoard kanbanViewData={kanbanViewData} solidViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd}></KanbanBoard>
+        <KanbanBoard kanbanViewData={kanbanViewData} solidViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLinPagination={handleSwimLinPagination}></KanbanBoard>
       }
 
       <Dialog

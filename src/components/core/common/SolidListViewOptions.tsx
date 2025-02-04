@@ -3,7 +3,7 @@ import { Dialog } from "primereact/dialog";
 import { useState } from "react";
 
 
-export const SolidConfigureLayoutElement = ({ }: any) => {
+export const SolidListViewOptions = ({ }: any) => {
 
     const [visible, setVisible] = useState<boolean>(false);
 

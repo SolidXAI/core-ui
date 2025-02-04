@@ -36,7 +36,7 @@
 // │   └── SocialMediaLogin.tsx
 // ├── core
 // │   ├── common
-// │   │   ├── SolidConfigureLayoutElement.tsx
+// │   │   ├── SolidListViewOptions.tsx
 // │   │   ├── SolidCreateButton.tsx
 // │   │   ├── SolidGlobalSearchElement.tsx
 // │   │   └── SolidSearchBox.tsx
@@ -215,7 +215,7 @@ export {SingleSelectAutoCompleteField} from '@/components/common/SingleSelectAut
 export {SocialMediaLogin} from '@/components/common/SocialMediaLogin';
 
 
-export {SolidConfigureLayoutElement} from '@/components/core/common/SolidConfigureLayoutElement';
+export {SolidListViewOptions} from '@/components/core/common/SolidListViewOptions';
 export {SolidCreateButton} from '@/components/core/common/SolidCreateButton';
 export {SolidGlobalSearchElement} from '@/components/core/common/SolidGlobalSearchElement';
 export {SolidSearchBox} from '@/components/core/common/SolidSearchBox';
@@ -467,7 +467,7 @@ export { default as AuthBanner } from '@/components/common/AuthBanner';
 //CodeEditor.tsx
 export { default as CodeEditor } from '@/components/common/CodeEditor';
 //FilterComponent.tsx
-export { default as FilterComponent } from '@/components/common/FilterComponent';
+// export { default as FilterComponent } from '@/components/common/FilterComponent';
 //MarkdownViewer.tsx
 export { default as MarkdownViewer } from '@/components/common/MarkdownViewer';
 //SolidFormView.tsx
