@@ -1,9 +1,12 @@
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { Dialog } from "primereact/dialog";
 import { TabPanel, TabView } from "primereact/tabview";
 import { SolidSearchBox } from "./SolidSearchBox";
 import FilterComponent from "@/components/core/common/FilterComponent";
 import { Button } from "primereact/button";
+import { InputText } from "primereact/inputtext";
+import { OverlayPanel } from "primereact/overlaypanel";
+import { Divider } from "primereact/divider";
 
 
 export const SolidGlobalSearchElement = ({ viewData, applyFilter, showGlobalSearchElement, setShowGlobalSearchElement,customFilter, setCustomFilter,handleApplyCustomFilter }: any) => {
@@ -24,12 +27,31 @@ export const SolidGlobalSearchElement = ({ viewData, applyFilter, showGlobalSear
         }
     }, [])
 
+    const op = useRef(null);
 
     return (
-
-
-        <div className="card flex justify-content-center">
-            <i className="pi pi-search" onClick={() => setShowGlobalSearchElement(true)}></i>
+        <div className="flex justify-content-center solid-custom-filter-wrapper">
+            <div className="p-inputgroup flex-1"
+                onClick={(e) =>
+                    // @ts-ignore
+                    op.current.toggle(e)}
+            >
+                <InputText placeholder="Search Here" className="p-inputtext-sm" />
+                <Button
+                    icon="pi pi-search"
+                    severity="secondary"
+                    outlined size="small"
+                />
+            </div>
+            <OverlayPanel ref={op} className="solid-custom-overlay" style={{ minWidth: 378 }}>
+            <div className="px-4 py-3">
+                    <p className="m-0">Searching...</p>
+                </div>
+                <Divider className="m-0" />
+                <div className="px-2 py-1">
+                    <Button text size="small" label="Custom Filter" iconPos="left" icon='pi pi-plus'  onClick={() => setShowGlobalSearchElement(true)}/>
+                </div>
+            </OverlayPanel>
             <Dialog header={false} className="search-filter-popup" showHeader={false} visible={showGlobalSearchElement} style={{ width: '50vw' }} onHide={() => { if (!showGlobalSearchElement) return; setShowGlobalSearchElement(false); }}>
                 <div className="flex field-popup-navigation gap-3 justify-content-between ">
                     <div className="flex text-2xl font-bold align-items-center ml-4" style={{ color: '#000' }}>

@@ -1,4 +1,4 @@
-"use client";
+'use client';
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { PanelMenu } from "primereact/panelmenu";
@@ -12,13 +12,16 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
     const itemRenderer = (item: any, options: any) => {
         const currentItem = item?.url?.split('/').slice(-2, -1)[0];
         return (
-            <div key={item?.key} className={`flex align-items-center cursor-pointer menuHead px-2 ${currentItem === activeParentPath ? 'active-solid-men p-highlight' : ''}`} onClick={options.onClick}>
-                <Link href={item?.url ? item?.url : '#'} className="w-full flex justify-content-between font-semibold">
-                    <span className="">
-                        {item.label}
-                    </span>
+            <div key={item?.key} className={`flex align-items-center cursor-pointer menuHead px-3 ${currentItem === activeParentPath ? ' p-highlight' : ''}`} onClick={options.onClick}>
+                <Link href={item?.url ? item?.url : '#'} className="w-full flex justify-content-between font-medium">
+                    <div className="flex align-items-center gap-3">
+                        <span className={item.icon} />
+                        <span className="">
+                            {item.label}
+                        </span>
+                    </div>
                     {item?.items && item?.items?.length > 0 &&
-                        <span className={`${expandedKeys[item.key] === true ? "pi pi-angle-up" : "pi pi-angle-down"}`} style={{ color: "#8D9199" }} />
+                        <span className={`sidebar-chevrons ${expandedKeys[item.key] === true ? "pi pi-angle-up" : "pi pi-angle-down"}`} />
                     }
                 </Link>
             </div>
@@ -29,7 +32,7 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
         return menuItems.map((mi) => ({
             key: mi.key,
             label: mi.title,
-            icon: mi.children ? "pi pi-angle-down" : "",
+            icon: mi.children ? "pi pi-folder" : "",
             template: itemRenderer,
             url: mi.path ? mi.path : null,
             items: mi.children ? createMenuItems(mi.children) : null, // Recursively add children
@@ -50,7 +53,7 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
     };
 
     return (
-        <div className="card flex flex-column align-items-center gap-3">
+        <div className="solid-panel-menu">
             <PanelMenu
                 model={items}
                 expandedKeys={expandedKeys}

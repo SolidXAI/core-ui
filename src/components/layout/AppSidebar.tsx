@@ -1,0 +1,170 @@
+import { setIsAuthenticated, setUser } from "@/redux/features/userSlice";
+import { getSession, signOut, useSession } from "next-auth/react";
+import React, { useEffect, useRef, useState } from "react";
+import NavbarTwoMenu from "./navbar-two-menu";
+import UserProfileMenu from "./user-profile-menu";
+import { useDispatch, useSelector } from "react-redux";
+import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
+import { InputText } from "primereact/inputtext";
+import { Button } from "primereact/button";
+import { IconField } from "primereact/iconfield";
+import { InputIcon } from "primereact/inputicon";
+import { useGetSolidMenuBasedOnRoleQuery } from "@/redux/api/solidMenuApi";
+import { ToastContainer } from "@/helpers/ToastContainer";
+// import menu from "@/helpers/menu";
+
+const AppSidebar = () => {
+    const dispatch = useDispatch();
+
+    // const [show, setShow] = useState(false);
+    const visibleNavbar = useSelector(
+        (state: any) => state.navbarState.visibleNavbar
+    );
+    const { data: menu } = useGetSolidMenuBasedOnRoleQuery("");
+
+
+    const [currentMenu, setCurrentMenu] = useState();
+    const [currentMainMenu, setCurrentMainMenu] = useState();
+    const [searchTerm, setSearchTerm] = useState("");
+
+    useEffect(() => {
+        if (menu) {
+            setCurrentMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === process.env.NEXT_PUBLIC_DEFAULT_MENU_KEY)[0]?.children);
+            setCurrentMainMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === process.env.NEXT_PUBLIC_DEFAULT_MENU_KEY)[0]?.title)
+        }
+    }, [menu])
+
+    const { data } = useSession();
+
+    // const handleToggle = () => setShow(!show);
+    const handleToggle = () => dispatch(toggleNavbar());
+    const handleMenu = (m: any) => {
+        // setShow(true);
+        dispatch(showNavbar());
+        setCurrentMainMenu(m.title);
+        setCurrentMenu(m.children);
+    };
+
+
+
+    useEffect(() => {
+        if (data) {
+            dispatch(setUser(data?.user));
+            dispatch(setIsAuthenticated(true));
+        }
+    }, [data]);
+
+    const logoutHandler = () => {
+        signOut();
+    };
+
+    const handleSearch = () => {
+        // TODO: Handle the search logic here
+
+    };
+
+    const [isSearchShow, setSearchShow] = useState(false);
+    const searchRef = useRef<HTMLDivElement>(null);
+
+    const handleClickOutside = (event: any) => {
+        if (searchRef.current && !searchRef.current.contains(event.target)) {
+            setSearchShow(false);
+        }
+    };
+
+    useEffect(() => {
+        if (isSearchShow) {
+            document.addEventListener("mousedown", handleClickOutside);
+        } else {
+            document.removeEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [isSearchShow]);
+
+
+
+    return (
+        <>
+            <ToastContainer />
+
+            {/* commented this as this is not working properly @Jenendar to figure this out... */}
+            {(visibleNavbar || currentMainMenu) && (
+                <Button
+                    className={`sidebar-toggle-button ${!visibleNavbar ? "s-collapsed" : ""}`}
+                    onClick={handleToggle}
+                    severity="secondary"
+                >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                        <rect x="0.3" y="0.3" width="23.4" height="23.4" rx="2.1" fill="white" />
+                        <rect x="0.3" y="0.3" width="23.4" height="23.4" rx="2.1" stroke="#D8E2EA" stroke-width="0.6" />
+                        <path d="M5.09735 16V14.6667H13.5929V16H5.09735ZM5.09735 12.6667V11.3333H11.6324V12.6667H5.09735ZM5.09735 9.33333V8H13.5929V9.33333H5.09735Z" fill="#8D9199" />
+                        <path d="M16.2621 12L18.9026 14.3L18.099 15L14.6549 12L18.099 9L18.9026 9.7L16.2621 12Z" fill="#8D9199" />
+                    </svg>
+                </Button>
+            )}
+
+            <div className="sidebar-left">
+                <div className="navbar-menu">
+                    {menu && menu.data.length > 0 && menu.data.map((m: any) => (
+                        <div
+                            key={m.title}
+                            className={`menu-item ${currentMainMenu === m.title ? "active-menu-image" : ""}`}
+                        >
+                            <a onClick={() => handleMenu(m)}>
+                                <img
+                                    style={{ cursor: "pointer", width: '30px' }}
+                                    // src={currentMainMenu === m.title ? `/images/${m.title.toLocaleLowerCase()}-active.svg` : `/images/${m.title.toLocaleLowerCase()}.svg`}
+                                    // src={`/images/menu/${m.title}.svg`}
+                                    src={m.icon.startsWith("/") ? m.icon : `${process.env.API_URL}/${m.icon}`}
+                                    // src={`/images/menu/app-builder.svg`}
+                                    alt="Solid"
+                                />
+                            </a>
+                        </div>
+                    ))}
+                </div>
+
+                <UserProfileMenu></UserProfileMenu>
+            </div>
+            {currentMenu && (
+                <div className={`sidebar-right ${visibleNavbar ? "open" : ""}`}>
+
+                    <div className="flex relative justify-content-between align-items-center py-4 px-3">
+                        <div className="text-base font-semibold">{currentMainMenu && currentMainMenu}</div>
+                        {/* <button
+                            className="sidebar-toggle-button"
+                            onClick={handleToggle}
+                        >
+                            <img
+                                style={{ cursor: "pointer" }}
+                                src={`/images/menu-toggle.png`}
+                                alt="Solid"
+                            />
+                        </button> */}
+                    </div>
+                    {/* <div className="w-full px-3 mb-3" style={{ position: 'relative' }} ref={searchRef}>
+                        <IconField iconPosition="left">
+                            <InputIcon className="pi pi-search text-sm"> </InputIcon>
+                            <InputText placeholder="Search" className="small-input text-sm w-full pr-6" />
+                        </IconField>
+                        <div className="absolute max-h-1rem" style={{ top: 5, right: 20 }}>
+                            <img
+                                style={{ cursor: "pointer", maxHeight: '1.3rem' }}
+                                src="/images/icons/jump-to-icon.png"
+                                alt="Solid"
+                            />
+                        </div>
+                    </div> */}
+                    <div className="px-3">
+                        <NavbarTwoMenu menuItems={currentMenu}></NavbarTwoMenu>
+                    </div>
+                </div>
+            )}
+        </>
+    );
+};
+
+export default AppSidebar;

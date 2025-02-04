@@ -13,7 +13,7 @@ export const SolidCreateButton = ({ url }: any) => {
     return (
         <div>
             <Link href={createPath}>
-              <Button type="button" icon="pi pi-plus" label="Add" size='small'  className='small-button' ></Button>
+              <Button type="button" icon="pi pi-plus" label="Add" size='small'></Button>
             </Link>
         </div>
     )

@@ -7,9 +7,10 @@ import { DataTable, DataTableFilterMeta } from 'primereact/datatable';
 import { Dropdown, DropdownChangeEvent } from 'primereact/dropdown';
 import { InputNumber, InputNumberChangeEvent } from 'primereact/inputnumber';
 import React, { useEffect, useState } from 'react';
-import { FilterIcon } from '../modelsComponents/filterIcon';
 import { CustomTag } from '../Tag/CustomTag';
 import { DemoService } from './DemoData';
+import { FilterIcon } from '../modelsComponents/filterIcon';
+FilterIcon
 const defaultFilters: DataTableFilterMeta = {
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
     name: {
@@ -118,7 +119,7 @@ export const ListViewTable = () => {
     };
     return (
         <div className="">
-              <div className="form-wrapper-title mb-5">All</div>
+            <div className="form-wrapper-title mb-5">All</div>
             <div className='flex gap-3 mb-3'>
 
                 {selectedProducts?.length ?
@@ -138,7 +139,7 @@ export const ListViewTable = () => {
                 emptyMessage="No Product found." onFilter={(e) => setFilters(e.filters)}
                 filterIcon={() => <FilterIcon />}
                 selectionMode={'checkbox'}
-                selection={selectedProducts|| []}
+                selection={selectedProducts || []}
                 onSelectionChange={(e) => setSelectedProducts(e.value)}
             >
                 <Column selectionMode="multiple" headerStyle={{ width: '4rem' }}></Column>

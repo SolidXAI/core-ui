@@ -1,55 +1,55 @@
-"use client";
+// "use client";
 
-import { useRouter, useSearchParams } from "next/navigation";
-import Pagination from "react-js-pagination";
+// import { useRouter, useSearchParams } from "next/navigation";
+// import Pagination from "react-js-pagination";
 
-interface Props {
-  resPerPage: number;
-  filteredRoomsCount: number;
-}
+// interface Props {
+//   resPerPage: number;
+//   filteredRoomsCount: number;
+// }
 
-const CustomPagination = ({ resPerPage, filteredRoomsCount }: Props) => {
-  const router = useRouter();
-  const searchParams = useSearchParams();
-  let page = searchParams.get("page") || 1;
-  page = Number(page);
+// const CustomPagination = ({ resPerPage, filteredRoomsCount }: Props) => {
+//   const router = useRouter();
+//   const searchParams = useSearchParams();
+//   let page = searchParams.get("page") || 1;
+//   page = Number(page);
 
-  let queryParams;
+//   let queryParams;
 
-  const handlePageChange = (currentPage: string) => {
-    if (typeof window !== "undefined") {
-      queryParams = new URLSearchParams(window.location.search);
+//   const handlePageChange = (currentPage: string) => {
+//     if (typeof window !== "undefined") {
+//       queryParams = new URLSearchParams(window.location.search);
 
-      if (queryParams.has("page")) {
-        queryParams.set("page", currentPage);
-      } else {
-        queryParams.append("page", currentPage);
-      }
+//       if (queryParams.has("page")) {
+//         queryParams.set("page", currentPage);
+//       } else {
+//         queryParams.append("page", currentPage);
+//       }
 
-      const path = `${window.location.pathname}?${queryParams.toString()}`;
-      router.push(path);
-    }
-  };
-  return (
-    <div>
-      {resPerPage < filteredRoomsCount && (
-        <div className="d-flex justify-content-center mt-5">
-          <Pagination
-            activePage={page}
-            itemsCountPerPage={resPerPage}
-            totalItemsCount={filteredRoomsCount}
-            onChange={handlePageChange}
-            nextPageText={"Next"}
-            prevPageText={"Prev"}
-            firstPageText={"First"}
-            lastPageText={"Last"}
-            itemClass="page-item"
-            linkClass="page-link"
-          />
-        </div>
-      )}
-    </div>
-  );
-};
+//       const path = `${window.location.pathname}?${queryParams.toString()}`;
+//       router.push(path);
+//     }
+//   };
+//   return (
+//     <div>
+//       {resPerPage < filteredRoomsCount && (
+//         <div className="d-flex justify-content-center mt-5">
+//           <Pagination
+//             activePage={page}
+//             itemsCountPerPage={resPerPage}
+//             totalItemsCount={filteredRoomsCount}
+//             onChange={handlePageChange}
+//             nextPageText={"Next"}
+//             prevPageText={"Prev"}
+//             firstPageText={"First"}
+//             lastPageText={"Last"}
+//             itemClass="page-item"
+//             linkClass="page-link"
+//           />
+//         </div>
+//       )}
+//     </div>
+//   );
+// };
 
-export default CustomPagination;
+// export default CustomPagination;
