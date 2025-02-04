@@ -1,8 +1,9 @@
 // @ts-nocheck
-'use client';
+'use client'
 
-import { DragDropContext } from "@hello-pangea/dnd";
-import { useState } from "react";
+import React, { useState, useEffect } from "react";
+import { DragDropContext, DropResult } from "@hello-pangea/dnd";
+import axios from "axios";
 import KanbanColumn from "./KanbanColumn";
 
 // Define types for groupData and Grouped Data
@@ -23,7 +24,7 @@ interface ApiResponse {
     };
 }
 
-export const KanbanBoard = ({ kanbanViewData, solidViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd }: any) => {
+export const KanbanBoard = ({ kanbanViewData, solidViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd,handleSwimLinPagination }: any) => {
     const [loading, setLoading] = useState<boolean>(true);
     // State to manage the folded status of each column
     const [foldedStates, setFoldedStates] = useState<Record<string, boolean>>({});
@@ -108,6 +109,8 @@ export const KanbanBoard = ({ kanbanViewData, solidViewMetaData, setKanbanViewDa
                         />
                     );
                 })}
+                <div className="kanban-load-more-folded">
+                    <a className="kaban-load-more" onClick={handleSwimLinPagination}>load More</a></div>
             </div>
         </DragDropContext>
     );

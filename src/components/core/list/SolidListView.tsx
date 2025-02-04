@@ -1,25 +1,35 @@
-'use client';
-import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
-import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
-import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
-import { useRouter } from "next/navigation";
-import { FilterMatchMode } from "primereact/api";
-import { Button } from "primereact/button";
-import { Column } from "primereact/column";
+// @ts-nocheck
+
+"use client";
+
+import React, { useState, useEffect } from "react";
 import {
   DataTable,
   DataTableFilterMeta,
   DataTableStateEvent,
 } from "primereact/datatable";
-import { Dialog } from "primereact/dialog";
+import { Column } from "primereact/column";
+import { FilterMatchMode } from "primereact/api";
+import Link from "next/link";
 import qs from "qs";
-import { useEffect, useState } from "react";
-import { SolidConfigureLayoutElement } from "../common/SolidConfigureLayoutElement";
+import { Button } from "primereact/button";
+import { Dialog } from "primereact/dialog";
+import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
+import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
+import { SolidListViewColumn } from "./SolidListViewColumn";
+import { SolidListViewOptions } from "../common/SolidListviewOptions";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
+import { pascalCase } from "change-case";
+import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
+import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
+import { useRouter } from "next/navigation";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
-import { SolidListViewColumn } from "./SolidListViewColumn";
+import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@/components/core/common/FilterComponent";
+
+const getRandomInt = (min: number, max: number) => {
+  return Math.floor(Math.random() * (max - min + 1)) + min;
+}
 
 type SolidListViewParams = {
   moduleName: string;
@@ -31,11 +41,215 @@ type SolidListViewParams = {
   customFilter?: any
 };
 
+// const transformRulesToFilters = (filterRules: any) => {
+//   if (!filterRules || !filterRules.children) return {};
+
+//   let operatorKey = filterRules.matchOperator === "and" ? "$and" : "$or";
+
+//   let filters = filterRules.children.map((child: any) => {
+//     if (child.type === "rule") {
+//       let filterValue ;
+//       if(child.value){
+
+//       if(child.value.length === 1){
+//         if (typeof child.value[0] === "object" && child.value[0] !== null) {
+//           filterValue = [child.value[0].value];
+//         }else{
+//           filterValue = child.value[0];
+//         }
+//       }else{
+//         if (typeof child.value[0] === "object" && child.value[0] !== null) {
+//           filterValue = child.value.map((i:any) => i.value);
+//         }else{
+//           filterValue = child.value;
+//         }
+//       }
+//     }
+
+//       let ruleFilter = { [child.fieldName]: { [child.matchMode]:  filterValue} };
+//       // If the rule has children, process them recursively
+//       if (child.children && child.children.length > 0) {
+//         let childFilters = transformRulesToFilters({ matchOperator: "and", children: child.children }).filters;
+//         return { [operatorKey]: [ruleFilter, childFilters] };
+//       }
+
+//       return ruleFilter;
+//     } else if (child.type === "rule_group") {
+//       return transformRulesToFilters(child).filters; // Recursively process rule groups
+//     }
+//   }).filter(Boolean);
+
+//   return { filters: { [operatorKey]: filters } };
+
+
+// }
+const transformRulesToFilters = (input: any) => {
+
+  // Helper function to process individual rules
+  const processRule = (rule) => {
+    if (rule.value.length > 0) {
+
+      // Ensure rule.value is always an array
+      let values = typeof rule.value[0] === "object" ? rule.value.map((i: any) => i.value) : rule.value;
+      if (rule.matchMode !== '$in' && rule.matchMode !== '$notIn' && rule.matchMode !== '$between') {
+        values = values[0];
+      }
+      // Rule transformation
+      let transformedRule = {
+        [rule.fieldName]: {
+          [rule.matchMode]: values    // Assuming `value` is always an array with `value` and `label`
+        }
+      };
+
+      // If the rule has children (which means it's a rule group), process them
+      let processedFields;
+      if (rule.children && rule.children.length > 0) {
+        processedFields = rule.children.map(child => processRuleGroup(child));
+      }
+      if (processedFields) {
+        return { ...transformedRule, processedFields }
+      }
+      return { ...transformedRule }
+    }
+
+  };
+
+  // Helper function to process rule groups
+  const processRuleGroup = (ruleGroup) => {
+    const operator = ruleGroup.matchOperator === 'or' ? '$or' : '$and';
+    const children = ruleGroup.children.map(child => {
+      if (child.type === 'rule') {
+        // Process the rule
+        return processRule(child);
+      } else if (child.type === 'rule_group') {
+        // Process the rule group recursively
+        return processRuleGroup(child);
+      }
+    });
+
+    return {
+      [operator]: children
+    };
+  };
+
+  // Start processing the root rule group
+  const filterObject = processRuleGroup(input);
+
+  function liftProcessedFields(filters) {
+    if (!filters || typeof filters !== 'object') return filters;
+
+    function processArray(arr) {
+      let newArr = [];
+      for (let obj of arr) {
+        if (obj.processedFields) {
+          let processed = processArray(obj.processedFields); // Recursively process nested processedFields
+          delete obj.processedFields;
+          newArr.push(obj, ...processed);
+        } else {
+          newArr.push(obj);
+        }
+
+        for (let key in obj) {
+          if (Array.isArray(obj[key])) {
+            obj[key] = processArray(obj[key]);
+          }
+        }
+      }
+      return newArr;
+    }
+
+    for (let key in filters) {
+      if (Array.isArray(filters[key])) {
+        filters[key] = processArray(filters[key]);
+      }
+    }
+
+    return filters;
+  } return {
+    filters: liftProcessedFields(filterObject)
+  };
+}
+
+
 export const SolidListView = (params: SolidListViewParams) => {
+
+  const initialState: FilterRule[] = [
+    {
+      "id": 1,
+      "type": "rule_group",
+      "matchOperator": "or",
+      "parentRule": null,
+      "children": [
+        {
+          "id": 1738397527814,
+          "type": "rule",
+          "fieldName": "module",
+          "matchMode": "$in",
+          "value": [
+            {
+              "label": "solid-core",
+              "value": 1
+            }
+          ],
+          "parentRule": 1,
+          "children": [
+            {
+              "id": 1738397555900,
+              "type": "rule_group",
+              "matchOperator": "and",
+              "parentRule": 1738397527814,
+              "children": [
+                {
+                  "id": 1738397556184,
+                  "type": "rule",
+                  "fieldName": "name",
+                  "matchMode": "$startsWithi",
+                  "value": [
+                    "social"
+                  ],
+                  "parentRule": 1738397555900,
+                  "children": []
+                },
+                {
+                  "id": 1738397556147,
+                  "type": "rule",
+                  "fieldName": "displayName",
+                  "matchMode": "$startsWithi",
+                  "value": [
+                    "social"
+                  ],
+                  "parentRule": 1738397555900,
+                  "children": []
+                }
+              ]
+            }
+          ]
+        },
+        {
+          "id": 1738397547577,
+          "type": "rule",
+          "fieldName": "module",
+          "matchMode": "$in",
+          "value": [
+            {
+              "label": "srmd-tracker",
+              "value": 4
+            }
+          ],
+          "parentRule": 1,
+          "children": []
+        }
+      ]
+    }
+  ];
+
 
   const router = useRouter()
   // TODO: The initial filter state will be created based on the fields which are present on this list view. 
   const [filters, setFilters] = useState<DataTableFilterMeta>({});
+  const [customFilter, setCustomFilter] = useState<FilterRule[]>(initialState);
+  const [showGlobalSearchElement, setShowGlobalSearchElement] = useState<boolean>(false);
+
   const [toPopulate, setToPopulate] = useState<string[]>([]);
   const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
 
@@ -152,6 +366,9 @@ export const SolidListView = (params: SolidListViewParams) => {
       initialFilterMethod()
     }
   }, [solidListViewMetaData]);
+
+
+
 
 
 
@@ -399,6 +616,31 @@ export const SolidListView = (params: SolidListViewParams) => {
     triggerGetSolidEntities(queryString);
   };
 
+  //apply custom filter code 
+  const handleApplyCustomFilter = () => {
+    const transformedFilter = transformRulesToFilters(customFilter[0]);
+    console.log("transformedFilter", transformedFilter);
+
+    if (toPopulate) {
+      const queryData = {
+        offset: 0,
+        limit: 25,
+        populate: toPopulate,
+        sort: [`id:desc`],
+        filters: { ...transformedFilter.filters }
+      };
+      if (params.embeded) {
+
+      }
+      const queryString = qs.stringify(queryData, {
+        encodeValuesOnly: true
+      });
+
+      triggerGetSolidEntities(queryString);
+      // setShowGlobalSearchElement(false)
+      setSelectedRecords([]);
+    }
+  }
   // handle filter...
   const onFilter = (e: any) => {
     setFilters(e.filters);
@@ -521,11 +763,11 @@ export const SolidListView = (params: SolidListViewParams) => {
           }
 
           {solidListViewMetaData?.data?.solidView?.layout?.attrs?.enableGlobalSearch === true && params.embeded === false &&
-            <SolidGlobalSearchElement viewData={solidListViewMetaData} ></SolidGlobalSearchElement>
+            <SolidGlobalSearchElement viewData={solidListViewMetaData} showGlobalSearchElement={showGlobalSearchElement} setShowGlobalSearchElement={setShowGlobalSearchElement} customFilter={customFilter} setCustomFilter={setCustomFilter} handleApplyCustomFilter={handleApplyCustomFilter} ></SolidGlobalSearchElement>
           }
         </div>
         {params.embeded === false &&
-          <SolidConfigureLayoutElement></SolidConfigureLayoutElement>
+          <SolidListViewOptions></SolidListViewOptions>
         }
       </div>
       <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
