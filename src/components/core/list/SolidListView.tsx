@@ -17,7 +17,7 @@ import { Dialog } from "primereact/dialog";
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
 import { SolidListViewColumn } from "./SolidListViewColumn";
-import { SolidListViewOptions } from "../common/SolidListviewOptions";
+// import { SolidListViewOptions } from "@/components/core/common/SolidListViewOptions";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { pascalCase } from "change-case";
@@ -26,7 +26,8 @@ import { createPermission, deletePermission, updatePermission } from "@/helpers/
 import { useRouter } from "next/navigation";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@/components/core/common/FilterComponent";
-
+import { SolidLayoutViews } from '../common/SolidLayoutViews'
+import { FilterIcon } from '../../modelsComponents/filterIcon';
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -839,9 +840,9 @@ export const SolidListView = (params: SolidListViewParams) => {
             view={view}
           />
 
-          {params.embeded === false &&
+          {/* {params.embeded === false &&
             <SolidListViewOptions></SolidListViewOptions>
-          }
+          } */}
         </div>
       </div>
       <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
