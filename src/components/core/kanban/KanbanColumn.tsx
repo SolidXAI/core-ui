@@ -2,16 +2,19 @@
 'use client';
 
 
+import React, { useRef } from "react";
 import { Droppable, DroppableProvided } from "@hello-pangea/dnd";
-import { OverlayPanel } from "primereact/overlaypanel";
-import { useRef } from "react";
+import { Button } from "primereact/button";
 import KanbanCard from "./KanbanCard";
+import { OverlayPanel } from "primereact/overlaypanel";
 
 // Define types for props
 interface Group {
   label: string;
   count: number;
   folded: boolean;
+  limit: number;
+  currentPage: number;
 }
 
 interface GroupData {
@@ -28,8 +31,9 @@ interface KanbanColumnProps {
   handleLoadMore: (groupByField: string) => void;
 }
 
-const KanbanColumn = ({ groupByField, solidViewMetaData,group, groupData, toggleFold, handleLoadMore }: KanbanColumnProps) => {
+const KanbanColumn = ({ groupByField, solidViewMetaData, group, groupData, toggleFold, handleLoadMore }: KanbanColumnProps) => {
   const op = useRef<any>(null);
+
 
   return (
     <div className={group.folded ? "kanban-column kanban-column-folded" : "kanban-column"}>
@@ -107,12 +111,14 @@ const KanbanColumn = ({ groupByField, solidViewMetaData,group, groupData, toggle
                 <KanbanCard key={data.id} data={data} solidViewMetaData={solidViewMetaData} index={index} />
               ))}
               {provided.placeholder}
-              <a
-              className="load-more-button"
-                onClick={() => handleLoadMore(groupByField)}
-              >
-                Load more data...
-              </a>
+              {group.count > 0 &&
+                <a
+                  className="load-more-button"
+                  onClick={() => handleLoadMore(groupByField)}
+                >
+                  Load more data... ({group.count - (group.limit * group.currentPage)} remaining)
+                </a>
+              }
             </div>
           )}
         </Droppable>

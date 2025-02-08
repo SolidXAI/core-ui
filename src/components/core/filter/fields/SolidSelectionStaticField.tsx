@@ -31,8 +31,7 @@ const SolidSelectionStaticField = ({ fieldMetadata, onChange, index, rule }: Sol
             <SolidVarInputsFilterElement
                 values={rule.value}
                 onChange={(e: any) => {
-                    console.log("e", e);
-                    onChange(rule.id, 'value', e.value)
+                    onChange(rule.id, 'value', e)
                 }}
                 numberOfInputs={numberOfInputs}
                 inputType={InputTypes.SelectionStatic}

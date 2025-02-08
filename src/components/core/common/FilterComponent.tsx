@@ -88,7 +88,6 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
   // const applicableInputField = rule.fieldName ? fields.find(f => f.name === rule.fieldName)?.type : "";
   const [fieldName, setFieldName] = useState({ name: rule.fieldName });
   const [matchMode, setMatchMode] = useState({ name: rule.matchMode });
-  console.log("level", level);
 
   return (
     // <div style={{ marginLeft: (level - 1) * 10 + 'px' }} className="filter-rule">
@@ -303,7 +302,7 @@ const FilterGroupComponent = ({ viewData, fields, group, onChange, onAddRule, on
 };
 
 // Main Filter component
-const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, handleApplyCustomFilter }) => {
+const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, transformFilterRules }) => {
   // const initialState: FilterRule[] = [
   //   {
   //     id: 1,
@@ -420,10 +419,10 @@ const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, handle
     setFilterRules(prev => deleteRecursively(prev, id));
   };
 
-  const handlePrintState = () => {
-    setPrintedState(JSON.stringify(filterRules, null, 2)); // Pretty format the state
-    handleApplyCustomFilter()
-  };
+  // const handlePrintState = () => {
+  //   // setPrintedState(JSON.stringify(filterRules, null, 2)); // Pretty format the state
+  //   transformFilterRules(filterRules)
+  // };
 
 
 
@@ -449,7 +448,7 @@ const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, handle
       </div>
 
       <div className='text-center'>
-        <Button label="Apply" size="small" onClick={handlePrintState} type="submit" className="small-button" />
+        <Button label="Apply" size="small" onClick={() => transformFilterRules(filterRules)} type="submit" className="small-button" />
 
         <br></br>
         <textarea value={printedState} readOnly rows={20} cols={100} style={{ marginTop: '20px' }} />

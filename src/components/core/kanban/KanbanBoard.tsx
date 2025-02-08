@@ -24,7 +24,7 @@ interface ApiResponse {
     };
 }
 
-export const KanbanBoard = ({ kanbanViewData, solidViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd,handleSwimLinPagination }: any) => {
+export const KanbanBoard = ({ kanbanViewData, solidViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLinPagination }: any) => {
     const [loading, setLoading] = useState<boolean>(true);
     // State to manage the folded status of each column
     const [foldedStates, setFoldedStates] = useState<Record<string, boolean>>({});
@@ -94,6 +94,8 @@ export const KanbanBoard = ({ kanbanViewData, solidViewMetaData, setKanbanViewDa
                     const group = {
                         label: data.groupName,
                         count: data.groupData.meta.totalRecords,
+                        limit: data.groupData.meta.perPage,
+                        currentPage: data.groupData.meta.currentPage,
                         folded: foldedStates[data.groupName] || false,
                     };
 

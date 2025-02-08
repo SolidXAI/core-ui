@@ -29,7 +29,7 @@ const SolidSelectionDynamicField = ({ fieldMetadata, onChange, index, rule }: So
                 values={rule.value}
                 onChange={(e: any) => {
                     console.log("e", e);
-                    onChange(rule.id, 'value', e.map((i: any) => i.value))
+                    onChange(rule.id, 'value', e)  
                 }}
                 numberOfInputs={numberOfInputs}
                 inputType={InputTypes.SelectionDynamic}

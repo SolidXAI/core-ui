@@ -7,13 +7,11 @@ import { DropResult } from "@hello-pangea/dnd";
 import Link from "next/link";
 import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
-import {
-  DataTableFilterMeta
-} from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import qs from "qs";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SolidCreateButton } from "../common/SolidCreateButton";
+import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import KanbanBoard from "./KanbanBoard";
 
 type SolidKanbanViewParams = {
@@ -22,12 +20,15 @@ type SolidKanbanViewParams = {
   embeded: boolean;
 };
 
+
 export const SolidKanbanView = (params: SolidKanbanViewParams) => {
+  const solidGlobalSearchElementRef = useRef();
 
   // TODO: The initial filter state will be created based on the fields which are present on this kanban view. 
-  const [filters, setFilters] = useState<DataTableFilterMeta>({});
+  const [filters, setFilters] = useState<any>();
   const [toPopulate, setToPopulate] = useState<string[]>([]);
   const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
+  const [showGlobalSearchElement, setShowGlobalSearchElement] = useState<boolean>(false);
 
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
   useEffect(() => {
@@ -52,9 +53,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     fetchPermissions();
   }, [params.modelName]);
 
-  const isFilterApplied = Object.values(filters).some(
-    (filter: any) => filter?.value && filter.value.length > 0
-  );
+  const isFilterApplied = filters ? true : false;
 
   // Create the RTK slices for this entity
   const entityApi = createSolidEntityApi(params.modelName);
@@ -137,8 +136,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         toPopulate.push(fieldMetadata.name);
       }
     }
-    setFilters(initialFilters);
-    setRows(kanbanViewMetaData?.data?.solidView?.layout?.attrs?.defaultPageSize ? kanbanViewMetaData?.data?.solidView?.layout?.attrs.defaultPageSize : 25)
+    // setFilters(initialFilters);
+    setRows(kanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsCount ? kanbanViewMetaData?.data?.solidView?.layout?.attrs.recordsCount : 25)
     setToPopulate(toPopulate);
   }
 
@@ -167,9 +166,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [columnsCount, setColumnsCount] = useState(5);
   const [swimLaneCurrentPageNumber, setSwimLaneCurrentPageNumber] = useState(1);
 
-  console.log("kanbanViewData", kanbanViewData);
-
-
   // Get the kanban view data.
   // const [triggerGetSolidEntitiesForKanban, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidKanbanEntitiesQuery();
   const [triggerGetSolidEntities, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidEntitiesQuery();
@@ -178,9 +174,9 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   // After data is fetched populate the kanban view state so as to be able to render the data. 
   useEffect(() => {
     if (solidEntityKanbanViewData) {
-
-      setKanbanViewData(solidEntityKanbanViewData?.groupRecords);
-      const loadmoredata = Object.entries(solidEntityKanbanViewData?.groupRecords).reduce((acc: any, [key, value]: any) => {
+      const latestKanbanGroupData = [...kanbanViewData, ...solidEntityKanbanViewData?.groupRecords]
+      setKanbanViewData(latestKanbanGroupData);
+      const loadmoredata = Object.entries(latestKanbanGroupData).reduce((acc: any, [key, value]: any) => {
         acc[value.groupName] = {
           offset: (value.groupData.meta.currentPage - 1) * value.groupData.meta.perPage,
           limit: value.groupData.meta.perPage,
@@ -191,7 +187,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
       setKanbanLoadMoreData(loadmoredata)
       setLoading(false);
-
     }
   }, [solidEntityKanbanViewData]);
 
@@ -230,18 +225,19 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     if (solidKanbanViewMetaData) {
       const groupByFieldName = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.groupBy;
       const columnsToLoadCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.pageSize || 5;
-      
+
       if (toPopulate) {
         const queryData = {
           offset: 0,
-          limit: 2,
+          limit: columnsToLoadCount,
           fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
           groupBy: groupByFieldName,
           populate: toPopulate,
           populateGroup: true,
           groupFilter: {
-            limit: rows,
-            offset: 0
+            limit: kanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsCount,
+            offset: 0,
+            filters:filters
           }
           // sort: [`id:desc`],
         };
@@ -261,11 +257,49 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
 
   // clear Filter
-  const clearFilter = () => {
+
+  const clearFilter = async() => {
     if (solidKanbanViewMetaData) {
-      initialFilterMethod()
+      // initialFilterMethod()
     }
+    setFilters(null);
+    if (solidKanbanViewMetaData) {
+      const groupByFieldName = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.groupBy;
+      const columnsToLoadCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.pageSize || 5;
+
+      if (toPopulate) {
+        const queryData = {
+          offset: 0,
+          limit: columnsToLoadCount,
+          fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
+          groupBy: groupByFieldName,
+          populate: toPopulate,
+          populateGroup: true,
+          groupFilter: {
+            limit: rows,
+            offset: 0,
+          }
+          // sort: [`id:desc`],
+        };
+        // fields=status&groupBy=status&fields=count(status)&populateGroup=true
+        const queryString = qs.stringify(queryData, {
+          encodeValuesOnly: true
+        });
+
+        const data: any = await triggerGetSolidEntities(queryString);
+        if (data && data?.data?.groupRecords.length > 0) {
+          const updatedData = [...data.data.groupRecords];
+          setKanbanViewData(updatedData);
+        }
+        setSelectedRecords([]);
+      }
+    }
+
+    // @ts-ignore
+    solidGlobalSearchElementRef.current.clearFilter()
   };
+
+
 
 
   // clickable link allowing one to open the detail / form view.
@@ -316,7 +350,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         filters: {
           [groupByFieldName]: {
             $in: [status],
-          }
+          },
+          ...filters
         }
       }
 
@@ -434,15 +469,16 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       const groupByFieldName = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.groupBy;
       const columnsToLoadCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.pageSize || 5;
       const queryData = {
-        offset: swimLaneCurrentPageNumber * 2,
-        limit: 2,
+        offset: swimLaneCurrentPageNumber * columnsToLoadCount,
+        limit: columnsToLoadCount,
         fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
         groupBy: groupByFieldName,
         populate: toPopulate,
         populateGroup: true,
         groupFilter: {
           limit: rows,
-          offset: 0
+          offset: 0,
+          filters: filters
         }
         // sort: [`id:desc`],
       };
@@ -452,7 +488,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       });
 
       const data: any = await triggerGetSolidEntities(queryString);
-      console.log("data", data);
       if (data && data?.data?.groupRecords.length > 0) {
         const updatedData = [...kanbanViewData, ...data.data.groupRecords];
         setKanbanViewData(updatedData);
@@ -460,6 +495,62 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       setSwimLaneCurrentPageNumber(swimLaneCurrentPageNumber + 1)
     }
   }
+
+  const handleApplyCustomFilter = async (filters: any) => {
+
+    const groupByFieldName = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.groupBy;
+    const columnsToLoadCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.pageSize || 5;
+    setFilters(filters)
+
+    if (toPopulate) {
+      const queryData = {
+        offset: 0,
+        limit: columnsToLoadCount,
+        fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
+        groupBy: groupByFieldName,
+        populate: toPopulate,
+        populateGroup: true,
+        groupFilter: {
+          limit: rows,
+          offset: 0,
+          filters: filters
+        }
+        // sort: [`id:desc`],
+      };
+      // fields=status&groupBy=status&fields=count(status)&populateGroup=true
+      const queryString = qs.stringify(queryData, {
+        encodeValuesOnly: true
+      });
+
+      // triggerGetSolidEntities(queryString);
+      const data: any = await triggerGetSolidEntities(queryString);
+      if (data && data?.data?.groupRecords.length > 0) {
+        const updatedData = [...data.data.groupRecords];
+        setKanbanViewData(updatedData);
+      }
+      setSelectedRecords([]);
+    }
+    // if (toPopulate) {
+    //   const queryData = {
+    //     offset: 0,
+    //     limit: 25,
+    //     populate: toPopulate,
+    //     sort: [`id:desc`],
+    //     filters: { ...transformedFilter.filters }
+    //   };
+    //   if (params.embeded) {
+
+    //   }
+    //   const queryString = qs.stringify(queryData, {
+    //     encodeValuesOnly: true
+    //   });
+
+    //   triggerGetSolidEntities(queryString);
+    //   // setShowGlobalSearchElement(false)
+    //   setSelectedRecords([]);
+    // }
+  }
+
 
 
   return (
@@ -491,9 +582,11 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             />
           }
 
-          {/* {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
-            // <SolidGlobalSearchElement solidKanbanViewMetaData={solidKanbanViewMetaData} applyFilter={applyFilter} filterValues={filterValues} setFilterValues={setFilterValues}></SolidGlobalSearchElement>
-          } */}
+          {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
+            // <SolidGlobalSearchElement viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} ></SolidGlobalSearchElement>
+            <SolidGlobalSearchElement ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
+
+          }
         </div>
 
         {/* <SolidConfigureLayoutElement></SolidConfigureLayoutElement> */}

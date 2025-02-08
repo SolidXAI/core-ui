@@ -43,214 +43,16 @@ type SolidListViewParams = {
   customFilter?: any
 };
 
-// const transformRulesToFilters = (filterRules: any) => {
-//   if (!filterRules || !filterRules.children) return {};
-
-//   let operatorKey = filterRules.matchOperator === "and" ? "$and" : "$or";
-
-//   let filters = filterRules.children.map((child: any) => {
-//     if (child.type === "rule") {
-//       let filterValue ;
-//       if(child.value){
-
-//       if(child.value.length === 1){
-//         if (typeof child.value[0] === "object" && child.value[0] !== null) {
-//           filterValue = [child.value[0].value];
-//         }else{
-//           filterValue = child.value[0];
-//         }
-//       }else{
-//         if (typeof child.value[0] === "object" && child.value[0] !== null) {
-//           filterValue = child.value.map((i:any) => i.value);
-//         }else{
-//           filterValue = child.value;
-//         }
-//       }
-//     }
-
-//       let ruleFilter = { [child.fieldName]: { [child.matchMode]:  filterValue} };
-//       // If the rule has children, process them recursively
-//       if (child.children && child.children.length > 0) {
-//         let childFilters = transformRulesToFilters({ matchOperator: "and", children: child.children }).filters;
-//         return { [operatorKey]: [ruleFilter, childFilters] };
-//       }
-
-//       return ruleFilter;
-//     } else if (child.type === "rule_group") {
-//       return transformRulesToFilters(child).filters; // Recursively process rule groups
-//     }
-//   }).filter(Boolean);
-
-//   return { filters: { [operatorKey]: filters } };
-
-
-// }
-const transformRulesToFilters = (input: any) => {
-
-  // Helper function to process individual rules
-  const processRule = (rule) => {
-    if (rule.value.length > 0) {
-
-      // Ensure rule.value is always an array
-      let values = typeof rule.value[0] === "object" ? rule.value.map((i: any) => i.value) : rule.value;
-      if (rule.matchMode !== '$in' && rule.matchMode !== '$notIn' && rule.matchMode !== '$between') {
-        values = values[0];
-      }
-      // Rule transformation
-      let transformedRule = {
-        [rule.fieldName]: {
-          [rule.matchMode]: values    // Assuming `value` is always an array with `value` and `label`
-        }
-      };
-
-      // If the rule has children (which means it's a rule group), process them
-      let processedFields;
-      if (rule.children && rule.children.length > 0) {
-        processedFields = rule.children.map(child => processRuleGroup(child));
-      }
-      if (processedFields) {
-        return { ...transformedRule, processedFields }
-      }
-      return { ...transformedRule }
-    }
-
-  };
-
-  // Helper function to process rule groups
-  const processRuleGroup = (ruleGroup) => {
-    const operator = ruleGroup.matchOperator === 'or' ? '$or' : '$and';
-    const children = ruleGroup.children.map(child => {
-      if (child.type === 'rule') {
-        // Process the rule
-        return processRule(child);
-      } else if (child.type === 'rule_group') {
-        // Process the rule group recursively
-        return processRuleGroup(child);
-      }
-    });
-
-    return {
-      [operator]: children
-    };
-  };
-
-  // Start processing the root rule group
-  const filterObject = processRuleGroup(input);
-
-  function liftProcessedFields(filters) {
-    if (!filters || typeof filters !== 'object') return filters;
-
-    function processArray(arr) {
-      let newArr = [];
-      for (let obj of arr) {
-        if (obj.processedFields) {
-          let processed = processArray(obj.processedFields); // Recursively process nested processedFields
-          delete obj.processedFields;
-          newArr.push(obj, ...processed);
-        } else {
-          newArr.push(obj);
-        }
-
-        for (let key in obj) {
-          if (Array.isArray(obj[key])) {
-            obj[key] = processArray(obj[key]);
-          }
-        }
-      }
-      return newArr;
-    }
-
-    for (let key in filters) {
-      if (Array.isArray(filters[key])) {
-        filters[key] = processArray(filters[key]);
-      }
-    }
-
-    return filters;
-  } return {
-    filters: liftProcessedFields(filterObject)
-  };
-}
-
-
 export const SolidListView = (params: SolidListViewParams) => {
 
-  const initialState: FilterRule[] = [
-    {
-      "id": 1,
-      "type": "rule_group",
-      "matchOperator": "or",
-      "parentRule": null,
-      "children": [
-        {
-          "id": 1738397527814,
-          "type": "rule",
-          "fieldName": "module",
-          "matchMode": "$in",
-          "value": [
-            {
-              "label": "solid-core",
-              "value": 1
-            }
-          ],
-          "parentRule": 1,
-          "children": [
-            {
-              "id": 1738397555900,
-              "type": "rule_group",
-              "matchOperator": "and",
-              "parentRule": 1738397527814,
-              "children": [
-                {
-                  "id": 1738397556184,
-                  "type": "rule",
-                  "fieldName": "name",
-                  "matchMode": "$startsWithi",
-                  "value": [
-                    "social"
-                  ],
-                  "parentRule": 1738397555900,
-                  "children": []
-                },
-                {
-                  "id": 1738397556147,
-                  "type": "rule",
-                  "fieldName": "displayName",
-                  "matchMode": "$startsWithi",
-                  "value": [
-                    "social"
-                  ],
-                  "parentRule": 1738397555900,
-                  "children": []
-                }
-              ]
-            }
-          ]
-        },
-        {
-          "id": 1738397547577,
-          "type": "rule",
-          "fieldName": "module",
-          "matchMode": "$in",
-          "value": [
-            {
-              "label": "srmd-tracker",
-              "value": 4
-            }
-          ],
-          "parentRule": 1,
-          "children": []
-        }
-      ]
-    }
-  ];
+  const solidGlobalSearchElementRef = useRef();
 
 
   const router = useRouter()
   // TODO: The initial filter state will be created based on the fields which are present on this list view. 
-  const [filters, setFilters] = useState<DataTableFilterMeta>({});
-  const [customFilter, setCustomFilter] = useState<FilterRule[]>(initialState);
-  const [showGlobalSearchElement, setShowGlobalSearchElement] = useState<boolean>(false);
+  const [filters, setFilters] = useState<any>();
+  // const [customFilter, setCustomFilter] = useState<FilterRule[]>(initialState);
+  // const [showGlobalSearchElement, setShowGlobalSearchElement] = useState<boolean>(false);
 
   const [toPopulate, setToPopulate] = useState<string[]>([]);
   const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
@@ -278,9 +80,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     fetchPermissions();
   }, [params.modelName]);
 
-  const isFilterApplied = Object.values(filters).some(
-    (filter: any) => filter?.value && filter.value.length > 0
-  );
+  const isFilterApplied = filters ? true : false;
 
   // Create the RTK slices for this entity
   const entityApi = createSolidEntityApi(params.modelName);
@@ -347,7 +147,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         toPopulate.push(fieldMetadata.name);
       }
     }
-    setFilters(initialFilters);
+    // setFilters(initialFilters);
     setRows(solidListViewMetaData?.data?.solidView?.layout?.attrs?.defaultPageSize ? solidListViewMetaData?.data?.solidView?.layout?.attrs.defaultPageSize : 25)
     setToPopulate(toPopulate);
   }
@@ -368,11 +168,6 @@ export const SolidListView = (params: SolidListViewParams) => {
       initialFilterMethod()
     }
   }, [solidListViewMetaData]);
-
-
-
-
-
 
 
   // All list view state.
@@ -554,48 +349,16 @@ export const SolidListView = (params: SolidListViewParams) => {
     limit?: number,
     sortField?: string,
     sortOrder?: number,
-    filterQuery?: any
+    filters?: any
   ) => {
 
-    const formattedFilters: any = {};
     const solidFieldsMetadata = solidListViewMetaData.data.solidFieldsMetadata;
 
-    Object.keys(filterQuery).forEach((field) => {
-
-      const filterField = filterQuery[field];
-      const filterFieldMeta = solidFieldsMetadata[field];
-
-      // Some filters will not have constraints
-      if (!filterField.constraints) {
-        if (filterField.value != null) {
-          const { operator, value } = identifySolidOperatorAndValue(filterField.matchMode, filterField.value);
-
-          // Massage the filter value for relation many-to-one before sending to the server. 
-          if (filterFieldMeta.type === 'relation' && filterFieldMeta.relationType === 'many-to-one') {
-            // @ts-ignore
-            const manyToOneIds = value.map(i => i.value);
-            formattedFilters[field] = { [operator]: manyToOneIds };
-          }
-          // Massage the filter value for selectionStatic before sending to the server. 
-          else if (['selectionStatic', 'selectionDynamic'].includes(filterFieldMeta.type)) {
-            // @ts-ignore
-            const values = value.map(i => i.value);
-            formattedFilters[field] = { [operator]: values };
-          }
-          else {
-            formattedFilters[field] = { [operator]: value };
-          }
-        }
-      }
-      // TODO: Incase we start supporting multiple constraints in the future then we need to implement an else block here. 
-      else { }
-
-    });
 
     const queryData: any = {
       offset: offset ?? first,
       limit: limit ?? rows,
-      filters: formattedFilters,
+      filters: filters ?? filters,
       populate: toPopulate,
     };
 
@@ -619,40 +382,15 @@ export const SolidListView = (params: SolidListViewParams) => {
     triggerGetSolidEntities(queryString);
   };
 
-  //apply custom filter code 
-  const handleApplyCustomFilter = () => {
-    const transformedFilter = transformRulesToFilters(customFilter[0]);
-    console.log("transformedFilter", transformedFilter);
-
-    if (toPopulate) {
-      const queryData = {
-        offset: 0,
-        limit: 25,
-        populate: toPopulate,
-        sort: [`id:desc`],
-        filters: { ...transformedFilter.filters }
-      };
-      if (params.embeded) {
-
-      }
-      const queryString = qs.stringify(queryData, {
-        encodeValuesOnly: true
-      });
-
-      triggerGetSolidEntities(queryString);
-      // setShowGlobalSearchElement(false)
-      setSelectedRecords([]);
-    }
-  }
   // handle filter...
-  const onFilter = (e: any) => {
-    setFilters(e.filters);
+  const handleApplyCustomFilter = (filters) => {
+    setFilters(filters);
     setQueryString(
       0,
       rows,
       sortField,
       sortOrder === 1 || sortOrder === -1 ? sortOrder : 0,
-      e.filters
+      filters
     );
   };
 
@@ -661,6 +399,8 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (solidListViewMetaData) {
       initialFilterMethod()
     }
+    setFilters(null)
+    solidGlobalSearchElementRef.current.clearFilter()
   };
 
   const op = useRef(null)
@@ -818,7 +558,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           }
 
           {solidListViewMetaData?.data?.solidView?.layout?.attrs?.enableGlobalSearch === true && params.embeded === false &&
-            <SolidGlobalSearchElement viewData={solidListViewMetaData} showGlobalSearchElement={showGlobalSearchElement} setShowGlobalSearchElement={setShowGlobalSearchElement} customFilter={customFilter} setCustomFilter={setCustomFilter} handleApplyCustomFilter={handleApplyCustomFilter} ></SolidGlobalSearchElement>
+            <SolidGlobalSearchElement ref={solidGlobalSearchElementRef} viewData={solidListViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
           }
         </div>
         <div className="flex align-items-center gap-3">
@@ -860,9 +600,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           rows={rows}
           rowsPerPageOptions={solidListViewMetaData?.data?.solidView?.layout?.attrs?.pageSizeOptions}
           dataKey="id"
-          filters={filters}
           emptyMessage="No Entities found."
-          onFilter={onFilter}
           filterDisplay="menu"
           totalRecords={totalRecords}
           first={first}
