@@ -239,7 +239,7 @@ const CreateModule = ({ data }: any) => {
 
   useEffect(() => {
     if (isSuccess == true || isDeleteModuleSuceess == true || isModuleUpdateSuccess == true) {
-      router.push(`/admin/app-builder/module/all`);
+      router.push(`/admin/core/solid-core/module-metadata/list`);
     }
   }, [isSuccess, isDeleteModuleSuceess, isModuleUpdateSuccess])
 
@@ -334,7 +334,7 @@ const CreateModule = ({ data }: any) => {
 
                             formik.handleChange(e);
                             const { toKebabCase, toSnakeCase, toPluralCamelCase } = getSingularAndPlural(e.target.value);
-                            if (pathname.includes('create')) {
+                            if (pathname.includes('new')) {
                               formik.setFieldValue("name", toKebabCase);
                             }
 

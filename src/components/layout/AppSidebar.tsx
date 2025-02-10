@@ -114,14 +114,24 @@ const AppSidebar = () => {
                             className={`menu-item ${currentMainMenu === m.title ? "active-menu-image" : ""}`}
                         >
                             <a onClick={() => handleMenu(m)}>
-                                <img
-                                    style={{ cursor: "pointer", width: '30px' }}
-                                    // src={currentMainMenu === m.title ? `/images/${m.title.toLocaleLowerCase()}-active.svg` : `/images/${m.title.toLocaleLowerCase()}.svg`}
-                                    // src={`/images/menu/${m.title}.svg`}
-                                    src={m.icon.startsWith("/") ? m.icon : `${process.env.API_URL}/${m.icon}`}
-                                    // src={`/images/menu/app-builder.svg`}
-                                    alt="Solid"
-                                />
+                                {m.icon ?
+                                    <img
+                                        style={{ cursor: "pointer", width: '30px' }}
+                                        // src={currentMainMenu === m.title ? `/images/${m.title.toLocaleLowerCase()}-active.svg` : `/images/${m.title.toLocaleLowerCase()}.svg`}
+                                        // src={`/images/menu/${m.title}.svg`}
+                                        src={(m.icon && m.icon.startsWith("/")) ? m.icon : `${process.env.API_URL}/${m.icon}`}
+                                        // src={`/images/menu/app-builder.svg`}
+                                        alt="Solid"
+                                    />
+                                    :
+                                    <img
+                                        style={{ cursor: "pointer", width: '30px' }}
+                                        // src={currentMainMenu === m.title ? `/images/${m.title.toLocaleLowerCase()}-active.svg` : `/images/${m.title.toLocaleLowerCase()}.svg`}
+                                        // src={`/images/menu/${m.title}.svg`}
+                                        src={`/images/menu/app-builder.svg`}
+                                        alt="Solid"
+                                    />
+                                }
                             </a>
                         </div>
                     ))}
