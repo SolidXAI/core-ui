@@ -1,16 +1,12 @@
+import { ToastContainer } from "@/helpers/ToastContainer";
+import { useGetSolidMenuBasedOnRoleQuery } from "@/redux/api/solidMenuApi";
+import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 import { setIsAuthenticated, setUser } from "@/redux/features/userSlice";
-import { getSession, signOut, useSession } from "next-auth/react";
-import React, { useEffect, useRef, useState } from "react";
+import { signOut, useSession } from "next-auth/react";
+import { useEffect, useRef, useState } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import NavbarTwoMenu from "./navbar-two-menu";
 import UserProfileMenu from "./user-profile-menu";
-import { useDispatch, useSelector } from "react-redux";
-import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
-import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
-import { IconField } from "primereact/iconfield";
-import { InputIcon } from "primereact/inputicon";
-import { useGetSolidMenuBasedOnRoleQuery } from "@/redux/api/solidMenuApi";
-import { ToastContainer } from "@/helpers/ToastContainer";
 // import menu from "@/helpers/menu";
 
 const AppSidebar = () => {
@@ -92,10 +88,10 @@ const AppSidebar = () => {
 
             {/* commented this as this is not working properly @Jenendar to figure this out... */}
             {(visibleNavbar || currentMainMenu) && (
-                <Button
+                <div
                     className={`sidebar-toggle-button ${!visibleNavbar ? "s-collapsed" : ""}`}
                     onClick={handleToggle}
-                    severity="secondary"
+                    // severity="secondary"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <rect x="0.3" y="0.3" width="23.4" height="23.4" rx="2.1" fill="white" />
@@ -103,7 +99,7 @@ const AppSidebar = () => {
                         <path d="M5.09735 16V14.6667H13.5929V16H5.09735ZM5.09735 12.6667V11.3333H11.6324V12.6667H5.09735ZM5.09735 9.33333V8H13.5929V9.33333H5.09735Z" fill="#8D9199" />
                         <path d="M16.2621 12L18.9026 14.3L18.099 15L14.6549 12L18.099 9L18.9026 9.7L16.2621 12Z" fill="#8D9199" />
                     </svg>
-                </Button>
+                </div>
             )}
 
             <div className="sidebar-left">
@@ -116,7 +112,7 @@ const AppSidebar = () => {
                             <a onClick={() => handleMenu(m)}>
                                 {m.icon ?
                                     <img
-                                        style={{ cursor: "pointer", width: '30px' }}
+                                        style={{ cursor: "pointer", width: '30px' , mixBlendMode: "multiply"}}
                                         // src={currentMainMenu === m.title ? `/images/${m.title.toLocaleLowerCase()}-active.svg` : `/images/${m.title.toLocaleLowerCase()}.svg`}
                                         // src={`/images/menu/${m.title}.svg`}
                                         src={(m.icon && m.icon.startsWith("/")) ? m.icon : `${process.env.API_URL}/${m.icon}`}

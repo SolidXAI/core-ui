@@ -48,6 +48,33 @@ export const authApi = createApi({
         };
       },
     }),
+    initiateChangePassword: builder.mutation({
+      query(body) {
+        return {
+          url: '/iam/initiate/forgot-password',
+          method: "POST",
+          body,
+        }
+      }
+    }),
+    confirmForgotPassword: builder.mutation({
+      query(body) {
+        return {
+          url: '/iam/confirm/forgot-password',
+          method: "POST",
+          body
+        }
+      }
+    }),
+    changePassword: builder.mutation({
+      query(body) {
+          return {
+              url: `/iam/change-password`,
+              method: "POST",
+              body,
+          };
+      },
+  }),
   }),
 });
 
@@ -57,4 +84,7 @@ export const {
   useUpdateUserMutation,
   useForgotPasswordMutation,
   useResetPasswordMutation,
+  useInitiateChangePasswordMutation,
+  useConfirmForgotPasswordMutation,
+  useChangePasswordMutation
 } = authApi;
