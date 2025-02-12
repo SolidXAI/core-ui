@@ -46,21 +46,23 @@ const SolidOTPVerify = () => {
         <>
             <Toast ref={toast} />
             <div className={`auth-container ${authLayout === 'Center' ? 'center' : 'side'}`} style={{ minWidth: 480 }}>
-                <div className="flex justify-content-center">
-                    <div className="solid-logo flex align-items-center gap-3">
-                        <img
-                            alt="solid logo"
-                            src={'/images/SS-Logo-1 1.png'}
-                            className="position-relative img-fluid"
-                        />
-                        <div>
-                            <p className="solid-logo-title">
-                                Solid<br />Starters
-                            </p>
+            {authLayout === 'Center' &&
+                    <div className="flex justify-content-center">
+                        <div className="solid-logo flex align-items-center gap-3">
+                            <img
+                                alt="solid logo"
+                                src={'/images/SS-Logo-1 1.png'}
+                                className="position-relative img-fluid"
+                            />
+                            <div>
+                                <p className="solid-logo-title">
+                                    Solid<br />Starters
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <h2 className="solid-auth-title text-center">OTP Verification</h2>
+                }
+                <h2 className={`solid-auth-title ${authLayout === 'Center' ? 'text-center' : 'text-left'}`}>OTP Verification</h2>
                 <p className="solid-auth-subtitle text-sm">
                     Please enter the OTP sent to your email to complete verification
                 </p>
@@ -108,7 +110,7 @@ const SolidOTPVerify = () => {
                                     </div>
                                 </div>
                                 <div className="mt-4">
-                                    <Button type="submit" className="w-full font-light" label="Verify" />
+                                    <Button type="submit" className="w-full font-light auth-submit-button" label="Verify"  disabled={formik.isSubmitting} loading={formik.isSubmitting}/>
                                 </div>
                             </Form>
                         )}

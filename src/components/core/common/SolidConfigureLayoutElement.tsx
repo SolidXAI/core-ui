@@ -1,31 +1,102 @@
-'use client';
+"use client"
 import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
-import { useState } from "react";
+import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
+import { Divider } from "primereact/divider";
+import { OverlayPanel } from "primereact/overlaypanel";
+import { useRef, useState } from "react";
 
-
+interface FilterColumns {
+    name: string;
+    key: string;
+}
 export const SolidConfigureLayoutElement = ({ }: any) => {
 
-    const [visible, setVisible] = useState<boolean>(false);
+    // const [visible, setVisible] = useState<boolean>(false);
+    const op = useRef(null);
+    const customizeLayout = useRef(null);
+
+    const categories: FilterColumns[] = [
+        { name: 'ID', key: 'A' },
+        { name: 'Tracker Date', key: 'M' },
+        { name: 'Production', key: 'P' },
+        { name: 'Research', key: 'R' }
+    ];
+    const [selectedCategories, setSelectedCategories] = useState<FilterColumns[]>([categories[1]]);
+
+    const onCategoryChange = (e: CheckboxChangeEvent) => {
+        let _selectedCategories = [...selectedCategories];
+
+        if (e.checked)
+            _selectedCategories.push(e.value);
+        else
+            _selectedCategories = _selectedCategories.filter(category => category.key !== e.value.key);
+
+        setSelectedCategories(_selectedCategories);
+    };
 
     return (
-        <div className="flex justify-content-center">
+        <div className="position-relative">
             <Button
                 type="button"
                 size="small"
                 icon="pi pi-cog"
-                onClick={() => setVisible(true)}
                 severity="secondary"
                 outlined
+                // @ts-ignore
+                onClick={(e) => op.current.toggle(e)}
             />
-            <Dialog header="Header" visible={visible} style={{ width: '50vw' }} onHide={() => { if (!visible) return; setVisible(false); }}>
-                <p className="m-0">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-                    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                </p>
-            </Dialog>
+            <OverlayPanel ref={op}>
+                <div className="p-2">
+                    <div className="flex flex-column">
+                        <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2" />
+                        <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2" />
+                        <Button text icon='pi pi-share-alt' label="Share" size="small" severity="secondary" className="text-left gap-2" />
+                    </div>
+                </div>
+                <Divider className="m-0" />
+                <div className="p-2 position-relative">
+                    <Button
+                        icon='pi pi-sliders-h'
+                        label="Customize Layout"
+                        size="small"
+                        className="text-left gap-2 w-13rem"
+                        // @ts-ignore
+                        onClick={(e) => customizeLayout.current.toggle(e)}
+                    // onMouseEnter={(e) => customizeLayout.current.show(e)}
+                    />
+                    <p className="mt-3 mb-1 font-medium" style={{ color: 'var(--gray-400)' }}>Saved Layouts</p>
+                    <Button text severity="secondary" label="Diet Tracking" icon="pi pi-plus" size="small"/>
+                    <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}>
+                        <div className="pl-3 pt-2 flex align-items-center justify-content-between">
+                            <p className="m-0 font-bold">Columns</p>
+                            <Button text label="Save Layout" icon="pi pi-plus" />
+                        </div>
+                        <div className="flex flex-column gap-3 p-3">
+                            {categories.map((category) => {
+                                return (
+                                    <div key={category.key} className="flex align-items-center gap-1">
+                                        <Checkbox
+                                            inputId={category.key}
+                                            name="category"
+                                            value={category}
+                                            onChange={onCategoryChange}
+                                            checked={selectedCategories.some((item) => item.key === category.key)}
+                                        />
+                                        <label htmlFor={category.key} className="ml-2">
+                                            {category.name}
+                                        </label>
+                                    </div>
+                                );
+                            })}
+                        </div>
+                        <Divider className="m-0" />
+                        <div className="p-3 flex gap-2">
+                            <Button label="Apply" size="small" />
+                            <Button outlined label="Cancel" size="small" />
+                        </div>
+                    </OverlayPanel>
+                </div>
+            </OverlayPanel>
         </div>
     )
 

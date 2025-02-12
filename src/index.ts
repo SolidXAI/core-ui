@@ -580,6 +580,7 @@ export { default as SolidLogin } from '@/components/auth/SolidLogin';
 export { default as SolidOTPVerify } from '@/components/auth/SolidOTPVerify';
 export { default as SolidRegister } from '@/components/auth/SolidRegister';
 export { default as SolidResetPassword } from '@/components/auth/SolidResetPassword';
+export { default as SolidChangeForcePassword } from '@/components/auth/SolidChangeForcePassword';
 
 //redux
 export { default as authenticationReducer } from '@/redux/features/authSlice';

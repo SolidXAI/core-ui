@@ -1,5 +1,6 @@
-'use client';
+import { signIn } from 'next-auth/react'
 import { Button } from 'primereact/button'
+import React from 'react'
 
 export const SocialMediaLogin = () => {
     return (
@@ -21,11 +22,14 @@ export const SocialMediaLogin = () => {
                     </defs>
                 </svg>
             )}
+                className='flex gap-3'
                 outlined
                 severity="secondary"
+                label='Sign In with Google'
+                onClick={()=>signIn('google', {callbackUrl :'http://localhost:3001/admin/core/solid-core/user/list'})}
             >
             </Button>
-            <Button icon={() => (
+            {/* <Button icon={() => (
                 <svg width="24" height="24" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg" xlinkHref="http://www.w3.org/1999/xlink">
                     <rect width="24" height="24" fill="url(#pattern0_3520_3835)" />
                     <defs>
@@ -39,7 +43,7 @@ export const SocialMediaLogin = () => {
                 outlined
                 severity="secondary"
             >
-            </Button>
+            </Button> */}
         </div>
     )
 }
