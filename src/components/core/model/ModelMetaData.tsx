@@ -53,7 +53,6 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     enableSoftDelete: modelMetaData ? modelMetaData?.enableSoftDelete : "",
     enableAuditTracking: modelMetaData ? modelMetaData?.enableAuditTracking : "",
     internationalisation: modelMetaData ? modelMetaData?.internationalisation : "",
-    isExportable: modelMetaData ? modelMetaData?.isExportable : "",
     hasUserKey: modelMetaData ? modelMetaData?.hasUserKey : "",
     userKeyFieldId: modelMetaData ? modelMetaData.userKeyFieldId : "",
   };
@@ -97,7 +96,6 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     enableSoftDelete: Yup.boolean(),
     enableAuditTracking: Yup.boolean(),
     internationalisation: Yup.boolean(),
-    isExportable: Yup.boolean(),
   });
 
 
@@ -128,7 +126,6 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
           enableSoftDelete: values.enableSoftDelete === true ? true : '',
           enableAuditTracking: values.enableAuditTracking === true ? true : '',
           internationalisation: values.internationalisation === true ? true : '',
-          isExportable: values.isExportable === true ? true : '',
           hasUserKey: values.hasUserKey === true ? true : '',
           // userKeyFieldId :"",
         };
@@ -386,7 +383,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                       <p className="form-wrapper-heading">Configurations</p>
 
                       <div className="grid formgrid">
-                        {params.id === 'new' &&
+                        {/* {params.id === 'new' &&
 
                           <div className="md:col-6 sm:col-12">
                             <div className="field">
@@ -410,7 +407,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                                 />
                               )}
                             </div>
-                          </div>}
+                          </div>} */}
                         <div className="md:col-6 sm:col-12">
                           <div className="field">
                             <div className="flex align-items-center">
@@ -433,7 +430,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                             )}
                           </div>
                         </div>
-                        <div className="md:col-6 sm:col-12">
+                        {/* <div className="md:col-6 sm:col-12">
                           <div className="field">
                             <div className="flex align-items-center">
                               <Checkbox
@@ -454,8 +451,8 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                               />
                             )}
                           </div>
-                        </div>
-                        <div className="md:col-6 sm:col-12">
+                        </div> */}
+                        {/* <div className="md:col-6 sm:col-12">
                           <div className="field">
                             <div className="flex align-items-center">
                               <Checkbox
@@ -476,30 +473,8 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                               />
                             )}
                           </div>
-                        </div>
+                        </div> */}
 
-                        <div className="md:col-6 sm:col-12">
-                          <div className="field">
-                            <div className="flex align-items-center">
-                              <Checkbox
-                                name="isExportable"
-                                onChange={(e) => {
-                                  formik.setFieldValue("isExportable", e.checked);
-                                }}
-                                checked={formik.values.isExportable}
-                              ></Checkbox>
-                              <label htmlFor="isExportable" className="form-field-label ml-2">
-                                Is Exportable
-                              </label>
-                            </div>
-                            {isFormFieldValid(formik, "isExportable") && (
-                              <Message
-                                severity="error"
-                                text={formik?.errors?.isExportable?.toString()}
-                              />
-                            )}
-                          </div>
-                        </div>
                         <div className="md:col-6 sm:col-12">
                           <div className="field">
                             <div className="flex align-items-center">
