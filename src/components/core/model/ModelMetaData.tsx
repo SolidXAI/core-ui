@@ -46,7 +46,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     description: modelMetaData ? modelMetaData?.description : "",
     dataSource: modelMetaData ? modelMetaData?.dataSource : "",
     dataSourceType: modelMetaData ? modelMetaData?.dataSourceType : "",
-    tableName: modelMetaData ? modelMetaData?.tableName : "",
+    tableName: modelMetaData ? modelMetaData?.tableName : null,
     moduleId: modelMetaData ? modelMetaData?.module?.id : "",
     module: modelMetaData ? modelMetaData?.module : "",
     isSystem: modelMetaData ? modelMetaData?.isSystem : false,
@@ -337,7 +337,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                             existingData={formik.values.dataSource}
                             additionalAction={(e: any) => formik.setFieldValue("dataSourceType", e.target.value.type)}
                           />
-
+                          {formik.values.dataSourceType && <Message severity="info" text={`Your datasource will connect to a ${formik.values.dataSourceType} database`} />}
 
                           {isFormFieldValid(formik, "dataSource") && (
                             <Message severity="error" text={formik?.errors?.dataSource?.toString()} />
@@ -346,12 +346,12 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                       </div>
 
 
-                      <div className="field mt-3">
+                      {/* <div className="field mt-3">
                         <label htmlFor="dataSourceType" className="form-label form-field-label">
                           Data Source Type
                         </label>
                         <div>
-                          {/* <SingleSelectAutoCompleteField
+                          <SingleSelectAutoCompleteField
                             key="dataSourceType"
                             formik={formik}
                             isFormFieldValid={isFormFieldValid}
@@ -362,7 +362,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                             valueKey="value"
                             searchData={serachDataSourceType}
                             existingData={formik.values.dataSourceType}
-                          /> */}
+                          />
                           <InputText
                             disabled
                             type="text"
@@ -380,7 +380,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                             <Message severity="error" text={formik?.errors?.dataSourceType?.toString()} />
                           )}
                         </div>
-                      </div>
+                      </div> */}
                     </div>
                     <div className="form-wrapper mt-4">
                       <p className="form-wrapper-heading">Configurations</p>

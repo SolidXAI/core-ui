@@ -170,7 +170,7 @@ const CreateModule = ({ data }: any) => {
   });
 
   useEffect(() => {
-    if (data) {
+    if (data && data?.menuIconUrl) {
       setmenuIconPreview(`${process.env.API_URL}/${data.menuIconUrl}`);
     }
   }, [data])
