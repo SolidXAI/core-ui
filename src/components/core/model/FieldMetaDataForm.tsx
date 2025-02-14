@@ -195,6 +195,7 @@ function fetchCurrentFields(solidFieldType: any, fieldDefaultMetaData: any) {
     "index",
     "private",
     "encrypt",
+    "isUserKey"
   ];
 
 }
@@ -900,7 +901,8 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
     // externalIdProvider: fieldMetaData ? fieldMetaData?.externalIdProvider : null,
     // externalIdProviderCtxt: fieldMetaData ? fieldMetaData?.externalIdProviderCtxt : "",
     isSystem: fieldMetaData ? fieldMetaData?.isSystem : false,
-    columnName: fieldMetaData ? fieldMetaData?.columnName : null
+    columnName: fieldMetaData ? fieldMetaData?.columnName : null,
+    isUserKey: fieldMetaData ? fieldMetaData?.isUserKey : false
   };
 
 
@@ -964,7 +966,6 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
       });
     }
   };
-
 
 
   const handleTypeSelect = (e: any) => {
@@ -2736,7 +2737,32 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                             </div>
                           </div>
                         )}
+                        {currentFields.includes("isUserKey") && (
+                          <div className="md:col-6 sm:col-12">
+                            <div className="field">
+                              <div className="flex align-items-center">
+                                <Checkbox
+                                  name="isUserKey"
+                                  onChange={(e) => {
+                                    formik.setFieldValue("isUserKey", e.checked);
+                                  }}
+                                  checked={formik.values.isUserKey}
+                                ></Checkbox>
+                                <label htmlFor="ingredient1" className="form-label form-field-label ml-2">
+                                  Is Userkey
+                                </label>
+                              </div>
+                              <p className="fieldSubTitle">If userkey already then it will be replaced with this key</p>
 
+                              {isFormFieldValid(formik, "isUserKey") && (
+                                <Message
+                                  severity="error"
+                                  text={formik?.errors?.isUserKey?.toString()}
+                                />
+                              )}
+                            </div>
+                          </div>
+                        )}
                       </div>
 
 
