@@ -46,21 +46,16 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     description: modelMetaData ? modelMetaData?.description : "",
     dataSource: modelMetaData ? modelMetaData?.dataSource : "",
     dataSourceType: modelMetaData ? modelMetaData?.dataSourceType : "",
-    tableName: modelMetaData ? modelMetaData?.tableName : "",
+    tableName: modelMetaData ? modelMetaData?.tableName : null,
     moduleId: modelMetaData ? modelMetaData?.module?.id : "",
     module: modelMetaData ? modelMetaData?.module : "",
     isSystem: modelMetaData ? modelMetaData?.isSystem : false,
     enableSoftDelete: modelMetaData ? modelMetaData?.enableSoftDelete : "",
     enableAuditTracking: modelMetaData ? modelMetaData?.enableAuditTracking : "",
     internationalisation: modelMetaData ? modelMetaData?.internationalisation : "",
-    isExportable: modelMetaData ? modelMetaData?.isExportable : "",
-    hasUserKey: modelMetaData ? modelMetaData?.hasUserKey : "",
-    userKeyFieldId: modelMetaData ? modelMetaData.userKeyFieldId : "",
   };
 
   const [showTableName, setShowTableName] = useState<any>(false);
-  const [showUserKeyField, setShowUserKeyField] = useState<any>(modelMetaData?.hasUserKey == true ? true : false);
-
 
   useEffect(() => {
     if (modelMetaData && modelMetaData.tableName) {
@@ -97,7 +92,6 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     enableSoftDelete: Yup.boolean(),
     enableAuditTracking: Yup.boolean(),
     internationalisation: Yup.boolean(),
-    isExportable: Yup.boolean(),
   });
 
 
@@ -128,9 +122,6 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
           enableSoftDelete: values.enableSoftDelete === true ? true : '',
           enableAuditTracking: values.enableAuditTracking === true ? true : '',
           internationalisation: values.internationalisation === true ? true : '',
-          isExportable: values.isExportable === true ? true : '',
-          hasUserKey: values.hasUserKey === true ? true : '',
-          // userKeyFieldId :"",
         };
 
         setModelMetaData(modelData);
@@ -337,7 +328,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                             existingData={formik.values.dataSource}
                             additionalAction={(e: any) => formik.setFieldValue("dataSourceType", e.target.value.type)}
                           />
-
+                          {formik.values.dataSourceType && <Message severity="info" text={`Your datasource will connect to a ${formik.values.dataSourceType} database`} />}
 
                           {isFormFieldValid(formik, "dataSource") && (
                             <Message severity="error" text={formik?.errors?.dataSource?.toString()} />
@@ -346,12 +337,12 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                       </div>
 
 
-                      <div className="field mt-3">
+                      {/* <div className="field mt-3">
                         <label htmlFor="dataSourceType" className="form-label form-field-label">
                           Data Source Type
                         </label>
                         <div>
-                          {/* <SingleSelectAutoCompleteField
+                          <SingleSelectAutoCompleteField
                             key="dataSourceType"
                             formik={formik}
                             isFormFieldValid={isFormFieldValid}
@@ -362,7 +353,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                             valueKey="value"
                             searchData={serachDataSourceType}
                             existingData={formik.values.dataSourceType}
-                          /> */}
+                          />
                           <InputText
                             disabled
                             type="text"
@@ -380,13 +371,13 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                             <Message severity="error" text={formik?.errors?.dataSourceType?.toString()} />
                           )}
                         </div>
-                      </div>
+                      </div> */}
                     </div>
                     <div className="form-wrapper mt-4">
                       <p className="form-wrapper-heading">Configurations</p>
 
                       <div className="grid formgrid">
-                        {params.id === 'new' &&
+                        {/* {params.id === 'new' &&
 
                           <div className="md:col-6 sm:col-12">
                             <div className="field">
@@ -410,7 +401,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                                 />
                               )}
                             </div>
-                          </div>}
+                          </div>} */}
                         <div className="md:col-6 sm:col-12">
                           <div className="field">
                             <div className="flex align-items-center">
@@ -419,12 +410,14 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                                 onChange={(e) => {
                                   formik.setFieldValue("enableSoftDelete", e.checked);
                                 }}
+                                disabled={params.id !== 'new'}
                                 checked={formik.values.enableSoftDelete}
                               ></Checkbox>
                               <label htmlFor="enableSoftDelete" className="form-field-label ml-2">
                                 Enable Soft Delete
                               </label>
                             </div>
+                            {params.id !== 'new' && <p className="fieldSubTitle">Soft Delete is disabled in edit mode</p>}
                             {isFormFieldValid(formik, "enableSoftDelete") && (
                               <Message
                                 severity="error"
@@ -433,7 +426,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                             )}
                           </div>
                         </div>
-                        <div className="md:col-6 sm:col-12">
+                        {/* <div className="md:col-6 sm:col-12">
                           <div className="field">
                             <div className="flex align-items-center">
                               <Checkbox
@@ -454,8 +447,8 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                               />
                             )}
                           </div>
-                        </div>
-                        <div className="md:col-6 sm:col-12">
+                        </div> */}
+                        {/* <div className="md:col-6 sm:col-12">
                           <div className="field">
                             <div className="flex align-items-center">
                               <Checkbox
@@ -476,69 +469,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                               />
                             )}
                           </div>
-                        </div>
-
-                        <div className="md:col-6 sm:col-12">
-                          <div className="field">
-                            <div className="flex align-items-center">
-                              <Checkbox
-                                name="isExportable"
-                                onChange={(e) => {
-                                  formik.setFieldValue("isExportable", e.checked);
-                                }}
-                                checked={formik.values.isExportable}
-                              ></Checkbox>
-                              <label htmlFor="isExportable" className="form-field-label ml-2">
-                                Is Exportable
-                              </label>
-                            </div>
-                            {isFormFieldValid(formik, "isExportable") && (
-                              <Message
-                                severity="error"
-                                text={formik?.errors?.isExportable?.toString()}
-                              />
-                            )}
-                          </div>
-                        </div>
-                        <div className="md:col-6 sm:col-12">
-                          <div className="field">
-                            <div className="flex align-items-center">
-
-                              <div className="flex align-items-bottom">
-                                <Checkbox onChange={e => {
-                                  setShowUserKeyField(e.checked);
-                                  formik.setFieldValue("hasUserKey", e.checked);
-                                }} checked={showUserKeyField}></Checkbox>
-                                <label htmlFor="ingredient1" className="form-field-label ml-2">
-                                  Has User Key
-                                </label>
-                              </div>
-                            </div>
-                          </div>
-                          {showUserKeyField &&
-                            <div className="field mt-3">
-                              <label htmlFor="userKeyFieldId" className="form-label form-field-label">
-                                User Key Field
-                              </label>
-                              <InputText
-                                type="text"
-                                id="userKeyFieldId"
-                                name="userKeyFieldId"
-                                onChange={formik.handleChange}
-                                value={formik.values.userKeyFieldId}
-                                className={classNames("p-inputtext-sm w-full small-input", {
-                                  "p-invalid": isFormFieldValid(formik, "userKeyFieldId"),
-                                })}
-                              />
-                              {isFormFieldValid(formik, "userKeyFieldId") && (
-                                <Message
-                                  severity="error"
-                                  text={formik?.errors?.userKeyFieldId?.toString()}
-                                />
-                              )}
-                            </div>
-                          }
-                        </div>
+                        </div> */}
 
                       </div>
 
