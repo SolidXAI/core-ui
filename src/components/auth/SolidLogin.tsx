@@ -88,7 +88,7 @@ const SolidLogin = () => {
                                         showToast("error", "Login Error", response.error);
                                     } else {
                                         showToast("success", "Login Success", "Redirecting to dashboard...");
-                                        router.push("http://localhost:3001/admin/core/solid-core/user/list");
+                                        router.push("/admin/core/solid-core/user/list");
                                     }
                                 } catch (error) {
                                     showToast("error", "Login Failed", "Something went wrong");
