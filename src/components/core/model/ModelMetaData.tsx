@@ -4,6 +4,7 @@ import { getSingularAndPlural } from "@/helpers/helpers";
 import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
 import { useLazyGetmodulesQuery } from "@/redux/api/moduleApi";
 import { useFormik } from "formik";
+import { snakeCase } from "lodash";
 import { usePathname, useRouter } from "next/navigation";
 import { Checkbox } from "primereact/checkbox";
 import { InputText } from "primereact/inputtext";
@@ -106,6 +107,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     enableReinitialize: true,
     innerRef: formikModelMetadataRef,
     onSubmit: async (values) => {
+      const tableName = generateTableName(values.module.displayName, values.singularName);
       try {
         const modelData = {
           ...modelMetaData,
@@ -115,7 +117,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
           description: values.description,
           dataSource: values.dataSource,
           dataSourceType: values.dataSourceType,
-          tableName: showTableName === true ? values?.tableName : null,
+          tableName: showTableName === true ? values?.tableName : tableName,
           moduleId: values.moduleId,
           module: values.module,
           isSystem: values.isSystem ? values.isSystem === true : '',
@@ -123,7 +125,6 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
           enableAuditTracking: values.enableAuditTracking === true ? true : '',
           internationalisation: values.internationalisation === true ? true : '',
         };
-
         setModelMetaData(modelData);
         nextTab()
 
@@ -132,6 +133,12 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
       }
     },
   });
+
+  function generateTableName(moduleSlug: string, modelName: string): string {
+    const snakeCaseModelName = snakeCase(modelName);
+    const sankeCaseModuleName = snakeCase(moduleSlug);
+    return `${sankeCaseModuleName}_${snakeCaseModelName}`;
+  }
 
   const showError = async () => {
     const errors = await formik.validateForm(); // Trigger validation and get the updated errors
@@ -571,7 +578,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                                 }
                               }
 
-                            }} checked={showTableName}></Checkbox>
+                            }} checked={showTableName} disabled={params.id !== 'new'}></Checkbox>
                             <label htmlFor="ingredient1" className="ml-2">
                               Set table name
                             </label>

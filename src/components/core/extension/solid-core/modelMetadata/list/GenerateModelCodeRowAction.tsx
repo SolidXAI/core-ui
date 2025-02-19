@@ -3,7 +3,7 @@ import { useGenerateCodeForModelMutation } from "@/redux/api/modelApi";
 import { Button } from "primereact/button";
 
 
-export const GenerateModelCodeRowAction = ({ context }: any) => {
+const GenerateModelCodeRowAction = ({ context }: any) => {
 
     const [
         generateCode,
@@ -13,7 +13,7 @@ export const GenerateModelCodeRowAction = ({ context }: any) => {
 
     const generateCodeHandler = async () => {
         const response = await generateCode({ id: context.rowData.id })
-        context.closeCustomRowActionPopup();
+        context.closeListViewRowActionPopup();
         console.log("response", response);
     }
 
@@ -29,10 +29,10 @@ export const GenerateModelCodeRowAction = ({ context }: any) => {
             </ul>
             <div className="flex gap-5 justify-content-center">
                 <Button label="Ok" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={generateCodeHandler} />
-                <Button label="Cancel" icon="pi pi-times" className='small-button' onClick={() => context.closeCustomRowActionPopup()} />
+                <Button label="Cancel" icon="pi pi-times" className='small-button' onClick={() => context.closeListViewRowActionPopup()} />
             </div>
         </div >
     )
 }
 
-
+export default GenerateModelCodeRowAction;

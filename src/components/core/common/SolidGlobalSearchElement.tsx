@@ -101,7 +101,7 @@ const transformRulesToFilters = (input: any) => {
 
 }
 
-export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCustomFilter }: any, ref) => {
+export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCustomFilter, setShowArchived, showArchived }: any, ref) => {
 
     const initialState: FilterRule[] = [
         {
@@ -160,7 +160,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         }
     }, [])
 
-    const op = useRef(null);
+    const op = useRef<OverlayPanel>(null);
 
     return (
         <div className="flex justify-content-center solid-custom-filter-wrapper">
@@ -184,6 +184,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 <div className="px-2 py-1">
                     <Button text size="small" label="Custom Filter" iconPos="left" icon='pi pi-plus' onClick={() => setShowGlobalSearchElement(true)} />
                 </div>
+                <Divider className="m-0" />
+                {viewData?.data?.solidView?.model?.enableSoftDelete && <div className="px-2 py-1">
+                    <Button text size="small" label={showArchived ? "Hide Archived Records" : "Show Archived Records"} iconPos="left" onClick={() => {setShowArchived(!showArchived); op.current?.hide()}} />
+                </div>}
             </OverlayPanel>
             <Dialog header={false} className="search-filter-popup" showHeader={false} visible={showGlobalSearchElement} style={{ width: '50vw' }} onHide={() => { if (!showGlobalSearchElement) return; setShowGlobalSearchElement(false); }}>
                 <div className="flex field-popup-navigation gap-3 justify-content-between ">

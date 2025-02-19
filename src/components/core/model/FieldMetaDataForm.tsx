@@ -2713,7 +2713,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                             </div>
                           </div>
                         )}
-                        {currentFields.includes("isSystem") && (
+                        {/* {currentFields.includes("isSystem") && (
                           <div className="md:col-6 sm:col-12">
                             <div className="field">
                               <div className="flex align-items-center">
@@ -2736,7 +2736,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                               )}
                             </div>
                           </div>
-                        )}
+                        )} */}
                         {currentFields.includes("isUserKey") && (
                           <div className="md:col-6 sm:col-12">
                             <div className="field">
