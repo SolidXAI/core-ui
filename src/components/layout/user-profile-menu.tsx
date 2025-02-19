@@ -10,8 +10,11 @@ import { LayoutConfig } from "@/types";
 import { toggleTheme } from "@/redux/features/themeSlice";
 import { InputSwitch } from "primereact/inputswitch";
 import { Button } from "primereact/button";
+import { useRouter } from "next/navigation";
 
 const UserProfileMenu = () => {
+  const router = useRouter();
+
   // const { user } = useAppSelector((state) => state.auth);
   const { changeTheme } = useContext(PrimeReactContext);
   const { layoutConfig, setLayoutConfig } = useContext(LayoutContext);
@@ -76,7 +79,9 @@ const UserProfileMenu = () => {
             </div>
             <InputSwitch checked={checked} onChange={handleThemeToggle} />
           </div>
-
+          <div className="p-2">
+            <Button icon="pi pi-cog" label="General Settings" size="small" text severity="secondary" className="w-full text-left gap-2" onClick={()=>router.push("/admin/settings") }/>
+          </div>
           <div className="user-profile-body p-3">
             <Button
               text
