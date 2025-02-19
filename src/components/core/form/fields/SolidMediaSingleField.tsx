@@ -74,7 +74,7 @@ export class SolidMediaSingleField implements ISolidField {
     render(formik: FormikObject) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'col-12 s-field';
+        const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
@@ -156,58 +156,54 @@ export class SolidMediaSingleField implements ISolidField {
 
         return (
             <div className={className}>
-                <div className="justify-content-center align-items-center">
-                    <label htmlFor={fieldLayoutInfo.attrs.name}>{fieldLabel}
-                        &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
-                    </label>
-                </div>
-                <div className="s-input">
-                    <div
-                        {...getRootProps()}
-                        className="dropzone p-3 border-1 border-round surface-border"
-                    >
-                        <input {...getInputProps()} />
+                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                    &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
+                </label>
+                <div
+                    {...getRootProps()}
+                    className="dropzone p-3 border-1 border-round surface-border"
+                >
+                    <input {...getInputProps()} />
 
-                        {isDragActive ? (
-                            <DropzonePlaceholder />
-                        ) : imagesPreview ? (
-                            <div className="relative">
-                                <img
-                                    src={imageFormatHandler(imagesPreview) as string}
-                                    alt="Banner Image"
-                                    className="bg-white h-10rem w-14rem"
-                                />
-                                <Button
-                                    type="button"
-                                    onClick={(e) => {
-                                        e.stopPropagation();
-                                        setDeleteImageDialogVisible(true);
-                                        const data = {
-                                            e, imagesPreview
-                                        }
-                                        setImageToBeDeletedData(data)
-                                    }}
-                                    icon="pi pi-trash"
-                                    severity="secondary"
-                                    outlined
-                                    aria-label="Bookmark"
-                                    className="absolute right-0 top-0 bg-white z-5 m-2"
-                                    style={{
-                                        height: 25,
-                                        width: 25,
-                                    }}
-                                />
-                                <DropzoneUpload />
-                            </div>
-                        ) : (
-                            <DropzonePlaceholder />
-                        )}
-                        { }
-                    </div>
-                    {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    {isDragActive ? (
+                        <DropzonePlaceholder />
+                    ) : imagesPreview ? (
+                        <div className="relative">
+                            <img
+                                src={imageFormatHandler(imagesPreview) as string}
+                                alt="Banner Image"
+                                className="bg-white h-10rem w-14rem"
+                            />
+                            <Button
+                                type="button"
+                                onClick={(e) => {
+                                    e.stopPropagation();
+                                    setDeleteImageDialogVisible(true);
+                                    const data = {
+                                        e, imagesPreview
+                                    }
+                                    setImageToBeDeletedData(data)
+                                }}
+                                icon="pi pi-trash"
+                                severity="secondary"
+                                outlined
+                                aria-label="Bookmark"
+                                className="absolute right-0 top-0 bg-white z-5 m-2"
+                                style={{
+                                    height: 25,
+                                    width: 25,
+                                }}
+                            />
+                            <DropzoneUpload />
+                        </div>
+                    ) : (
+                        <DropzonePlaceholder />
                     )}
+                    { }
                 </div>
+                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                )}
                 <Dialog
                     visible={isDeleteImageDialogVisible}
                     header="Confirm Delete"

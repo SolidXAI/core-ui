@@ -968,6 +968,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
   };
 
 
+
   const handleTypeSelect = (e: any) => {
 
 
@@ -1028,58 +1029,79 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
   };
 
   return (
-    <div className="field-popup" >
+    <div>
       <Toast ref={toast} />
       <div>
         <form onSubmit={formik.handleSubmit}>
-          <div className="field-popup-navigation">
+          <div className="solid-field-metadata-form-header">
             {pathname.includes('create') ?
-              <div className="flex gap-3 justify-content-between ">
-                {showTypeFilter === false ?
-                  <div className="flex text-2xl font-bold align-items-center" style={{ color: '#000' }}>
-                    <Button icon="pi pi-arrow-left" rounded text type="reset" aria-label="Cancel" size="small" onClick={() => {
-                      if (!formik.values.displayName) {
-                        setShowTypeFilter(true)
-                      } else {
-                        setIsBackPopupVisible(true)
-                      }
-                    }
-                    } />
-                    <p className="field-popup-nav-heading">{capitalize(modelMetaData?.displayName)}</p>
-                  </div> :
-                  <div className="flex text-2xl font-bold align-items-center ml-4" style={{ color: '#000' }}>
-                    <p className="field-popup-nav-heading">Model - {capitalize(modelMetaData?.displayName)}</p>
-                  </div>
-                }
-                <div className="flex align-items-center gap-3 close-popup">
-                  <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setVisiblePopup(false)} />
+              <>
+                <div className="flex align-items-center gap-3">
+                  {showTypeFilter === false ?
+                    <>
+                      <Button
+                        text
+                        icon='pi pi-arrow-left'
+                        size="small"
+                        type="button"
+                        aria-label="Back"
+                        className='max-w-2rem bg-primary-reverse text-color'
+                        onClick={() => {
+                          if (!formik.values.displayName) {
+                            setShowTypeFilter(true)
+                          } else {
+                            setIsBackPopupVisible(true)
+                          }
+                        }
+                        }
+                      />
+                      <div className="form-wrapper-title text-base">{capitalize(modelMetaData?.displayName)}</div>
+                    </>
+                    :
+                    <div className="flex text-2xl font-bold align-items-center ml-4" style={{ color: '#000' }}>
+                      <div className="form-wrapper-title text-base">Model - {capitalize(modelMetaData?.displayName)}</div>
+                    </div>
+                  }
                 </div>
-              </div> :
-              <div className="flex gap-3 justify-content-between ">
-                <div className="flex text-2xl font-bold align-items-center" style={{ color: '#000' }}>
+                <div className="flex align-items-center gap-3 close-popup">
+                  <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setVisiblePopup(false)}
+                    className='max-w-2rem bg-primary-reverse text-color' />
+                </div>
+              </>
+              :
+              <>
+                <div className="flex align-items-center gap-3">
                   {!fieldMetaData?.id &&
-                    < Button icon="pi pi-arrow-left" rounded text type="reset" aria-label="Cancel" size="small" onClick={() => {
-                      if (!formik.values.displayName) {
-                        setShowTypeFilter(true)
-                      } else {
-                        setIsBackPopupVisible(true)
+                    <Button
+                      text
+                      icon='pi pi-arrow-left'
+                      size="small"
+                      type="button"
+                      aria-label="Back"
+                      className='max-w-2rem bg-primary-reverse text-color'
+                      onClick={() => {
+                        if (!formik.values.displayName) {
+                          setShowTypeFilter(true)
+                        } else {
+                          setIsBackPopupVisible(true)
+                        }
                       }
-                    }
-                    } />
+                      } />
                   }
                   {fieldMetaData ?
 
-                    <p className="field-popup-nav-heading ml-2">{capitalize(modelMetaData?.displayName)} &gt; {capitalize(fieldMetaData?.displayName)}</p>
+                    <div className="form-wrapper-title text-base">{capitalize(modelMetaData?.displayName)} &gt; {capitalize(fieldMetaData?.displayName)}</div>
 
                     :
-                    <p className="field-popup-nav-heading ml-2">Add New Field to {capitalize(modelMetaData?.displayName)}</p>
+                    <div className="form-wrapper-title text-base">Add New Field to {capitalize(modelMetaData?.displayName)}</div>
                   }
-
                 </div>
                 <div className="flex align-items-center gap-3 close-popup">
-                  <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setVisiblePopup(false)} />
+                  <Button icon="pi pi-times" text aria-label="Cancel" type="reset" size="small" onClick={() => setVisiblePopup(false)}
+                    className='max-w-2rem bg-primary-reverse text-color'
+                  />
                 </div>
-              </div>
+              </>
             }
           </div>
           {showTypeFilter === true ?
@@ -1091,139 +1113,128 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
             <div className="field-popup-form" >
               <div className="p-d-flex p-jc-center creat-field-for form-dem">
                 <div className="p-fluid" style={{ position: 'relative' }}>
-                  <div className="field-popup-heading">
-                    <p>Add a new {capitalize(selectedType.value)} Field</p>
+                  <div className="mb-3">
+                    <div className="form-wrapper-title">Add a new {capitalize(selectedType.value)} Field</div>
                   </div>
 
 
-                  <TabView panelContainerClassName="px-0 pb-0">
+                  <TabView>
                     <TabPanel
                       header="Basic Info"
                       className={(formik.touched.hasOwnProperty("name") && formik.errors.hasOwnProperty("name")) || (formik.touched.hasOwnProperty("displayName") && formik.errors.hasOwnProperty("displayName")) || (formik.touched.hasOwnProperty("displayName") && formik.errors.hasOwnProperty("ormType")) ? "tab-error-heading" : ""}
                     // rightIcon="pi pi-info-circle ml-2"
                     >
-                      <div className="grid p-nogutter">
+                      <div className="formgrid grid">
                         {currentFields.includes("displayName") && (
-                          <div className="md:col-6 sm:col-12">
-                            <div className="field">
-                              <label htmlFor="displayName" className="form-label form-field-label">
-                                Display Name
-                              </label>
-                              <InputText
-                                type="text"
-                                disabled={fieldMetaData?.id}
-                                id="displayName"
-                                name="displayName"
-                                onChange={(e) => {
-                                  formik.setFieldValue("displayName", e.target.value);
-                                  const { toCamelCase, toSnakeCase, toPluralCamelCase } = getSingularAndPlural(e.target.value);
-                                  formik.setFieldValue("name", toCamelCase);
-                                  if (showColumnName) {
-                                    formik.setFieldValue("columnName", toSnakeCase);
-                                  }
+                          <div className="field col-6 flex-flex-column gap-2">
+                            <label htmlFor="displayName" className="form-field-label">
+                              Display Name
+                            </label>
+                            <InputText
+                              type="text"
+                              disabled={fieldMetaData?.id}
+                              id="displayName"
+                              name="displayName"
+                              onChange={(e) => {
+                                formik.setFieldValue("displayName", e.target.value);
+                                const { toCamelCase, toSnakeCase, toPluralCamelCase } = getSingularAndPlural(e.target.value);
+                                formik.setFieldValue("name", toCamelCase);
+                                if (showColumnName) {
+                                  formik.setFieldValue("columnName", toSnakeCase);
+                                }
 
-                                }}
-                                value={formik.values.displayName}
-                                className={classNames("p-inputtext-sm w-full small-input", {
-                                  "p-invalid": isFormFieldValid(
-                                    formik,
-                                    "displayName"
-                                  ),
-                                })}
+                              }}
+                              value={formik.values.displayName}
+                              className={classNames("", {
+                                "p-invalid": isFormFieldValid(
+                                  formik,
+                                  "displayName"
+                                ),
+                              })}
+                            />
+                            {isFormFieldValid(formik, "displayName") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.displayName?.toString()}
                               />
-                              {isFormFieldValid(formik, "displayName") && (
-                                <Message
-                                  severity="error"
-                                  text={formik?.errors?.displayName?.toString()}
-                                />
-                              )}
-                            </div>
+                            )}
                           </div>
                         )}
 
 
                         {currentFields.includes("name") && (
-                          <div className="md:col-6 sm:col-12">
-                            <div className="field">
-                              <label htmlFor="name" className="form-label form-field-label">
-                                Name
-                              </label>
-                              <InputText
-                                disabled={fieldMetaData?.id}
-                                type="text"
-                                id="name"
-                                name="name"
-                                onChange={formik.handleChange}
-                                value={formik.values.name}
-                                className={classNames("p-inputtext-sm w-full small-input", {
-                                  "p-invalid": isFormFieldValid(formik, "name"),
-                                })}
+                          <div className="field col-6 flex-flex-column gap-2">
+                            <label htmlFor="name" className="form-field-label">
+                              Name
+                            </label>
+                            <InputText
+                              disabled={fieldMetaData?.id}
+                              type="text"
+                              id="name"
+                              name="name"
+                              onChange={formik.handleChange}
+                              value={formik.values.name}
+                              className={classNames("", {
+                                "p-invalid": isFormFieldValid(formik, "name"),
+                              })}
+                            />
+                            {isFormFieldValid(formik, "name") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.name?.toString()}
                               />
-                              {isFormFieldValid(formik, "name") && (
-                                <Message
-                                  severity="error"
-                                  text={formik?.errors?.name?.toString()}
-                                />
-                              )}
-                            </div>
+                            )}
                           </div>
                         )}
                         {currentFields.includes("description") && (
-                          <div className="md:col-6 sm:col-12">
-                            <div className="field">
-                              <label htmlFor="description" className="form-label form-field-label">
-                                Description
-                              </label>
-                              <InputTextarea
-                                aria-describedby="Description of your field"
-                                id="description"
-                                name="description"
-                                onChange={formik.handleChange}
-                                value={formik.values.description}
-                                rows={5}
-                                cols={30}
-                                className={classNames("p-inputtext-sm w-full", {
-                                  "p-invalid": isFormFieldValid(
-                                    formik,
-                                    "description"
-                                  ),
-                                })}
+                          <div className="field col-6 flex-flex-column gap-2 mt-4">
+                            <label htmlFor="description" className="form-field-label">
+                              Description
+                            </label>
+                            <InputTextarea
+                              aria-describedby="Description of your field"
+                              id="description"
+                              name="description"
+                              onChange={formik.handleChange}
+                              value={formik.values.description}
+                              rows={5}
+                              cols={30}
+                              className={classNames("", {
+                                "p-invalid": isFormFieldValid(
+                                  formik,
+                                  "description"
+                                ),
+                              })}
+                            />
+                            {isFormFieldValid(formik, "description") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.description?.toString()}
                               />
-                              {isFormFieldValid(formik, "description") && (
-                                <Message
-                                  severity="error"
-                                  text={formik?.errors?.description?.toString()}
-                                />
-                              )}
-                            </div>
+                            )}
                           </div>
                         )}
 
                         {currentFields.includes("columnName") && (
-                          <div className="md:col-6 sm:col-12">
-                            <div className="field mt-5">
-                              <div className="flex align-items-center">
+                          <div className="field col-6 mt-4">
+                            <div className="flex align-items-center gap-2">
+                              <Checkbox onChange={e => {
+                                setShowColumnName(e.checked);
+                                if (e.checked === true) {
+                                  const { toCamelCase, toSnakeCase, toPluralCamelCase } = getSingularAndPlural(formik.values.displayName);
+                                  if (pathname.includes('create')) {
+                                    formik.setFieldValue("columnName", toSnakeCase);
+                                  }
+                                }
 
-                                <div className="flex align-items-center">
-                                  <Checkbox onChange={e => {
-                                    setShowColumnName(e.checked);
-                                    if (e.checked === true) {
-                                      const { toCamelCase, toSnakeCase, toPluralCamelCase } = getSingularAndPlural(formik.values.displayName);
-                                      if (pathname.includes('create')) {
-                                        formik.setFieldValue("columnName", toSnakeCase);
-                                      }
-                                    }
-
-                                  }} checked={showColumnName}></Checkbox>
-                                  <label htmlFor="ingredient1" className="ml-2">
-                                    Set Column Name
-                                  </label>
-                                </div>
-                              </div>
+                              }} checked={showColumnName}></Checkbox>
+                              <label htmlFor="ingredient1" className="form-field-label">
+                                Set Column Name
+                              </label>
                             </div>
                             {showColumnName &&
-                              <div className="field mt-3">
-                                <label htmlFor="columnName" className="form-label form-field-label">
+                              <div className="field col-12 flex-flex-column gap-2 mt-4">
+                                <label htmlFor="columnName" className="form-field-label">
                                   Column Name
                                 </label>
                                 <InputText
@@ -1233,7 +1244,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   name="columnName"
                                   onChange={formik.handleChange}
                                   value={formik.values.columnName}
-                                  className={classNames("p-inputtext-sm w-full small-input", {
+                                  className={classNames("", {
                                     "p-invalid": isFormFieldValid(formik, "columnName"),
                                   })}
                                 />
@@ -1251,8 +1262,8 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
 
                         {/* {currentFields.includes("type") && (
                           <div className="md:col-6 sm:col-12">
-                            <div className="field">
-                              <label htmlFor="type" className="form-label form-field-label">
+                            <div className="field col-6 flex-flex-column gap-2">
+                              <label htmlFor="type" className="form-field-label">
                                 Type
                               </label>
                               <AutoComplete
@@ -1304,145 +1315,136 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                     //  rightIcon="pi pi-cog ml-2"
                     >
                       {formik?.values?.type?.length > 0 && (
-                        <div className="grid p-nogutter">
+                        <div className="formgrid grid">
                           {currentFields.includes("length") && (
-                            <div className="md:col-6 sm:col-12">
-                              <div className="field">
-                                <label htmlFor="length" className="form-label form-field-label">
-                                  Length
-                                </label>
-                                <InputNumber
-                                  // type="text"
-                                  id="length"
-                                  name="length"
-                                  onValueChange={formik.handleChange}
-                                  value={formik.values.length}
-                                  className={classNames("p-inputtext-sm w-full small-input", {
-                                    "p-invalid": isFormFieldValid(
-                                      formik,
-                                      "length"
-                                    ),
-                                  })}
+                            <div className="field col-6 flex-flex-column gap-2">
+                              <label htmlFor="length" className="form-field-label">
+                                Length
+                              </label>
+                              <InputNumber
+                                // type="text"
+                                id="length"
+                                name="length"
+                                onValueChange={formik.handleChange}
+                                value={formik.values.length}
+                                className={classNames("", {
+                                  "p-invalid": isFormFieldValid(
+                                    formik,
+                                    "length"
+                                  ),
+                                })}
+                              />
+                              {isFormFieldValid(formik, "length") && (
+                                <Message
+                                  severity="error"
+                                  text={formik?.errors?.length?.toString()}
                                 />
-                                {isFormFieldValid(formik, "length") && (
-                                  <Message
-                                    severity="error"
-                                    text={formik?.errors?.length?.toString()}
-                                  />
-                                )}
-                              </div>
+                              )}
                             </div>
                           )}
                           {currentFields.includes("defaultValue") && (
-                            <div className="md:col-6 sm:col-12">
-                              <div className="field">
-                                <label
-                                  htmlFor="defaultValue"
-                                  className="form-label form-field-label"
-                                >
-                                  Default Value
-                                </label>
-                                {/* <InputText
+                            <div className="field col-6 flex-flex-column gap-2">
+                              <label
+                                htmlFor="defaultValue"
+                                className="form-field-label"
+                              >
+                                Default Value
+                              </label>
+                              {/* <InputText
                                 type="text"
                                 id="defaultValue"
                                 name="defaultValue"
                                 onChange={formik.handleChange}
                                 value={formik.values.defaultValue}
-                                className={classNames("p-inputtext-sm w-full small-input", {
+                                className={classNames("", {
                                   "p-invalid": isFormFieldValid(
                                     formik,
                                     "defaultValue"
                                   ),
                                 })}
                               /> */}
-                                {(selectedType.value === "shortText" || selectedType.value === "longText" || selectedType.value === "richText" || selectedType.value === "json" || selectedType.value === "password" || selectedType.value === "selectionStatic") &&
-                                  <InputText
-                                    type="text"
-                                    id="defaultValue"
-                                    name="defaultValue"
-                                    onChange={formik.handleChange}
-                                    value={formik.values.defaultValue}
-                                    className={classNames("p-inputtext-sm w-full small-input", {
-                                      "p-invalid": isFormFieldValid(
-                                        formik,
-                                        "defaultValue"
-                                      ),
-                                    })}
-                                  />
-                                }
-                                {(selectedType.value === "float" || selectedType.value === "decimal") &&
-                                  <InputNumber
-                                    id="defaultValue"
-                                    name="defaultValue"
-                                    minFractionDigits={2}
-                                    maxFractionDigits={5}
-                                    value={formik.values.defaultValue}
-                                    onValueChange={(e) => formik.setFieldValue("defaultValue", e.value)}  // Ensure correct value change handling
-                                    className={classNames("p-inputtext-sm w-full small-input", {
-                                      "p-invalid": isFormFieldValid(formik, "defaultValue"),
-                                    })}
-                                  />
-                                }
-                                {(selectedType.value === "int" || selectedType.value === "bigint") &&
-                                  <InputNumber
-                                    id="defaultValue"
-                                    name="defaultValue"
-                                    value={formik.values.defaultValue}
-                                    onValueChange={(e) => formik.setFieldValue("defaultValue", e.value)}  // Ensure correct value change handling
-                                    className={classNames("p-inputtext-sm w-full small-input", {
-                                      "p-invalid": isFormFieldValid(formik, "defaultValue"),
-                                    })}
-                                  />
-                                }
-                                {selectedType.value === "boolean" &&
-                                  <SelectButton
-                                    value={formik.values.defaultValue ? formik.values.defaultValue : "false"}
-                                    onChange={(e) => formik.setFieldValue("defaultValue", e.value)} // Custom handling for boolean input
-                                    options={booleanOptions}
-                                    className={classNames("p-inputtext-sm w-full small-input flex boolean-switch", {
-                                      "p-invalid": isFormFieldValid(formik, "defaultValue"),
-                                    })}
-                                  />
-                                }
-                                {(selectedType.value === "date" || selectedType.value === "datetime" || selectedType.value === "time") &&
-                                  <Calendar
-                                    id="defaultValue"
-                                    name="defaultValue"
-                                    value={formik.values.defaultValue ? new Date(formik.values.defaultValue) : new Date()}
-                                    onChange={(e) => formik.setFieldValue("defaultValue", e.value)} // Use setFieldValue for proper handling
-                                    showTime={formik.values.type === "datetime"}  // Show time picker for datetime
-                                    timeOnly={formik.values.type === "time"}      // Time-only for time
-                                    dateFormat="yy-mm-dd"
-                                    hourFormat="24"                             // 24-hour format for time
-                                    className={classNames("p-inputtext-sm w-full small-input", {
-                                      "p-invalid": isFormFieldValid(formik, "defaultValue"),
-                                    })}
-                                  />
-                                }
-                                {isFormFieldValid(formik, "defaultValue") && (
-                                  <Message
-                                    severity="error"
-                                    text={formik?.errors?.defaultValue?.toString()}
-                                  />
-                                )}
-                              </div>
+                              {(selectedType.value === "shortText" || selectedType.value === "longText" || selectedType.value === "richText" || selectedType.value === "json" || selectedType.value === "password" || selectedType.value === "selectionStatic") &&
+                                <InputText
+                                  type="text"
+                                  id="defaultValue"
+                                  name="defaultValue"
+                                  onChange={formik.handleChange}
+                                  value={formik.values.defaultValue}
+                                  className={classNames("", {
+                                    "p-invalid": isFormFieldValid(
+                                      formik,
+                                      "defaultValue"
+                                    ),
+                                  })}
+                                />
+                              }
+                              {(selectedType.value === "float" || selectedType.value === "decimal") &&
+                                <InputNumber
+                                  id="defaultValue"
+                                  name="defaultValue"
+                                  minFractionDigits={2}
+                                  maxFractionDigits={5}
+                                  value={formik.values.defaultValue}
+                                  onValueChange={(e) => formik.setFieldValue("defaultValue", e.value)}  // Ensure correct value change handling
+                                  className={classNames("", {
+                                    "p-invalid": isFormFieldValid(formik, "defaultValue"),
+                                  })}
+                                />
+                              }
+                              {(selectedType.value === "int" || selectedType.value === "bigint") &&
+                                <InputNumber
+                                  id="defaultValue"
+                                  name="defaultValue"
+                                  value={formik.values.defaultValue}
+                                  onValueChange={(e) => formik.setFieldValue("defaultValue", e.value)}  // Ensure correct value change handling
+                                  className={classNames("", {
+                                    "p-invalid": isFormFieldValid(formik, "defaultValue"),
+                                  })}
+                                />
+                              }
+                              {selectedType.value === "boolean" &&
+                                <SelectButton
+                                  value={formik.values.defaultValue ? formik.values.defaultValue : "false"}
+                                  onChange={(e) => formik.setFieldValue("defaultValue", e.value)} // Custom handling for boolean input
+                                  options={booleanOptions}
+                                  className={classNames(" flex boolean-switch", {
+                                    "p-invalid": isFormFieldValid(formik, "defaultValue"),
+                                  })}
+                                />
+                              }
+                              {(selectedType.value === "date" || selectedType.value === "datetime" || selectedType.value === "time") &&
+                                <Calendar
+                                  id="defaultValue"
+                                  name="defaultValue"
+                                  value={formik.values.defaultValue ? new Date(formik.values.defaultValue) : new Date()}
+                                  onChange={(e) => formik.setFieldValue("defaultValue", e.value)} // Use setFieldValue for proper handling
+                                  showTime={formik.values.type === "datetime"}  // Show time picker for datetime
+                                  timeOnly={formik.values.type === "time"}      // Time-only for time
+                                  dateFormat="yy-mm-dd"
+                                  hourFormat="24"                             // 24-hour format for time
+                                  className={classNames("", {
+                                    "p-invalid": isFormFieldValid(formik, "defaultValue"),
+                                  })}
+                                />
+                              }
+                              {isFormFieldValid(formik, "defaultValue") && (
+                                <Message
+                                  severity="error"
+                                  text={formik?.errors?.defaultValue?.toString()}
+                                />
+                              )}
                             </div>
                           )}
 
-
-
-
-
                           {currentFields.includes("mediaTypes") && (
-                            <div className="md:col-6 sm:col-12">
-                              <div className="field">
-                                <label
-                                  htmlFor="mediaTypes"
-                                  className="form-label form-field-label"
-                                >
-                                  Media Type
-                                </label>
-                                {/* <MultipleSelectAutoCompleteField
+                            <div className="field col-6 flex-flex-column gap-2">
+                              <label
+                                htmlFor="mediaTypes"
+                                className="form-field-label"
+                              >
+                                Media Type
+                              </label>
+                              {/* <MultipleSelectAutoCompleteField
                                   key="mediaTypes"
                                   formik={formik}
                                   isFormFieldValid={isFormFieldValid}
@@ -1454,7 +1456,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   existingData={formik.values.mediaTypes}
                                 /> */}
 
-                                {/* {selectedType.value === "mediaSingle" &&
+                              {/* {selectedType.value === "mediaSingle" &&
                                   <SingleSelectAutoCompleteField
                                     key="mediaTypes"
                                     formik={formik}
@@ -1468,17 +1470,17 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   />
                                 } */}
 
-                                {isFormFieldValid(formik, "mediaTypes") && (
-                                  <Message
-                                    severity="error"
-                                    text={formik?.errors?.mediaTypes?.toString()}
-                                  />
-                                )}
-                                <MultiSelect value={formik.values.mediaTypes} onChange={(e) => formik.setFieldValue("mediaTypes", e.value)} options={mediaTypesOptions} optionLabel="label"
-                                  placeholder="Select Media Types" maxSelectedLabels={3} display="chip" className="p-inputtext-sm w-full small-input" />
+                              {isFormFieldValid(formik, "mediaTypes") && (
+                                <Message
+                                  severity="error"
+                                  text={formik?.errors?.mediaTypes?.toString()}
+                                />
+                              )}
+                              <MultiSelect value={formik.values.mediaTypes} onChange={(e) => formik.setFieldValue("mediaTypes", e.value)} options={mediaTypesOptions} optionLabel="label"
+                                placeholder="Select Media Types" maxSelectedLabels={3} display="chip" className="" />
 
 
-                                {/* <Dropdown
+                              {/* <Dropdown
                                   id="mediaTypes"
                                   name="mediaTypes"
                                   multiple
@@ -1488,7 +1490,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                     formik.setFieldValue("mediaTypes", e.value)
                                   }
                                   placeholder="Select a Media Type"
-                                  className={classNames("p-inputtext-sm w-full small-input", {
+                                  className={classNames("", {
                                     "p-invalid": isFormFieldValid(
                                       formik,
                                       "mediaTypes"
@@ -1497,127 +1499,119 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                 /> */}
 
 
-                              </div>
                             </div>
                           )}
                           {currentFields.includes("mediaMaxSizeKb") && (
-                            <div className="md:col-6 sm:col-12">
-                              <div className="field">
-                                <label
-                                  htmlFor="mediaMaxSizeKb"
-                                  className="form-label form-field-label"
-                                >
-                                  Media Max Size (Mb)
-                                </label>
-                                <InputNumber
-                                  id="mediaMaxSizeKb"
-                                  name="mediaMaxSizeKb"
-                                  onValueChange={formik.handleChange}
-                                  value={formik.values.mediaMaxSizeKb}
-                                  className={classNames("p-inputtext-sm w-full small-input", {
-                                    "p-invalid": isFormFieldValid(
-                                      formik,
-                                      "mediaMaxSizeKb"
-                                    ),
-                                  })}
-                                />
+                            <div className="field col-6 flex-flex-column gap-2">
+                              <label
+                                htmlFor="mediaMaxSizeKb"
+                                className="form-field-label"
+                              >
+                                Media Max Size (Mb)
+                              </label>
+                              <InputNumber
+                                id="mediaMaxSizeKb"
+                                name="mediaMaxSizeKb"
+                                onValueChange={formik.handleChange}
+                                value={formik.values.mediaMaxSizeKb}
+                                className={classNames("", {
+                                  "p-invalid": isFormFieldValid(
+                                    formik,
+                                    "mediaMaxSizeKb"
+                                  ),
+                                })}
+                              />
 
-                                {isFormFieldValid(formik, "mediaMaxSizeKb") && (
-                                  <Message
-                                    severity="error"
-                                    text={formik?.errors?.mediaMaxSizeKb?.toString()}
-                                  />
-                                )}
-                              </div>
+                              {isFormFieldValid(formik, "mediaMaxSizeKb") && (
+                                <Message
+                                  severity="error"
+                                  text={formik?.errors?.mediaMaxSizeKb?.toString()}
+                                />
+                              )}
                             </div>
                           )}
                           {currentFields.includes("mediaStorageProviderId") && (
-                            <div className="md:col-6 sm:col-12">
-                              <div className="field form-dropdown-select">
-                                <label
-                                  htmlFor="mediaStorageProviderId"
-                                  className="form-label form-field-label"
-                                >
-                                  Media  Storage Provider
-                                </label>
+                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                              <label
+                                htmlFor="mediaStorageProviderId"
+                                className="form-field-label"
+                              >
+                                Media  Storage Provider
+                              </label>
 
-                                <SingleSelectAutoCompleteField
-                                  key="mediaStorageProviderId"
-                                  formik={formik}
-                                  isFormFieldValid={isFormFieldValid}
-                                  relationField={true}
-                                  fieldName="mediaStorageProvider"
-                                  fieldNameId="mediaStorageProviderId"
-                                  labelKey="name"
-                                  valueKey="value"
-                                  searchData={searchMediaStorageProvIderId}
-                                  existingData={formik.values.mediaStorageProvider}
-                                />
+                              <SingleSelectAutoCompleteField
+                                key="mediaStorageProviderId"
+                                formik={formik}
+                                isFormFieldValid={isFormFieldValid}
+                                relationField={true}
+                                fieldName="mediaStorageProvider"
+                                fieldNameId="mediaStorageProviderId"
+                                labelKey="name"
+                                valueKey="value"
+                                searchData={searchMediaStorageProvIderId}
+                                existingData={formik.values.mediaStorageProvider}
+                              />
 
-                                {isFormFieldValid(
-                                  formik,
-                                  "mediaStorageProvider"
-                                ) && (
-                                    <Message
-                                      severity="error"
-                                      text={formik?.errors?.mediaStorageProviderId?.toString()}
-                                    />
-                                  )}
-                              </div>
+                              {isFormFieldValid(
+                                formik,
+                                "mediaStorageProvider"
+                              ) && (
+                                  <Message
+                                    severity="error"
+                                    text={formik?.errors?.mediaStorageProviderId?.toString()}
+                                  />
+                                )}
                             </div>
                           )}
 
                           {currentFields.includes("mediaEmbedded") && (
-                            <div className="md:col-6 sm:col-12">
-                              <div className="field">
-                                <label
-                                  htmlFor="mediaEmbedded"
-                                  className="form-label form-field-label"
-                                >
-                                  Media Embedded
-                                </label>
-                                {/* <InputText
+                            <div className="field col-6 flex-flex-column gap-2">
+                              <label
+                                htmlFor="mediaEmbedded"
+                                className="form-field-label"
+                              >
+                                Media Embedded
+                              </label>
+                              {/* <InputText
                                 type="text"
                                 id="mediaEmbedded"
                                 name="mediaEmbedded"
                                 onChange={formik.handleChange}
                                 value={formik.values.mediaEmbedded}
-                                className={classNames("p-inputtext-sm w-full small-input", {
+                                className={classNames("", {
                                   "p-invalid": isFormFieldValid(
                                     formik,
                                     "mediaEmbedded"
                                   ),
                                 })}
                               /> */}
-                                <SelectButton
-                                  value={formik.values.mediaEmbedded}
-                                  // onChange={formik.handleChange}
-                                  onChange={(e) => {
-                                    formik.setFieldValue("mediaEmbedded", e.value);
-                                  }}
-                                  options={booleanOptions}
-                                  className={classNames("p-inputtext-sm w-full small-input flex boolean-switch", {
-                                    "p-invalid": isFormFieldValid(
-                                      formik,
-                                      "mediaEmbedded"
-                                    ),
-                                  })}
+                              <SelectButton
+                                value={formik.values.mediaEmbedded}
+                                // onChange={formik.handleChange}
+                                onChange={(e) => {
+                                  formik.setFieldValue("mediaEmbedded", e.value);
+                                }}
+                                options={booleanOptions}
+                                className={classNames(" flex boolean-switch", {
+                                  "p-invalid": isFormFieldValid(
+                                    formik,
+                                    "mediaEmbedded"
+                                  ),
+                                })}
+                              />
+                              {isFormFieldValid(formik, "mediaEmbedded") && (
+                                <Message
+                                  severity="error"
+                                  text={formik?.errors?.mediaEmbedded?.toString()}
                                 />
-                                {isFormFieldValid(formik, "mediaEmbedded") && (
-                                  <Message
-                                    severity="error"
-                                    text={formik?.errors?.mediaEmbedded?.toString()}
-                                  />
-                                )}
-                              </div>
+                              )}
                             </div>
                           )}
                           {currentFields.includes("relationType") && (
-                            <div className="md:col-6 sm:col-12">
-                              <div className="field">
-                                {/* <label
+                            <div className="field col-6 flex-flex-column gap-2">
+                              {/* <label
                                   htmlFor="relationType"
-                                  className="form-label form-field-label"
+                                  className="form-field-label"
                                 >
                                   Relation Type
                                 </label>
@@ -1630,7 +1624,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                     formik.setFieldValue("relationType", e.value)
                                   }
                                   placeholder="Select a Data Source"
-                                  className={classNames("p-inputtext-sm w-full small-input", {
+                                  className={classNames("", {
                                     "p-invalid": isFormFieldValid(
                                       formik,
                                       "relationType"
@@ -1638,25 +1632,25 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   })}
                                 /> */}
 
-                                <label
-                                  htmlFor="relationType"
-                                  className="form-label form-field-label "
-                                >
-                                  Relation Type
-                                </label>
-                                <SelectButton
-                                  value={formik.values.relationType}
-                                  options={fieldDefaultMetaData.data.relationTypes}
-                                  onChange={(e) =>
-                                    formik.setFieldValue("relationType", e.value)
-                                  }
-                                  className={classNames("p-inputtext-sm w-full small-input flex boolean-switch", {
-                                    "p-invalid": isFormFieldValid(formik, "relationType"),
-                                  })}
-                                  optionLabel="label"
-                                />
+                              <label
+                                htmlFor="relationType"
+                                className="form-field-label "
+                              >
+                                Relation Type
+                              </label>
+                              <SelectButton
+                                value={formik.values.relationType}
+                                options={fieldDefaultMetaData.data.relationTypes}
+                                onChange={(e) =>
+                                  formik.setFieldValue("relationType", e.value)
+                                }
+                                className={classNames(" flex boolean-switch", {
+                                  "p-invalid": isFormFieldValid(formik, "relationType"),
+                                })}
+                                optionLabel="label"
+                              />
 
-                                {/* <div className="align-items-center">
+                              {/* <div className="align-items-center">
                                   <div className="flex mt-3">
                                     {fieldDefaultMetaData?.data?.relationTypes.map((i: any) => (
                                       <div key={i.value} className="mr-3">
@@ -1667,162 +1661,152 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                           onChange={(e) => formik.setFieldValue("relationType", e.value)}
                                           checked={formik.values.relationType === i.value}
                                         />
-                                        <label htmlFor="ingredient1" className="form-label form-field-label ml-2">{i.value}</label>
+                                        <label htmlFor="ingredient1" className="form-field-label ml-2">{i.value}</label>
                                       </div>
                                     ))}
                                   </div>
                                 </div> */}
 
-                                {isFormFieldValid(formik, "relationType") && (
-                                  <Message
-                                    severity="error"
-                                    text={formik?.errors?.relationType?.toString()}
-                                  />
-                                )}
-                              </div>
+                              {isFormFieldValid(formik, "relationType") && (
+                                <Message
+                                  severity="error"
+                                  text={formik?.errors?.relationType?.toString()}
+                                />
+                              )}
                             </div>
                           )}
                           {currentFields.includes("relationType") && formik.values.relationType === "many-to-one" && (
-                            <div className="md:col-6 sm:col-12">
-                              <div className="field">
-                                <label
-                                  htmlFor="relationCascade"
-                                  className="form-label form-field-label"
-                                >
-                                  Relation Cascade
-                                </label>
-                                <Dropdown
-                                  id="relationCascade"
-                                  name="relationCascade"
-                                  value={formik.values.relationCascade}
-                                  options={fieldDefaultMetaData.data.cascadeTypes}
-                                  onChange={(e) =>
-                                    formik.setFieldValue(
-                                      "relationCascade",
-                                      e.value
-                                    )
-                                  }
-                                  placeholder="Cascade"
-                                  className={classNames("small-input p-inputtext-sm w-full", {
-                                    "p-invalid": isFormFieldValid(
-                                      formik,
-                                      "relationCascade"
-                                    ),
-                                  })}
+                            <div className="field col-6 flex-flex-column gap-2">
+                              <label
+                                htmlFor="relationCascade"
+                                className="form-field-label"
+                              >
+                                Relation Cascade
+                              </label>
+                              <Dropdown
+                                id="relationCascade"
+                                name="relationCascade"
+                                value={formik.values.relationCascade}
+                                options={fieldDefaultMetaData.data.cascadeTypes}
+                                onChange={(e) =>
+                                  formik.setFieldValue(
+                                    "relationCascade",
+                                    e.value
+                                  )
+                                }
+                                placeholder="Cascade"
+                                className={classNames("small-input p-inputtext-sm w-full", {
+                                  "p-invalid": isFormFieldValid(
+                                    formik,
+                                    "relationCascade"
+                                  ),
+                                })}
+                              />
+                              {isFormFieldValid(formik, "relationCascade") && (
+                                <Message
+                                  severity="error"
+                                  text={formik?.errors?.relationCascade?.toString()}
                                 />
-                                {isFormFieldValid(formik, "relationCascade") && (
-                                  <Message
-                                    severity="error"
-                                    text={formik?.errors?.relationCascade?.toString()}
-                                  />
-                                )}
-                              </div>
+                              )}
                             </div>
                           )}
 
 
                           {currentFields.includes("relationModelFieldName") && formik.values.relationType === "many-to-many" && (
-                            <div className="md:col-6 sm:col-12">
-                              <div className="field">
-                                <label
-                                  htmlFor="relationModelFieldName"
-                                  className="form-label form-field-label"
-                                >
-                                  Relation Model Field Name
-                                </label>
-                                <InputText
-                                  type="text"
-                                  id="relationModelFieldName"
-                                  name="relationModelFieldName"
-                                  onChange={formik.handleChange}
-                                  value={formik.values.relationModelFieldName}
-                                  className={classNames("p-inputtext-sm w-full small-input", {
-                                    "p-invalid": isFormFieldValid(
-                                      formik,
-                                      "relationModelFieldName"
-                                    ),
-                                  })}
+                            <div className="field col-6 flex-flex-column gap-2">
+                              <label
+                                htmlFor="relationModelFieldName"
+                                className="form-field-label"
+                              >
+                                Relation Model Field Name
+                              </label>
+                              <InputText
+                                type="text"
+                                id="relationModelFieldName"
+                                name="relationModelFieldName"
+                                onChange={formik.handleChange}
+                                value={formik.values.relationModelFieldName}
+                                className={classNames("", {
+                                  "p-invalid": isFormFieldValid(
+                                    formik,
+                                    "relationModelFieldName"
+                                  ),
+                                })}
+                              />
+                              {isFormFieldValid(formik, "relationModelFieldName") && (
+                                <Message
+                                  severity="error"
+                                  text={formik?.errors?.relationModelFieldName?.toString()}
                                 />
-                                {isFormFieldValid(formik, "relationModelFieldName") && (
-                                  <Message
-                                    severity="error"
-                                    text={formik?.errors?.relationModelFieldName?.toString()}
-                                  />
-                                )}
+                              )}
 
-                              </div>
                             </div>
                           )}
 
 
                           {currentFields.includes("relationCreateInverse") && formik.values.relationType === "many-to-many" && (
-                            <div className="md:col-6 sm:col-12">
-                              <div className="field">
-                                <label
-                                  htmlFor="relationCreateInverse"
-                                  className="form-label form-field-label"
-                                >
-                                  Relation Create Inverse
-                                </label>
-                                <Dropdown
-                                  id="relationCreateInverse"
-                                  name="relationCreateInverse"
-                                  value={formik.values.relationCreateInverse}
-                                  options={relationCreateInverses}
-                                  onChange={(e) =>
-                                    formik.setFieldValue(
-                                      "relationCreateInverse",
-                                      e.value
-                                    )
-                                  }
-                                  placeholder="Select a Data Source"
-                                  className={classNames("p-inputtext-sm w-full small-input", {
-                                    "p-invalid": isFormFieldValid(
-                                      formik,
-                                      "relationCreateInverse"
-                                    ),
-                                  })}
-                                />
-                                {isFormFieldValid(
-                                  formik,
-                                  "relationCreateInverse"
-                                ) && (
-                                    <Message
-                                      severity="error"
-                                      text={formik?.errors?.relationCreateInverse?.toString()}
-                                    />
-                                  )}
-                              </div>
+                            <div className="field col-6 flex-flex-column gap-2">
+                              <label
+                                htmlFor="relationCreateInverse"
+                                className="form-field-label"
+                              >
+                                Relation Create Inverse
+                              </label>
+                              <Dropdown
+                                id="relationCreateInverse"
+                                name="relationCreateInverse"
+                                value={formik.values.relationCreateInverse}
+                                options={relationCreateInverses}
+                                onChange={(e) =>
+                                  formik.setFieldValue(
+                                    "relationCreateInverse",
+                                    e.value
+                                  )
+                                }
+                                placeholder="Select a Data Source"
+                                className={classNames("", {
+                                  "p-invalid": isFormFieldValid(
+                                    formik,
+                                    "relationCreateInverse"
+                                  ),
+                                })}
+                              />
+                              {isFormFieldValid(
+                                formik,
+                                "relationCreateInverse"
+                              ) && (
+                                  <Message
+                                    severity="error"
+                                    text={formik?.errors?.relationCreateInverse?.toString()}
+                                  />
+                                )}
                             </div>
                           )}
 
 
-                          <div className="md:col-12 sm:col-12">
-                            <div className="grid p-nogutter">
-                              {currentFields.includes("relationModelModuleName") && (
-                                <div className="md:col-6 sm:col-12">
-                                  <div className="field">
-                                    <label
-                                      htmlFor="relationModelModuleName"
-                                      className="form-label form-field-label"
-                                    >
-                                      Relation Model Module Name
-                                    </label>
+                          {currentFields.includes("relationModelModuleName") && (
+                            <div className="field col-6 flex-flex-column gap-2">
+                              <label
+                                htmlFor="relationModelModuleName"
+                                className="form-field-label"
+                              >
+                                Relation Model Module Name
+                              </label>
 
-                                    <SingleSelectAutoCompleteField
-                                      key="relationModelModuleName"
-                                      formik={formik}
-                                      isFormFieldValid={isFormFieldValid}
-                                      fieldName="relationModelModuleName"
-                                      fieldNameId="relationModelModuleName"
-                                      labelKey="name"
-                                      valueKey="name"
-                                      searchData={searchRelationModelModuleNames}
-                                      existingData={formik.values.relationModelModuleName}
-                                      additionalAction={(e: any) => formik.setFieldValue("relationModelSingularName", "")}
-                                    />
+                              <SingleSelectAutoCompleteField
+                                key="relationModelModuleName"
+                                formik={formik}
+                                isFormFieldValid={isFormFieldValid}
+                                fieldName="relationModelModuleName"
+                                fieldNameId="relationModelModuleName"
+                                labelKey="name"
+                                valueKey="name"
+                                searchData={searchRelationModelModuleNames}
+                                existingData={formik.values.relationModelModuleName}
+                                additionalAction={(e: any) => formik.setFieldValue("relationModelSingularName", "")}
+                              />
 
-                                    {/* <AutoComplete
+                              {/* <AutoComplete
                                   value={selectedRelationModelModuleName}
                                   suggestions={filteredRelationModelModuleNames}
                                   invalid={isFormFieldValid(
@@ -1843,101 +1827,92 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   }}
                                 /> */}
 
-                                    {isFormFieldValid(
-                                      formik,
-                                      "relationModelModuleName"
-                                    ) && (
-                                        <Message
-                                          severity="error"
-                                          text={formik?.errors?.relationModelModuleName?.toString()}
-                                        />
-                                      )}
-                                  </div>
-                                </div>
-                              )}
-
-                              {currentFields.includes(
-                                "relationModelSingularName"
+                              {isFormFieldValid(
+                                formik,
+                                "relationModelModuleName"
                               ) && (
-                                  <div className="md:col-6 sm:col-12">
-                                    <div className="field">
-                                      <label
-                                        htmlFor="relationModelSingularName"
-                                        className="form-label form-field-label"
-                                      >
-                                        Relation Model Singular Name
-                                      </label>
+                                  <Message
+                                    severity="error"
+                                    text={formik?.errors?.relationModelModuleName?.toString()}
+                                  />
+                                )}
+                            </div>
+                          )}
+
+                          {currentFields.includes(
+                            "relationModelSingularName"
+                          ) && (
+                              <div className="field col-6 flex-flex-column gap-2">
+                                <label
+                                  htmlFor="relationModelSingularName"
+                                  className="form-field-label"
+                                >
+                                  Relation Model Singular Name
+                                </label>
 
 
-                                      <SingleSelectAutoCompleteField
-                                        key="relationModelSingularName"
-                                        formik={formik}
-                                        isFormFieldValid={isFormFieldValid}
-                                        fieldName="relationModelSingularName"
-                                        fieldNameId="relationModelSingularName"
-                                        labelKey="displayName"
-                                        valueKey="singularName"
-                                        searchData={searchRelationModelSingularNames}
-                                        existingData={formik.values.relationModelSingularName}
-                                      />
+                                <SingleSelectAutoCompleteField
+                                  key="relationModelSingularName"
+                                  formik={formik}
+                                  isFormFieldValid={isFormFieldValid}
+                                  fieldName="relationModelSingularName"
+                                  fieldNameId="relationModelSingularName"
+                                  labelKey="displayName"
+                                  valueKey="singularName"
+                                  searchData={searchRelationModelSingularNames}
+                                  existingData={formik.values.relationModelSingularName}
+                                />
 
-                                      {/* <InputText
+                                {/* <InputText
                                         type="text"
                                         id="relationModelSingularName"
                                         name="relationModelSingularName"
                                         onChange={formik.handleChange}
                                         value={formik.values.relationModelSingularName}
-                                        className={classNames("p-inputtext-sm w-full small-input", {
+                                        className={classNames("", {
                                           "p-invalid": isFormFieldValid(
                                             formik,
                                             "relationModelSingularName"
                                           ),
                                         })}
                                       /> */}
-                                      {isFormFieldValid(
-                                        formik,
-                                        "relationModelSingularName"
-                                      ) && (
-                                          <Message
-                                            severity="error"
-                                            text={formik?.errors?.relationModelSingularName?.toString()}
-                                          />
-                                        )}
-                                    </div>
-                                  </div>
-                                )}
-
-
-                            </div>
-                          </div>
-
+                                {isFormFieldValid(
+                                  formik,
+                                  "relationModelSingularName"
+                                ) && (
+                                    <Message
+                                      severity="error"
+                                      text={formik?.errors?.relationModelSingularName?.toString()}
+                                    />
+                                  )}
+                              </div>
+                            )}
 
                           {currentFields.includes("selectionDynamicProvider") && (
-                            <div className="md:col-6 sm:col-12">
-                              <div className="field">
-                                <label
-                                  htmlFor="selectionDynamicProvider"
-                                  className="form-label form-field-label"
-                                >
-                                  Selection Dynamic Provider
-                                </label>
+                            <div className="field col-6 flex-flex-column gap-2">
+                              <label
+                                htmlFor="selectionDynamicProvider"
+                                className="form-field-label"
+                              >
+                                Selection Dynamic Provider
+                              </label>
 
-                                <SingleSelectAutoCompleteField
-                                  key="selectionDynamicProvider"
-                                  formik={formik}
-                                  isFormFieldValid={isFormFieldValid}
-                                  // relationField={false}
-                                  fieldName="selectionDynamicProvider"
-                                  fieldNameId={null}
-                                  labelKey="label"
-                                  valueKey="value"
-                                  searchData={searchSelectionDynamicProvider}
-                                  existingData={formik.values.selectionDynamicProvider}
-                                  additionalAction={(e: any) => setMarkdownText(e.target.value.help)}
-                                />
+                              <SingleSelectAutoCompleteField
+                                key="selectionDynamicProvider"
+                                formik={formik}
+                                isFormFieldValid={isFormFieldValid}
+                                // relationField={false}
+                                fieldName="selectionDynamicProvider"
+                                fieldNameId={null}
+                                labelKey="label"
+                                valueKey="value"
+                                searchData={searchSelectionDynamicProvider}
+                                existingData={formik.values.selectionDynamicProvider}
+                                additionalAction={(e: any) => setMarkdownText(e.target.value.help)}
+                              />
 
 
-                                {/* <AutoComplete
+                              {/* <AutoComplete
                                   value={selectionDynamicProvider}
                                   suggestions={filteredSelectionDynamicProvider}
                                   invalid={isFormFieldValid(
@@ -1958,69 +1933,65 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   }}
                                 /> */}
 
-                                {isFormFieldValid(
-                                  formik,
-                                  "selectionDynamicProvider"
-                                ) && (
-                                    <Message
-                                      severity="error"
-                                      text={formik?.errors?.selectionDynamicProvider?.toString()}
-                                    />
-                                  )}
-                              </div>
+                              {isFormFieldValid(
+                                formik,
+                                "selectionDynamicProvider"
+                              ) && (
+                                  <Message
+                                    severity="error"
+                                    text={formik?.errors?.selectionDynamicProvider?.toString()}
+                                  />
+                                )}
                             </div>
                           )}
                           {currentFields.includes("selectionValueType") && (
-                            <div className="md:col-6 sm:col-12">
-                              <div className="field form-dropdown-select">
-                                <label
-                                  htmlFor="selectionValueType"
-                                  className="form-label form-field-label"
-                                >
-                                  Selection Value Type
-                                </label>
-                                <Dropdown
-                                  id="selectionValueType"
-                                  name="selectionValueType"
-                                  value={formik.values.selectionValueType}
-                                  options={selctionValueTypes}
-                                  onChange={(e) =>
-                                    formik.setFieldValue(
-                                      "selectionValueType",
-                                      e.value
-                                    )
-                                  }
-                                  placeholder="Select a Data Source"
-                                  className={classNames("p-inputtext-sm w-full small-input", {
-                                    "p-invalid": isFormFieldValid(
-                                      formik,
-                                      "selectionValueType"
-                                    ),
-                                  })}
-                                />
-                                {isFormFieldValid(
-                                  formik,
-                                  "selectionValueType"
-                                ) && (
-                                    <Message
-                                      severity="error"
-                                      text={formik?.errors?.selectionValueType?.toString()}
-                                    />
-                                  )}
-                              </div>
+                            <div className="field col-6 flex-flex-column gap-2">
+                              <label
+                                htmlFor="selectionValueType"
+                                className="form-field-label"
+                              >
+                                Selection Value Type
+                              </label>
+                              <Dropdown
+                                id="selectionValueType"
+                                name="selectionValueType"
+                                value={formik.values.selectionValueType}
+                                options={selctionValueTypes}
+                                onChange={(e) =>
+                                  formik.setFieldValue(
+                                    "selectionValueType",
+                                    e.value
+                                  )
+                                }
+                                placeholder="Select a Data Source"
+                                className={classNames("", {
+                                  "p-invalid": isFormFieldValid(
+                                    formik,
+                                    "selectionValueType"
+                                  ),
+                                })}
+                              />
+                              {isFormFieldValid(
+                                formik,
+                                "selectionValueType"
+                              ) && (
+                                  <Message
+                                    severity="error"
+                                    text={formik?.errors?.selectionValueType?.toString()}
+                                  />
+                                )}
                             </div>
                           )}
 
                           {currentFields.includes("selectionStaticValues") && (
-                            <div className="md:col-6 sm:col-12">
-                              <div className="field">
-                                <label
-                                  htmlFor="selectionStaticValues"
-                                  className="form-label form-field-label"
-                                >
-                                  Selection Static Values
-                                </label>
-                                {/* <InputTextarea
+                            <div className="field col-6 flex-flex-column gap-2">
+                              <label
+                                htmlFor="selectionStaticValues"
+                                className="form-field-label"
+                              >
+                                Selection Static Values
+                              </label>
+                              {/* <InputTextarea
                                   value={selectionStaticValues}
                                   placeholder="male:Male"
                                   onChange={(e) => {
@@ -2037,54 +2008,52 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   rows={5}
                                   cols={30}
                                 /> */}
-                                {formik.values.selectionStaticValues.map((enumValue: string, index: number) => (
-                                  <SelectionStaticValues
-                                    key={index}
-                                    enumValue={enumValue}
-                                    onUpdate={(updatedString: any) => updateEnumValues(index, updatedString)}
-                                    onDelete={() => deleteEnumValue(index)}
-                                    onAdd={addEnumValue}
+                              {formik.values.selectionStaticValues.map((enumValue: string, index: number) => (
+                                <SelectionStaticValues
+                                  key={index}
+                                  enumValue={enumValue}
+                                  onUpdate={(updatedString: any) => updateEnumValues(index, updatedString)}
+                                  onDelete={() => deleteEnumValue(index)}
+                                  onAdd={addEnumValue}
+                                />
+                              ))
+                              }
+                              {isFormFieldValid(
+                                formik,
+                                "selectionStaticValues"
+                              ) && (
+                                  <Message
+                                    severity="error"
+                                    text={formik?.errors?.selectionStaticValues?.toString()}
                                   />
-                                ))
-                                }
-                                {isFormFieldValid(
-                                  formik,
-                                  "selectionStaticValues"
-                                ) && (
-                                    <Message
-                                      severity="error"
-                                      text={formik?.errors?.selectionStaticValues?.toString()}
-                                    />
-                                  )}
-                              </div>
+                                )}
                             </div>
                           )}
                           {currentFields.includes("computedFieldValueType") && (
-                            <div className="md:col-6 sm:col-12">
-                              <div className="field">
-                                <label
-                                  htmlFor="computedFieldValueType"
-                                  className="form-label form-field-label"
-                                >
-                                  Computed Field Value Type
-                                </label>
-                                <AutoComplete
+                            <div className="field col-6 flex-flex-column gap-2">
+                              <label
+                                htmlFor="computedFieldValueType"
+                                className="form-field-label"
+                              >
+                                Computed Field Value Type
+                              </label>
+                              <AutoComplete
 
-                                  value={selectedComputedFieldValueType}
-                                  invalid={isFormFieldValid(formik, "computedFieldValueType")}
-                                  suggestions={filteredComputedFieldValueTypes}
-                                  completeMethod={searchComputedFieldValueType}
-                                  virtualScrollerOptions={{ itemSize: 38 }}
-                                  field="label"
-                                  dropdown
-                                  className="small-input"
-                                  onChange={(e) => {
-                                    setSelectedComputedFieldValueType(e.value);
-                                    formik.setFieldValue("computedFieldValueType", e.value.value);
-                                  }}
-                                />
+                                value={selectedComputedFieldValueType}
+                                invalid={isFormFieldValid(formik, "computedFieldValueType")}
+                                suggestions={filteredComputedFieldValueTypes}
+                                completeMethod={searchComputedFieldValueType}
+                                virtualScrollerOptions={{ itemSize: 38 }}
+                                field="label"
+                                dropdown
+                                className="small-input"
+                                onChange={(e) => {
+                                  setSelectedComputedFieldValueType(e.value);
+                                  formik.setFieldValue("computedFieldValueType", e.value.value);
+                                }}
+                              />
 
-                                {/* <Dropdown
+                              {/* <Dropdown
                                 id="mediaTypes"
                                 name="mediaTypes"
                                 value={formik.values.mediaTypes}
@@ -2093,80 +2062,77 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   formik.setFieldValue("mediaTypes", e.value)
                                 }
                                 placeholder="Select a Data Source"
-                                className={classNames("p-inputtext-sm w-full small-input", {
+                                className={classNames("", {
                                   "p-invalid": isFormFieldValid(
                                     formik,
                                     "mediaTypes"
                                   ),
                                 })}
                               /> */}
-                                {isFormFieldValid(formik, "computedFieldValueType") && (
-                                  <Message
-                                    severity="error"
-                                    text={formik?.errors?.computedFieldValueType?.toString()}
-                                  />
-                                )}
-                              </div>
+                              {isFormFieldValid(formik, "computedFieldValueType") && (
+                                <Message
+                                  severity="error"
+                                  text={formik?.errors?.computedFieldValueType?.toString()}
+                                />
+                              )}
                             </div>
                           )}
 
                           {currentFields.includes(
                             "computedFieldValueProvider"
                           ) && (
-                              <div className="md:col-6 sm:col-12">
-                                <div className="field">
-                                  <label
-                                    htmlFor="computedFieldValueProvider"
-                                    className="form-label form-field-label"
-                                  >
-                                    Computed Field Provider
-                                  </label>
+                              <div className="field col-6 flex-flex-column gap-2">
+                                <label
+                                  htmlFor="computedFieldValueProvider"
+                                  className="form-field-label"
+                                >
+                                  Computed Field Provider
+                                </label>
 
-                                  <SingleSelectAutoCompleteField
-                                    key="computedFieldValueProvider"
-                                    formik={formik}
-                                    isFormFieldValid={isFormFieldValid}
-                                    // relationField={false}
-                                    fieldName="computedFieldValueProvider"
-                                    fieldNameId={null}
-                                    labelKey="label"
-                                    valueKey="value"
-                                    searchData={searchComputedProvider}
-                                    existingData={formik.values.computedFieldValueProvider}
-                                    additionalAction={(e: any) => setMarkdownText(e.target.value.help)}
+                                <SingleSelectAutoCompleteField
+                                  key="computedFieldValueProvider"
+                                  formik={formik}
+                                  isFormFieldValid={isFormFieldValid}
+                                  // relationField={false}
+                                  fieldName="computedFieldValueProvider"
+                                  fieldNameId={null}
+                                  labelKey="label"
+                                  valueKey="value"
+                                  searchData={searchComputedProvider}
+                                  existingData={formik.values.computedFieldValueProvider}
+                                  additionalAction={(e: any) => setMarkdownText(e.target.value.help)}
 
-                                  />
-                                  {/* <InputText
+                                />
+                                {/* <InputText
                                     type="text"
                                     id="computedFieldValueProvider"
                                     name="computedFieldValueProvider"
                                     onChange={formik.handleChange}
                                     value={formik.values.computedFieldValueProvider}
-                                    className={classNames("p-inputtext-sm w-full small-input", {
+                                    className={classNames("", {
                                       "p-invalid": isFormFieldValid(
                                         formik,
                                         "computedFieldValueProvider"
                                       ),
                                     })}
                                   /> */}
-                                  {isFormFieldValid(
-                                    formik,
-                                    "computedFieldValueProvider"
-                                  ) && (
-                                      <Message
-                                        severity="error"
-                                        text={formik?.errors?.computedFieldValueProvider?.toString()}
-                                      />
-                                    )}
-                                </div>
+                                {isFormFieldValid(
+                                  formik,
+                                  "computedFieldValueProvider"
+                                ) && (
+                                    <Message
+                                      severity="error"
+                                      text={formik?.errors?.computedFieldValueProvider?.toString()}
+                                    />
+                                  )}
                               </div>
                             )}
                           {/* {currentFields.includes("externalIdProvider") && (
                             <div className="md:col-6 sm:col-12">
-                              <div className="field">
+                              <div className="field col-6 flex-flex-column gap-2">
                                 <label
                                   htmlFor="externalIdProvider"
-                                  className="form-label form-field-label"
+                                  className="form-field-label"
                                 >
                                   External Id Provider
                                 </label>
@@ -2199,98 +2165,72 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                           )} */}
 
                           {currentFields.includes("selectionDynamicProviderCtxt") && (
-                            <div className="md:col-12 sm:col-12">
+                            // {/* {markdownText &&
+                            //       <div className="md:col-12 sm:col-12">
+                            //         <div className="field col-6 flex-flex-column gap-2">
+                            //           <label htmlFor="name" className="form-field-label">
+                            //             Markdown
+                            //           </label>
+                            //           <MarkdownViewer data={markdownText}></MarkdownViewer>
+                            //         </div>
+                            //       </div>
+                            //     } */}
 
-                              <div className="grid p-nogutter">
-                                {/* {markdownText &&
-                                  <div className="md:col-12 sm:col-12">
-                                    <div className="field">
-                                      <label htmlFor="name" className="form-label form-field-label">
-                                        Markdown
-                                      </label>
-                                      <MarkdownViewer data={markdownText}></MarkdownViewer>
-                                    </div>
-                                  </div>
-                                } */}
+                            <div className="field col-12 flex-flex-column gap-2 mt-4">
+                              <label htmlFor="selectionDynamicProviderCtxt" className="form-field-label">
+                                Selection Dynamic Provider Context
+                              </label>
+                              <CodeEditor
+                                formik={formik}
+                                field="selectionDynamicProviderCtxt" >
+                              </CodeEditor>
+                              <div className=" form-field-label  mt-4">{markdownText}</div>
 
-                                <div className="md:col-12 sm:col-12">
-                                  <div className="field">
-                                    <label htmlFor="selectionDynamicProviderCtxt" className="form-label form-field-label">
-                                      Selection Dynamic Provider Context
-                                    </label>
-                                    <CodeEditor
-                                      formik={formik}
-                                      field="selectionDynamicProviderCtxt" >
-                                    </CodeEditor>
-                                    <div className=" form-field-label  mt-4">{markdownText}</div>
-
-                                    {isFormFieldValid(
-                                      formik,
-                                      "selectionDynamicProviderCtxt"
-                                    ) && (
-                                        <Message
-                                          severity="error"
-                                          text={formik?.errors?.selectionDynamicProviderCtxt?.toString()}
-                                        />
-                                      )}
-                                  </div>
-                                </div>
-                                {/* {currentFields.includes("markdown") && ( */}
-
-                              </div>
+                              {isFormFieldValid(
+                                formik,
+                                "selectionDynamicProviderCtxt"
+                              ) && (
+                                  <Message
+                                    severity="error"
+                                    text={formik?.errors?.selectionDynamicProviderCtxt?.toString()}
+                                  />
+                                )}
                             </div>
+                            // {/* {currentFields.includes("markdown") && ( */}
+
                           )}
 
                           {currentFields.includes("computedFieldValueProviderCtxt") && (
-                            <div className="md:col-12 sm:col-12">
+                            <div className="field col-12 flex-flex-column gap-2 mt-4">
+                              <label htmlFor="computedFieldValueProviderCtxt" className="form-field-label">
+                                Computed Field Value Provider Context
+                              </label>
+                              <CodeEditor
+                                formik={formik}
+                                field="computedFieldValueProviderCtxt" >
+                              </CodeEditor>
+                              <div className="form-field-label mt-4">{markdownText}</div>
 
-                              <div className="grid p-nogutter">
-                                {/* {markdownText &&
-                                  <div className="md:col-12 sm:col-12">
-                                    <div className="field">
-                                      <label htmlFor="name" className="form-label form-field-label">
-                                        Markdown
-                                      </label>
-                                      <MarkdownViewer data={markdownText}></MarkdownViewer>
-                                    </div>
-                                  </div>
-                                } */}
-                                <div className="md:col-12 sm:col-12">
-                                  <div className="field">
-                                    <label htmlFor="computedFieldValueProviderCtxt" className="form-label form-field-label">
-                                      Computed Field Value Provider Context
-                                    </label>
-                                    <CodeEditor
-                                      formik={formik}
-                                      field="computedFieldValueProviderCtxt" >
-                                    </CodeEditor>
-                                    <div className="form-field-label mt-4">{markdownText}</div>
-
-                                    {isFormFieldValid(
-                                      formik,
-                                      "computedFieldValueProviderCtxt"
-                                    ) && (
-                                        <Message
-                                          severity="error"
-                                          text={formik?.errors?.computedFieldValueProviderCtxt?.toString()}
-                                        />
-                                      )}
-                                  </div>
-                                </div>
-                                {/* {currentFields.includes("markdown") && ( */}
-
-                              </div>
+                              {isFormFieldValid(
+                                formik,
+                                "computedFieldValueProviderCtxt"
+                              ) && (
+                                  <Message
+                                    severity="error"
+                                    text={formik?.errors?.computedFieldValueProviderCtxt?.toString()}
+                                  />
+                                )}
                             </div>
                           )}
 
                           {/* {currentFields.includes("externalIdProviderCtxt") && (
                             <div className="md:col-12 sm:col-12">
 
-                              <div className="grid p-nogutter">
+                              <div className="formgrid grid">
                                 {markdownText &&
                                   <div className="md:col-12 sm:col-12">
-                                    <div className="field">
-                                      <label htmlFor="name" className="form-label form-field-label">
+                                    <div className="field col-6 flex-flex-column gap-2">
+                                      <label htmlFor="name" className="form-field-label">
                                         Markdown
                                       </label>
                                       <MarkdownViewer data={markdownText}></MarkdownViewer>
@@ -2298,8 +2238,8 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   </div>
                                 }
                                 <div className="md:col-12 sm:col-12">
-                                  <div className="field">
-                                    <label htmlFor="name" className="form-label form-field-label">
+                                  <div className="field col-6 flex-flex-column gap-2">
+                                    <label htmlFor="name" className="form-field-label">
                                       External Id Provider Context
                                     </label>
                                     <CodeEditor
@@ -2326,19 +2266,14 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                       )}
                       {(currentFields.includes("regexPattern") || currentFields.includes("min") || currentFields.includes("max") || currentFields.includes("ormType")) && ormTypeOptions &&
                         <>
-                          <div className="grid p-nogutter section-sub-heading">
-                            <div className="md:col-12 sm:col-12">
-                              <p className="form-subheading">Validations</p>
-                            </div>
-                          </div>
-                          <div className="grid p-nogutter">
+                          <p className="form-wrapper-heading text-base">Validations</p>
+                          <div className="formgrid grid">
                             {(currentFields.includes("regexPattern") && selectedType.value === "password") &&
                               <>
-                                <div className="md:col-6 sm:col-12">
-                                  <div className="field">
+                                  <div className="field col-6 flex-flex-column gap-2">
                                     <label
                                       htmlFor="regexPattern"
-                                      className="form-label form-field-label"
+                                      className="form-field-label"
                                     >
                                       Password Policy
                                     </label>
@@ -2350,20 +2285,18 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                     }} options={passwordPolicyOptions} optionLabel="label"
                                       placeholder="Select a Password Policy"
                                       // className="w-full md:w-14rem"
-                                      className="p-inputtext-sm w-full small-input"
+                                      className=""
                                       checkmark={true} highlightOnSelect={false} />
 
                                   </div>
-                                </div>
                               </>
                             }
                             {currentFields.includes("regexPattern") && (
                               <>
-                                <div className="md:col-6 sm:col-12">
-                                  <div className="field">
+                                  <div className="field col-6 flex-flex-column gap-2">
                                     <label
                                       htmlFor="regexPattern"
-                                      className="form-label form-field-label"
+                                      className="form-field-label"
                                     >
                                       Regex Pattern
                                     </label>
@@ -2373,7 +2306,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                       name="regexPattern"
                                       onChange={formik.handleChange}
                                       value={formik.values.regexPattern}
-                                      className={classNames("p-inputtext-sm w-full small-input", {
+                                      className={classNames("", {
                                         "p-invalid": isFormFieldValid(
                                           formik,
                                           "regexPattern"
@@ -2387,14 +2320,11 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                       />
                                     )}
                                   </div>
-                                </div>
                                 {currentFields.includes("regexPattern") && (
-
-                                  <div className="md:col-6 sm:col-12">
-                                    <div className="field">
+                                    <div className="field col-6 flex-flex-column gap-2">
                                       <label
                                         htmlFor="regexPatternNotMatchingErrorMsg"
-                                        className="form-label form-field-label"
+                                        className="form-field-label"
                                       >
                                         Regex Pattern Not Matching Error Msg
                                       </label>
@@ -2404,7 +2334,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                         name="regexPatternNotMatchingErrorMsg"
                                         onChange={formik.handleChange}
                                         value={formik.values.regexPatternNotMatchingErrorMsg}
-                                        className={classNames("p-inputtext-sm w-full small-input", {
+                                        className={classNames("", {
                                           "p-invalid": isFormFieldValid(
                                             formik,
                                             "regexPatternNotMatchingErrorMsg"
@@ -2418,18 +2348,15 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                         />
                                       )}
                                     </div>
-                                  </div>
                                 )}
                               </>
 
                             )}
                             {(currentFields.includes("min") || currentFields.includes("max")) &&
-                              <div className="md:col-12 sm:col-12">
-                                <div className="grid p-nogutter">
+                                <>
                                   {currentFields.includes("min") && (
-                                    <div className="md:col-6 sm:col-12">
-                                      <div className="field">
-                                        <label htmlFor="min" className="form-label form-field-label">
+                                      <div className="field col-6 flex-flex-column gap-2">
+                                        <label htmlFor="min" className="form-field-label">
                                           Min (Characters Allowed)
 
                                         </label>
@@ -2439,7 +2366,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                 name="min"
                                 onChange={formik.handleChange}
                                 value={formik.values.min}
-                                className={classNames("p-inputtext-sm w-full small-input", {
+                                className={classNames("", {
                                   "p-invalid": isFormFieldValid(formik, "min"),
                                 })}
                               /> */}
@@ -2457,7 +2384,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                             name="min"
                                             onValueChange={formik.handleChange}
                                             value={formik.values.min}
-                                            className={classNames("p-inputtext-sm w-full small-input", {
+                                            className={classNames("", {
                                               "p-invalid": isFormFieldValid(
                                                 formik,
                                                 "min"
@@ -2473,12 +2400,10 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                           />
                                         )}
                                       </div>
-                                    </div>
                                   )}
                                   {currentFields.includes("max") && (
-                                    <div className="md:col-6 sm:col-12">
-                                      <div className="field">
-                                        <label htmlFor="max" className="form-label form-field-label">
+                                      <div className="field col-6 flex-flex-column gap-2">
+                                        <label htmlFor="max" className="form-field-label">
                                           Max (Character allowed)
                                         </label>
                                         {/* <InputText
@@ -2487,7 +2412,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                 name="max"
                                 onChange={formik.handleChange}
                                 value={formik.values.max}
-                                className={classNames("p-inputtext-sm w-full small-input", {
+                                className={classNames("", {
                                   "p-invalid": isFormFieldValid(formik, "max"),
                                 })}
                               /> */}
@@ -2504,7 +2429,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                             name="max"
                                             onValueChange={formik.handleChange}
                                             value={formik.values.max}
-                                            className={classNames("p-inputtext-sm w-full small-input", {
+                                            className={classNames("", {
                                               "p-invalid": isFormFieldValid(
                                                 formik,
                                                 "max"
@@ -2520,16 +2445,14 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                           />
                                         )}
                                       </div>
-                                    </div>
                                   )}
-                                </div>
-                              </div>
+                                </>
                             }
                             {currentFields.includes("ormType") && (
                               <div className="md:col-12 sm:col-12">
                                 {ormTypeOptions && ormTypeOptions.length > 1 &&
-                                  <div className="field">
-                                    <label htmlFor="ormType" className="form-label form-field-label">
+                                  <div className="field col-6 flex-flex-column gap-2">
+                                    <label htmlFor="ormType" className="form-field-label">
                                       Type
                                     </label>
                                     {/* <SingleSelectAutoCompleteField
@@ -2579,15 +2502,10 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                         </>
                       }
 
-                      <div className="grid p-nogutter section-sub-heading">
-                        <div className="md:col-12 sm:col-12">
-                          <p className="form-subheading">Settings</p>
-                        </div>
-                      </div>
-                      <div className="grid p-nogutter">
+                      <p className="form-wrapper-heading text-base">Settings</p>
+                      <div className="formgrid grid">
                         {currentFields.includes("required") && (
-                          <div className="md:col-6 sm:col-12">
-                            <div className="field">
+                            <div className="field col-6 flex-flex-column gap-2">
                               <div className="flex align-items-center">
                                 <Checkbox
                                   name="required"
@@ -2596,11 +2514,11 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   }}
                                   checked={formik.values.required}
                                 ></Checkbox>
-                                <label htmlFor="ingredient1" className="form-label form-field-label ml-2">
+                                <label htmlFor="ingredient1" className="form-field-label ml-2">
                                   Required
                                 </label>
                               </div>
-                              <p className="fieldSubTitle">You won't be able to create an entry if this field is empty</p>
+                              <p className="text-xs mt-2">You won't be able to create an entry if this field is empty</p>
 
                               {isFormFieldValid(formik, "required") && (
                                 <Message
@@ -2609,11 +2527,9 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                 />
                               )}
                             </div>
-                          </div>
                         )}
                         {currentFields.includes("unique") && (
-                          <div className="md:col-6 sm:col-12">
-                            <div className="field">
+                            <div className="field col-6 flex-flex-column gap-2">
                               <div className="flex align-items-center">
                                 <Checkbox
                                   name="unique"
@@ -2622,11 +2538,11 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   }}
                                   checked={formik.values.unique}
                                 ></Checkbox>
-                                <label htmlFor="ingredient1" className="form-label form-field-label ml-2">
+                                <label htmlFor="ingredient1" className="form-field-label ml-2">
                                   Unique
                                 </label>
                               </div>
-                              <p className="fieldSubTitle">You won't be able to create an entry if there is an existing entry with identical content</p>
+                              <p className="text-xs mt-2">You won't be able to create an entry if there is an existing entry with identical content</p>
 
                               {isFormFieldValid(formik, "unique") && (
                                 <Message
@@ -2635,11 +2551,9 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                 />
                               )}
                             </div>
-                          </div>
                         )}
                         {currentFields.includes("index") && (
-                          <div className="md:col-6 sm:col-12">
-                            <div className="field">
+                            <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <div className="flex align-items-center">
                                 <Checkbox
                                   name="index"
@@ -2648,7 +2562,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   }}
                                   checked={formik.values.index}
                                 ></Checkbox>
-                                <label htmlFor="ingredient1" className="form-label form-field-label ml-2">
+                                <label htmlFor="ingredient1" className="form-field-label ml-2">
                                   Index
                                 </label>
                               </div>
@@ -2659,11 +2573,9 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                 />
                               )}
                             </div>
-                          </div>
                         )}
                         {currentFields.includes("private") && (
-                          <div className="md:col-6 sm:col-12">
-                            <div className="field">
+                            <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <div className="flex align-items-center">
                                 <Checkbox
                                   name="private"
@@ -2672,11 +2584,11 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   }}
                                   checked={formik.values.private}
                                 ></Checkbox>
-                                <label htmlFor="ingredient1" className="form-label form-field-label ml-2">
+                                <label htmlFor="ingredient1" className="form-field-label ml-2">
                                   Private
                                 </label>
                               </div>
-                              <p className="fieldSubTitle">This field will not show up in the API response</p>
+                              <p className="text-xs mt-2">This field will not show up in the API response</p>
 
 
                               {isFormFieldValid(formik, "private") && (
@@ -2686,12 +2598,10 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                 />
                               )}
                             </div>
-                          </div>
                         )}
                         {currentFields.includes("encrypt") && (
-                          <div className="md:col-6 sm:col-12">
-                            <div className="field">
-                              <div className="flex align-items-center">
+                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                              <div className="flex align-items-center gap-2">
                                 <Checkbox
                                   name="encrypt"
                                   onChange={(e) => {
@@ -2700,7 +2610,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   }}
                                   checked={formik.values.encrypt}
                                 ></Checkbox>
-                                <label htmlFor="ingredient1" className="form-label form-field-label ml-2">
+                                <label htmlFor="ingredient1" className="form-field-label">
                                   Encrypt
                                 </label>
                               </div>
@@ -2711,12 +2621,10 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                 />
                               )}
                             </div>
-                          </div>
                         )}
                         {currentFields.includes("isSystem") && (
-                          <div className="md:col-6 sm:col-12">
-                            <div className="field">
-                              <div className="flex align-items-center">
+                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                              <div className="flex align-items-center gap-2">
                                 <Checkbox
                                   name="isSystem"
                                   onChange={(e) => {
@@ -2724,7 +2632,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   }}
                                   checked={formik.values.isSystem}
                                 ></Checkbox>
-                                <label htmlFor="ingredient1" className="form-label form-field-label ml-2">
+                                <label htmlFor="ingredient1" className="form-field-label">
                                   isSystem
                                 </label>
                               </div>
@@ -2735,12 +2643,10 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                 />
                               )}
                             </div>
-                          </div>
                         )}
                         {currentFields.includes("isUserKey") && (
-                          <div className="md:col-6 sm:col-12">
-                            <div className="field">
-                              <div className="flex align-items-center">
+                         <div className="field col-6 flex-flex-column gap-2 mt-3">
+                         <div className="flex align-items-center gap-2">
                                 <Checkbox
                                   name="isUserKey"
                                   onChange={(e) => {
@@ -2748,7 +2654,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   }}
                                   checked={formik.values.isUserKey}
                                 ></Checkbox>
-                                <label htmlFor="ingredient1" className="form-label form-field-label ml-2">
+                                <label htmlFor="ingredient1" className="form-field-label">
                                   Is Userkey
                                 </label>
                               </div>
@@ -2761,18 +2667,17 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                 />
                               )}
                             </div>
-                          </div>
                         )}
                       </div>
 
 
                       {formik.values.encrypt === true && (
-                        <div className="grid p-nogutter mt-2">
+                        <div className="formgrid grid mt-2">
                           <div className="md:col-6 sm:col-12">
-                            <div className="field">
+                            <div className="field col-6 flex-flex-column gap-2">
                               <label
                                 htmlFor="encryptionType"
-                                className="form-label form-field-label"
+                                className="form-field-label"
                               >
                                 Encryption Type
                               </label>
@@ -2814,8 +2719,8 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                             </div>
                           </div>
                           <div className="md:col-6 sm:col-12">
-                            <div className="field">
-                              <label htmlFor="decryptWhen" className="form-label form-field-label">
+                            <div className="field col-6 flex-flex-column gap-2">
+                              <label htmlFor="decryptWhen" className="form-field-label">
                                 Decrypt When
                               </label>
                               {/* <AutoComplete
@@ -2900,5 +2805,6 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
     </div >
   );
 };
+
 
 export default FieldMetaDataForm;

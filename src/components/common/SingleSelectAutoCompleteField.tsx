@@ -35,7 +35,6 @@ export const SingleSelectAutoCompleteField = ({ disabled, formik, isFormFieldVal
                 invalid={isFormFieldValid(formik, fieldName)}
                 completeMethod={searchItems}
                 virtualScrollerOptions={{ itemSize: 38 }}
-                className="w-full small-input"
                 // style={{
                 //     maxHeight: 39.67
                 // }}

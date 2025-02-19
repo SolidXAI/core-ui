@@ -28,7 +28,7 @@ const FieldSelector = ({ handleTypeSelect, modelMetaData }: any) => {
         { label: 'Computed', description: 'A computed field based on other data', icon: 'pi pi-cog', value: 'computed' },
         // { label: 'External ID', description: 'An external identifier', icon: 'pi pi-key', value: 'externalId' },
         { label: 'UUID', description: 'Unique Identifier', icon: 'pi pi-key', value: 'uuid' }
-        
+
     ];
 
 
@@ -38,29 +38,24 @@ const FieldSelector = ({ handleTypeSelect, modelMetaData }: any) => {
     };
 
     return (
-        <div>
-            <div className="grid p-nogutter field-selection-form">
-            <div className="md:col-12 sm:col-12">
-
-            <h4 className='mt-2 mb-2'>Select Field Type</h4>
-            </div>
+        <div className='p-4'>
+            <p className="form-wrapper-heading text-base m-0">Select Field Type</p>
+            <div className='formgrid grid'>
                 {solidFieldOptions.map((field, index) => (
-                    <div className="md:col-6 sm:col-12">
+                    <div className="field col-6 mt-3" key={index}>
                         <div
-                            className={`flex align-items-center type-field-card ${selectedField === field.value ? 'selected' : ''}`}
+                            className={`flex align-items-center gap-3 type-field-card ${selectedField === field.value ? 'selected' : ''}`}
                             onClick={() => handleTypeSelect(field.value)}
                         >
-                            <i className={`type-icon pi ${field.icon}`} style={{ fontSize: '2em', marginBottom: '10px' }}></i>
-                            <div className='type-text'>
-                                <p className='type-heading'>{field.label}</p>
-                                <p className='type-description'>{field.description}</p>
+                            <i className={`pi ${field.icon}`}></i>
+                            <div className=''>
+                                <p className='text-sm m-0 font-bold'>{field.label}</p>
+                                <p className='text-xs'>{field.description}</p>
                             </div>
                         </div>
                     </div>
                 ))}
-
             </div>
-
         </div>
     );
 };
