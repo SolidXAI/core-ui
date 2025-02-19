@@ -97,7 +97,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     useUpdateSolidEntityMutation,
     useRecoverSolidEntityByIdQuery,
     useLazyRecoverSolidEntityByIdQuery,
-    useLazyRecoverSolidEntityQuery
+    useRecoverSolidEntityMutation
   } = entityApi;
 
   // Get the list view layout & metadata first. 
@@ -181,6 +181,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [sortField, setSortField] = useState("");
   const [sortOrder, setSortOrder] = useState(0);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
+  const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [isRecoverDialogVisible, setRecoverDialogVisible] = useState(false);
@@ -199,7 +200,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   const [triggerRecoverSolidEntitiesById, { data: recoverByIdData, isLoading: recoverByIdIsLoading, error: recoverByIdError, isError: recoverByIdIsError, isSuccess: recoverByIdIsSuccess }] = useLazyRecoverSolidEntityByIdQuery();
 
-  const [triggerRecoverSolidEntities, { data: recoverByData, isLoading: recoverByIsLoading, error: recoverError, isError: recoverIsError, isSuccess: recoverByIsSuccess }] = useLazyRecoverSolidEntityQuery();
+  const [triggerRecoverSolidEntities, { data: recoverByData, isLoading: recoverByIsLoading, error: recoverError, isError: recoverIsError, isSuccess: recoverByIsSuccess }] = useRecoverSolidEntityMutation();
 
   // After data is fetched populate the list view state so as to be able to render the data. 
   useEffect(() => {
@@ -255,6 +256,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
     triggerGetSolidEntities(queryString);
     setSelectedRecords([]);
+    setSelectedRecoverRecords([]);
   }, [showArchived, recoverByIdIsSuccess, recoverByIsSuccess]);
 
 
@@ -277,6 +279,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
       triggerGetSolidEntities(queryString);
       setSelectedRecords([]);
+      setSelectedRecoverRecords([]);
       setShowArchived(false);
     }
   }, [isDeleteSolidEntitiesSucess, isDeleteSolidSingleEntitySuccess, toPopulate]);
@@ -307,7 +310,11 @@ export const SolidListView = (params: SolidListViewParams) => {
   // handle change in the records which are currently selected...
   const onSelectionChange = (event: any) => {
     const value = event.value;
-    setSelectedRecords(value);
+    const activeRecords = value.filter((record: any) => record.deletedAt === null);
+    const deletedRecords = value.filter((record: any) => record.deletedAt !== null);
+
+    setSelectedRecords(activeRecords);
+    setSelectedRecoverRecords(deletedRecords);
   };
 
   const identifySolidOperatorAndValue = (primeReactMatchMode: FilterMatchMode, value: any): { operator: string, value: string | string[] | any[] } => {
@@ -502,7 +509,11 @@ export const SolidListView = (params: SolidListViewParams) => {
   }
 
   const recoverAll = () => {
-    triggerRecoverSolidEntities();
+    let recoverList: any = [];
+    selectedRecoverRecords.forEach((element: any) => {
+      recoverList.push(element.id);
+    });
+    triggerRecoverSolidEntities(recoverList);
     setRecoverDialogVisible(false);
   }
 
@@ -513,8 +524,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   }, [recoverIsError, recoverByIdIsError])
 
   const showError = async (error) => {
-    const errorMessages = error.data.message;
-    console.log('errorMessages', errorMessages);
+    const errorMessages = error?.data?.message;
     if (errorMessages.length > 0) {
       toast?.current?.show({
         severity: "error",
@@ -553,6 +563,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const onDeleteClose = () => {
     setDialogVisible(false);
     setSelectedRecords([]);
+    setSelectedRecoverRecords([]);
   }
 
   // Render columns dynamically based on metadata
@@ -688,7 +699,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           sortOrder={sortOrder === 1 || sortOrder === -1 ? sortOrder : 0}
           loading={loading || isLoading}
           loadingIcon="pi pi-spinner"
-          selection={selectedRecords}
+          selection={[...selectedRecords, ...selectedRecoverRecords]}
           onSelectionChange={onSelectionChange}
           selectionMode="multiple"
           removableSort
@@ -753,7 +764,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
       <Dialog
         visible={isRecoverDialogVisible}
-        header="Confirm Delete"
+        header="Confirm Recover"
         modal
         footer={() => (
           <div className="flex justify-content-center">

@@ -72,8 +72,13 @@ export const createSolidEntityApi = (entityName: string) => {
             recoverSolidEntityById: builder.query({
                 query: (id) => `/${kebabEntityName}/recover/${id}`,
             }),
-            recoverSolidEntity: builder.query({
-                query: () => `/${kebabEntityName}/bulk-recover/`,
+            recoverSolidEntity: builder.mutation({
+                query: (data) => ({
+                    url: `/${kebabEntityName}/bulk-recover/`,
+                    method: 'POST',
+                    body: data
+                })
+
             }),
         }),
     });
