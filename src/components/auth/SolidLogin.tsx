@@ -12,13 +12,18 @@ import { Password } from "primereact/password";
 import { TabPanel, TabView } from 'primereact/tabview';
 import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import { LayoutContext } from "../layout/context/layoutcontext";
+import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 
 
 const SolidLogin = () => {
+    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
+    useEffect(() => {
+        trigger("") // Fetch settings on mount
+    }, [trigger])
     const { layoutConfig } = useContext(LayoutContext);
     const { authLayout } = layoutConfig;
     const toast = useRef<Toast>(null);
@@ -48,8 +53,8 @@ const SolidLogin = () => {
     return (
         <div className="">
             <Toast ref={toast} />
-            <div className={`auth-container ${authLayout === 'Center' ? 'center' : 'side'}`}>
-                {authLayout === 'Center' &&
+            <div className={`auth-container ${solidSettingsData?.data[0]?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
+                {solidSettingsData?.data[0]?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
                         <div className="solid-logo flex align-items-center gap-3">
                             <img
@@ -65,7 +70,7 @@ const SolidLogin = () => {
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${authLayout === 'Center' ? 'text-center' : 'text-left'}`}>Sign In To Your Account</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.data[0]?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>Sign In To Your Account</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
 
                 <TabView>
@@ -88,7 +93,7 @@ const SolidLogin = () => {
                                         showToast("error", "Login Error", response.error);
                                     } else {
                                         showToast("success", "Login Success", "Redirecting to dashboard...");
-                                        router.push("http://localhost:3001/admin/core/solid-core/user/list");
+                                        router.push("/admin/core/solid-core/user/list");
                                     }
                                 } catch (error) {
                                     showToast("error", "Login Failed", "Something went wrong");
@@ -154,18 +159,22 @@ const SolidLogin = () => {
                     <TabPanel header="Login Without Password">
                     </TabPanel>
                 </TabView>
-                <Divider align="center">
-                    <div className="inline-flex align-items-center">
-                        or
-                    </div>
-                </Divider>
-                <SocialMediaLogin />
+                {solidSettingsData?.data[0]?.iamGoogleOAuthEnabled &&
+                    <>
+                        <Divider align="center">
+                            <div className="inline-flex align-items-center">
+                                or
+                            </div>
+                        </Divider>
+                        <SocialMediaLogin />
+                    </>
+                }
             </div>
-            {/* <div className=" mt-5">
+            {solidSettingsData?.data[0]?.iamAllowPublicRegistration && <div className=" mt-5">
                 <div className="text-sm text-center text-400 secondary-dark-color">
                     Don’t have an account ? <Link className="font-bold" href="/auth/register">Sign Up</Link>
                 </div>
-            </div> */}
+            </div>}
         </div>
     );
 };

@@ -57,9 +57,8 @@ const SolidChangeForcePassword = () => {
                 } else (
                     showToast("error", "Login Error", response.error)
                 )
-            } catch (err) {
-                console.error("Failed to update password:", err);
-                showToast("error", "Login Failed", "Something went wrong");
+            } catch (err:any) {
+                showToast("error", "Login Failed", err?.data?.message);
             }
         },
     });

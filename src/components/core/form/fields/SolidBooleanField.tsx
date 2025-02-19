@@ -59,7 +59,7 @@ export class SolidBooleanField implements ISolidField {
 
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'col-12 s-field';
+        const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const booleanOptions = ["false", "true"];
@@ -77,12 +77,9 @@ export class SolidBooleanField implements ISolidField {
 
         return (
             <div className={className}>
-                <div className="justify-content-center align-items-center">
-                    <label htmlFor={fieldLayoutInfo.attrs.name}>{fieldLabel}
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
                     </label>
-                </div>
-                <div className="s-input">
                     {/* <InputText
                         id={fieldLayoutInfo.attrs.name}
                         className="small-input"
@@ -98,7 +95,7 @@ export class SolidBooleanField implements ISolidField {
                         onChange={(e) => formik.setFieldValue(fieldLayoutInfo.attrs.name, e.value)} // Custom handling for boolean input
                         value={formik.values[fieldLayoutInfo.attrs.name] ? formik.values[fieldLayoutInfo.attrs.name].toString() : "false"}
                         options={booleanOptions}
-                        className={classNames("p-inputtext-sm w-full small-input flex boolean-switch", {
+                        className={classNames("", {
                             "p-invalid": isFormFieldValid(formik, "defaultValue"),
                         })}
 
@@ -106,7 +103,6 @@ export class SolidBooleanField implements ISolidField {
                     {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                         <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                     )}
-                </div>
             </div>
         );
     }

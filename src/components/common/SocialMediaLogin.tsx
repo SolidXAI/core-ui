@@ -26,7 +26,7 @@ export const SocialMediaLogin = () => {
                 outlined
                 severity="secondary"
                 label='Sign In with Google'
-                onClick={()=>signIn('google', {callbackUrl :'http://localhost:3001/admin/core/solid-core/user/list'})}
+                onClick={()=>signIn('google', {callbackUrl :'/admin/core/solid-core/user/list'})}
             >
             </Button>
             {/* <Button icon={() => (

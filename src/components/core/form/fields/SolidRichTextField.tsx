@@ -57,7 +57,7 @@ export class SolidRichTextField implements ISolidField {
     render(formik: FormikObject) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'col-12 s-field';
+        const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
@@ -73,12 +73,9 @@ export class SolidRichTextField implements ISolidField {
 
         return (
             <div className={className}>
-                <div className="justify-content-center align-items-center">
-                    <label htmlFor={fieldLayoutInfo.attrs.name}>{fieldLabel}
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
                     </label>
-                </div>
-                <div className="s-input">
                     <Editor
                         readOnly={formReadonly || fieldReadonly}
                         disabled={formDisabled || fieldDisabled}
@@ -91,7 +88,6 @@ export class SolidRichTextField implements ISolidField {
                     {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                         <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                     )}
-                </div>
             </div>
         );
     }

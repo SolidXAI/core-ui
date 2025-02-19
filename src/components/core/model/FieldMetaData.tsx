@@ -44,11 +44,12 @@ const FieldMetaData = ({ modelMetaData, fieldMetaData, setFieldMetaData, deleteM
         {rowData.isSystem !== true &&
           <Button
             icon="pi pi-pencil"
+            text
             onClick={() => {
               setSelectedFieldMetaData(rowData);
               setVisiblePopup(true);
             }}
-            className="p-button-rounded p-button-text"
+            size="small"
           />
         }
       </>
@@ -65,7 +66,7 @@ const FieldMetaData = ({ modelMetaData, fieldMetaData, setFieldMetaData, deleteM
     return (
       <>
         {(pathname.includes('create') || rowData.isSystem !== true) &&
-          <Button icon="pi pi-trash" onClick={() => deleteRow(rowData)} className="p-button-rounded p-button-danger p-button-text" />
+          <Button icon="pi pi-trash" text severity="danger" onClick={() => deleteRow(rowData)} size="small" />
 
         }
       </>
@@ -102,31 +103,26 @@ const FieldMetaData = ({ modelMetaData, fieldMetaData, setFieldMetaData, deleteM
                     setVisiblePopup(true)
                   }
                 }} size="small"
-                className="small-button"
               />
             }
           </div>
-          <div className="card">
-            <DataTable value={fieldMetaData} dataKey="id"
-              tableStyle={{ minWidth: '50rem' }} size="small" className="custom-table" rowClassName={() => 'custom-row-height'}>
-              <Column field="displayName" header="Display Name" headerClassName="table-header-fs"></Column>
-              <Column field="name" header="Name" headerClassName="table-header-fs"></Column>
-              <Column field="type" header="Type" headerClassName="table-header-fs"></Column>
+          <DataTable value={fieldMetaData} dataKey="id"
+            tableStyle={{ minWidth: '50rem' }} size="small">
+            <Column field="displayName" header="Display Name" headerClassName="table-header-fs"></Column>
+            <Column field="name" header="Name" headerClassName="table-header-fs"></Column>
+            <Column field="type" header="Type" headerClassName="table-header-fs"></Column>
 
-              {modelMetaData.isSystem !== true &&
-                <Column body={editTemplate} header="Edit" headerClassName="table-header-fs" style={{ width: '10%' }} />
-              }
-              {modelMetaData.isSystem !== true &&
-                <Column body={deleteTemplate} header="Delete" headerClassName="table-header-fs" style={{ width: '10%' }} />
-              }
-            </DataTable>
-          </div>
+            {modelMetaData.isSystem !== true &&
+              <Column body={editTemplate} header="Edit" headerClassName="table-header-fs" style={{ width: '10%' }} />
+            }
+            {modelMetaData.isSystem !== true &&
+              <Column body={deleteTemplate} header="Delete" headerClassName="table-header-fs" style={{ width: '10%' }} />
+            }
+          </DataTable>
           <Dialog
-            className="field-poopup-container"
             header=""
             visible={visiblePopup}
             style={{ width: "40vw" }}
-            contentStyle={{ borderRadius: 8 }}
             onHide={() => {
               if (!visiblePopup) return;
 
@@ -145,5 +141,4 @@ const FieldMetaData = ({ modelMetaData, fieldMetaData, setFieldMetaData, deleteM
 
   );
 };
-
 export default FieldMetaData;

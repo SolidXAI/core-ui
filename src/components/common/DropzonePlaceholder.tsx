@@ -1,10 +1,18 @@
 'use client';
 
+import { Button } from "primereact/button";
+
 export const DropzonePlaceholder = () => {
     return (
-        <div className='flex flex-column align-items-center p-3 border-1 border-dashed surface-border'>
-            <svg xmlns="http://www.w3.org/2000/svg" width="1rem" height="1rem" fill="none" viewBox="0 0 24 20" aria-hidden="true" className='dropzone-placeholder'><path fill="#32324D" d="M21.569 2.398H7.829v1.586h13.74c.47 0 .826.5.826 1.094v9.853l-2.791-3.17a2.13 2.13 0 0 0-.74-.55 2.214 2.214 0 0 0-.912-.196 2.215 2.215 0 0 0-.912.191 2.131 2.131 0 0 0-.74.546l-2.93 3.385-2.973-3.36a2.147 2.147 0 0 0-.741-.545 2.228 2.228 0 0 0-1.824.007c-.286.13-.538.319-.739.553l-2.931 3.432V7.653H2.51v9.894c.023.153.06.304.108.452v.127l.041.095c.057.142.126.28.207.412l.099.15c.074.107.157.207.247.302l.124.119c.13.118.275.222.43.309h.024c.36.214.775.327 1.198.325h16.515c.36-.004.716-.085 1.039-.24.323-.153.606-.375.827-.648a2.78 2.78 0 0 0 .504-.888c.066-.217.108-.44.124-.666V5.078a2.497 2.497 0 0 0-.652-1.81 2.706 2.706 0 0 0-1.776-.87Z"></path><path fill="#32324D" d="M12.552 9.199c.912 0 1.651-.71 1.651-1.585 0-.876-.74-1.586-1.651-1.586-.912 0-1.652.71-1.652 1.586 0 .875.74 1.585 1.652 1.585ZM3.303 6.408h.826V3.997h2.477V2.41H4.129V0h-.826c-.219 0-.85.002-.826 0v2.411H0v1.586h2.477v2.41h.826Z"></path></svg>
-            <p className='text-xs text-cyan-500 font-semibold'>Click to add an asset or drag and drop one in this area</p>
+        <div className='solid-dropzone'>
+                <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                    <path d="M11 16V7.85L8.4 10.45L7 9L12 4L17 9L15.6 10.45L13 7.85V16H11ZM6 20C5.45 20 4.97917 19.8042 4.5875 19.4125C4.19583 19.0208 4 18.55 4 18V15H6V18H18V15H20V18C20 18.55 19.8042 19.0208 19.4125 19.4125C19.0208 19.8042 18.55 20 18 20H6Z" fill="#666666" />
+                </svg>
+                <div className='font-bold'>
+                    Drag and Drop or <span className='text-primary'> choose files</span> to upload
+                </div>
+                <p>Supported format : PDF/JPEG | File size max 10 MB</p>
+                <Button outlined size='small' severity='secondary' label='Click to Brows' />
         </div>
     )
 }

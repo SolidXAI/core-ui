@@ -8,12 +8,17 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
-import { useContext, useRef } from "react";
+import { useContext, useEffect, useRef } from "react";
 import * as Yup from "yup";
 import { LayoutContext } from "../layout/context/layoutcontext";
+import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 
 
 const SolidForgotPassword = () => {
+    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
+    useEffect(() => {
+        trigger("") // Fetch settings on mount
+    }, [trigger])
     const { layoutConfig } = useContext(LayoutContext);
     const { authLayout } = layoutConfig;
     const toast = useRef<Toast>(null);
@@ -70,8 +75,8 @@ const SolidForgotPassword = () => {
     return (
         <>
             <Toast ref={toast} />
-            <div className={`auth-container ${authLayout === 'Center' ? 'center' : 'side'}`}>
-                {authLayout === 'Center' &&
+            <div className={`auth-container ${solidSettingsData?.data[0]?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
+                {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
                         <div className="solid-logo flex align-items-center gap-3">
                             <img
@@ -87,7 +92,7 @@ const SolidForgotPassword = () => {
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${authLayout === 'Center' ? 'text-center' : 'text-left'}`}>Forgot Password</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.data[0]?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>Forgot Password</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
                 <form onSubmit={formik.handleSubmit}>
                     <div className="flex flex-column gap-2">

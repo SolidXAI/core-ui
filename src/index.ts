@@ -213,7 +213,9 @@ export { HeaderDynamicTitles } from '@/components/common/HeaderDynamicTitles';
 export { MultipleSelectAutoCompleteField } from '@/components/common/MultipleSelectAutoCompleteField';
 export { SingleSelectAutoCompleteField } from '@/components/common/SingleSelectAutoCompleteField';
 export { SocialMediaLogin } from '@/components/common/SocialMediaLogin';
-
+export { BackButton } from '@/components/common/BackButton'
+export { FileReaderExt } from '@/components/common/FileReaderExt'
+export { SolidFormStepper } from '@/components/common/SolidFormStepper'
 
 // export { SolidListViewOptions } from '@/components/core/common/SolidListViewOptions';
 export { SolidConfigureLayoutElement } from '@/components/core/common/SolidConfigureLayoutElement';
@@ -449,7 +451,7 @@ export { solidViewsApi, useCreateSolidViewMutation, useDeleteMultipleSolidViewsM
 // export * from '@/redux/api/tagApi';
 // export * from '@/redux/api/tagGroupApi';
 export { useCreateuserroleMutation, useCreateuserrolebulkMutation, useDeleteMultipleUsersMutation, useDeleteUserMutation, useGetusersByIdQuery, useGetusersQuery, useLazyCheckIfPermissionExistsQuery, useLazyGetusersByIdQuery, useLazyGetusersQuery, useLazyUpdateSessionQuery, useRegisterUserMutation, useUpdatePasswordMutation, useUpdateProfileMutation, useUpdateSessionQuery, useUploadAvatarMutation, userApi } from '@/redux/api/userApi';
-
+export { solidSettingsApi, useCreateSolidSettingsMutation, useGetSolidSettingsByIdQuery, useGetSolidSettingsQuery, useGetAuthSettingsQuery, useLazyGetAuthSettingsQuery, useLazyGetSolidSettingsQuery, useLazyGetSolidSettingsByIdQuery, useUpdateSolidSettingsMutation, } from '@/redux/api/solidSettingsApi';
 export { logout, setToken } from '@/redux/features/authSlice';
 export { gridView, listView } from '@/redux/features/dataViewSlice';
 export { hideNavbar, showNavbar, toggleNavbar } from '@/redux/features/navbarSlice';
@@ -593,3 +595,4 @@ export { default as userReducer } from '@/redux/features/userSlice';
 
 // types
 export type { LayoutConfig } from '@/types';
+export { GeneralSettings } from '@/components/common/GeneralSettings';

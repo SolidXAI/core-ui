@@ -44,7 +44,7 @@ export class SolidIntegerField implements ISolidField {
     render(formik: FormikObject) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'col-12 s-field';
+        const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
@@ -59,27 +59,22 @@ export class SolidIntegerField implements ISolidField {
 
         return (
             <div className={className}>
-                <div className="justify-content-center align-items-center">
-                    <label htmlFor={fieldLayoutInfo.attrs.name}>{fieldLabel}
-                        &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
-                    </label>
-                </div>
-                <div className="s-input">
-                    <InputNumber
-                        readOnly={formReadonly || fieldReadonly}
-                        disabled={formDisabled || fieldDisabled}
-                        id={fieldLayoutInfo.attrs.name}
-                        className="small-input"
-                        aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                        onChange={(e: any) => {
-                            formik.setFieldValue(fieldLayoutInfo.attrs.name, e.value)
-                        }}
-                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                    />
-                    {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                    )}
-                </div>
+                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                    &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
+                </label>
+                <InputNumber
+                    readOnly={formReadonly || fieldReadonly}
+                    disabled={formDisabled || fieldDisabled}
+                    id={fieldLayoutInfo.attrs.name}
+                    aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
+                    onChange={(e: any) => {
+                        formik.setFieldValue(fieldLayoutInfo.attrs.name, e.value)
+                    }}
+                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                />
+                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                )}
             </div>
         );
     }
