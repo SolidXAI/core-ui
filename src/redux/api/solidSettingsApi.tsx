@@ -19,7 +19,7 @@ export const solidSettingsApi = createApi({
         }),
         getAuthSettings: builder.query({
             query: () => {
-                return `/setting/getSettings`
+                return `/setting/wrapped`
             },
         }),
         getSolidSettingsById: builder.query({
