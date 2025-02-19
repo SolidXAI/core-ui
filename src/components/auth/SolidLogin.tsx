@@ -53,8 +53,8 @@ const SolidLogin = () => {
     return (
         <div className="">
             <Toast ref={toast} />
-            <div className={`auth-container ${solidSettingsData?.data[0]?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
-                {solidSettingsData?.data[0]?.authPagesLayout === 'center' &&
+            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
+                {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
                         <div className="solid-logo flex align-items-center gap-3">
                             <img
@@ -70,7 +70,7 @@ const SolidLogin = () => {
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data[0]?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>Sign In To Your Account</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>Sign In To Your Account</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
 
                 <TabView>
@@ -159,7 +159,7 @@ const SolidLogin = () => {
                     <TabPanel header="Login Without Password">
                     </TabPanel>
                 </TabView>
-                {solidSettingsData?.data[0]?.iamGoogleOAuthEnabled &&
+                {solidSettingsData?.data?.iamGoogleOAuthEnabled &&
                     <>
                         <Divider align="center">
                             <div className="inline-flex align-items-center">
@@ -170,7 +170,7 @@ const SolidLogin = () => {
                     </>
                 }
             </div>
-            {solidSettingsData?.data[0]?.iamAllowPublicRegistration && <div className=" mt-5">
+            {solidSettingsData?.data?.iamAllowPublicRegistration && <div className=" mt-5">
                 <div className="text-sm text-center text-400 secondary-dark-color">
                     Don’t have an account ? <Link className="font-bold" href="/auth/register">Sign Up</Link>
                 </div>

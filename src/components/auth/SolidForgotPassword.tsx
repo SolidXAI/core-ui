@@ -75,7 +75,7 @@ const SolidForgotPassword = () => {
     return (
         <>
             <Toast ref={toast} />
-            <div className={`auth-container ${solidSettingsData?.data[0]?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
+            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
                         <div className="solid-logo flex align-items-center gap-3">
@@ -92,7 +92,7 @@ const SolidForgotPassword = () => {
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data[0]?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>Forgot Password</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>Forgot Password</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
                 <form onSubmit={formik.handleSubmit}>
                     <div className="flex flex-column gap-2">
