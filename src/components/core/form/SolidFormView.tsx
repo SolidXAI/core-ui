@@ -32,6 +32,8 @@ import { SolidSelectionDynamicField } from "./fields/SolidSelectionDynamicField"
 import { SolidSelectionStaticField } from "./fields/SolidSelectionStaticField";
 import { SolidShortTextField } from "./fields/SolidShortTextField";
 import { SolidTimeField } from "./fields/SolidTimeField";
+import { BackButton } from "@/components/common/BackButton";
+import { SolidFormStepper } from "@/components/common/SolidFormStepper";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -149,14 +151,17 @@ const SolidGroup = ({ children, attrs }: any) => {
     const className = attrs.className;
 
     return (
-        <div className={className}>
-            <div className="s_group">
-                <fieldset>
-                    {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
-                    <div className="grid">{children}</div>
-                </fieldset>
-            </div>
+        // <div className={className}>
+        //     <div className="s_group">
+        //         <fieldset>
+        //             {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
+        //             <div className="grid">{children}</div>
+        //         </fieldset>
+        //     </div>
 
+        // </div>
+        <div className="formgrid grid">
+            {children}
         </div>
     );
 };
@@ -166,54 +171,57 @@ const SolidRow = ({ children, attrs }: any) => {
     const className = attrs.className;
 
     return (
-        <div className={`row ${className}`}>
+        // <div className={`row ${className}`}>
 
-            <div className="s_group">
-                <fieldset>
-                    {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
-                    <div className="grid">{children}</div>
-                </fieldset>
-            </div>
+        //     <div className="s_group">
+        //         <fieldset>
+        //             {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
+        //             <div className="grid">{children}</div>
+        //         </fieldset>
+        //     </div>
 
-        </div>
+        // </div>
+        <div>{children}</div>
     );
 };
 const SolidColumn = ({ children, attrs }: any) => {
     const className = attrs.className;
 
     return (
-        <div className={`${className}`}>
-            <div className="s_group">
-                <fieldset>
-                    {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
-                    <div className="grid">{children}</div>
-                </fieldset>
-            </div>
+        // <div className={`${className}`}>
+        //     <div className="s_group">
+        //         <fieldset>
+        //             {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
+        //             <div className="grid">{children}</div>
+        //         </fieldset>
+        //     </div>
 
+        // </div>
+        <div className="formgrid grid">
+            {children}
         </div>
     );
 };
 
 const SolidSheet = ({ children }: any) => (
 
-    <div className="p-fluid p-grid">
+    <div>
         {children}
     </div>
 );
 const SolidNotebook = ({ children }: any) => {
 
-    return (<div className="solid-tab-view">
+    return (
         <TabView>
             {children}
         </TabView>
-    </div>
     )
 };
 
 
 const SolidPage = ({ attrs, children, key }: any) => (
-    <TabPanel key={key} header={attrs.label} className="solid-tab-panel">
-        <div className="p-fluid">{children}</div>
+    <TabPanel key={key} header={attrs.label} >
+        <div>{children}</div>
     </TabPanel>
 );
 
@@ -500,17 +508,16 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const {
         data: solidFormViewData,
         isLoading: solidFormViewDataIsLoading,
-    } = useGetSolidEntityByIdQuery({ id: params.id, qs: formViewDataQs },
-        { skip: !solidFormViewMetaData || params.id === 'new', refetchOnMountOrArgChange: true, });
+    } = useGetSolidEntityByIdQuery({ id: params.id, qs: formViewDataQs }, { skip: !solidFormViewMetaData || params.id === 'new' });
     useEffect(() => {
         if (solidFormViewData) {
             console.log(`DATA: `, solidFormViewData);
             setInitialEntityData(solidFormViewData.data);
         }
-    }, [solidFormViewData, params]);
+    }, [solidFormViewData]);
 
     let formik: FormikObject;
-    
+
     if (solidFormViewMetaDataIsLoading || solidFormViewDataIsLoading || !formViewLayout) {
         formik = useFormik({
             initialValues: {},
@@ -641,164 +648,172 @@ const SolidFormView = (params: SolidFormViewProps) => {
         console.log("params.embeded", params.embeded);
 
         return (
-            <>
+            <div className="solid-form-wrapper">
                 <Toast ref={toast} />
 
                 <form onSubmit={formik.handleSubmit}>
+                    <div className="solid-form-header">
+                        {params.id === "new" ? (
+                            <>
+                                <div className="flex align-items-center gap-3">
+                                    <BackButton />
+                                    <div className="form-wrapper-title"> {createHeaderTitle}</div>
+                                </div>
+                                <div className="gap-3 flex">
+                                    {params.embeded !== true &&
+                                        actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
+                                        !formViewLayout.attrs.readonly &&
+                                        !formViewLayout.attrs.readonly &&
+                                        <div>
+                                            <Button
+                                                label="Save"
+                                                size="small"
+                                                onClick={() => showError()}
+                                                type="submit"
+                                            />
+                                        </div>
+                                    }
+                                    {params.embeded !== true &&
+                                        actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
+                                        !formViewLayout.attrs.readonly &&
+                                        !formViewLayout.attrs.readonly &&
+                                        <div>
+                                            <Button
+                                                label="Save & Close"
+                                                size="small"
+                                                onClick={() => {
+                                                    setRedirectToList(true);
+                                                    showError()
+                                                }}
+                                                type="submit"
+                                            />
+                                        </div>
+                                    }
+                                    {params.embeded == true &&
+                                        actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
+                                        !formViewLayout.attrs.readonly &&
+                                        !formViewLayout.attrs.readonly &&
+                                        <div>
+                                            <Button
+                                                label="Save"
+                                                size="small"
+                                                onClick={() => {
+                                                    setRedirectToList(false);
+                                                    showError()
+                                                }}
+                                                type="submit"
+                                            />
+                                        </div>
+                                    }
+                                    {params.embeded == true &&
+                                        <Button outlined size="small" type="button" label="Cancel" severity="danger" onClick={() => params.handlePopupClose()} />
 
-                    {params.id === "new" ? (
-                        <div className="flex gap-3 justify-content-between mb-3 align-items-baseline">
-                            <div className="form-wrapper-title"> {createHeaderTitle}</div>
-                            <div className="gap-1 flex">
-                                {params.embeded !== true &&
-                                    actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
-                                    !formViewLayout.attrs.readonly &&
-                                    !formViewLayout.attrs.readonly &&
-                                    <div>
-                                        <Button
-                                            label="Save"
-                                            size="small"
-                                            onClick={() => showError()}
-                                            type="submit"
-                                            className="small-button"
-                                        />
-                                    </div>
-                                }
-                                {params.embeded !== true &&
-                                    actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
-                                    !formViewLayout.attrs.readonly &&
-                                    !formViewLayout.attrs.readonly &&
-                                    <div>
-                                        <Button
-                                            label="Save & Close"
-                                            size="small"
-                                            onClick={() => {
-                                                setRedirectToList(true);
-                                                showError()
-                                            }}
-                                            type="submit"
-                                            className="small-button"
-                                        />
-                                    </div>
-                                }
-                                {params.embeded == true &&
-                                    actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
-                                    !formViewLayout.attrs.readonly &&
-                                    !formViewLayout.attrs.readonly &&
-                                    <div>
-                                        <Button
-                                            label="Save"
-                                            size="small"
-                                            onClick={() => {
-                                                setRedirectToList(false);
-                                                showError()
-                                            }}
-                                            type="submit"
-                                            className="small-button"
-                                        />
-                                    </div>
-                                }
-                                {params.embeded == true &&
-                                    <Button outlined size="small" type="button" label="Cancel" severity="danger" onClick={() => params.handlePopupClose()} className='small-button' />
+                                    }
+                                    {params.embeded !== true &&
+                                        <SolidCancelButton />
+                                    }
 
-                                }
-                                {params.embeded !== true &&
-                                    <SolidCancelButton />
-                                }
+                                </div>
+                            </>
+                        ) : (
+                            <>
+                                <div className="flex align-items-center gap-3">
+                                    <BackButton />
+                                    <div className="form-wrapper-title"> {editHeaderTitle}</div>
+                                </div>
+                                <div className="gap-3 flex">
+                                    {params.embeded !== true &&
+                                        actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
+                                        !formViewLayout.attrs.readonly &&
+                                        !formViewLayout.attrs.readonly &&
+                                        <div>
+                                            <Button
+                                                label="Save"
+                                                size="small"
+                                                onClick={() => showError()}
+                                                type="submit"
+                                            />
+                                        </div>
+                                    }
+                                    {params.embeded == true &&
+                                        actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
+                                        !formViewLayout.attrs.readonly &&
+                                        !formViewLayout.attrs.readonly &&
+                                        <div>
+                                            <Button
+                                                label="Save"
+                                                size="small"
+                                                onClick={() => showError()}
+                                                type="submit"
+                                            />
+                                        </div>
+                                    }
+                                    {params.embeded !== true &&
+                                        actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
+                                        !formViewLayout.attrs.readonly &&
+                                        !formViewLayout.attrs.readonly &&
+                                        <div>
+                                            <Button
+                                                label="Save & Close"
+                                                size="small"
+                                                onClick={() => {
+                                                    setRedirectToList(true);
+                                                    showError()
+                                                }}
+                                                type="submit"
+                                            />
+                                        </div>
+                                    }
+                                    {params.embeded !== true &&
+                                        actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
+                                        !formViewLayout.attrs.readonly &&
+                                        !formViewLayout.attrs.readonly &&
+                                        <div>
+                                            <Button
+                                                size="small"
+                                                type="button"
+                                                label="Delete"
+                                                severity="danger"
+                                                onClick={() => setDeleteDialogVisible(true)}
+                                            />
+                                        </div>
+                                    }
+                                    {params.embeded == true &&
+                                        actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
+                                        !formViewLayout.attrs.readonly &&
+                                        !formViewLayout.attrs.readonly &&
+                                        <div>
+                                            <Button
+                                                size="small"
+                                                type="button"
+                                                label="Delete"
+                                                severity="danger"
+                                                onClick={() => setDeleteDialogVisible(true)}
+                                            />
+                                        </div>
+                                    }
+                                    {params.embeded == true &&
+                                        <Button outlined size="small" type="button" label="Cancel" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' />
 
+                                    }
+                                    {params.embeded !== true &&
+                                        <SolidCancelButton />
+                                    }
+                                </div>
+                            </>
+                        )}
+                    </div>
+                    <div className="solid-form-stepper">
+                        <SolidFormStepper />
+                    </div>
+                    <div className="p-4 solid-form-content">
+                        <div className="grid">
+                            <div className="col-8 mx-auto">
+                                {renderFormDynamically(formViewMetaData)}
                             </div>
                         </div>
-                    ) : (
-                        <div className="flex gap-3 justify-content-between mb-3">
-                            <div className="form-wrapper-title"> {editHeaderTitle}</div>
-                            <div className="gap-3 flex">
-                                {params.embeded !== true &&
-                                    actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
-                                    !formViewLayout.attrs.readonly &&
-                                    !formViewLayout.attrs.readonly &&
-                                    <div>
-                                        <Button
-                                            label="Save"
-                                            size="small"
-                                            onClick={() => showError()}
-                                            type="submit"
-                                            className="small-button"
-                                        />
-                                    </div>
-                                }
-                                {params.embeded == true &&
-                                    actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
-                                    !formViewLayout.attrs.readonly &&
-                                    !formViewLayout.attrs.readonly &&
-                                    <div>
-                                        <Button
-                                            label="Save"
-                                            size="small"
-                                            onClick={() => showError()}
-                                            type="submit"
-                                            className="small-button"
-                                        />
-                                    </div>
-                                }
-                                {params.embeded !== true &&
-                                    actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
-                                    !formViewLayout.attrs.readonly &&
-                                    !formViewLayout.attrs.readonly &&
-                                    <div>
-                                        <Button
-                                            label="Save & Close"
-                                            size="small"
-                                            onClick={() => {
-                                                setRedirectToList(true);
-                                                showError()
-                                            }}
-                                            type="submit"
-                                            className="small-button"
-                                        />
-                                    </div>
-                                }
-                                {params.embeded !== true &&
-                                    actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
-                                    !formViewLayout.attrs.readonly &&
-                                    !formViewLayout.attrs.readonly &&
-                                    <div>
-                                        <Button
-                                            size="small"
-                                            type="button"
-                                            label="Delete"
-                                            severity="danger"
-                                            onClick={() => setDeleteDialogVisible(true)}
-                                            className="small-button"
-                                        />
-                                    </div>
-                                }
-                                {params.embeded == true &&
-                                    actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
-                                    !formViewLayout.attrs.readonly &&
-                                    !formViewLayout.attrs.readonly &&
-                                    <div>
-                                        <Button
-                                            size="small"
-                                            type="button"
-                                            label="Delete"
-                                            severity="danger"
-                                            onClick={() => setDeleteDialogVisible(true)}
-                                            className="small-button"
-                                        />
-                                    </div>
-                                }
-                                {params.embeded == true &&
-                                    <Button outlined size="small" type="button" label="Cancel" severity="danger" onClick={() => params.handlePopupClose()} className='small-button' />
-
-                                }
-                                {params.embeded !== true &&
-                                    <SolidCancelButton />
-                                }
-                            </div>
-                        </div>
-                    )}
-                    {renderFormDynamically(formViewMetaData)}
-                </form>
+                    </div>
+                </form >
                 <Dialog
                     visible={isDeleteDialogVisible}
                     header="Confirm Delete"
@@ -813,7 +828,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 >
                     <p>Are you sure you want to delete?</p>
                 </Dialog>
-            </>
+            </div >
         );
 
     }

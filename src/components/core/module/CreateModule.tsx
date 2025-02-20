@@ -1,8 +1,11 @@
 "use client"
+import { BackButton } from "@/components/common/BackButton";
 import { CancelButton } from "@/components/common/CancelButton";
 import { DropzonePlaceholder } from "@/components/common/DropzonePlaceholder";
 import { DropzoneUpload } from "@/components/common/DropzoneUpload";
+import { FileReaderExt } from "@/components/common/FileReaderExt";
 import { SingleSelectAutoCompleteField } from "@/components/common/SingleSelectAutoCompleteField";
+import { SolidFormStepper } from "@/components/common/SolidFormStepper";
 import { getSingularAndPlural } from "@/helpers/helpers";
 import { handleError } from "@/helpers/ToastContainer";
 import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
@@ -16,6 +19,8 @@ import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Message } from "primereact/message";
+import { OverlayPanel } from "primereact/overlaypanel";
+import { ProgressBar } from "primereact/progressbar";
 import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
 import React, { useEffect, useRef, useState } from "react";
@@ -47,6 +52,17 @@ const CreateModule = ({ data }: any) => {
   const [menuIconPreview, setmenuIconPreview] = useState<
     string | ArrayBuffer | null
   >(null);
+  const [uploadProgress, setUploadProgress] = useState<number>(0);
+  const [uploadCompleted, setUploadCompleted] = useState<boolean>(false);
+  const [fileDetails, setFileDetails] = useState<{ name: string; type: string } | null>(null);
+  const [uploadedSize, setUploadedSize] = useState<string>("0 MB");
+  const [totalSize, setTotalSize] = useState<string>("0 KB");
+
+  const formatFileSize = (size: number) => {
+    return size >= 1024 * 1024
+      ? `${(size / (1024 * 1024)).toFixed(1)} MB`
+      : `${(size / 1024).toFixed(1)} KB`;
+  };
 
   const [
     CreateModule,
@@ -144,19 +160,38 @@ const CreateModule = ({ data }: any) => {
     },
   });
 
-
   const handleDropmenuIcon = (acceptedFiles: File[]) => {
     const file = acceptedFiles[0];
-    if (file) {
-      formik.setFieldValue("menuIconUrl", file);
+    if (!file) return;
 
-      // Show image preview
-      const reader = new FileReader();
-      reader.onloadend = () => setmenuIconPreview(reader.result);
-      reader.readAsDataURL(file);
-    } else {
-      console.error("No file was accepted");
-    }
+    setUploadCompleted(false);
+    setUploadProgress(0);
+    setTotalSize(formatFileSize(file.size));
+    setUploadedSize("0 KB");
+    setFileDetails({ name: file.name, type: file.type });
+
+    const reader = new FileReader();
+
+    reader.onloadstart = () => {
+      setUploadProgress(0);
+      setUploadedSize("0 KB");
+    };
+    reader.onprogress = (event) => {
+      if (event.loaded && event.total) {
+        const percent = Math.round((event.loaded / event.total) * 100);
+        setUploadProgress(percent);
+        setUploadedSize(formatFileSize(event.loaded));
+      }
+    };
+
+    reader.onloadend = () => {
+      setUploadProgress(100);
+      setUploadCompleted(true);
+      setUploadedSize(totalSize); // Set uploaded size to total size after completion
+    };
+
+    reader.readAsDataURL(file);
+    formik.setFieldValue("menuIconUrl", file);
   };
 
   const { getRootProps: getRootPropsmenuIcon, getInputProps: getInputPropsmenuIcon, isDragActive: isDragActivemenuIcon } = useDropzone({
@@ -170,16 +205,28 @@ const CreateModule = ({ data }: any) => {
   });
 
   useEffect(() => {
-    if (data && data?.menuIconUrl) {
+    if (data) {
       setmenuIconPreview(`${process.env.API_URL}/${data.menuIconUrl}`);
+
+      const fileName = data.menuIconUrl.split("/").pop(); // Extract filename from URL
+      setFileDetails({ name: fileName || "Unknown File", type: "Uploaded File" });
+
+      // Set the upload progress to 100% since the file is already uploaded
+      setUploadProgress(100);
+      setUploadCompleted(true);
+
+      // Ensure Formik has the existing file URL
+      formik.setFieldValue("menuIconUrl", data.menuIconUrl);
     }
   }, [data])
-
-  const handleDeleteMenuIcon = (e: React.MouseEvent) => {
+  const handleCancelUpload = (e: React.MouseEvent) => {
     e.stopPropagation();
-    setmenuIconPreview(null);
+    setUploadProgress(0);
+    setUploadCompleted(false);
+    setFileDetails(null);
     formik.setFieldValue("menuIconUrl", null);
-  }
+  };
+
 
   const deteleAction = async () => {
     deleteModule(data.id);
@@ -276,299 +323,284 @@ const CreateModule = ({ data }: any) => {
     });
   }, [isError, isModuleUpdateError, isModuleDeleteError, isMediaDeleteError])
 
+  const op = useRef(null);
 
-
+  const formActionDropdown = () => {
+    return (
+      <div>
+        <Button
+          outlined
+          severity="secondary"
+          type="button"
+          icon='pi pi-ellipsis-h'
+          size="small"
+          className="max-w-2rem bg-primary-reverse"
+          onClick={(e) =>
+            // @ts-ignore 
+            op.current.toggle(e)
+          }
+        />
+        <OverlayPanel ref={op} className="solid-custom-overlay" style={{ top: 10 }}>
+          <div className="flex flex-column gap-1 p-1">
+            <Button
+              text
+              type="button"
+              className="w-8rem text-left gap-2 text-color"
+              label="Duplicate"
+              size="small"
+              iconPos="left"
+              icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M6 11.9997C5.63333 11.9997 5.31944 11.8691 5.05833 11.608C4.79722 11.3469 4.66667 11.033 4.66667 10.6663V2.66634C4.66667 2.29967 4.79722 1.98579 5.05833 1.72467C5.31944 1.46356 5.63333 1.33301 6 1.33301H12C12.3667 1.33301 12.6806 1.46356 12.9417 1.72467C13.2028 1.98579 13.3333 2.29967 13.3333 2.66634V10.6663C13.3333 11.033 13.2028 11.3469 12.9417 11.608C12.6806 11.8691 12.3667 11.9997 12 11.9997H6ZM6 10.6663H12V2.66634H6V10.6663ZM3.33333 14.6663C2.96667 14.6663 2.65278 14.5358 2.39167 14.2747C2.13056 14.0136 2 13.6997 2 13.333V3.99967H3.33333V13.333H10.6667V14.6663H3.33333Z" fill="black" fill-opacity="0.88" />
+              </svg>}
+            />
+            <Button
+              text
+              type="button"
+              className="w-8rem text-left gap-2 text-color"
+              label="Delete"
+              size="small"
+              iconPos="left"
+              icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M4.66666 14C4.29999 14 3.9861 13.8694 3.72499 13.6083C3.46388 13.3472 3.33332 13.0333 3.33332 12.6667V4H2.66666V2.66667H5.99999V2H9.99999V2.66667H13.3333V4H12.6667V12.6667C12.6667 13.0333 12.5361 13.3472 12.275 13.6083C12.0139 13.8694 11.7 14 11.3333 14H4.66666ZM11.3333 4H4.66666V12.6667H11.3333V4ZM5.99999 11.3333H7.33332V5.33333H5.99999V11.3333ZM8.66666 11.3333H9.99999V5.33333H8.66666V11.3333Z" fill="#4B4D52" />
+              </svg>
+              }
+              onClick={deteleAction}
+            />
+          </div>
+        </OverlayPanel>
+      </div>
+    )
+  }
 
   return (
-    <div className="grid">
-      <div className="col-12 xl:col-12 mx-auto">
-        <div>
-          <Toast ref={toast} />
-          <form onSubmit={formik.handleSubmit}>
-            {pathname.includes('create') ?
-              <div className="flex gap-3 justify-content-between mb-5">
-                <div className="form-wrapper-title" style={{ color: '#000' }}> Create Module</div>
-
-                <div className="gap-3 flex">
-                  <div>
-                    <Button label="Save" size="small" onClick={() => showError()} type="submit" className="small-button" />
-                  </div>
-                  <CancelButton />
-                </div>
+    <div className="solid-form-wrapper">
+      <Toast ref={toast} />
+      <form onSubmit={formik.handleSubmit}>
+        <div className="solid-form-header">
+          {pathname.includes('new') ?
+            <>
+              <div className="flex align-items-center gap-3">
+                <BackButton />
+                <div className="form-wrapper-title">Create Module</div>
               </div>
-              :
-              <div className="flex gap-3 justify-content-between mb-5">
-                <div className="form-wrapper-title" style={{ color: '#000' }}> Edit Module</div>
-                <div className="gap-3 flex">
-                  {data?.isSystem !== true &&
-                    <>
-                      <div>
-                        <Button label="Save" size="small" onClick={() => showError()} type="submit" className="small-button" />
-                      </div>
-                      <div>
-                        <Button size="small" type="button" label="Delete" severity="danger" onClick={deteleAction} className="small-button" />
-                      </div>
-                    </>
-                  }
-                  <CancelButton />
-                </div>
+              <div className="gap-3 flex">
+                <Button label="Save" size="small" onClick={() => showError()} type="submit" />
+                <CancelButton />
               </div>
-            }
-            <div className="grid formgrid">
-              <div className="md:col-6 sm:col-12 mx-auto">
-                <div className="form-wrapper mt-4">
-                  <p className="form-wrapper-heading">Basic Info</p>
-                  <div className="grid formgrid">
-                    <div className="md:col-12 sm:col-12 mx-auto">
-                      <div className="field">
-                        <label htmlFor="displayName" className="form-label form-field-label">
-                          Display Name <span style={{ color: 'red' }}>*</span>
-                        </label>
-                        <InputText
-                          disabled={data ? true : false}
-                          type="text"
-                          id="displayName"
-                          name="displayName"
-                          // onChange={formik.handleChange}
-                          onChange={(e) => {
-
-                            formik.handleChange(e);
-                            const { toKebabCase, toSnakeCase, toPluralCamelCase } = getSingularAndPlural(e.target.value);
-                            if (pathname.includes('new')) {
-                              formik.setFieldValue("name", toKebabCase);
-                            }
-
-                          }}
-                          value={formik.values.displayName}
-                          className={classNames("p-inputtext-sm small-input w-full", {
-                            "p-invalid": isFormFieldValid(formik, "displayName"),
-                          })}
-                        />
-                        {isFormFieldValid(formik, "displayName") && (
-                          <Message
-                            severity="error"
-                            text={formik?.errors?.displayName?.toString()}
-                          />
-                        )}
-                      </div>
-                    </div>
-                    <div className="md:col-12 sm:col-12 mx-auto">
-                      <div className="field">
-                        <label htmlFor="name" className="form-label form-field-label">
-                          Name <span style={{ color: 'red' }}>*</span>
-                        </label>
-                        <InputText
-                          disabled
-                          type="text"
-                          id="name"
-                          name="name"
-                          onChange={formik.handleChange}
-                          value={formik.values.name}
-                          className={classNames("p-inputtext-sm small-input w-full", {
-                            "p-invalid": isFormFieldValid(formik, "name"),
-                          })}
-                        />
-                        {isFormFieldValid(formik, "name") && (
-                          <Message severity="error" text={formik?.errors?.name?.toString()} />
-                        )}
-                      </div>
-                    </div>
-                    <div className="md:col-12 sm:col-12 mx-auto">
-                      <div className="field">
-                        <label htmlFor="description" className="form-label form-field-label">
-                          Description <span style={{ color: 'red' }}>*</span>
-                        </label>
-                        <InputTextarea
-                          id="description"
-                          name="description"
-                          onChange={formik.handleChange}
-                          value={formik.values.description}
-                          className={classNames("p-inputtext-sm w-full", {
-                            "p-invalid": isFormFieldValid(formik, "description"),
-                          })}
-                          rows={5}
-                          cols={30}
-                        />
-                        {isFormFieldValid(formik, "description") && (
-                          <Message
-                            severity="error"
-                            text={formik?.errors?.description?.toString()}
-                          />
-                        )}
-                      </div>
-                    </div>
-
-                    <div className="md:col-12 sm:col-12 mx-auto">
-                      <div className="field">
-                        <label htmlFor="description" className="form-label form-field-label">
-                          Menu Sequence Number
-                        </label>
-                        <InputText
-                          id="menuSequenceNumber"
-                          type="number"
-                          onChange={formik.handleChange}
-                          min={0}
-                          value={formik.values.menuSequenceNumber}
-                          className={classNames("p-inputtext-sm w-full", {
-                            "p-invalid": isFormFieldValid(formik, "menuSequenceNumber"),
-                          })}
-                        />
-                        {isFormFieldValid(formik, "menuSequenceNumber") && (
-                          <Message
-                            severity="error"
-                            text={formik?.errors?.menuSequenceNumber?.toString()}
-                          />
-                        )}
-                      </div>
-                    </div>
-
-
-
-                  </div>
-                </div>
+            </>
+            :
+            <>
+              <div className="flex align-items-center gap-3">
+                <BackButton />
+                <div className="form-wrapper-title"> Edit Module</div>
               </div>
-              <div className="md:col-6 sm:col-12 mx-auto">
-                <div className="form-wrapper mt-4">
-                  <p className="form-wrapper-heading">Configurations</p>
-                  <div className="grid formgrid">
-
-                    <div className="md:col-12 sm:col-12 mx-auto">
-                      <div className="field">
-                        <label htmlFor="defaultDataSource" className="form-label form-field-label">
-                          Default Data Source
-                        </label>
-                        <SingleSelectAutoCompleteField
-                          disabled={data ? true : false}
-                          key="defaultDataSource"
-                          formik={formik}
-                          isFormFieldValid={isFormFieldValid}
-                          // relationField={false}
-                          fieldName="defaultDataSource"
-                          fieldNameId={null}
-                          labelKey="label"
-                          valueKey="value"
-                          className="small-input"
-                          searchData={serachDDefaultDataSource}
-                          existingData={formik.values.defaultDataSource}
-                        />
-                        {/* <Dropdown
-                      id="defaultDataSource"
-                      name="defaultDataSource"
-                      value={formik.values.defaultDataSource}
-                      options={dataSources}
-                      onChange={(e) =>
-                        formik.setFieldValue("defaultDataSource", e.value)
+              <div className="gap-3 flex">
+                {data?.isSystem !== true &&
+                  <>
+                    <Button label="Save" size="small" onClick={() => showError()} type="submit" />
+                    <CancelButton />
+                    {formActionDropdown()}
+                  </>
+                }
+              </div>
+            </>
+          }
+        </div>
+        <div className="solid-form-stepper">
+          <SolidFormStepper />
+        </div>
+        <div className="p-4 solid-form-content">
+          <div className="grid">
+            <div className="col-8 mx-auto">
+              <p className="form-wrapper-heading text-base">Basic Info</p>
+              <div className="formgrid grid">
+                <div className="field col-6 flex flex-column gap-2">
+                  <label htmlFor="displayName" className="form-field-label">
+                    Display Name <span style={{ color: 'red' }}>*</span>
+                  </label>
+                  <InputText
+                    disabled={data ? true : false}
+                    type="text"
+                    id="displayName"
+                    name="displayName"
+                    // onChange={formik.handleChange}
+                    onChange={(e) => {
+                      formik.handleChange(e);
+                      const { toKebabCase, toSnakeCase, toPluralCamelCase } = getSingularAndPlural(e.target.value);
+                      if (pathname.includes('new')) {
+                        formik.setFieldValue("name", toKebabCase);
                       }
-                      placeholder="Select a Data Source"
-                      className={classNames("p-inputtext-sm w-full", {
-                        "p-invalid": isFormFieldValid(
-                          formik,
-                          "defaultDataSource"
-                        ),
-                      })}
-                    /> */}
-                        {isFormFieldValid(formik, "defaultDataSource") && (
-                          <Message
-                            severity="error"
-                            text={formik?.errors?.defaultDataSource?.toString()}
-                          />
-                        )}
-                      </div>
-                    </div>
 
-                    <div className="md:col-12 sm:col-12">
-                      <div className="field">
-                        <label htmlFor="menuIconUrl" className="form-label form-field-label">
-                          Menu Icon <small className="text-red-500 helper-text">(only svg, png and jpeg are allowed)</small>
-                        </label>
-                        <div {...getRootPropsmenuIcon()} className="dropzone p-3 border-1 border-round surface-border">
-                          <input {...getInputPropsmenuIcon()} />
-                          {isDragActivemenuIcon ? (
-                            <DropzonePlaceholder />
-                          ) : (menuIconPreview ? (
-                            <div className="relative">
-                              <img src={menuIconPreview as string} alt="menuIcon Preview" style={{ maxWidth: "200px", maxHeight: "200px" }} />
-                              <Button
-                                type="button"
-                                onClick={(e) => {
-                                  e.stopPropagation();
-                                  // setImageDialogVisible(true);
-                                  handleDeleteMenuIcon(e)
-                                }}
-                                icon="pi pi-trash"
-                                severity="secondary"
-                                outlined
-                                aria-label="Bookmark"
-                                className="absolute right-0 top-0 bg-white z-5 m-2"
-                                style={{
-                                  height: 25,
-                                  width: 25
-                                }}
-                              />
-                              <DropzoneUpload />
-                            </div>
-                          ) : (<DropzonePlaceholder />)
-                          )}
-                        </div>
-                        <p className="text-xs text-color-secondary">Note : For optimal display, use an image with dimensions of 24px width and 24px height.</p>
-                        {isFormFieldValid(formik, "menuIconUrl") && (
-                          <Message severity="error" text={formik?.errors?.menuIconUrl?.toString()} />
-                        )}
-                      </div>
-                    </div>
-
-                    {/* 
-                    <div className="md:col-12 sm:col-12 mx-auto">
-                      <div className="field">
-                        <label htmlFor="menuIconUrl" className="form-label form-field-label">
-                          Menu Icon
-                        </label>
-                        <InputText
-                          type="text"
-                          id="menuIconUrl"
-                          name="menuIconUrl"
-                          onChange={formik.handleChange}
-                          value={formik.values.menuIconUrl}
-                          className={classNames("p-inputtext-sm small-input w-full", {
-                            "p-invalid": isFormFieldValid(formik, "menuIconUrl"),
-                          })}
-                        />
-                        {isFormFieldValid(formik, "menuIconUrl") && (
-                          <Message severity="error" text={formik?.errors?.menuIconUrl?.toString()} />
-                        )}
-                      </div>
-                    </div> */}
-                    {data &&
-                      <div className="md:col-6 sm:col-12 mt-4">
-                        <div className="field">
-                          <div className="flex align-items-center">
-                            <Checkbox
-                              name="isSystem"
-                              onChange={(e) => {
-                                formik.setFieldValue("isSystem", e.checked);
-                              }}
-                              checked={formik.values.isSystem}
-                            ></Checkbox>
-                            <label htmlFor="isSystem" className="form-field-label ml-2">
-                              Is System
-                            </label>
-                          </div>
-                          {isFormFieldValid(formik, "isSystem") && (
-                            <Message
-                              severity="error"
-                              text={formik?.errors?.isSystem?.toString()}
-                            />
-                          )}
-                        </div>
-                      </div>
-                    }
+                    }}
+                    value={formik.values.displayName}
+                    className={classNames("", {
+                      "p-invalid": isFormFieldValid(formik, "displayName"),
+                    })}
+                  />
+                  {isFormFieldValid(formik, "displayName") && (
+                    <Message
+                      severity="error"
+                      text={formik?.errors?.displayName?.toString()}
+                    />
+                  )}
+                </div>
+                <div className="field col-6 flex flex-column gap-2">
+                  <label htmlFor="name" className="form-field-label">
+                    Name <span style={{ color: 'red' }}>*</span>
+                  </label>
+                  <InputText
+                    disabled
+                    type="text"
+                    id="name"
+                    name="name"
+                    onChange={formik.handleChange}
+                    value={formik.values.name}
+                    className={classNames("", {
+                      "p-invalid": isFormFieldValid(formik, "name"),
+                    })}
+                  />
+                  {isFormFieldValid(formik, "name") && (
+                    <Message severity="error" text={formik?.errors?.name?.toString()} />
+                  )}
+                </div>
+              </div>
+              <div className="formgrid grid mt-4">
+                <div className="field col-6 flex flex-column gap-2">
+                  <label htmlFor="description" className="form-field-label">
+                    Menu Sequence Number
+                  </label>
+                  <InputText
+                    id="menuSequenceNumber"
+                    type="number"
+                    onChange={formik.handleChange}
+                    min={0}
+                    value={formik.values.menuSequenceNumber}
+                    className={classNames("", {
+                      "p-invalid": isFormFieldValid(formik, "menuSequenceNumber"),
+                    })}
+                  />
+                  {isFormFieldValid(formik, "menuSequenceNumber") && (
+                    <Message
+                      severity="error"
+                      text={formik?.errors?.menuSequenceNumber?.toString()}
+                    />
+                  )}
+                </div>
+                <div className="field col-6 flex flex-column gap-2">
+                  <label htmlFor="description" className="form-field-label">
+                    Description <span style={{ color: 'red' }}>*</span>
+                  </label>
+                  <InputTextarea
+                    id="description"
+                    name="description"
+                    onChange={formik.handleChange}
+                    value={formik.values.description}
+                    className={classNames("", {
+                      "p-invalid": isFormFieldValid(formik, "description"),
+                    })}
+                    rows={5}
+                    cols={30}
+                  />
+                  {isFormFieldValid(formik, "description") && (
+                    <Message
+                      severity="error"
+                      text={formik?.errors?.description?.toString()}
+                    />
+                  )}
+                </div>
+              </div>
+              <Divider />
+              <p className="form-wrapper-heading text-base" style={{ fontSize: 16 }}>Configurations</p>
+              <div className="formgrid grid">
+                <div className="field col-6 flex flex-column gap-2">
+                  <label htmlFor="defaultDataSource" className="form-field-label">
+                    Default Data Source
+                  </label>
+                  <SingleSelectAutoCompleteField
+                    disabled={data ? true : false}
+                    key="defaultDataSource"
+                    formik={formik}
+                    isFormFieldValid={isFormFieldValid}
+                    // relationField={false}
+                    fieldName="defaultDataSource"
+                    fieldNameId={null}
+                    labelKey="label"
+                    valueKey="value"
+                    searchData={serachDDefaultDataSource}
+                    existingData={formik.values.defaultDataSource}
+                  />
+                  {isFormFieldValid(formik, "defaultDataSource") && (
+                    <Message
+                      severity="error"
+                      text={formik?.errors?.defaultDataSource?.toString()}
+                    />
+                  )}
+                </div>
+                <div className="field col-6 flex flex-column gap-2">
+                  <label htmlFor="menuIconUrl" className="form-label form-field-label">
+                    Menu Icon <small className="text-red-500 helper-text">(only svg, png and jpeg are allowed)</small>
+                  </label>
+                  <div {...getRootPropsmenuIcon()} className="solid-dropzone-wrapper">
+                    <input {...getInputPropsmenuIcon()} />
+                    <DropzonePlaceholder />
                   </div>
+                  {isFormFieldValid(formik, "menuIconUrl") && (
+                    <Message severity="error" text={formik?.errors?.menuIconUrl?.toString()} />
+                  )}
+
+                  {fileDetails && (
+                    <div className="solid-file-upload-wrapper">
+                      <div className="flex align-items-center gap-2">
+                        <FileReaderExt fileDetails={fileDetails} />
+                        <div className="w-full flex flex-column gap-1">
+                          <div className="flex align-items-center justify-content-between">
+                            <div className="font-bold">{fileDetails.name}</div>
+                            <div className="cancel-upload-button" onClick={handleCancelUpload}>
+                              <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 6 6" fill="none">
+                                <path d="M0.6 6L0 5.4L2.4 3L0 0.6L0.6 0L3 2.4L5.4 0L6 0.6L3.6 3L6 5.4L5.4 6L3 3.6L0.6 6Z" fill="#4B4D52" />
+                              </svg>
+                            </div>
+                          </div>
+                          {
+                            uploadCompleted ?
+                              <div className="flex align-items-center gap-2 text-sm">
+                                {totalSize} of {totalSize}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="4" height="4" viewBox="0 0 4 4" fill="none">
+                                  <circle cx="2" cy="2" r="2" fill="#C1C1C1" />
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                  <mask id="mask0_2480_8635" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">
+                                    <rect width="20" height="20" fill="#D9D9D9" />
+                                  </mask>
+                                  <g mask="url(#mask0_2480_8635)">
+                                    <path d="M9.16 12.76L13.39 8.53L12.55 7.69L9.16 11.08L7.45 9.37L6.61 10.21L9.16 12.76ZM10 16C9.17 16 8.39 15.8424 7.66 15.5272C6.93 15.2124 6.295 14.785 5.755 14.245C5.215 13.705 4.7876 13.07 4.4728 12.34C4.1576 11.61 4 10.83 4 10C4 9.17 4.1576 8.39 4.4728 7.66C4.7876 6.93 5.215 6.295 5.755 5.755C6.295 5.215 6.93 4.7874 7.66 4.4722C8.39 4.1574 9.17 4 10 4C10.83 4 11.61 4.1574 12.34 4.4722C13.07 4.7874 13.705 5.215 14.245 5.755C14.785 6.295 15.2124 6.93 15.5272 7.66C15.8424 8.39 16 9.17 16 10C16 10.83 15.8424 11.61 15.5272 12.34C15.2124 13.07 14.785 13.705 14.245 14.245C13.705 14.785 13.07 15.2124 12.34 15.5272C11.61 15.8424 10.83 16 10 16Z" fill="#722ED1" />
+                                  </g>
+                                </svg>
+                                Completed
+                              </div>
+                              :
+                              <div className="flex align-items-center gap-2 text-sm">
+                                {uploadedSize} of {totalSize}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="4" height="4" viewBox="0 0 4 4" fill="none">
+                                  <circle cx="2" cy="2" r="2" fill="#C1C1C1" />
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                  <path d="M7.375 10.5V5.40625L5.75 7.03125L4.875 6.125L8 3L11.125 6.125L10.25 7.03125L8.625 5.40625V10.5H7.375ZM4.25 13C3.90625 13 3.61198 12.8776 3.36719 12.6328C3.1224 12.388 3 12.0938 3 11.75V9.875H4.25V11.75H11.75V9.875H13V11.75C13 12.0938 12.8776 12.388 12.6328 12.6328C12.388 12.8776 12.0938 13 11.75 13H4.25Z" fill="black" />
+                                </svg>
+                                Uploading ${uploadProgress}% Completed
+                              </div>
+                          }
+                        </div>
+                      </div>
+                      <ProgressBar value={uploadProgress} showValue={false} style={{ height: 4 }} className="mt-2" />
+                    </div>
+                  )}
                 </div>
               </div>
             </div>
-          </form>
+          </div>
         </div>
-      </div>
+      </form>
     </div>
   );
 };

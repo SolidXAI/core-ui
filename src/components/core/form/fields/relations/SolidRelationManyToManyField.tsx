@@ -97,7 +97,7 @@ export class SolidRelationManyToManyField implements ISolidField {
     render(formik: FormikObject) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'col-12 s-field';
+        const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
@@ -115,24 +115,26 @@ export class SolidRelationManyToManyField implements ISolidField {
 
 
         return (
-            <div className={className}>
-                <div className="s-input">
-                    {fieldLayoutInfo.attrs.renderMode === "checkbox" &&
-                        this.renderCheckBoxMode(formik, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
-                    }
-                    {(!fieldLayoutInfo.attrs.renderMode || fieldLayoutInfo.attrs.renderMode === "autocomplete") &&
-                        this.renderAutoCompleteMode(formik, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
-                    }
-                    {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (<Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />)}
-                </div>
-            </div>
+            <>
+                {/* <div className={className}> */}
+                {fieldLayoutInfo.attrs.renderMode === "checkbox" &&
+                    <div className={className}>
+                        {this.renderCheckBoxMode(formik, visibleCreateRelationEntity, setvisibleCreateRelationEntity)}
+                    </div>
+                }
+                {(!fieldLayoutInfo.attrs.renderMode || fieldLayoutInfo.attrs.renderMode === "autocomplete") &&
+                    this.renderAutoCompleteMode(formik, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
+                }
+                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (<Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />)}
+                {/* </div> */}
+            </>
         );
     }
 
     renderCheckBoxMode(formik: FormikObject, visibleCreateRelationEntity: any, setvisibleCreateRelationEntity: any) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'col-12 s-field';
+        const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
 
         // auto complete specific code. 
@@ -232,8 +234,10 @@ export class SolidRelationManyToManyField implements ISolidField {
 
             return (
                 <div className={className}>
-                    <div className="flex align-items-center gap-2">
-                        {capitalize(fieldLayoutInfo.attrs.name)}
+                    <div className="flex align-items-center gap-3">
+                        <label className="form-field-label">
+                            {capitalize(fieldLayoutInfo.attrs.name)}
+                        </label>
                         {fieldLayoutInfo.attrs.inlineCreate === "true" &&
                             this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
                         }
@@ -259,18 +263,18 @@ export class SolidRelationManyToManyField implements ISolidField {
         return (
             <div>
 
-                <Panel toggleable headerTemplate={headerTemplate} style={{ marginBottom: "30px" }}>
+                <Panel toggleable headerTemplate={headerTemplate}>
 
-                    <div style={{ display: "grid", gridTemplateColumns: "auto auto" }}>
-                        {autoCompleteItems && autoCompleteItems.map((a: any) => {
+                    <div className="formgrid grid">
+                        {autoCompleteItems && autoCompleteItems.map((a: any, i: number) => {
                             return (
-                                <div key={a.label} className="p-field-checkbox many-to-many-checkbox md:col-6 sm:col-12">
+                                <div key={a.label} className={`field col-6 flex gap-2 ${i >= 2 ? 'mt-3' : ''}`}>
                                     <Checkbox
                                         inputId={a.label}
                                         checked={formik.values[fieldLayoutInfo.attrs.name].some((item: any) => item.label === a.label)}
                                         onChange={() => handleCheckboxChange(a)}
                                     />
-                                    <label htmlFor={a.label}> {a.label}</label>
+                                    <label htmlFor={a.label} className="form-field-label m-0"> {a.label}</label>
                                 </div>
                             )
                         })}
@@ -285,7 +289,7 @@ export class SolidRelationManyToManyField implements ISolidField {
     renderAutoCompleteMode(formik: FormikObject, visibleCreateRelationEntity: any, setvisibleCreateRelationEntity: any) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'col-12 s-field';
+        const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
 
         // auto complete specific code. 
@@ -354,32 +358,24 @@ export class SolidRelationManyToManyField implements ISolidField {
 
         return (
             <div className={className}>
-                <div className="justify-content-center align-items-center">
-                    <label htmlFor={fieldLayoutInfo.attrs.name}>{fieldLabel}
+                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
 
-                    </label>
-                </div>
-                <div className="s-input">
-                    <div className="flex align-items-center justify-content-center">
-                        <AutoComplete
-                            readOnly={readOnly}
-                            disabled={disabled}
-                            multiple
-                            {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
-                            id={fieldLayoutInfo.attrs.name}
-                            field="label"
-                            value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                            dropdown
-                            className="w-full autocomplete-small-input"
-                            suggestions={autoCompleteItems}
-                            completeMethod={autoCompleteSearch}
-                            onChange={formik.handleChange} />
-                        {fieldLayoutInfo.attrs.inlineCreate === "true" &&
-                            this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
-                        }
-                    </div>
-
-                </div>
+                </label>
+                <AutoComplete
+                    readOnly={readOnly}
+                    disabled={disabled}
+                    multiple
+                    {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
+                    id={fieldLayoutInfo.attrs.name}
+                    field="label"
+                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                    dropdown
+                    suggestions={autoCompleteItems}
+                    completeMethod={autoCompleteSearch}
+                    onChange={formik.handleChange} />
+                {fieldLayoutInfo.attrs.inlineCreate === "true" &&
+                    this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
+                }
             </div>
         );
     }
@@ -388,7 +384,7 @@ export class SolidRelationManyToManyField implements ISolidField {
 
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'col-12 s-field';
+        const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
 
         const params = {
@@ -406,22 +402,25 @@ export class SolidRelationManyToManyField implements ISolidField {
             }),
             modelName: camelCase(this.fieldContext.fieldMetadata.relationModelSingularName)
         }
+        // console.log("fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ", fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width);
 
         return (
-            <div className="many-to-many-add" >
-                <Button icon="pi pi-plus"
+            <div >
+                <Button
+                    icon="pi pi-plus"
                     rounded
                     outlined
                     aria-label="Filter"
                     type="button"
+                    size="small"
                     onClick={() => setvisibleCreateRelationEntity(true)}
+                    className="custom-add-button"
                 />
                 <Dialog
                     header=""
                     showHeader={false}
                     visible={visibleCreateRelationEntity}
-                    className="many-to-many-creat-form-dialog"
-                    style={{ width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "40vw" }}
+                    style={{ width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw" }}
                     onHide={() => {
                         if (!visibleCreateRelationEntity) return;
                         setvisibleCreateRelationEntity(false);

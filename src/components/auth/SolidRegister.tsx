@@ -6,6 +6,7 @@ import { useFormik } from "formik";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
+import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import { Password } from "primereact/password";
@@ -13,6 +14,7 @@ import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
 import { ChangeEventHandler, useContext, useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
+import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import { LayoutContext } from "../layout/context/layoutcontext";
 
 const SolidRegister = () => {
@@ -113,25 +115,27 @@ const SolidRegister = () => {
         <>
             <Toast ref={toast} />
             <div className={`auth-container ${authLayout === 'Center' ? 'center' : 'side'}`}>
-                <div className="flex justify-content-center">
-                    <div className="solid-logo flex align-items-center gap-3">
-                        <img
-                            alt="solid logo"
-                            src={'/images/SS-Logo-1 1.png'}
-                            className="position-relative img-fluid"
-                        />
-                        <div>
-                            <p className="solid-logo-title">
-                                Solid<br />Starters
-                            </p>
+                {authLayout === 'Center' &&
+                    <div className="flex justify-content-center">
+                        <div className="solid-logo flex align-items-center gap-3">
+                            <img
+                                alt="solid logo"
+                                src={'/images/SS-Logo-1 1.png'}
+                                className="position-relative img-fluid"
+                            />
+                            <div>
+                                <p className="solid-logo-title">
+                                    Solid<br />Starters
+                                </p>
+                            </div>
                         </div>
                     </div>
-                </div>
-                <h2 className="solid-auth-title text-center">Sign Up To Your Account</h2>
-                <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p>
+                }
+                <h2 className={`solid-auth-title ${authLayout === 'Center' ? 'text-center' : 'text-left'}`}>Sign Up To Your Account</h2>
+                {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
                 <>
                     <form onSubmit={formik.handleSubmit}>
-                        <div className="grid">
+                        {/* <div className="grid">
                             <div className="col-6">
                                 <div className="flex flex-column gap-2">
                                     <label htmlFor="email" className="solid-auth-input-label">First Name</label>
@@ -166,6 +170,21 @@ const SolidRegister = () => {
                                     />}
                                 </div>
                             </div>
+                        </div> */}
+                        <div className="flex flex-column gap-2 mt-3">
+                            <label htmlFor="email" className="solid-auth-input-label">Username</label>
+                            <InputText
+                                id="username"
+                                name="username"
+                                placeholder="username"
+                                onChange={formik.handleChange}
+                                value={formik.values.username}
+                            />
+                            {isFormFieldValid(formik, "username") && <Message
+                                className="text-red-500 text-sm"
+                                severity="error"
+                                text={formik?.errors?.username?.toString()}
+                            />}
                         </div>
                         <div className="flex flex-column gap-2 mt-3">
                             <label htmlFor="email" className="solid-auth-input-label">Email</label>
@@ -204,10 +223,16 @@ const SolidRegister = () => {
                             />}
                         </div>
                         <div className="mt-4">
-                            <Button className="w-full font-light" label="Sign Up" />
+                            <Button className="w-full font-light auth-submit-button" label="Sign Up"  disabled={formik.isSubmitting} loading={formik.isSubmitting} />
                         </div>
                     </form>
                 </>
+                <Divider align="center">
+                    <div className="inline-flex align-items-center">
+                        or
+                    </div>
+                </Divider>
+                <SocialMediaLogin />
             </div>
             <div className="text-center mt-5">
                 <div className="text-sm text-400 secondary-dark-color">

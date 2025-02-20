@@ -1,5 +1,7 @@
 'use client';
+import { BackButton } from "@/components/common/BackButton";
 import { CancelButton } from "@/components/common/CancelButton";
+import { SolidFormStepper } from "@/components/common/SolidFormStepper";
 import { useRegisterPrivateMutation, useUpdateUserMutation } from "@/redux/api/authApi";
 import { useGetrolesQuery } from "@/redux/api/roleApi";
 import { useDeleteUserMutation } from "@/redux/api/userApi";
@@ -8,6 +10,7 @@ import { useFormik } from "formik";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
+import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import { Panel } from "primereact/panel";
@@ -24,7 +27,7 @@ interface ErrorResponseData {
   error: string;
 }
 
-const CreateUser = ({ data,params }: any) => {
+const CreateUser = ({ data, params }: any) => {
 
   const toast = useRef<Toast>(null);
   const pathname = usePathname();
@@ -231,186 +234,191 @@ const CreateUser = ({ data,params }: any) => {
   }, [isSuccess, isDeleteUserSuceess, isUpdateuserSuceess])
 
   return (
-    <div className="p-grid p-fluid">
+    <div className="solid-form-wrapper">
       <Toast ref={toast} />
-
       <form onSubmit={formik.handleSubmit}>
-        {params.id === "new" ? (
-          <div className="flex gap-3 justify-content-between mb-5">
-            <div className="form-wrapper-title">Create User</div>
-            <div className="gap-3 flex">
-              <Button label="Save" size="small" type="submit" className="small-button" />
-              <CancelButton />
-            </div>
-          </div>
-        ) : (
-          <div className="flex gap-3 justify-content-between mb-5">
-            <h1 className="m-0">Update User</h1>
-            <div className="gap-3 flex">
-              <Button label="Save" size="small" type="submit" className="small-button" />
-              {data &&
-                <Button outlined label="Delete" size="small" severity="danger" type="button" onClick={() => deleteUser(data.id)} className="small-button" />
-              }
-              <CancelButton />
-            </div>
-          </div>
-        )}
-        <div className="form-wrapper">
-          <div className="grid formgrid">
-            <div className="md:col-6 sm:col-12">
-              <div className="field">
-                <label htmlFor="fullName" className="form-label form-field-label">
-                  Full Name
-                </label>
-                <InputText
-                  type="text"
-                  id="fullName"
-                  name="fullName"
-                  autoComplete={"off"}
-                  onChange={formik.handleChange}
-                  value={formik.values.fullName}
-                  className={classNames("p-inputtext-sm w-full small-input", {
-                    "p-invalid": formik.touched.fullName && formik.errors.fullName,
-                  })}
-                />
-                {isFormFieldValid(formik, "fullName") && (
-                  <Message
-                    severity="error"
-                    text={formik?.errors?.fullName?.toString()}
-                  />
-                )}
+        <div className="solid-form-header">
+          {params.id === "new" ? (
+            <>
+              <div className="flex align-items-center gap-3">
+                <BackButton />
+                <div className="form-wrapper-title">Create User</div>
               </div>
-            </div>
-            <div className="md:col-6 sm:col-12">
-              <div className="field">
-                <label htmlFor="username" className="form-label form-field-label">
-                  Username
-                </label>
-                <InputText
-                  type="text"
-                  id="username"
-                  name="username"
-                  autoComplete={"off"}
-                  disabled={data ? true : false}
-                  onChange={formik.handleChange}
-                  value={formik.values.username}
-                  className={classNames("p-inputtext-sm w-full small-input", {
-                    "p-invalid": formik.touched.username && formik.errors.username,
-                  })}
-                />
-                {isFormFieldValid(formik, "username") && (
-                  <Message
-                    severity="error"
-                    text={formik?.errors?.username?.toString()}
-                  />
-                )}
+              <div className="gap-3 flex">
+                <Button label="Save" size="small" type="submit" />
+                <CancelButton />
               </div>
-            </div>
-            <div className="md:col-6 sm:col-12">
-              <div className="field">
-                <label htmlFor="email" className="form-label form-field-label">
-                  Email
-                </label>
-                <InputText
-                  type="text"
-                  id="email"
-                  name="email"
-                  autoComplete={"off"}
-                  disabled={data ? true : false}
-                  onChange={formik.handleChange}
-                  value={formik.values.email}
-                  className={classNames("p-inputtext-sm w-full small-input", {
-                    "p-invalid": formik.touched.email && formik.errors.email,
-                  })}
-                />
-                {isFormFieldValid(formik, "email") && (
-                  <Message
-                    severity="error"
-                    text={formik?.errors?.email?.toString()}
-                  />
-                )}
+            </>
+          ) : (
+            <>
+              <div className="flex align-items-center gap-3">
+                <BackButton />
+                <h1 className="m-0">Update User</h1>
               </div>
-            </div>
-            <div className="md:col-6 sm:col-12">
-              <div className="field">
-                <label htmlFor="mobile" className="form-label form-field-label">
-                  Mobile
-                </label>
-                <InputText
-                  type="text"
-                  id="mobile"
-                  name="mobile"
-                  autoComplete={"off"}
-                  onChange={formik.handleChange}
-                  value={formik.values.mobile}
-                  className={classNames("p-inputtext-sm w-full small-input", {
-                    "p-invalid": formik.touched.mobile && formik.errors.mobile,
-                  })}
-                />
-                {isFormFieldValid(formik, "mobile ") && (
-                  <Message
-                    severity="error"
-                    text={formik?.errors?.mobile?.toString()}
-                  />
-                )}
+              <div>
+                <div className="gap-3 flex">
+                  <Button label="Save" size="small" type="submit" />
+                  {data &&
+                    <Button outlined label="Delete" size="small" severity="danger" type="button" onClick={() => deleteUser(data.id)} />
+                  }
+                  <CancelButton />
+                </div>
               </div>
-            </div>
-            <div className="md:col-6 sm:col-12">
-              <div className="field">
-                <label htmlFor="Password" className="form-label form-field-label">
-                  Password
-                </label>
-                <Password
-                  id="password"
-                  autoComplete="off"
-                  aria-autocomplete="none"
-                  value={formik.values.password}
-                  onChange={(e) => {
-                    formik.setFieldValue("password", e.target.value);
-                  }}
-                  toggleMask
-                  className={classNames("p-inputtext-sm w-full small-input", {
-                    "p-invalid": isFormFieldValid(formik, "name"),
-                  })}
-
-                  inputClassName="w-full"
-                  feedback={false}
-                />
-                {isFormFieldValid(formik, "password") && (
-                  <Message
-                    severity="error"
-                    text={formik?.errors?.password?.toString()}
-                  />
-                )}
-              </div>
-            </div>
-
-          </div>
+            </>
+          )}
         </div>
-
-        <div className="form-wrapper">
-          <div className="p-col-12 p-md-6">
-            <h2>Roles</h2>
-            <Panel toggleable header="Roles" style={{ marginBottom: "30px" }}>
-              <div style={{ display: "grid", gridTemplateColumns: "auto auto" }}>
-                {rolesData?.data?.records && rolesData?.data?.records.map((role: any) => (
-                  <div key={role.name} className="p-field-checkbox md:col-6 sm:col-12">
-                    <Checkbox
-                      inputId={role.name}
-                      checked={selectedRoles.includes(role.name)}
-                      onChange={() => handleCheckboxChange(role.name)}
-                      disabled={data ? true : false}
+        <div className="solid-form-stepper">
+          <SolidFormStepper />
+        </div>
+        <div className="p-4 solid-form-content">
+          <div className="grid">
+            <div className="col-8 mx-auto">
+              <p className="form-wrapper-heading text-base">Basic Info</p>
+              <div className="grid formgrid">
+                <div className="field col-6 flex flex-column gap-2">
+                  <label htmlFor="fullName" className="form-field-label">
+                    Full Name
+                  </label>
+                  <InputText
+                    type="text"
+                    id="fullName"
+                    name="fullName"
+                    autoComplete={"off"}
+                    onChange={formik.handleChange}
+                    value={formik.values.fullName}
+                    className={classNames("", {
+                      "p-invalid": formik.touched.fullName && formik.errors.fullName,
+                    })}
+                  />
+                  {isFormFieldValid(formik, "fullName") && (
+                    <Message
+                      severity="error"
+                      text={formik?.errors?.fullName?.toString()}
                     />
-                    <label htmlFor={role.name}> {role.name}</label>
-                  </div>
-                ))}
+                  )}
+                </div>
+                <div className="field col-6 flex flex-column gap-2">
+                  <label htmlFor="username" className="form-field-label">
+                    Username
+                  </label>
+                  <InputText
+                    type="text"
+                    id="username"
+                    name="username"
+                    autoComplete={"off"}
+                    disabled={data ? true : false}
+                    onChange={formik.handleChange}
+                    value={formik.values.username}
+                    className={classNames("", {
+                      "p-invalid": formik.touched.username && formik.errors.username,
+                    })}
+                  />
+                  {isFormFieldValid(formik, "username") && (
+                    <Message
+                      severity="error"
+                      text={formik?.errors?.username?.toString()}
+                    />
+                  )}
+                </div>
+                <div className="field col-6 flex flex-column gap-2 mt-4">
+                  <label htmlFor="email" className="form-field-label">
+                    Email
+                  </label>
+                  <InputText
+                    type="text"
+                    id="email"
+                    name="email"
+                    autoComplete={"off"}
+                    disabled={data ? true : false}
+                    onChange={formik.handleChange}
+                    value={formik.values.email}
+                    className={classNames("", {
+                      "p-invalid": formik.touched.email && formik.errors.email,
+                    })}
+                  />
+                  {isFormFieldValid(formik, "email") && (
+                    <Message
+                      severity="error"
+                      text={formik?.errors?.email?.toString()}
+                    />
+                  )}
+                </div>
+                <div className="field col-6 flex flex-column gap-2 mt-4">
+                  <label htmlFor="mobile" className="form-field-label">
+                    Mobile
+                  </label>
+                  <InputText
+                    type="text"
+                    id="mobile"
+                    name="mobile"
+                    autoComplete={"off"}
+                    onChange={formik.handleChange}
+                    value={formik.values.mobile}
+                    className={classNames("", {
+                      "p-invalid": formik.touched.mobile && formik.errors.mobile,
+                    })}
+                  />
+                  {isFormFieldValid(formik, "mobile ") && (
+                    <Message
+                      severity="error"
+                      text={formik?.errors?.mobile?.toString()}
+                    />
+                  )}
+                </div>
+                <div className="field col-6 flex flex-column gap-2 my-4">
+                  <label htmlFor="Password" className="form-field-label">
+                    Password
+                  </label>
+                  <Password
+                    id="password"
+                    autoComplete="off"
+                    aria-autocomplete="none"
+                    value={formik.values.password}
+                    onChange={(e) => {
+                      formik.setFieldValue("password", e.target.value);
+                    }}
+                    toggleMask
+                    className={classNames("", {
+                      "p-invalid": isFormFieldValid(formik, "name"),
+                    })}
+
+                    inputClassName="w-full"
+                    feedback={false}
+                  />
+                  {isFormFieldValid(formik, "password") && (
+                    <Message
+                      severity="error"
+                      text={formik?.errors?.password?.toString()}
+                    />
+                  )}
+                </div>
+
               </div>
-            </Panel>
+
+              <Divider />
+              <p className="form-wrapper-heading text-base" style={{ fontSize: 16 }}>Roles</p>
+              <Panel toggleable header="Roles">
+                <div className="formgrid grid">
+                  {rolesData?.data?.records && rolesData?.data?.records.map((role: any, i: number) => (
+                    <div key={role.name} className={`field col-6 flex gap-2 ${i >= 2 ? 'mt-3' : ''}`}>
+                      <Checkbox
+                        inputId={role.name}
+                        checked={selectedRoles.includes(role.name)}
+                        onChange={() => handleCheckboxChange(role.name)}
+                        disabled={data ? true : false}
+                      />
+                      <label htmlFor={role.name}> {role.name}</label>
+                    </div>
+                  ))}
+                </div>
+              </Panel>
+            </div>
           </div>
         </div>
       </form>
     </div>
   );
 };
+
 
 export default CreateUser;

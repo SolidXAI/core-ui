@@ -53,11 +53,9 @@ const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column }: 
             filterPlaceholder={`Search by ${fieldMetadata.displayName}`}
             style={{ minWidth: "12rem" }}
             headerClassName="table-header-fs"
-            // body={(data)=>{
-            //     console.log("DAta", data);
-                
-            //     return <div className="solid-table-row">{data.name}</div>
-            // }}
+            body={(rowData) => {
+                return <div className="solid-table-row">{rowData[fieldMetadata.name]}</div>;
+            }}
         ></Column>
     );
 
