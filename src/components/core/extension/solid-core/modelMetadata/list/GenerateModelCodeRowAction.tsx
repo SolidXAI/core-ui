@@ -4,7 +4,6 @@ import { Button } from "primereact/button";
 
 
 const GenerateModelCodeRowAction = ({ context }: any) => {
-
     const [
         generateCode,
         { isLoading: isGenerateCodeUpdating, isSuccess: isGenerateCodeSuceess, isError: isGenerateCodeError, error: generateCodeError, data: generateCodeData },
@@ -12,7 +11,7 @@ const GenerateModelCodeRowAction = ({ context }: any) => {
 
 
     const generateCodeHandler = async () => {
-        const response = await generateCode({ id: context.rowData.id })
+        const response = await generateCode({ id: context?.rowData?.id })
         context.closeListViewRowActionPopup();
         console.log("response", response);
     }
