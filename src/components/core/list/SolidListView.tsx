@@ -30,6 +30,7 @@ import { SolidLayoutViews } from '../common/SolidLayoutViews'
 import { SolidConfigureLayoutElement } from '../common/SolidConfigureLayoutElement'
 import { FilterIcon } from '../../modelsComponents/filterIcon';
 import { OverlayPanel } from "primereact/overlaypanel";
+import { Toast } from "primereact/toast";
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -94,7 +95,10 @@ export const SolidListView = (params: SolidListViewParams) => {
     useLazyGetSolidEntitiesQuery,
     useLazyGetSolidEntityByIdQuery,
     usePrefetch,
-    useUpdateSolidEntityMutation
+    useUpdateSolidEntityMutation,
+    useRecoverSolidEntityByIdQuery,
+    useLazyRecoverSolidEntityByIdQuery,
+    useRecoverSolidEntityMutation
   } = entityApi;
 
   // Get the list view layout & metadata first. 
@@ -109,7 +113,6 @@ export const SolidListView = (params: SolidListViewParams) => {
     isError: solidListViewMetaDataIsError,
     refetch
   } = useGetSolidViewLayoutQuery(listViewMetaDataQs);
-
 
   const initialFilterMethod = () => {
 
@@ -179,24 +182,30 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [sortField, setSortField] = useState("");
   const [sortOrder, setSortOrder] = useState(0);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
+  const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isDialogVisible, setDialogVisible] = useState(false);
+  const [isRecoverDialogVisible, setRecoverDialogVisible] = useState(false);
   const [createButtonUrl, setCreateButtonUrl] = useState<string>();
   const [editButtonUrl, setEditButtonUrl] = useState<string>();
+  const [showArchived, setShowArchived] = useState(false);
 
   // Custom Row Action
   const [listViewRowActionPopupState, setListViewRowActionPopupState] = useState(false);
   const [listViewRowActionData, setListRowActionData] = useState<any>();
 
+  const toast = useRef<Toast>(null);
+
   // Get the list view data.
   const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading, error }] = useLazyGetSolidEntitiesQuery();
 
+  const [triggerRecoverSolidEntitiesById, { data: recoverByIdData, isLoading: recoverByIdIsLoading, error: recoverByIdError, isError: recoverByIdIsError, isSuccess: recoverByIdIsSuccess }] = useLazyRecoverSolidEntityByIdQuery();
 
+  const [triggerRecoverSolidEntities, { data: recoverByData, isLoading: recoverByIsLoading, error: recoverError, isError: recoverIsError, isSuccess: recoverByIsSuccess }] = useRecoverSolidEntityMutation();
 
   // After data is fetched populate the list view state so as to be able to render the data. 
   useEffect(() => {
     if (solidEntityListViewData) {
-
       setListViewData(solidEntityListViewData?.records);
       setTotalRecords(solidEntityListViewData?.meta.totalRecords);
       setLoading(false);
@@ -231,6 +240,27 @@ export const SolidListView = (params: SolidListViewParams) => {
     },
   ] = useDeleteMultipleSolidEntitiesMutation();
 
+  // Fetch Soft Deleted data
+  useEffect(() => {
+    const queryData = {
+      offset: 0,
+      limit: 25,
+      populate: toPopulate,
+      sort: [`id:desc`],
+    };
+    if (showArchived) {
+      queryData.showSoftDeleted = 'true';
+    }
+    const queryString = qs.stringify(queryData, {
+      encodeValuesOnly: true
+    });
+
+    triggerGetSolidEntities(queryString);
+    setSelectedRecords([]);
+    setSelectedRecoverRecords([]);
+  }, [showArchived, recoverByIdIsSuccess, recoverByIsSuccess]);
+
+
   // Fetch data after toPopulate has been populated...
   useEffect(() => {
     if (toPopulate) {
@@ -250,6 +280,8 @@ export const SolidListView = (params: SolidListViewParams) => {
 
       triggerGetSolidEntities(queryString);
       setSelectedRecords([]);
+      setSelectedRecoverRecords([]);
+      setShowArchived(false);
     }
   }, [isDeleteSolidEntitiesSucess, isDeleteSolidSingleEntitySuccess, toPopulate]);
 
@@ -279,7 +311,11 @@ export const SolidListView = (params: SolidListViewParams) => {
   // handle change in the records which are currently selected...
   const onSelectionChange = (event: any) => {
     const value = event.value;
-    setSelectedRecords(value);
+    const activeRecords = value.filter((record: any) => record.deletedAt === null);
+    const deletedRecords = value.filter((record: any) => record.deletedAt !== null);
+
+    setSelectedRecords(activeRecords);
+    setSelectedRecoverRecords(deletedRecords);
   };
 
   const identifySolidOperatorAndValue = (primeReactMatchMode: FilterMatchMode, value: any): { operator: string, value: string | string[] | any[] } => {
@@ -475,6 +511,51 @@ export const SolidListView = (params: SolidListViewParams) => {
     );
   };
 
+  // Recover functions
+  const recoverById = (id) => {
+    triggerRecoverSolidEntitiesById(id);
+  }
+
+  const recoverAll = () => {
+    let recoverList: any = [];
+    selectedRecoverRecords.forEach((element: any) => {
+      recoverList.push(element.id);
+    });
+    triggerRecoverSolidEntities(recoverList);
+    setRecoverDialogVisible(false);
+  }
+
+  useEffect(() => {
+    if (recoverIsError || recoverByIdIsError) {
+      showError(recoverByIdIsError ? recoverByIdError : recoverError);
+    }
+  }, [recoverIsError, recoverByIdIsError])
+
+  const showError = async (error) => {
+    const errorMessages = error?.data?.message;
+    if (errorMessages.length > 0) {
+      toast?.current?.show({
+        severity: "error",
+        summary: "Can you send me the report?",
+        // sticky: true,
+        life: 3000,
+        //@ts-ignore
+        content: (props) => (
+          <div
+            className="flex flex-column align-items-left"
+            style={{ flex: "1" }}
+          >
+            {errorMessages.map((m, index) => (
+              <div className="flex align-items-center gap-2" key={index}>
+                <span className="font-bold text-900">{String(m)}</span>
+              </div>
+            ))}
+          </div>
+        ),
+      });
+    }
+  };
+
   // handle bulk deletion
   const deleteBulk = () => {
     let deleteList: any = [];
@@ -490,6 +571,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const onDeleteClose = () => {
     setDialogVisible(false);
     setSelectedRecords([]);
+    setSelectedRecoverRecords([]);
   }
 
   // Render columns dynamically based on metadata
@@ -542,6 +624,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   return (
     <>
       <div className="page-header">
+      <Toast ref={toast} />
         <div className="flex gap-3 align-items-center">
 
 
@@ -566,7 +649,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           }
 
           {solidListViewMetaData?.data?.solidView?.layout?.attrs?.enableGlobalSearch === true && params.embeded === false &&
-            <SolidGlobalSearchElement ref={solidGlobalSearchElementRef} viewData={solidListViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
+            <SolidGlobalSearchElement ref={solidGlobalSearchElementRef} viewData={solidListViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  setShowArchived={setShowArchived} showArchived={showArchived}></SolidGlobalSearchElement>
           }
         </div>
         <div className="flex align-items-center gap-3">
@@ -580,6 +663,9 @@ export const SolidListView = (params: SolidListViewParams) => {
               onClick={() => params.handlePopUpOpen(true)}
             ></Button>
           }
+          {showArchived && <Button type="button" icon="pi pi-refresh" label="Recover" size='small' severity="warning"
+              onClick={() => setRecoverDialogVisible(true)}
+          ></Button>}
           <SolidLayoutViews
             sizeOptions={sizeOptions}
             setSize={setSize}
@@ -596,10 +682,13 @@ export const SolidListView = (params: SolidListViewParams) => {
           } */}
         </div>
       </div>
-      <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
+      <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);} .greyed-out-row { background-color: #f5f5f5 !important; color: #a0a0a0 !important; opacity: 0.6;}`}</style>
       <div className="solid-datatable-wrapper">
         <DataTable
           value={listViewData}
+          rowClassName={(rowData) => {
+            return rowData.deletedAt ? "greyed-out-row" : "";
+          }}
           showGridlines={false}
           lazy
           scrollable
@@ -620,7 +709,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           sortOrder={sortOrder === 1 || sortOrder === -1 ? sortOrder : 0}
           loading={loading || isLoading}
           loadingIcon="pi pi-spinner"
-          selection={selectedRecords}
+          selection={[...selectedRecords, ...selectedRecoverRecords]}
           onSelectionChange={onSelectionChange}
           selectionMode="multiple"
           removableSort
@@ -635,7 +724,14 @@ export const SolidListView = (params: SolidListViewParams) => {
 
           {renderColumnsDynamically(listViewMetaData)}
           {actionsAllowed.includes(`${updatePermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.edit !== false &&
-            <Column body={detailsBodyTemplate} ></Column>
+            <Column body={(rowData) => (
+              rowData.deletedAt ? (
+                <a onClick={() => recoverById(rowData.id)} className="retrieve-button">
+                  <i className="pi pi-refresh" style={{ fontSize: "1rem" }}/>
+                </a>
+              ) :
+                detailsBodyTemplate(rowData)
+            )}></Column>
           }
           {solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons &&
             solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons.map((rowAction: any) => {
@@ -678,6 +774,20 @@ export const SolidListView = (params: SolidListViewParams) => {
         <p>Are you sure you want to delete the selected records?</p>
       </Dialog>
 
+      <Dialog
+        visible={isRecoverDialogVisible}
+        header="Confirm Recover"
+        modal
+        footer={() => (
+          <div className="flex justify-content-center">
+            <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={recoverAll} />
+            <Button label="No" icon="pi pi-times" className='small-button' onClick={() => setRecoverDialogVisible(false)} />
+          </div>
+        )}
+        onHide={() => setRecoverDialogVisible(false)}
+      >
+        <p>Are you sure you want to recover all records?</p>
+      </Dialog>
 
       {listViewRowActionData &&
         <Dialog

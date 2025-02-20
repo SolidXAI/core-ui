@@ -2622,9 +2622,10 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                               )}
                             </div>
                         )}
-                        {currentFields.includes("isSystem") && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
-                              <div className="flex align-items-center gap-2">
+                        {/* {currentFields.includes("isSystem") && (
+                          <div className="md:col-6 sm:col-12">
+                            <div className="field">
+                              <div className="flex align-items-center">
                                 <Checkbox
                                   name="isSystem"
                                   onChange={(e) => {
@@ -2643,7 +2644,8 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                 />
                               )}
                             </div>
-                        )}
+                          </div>
+                        )} */}
                         {currentFields.includes("isUserKey") && (
                          <div className="field col-6 flex-flex-column gap-2 mt-3">
                          <div className="flex align-items-center gap-2">

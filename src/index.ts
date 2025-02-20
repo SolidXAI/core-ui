@@ -592,6 +592,7 @@ export { default as popupReducer } from '@/redux/features/popupSlice';
 export { default as themeReducer } from '@/redux/features/themeSlice';
 export { default as userReducer } from '@/redux/features/userSlice';
 
+export {default as GenerateModelCodeRowAction } from '@/components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction'
 
 // types
 export type { LayoutConfig } from '@/types';

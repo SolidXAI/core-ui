@@ -69,6 +69,17 @@ export const createSolidEntityApi = (entityName: string) => {
                     method: 'DELETE',
                 }),
             }),
+            recoverSolidEntityById: builder.query({
+                query: (id) => `/${kebabEntityName}/recover/${id}`,
+            }),
+            recoverSolidEntity: builder.mutation({
+                query: (data) => ({
+                    url: `/${kebabEntityName}/bulk-recover/`,
+                    method: 'POST',
+                    body: data
+                })
+
+            }),
         }),
     });
 };

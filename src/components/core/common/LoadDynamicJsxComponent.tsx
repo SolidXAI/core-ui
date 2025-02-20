@@ -1,6 +1,7 @@
 'use client';
 import dynamic from "next/dynamic";
 import path from "path";
+import GenerateModelCodeRowAction from "../extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction";
 
 // Fallback component for missing components
 const FallbackComponent = ({ componentName }: any) => (
@@ -31,7 +32,7 @@ export const LoadDynamicJsxComponent = ({ context }: any) => {
             } catch (error) {
                 console.error(`Failed to load component "${context?.rowAction?.action?.customComponent}":`, error);
                 // Return a fallback component if the import fails
-                return () => <FallbackComponent componentName={context?.rowAction?.action?.customComponent} />;
+                return () => <GenerateModelCodeRowAction context={context} />;
             }
         },
         { ssr: false } // Disable server-side rendering
