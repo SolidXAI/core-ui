@@ -323,12 +323,12 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
                   "Max must be greater than Min",
                   function (value) {
                     const { min } = this.parent; // Access sibling field 'min'
-                    if (min != null && value == null) {
-                      // Trigger error if Min is filled but Max is empty
-                      return this.createError({
-                        message: "Max is required if Min is specified",
-                      });
-                    }
+                    // if (min != null && value == null) {
+                    //   // Trigger error if Min is filled but Max is empty
+                    //   return this.createError({
+                    //     message: "Max is required if Min is specified",
+                    //   });
+                    // }
                     return value == null || value > min; // Validate only if Max exists
                   }
                 );
@@ -345,12 +345,12 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
                   "Max must be greater than Min",
                   function (value) {
                     const { min } = this.parent; // Access sibling field 'min'
-                    if (min != null && value == null) {
-                      // Trigger error if Min is filled but Max is empty
-                      return this.createError({
-                        message: "Max is required if Min is specified",
-                      });
-                    }
+                    // if (min != null && value == null) {
+                    //   // Trigger error if Min is filled but Max is empty
+                    //   return this.createError({
+                    //     message: "Max is required if Min is specified",
+                    //   });
+                    // }
                     return value == null || value > min; // Validate only if Max exists
                   }
                 );
@@ -1117,7 +1117,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
               <div className="p-d-flex p-jc-center creat-field-for form-dem">
                 <div className="p-fluid" style={{ position: 'relative' }}>
                   <div className="mb-3">
-                    <div className="form-wrapper-title">Add a new {capitalize(selectedType.value)} Field</div>
+                    <div className="form-wrapper-title">{fieldMetaData ? `Edit ${capitalize(selectedType.value)} Field` : `Add a new ${capitalize(selectedType.value)} Field`}</div>
                   </div>
 
 

@@ -113,14 +113,9 @@ const FieldMetaData = ({ modelMetaData, fieldMetaData, setFieldMetaData, deleteM
             <Column field="name" header="Name" headerClassName="table-header-fs"></Column>
             <Column field="type" header="Type" headerClassName="table-header-fs"></Column>
 
-            {modelMetaData.isSystem !== true && (
-              <Column 
-                body={(rowData) => (!rowData.id ? editTemplate(rowData) : null)} 
-                header="Edit" 
-                headerClassName="table-header-fs" 
-                style={{ width: '10%' }} 
-              />
-            )}
+            {modelMetaData.isSystem !== true &&
+              <Column body={editTemplate} header="Edit" headerClassName="table-header-fs" style={{ width: '10%' }} />
+            }
             {modelMetaData.isSystem !== true &&
               <Column body={deleteTemplate} header="Delete" headerClassName="table-header-fs" style={{ width: '10%' }} />
             }
@@ -140,7 +135,12 @@ const FieldMetaData = ({ modelMetaData, fieldMetaData, setFieldMetaData, deleteM
           </Dialog>
           <Dialog
             visible={isRequiredPopUp}
-            header="Warning"
+            header={(
+              <div className="flex align-items-center">
+                <i className="pi pi-exclamation-triangle text-yellow-500 text-xl mr-2"></i>
+                <span>Warning</span>
+              </div>
+            )}
             headerClassName="text-center"
             modal
             footer={() => (
