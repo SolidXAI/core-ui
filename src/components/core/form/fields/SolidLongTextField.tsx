@@ -21,7 +21,12 @@ export class SolidLongTextField implements ISolidField {
     }
 
     initialValue(): any {
-        return this.fieldContext.data[this.fieldContext.field.attrs.name];
+        const fieldName = this.fieldContext.field.attrs.name;
+        const fieldDefaultValue = this.fieldContext?.fieldMetadata?.defaultValue;
+    
+        const existingValue = this.fieldContext.data[fieldName];
+    
+        return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
     }
 
     validationSchema(): Schema {

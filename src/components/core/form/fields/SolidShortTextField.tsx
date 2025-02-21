@@ -21,8 +21,14 @@ export class SolidShortTextField implements ISolidField {
     }
 
     initialValue(): any {
-        return this.fieldContext.data[this.fieldContext.field.attrs.name];
+        const fieldName = this.fieldContext.field.attrs.name;
+        const fieldDefaultValue = this.fieldContext?.fieldMetadata?.defaultValue;
+    
+        const existingValue = this.fieldContext.data[fieldName];
+    
+        return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
     }
+    
 
     validationSchema(): Schema {
         let schema: Yup.StringSchema<string | null | undefined> = Yup.string();
@@ -62,7 +68,7 @@ export class SolidShortTextField implements ISolidField {
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
-
+        console.log('fieldMetadata', fieldMetadata);
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
         const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
