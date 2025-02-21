@@ -1,21 +1,33 @@
 'use client';
 import { useGenerateCodeForModelMutation } from "@/redux/api/modelApi";
+import { useSeederMutation } from "@/redux/api/testApi";
 import { Button } from "primereact/button";
+import { useEffect } from "react";
 
 
 const GenerateModelCodeRowAction = ({ context }: any) => {
-
     const [
         generateCode,
         { isLoading: isGenerateCodeUpdating, isSuccess: isGenerateCodeSuceess, isError: isGenerateCodeError, error: generateCodeError, data: generateCodeData },
     ] = useGenerateCodeForModelMutation();
 
+    const [triggerSeeder, {data}] = useSeederMutation();
+
 
     const generateCodeHandler = async () => {
-        const response = await generateCode({ id: context.rowData.id })
+        const response = await generateCode({ id: context?.rowData?.id });
         context.closeListViewRowActionPopup();
         console.log("response", response);
     }
+
+    useEffect(() => {
+        const seeder = async () => {
+            if(isGenerateCodeSuceess) {
+                await triggerSeeder("ModuleMetadataSeederService");
+            }
+        }
+        seeder();
+    }, [isGenerateCodeSuceess])
 
     return (
         <div>

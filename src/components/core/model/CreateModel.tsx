@@ -342,6 +342,7 @@ const CreateModel = ({ data, params }: any) => {
                   deleteModelFunction={deleteModelFunction}
                   nextTab={nextTab}
                   formikFieldsMetadataRef={formikFieldsMetadataRef}
+                  params={params}
                 ></FieldMetaData>
               </TabPanel>
             </TabView>

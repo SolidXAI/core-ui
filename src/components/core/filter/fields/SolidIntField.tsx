@@ -6,8 +6,8 @@ import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilter
 const SolidIntField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
     // const filterable = column.attrs.filterable;
     const filterMatchModeOptions = [
-        { label: 'Equals', value: "$eqi" },
-        { label: 'Not Equals', value: "$nei" },
+        { label: 'Equals', value: "$eq" },
+        { label: 'Not Equals', value: "$ne" },
         { label: 'Less Than', value: "$lt" },
         { label: 'Less Than Or Equal', value: "$lte" },
         { label: 'Greater Than', value: "$gt" },

@@ -11,7 +11,7 @@ import { useRef, useState } from "react";
 import FieldMetaDataForm from "./FieldMetaDataForm";
 
 
-const FieldMetaData = ({ modelMetaData, fieldMetaData, setFieldMetaData, deleteModelFunction, nextTab, formikFieldsMetadataRef }: any) => {
+const FieldMetaData = ({ modelMetaData, fieldMetaData, setFieldMetaData, deleteModelFunction, nextTab, formikFieldsMetadataRef, params }: any) => {
   const pathname = usePathname();
   const msgs = useRef<Messages>(null);
 
@@ -29,6 +29,7 @@ const FieldMetaData = ({ modelMetaData, fieldMetaData, setFieldMetaData, deleteM
   });
   const toast = useRef<Toast>(null);
   const [visiblePopup, setVisiblePopup] = useState(false);
+  const [isRequiredPopUp, setIsRequiredPopUp] = useState(false);
   const [currentPopup, setCurrentPopup] = useState();
   const [selectedFieldMetaData, setSelectedFieldMetaData] = useState(null);
   const onRowSelect = (event: any) => {
@@ -130,9 +131,27 @@ const FieldMetaData = ({ modelMetaData, fieldMetaData, setFieldMetaData, deleteM
             }}
             showHeader={false}
           >
-            <FieldMetaDataForm modelMetaData={modelMetaData} fieldMetaData={selectedFieldMetaData} allFields={fieldMetaData} setFieldMetaData={setFieldMetaData} deleteModelFunction={deleteModelFunction} setVisiblePopup={setVisiblePopup} formikFieldsMetadataRef={formikFieldsMetadataRef} ></FieldMetaDataForm>
+            <FieldMetaDataForm modelMetaData={modelMetaData} fieldMetaData={selectedFieldMetaData} allFields={fieldMetaData} setFieldMetaData={setFieldMetaData} deleteModelFunction={deleteModelFunction} setVisiblePopup={setVisiblePopup} formikFieldsMetadataRef={formikFieldsMetadataRef} params={params} setIsRequiredPopUp={setIsRequiredPopUp}></FieldMetaDataForm>
           </Dialog>
-
+          <Dialog
+            visible={isRequiredPopUp}
+            header={(
+              <div className="flex align-items-center">
+                <i className="pi pi-exclamation-triangle text-yellow-500 text-xl mr-2"></i>
+                <span>Warning</span>
+              </div>
+            )}
+            headerClassName="text-center"
+            modal
+            footer={() => (
+              <div className="flex justify-content-center">
+                <Button label="Ok" className='small-button' onClick={() => setIsRequiredPopUp(false)} />
+              </div>
+            )}
+            onHide={() => setIsRequiredPopUp(false)}
+          >
+            <p>If there is data against this model this operation might not work and manual intervention will be required</p>
+          </Dialog>
         </div >
       }
     </>
