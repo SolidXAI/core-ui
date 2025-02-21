@@ -30,7 +30,7 @@ export const SocialMediaLogin = () => {
                 outlined
                 severity="secondary"
                 label='Sign In with Google'
-                onClick={() => router.push("https://uat-api.lm.solidxai.com/api/iam/google/connect")}
+                onClick={() => router.push(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/iam/google/connect`)}
             // onClick={()=>signIn('google', {callbackUrl :'https://uat-api.lm.solidxai.com/api/iam/google/connect'})}
             >
             </Button>
