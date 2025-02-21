@@ -310,17 +310,18 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     existingData={formik.values.dataSource}
                     additionalAction={(e: any) => formik.setFieldValue("dataSourceType", e.target.value.type)}
                   />
+                  {formik.values.dataSourceType && <p className="form-field-label">Your datasource will connect to a {formik.values.dataSourceType} database</p>}
                   {isFormFieldValid(formik, "dataSource") && (
                     <Message severity="error" text={formik?.errors?.dataSource?.toString()} />
                   )}
                 </div>
 
 
-                <div className="field col-12 flex flex-column gap-2 my-4">
+                {/* <div className="field col-12 flex flex-column gap-2 my-4">
                   <label htmlFor="dataSourceType" className="form-field-label">
                     Data Source Type
                   </label>
-                  {/* <SingleSelectAutoCompleteField
+                  <SingleSelectAutoCompleteField
                             key="dataSourceType"
                             formik={formik}
                             isFormFieldValid={isFormFieldValid}
@@ -331,7 +332,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                             valueKey="value"
                             searchData={serachDataSourceType}
                             existingData={formik.values.dataSourceType}
-                          /> */}
+                          /> 
                   <InputText
                     disabled
                     type="text"
@@ -348,12 +349,12 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   {isFormFieldValid(formik, "dataSourceType") && (
                     <Message severity="error" text={formik?.errors?.dataSourceType?.toString()} />
                   )}
-                </div>
+                </div>*/}
               </div>
               <Divider />
               <p className="form-wrapper-heading text-base">Configurations</p>
               <div className="grid formgrid">
-                {params.id === 'new' &&
+                {/* {params.id === 'new' &&
 
                   <div className="field col-6">
                     <div className="flex align-items-center gap-2">
@@ -375,7 +376,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                         text={formik?.errors?.isSystem?.toString()}
                       />
                     )}
-                  </div>}
+                  </div>} */}
                 <div className="field col-6">
                   <div className="flex align-items-center gap-2">
                     <Checkbox
@@ -390,7 +391,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                       Enable Soft Delete
                     </label>
                   </div>
-                  {params.id !== 'new' && <p className="form-field-label">Soft Delete is disabled in edit mode</p>}
+                  {params.id !== 'new' && <p className="form-field-label">Soft-delete can only be set during initial creation to maintain data integrity</p>}
                   {isFormFieldValid(formik, "enableSoftDelete") && (
                     <Message
                       severity="error"
