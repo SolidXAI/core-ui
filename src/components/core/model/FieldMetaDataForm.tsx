@@ -972,11 +972,10 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
 
 
 
-  const handleTypeSelect = (e: any) => {
-
+  const handleTypeSelect = (e: any, label: string) => {
 
     setShowTypeFilter(false);
-    setSelectedType({ label: e, value: e });
+    setSelectedType({ label: label, value: e });
     formik.setFieldValue("type", e);
     if (e == "email") {
       formik.setFieldValue("regexPattern", "/^[a-zA-Z0-9. _%+-]+@[a-zA-Z0-9. -]+\\. [a-zA-Z]{2,}$/");
@@ -1117,7 +1116,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
               <div className="p-d-flex p-jc-center creat-field-for form-dem">
                 <div className="p-fluid" style={{ position: 'relative' }}>
                   <div className="mb-3">
-                    <div className="form-wrapper-title">{fieldMetaData ? `Edit ${capitalize(selectedType.value)} Field` : `Add a new ${capitalize(selectedType.value)} Field`}</div>
+                    <div className="form-wrapper-title">{fieldMetaData ? `Edit ${capitalize(selectedType.label)} Field` : `Add a new ${capitalize(selectedType.label)} Field`}</div>
                   </div>
 
 
@@ -1953,7 +1952,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                 htmlFor="selectionValueType"
                                 className="form-field-label"
                               >
-                                Selection Value Type
+                                Select Value Type
                               </label>
                               <Dropdown
                                 id="selectionValueType"
