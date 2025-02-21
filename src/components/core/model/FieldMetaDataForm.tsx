@@ -506,7 +506,7 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
   return Yup.object(schema);
 };
 
-const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, allFields, deleteModelFunction, setVisiblePopup }: any) => {
+const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, allFields, deleteModelFunction, setVisiblePopup, params, setIsRequiredPopUp }: any) => {
 
   const booleanOptions = ["false", "true"];
   const [isBackPopupVisible, setIsBackPopupVisible] = useState(false);
@@ -923,6 +923,9 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
             return updatedItems
           }
           else {
+            if (params?.id !== 'new' && formtatedFieldPayload?.required && !formtatedFieldPayload?.defaultValue) {
+              setIsRequiredPopUp(true);
+            }
             return [...prevItems, formtatedFieldPayload]
           }
         });
