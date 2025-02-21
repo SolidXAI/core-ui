@@ -417,7 +417,7 @@ export { revalidateTag } from '@/helpers/revalidate';
 // │   └── userSlice.ts
 // ├── hooks.ts
 // export * from '@/redux/api/articleApi';
-export { authApi, useForgotPasswordMutation, useRegisterMutation, useRegisterPrivateMutation, useResetPasswordMutation, useUpdateUserMutation } from '@/redux/api/authApi';
+export { authApi, useForgotPasswordMutation, useRegisterMutation, useRegisterPrivateMutation, useResetPasswordMutation, useUpdateUserMutation ,useInitateLoginMutation, useConfirmOtpLoginMutation, useInitateRegisterMutation, useConfirmOtpRegisterMutation,} from '@/redux/api/authApi';
 // export * from '@/redux/api/automationApi';
 // export * from '@/redux/api/categoryApi';
 // export * from '@/redux/api/cityApi';
@@ -443,6 +443,9 @@ export { testApi, useSeederMutation } from '@/redux/api/testApi';
 // export * from '@/redux/api/ratingApi';
 // export * from '@/redux/api/reviewApi';
 // export * from '@/redux/api/roleApi';
+export {
+    roleApi, useGetrolesQuery, useGetroleByIdQuery, useCreateroleMutation, useLazyGetrolesQuery, useUpdateroleMutation, useDeleteroleMutation
+} from '@/redux/api/roleApi'
 export { solidActionsApi, useCreateSolidActionMutation, useDeleteMultipleSolidActionsMutation, useDeleteSolidActionMutation, useGetSolidActionByIdQuery, useGetSolidActionsQuery, useLazyGetSolidActionByIdQuery, useLazyGetSolidActionsQuery, useUpdateSolidActionMutation } from '@/redux/api/solidActionApi';
 // export * from '@/redux/api/solidCountryApi';
 export { createSolidEntityApi } from '@/redux/api/solidEntityApi';
@@ -584,6 +587,8 @@ export { default as SolidOTPVerify } from '@/components/auth/SolidOTPVerify';
 export { default as SolidRegister } from '@/components/auth/SolidRegister';
 export { default as SolidResetPassword } from '@/components/auth/SolidResetPassword';
 export { default as SolidChangeForcePassword } from '@/components/auth/SolidChangeForcePassword';
+export { default as SolidInitialLoginOtp } from '@/components/auth/SolidInitialLoginOtp';
+export { default as SolidInitiateRegisterOtp } from '@/components/auth/SolidInitiateRegisterOtp';
 
 //redux
 export { default as authenticationReducer } from '@/redux/features/authSlice';
@@ -593,7 +598,7 @@ export { default as popupReducer } from '@/redux/features/popupSlice';
 export { default as themeReducer } from '@/redux/features/themeSlice';
 export { default as userReducer } from '@/redux/features/userSlice';
 
-export {default as GenerateModelCodeRowAction } from '@/components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction'
+export { default as GenerateModelCodeRowAction } from '@/components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction'
 
 // types
 export type { LayoutConfig } from '@/types';

@@ -1,36 +1,32 @@
 "use client";
 
+import { useConfirmOtpLoginMutation } from "@/redux/api/authApi";
+import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { Form, Formik } from "formik";
-import { signIn } from "next-auth/react";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import { InputOtp } from "primereact/inputotp";
 import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as Yup from "yup";
-import { LayoutContext } from "../layout/context/layoutcontext";
-import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 
 
-const SolidOTPVerify = () => {
+const SolidInitialLoginOtp = ({ email }: { email: string }) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
     useEffect(() => {
         trigger("")
     }, [trigger])
-    const [otp, setOTP] = useState<number | any>();
+    const [initiateOtpLogin] = useConfirmOtpLoginMutation();
 
     const toast = useRef<Toast>(null);
     const router = useRouter();
 
-    const [password, setPassword] = useState('');
-    const [checked, setChecked] = useState<boolean>(false);
-
     const validationSchema = Yup.object({
-        email: Yup.string()
-            .email("Invalid email address")
-            .required("Email is required"),
+        otp: Yup.string()
+            .matches(/^\d{6}$/, "OTP must be a 6-digit number")
+            .required("OTP is required"),
     });
 
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
@@ -49,7 +45,7 @@ const SolidOTPVerify = () => {
         <>
             <Toast ref={toast} />
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`} style={{ minWidth: 480 }}>
-            {solidSettingsData?.data?.authPagesLayout === 'center' &&
+                {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
                         <div className="solid-logo flex align-items-center gap-3">
                             <img
@@ -72,39 +68,45 @@ const SolidOTPVerify = () => {
                 <>
                     <Formik
                         initialValues={{
-                            email: "",
-                            password: "",
+                            otp: "",
                         }}
                         validationSchema={validationSchema}
-                        onSubmit={async (values) => {
-                            // Handle form submission
-                            const email = values.email;
-                            const password = values.password;
+                        onSubmit={async (values, { setSubmitting }) => {
+                            try {
+                                const payload = {
+                                    type: "email",
+                                    identifier: email,
+                                    otp: values.otp
+                                };
 
-                            const response = await signIn("credentials", {
-                                redirect: false,
-                                email,
-                                password,
-                            });
-                            if (response?.error) {
-                                showToast("error", "Login Error", response.error);
-                            } else {
-                                showToast("success", "Login Success", "Redirecting to dashboard...");
-                                router.push("/admin/core/solid-core/user/list");
+                                const response = await initiateOtpLogin(payload).unwrap(); // Call mutation trigger
+
+                                if (response?.statusCode === 200) {
+                                    showToast("success", "Login Successfully", "Login");
+                                    router.push(`/admin/core/solid-core/user/list`);
+                                } else {
+                                    showToast("error", "Login Error", response.error);
+                                }
+                            } catch (err: any) {
+                                showToast("error", "Login Error", err?.data ? err?.data?.message : "Something Went Wrong");
+                            } finally {
+                                setSubmitting(false);
                             }
-
                         }}
                     >
                         {(formik) => (
                             <Form>
                                 <div className="flex flex-column gap-2 px-3">
-                                    <label htmlFor="email" className="solid-auth-input-label">Enter OTP</label>
-                                    <InputOtp value={otp} onChange={(e) => setOTP(e.value)} length={6} style={{ width: '100%' }} />
-                                    {isFormFieldValid(formik, "email") && <Message
-                                        className="text-red-500 text-sm"
-                                        severity="error"
-                                        text={formik?.errors?.email?.toString()}
-                                    />}
+                                    <label htmlFor="otp" className="solid-auth-input-label">Enter OTP</label>
+                                    <InputOtp
+                                        value={formik.values.otp}
+                                        onChange={(e) => formik.setFieldValue("otp", e.value)}
+                                        length={6}
+                                        style={{ width: '100%' }}
+                                    />
+                                    {isFormFieldValid(formik, "otp") && (
+                                        <Message className="text-red-500 text-sm" severity="error" text={formik.errors.otp?.toString()} />
+                                    )}
                                     <div className="flex align-items-center justify-content-between">
                                         <Button type="button" icon='pi pi-refresh' iconPos="left" link label="Resend Code" className="px-0 text-sm font-normal" />
                                         <p className="m-0 text-sm text-color">
@@ -113,7 +115,7 @@ const SolidOTPVerify = () => {
                                     </div>
                                 </div>
                                 <div className="mt-4">
-                                    <Button type="submit" className="w-full font-light auth-submit-button" label="Verify"  disabled={formik.isSubmitting} loading={formik.isSubmitting}/>
+                                    <Button type="submit" className="w-full font-light auth-submit-button" label="Verify" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
                                 </div>
                             </Form>
                         )}
@@ -129,4 +131,4 @@ const SolidOTPVerify = () => {
     );
 };
 
-export default SolidOTPVerify;
+export default SolidInitialLoginOtp;
