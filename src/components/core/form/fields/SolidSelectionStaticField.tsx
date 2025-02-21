@@ -22,12 +22,17 @@ export class SolidSelectionStaticField implements ISolidField {
     }
 
     initialValue(): any {
-        // TODO: Use the field metadata to re-create the object in the valid format 
-        // {label: '', value: ''}
-        const optionValue = this.fieldContext.data[this.fieldContext.field.attrs.name];
+        // Get field name and metadata
+        const fieldName = this.fieldContext.field.attrs.name;
         const fieldMetadata = this.fieldContext.fieldMetadata;
-
-        const getDisplayValue = (value: string): string | null => {
+        const fieldDefaultValue = fieldMetadata?.defaultValue;
+    
+        // Get existing value from form data
+        const existingValue = this.fieldContext.data[fieldName];
+    
+        // Function to get display value based on selectionStaticValues
+        const getDisplayValue = (value: string | null): string | null => {
+            if (!value) return null;
             for (const item of fieldMetadata.selectionStaticValues) {
                 const [lhs, rhs] = item.split(':');
                 if (lhs === value) {
@@ -36,11 +41,16 @@ export class SolidSelectionStaticField implements ISolidField {
             }
             return null;
         };
-
-        const displayValue = getDisplayValue(optionValue)
-
-        return { label: displayValue ?? '', value: optionValue };
+    
+        // Determine the final value to use (existing value or default value)
+        const finalValue = existingValue ?? fieldDefaultValue ?? '';
+    
+        // Get display value for the final value
+        const displayValue = getDisplayValue(finalValue);
+    
+        return { label: displayValue ?? '', value: finalValue };
     }
+    
 
     validationSchema(): Schema {
 

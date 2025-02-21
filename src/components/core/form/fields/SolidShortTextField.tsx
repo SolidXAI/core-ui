@@ -68,7 +68,6 @@ export class SolidShortTextField implements ISolidField {
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
-        console.log('fieldMetadata', fieldMetadata);
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
         const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
