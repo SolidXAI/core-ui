@@ -5,10 +5,46 @@ export const authApi = createApi({
   reducerPath: "authApi",
   baseQuery: baseQueryWithAuth,
   endpoints: (builder) => ({
+    initateLogin: builder.mutation({
+      query(body) {
+        return {
+          url: "/iam/otp/login/initiate",
+          method: "POST",
+          body,
+        };
+      },
+    }),
+    confirmOtpLogin: builder.mutation({
+      query(body) {
+        return {
+          url: "/iam/otp/login/confirm",
+          method: "POST",
+          body,
+        };
+      },
+    }),
     register: builder.mutation({
       query(body) {
         return {
           url: "/iam/register",
+          method: "POST",
+          body,
+        };
+      },
+    }),
+    initateRegister: builder.mutation({
+      query(body) {
+        return {
+          url: "/iam/otp/register/initiate",
+          method: "POST",
+          body,
+        };
+      },
+    }),
+    confirmOtpRegister: builder.mutation({
+      query(body) {
+        return {
+          url: "/iam/otp/register/confirm",
           method: "POST",
           body,
         };
@@ -68,13 +104,13 @@ export const authApi = createApi({
     }),
     changePassword: builder.mutation({
       query(body) {
-          return {
-              url: `/iam/change-password`,
-              method: "POST",
-              body,
-          };
+        return {
+          url: `/iam/change-password`,
+          method: "POST",
+          body,
+        };
       },
-  }),
+    }),
   }),
 });
 
@@ -86,5 +122,9 @@ export const {
   useResetPasswordMutation,
   useInitiateChangePasswordMutation,
   useConfirmForgotPasswordMutation,
-  useChangePasswordMutation
+  useChangePasswordMutation,
+  useInitateLoginMutation,
+  useConfirmOtpLoginMutation,
+  useInitateRegisterMutation,
+  useConfirmOtpRegisterMutation,
 } = authApi;

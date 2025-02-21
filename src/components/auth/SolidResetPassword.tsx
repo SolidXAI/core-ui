@@ -1,6 +1,7 @@
 "use client";
 
 import { useConfirmForgotPasswordMutation } from "@/redux/api/authApi";
+import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { useFormik } from "formik";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -9,14 +10,15 @@ import { Message } from "primereact/message";
 import { Password } from "primereact/password";
 import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
-import { useContext, useRef } from "react";
+import { useEffect, useRef } from "react";
 import * as Yup from "yup";
-import { LayoutContext } from "../layout/context/layoutcontext";
 
 
 const SolidResetPassword = ({ verificationToken, username }: { verificationToken?: any, username?: any }) => {
-    const { layoutConfig } = useContext(LayoutContext);
-    const { authLayout } = layoutConfig;
+    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    useEffect(() => {
+        trigger("")
+    }, [trigger])
     const toast = useRef<Toast>(null);
     const router = useRouter();
 
@@ -71,8 +73,8 @@ const SolidResetPassword = ({ verificationToken, username }: { verificationToken
     return (
         <>
             <Toast ref={toast} />
-            <div className={`auth-container ${authLayout === 'Center' ? 'center' : 'side'}`}>
-                {authLayout === 'Center' &&
+            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center'  ? 'center' : 'side'}`}>
+                {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
                         <div className="solid-logo flex align-items-center gap-3">
                             <img
@@ -88,7 +90,7 @@ const SolidResetPassword = ({ verificationToken, username }: { verificationToken
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${authLayout === 'Center' ? 'text-center' : 'text-left'}`}>Create New Password</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>Create New Password</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
                 <form onSubmit={formik.handleSubmit}>
                     <div className="flex flex-column gap-2">

@@ -17,26 +17,19 @@ import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import { LayoutContext } from "../layout/context/layoutcontext";
 import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
-
+import { useInitateLoginMutation } from "@/redux/api/authApi";
 
 const SolidLogin = () => {
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
+    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    const [initiateLogin] = useInitateLoginMutation();
+
     useEffect(() => {
         trigger("") // Fetch settings on mount
     }, [trigger])
-    const { layoutConfig } = useContext(LayoutContext);
-    const { authLayout } = layoutConfig;
     const toast = useRef<Toast>(null);
     const router = useRouter();
 
     const [password, setPassword] = useState('');
-
-    const validationSchema = Yup.object({
-        email: Yup.string()
-            .email("Invalid email address")
-            .required("Email is required"),
-        password: Yup.string().required("Password is required"),
-    });
 
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
         toast.current?.show({
@@ -73,14 +66,19 @@ const SolidLogin = () => {
                 <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>Sign In To Your Account</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
 
-                <TabView>
-                    <TabPanel header="Login With Password">
+                <TabView className="solid-auth-tabview">
+                    <TabPanel header="With Password">
                         <Formik
                             initialValues={{
                                 email: "",
                                 password: "",
                             }}
-                            validationSchema={validationSchema}
+                            validationSchema={Yup.object({
+                                email: Yup.string()
+                                    .email("Invalid email address")
+                                    .required("Email is required"),
+                                password: Yup.string().required("Password is required"),
+                            })}
                             onSubmit={async (values, { setSubmitting }) => {
                                 try {
                                     const response = await signIn("credentials", {
@@ -95,8 +93,8 @@ const SolidLogin = () => {
                                         showToast("success", "Login Success", "Redirecting to dashboard...");
                                         router.push("/admin/core/solid-core/user/list");
                                     }
-                                } catch (error) {
-                                    showToast("error", "Login Failed", "Something went wrong");
+                                } catch (error: any) {
+                                    showToast("error", "Login Error", error?.data ? error?.data?.message : "Something Went Wrong");
                                 } finally {
                                     setSubmitting(false); // Re-enable the button after submission
                                 }
@@ -156,7 +154,64 @@ const SolidLogin = () => {
                             )}
                         </Formik>
                     </TabPanel>
-                    <TabPanel header="Login Without Password">
+                    <TabPanel header="Without Password">
+                        <Formik
+                            initialValues={{
+                                email: "",
+                            }}
+                            validationSchema={Yup.object({
+                                email: Yup.string()
+                                    .email("Invalid email address")
+                            })}
+                            onSubmit={async (values, { setSubmitting }) => {
+                                try {
+                                    const payload = {
+                                        type: "email",
+                                        identifier: values.email,
+                                    };
+
+                                    const response = await initiateLogin(payload).unwrap(); // Call mutation trigger
+
+                                    if (response?.statusCode === 200) {
+                                        showToast("success", "OTP sent Successfully", response?.data?.message);
+                                        const email = values.email;
+                                        router.push(`/auth/initiate-login?email=${email}`);
+                                    } else {
+                                        showToast("error", "Login Error", response.error);
+                                    }
+                                } catch (err: any) {
+                                    showToast("error", "Login Error", err?.data ? err?.data?.message : "Something Went Wrong");
+                                } finally {
+                                    setSubmitting(false);
+                                }
+                            }}
+                        >
+                            {(formik) => (
+                                <Form>
+                                    <div className="flex flex-column gap-2">
+                                        <label htmlFor="email" className="solid-auth-input-label">Email</label>
+                                        <InputText
+                                            id="email"
+                                            name="email"
+                                            placeholder="Email ID"
+                                            onChange={formik.handleChange}
+                                            value={formik.values.email}
+                                        />
+                                        {isFormFieldValid(formik, "email") && <Message
+                                            className="text-red-500 text-sm"
+                                            severity="error"
+                                            text={formik?.errors?.email?.toString()}
+                                        />}
+                                    </div>
+                                    <div className="mt-4 text-right">
+                                        <Link href={"/auth/initiate-forgot-password"} className="solid-auth-input-label">Forgot Password?</Link>
+                                    </div>
+                                    <div className="mt-4">
+                                        <Button className="w-full font-light auth-submit-button" label="Sign In" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
+                                    </div>
+                                </Form>
+                            )}
+                        </Formik>
                     </TabPanel>
                 </TabView>
                 {solidSettingsData?.data?.iamGoogleOAuthEnabled &&

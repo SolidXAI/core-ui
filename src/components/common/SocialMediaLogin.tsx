@@ -1,8 +1,12 @@
+"use client"
 import { signIn } from 'next-auth/react'
+import { useRouter } from 'next/navigation';
 import { Button } from 'primereact/button'
 import React from 'react'
 
 export const SocialMediaLogin = () => {
+    const router = useRouter();
+
     return (
         <div className="flex justify-content-center mt-4 gap-3">
             <Button icon={() => (
@@ -26,7 +30,8 @@ export const SocialMediaLogin = () => {
                 outlined
                 severity="secondary"
                 label='Sign In with Google'
-                onClick={()=>signIn('google', {callbackUrl :'/admin/core/solid-core/user/list'})}
+                onClick={() => router.push("https://uat-api.lm.solidxai.com/api/iam/google/connect")}
+            // onClick={()=>signIn('google', {callbackUrl :'https://uat-api.lm.solidxai.com/api/iam/google/connect'})}
             >
             </Button>
             {/* <Button icon={() => (

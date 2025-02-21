@@ -417,7 +417,7 @@ export { revalidateTag } from '@/helpers/revalidate';
 // │   └── userSlice.ts
 // ├── hooks.ts
 // export * from '@/redux/api/articleApi';
-export { authApi, useForgotPasswordMutation, useRegisterMutation, useRegisterPrivateMutation, useResetPasswordMutation, useUpdateUserMutation } from '@/redux/api/authApi';
+export { authApi, useForgotPasswordMutation, useRegisterMutation, useRegisterPrivateMutation, useResetPasswordMutation, useUpdateUserMutation ,useInitateLoginMutation, useConfirmOtpLoginMutation, useInitateRegisterMutation, useConfirmOtpRegisterMutation,} from '@/redux/api/authApi';
 // export * from '@/redux/api/automationApi';
 // export * from '@/redux/api/categoryApi';
 // export * from '@/redux/api/cityApi';
@@ -583,6 +583,8 @@ export { default as SolidOTPVerify } from '@/components/auth/SolidOTPVerify';
 export { default as SolidRegister } from '@/components/auth/SolidRegister';
 export { default as SolidResetPassword } from '@/components/auth/SolidResetPassword';
 export { default as SolidChangeForcePassword } from '@/components/auth/SolidChangeForcePassword';
+export { default as SolidInitialLoginOtp } from '@/components/auth/SolidInitialLoginOtp';
+export { default as SolidInitiateRegisterOtp } from '@/components/auth/SolidInitiateRegisterOtp';
 
 //redux
 export { default as authenticationReducer } from '@/redux/features/authSlice';
