@@ -1416,7 +1416,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                 <Calendar
                                   id="defaultValue"
                                   name="defaultValue"
-                                  value={formik.values.defaultValue ? new Date(formik.values.defaultValue) : new Date()}
+                                  value={formik.values.defaultValue ? new Date(formik.values.defaultValue) : null}
                                   onChange={(e) => formik.setFieldValue("defaultValue", e.value)} // Use setFieldValue for proper handling
                                   showTime={formik.values.type === "datetime"}  // Show time picker for datetime
                                   timeOnly={formik.values.type === "time"}      // Time-only for time

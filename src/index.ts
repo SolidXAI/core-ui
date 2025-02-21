@@ -432,6 +432,7 @@ export { mediaStorageProviderApi, useCreateMediaStorageProivderMutation, useDele
 // export * from '@/redux/api/modelApi';
 export { modelsApi, useCreatemodelMutation, useDeleteMultipleModelsMutation, useDeletemodelMutation, useGenerateCodeForModelMutation, useGetModelsQuery, useGetmodelByIdQuery, useLazyGetModelsQuery, useLazyGetmodelByIdQuery, useUpdatemodelMutation } from '@/redux/api/modelApi';
 export { modulesApi, useCreatemoduleMutation, useDeleteMultiplemodulesMutation, useDeletemoduleMutation, useGenerateCodeFormoduleMutation, useGetDefaultDataSourceQuery, useGetmoduleByIdQuery, useGetmodulesQuery, useLazyGetDefaultDataSourceQuery, useLazyGetmoduleByIdQuery, useLazyGetmodulesQuery, useRefreshPermissionsMutation, useUpdatemoduleMutation } from '@/redux/api/moduleApi';
+export { testApi, useSeederMutation } from '@/redux/api/testApi';
 // export * from '@/redux/api/orderAttributeApi';
 // export * from '@/redux/api/permissionApi';
 // export * from '@/redux/api/pincodeApi';
