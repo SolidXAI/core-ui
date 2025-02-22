@@ -2346,7 +2346,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
 
                         </div>
                       )}
-                      {(currentFields.includes("regexPattern") || currentFields.includes("min") || currentFields.includes("max") || currentFields.includes("ormType")) && ormTypeOptions &&
+                      {(currentFields.includes("regexPattern") || currentFields.includes("min") || currentFields.includes("max") || currentFields.includes("ormType")) && ormTypeOptions && formik.values.relationType !== "many-to-many" &&
                         <>
                           <p className="form-wrapper-heading text-base">Validations</p>
                           <div className="formgrid grid">
