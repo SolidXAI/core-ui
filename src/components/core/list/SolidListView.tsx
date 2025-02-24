@@ -121,7 +121,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
     const initialFilters: any = {};
     const toPopulate: string[] = [];
-    for (let i = 0; i < solidView.layout.children.length; i++) {
+    for (let i = 0; i < solidView.layout.children?.length; i++) {
       const column = solidView.layout.children[i];
       const fieldMetadata = solidFieldsMetadata[column.attrs.name];
       if (!fieldMetadata?.type) {
@@ -405,7 +405,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (sortField) {
       const sortFieldMetadata = solidFieldsMetadata[sortField];
       if (sortFieldMetadata.type === 'relation' && sortFieldMetadata.relationType === 'many-to-one') {
-        sortField = `${sortField}.${sortFieldMetadata.relationModel.userKeyField.name}`;
+        sortField = `${sortField}.${sortFieldMetadata?.relationModel?.userKeyField?.name}`;
       }
       queryData.sort = [
         `${sortField}:${sortOrder == 0 ? null : sortOrder == 1 ? "asc" : "desc"}`,
@@ -612,7 +612,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (!solidView || !solidFieldsMetadata) {
       return;
     }
-    return solidView.layout.children.map((column: any) => {
+    return solidView.layout.children?.map((column: any) => {
       const fieldMetadata = solidFieldsMetadata[column.attrs.name];
       if (!fieldMetadata) {
         return;

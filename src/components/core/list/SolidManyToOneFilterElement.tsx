@@ -19,7 +19,7 @@ export const SolidManyToOneFilterElement = ({ value, updateInputs, index, fieldM
             offset: 0,
             limit: 10,
             filters: {
-                [fieldMetadata.relationModel.userKeyField.name]: {
+                [fieldMetadata?.relationModel?.userKeyField?.name]: {
                     $containsi: event.query
                 }
             }
@@ -38,7 +38,7 @@ export const SolidManyToOneFilterElement = ({ value, updateInputs, index, fieldM
         if (autocompleteData) {
             const autoCompleteItems = autocompleteData.records.map((item: any) => {
                 return {
-                    label: item[fieldMetadata.relationModel.userKeyField.name],
+                    label: item[fieldMetadata?.relationModel?.userKeyField?.name],
                     value: item['id']
                 }
             });
