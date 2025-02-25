@@ -30,11 +30,11 @@ const SolidBooleanColumn = ({ solidListViewMetaData, fieldMetadata, column }: So
 
     // Custom body template for Boolean column
     const bodyTemplate = (rowData: any) => {
-        return rowData.isActive ? 'Yes' : 'No';
+        const fieldKey = column.attrs.label ?? fieldMetadata.name;
+        return rowData[fieldKey] ? 'Yes' : 'No';
     };
 
     const header = column.attrs.label ?? fieldMetadata.displayName;
-
 
     // TODO: filterTemplate, bodyTemplate & filterMatchModeOptions to be provided.
 

@@ -45,7 +45,7 @@ const FieldSelector = ({ handleTypeSelect, modelMetaData }: any) => {
                     <div className="field col-6 mt-3" key={index}>
                         <div
                             className={`flex align-items-center gap-3 type-field-card ${selectedField === field.value ? 'selected' : ''}`}
-                            onClick={() => handleTypeSelect(field.value)}
+                            onClick={() => handleTypeSelect(field.value, field.label)}
                         >
                             <i className={`pi ${field.icon}`}></i>
                             <div className=''>

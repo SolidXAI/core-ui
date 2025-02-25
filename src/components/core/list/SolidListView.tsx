@@ -121,20 +121,23 @@ export const SolidListView = (params: SolidListViewParams) => {
 
     const initialFilters: any = {};
     const toPopulate: string[] = [];
-    for (let i = 0; i < solidView.layout.children.length; i++) {
+    for (let i = 0; i < solidView.layout.children?.length; i++) {
       const column = solidView.layout.children[i];
       const fieldMetadata = solidFieldsMetadata[column.attrs.name];
-
+      if (!fieldMetadata?.type) {
+        showFieldError(`${column.attrs.label} is not present in metadata`)
+        return;
+      }
       // Form the initial filters after iterating over the columns and field metadata. 
-      if (['int', 'bigint', 'float', 'decimal'].includes(fieldMetadata.type)) {
+      if (['int', 'bigint', 'float', 'decimal'].includes(fieldMetadata?.type)) {
         // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] }
         initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.EQUALS }
       }
-      else if (['date', 'datetime', 'time', 'boolean'].includes(fieldMetadata.type)) {
+      else if (['date', 'datetime', 'time', 'boolean'].includes(fieldMetadata?.type)) {
         // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }] }
         initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.EQUALS }
       }
-      else if (['relation', 'selectionStatic', 'selectionDynamic'].includes(fieldMetadata.type)) {
+      else if (['relation', 'selectionStatic', 'selectionDynamic'].includes(fieldMetadata?.type)) {
         initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.IN }
       }
       else {
@@ -402,7 +405,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (sortField) {
       const sortFieldMetadata = solidFieldsMetadata[sortField];
       if (sortFieldMetadata.type === 'relation' && sortFieldMetadata.relationType === 'many-to-one') {
-        sortField = `${sortField}.${sortFieldMetadata.relationModel.userKeyField.name}`;
+        sortField = `${sortField}.${sortFieldMetadata?.relationModel?.userKeyField?.name}`;
       }
       queryData.sort = [
         `${sortField}:${sortOrder == 0 ? null : sortOrder == 1 ? "asc" : "desc"}`,
@@ -556,6 +559,28 @@ export const SolidListView = (params: SolidListViewParams) => {
     }
   };
 
+  const showFieldError = async (error) => {
+    if (error) {
+      toast?.current?.show({
+        severity: "error",
+        summary: "Can you send me the report?",
+        // sticky: true,
+        life: 3000,
+        //@ts-ignore
+        content: (props) => (
+          <div
+            className="flex flex-column align-items-left"
+            style={{ flex: "1" }}
+          >
+            <div className="flex align-items-center gap-2" >
+              <span className="font-bold text-900">{String(error)}</span>
+            </div>
+          </div>
+        ),
+      });
+    }
+  };
+
   // handle bulk deletion
   const deleteBulk = () => {
     let deleteList: any = [];
@@ -587,7 +612,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (!solidView || !solidFieldsMetadata) {
       return;
     }
-    return solidView.layout.children.map((column: any) => {
+    return solidView.layout.children?.map((column: any) => {
       const fieldMetadata = solidFieldsMetadata[column.attrs.name];
       if (!fieldMetadata) {
         return;

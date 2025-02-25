@@ -29,7 +29,7 @@ export class SolidRelationManyToManyField implements ISolidField {
 
         const manyToManyFieldData = this.fieldContext.data[this.fieldContext.field.attrs.name];
         const fieldMetadata = this.fieldContext.fieldMetadata;
-        const userKeyField = fieldMetadata.relationModel.userKeyField.name;
+        const userKeyField = fieldMetadata?.relationModel?.userKeyField?.name;
         if (manyToManyFieldData) {
             return manyToManyFieldData.map((e: any) => {
                 const manyToManyColVal = e[userKeyField] || '';
@@ -150,7 +150,7 @@ export class SolidRelationManyToManyField implements ISolidField {
             let filterQuery;
             if (query) {
                 filterQuery = {
-                    [fieldMetadata.relationModel.userKeyField.name]: {
+                    [fieldMetadata?.relationModel?.userKeyField?.name]: {
                         '$containsi': query
                     }
                 }
@@ -175,7 +175,7 @@ export class SolidRelationManyToManyField implements ISolidField {
             if (autocompleteData) {
                 const autoCompleteItems = autocompleteData.records.map((item: any) => {
                     return {
-                        label: item[fieldMetadata.relationModel.userKeyField.name],
+                        label: item[fieldMetadata?.relationModel?.userKeyField?.name],
                         value: item['id'],
                         original: item
                     }
@@ -205,7 +205,7 @@ export class SolidRelationManyToManyField implements ISolidField {
             const updatedRelationData = [
                 ...currentRelationData,
                 {
-                    label: jsonValues[fieldMetadata.relationModel.userKeyField.name],
+                    label: jsonValues[fieldMetadata?.relationModel?.userKeyField?.name],
                     value: "new",
                     original: jsonValues,
                 },
@@ -309,7 +309,7 @@ export class SolidRelationManyToManyField implements ISolidField {
                 offset: 0,
                 limit: 10,
                 filters: {
-                    [fieldMetadata.relationModel.userKeyField.name]: {
+                    [fieldMetadata?.relationModel?.userKeyField?.name]: {
                         '$containsi': event.query
                     }
                 }
@@ -328,7 +328,7 @@ export class SolidRelationManyToManyField implements ISolidField {
             if (autocompleteData) {
                 const autoCompleteItems = autocompleteData.records.map((item: any) => {
                     return {
-                        label: item[fieldMetadata.relationModel.userKeyField.name],
+                        label: item[fieldMetadata?.relationModel?.userKeyField?.name],
                         value: item['id'],
                         original: item
 
@@ -344,7 +344,7 @@ export class SolidRelationManyToManyField implements ISolidField {
             const updatedRelationData = [
                 ...currentRelationData,
                 {
-                    label: jsonValues[fieldMetadata.relationModel.userKeyField.name],
+                    label: jsonValues[fieldMetadata?.relationModel?.userKeyField?.name],
                     value: "new",
                     original: jsonValues,
                 },

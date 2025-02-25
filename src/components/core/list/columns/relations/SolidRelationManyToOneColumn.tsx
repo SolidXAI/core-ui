@@ -34,7 +34,7 @@ const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, co
         // This is the userkey that will be present within the rowData.
         if (manyToOneFieldData) {
             // Since this is a many-to-one field, we fetch the user key field of the associated model.
-            const userKeyField = fieldMetadata.relationModel.userKeyField.name;
+            const userKeyField = fieldMetadata?.relationModel?.userKeyField?.name;
 
             const manyToOneColVal = manyToOneFieldData[userKeyField];
 

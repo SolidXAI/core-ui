@@ -141,7 +141,7 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
         solidFormViewMetaData: solidFormViewMetaData,
         modelName: modelName,
     }
-    const solidField = fieldFactory(fieldMetadata.type, fieldContext);
+    const solidField = fieldFactory(fieldMetadata?.type, fieldContext);
 
     return solidField?.render(formik);
 };
@@ -280,6 +280,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
     const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
+
+    const errorFields: string[] = [];
 
     const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
     useEffect(() => {
@@ -456,7 +458,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     modelName: params.modelName,
                 }
 
-                let solidField = fieldFactory(fieldMetadata.type, fieldContext);
+                let solidField = fieldFactory(fieldMetadata?.type, fieldContext);
 
                 // Append each field to the FormData
                 if (value !== undefined && value !== null && solidField) {
@@ -480,6 +482,26 @@ const SolidFormView = (params: SolidFormViewProps) => {
         }
     }
 
+    const showFieldError = () => {
+        if (errorFields.length === 0) return;
+        errorFields.forEach((error) => {
+            toast?.current?.show({
+                severity: "error",
+                summary: "Metadata Error",
+                detail: error,
+                life: 3000,
+            });
+
+        });
+    
+        // errorFields.length = 0;
+    };
+    useEffect(() => {
+        if (errorFields.length > 0) {
+            showFieldError();
+        }
+    }, [errorFields])
+
     // - - - - - - - - - - - -- - - - - - - - - - - - DATA here
     // Fetch the actual data here. 
     // This is the initial value of this form, will come from an API call in the case of edit. 
@@ -493,10 +515,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
         for (let i = 0; i < layoutFields.length; i++) {
             const formLayoutField = layoutFields[i];
             const fieldMetadata = solidFieldsMetadata[formLayoutField.attrs.name];
-            if (fieldMetadata.type === 'relation') {
+            if (fieldMetadata?.type === 'relation') {
                 toPopulate.push(fieldMetadata.name);
             }
-            if (fieldMetadata.type === 'mediaSingle' || fieldMetadata.type === 'mediaMultiple') {
+            if (fieldMetadata?.type === 'mediaSingle' || fieldMetadata?.type === 'mediaMultiple') {
                 toPopulateMedia.push(fieldMetadata.name);
             }
         }
@@ -550,7 +572,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 solidFormViewMetaData: solidFormViewMetaData,
                 modelName: params.modelName,
             }
-            let solidField = fieldFactory(fieldMetadata.type, fieldContext);
+            let solidField = fieldFactory(fieldMetadata?.type, fieldContext);
+            if (!fieldMetadata?.type) {
+                const errorMessage = formLayoutField.attrs.label;
+                if (!errorFields.includes(errorMessage)) {
+                    errorFields.push(errorMessage);
+                }
+            }
             if (solidField) {
                 // @ts-ignore
                 validationSchema[formLayoutField.attrs.name] = solidField.validationSchema();

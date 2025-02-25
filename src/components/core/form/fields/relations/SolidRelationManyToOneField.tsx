@@ -21,7 +21,7 @@ export class SolidRelationManyToOneField implements ISolidField {
 
         const manyToOneFieldData = this.fieldContext.data[this.fieldContext.field.attrs.name];
         const fieldMetadata = this.fieldContext.fieldMetadata;
-        const userKeyField = fieldMetadata.relationModel.userKeyField.name;
+        const userKeyField = fieldMetadata?.relationModel?.userKeyField?.name;
         const manyToOneColVal = manyToOneFieldData ? manyToOneFieldData[userKeyField] : '';
         if (manyToOneColVal) {
             return { label: manyToOneColVal || '', value: manyToOneFieldData?.id || '' };
@@ -77,7 +77,7 @@ export class SolidRelationManyToOneField implements ISolidField {
                 offset: 0,
                 limit: 10,
                 filters: {
-                    [fieldMetadata.relationModel.userKeyField.name]: {
+                    [fieldMetadata?.relationModel?.userKeyField?.name]: {
                         '$containsi': event.query
                     }
                 }
@@ -96,7 +96,7 @@ export class SolidRelationManyToOneField implements ISolidField {
             if (autocompleteData) {
                 const autoCompleteItems = autocompleteData.records.map((item: any) => {
                     return {
-                        label: item[fieldMetadata.relationModel.userKeyField.name],
+                        label: item[fieldMetadata?.relationModel?.userKeyField?.name],
                         value: item['id']
                     }
                 });
