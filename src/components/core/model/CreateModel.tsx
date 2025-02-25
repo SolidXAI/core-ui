@@ -57,6 +57,8 @@ const CreateModel = ({ data, params }: any) => {
   ] = useDeletemodelMutation();
 
   const [activeIndex, setActiveIndex] = useState<number>(0);
+  // added to track error to change tab color
+  const [tabErrors, setTabErrors] = useState<{ [key: number]: boolean }>({});
 
   const nextTab = () => {
     setActiveIndex(activeIndex + 1);
@@ -114,21 +116,45 @@ const CreateModel = ({ data, params }: any) => {
       await formikModelMetadataRef.current.submitForm(); // Call the handleSubmit function from the formik instance
 
       // @ts-ignore
-      formikModelMetadataRef.current.validateForm().then(() => {
-        if (Object.keys(formikModelMetadataRef?.current?.errors).length === 0) {
+      // formikModelMetadataRef.current.validateForm().then(() => {
+      //   if (Object.keys(formikModelMetadataRef?.current?.errors).length === 0) {
 
-          if (fieldMetaData.length > 0) {
-            handleFormSubmit();
-          } else {
-            if (activeIndex === 0) {
-              nextTab();
-              // showError({ error: "Please add Atleast one field" });
-              handleError(["Please add Atleast one field"])
-            } else {
-              handleError(["Please add Atleast one field"])
-              // showError({ error: "Please add Atleast one field" });
-            }
-          }
+      //     if (fieldMetaData.length > 0) {
+      //       handleFormSubmit();
+      //     } else {
+      //       if (activeIndex === 0) {
+      //         nextTab();
+      //         // showError({ error: "Please add Atleast one field" });
+      //         handleError(["Please add Atleast one field"])
+      //       } else {
+      //         handleError(["Please add Atleast one field"])
+      //         // showError({ error: "Please add Atleast one field" });
+      //       }
+      //     }
+      //   }
+      // });
+
+      formikModelMetadataRef.current.validateForm().then((errors: any) => {
+        let firstErrorTab: number | undefined;
+  
+        if (Object.keys(errors).length > 0) {
+          const errorMessages = Object.values(errors);
+          errorMessages.forEach((error) => {
+            handleError([error]); // Call handleError for each error separately
+          });
+      
+          firstErrorTab = 0; // Model Metadata tab has errors
+        }
+  
+        if (fieldMetaData.length === 0) {
+          handleError(["Please add at least one field"]);
+          firstErrorTab = firstErrorTab ?? 1; // If no prior error, set to Field tab
+        }
+        if (firstErrorTab !== undefined) {
+          setTabErrors({ [firstErrorTab]: true }); // Set error only on the first tab with an issue
+          setActiveIndex(firstErrorTab); // Switch to the tab with an error
+        } else {
+          handleFormSubmit();
         }
       });
     }
@@ -262,6 +288,18 @@ const CreateModel = ({ data, params }: any) => {
 
   }, [isCreateModelError, isDeleteModelError, isUpdateModelError])
 
+  // Added useEffect to remove active tab class border color if error is there.
+  useEffect(() => {
+    const tabHeaders = document.querySelectorAll(".p-tabview-nav li");
+    if (tabHeaders.length > 0) {
+      if (tabErrors[0]) {
+        tabHeaders[0].classList.remove("p-highlight");
+      }
+      if (tabErrors[1]) {
+        tabHeaders[1].classList.remove("p-highlight");
+      }
+    }
+  }, [tabErrors]);
 
 
 
@@ -323,7 +361,8 @@ const CreateModel = ({ data, params }: any) => {
 
               }}
             >
-              <TabPanel header="Model">
+              <TabPanel header="Model"
+                headerClassName={tabErrors[0] ? "tab-error" : ""}>
                 <ModelMetaData
                   modelMetaData={modelMetaData}
                   setModelMetaData={setModelMetaData}
@@ -334,7 +373,8 @@ const CreateModel = ({ data, params }: any) => {
                   params={params}
                 ></ModelMetaData>
               </TabPanel>
-              <TabPanel header="Fields" >
+              <TabPanel header="Fields" 
+                headerClassName={tabErrors[1] ? "tab-error" : ""}>
                 <FieldMetaData
                   modelMetaData={modelMetaData}
                   fieldMetaData={fieldMetaData}
