@@ -19,8 +19,6 @@ const SolidForgotPassword = () => {
     useEffect(() => {
         trigger("") // Fetch settings on mount
     }, [trigger])
-    const { layoutConfig } = useContext(LayoutContext);
-    const { authLayout } = layoutConfig;
     const toast = useRef<Toast>(null);
     const router = useRouter();
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
