@@ -12,7 +12,7 @@ import { useContext, useEffect, useRef } from "react";
 import * as Yup from "yup";
 import { LayoutContext } from "../layout/context/layoutcontext";
 import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
-
+import { AppTitle } from "@/helpers/AppTitle";
 
 const SolidForgotPassword = () => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
@@ -82,11 +82,7 @@ const SolidForgotPassword = () => {
                                 src={'/images/SS-Logo-1 1.png'}
                                 className="position-relative img-fluid"
                             />
-                            <div>
-                                <p className="solid-logo-title">
-                                    Solid<br />Starters
-                                </p>
-                            </div>
+                            <AppTitle title={solidSettingsData} />
                         </div>
                     </div>
                 }

@@ -11,6 +11,8 @@ import { toggleTheme } from "@/redux/features/themeSlice";
 import { InputSwitch } from "primereact/inputswitch";
 import { Button } from "primereact/button";
 import { useRouter } from "next/navigation";
+import { Dialog } from "primereact/dialog";
+import { Divider } from "primereact/divider";
 
 const UserProfileMenu = () => {
   const router = useRouter();
@@ -18,9 +20,10 @@ const UserProfileMenu = () => {
   // const { user } = useAppSelector((state) => state.auth);
   const { changeTheme } = useContext(PrimeReactContext);
   const { layoutConfig, setLayoutConfig } = useContext(LayoutContext);
-  const { theme } = useSelector((state:any) => state.theme); // Get current theme from Redux
-  const { user } = useSelector((state:any) => state.auth);
+  const { theme } = useSelector((state: any) => state.theme); // Get current theme from Redux
+  const { user } = useSelector((state: any) => state.auth);
   const [checked, setChecked] = useState(theme === "dark");
+  const [confirmLogout, setConfirmLogout] = useState(false);
   const dispatch = useDispatch();
   const op = useRef(null);
   const logoutHandler = () => {
@@ -79,9 +82,6 @@ const UserProfileMenu = () => {
             </div>
             <InputSwitch checked={checked} onChange={handleThemeToggle} />
           </div>
-          <div className="p-2">
-            <Button icon="pi pi-cog" label="General Settings" size="small" text severity="secondary" className="w-full text-left gap-2" onClick={()=>router.push("/admin/settings") }/>
-          </div>
           <div className="user-profile-body p-3">
             <Button
               text
@@ -92,13 +92,25 @@ const UserProfileMenu = () => {
                   <path d="M3.75 15.75C3.3375 15.75 2.98438 15.6031 2.69063 15.3094C2.39687 15.0156 2.25 14.6625 2.25 14.25V3.75C2.25 3.3375 2.39687 2.98438 2.69063 2.69063C2.98438 2.39687 3.3375 2.25 3.75 2.25H9V3.75H3.75V14.25H9V15.75H3.75ZM12 12.75L10.9688 11.6625L12.8813 9.75H6.75V8.25H12.8813L10.9688 6.3375L12 5.25L15.75 9L12 12.75Z" fill="#F04A4A" />
                 </svg>
               }
-              onClick={e => logoutHandler()}
+              onClick={() => setConfirmLogout(true)}
               label="Logout"
             />
           </div>
         </OverlayPanel>
-      </div >
-    </div >
+      </div>
+      <Dialog header="Logout" headerClassName="py-2" contentClassName="px-0 pb-0" visible={confirmLogout} style={{ width: '20vw' }} onHide={() => { if (!confirmLogout) return; setConfirmLogout(false); }}>
+        <Divider className="m-0" />
+        <div className="p-4">
+          <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
+            Are you sure you want to log out?
+          </p>
+          <div className="flex align-items-center gap-2 mt-3">
+            <Button label="Logout" size="small" onClick={e => logoutHandler()} />
+            <Button label="Cancel" size="small" onClick={() => setConfirmLogout(false)} outlined />
+          </div>
+        </div>
+      </Dialog>
+    </div>
   );
 };
 

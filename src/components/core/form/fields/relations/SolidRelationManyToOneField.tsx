@@ -54,7 +54,7 @@ export class SolidRelationManyToOneField implements ISolidField {
     render(formik: FormikObject) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
+        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
 
@@ -109,21 +109,22 @@ export class SolidRelationManyToOneField implements ISolidField {
 
         return (
             <div className={className}>
-                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-
-                </label>
-                <AutoComplete
-                    readOnly={formReadonly || fieldReadonly}
-                    disabled={formDisabled || fieldDisabled}
-                    {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
-                    id={fieldLayoutInfo.attrs.name}
-                    field="label"
-                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                    dropdown
-                    suggestions={autoCompleteItems}
-                    completeMethod={autoCompleteSearch}
-                    onChange={formik.handleChange} />
-
+                <div className="flex flex-column gap-2 mt-4">
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                    </label>
+                    <AutoComplete
+                        readOnly={formReadonly || fieldReadonly}
+                        disabled={formDisabled || fieldDisabled}
+                        {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
+                        id={fieldLayoutInfo.attrs.name}
+                        field="label"
+                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                        dropdown
+                        suggestions={autoCompleteItems}
+                        completeMethod={autoCompleteSearch}
+                        onChange={formik.handleChange}
+                    />
+                </div>
                 {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                     <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 )}

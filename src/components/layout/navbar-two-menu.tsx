@@ -11,8 +11,13 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
     const [expandedKeys, setExpandedKeys] = useState<any>({});
     const itemRenderer = (item: any, options: any) => {
         const currentItem = item?.url?.split('/').slice(-2, -1)[0];
+        const isSettingsPage = pathname.includes('/settings/') && item?.url?.includes('/settings/')
+        ? pathname === item?.url // Exact match check for settings pages
+        : currentItem === activeParentPath
+
+    // currentItem === activeParentPath ?' p-highlight' : ''
         return (
-            <div key={item?.key} className={`flex align-items-center cursor-pointer menuHead px-3 ${currentItem === activeParentPath ? ' p-highlight' : ''}`} onClick={options.onClick}>
+            <div key={item?.key} className={`flex align-items-center cursor-pointer menuHead px-3 ${isSettingsPage ? ' p-highlight' : ''}`} onClick={options.onClick}>
                 <Link href={item?.url ? item?.url : '#'} className="w-full flex justify-content-between font-medium">
                     <div className="flex align-items-center gap-3">
                         <span className={item.icon} />

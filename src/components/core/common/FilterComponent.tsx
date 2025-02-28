@@ -6,10 +6,11 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputNumber } from 'primereact/inputnumber';
 import { InputText } from 'primereact/inputtext';
 import { Tooltip } from 'primereact/tooltip';
-import React, { useEffect, useState } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import { SolidFilterFields } from '../filter/SolidFilterFields';
 import { Button } from 'primereact/button';
-
+import { Fieldset } from 'primereact/fieldset';
+import { OverlayPanel } from 'primereact/overlaypanel';
 export enum FilterRuleType {
   RULE = 'rule',
   RULE_GROUP = 'rule_group'
@@ -91,218 +92,147 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
 
   return (
     // <div style={{ marginLeft: (level - 1) * 10 + 'px' }} className="filter-rule">
-    <div className="filter-rule">
-      <div className="filter-individual-rule">
-        <div className='filter-individual-rule-form'>
-          <div className=" flex align-items-center">
-            <div className=" p-0" style={{ flex: "10" }}>
-              {/* <div className="filter-component-fields"> */}
-              <div className='filter-component-fields'>
-                <div className='filter-component-fields-section-one' >
-                  <Dropdown
-                    key={rule.id}
-                    value={fieldName.name}
-                    onChange={e => {
-                      setFieldName({ name: e.value, value: e.value })
-                      onChange(rule.id, 'fieldName', e.value)
-                    }}
-                    options={fields}
-                    optionLabel='name'
-                    optionValue='name'
-                    style={{ marginLeft: (level - 1) * 5 + 'px', width: "100%", maxWidth: "-webkit-fill-available" }}
-                    placeholder="Select Field" className="w-full md:w-14rem" />
-                </div>
-                {/* <Dropdown
-                    value={matchMode}
-                    onChange={e => {
-                      setMatchMode({ name: e.value.name })
-                      onChange(rule.id, 'matchMode', e.value.name)
-                    }}
-                    disabled={!rule.fieldName}
-                    options={applicableOperators}
-                    optionLabel='name'
-                    placeholder="Select Field" className="w-full filter-small-input md:w-14rem" /> */}
 
-                <div className='filter-component-fields-section-two'>
-                  {!rule.fieldName &&
-                    <>
-                      <InputText
-                        disabled
-                        value={rule.value || ''}
-                        placeholder="operator"
-                        className='filter-small-input'
-                      />
-                      <InputText
-                        disabled
-                        value={rule.value || ''}
-                        placeholder="value"
-                        className='filter-small-input'
-                      />
-                    </>
-                  }
-                  {rule.fieldName &&
-                    <SolidFilterFields viewData={viewData} fieldMetadata={viewData.data.solidFieldsMetadata[rule.fieldName]} onChange={onChange} index={rule.id} rule={rule}></SolidFilterFields>
-                  }
-                </div>
-
-
-                {/* <div className="col-4">
-                  {applicableInputField === 'number' && (
-                    <InputNumber
-                      value={rule.value || ''}
-                      placeholder="Value"
-                      className='filter-small-input'
-                      onChange={(e) => onChange(rule.id, 'value', e.value)}
-                    />
-                  )
-                  }
-                  {applicableInputField === 'string' && (
-                    <InputText
-                      value={rule.value || ''}
-                      placeholder="Value"
-                      className='filter-small-input'
-                      onChange={(e) => onChange(rule.id, 'value', e.target.value)}
-                    />
-                  )
-                  }
-                  {applicableInputField === 'date' && (
-                    <Calendar value={rule.value || ''} onChange={(e) => onChange(rule.id, 'value', new Date(e.value))} dateFormat="dd/mm/yy" showIcon />
-                  )
-                  }
-                </div> */}
-
-
-              </div>
-            </div>
-            <div className="col-2 flex justify-content-end" style={{ flex: "2" }}>
-              <button onClick={() => onAddRule(rule.parentRule)}>
-                <div className="card flex justify-content-center">
-                  {/* <Tooltip target=".custom-target-icon" /> */}
-
-                  <i className="custom-target-icon pi pi-plus-circle p-text-secondary p-overlay-badge"
-                    data-pr-tooltip="Add Rule"
-                    data-pr-position="right"
-                    data-pr-at="right+5 top"
-                    data-pr-my="left center-2"
-                    style={{ fontSize: '1.2rem', cursor: 'pointer' }}>
-                  </i>
-                </div>
-
-
-              </button>
-
-              {/* < Button
-                icon="pi pi-plus"
-                onClick={() => onAddGroup(rule.id)}
-                size="small"
-                className="small-button"
-                type="button"
-              />
-              <Button
-                icon="pi pi-trash"
-                onClick={() => onDelete(rule.id)}
-                size="small"
-                className="small-button"
-                severity="danger"
-                type="button"
-              /> */}
-              <button onClick={() => onAddGroup(rule.id)}>
-                <div className="card flex justify-content-center">
-
-                  <i className="custom-target-icon pi pi-sitemap p-text-secondary p-overlay-badge"
-                    data-pr-tooltip="Add Group"
-                    data-pr-position="right"
-                    data-pr-at="right+5 top"
-                    data-pr-my="left center-2"
-                    style={{ fontSize: '1.2rem', cursor: 'pointer' }}>
-                  </i>
-                </div>
-
-              </button>
-
-              <button onClick={() => onDelete(rule.id)}>
-                <div className="card flex justify-content-center">
-
-                  <i className="custom-target-icon pi pi-trash p-text-secondary p-overlay-badge"
-                    data-pr-tooltip="Delete Rule"
-                    data-pr-position="right"
-                    data-pr-at="right+5 top"
-                    data-pr-my="left center-2"
-                    style={{ fontSize: '1.2rem', cursor: 'pointer' }}>
-                  </i>
-                </div>
-              </button>
-
-            </div>
-
-          </div>
-
-
-
-
-
+    <div className='mt-2'>
+      <div className='formgrid grid'>
+        <div className='col-3'>
+          <Dropdown
+            key={rule.id}
+            value={fieldName.name}
+            onChange={e => {
+              setFieldName({ name: e.value, value: e.value })
+              onChange(rule.id, 'fieldName', e.value)
+            }}
+            options={fields}
+            optionLabel='name'
+            optionValue='name'
+            placeholder="Select Field"
+            className='w-full'
+          />
         </div>
-
+        <div className='col-7'>
+          <div className='formgrid grid'>
+            {rule.fieldName ?
+              <SolidFilterFields viewData={viewData} fieldMetadata={viewData.data.solidFieldsMetadata[rule.fieldName]} onChange={onChange} index={rule.id} rule={rule}></SolidFilterFields>
+              : <>
+                <div className='col-6'>
+                  <InputText
+                    disabled
+                    value={rule.value || ''}
+                    placeholder="operator"
+                    className='w-full'
+                  />
+                </div>
+                <div className='col-6'>
+                  <InputText
+                    disabled
+                    value={rule.value || ''}
+                    placeholder="value"
+                    className='w-full'
+                  />
+                </div>
+              </>
+            }
+          </div>
+        </div>
+        <div className='col-2'>
+          <div className='formgrid grid'>
+            <div className='col-4 flex align-items-center'>
+              <Button text severity='secondary' icon="pi pi-plus" size='small' onClick={() => onAddRule(rule.parentRule)} className='solid-filter-action-btn' />
+            </div>
+            <div className='col-4 flex align-items-center'>
+              <Button text severity='secondary' icon={
+                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                  <path d="M11.6665 13.334H13.3332V11.6673H14.9998V10.0007H13.3332V8.33398H11.6665V10.0007H9.99984V11.6673H11.6665V13.334ZM3.33317 16.6673C2.87484 16.6673 2.48248 16.5041 2.15609 16.1777C1.8297 15.8513 1.6665 15.459 1.6665 15.0007V5.00065C1.6665 4.54232 1.8297 4.14996 2.15609 3.82357C2.48248 3.49718 2.87484 3.33398 3.33317 3.33398H8.33317L9.99984 5.00065H16.6665C17.1248 5.00065 17.5172 5.16385 17.8436 5.49023C18.17 5.81662 18.3332 6.20898 18.3332 6.66732V15.0007C18.3332 15.459 18.17 15.8513 17.8436 16.1777C17.5172 16.5041 17.1248 16.6673 16.6665 16.6673H3.33317ZM3.33317 15.0007H16.6665V6.66732H9.31234L7.64567 5.00065H3.33317V15.0007Z" fill="#4B4D52" />
+                </svg>
+              } size='small' onClick={() => onAddGroup(rule.id)} className='solid-filter-action-btn p-0' />
+            </div>
+            <div className='col-4 flex align-items-center'>
+              <Button text severity='secondary' icon="pi pi-trash" size='small' onClick={() => onDelete(rule.id)} className='solid-filter-action-btn' />
+            </div>
+          </div>
+        </div>
       </div>
 
-      <div className="nested-rules">
-        {rule.children && rule.children.map(nestedRule => (
-          nestedRule.type === FilterRuleType.RULE
+      {rule.children && rule.children.map(nestedRule => (
+        <div className='p-3 nested-custom-filter' key={nestedRule.id}>
+          {nestedRule.type === FilterRuleType.RULE
             ? <FilterRuleComponent key={nestedRule.id} viewData={viewData} fields={fields} rule={nestedRule} onChange={onChange} onAddRule={onAddRule} onAddGroup={onAddGroup} onDelete={onDelete} level={level + 1} />
             : <FilterGroupComponent key={nestedRule.id} viewData={viewData} fields={fields} group={nestedRule} onChange={onChange} onAddRule={onAddRule} onAddGroup={onAddGroup} onDelete={onDelete} level={level + 1} />
-        ))}
-      </div>
+          }
+        </div>
+      ))}
+      {/* <Button text label='Add Condition' icon="pi pi-plus" size='small' onClick={() => onAddRule(rule.parentRule)} /> */}
     </div>
   );
 };
 
 // Component to render a group of filter rules
 const FilterGroupComponent = ({ viewData, fields, group, onChange, onAddRule, onAddGroup, onDelete, level }) => {
+  const op = useRef(null);
+  const legendTemplate = (
+    <>
+      <Button
+        size='small'
+        label={group.matchOperator}
+        className='small-button'
+        icon="pi pi-angle-down"
+        iconPos='right'
+        onClick={(e) => op.current.toggle(e)}
+        style={{
+          textTransform: "uppercase"
+        }}
+      />
+      <OverlayPanel ref={op} className='m-0'>
+        <div className='flex flex-column'>
+          <Button
+            size="small"
+            label="AND"
+            text
+            className='small-button'
+            onClick={(e) => { onChange(group.id, 'matchOperator', FilterOperator.AND); op.current.hide(e) }}
+          />
+          <Button
+            size="small"
+            label="OR"
+            text
+            className='small-button'
+            onClick={(e) => { onChange(group.id, 'matchOperator', FilterOperator.OR); op.current.hide(e) }}
+          />
+        </div>
+      </OverlayPanel>
+    </>
+    // <select className='filter-select'
+    //   value={group.matchOperator}
+    //   onChange={e => onChange(group.id, 'matchOperator', e.target.value)}
+    // >
+    //   <option value={FilterOperator.AND}>AND</option>
+    //   <option value={FilterOperator.OR}>OR</option>
+    // </select>
+  )
   return (
-    <div className="filter-group">
-      {/* <div style={{ marginLeft: (level - 1) * 10 + 'px' }} className="filter-group"> */}
-
-      <div className='flex justify-content-between align-items-center'>
-        <p className='mb-1 mt-1 filter-text'
-          style={{ marginLeft: (level - 1) * 5 + 'px' }}
-        > Match
-          <select className='filter-select'
-            value={group.matchOperator}
-            onChange={e => onChange(group.id, 'matchOperator', e.target.value)}
-          >
-            <option value={FilterOperator.AND}>AND</option>
-            <option value={FilterOperator.OR}>OR</option>
-          </select>
-          of the following rules:</p>
-
-        {/* <button onClick={() => onAddRule(group.id)}>Add Rule to Group</button> */}
-        {/* <button onClick={() => onAddGroup(group.id)}>Add Group to Group</button> */}
-
-        {/* Add Delete Button for non-root groups */}
-        {level > 0 && <button style={{ marginRight: "8px" }} onClick={() => onDelete(group.id)}>
-          <div className="card flex justify-content-center">
-            <Tooltip target=".custom-target-icon" />
-
-            <i className="custom-target-icon pi pi-trash p-text-secondary p-overlay-badge"
-              data-pr-tooltip="Delete Group"
-              data-pr-position="right"
-              data-pr-at="right+5 top"
-              data-pr-my="left center-2"
-              style={{ fontSize: '1.2rem', cursor: 'pointer' }}>
-            </i>
-          </div></button>}
-      </div>
+    <Fieldset legend={legendTemplate} className='primary-filter-fieldset'>
       {group.children && group.children.map(rule => (
         rule.type === FilterRuleType.RULE
           ? <FilterRuleComponent key={rule.id} viewData={viewData} fields={fields} rule={rule} onChange={onChange} onAddRule={onAddRule} onAddGroup={onAddGroup} onDelete={onDelete} level={level + 1} />
           : <FilterGroupComponent key={rule.id} viewData={viewData} fields={fields} group={rule} onChange={onChange} onAddRule={onAddRule} onAddGroup={onAddGroup} onDelete={onDelete} level={level + 1} />
       ))}
-    </div>
+      {/* {level > 0 &&
+        <div className='mt-2'>
+          <Button size="small" severity='danger' icon="pi pi-trash " onClick={() => onDelete(group.id)} />
+        </div>
+      } */}
+
+      {/* Add Condition Button to add parent rule */}
+      {level === 0 &&
+        <Button text label='Add Condition' icon="pi pi-plus" size='small' onClick={() => onAddRule(group.id)} className='px-0 mt-2' />
+      }
+    </Fieldset>
   );
 };
 
 // Main Filter component
-const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, transformFilterRules }) => {
+const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, transformFilterRules, closeDialog }) => {
   // const initialState: FilterRule[] = [
   //   {
   //     id: 1,
@@ -404,18 +334,39 @@ const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, transf
     setFilterRules(prev => addChild(prev, parentRuleId, newGroup));
   };
 
+  // const handleDeleteRule = (id) => {
+  //   const deleteRecursively = (rules, id) => {
+  //     return rules.filter(rule => rule.id !== id).map(rule => {
+  //       if (rule.children) {
+  //         return {
+  //           ...rule,
+  //           children: deleteRecursively(rule.children, id)
+  //         };
+  //       }
+  //       return rule;
+  //     });
+  //   };
+  //   setFilterRules(prev => deleteRecursively(prev, id));
+  // };
+
   const handleDeleteRule = (id) => {
     const deleteRecursively = (rules, id) => {
-      return rules.filter(rule => rule.id !== id).map(rule => {
-        if (rule.children) {
-          return {
-            ...rule,
-            children: deleteRecursively(rule.children, id)
-          };
-        }
-        return rule;
-      });
+      return rules
+        .filter(rule => rule.id !== id) // Remove the target rule
+        .map(rule => {
+          if (rule.children) {
+            const updatedChildren = deleteRecursively(rule.children, id);
+            // If the rule had only one child and it's now empty, remove the parent
+            if (rule.children.length === 1 && updatedChildren.length === 0) {
+              return null;
+            }
+            return { ...rule, children: updatedChildren };
+          }
+          return rule;
+        })
+        .filter(Boolean); // Remove null values
     };
+
     setFilterRules(prev => deleteRecursively(prev, id));
   };
 
@@ -429,8 +380,6 @@ const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, transf
 
   return (
     <div className=''>
-      <div className="filter-builder">
-
         {filterRules.map(rule => (
           <FilterGroupComponent
             key={rule.id}
@@ -444,9 +393,6 @@ const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, transf
             level={0} // Top-level group
           />
         ))}
-
-      </div>
-
       <div className='text-center'>
         <Button label="Apply" size="small" onClick={() => transformFilterRules(filterRules)} type="submit" className="small-button" />
 

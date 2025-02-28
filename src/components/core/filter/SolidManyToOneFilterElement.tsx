@@ -52,6 +52,8 @@ export const SolidManyToOneFilterElement = ({ value, updateInputs, index, fieldM
             value={value}
             suggestions={autoCompleteItems}
             completeMethod={autoCompleteSearch}
-            onChange={(e) => updateInputs(index, e.value)} />
+            onChange={(e) => updateInputs(index, e.value)}
+            className="w-full"
+        />
     )
 }

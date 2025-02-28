@@ -54,7 +54,7 @@ export class SolidRelationOneToManyField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
 
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12 flex flex-column gap-2 mt-3';
+        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
@@ -151,7 +151,7 @@ export class SolidRelationOneToManyField implements ISolidField {
 
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'col-12 s-field';
+        const className = fieldLayoutInfo.attrs?.className || 'col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
 
 

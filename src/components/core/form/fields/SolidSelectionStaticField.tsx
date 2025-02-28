@@ -26,10 +26,10 @@ export class SolidSelectionStaticField implements ISolidField {
         const fieldName = this.fieldContext.field.attrs.name;
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldDefaultValue = fieldMetadata?.defaultValue;
-    
+
         // Get existing value from form data
         const existingValue = this.fieldContext.data[fieldName];
-    
+
         // Function to get display value based on selectionStaticValues
         const getDisplayValue = (value: string | null): string | null => {
             if (!value) return null;
@@ -41,16 +41,16 @@ export class SolidSelectionStaticField implements ISolidField {
             }
             return null;
         };
-    
+
         // Determine the final value to use (existing value or default value)
         const finalValue = existingValue ?? fieldDefaultValue ?? '';
-    
+
         // Get display value for the final value
         const displayValue = getDisplayValue(finalValue);
-    
+
         return { label: displayValue ?? '', value: finalValue };
     }
-    
+
 
     validationSchema(): Schema {
 
@@ -72,7 +72,7 @@ export class SolidSelectionStaticField implements ISolidField {
     render(formik: FormikObject) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
+        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
@@ -98,22 +98,23 @@ export class SolidSelectionStaticField implements ISolidField {
 
         return (
             <div className={className}>
-                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                    &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
-                </label>
-                <AutoComplete
-                    readOnly={formReadonly || fieldReadonly}
-                    disabled={formDisabled || fieldDisabled}
-                    {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
-                    id={fieldLayoutInfo.attrs.name}
-                    field="label"
-                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                    dropdown
-                    suggestions={selectionStaticItems}
-                    completeMethod={selectionStaticSearch}
-                    // onChange={(e) => updateInputs(index, e.value)} />
-                    onChange={formik.handleChange} />
-
+                <div className="flex flex-column gap-2 mt-4">
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                        &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
+                    </label>
+                    <AutoComplete
+                        readOnly={formReadonly || fieldReadonly}
+                        disabled={formDisabled || fieldDisabled}
+                        {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
+                        id={fieldLayoutInfo.attrs.name}
+                        field="label"
+                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                        dropdown
+                        suggestions={selectionStaticItems}
+                        completeMethod={selectionStaticSearch}
+                        // onChange={(e) => updateInputs(index, e.value)} />
+                        onChange={formik.handleChange} />
+                </div>
                 {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                     <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 )}

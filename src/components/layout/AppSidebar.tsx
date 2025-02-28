@@ -80,6 +80,36 @@ const AppSidebar = () => {
         };
     }, [isSearchShow]);
 
+    const additionalMenu = {
+        title: "General Settings",
+        key: "general-settings",
+        children: [
+            {
+                title: "Settings",
+                path: "",
+                key: "settings-menu-item",
+                children: [
+                    {
+                        title: "App Settings",
+                        path: "/admin/settings/app-settings",
+                        key: "app-setting"
+                    },
+                    {
+                        title: "Authentication Settings",
+                        path: "/admin/settings/authentication-settings",
+                        key: "auth-setting"
+                    },
+                    {
+                        title: "Misc",
+                        path: "/admin/settings/misc-settings",
+                        key: "misc-setting"
+                    }
+                ]
+            }
+        ],
+        icon: "/images/Navigation/settings.png" // Default icon (optional)
+    };
+    const updatedMenuData = menu?.data ? [...menu.data, additionalMenu] : [additionalMenu];
 
 
     return (
@@ -91,7 +121,7 @@ const AppSidebar = () => {
                 <div
                     className={`sidebar-toggle-button ${!visibleNavbar ? "s-collapsed" : ""}`}
                     onClick={handleToggle}
-                    // severity="secondary"
+                // severity="secondary"
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <rect x="0.3" y="0.3" width="23.4" height="23.4" rx="2.1" fill="white" />
@@ -104,7 +134,7 @@ const AppSidebar = () => {
 
             <div className="sidebar-left">
                 <div className="navbar-menu">
-                    {menu && menu.data.length > 0 && menu.data.map((m: any) => (
+                    {updatedMenuData.length > 0 && updatedMenuData.map((m: any) => (
                         <div
                             key={m.title}
                             className={`menu-item ${currentMainMenu === m.title ? "active-menu-image" : ""}`}
@@ -112,20 +142,15 @@ const AppSidebar = () => {
                             <a onClick={() => handleMenu(m)}>
                                 {m.icon ?
                                     <img
-                                        style={{ cursor: "pointer", width: '30px' , mixBlendMode: "multiply"}}
-                                        // src={currentMainMenu === m.title ? `/images/${m.title.toLocaleLowerCase()}-active.svg` : `/images/${m.title.toLocaleLowerCase()}.svg`}
-                                        // src={`/images/menu/${m.title}.svg`}
+                                        style={{ cursor: "pointer", width: '30px', mixBlendMode: "multiply" }}
                                         src={(m.icon && m.icon.startsWith("/")) ? m.icon : `${process.env.API_URL}/${m.icon}`}
-                                        // src={`/images/menu/app-builder.svg`}
-                                        alt="Solid"
+                                        alt={m.title}
                                     />
                                     :
                                     <img
                                         style={{ cursor: "pointer", width: '30px' }}
-                                        // src={currentMainMenu === m.title ? `/images/${m.title.toLocaleLowerCase()}-active.svg` : `/images/${m.title.toLocaleLowerCase()}.svg`}
-                                        // src={`/images/menu/${m.title}.svg`}
                                         src={`/images/menu/app-builder.svg`}
-                                        alt="Solid"
+                                        alt={m.title}
                                     />
                                 }
                             </a>

@@ -31,6 +31,8 @@ import { SolidConfigureLayoutElement } from '../common/SolidConfigureLayoutEleme
 import { FilterIcon } from '../../modelsComponents/filterIcon';
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Toast } from "primereact/toast";
+import { Divider } from "primereact/divider";
+
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -443,8 +445,12 @@ export const SolidListView = (params: SolidListViewParams) => {
     solidGlobalSearchElementRef.current.clearFilter()
   };
 
-  const [solidsolidViewDataId, setSolidViewDataId] = useState<number | null>()
+  const [solidsolidViewDataId, setSolidViewDataId] = useState<number | null>();
+  const [solidFieldName, setSolidFieldName] = useState<string>("")
+
   const op = useRef(null)
+  const [deleteEntity, setDeleteEntity] = useState(false);
+
 
   // clickable link allowing one to open the detail / form view.
   const detailsBodyTemplate = (solidViewData: any) => {
@@ -458,7 +464,8 @@ export const SolidListView = (params: SolidListViewParams) => {
           // @ts-ignore 
           {
             op.current.toggle(e);
-            setSolidViewDataId(solidViewData.id)
+            setSolidViewDataId(solidViewData.id);
+            setSolidFieldName(solidViewData?.singularName)
           }
           }
 
@@ -497,8 +504,30 @@ export const SolidListView = (params: SolidListViewParams) => {
               icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M4.66666 14C4.29999 14 3.9861 13.8694 3.72499 13.6083C3.46388 13.3472 3.33332 13.0333 3.33332 12.6667V4H2.66666V2.66667H5.99999V2H9.99999V2.66667H13.3333V4H12.6667V12.6667C12.6667 13.0333 12.5361 13.3472 12.275 13.6083C12.0139 13.8694 11.7 14 11.3333 14H4.66666ZM11.3333 4H4.66666V12.6667H11.3333V4ZM5.99999 11.3333H7.33332V5.33333H5.99999V11.3333ZM8.66666 11.3333H9.99999V5.33333H8.66666V11.3333Z" fill="#4B4D52" />
               </svg>}
-              onClick={() => deleteSolidSingleEntiry(solidViewData.id)}
+              onClick={() => setDeleteEntity(true)}
             />
+            {solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons &&
+              solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons.map((rowAction: any) => {
+                return (
+                  <Button
+                    text
+                    size="small"
+                    icon={rowAction?.attrs?.className ? rowAction?.attrs?.className : "pi pi-pencil"}
+                    onClick={() => {
+                      setListRowActionData({
+                        modelName: params.modelName,
+                        moduleName: params.moduleName,
+                        rowAction: rowAction,
+                        rowData: rowData,
+                        closeListViewRowActionPopup: closeListViewRowActionPopup
+
+                      });
+                      setListViewRowActionPopupState(true)
+                    }
+                    }
+                  />
+                );
+              })}
           </div>
         </OverlayPanel>
       </div>
@@ -649,7 +678,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   return (
     <>
       <div className="page-header">
-      <Toast ref={toast} />
+        <Toast ref={toast} />
         <div className="flex gap-3 align-items-center">
 
 
@@ -658,10 +687,9 @@ export const SolidListView = (params: SolidListViewParams) => {
             label="Delete"
             size="small"
             onClick={() => setDialogVisible(true)}
-            className="small-button"
             severity="danger"
           />}
-          {isFilterApplied &&
+          {/* {isFilterApplied &&
             <Button
               type="button"
               icon="pi pi-filter-slash"
@@ -671,10 +699,10 @@ export const SolidListView = (params: SolidListViewParams) => {
               onClick={clearFilter}
               className="small-button"
             />
-          }
+          } */}
 
           {solidListViewMetaData?.data?.solidView?.layout?.attrs?.enableGlobalSearch === true && params.embeded === false &&
-            <SolidGlobalSearchElement ref={solidGlobalSearchElementRef} viewData={solidListViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  setShowArchived={setShowArchived} showArchived={showArchived}></SolidGlobalSearchElement>
+            <SolidGlobalSearchElement filters={filters} clearFilter={clearFilter} ref={solidGlobalSearchElementRef} viewData={solidListViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}></SolidGlobalSearchElement>
           }
         </div>
         <div className="flex align-items-center gap-3">
@@ -684,12 +712,12 @@ export const SolidListView = (params: SolidListViewParams) => {
           }
           {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true &&
             // < SolidCreateButton url={createButtonUrl} />
-            <Button type="button" icon="pi pi-plus" label="Add" size='small' className='small-button'
+            <Button type="button" icon="pi pi-plus" label="Add" size='small'
               onClick={() => params.handlePopUpOpen(true)}
             ></Button>
           }
-          {showArchived && <Button type="button" icon="pi pi-refresh" label="Recover" size='small' severity="warning"
-              onClick={() => setRecoverDialogVisible(true)}
+          {showArchived && <Button type="button" icon="pi pi-refresh" label="Recover" size='small' severity="secondary"
+            onClick={() => setRecoverDialogVisible(true)}
           ></Button>}
           <SolidLayoutViews
             sizeOptions={sizeOptions}
@@ -700,7 +728,7 @@ export const SolidListView = (params: SolidListViewParams) => {
             view={view}
           />
           {params.embeded === false &&
-            <SolidConfigureLayoutElement></SolidConfigureLayoutElement>
+            <SolidConfigureLayoutElement setShowArchived={setShowArchived} showArchived={showArchived} viewData={solidListViewMetaData}></SolidConfigureLayoutElement>
           }
           {/* {params.embeded === false &&
             <SolidListViewOptions></SolidListViewOptions>
@@ -749,39 +777,15 @@ export const SolidListView = (params: SolidListViewParams) => {
 
           {renderColumnsDynamically(listViewMetaData)}
           {actionsAllowed.includes(`${updatePermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.edit !== false &&
-            <Column body={(rowData) => (
+            <Column frozen alignFrozen="right" body={(rowData) => (
               rowData.deletedAt ? (
                 <a onClick={() => recoverById(rowData.id)} className="retrieve-button">
-                  <i className="pi pi-refresh" style={{ fontSize: "1rem" }}/>
+                  <i className="pi pi-refresh" style={{ fontSize: "1rem" }} />
                 </a>
               ) :
                 detailsBodyTemplate(rowData)
             )}></Column>
           }
-          {solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons &&
-            solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons.map((rowAction: any) => {
-              return (
-                <Column
-                  key={rowAction}
-                  body={(rowData) => (
-                    <a onClick={() => {
-                      setListRowActionData({
-                        modelName: params.modelName,
-                        moduleName: params.moduleName,
-                        rowAction: rowAction,
-                        rowData: rowData,
-                        closeListViewRowActionPopup: closeListViewRowActionPopup
-
-                      });
-                      setListViewRowActionPopupState(true)
-                    }
-                    }>
-                      <i className={rowAction?.attrs?.className ? rowAction?.attrs?.className : "pi pi-pencil"} /> {/* PrimeIcons pencil icon */}
-                    </a>
-                  )}
-                />
-              );
-            })}
         </DataTable>
       </div>
       <Dialog
@@ -790,8 +794,8 @@ export const SolidListView = (params: SolidListViewParams) => {
         modal
         footer={() => (
           <div className="flex justify-content-center">
-            <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteBulk} />
-            <Button label="No" icon="pi pi-times" className='small-button' onClick={onDeleteClose} />
+            <Button label="Yes" icon="pi pi-check" severity="danger" autoFocus onClick={deleteBulk} />
+            <Button label="No" icon="pi pi-times" onClick={onDeleteClose} />
           </div>
         )}
         onHide={() => setDialogVisible(false)}
@@ -805,8 +809,8 @@ export const SolidListView = (params: SolidListViewParams) => {
         modal
         footer={() => (
           <div className="flex justify-content-center">
-            <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={recoverAll} />
-            <Button label="No" icon="pi pi-times" className='small-button' onClick={() => setRecoverDialogVisible(false)} />
+            <Button label="Yes" icon="pi pi-check" severity="danger" autoFocus onClick={recoverAll} />
+            <Button label="No" icon="pi pi-times" onClick={() => setRecoverDialogVisible(false)} />
           </div>
         )}
         onHide={() => setRecoverDialogVisible(false)}
@@ -823,6 +827,19 @@ export const SolidListView = (params: SolidListViewParams) => {
           <ListViewRowActionPopup context={listViewRowActionData}></ListViewRowActionPopup>
         </Dialog>
       }
+      <Dialog header="Delete Field" headerClassName="py-2" contentClassName="px-0 pb-0" visible={deleteEntity} style={{ width: '20vw' }} onHide={() => { if (!deleteEntity) return; setDeleteEntity(false); }}>
+        <Divider className="m-0" />
+        <div className="p-4">
+          <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
+            Are you sure you want to delete this Field ?
+          </p>
+          <p className="" style={{ color: 'var{--solid-grey-500}' }}>{solidFieldName}</p>
+          <div className="flex align-items-center gap-2 mt-3">
+            <Button label="Delete" size="small" onClick={() => { deleteSolidSingleEntiry(solidsolidViewDataId); setDeleteEntity(false); }} />
+            <Button label="Cancel" size="small" onClick={() => setDeleteEntity(false)} outlined />
+          </div>
+        </div>
+      </Dialog>
     </>
   );
 };

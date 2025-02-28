@@ -18,6 +18,7 @@ import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import { LayoutContext } from "../layout/context/layoutcontext";
 import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { useInitateLoginMutation } from "@/redux/api/authApi";
+import { AppTitle } from "@/helpers/AppTitle";
 
 const SolidLogin = () => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
@@ -55,11 +56,7 @@ const SolidLogin = () => {
                                 src={'/images/SS-Logo-1 1.png'}
                                 className="position-relative img-fluid"
                             />
-                            <div>
-                                <p className="solid-logo-title">
-                                    Solid<br />Starters
-                                </p>
-                            </div>
+                            <AppTitle title={solidSettingsData} />
                         </div>
                     </div>
                 }

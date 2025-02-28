@@ -151,6 +151,10 @@ const SolidGroup = ({ children, attrs }: any) => {
     const className = attrs.className;
 
     return (
+        <div className={className}>
+            {attrs.label && <p>{attrs.label}</p>}
+            <div className="grid">{children}</div>
+        </div>
         // <div className={className}>
         //     <div className="s_group">
         //         <fieldset>
@@ -160,9 +164,9 @@ const SolidGroup = ({ children, attrs }: any) => {
         //     </div>
 
         // </div>
-        <div className="formgrid grid">
-            {children}
-        </div>
+        // <div className="formgrid grid">
+        //     {children}
+        // </div>
     );
 };
 
@@ -181,7 +185,11 @@ const SolidRow = ({ children, attrs }: any) => {
         //     </div>
 
         // </div>
-        <div>{children}</div>
+        <div className={`row ${className}`}>
+            {attrs.label && <p >{attrs.label}</p>}
+            <div className="grid">{children}</div>
+        </div>
+        // <div>{children}</div>
     );
 };
 const SolidColumn = ({ children, attrs }: any) => {
@@ -197,31 +205,36 @@ const SolidColumn = ({ children, attrs }: any) => {
         //     </div>
 
         // </div>
-        <div className="formgrid grid">
-            {children}
+        <div className={`${className}`}>
+            {attrs.label && <p>{attrs.label}</p>}
+            <div className="grid">{children}</div>
         </div>
+        // <div className="formgrid grid">
+        //     {children}
+        // </div>
     );
 };
 
 const SolidSheet = ({ children }: any) => (
-
-    <div>
+    <div className="p-fluid p-grid">
         {children}
     </div>
 );
 const SolidNotebook = ({ children }: any) => {
 
     return (
-        <TabView>
-            {children}
-        </TabView>
+        <div className="solid-tab-view w-full">
+            <TabView>
+                {children}
+            </TabView>
+        </div>
     )
 };
 
 
 const SolidPage = ({ attrs, children, key }: any) => (
     <TabPanel key={key} header={attrs.label} >
-        <div>{children}</div>
+        <div className="p-fluid">{children}</div>
     </TabPanel>
 );
 
@@ -493,7 +506,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             });
 
         });
-    
+
         // errorFields.length = 0;
     };
     useEffect(() => {
@@ -679,7 +692,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             <div className="solid-form-wrapper">
                 <Toast ref={toast} />
 
-                <form onSubmit={formik.handleSubmit}>
+                <form style={{ width: '77.5%', borderRight: '1px solid var(--primary-light-color' }} onSubmit={formik.handleSubmit}>
                     <div className="solid-form-header">
                         {params.id === "new" ? (
                             <>
@@ -835,13 +848,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         <SolidFormStepper />
                     </div>
                     <div className="p-4 solid-form-content">
-                        <div className="grid">
-                            <div className="col-8 mx-auto">
-                                {renderFormDynamically(formViewMetaData)}
-                            </div>
-                        </div>
+                        {renderFormDynamically(formViewMetaData)}
                     </div>
-                </form >
+                </form>
+                <div style={{ width: '22.5%' }}>
+                </div>
                 <Dialog
                     visible={isDeleteDialogVisible}
                     header="Confirm Delete"
@@ -856,7 +867,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 >
                     <p>Are you sure you want to delete?</p>
                 </Dialog>
-            </div >
+            </div>
         );
 
     }

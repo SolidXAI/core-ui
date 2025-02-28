@@ -1,5 +1,6 @@
 "use client";
 
+import { AppTitle } from "@/helpers/AppTitle";
 import { useConfirmForgotPasswordMutation } from "@/redux/api/authApi";
 import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { useFormik } from "formik";
@@ -12,7 +13,6 @@ import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
-
 
 const SolidResetPassword = ({ verificationToken, username }: { verificationToken?: any, username?: any }) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
@@ -82,11 +82,7 @@ const SolidResetPassword = ({ verificationToken, username }: { verificationToken
                                 src={'/images/SS-Logo-1 1.png'}
                                 className="position-relative img-fluid"
                             />
-                            <div>
-                                <p className="solid-logo-title">
-                                    Solid<br />Starters
-                                </p>
-                            </div>
+                            <AppTitle title={solidSettingsData} />
                         </div>
                     </div>
                 }

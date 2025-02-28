@@ -41,7 +41,7 @@ export const SolidSelectionDynamicFilterElement = ({ value, updateInputs, index,
             field="label"
             value={value}
             dropdown
-            className="w-full small-input"
+            className="w-full"
             suggestions={selectionDynamicItems}
             completeMethod={selectionDynamicSearch}
             onChange={(e) => updateInputs(index, e.value)} />

@@ -12,7 +12,7 @@ export const DropzonePlaceholder = () => {
                     Drag and Drop or <span className='text-primary'> choose files</span> to upload
                 </div>
                 <p>Supported format : PDF/JPEG | File size max 10 MB</p>
-                <Button outlined size='small' severity='secondary' label='Click to Brows' />
+                <Button outlined size='small' severity='secondary' label='Click to Brows' type="button"/>
         </div>
     )
 }
