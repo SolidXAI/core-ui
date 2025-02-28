@@ -23,9 +23,9 @@ export class SolidDecimalField implements ISolidField {
     initialValue(): any {
         const fieldName = this.fieldContext.field.attrs.name;
         const fieldDefaultValue = this.fieldContext?.fieldMetadata?.defaultValue;
-    
+
         const existingValue = this.fieldContext.data[fieldName];
-    
+
         return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
     }
 
@@ -48,7 +48,7 @@ export class SolidDecimalField implements ISolidField {
     render(formik: FormikObject) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
+        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
@@ -63,6 +63,7 @@ export class SolidDecimalField implements ISolidField {
 
         return (
             <div className={className}>
+                <div className="flex flex-column gap-2 mt-4">
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
                     </label>
@@ -80,6 +81,7 @@ export class SolidDecimalField implements ISolidField {
                     {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                         <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                     )}
+                </div>
             </div>
         );
     }

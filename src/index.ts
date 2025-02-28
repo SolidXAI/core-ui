@@ -366,6 +366,7 @@ export type { Product } from '@/components/tables/ListViewTable';
 
 export { ToastContainer, handleError, handleSuccess } from '@/helpers/ToastContainer';
 export { getAuthCookieName, getAuthHeader } from '@/helpers/authHeader';
+export { AppTitle } from '@/helpers/AppTitle'
 // export * from '@/helpers/countries';
 export { addCommasToAmount, calculateDaysOfStay, getSingularAndPlural } from '@/helpers/helpers';
 // export * from '@/helpers/menu';
@@ -417,7 +418,7 @@ export { revalidateTag } from '@/helpers/revalidate';
 // │   └── userSlice.ts
 // ├── hooks.ts
 // export * from '@/redux/api/articleApi';
-export { authApi, useForgotPasswordMutation, useRegisterMutation, useRegisterPrivateMutation, useResetPasswordMutation, useUpdateUserMutation ,useInitateLoginMutation, useConfirmOtpLoginMutation, useInitateRegisterMutation, useConfirmOtpRegisterMutation,} from '@/redux/api/authApi';
+export { authApi, useForgotPasswordMutation, useRegisterMutation, useRegisterPrivateMutation, useResetPasswordMutation, useUpdateUserMutation, useInitateLoginMutation, useConfirmOtpLoginMutation, useInitateRegisterMutation, useConfirmOtpRegisterMutation, } from '@/redux/api/authApi';
 // export * from '@/redux/api/automationApi';
 // export * from '@/redux/api/categoryApi';
 // export * from '@/redux/api/cityApi';

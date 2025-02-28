@@ -12,6 +12,7 @@ import { useContext, useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { LayoutContext } from "../layout/context/layoutcontext";
 import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
+import { AppTitle } from "@/helpers/AppTitle";
 
 
 const SolidOTPVerify = () => {
@@ -49,7 +50,7 @@ const SolidOTPVerify = () => {
         <>
             <Toast ref={toast} />
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`} style={{ minWidth: 480 }}>
-            {solidSettingsData?.data?.authPagesLayout === 'center' &&
+                {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
                         <div className="solid-logo flex align-items-center gap-3">
                             <img
@@ -57,11 +58,7 @@ const SolidOTPVerify = () => {
                                 src={'/images/SS-Logo-1 1.png'}
                                 className="position-relative img-fluid"
                             />
-                            <div>
-                                <p className="solid-logo-title">
-                                    Solid<br />Starters
-                                </p>
-                            </div>
+                            <AppTitle title={solidSettingsData} />
                         </div>
                     </div>
                 }
@@ -113,7 +110,7 @@ const SolidOTPVerify = () => {
                                     </div>
                                 </div>
                                 <div className="mt-4">
-                                    <Button type="submit" className="w-full font-light auth-submit-button" label="Verify"  disabled={formik.isSubmitting} loading={formik.isSubmitting}/>
+                                    <Button type="submit" className="w-full font-light auth-submit-button" label="Verify" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
                                 </div>
                             </Form>
                         )}

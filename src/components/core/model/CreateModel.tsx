@@ -15,7 +15,8 @@ import FieldMetaData from "./FieldMetaData";
 import ModelMetaData from "./ModelMetaData";
 import { BackButton } from "@/components/common/BackButton";
 import { SolidFormStepper } from "@/components/common/SolidFormStepper";
-
+import { Dialog } from "primereact/dialog";
+import { Divider } from "primereact/divider";
 
 interface ErrorResponseData {
   message: string;
@@ -28,6 +29,7 @@ const CreateModel = ({ data, params }: any) => {
   const toast = useRef<Toast>(null);
   const router = useRouter();
   const pathname = usePathname();
+  const [deleteEntity, setDeleteEntity] = useState(false);
   const [isLoadingData, setIsLoadingData] = useState(data ? true : false);
   const formikModelMetadataRef = useRef<any>();
   const formikFieldsMetadataRef = useRef();
@@ -262,94 +264,103 @@ const CreateModel = ({ data, params }: any) => {
 
   }, [isCreateModelError, isDeleteModelError, isUpdateModelError])
 
-
-
-
   return (
     <div className="solid-form-wrapper">
       <Toast ref={toast} />
+      <div style={{ width: '77.5%', borderRight: '1px solid var(--primary-light-color' }}>
+        <div className="solid-form-header">
+          {params.id === "new" ?
+            <>
+              <div className="flex align-items-center gap-3">
+                <BackButton />
+                <div className="form-wrapper-title">Create Model</div>
+              </div>
+              <div className="gap-3 flex">
+                <Button label="Save" size="small" onClick={handleSubmit} type="submit" />
+                <CancelButton />
+              </div>
+            </>
+            :
+            <>
+              <div className="flex align-items-center gap-3">
+                <BackButton />
+                <div className="form-wrapper-title">Edit Model</div>
+              </div>
+              <div className="gap-3 flex">
+                {data?.isSystem !== true &&
+                  <>
+                    <div>
+                      <Button label="Save" size="small" type="submit" onClick={handleSubmit} />
+                    </div>
+                    <div>
+                      <Button outlined label="Delete" size="small" severity="danger" type="button" onClick={() => setDeleteEntity(true)} />
+                    </div>
+                  </>
+                }
+                <CancelButton />
+              </div>
+            </>
+          }
+        </div>
+        <div className="solid-form-stepper">
+          <SolidFormStepper />
+        </div>
+        <div className="p-4 solid-form-content">
+          <TabView
+            activeIndex={activeIndex}
+            onTabChange={(e) => {
+              if (activeIndex == 0) {
+                formikModelMetadataRef.current.handleSubmit();
+                setActiveIndex(e.index)
 
-      <div className="solid-form-header">
-        {params.id === "new" ?
-          <>
-            <div className="flex align-items-center gap-3">
-              <BackButton />
-              <div className="form-wrapper-title">Create Model</div>
-            </div>
-            <div className="gap-3 flex">
-              <Button label="Save" size="small" onClick={handleSubmit} type="submit" />
-              <CancelButton />
-            </div>
-          </>
-          :
-          <>
-            <div className="flex align-items-center gap-3">
-              <BackButton />
-              <div className="form-wrapper-title">Edit Model</div>
-            </div>
-            <div className="gap-3 flex">
-              {data?.isSystem !== true &&
-                <>
-                  <div>
-                    <Button label="Save" size="small" type="submit" onClick={handleSubmit} />
-                  </div>
-                  <div>
-                    <Button outlined label="Delete" size="small" severity="danger" type="button" onClick={deleteModelFunction} />
-                  </div>
-                </>
               }
-              <CancelButton />
-            </div>
-          </>
-        }
-      </div>
-      <div className="solid-form-stepper">
-        <SolidFormStepper />
-      </div>
-      <div className="p-4 solid-form-content">
-        <div className="grid">
-          <div className="col-8 mx-auto">
-            <TabView
-              activeIndex={activeIndex}
-              onTabChange={(e) => {
-                if (activeIndex == 0) {
-                  formikModelMetadataRef.current.handleSubmit();
-                  setActiveIndex(e.index)
+              if (activeIndex == 1) {
+                setActiveIndex(e.index)
+              }
 
-                }
-                if (activeIndex == 1) {
-                  setActiveIndex(e.index)
-                }
-
-              }}
-            >
-              <TabPanel header="Model">
-                <ModelMetaData
-                  modelMetaData={modelMetaData}
-                  setModelMetaData={setModelMetaData}
-                  allModelsNames={allModelsNames}
-                  deleteModelFunction={deleteModelFunction}
-                  nextTab={nextTab}
-                  formikModelMetadataRef={formikModelMetadataRef}
-                  params={params}
-                ></ModelMetaData>
-              </TabPanel>
-              <TabPanel header="Fields" >
-                <FieldMetaData
-                  modelMetaData={modelMetaData}
-                  fieldMetaData={fieldMetaData}
-                  setFieldMetaData={setFieldMetaData}
-                  deleteModelFunction={deleteModelFunction}
-                  nextTab={nextTab}
-                  formikFieldsMetadataRef={formikFieldsMetadataRef}
-                  params={params}
-                ></FieldMetaData>
-              </TabPanel>
-            </TabView>
-          </div>
+            }}
+          >
+            <TabPanel header="Model">
+              <ModelMetaData
+                modelMetaData={modelMetaData}
+                setModelMetaData={setModelMetaData}
+                allModelsNames={allModelsNames}
+                deleteModelFunction={deleteModelFunction}
+                nextTab={nextTab}
+                formikModelMetadataRef={formikModelMetadataRef}
+                params={params}
+              ></ModelMetaData>
+            </TabPanel>
+            <TabPanel header="Fields" >
+              <FieldMetaData
+                modelMetaData={modelMetaData}
+                fieldMetaData={fieldMetaData}
+                setFieldMetaData={setFieldMetaData}
+                deleteModelFunction={deleteModelFunction}
+                nextTab={nextTab}
+                formikFieldsMetadataRef={formikFieldsMetadataRef}
+                params={params}
+              ></FieldMetaData>
+            </TabPanel>
+          </TabView>
         </div>
       </div>
-    </div >
+      <div style={{ width: '22.5%' }}>
+      </div>
+      <Dialog header="Delete Field" headerClassName="py-2" contentClassName="px-0 pb-0" visible={deleteEntity} style={{ width: '20vw' }} onHide={() => { if (!deleteEntity) return; setDeleteEntity(false); }}>
+        <Divider className="m-0" />
+        <div className="p-4">
+          <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
+            Are you sure you want to delete this Field ?
+          </p>
+          <p className="" style={{ color: 'var{--solid-grey-500}' }}>{modelMetaData?.singularName}</p>
+          <div className="flex align-items-center gap-2 mt-3">
+            <Button label="Delete" size="small" onClick={deleteModelFunction} />
+            <Button label="Cancel" size="small" onClick={() => setDeleteEntity(false)} outlined />
+          </div>
+        </div>
+      </Dialog>
+    </div>
   );
 };
 

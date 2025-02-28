@@ -1,5 +1,6 @@
 "use client";
 
+import { AppTitle } from "@/helpers/AppTitle";
 import { useConfirmOtpLoginMutation } from "@/redux/api/authApi";
 import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { Form, Formik } from "formik";
@@ -11,7 +12,6 @@ import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
-
 
 const SolidInitialLoginOtp = ({ email }: { email: string }) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
@@ -53,11 +53,7 @@ const SolidInitialLoginOtp = ({ email }: { email: string }) => {
                                 src={'/images/SS-Logo-1 1.png'}
                                 className="position-relative img-fluid"
                             />
-                            <div>
-                                <p className="solid-logo-title">
-                                    Solid<br />Starters
-                                </p>
-                            </div>
+                            <AppTitle title={solidSettingsData} />
                         </div>
                     </div>
                 }

@@ -51,7 +51,7 @@ export class SolidSelectionDynamicField implements ISolidField {
     render(formik: FormikObject) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
+        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
@@ -93,8 +93,8 @@ export class SolidSelectionDynamicField implements ISolidField {
 
         return (
             <div className={className}>
+                <div className="flex flex-column gap-2 mt-4">
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-
                         &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
                     </label>
                     <AutoComplete
@@ -109,9 +109,10 @@ export class SolidSelectionDynamicField implements ISolidField {
                         completeMethod={selectionDynamicSearch}
                         // onChange={(e) => updateInputs(index, e.value)} />
                         onChange={formik.handleChange} />
-                    {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                    )}
+                </div>
+                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                )}
             </div>
         );
     }

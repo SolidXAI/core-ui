@@ -9,7 +9,7 @@ interface FilterColumns {
     name: string;
     key: string;
 }
-export const SolidConfigureLayoutElement = ({ }: any) => {
+export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, viewData }: any) => {
 
     // const [visible, setVisible] = useState<boolean>(false);
     const op = useRef(null);
@@ -54,7 +54,10 @@ export const SolidConfigureLayoutElement = ({ }: any) => {
                     </div>
                 </div>
                 <Divider className="m-0" />
-                <div className="p-2 position-relative">
+                <div className="p-2 position-relative flex flex-column gap-1">
+                    {viewData?.data?.solidView?.model?.enableSoftDelete &&
+                        <Button text size="small" className="text-left w-13rem" label={showArchived ? "Hide Archived Records" : "Show Archived Records"} iconPos="left" onClick={() => { setShowArchived(!showArchived); }} />
+                    }
                     <Button
                         icon='pi pi-sliders-h'
                         label="Customize Layout"
@@ -65,7 +68,7 @@ export const SolidConfigureLayoutElement = ({ }: any) => {
                     // onMouseEnter={(e) => customizeLayout.current.show(e)}
                     />
                     <p className="mt-3 mb-1 font-medium" style={{ color: 'var(--gray-400)' }}>Saved Layouts</p>
-                    <Button text severity="secondary" label="Diet Tracking" icon="pi pi-plus" size="small"/>
+                    <Button text severity="secondary" label="Diet Tracking" icon="pi pi-plus" size="small" />
                     <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}>
                         <div className="pl-3 pt-2 flex align-items-center justify-content-between">
                             <p className="m-0 font-bold">Columns</p>
@@ -99,5 +102,4 @@ export const SolidConfigureLayoutElement = ({ }: any) => {
             </OverlayPanel>
         </div>
     )
-
 }
