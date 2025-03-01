@@ -17,11 +17,9 @@ import qs from "qs";
 import React, { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 
-const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allModelsNames, deleteModelFunction, nextTab, formikModelMetadataRef, params }: any, ref) => {
+const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allModelsNames, deleteModelFunction, nextTab, formikModelMetadataRef, params, formErrors }: any, ref) => {
 
   // const ModelMetaData = ({ modelMetaData, setModelMetaData, deleteModelFunction, nextTab, formikModelMetadataRef }: any) => {   
-
-
 
   const router = useRouter();
   const toast = useRef<Toast>(null);
@@ -286,8 +284,9 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     valueKey="id"
                     searchData={searchModule}
                     existingData={formik.values.module}
+                    formErrors={formErrors}
                   />
-                  {isFormFieldValid(formik, "module") && (
+                  {(isFormFieldValid(formik, "module") || (formErrors["module"])) && (
                     <Message severity="error" text={formik?.errors?.moduleId?.toString()} />
                   )}
                 </div>
@@ -309,9 +308,10 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     searchData={serachDataSource}
                     existingData={formik.values.dataSource}
                     additionalAction={(e: any) => formik.setFieldValue("dataSourceType", e.target.value.type)}
+                    formErrors={formErrors}
                   />
                   {formik.values.dataSourceType && <p className="form-field-label">Your datasource will connect to a {formik.values.dataSourceType} database</p>}
-                  {isFormFieldValid(formik, "dataSource") && (
+                  {(isFormFieldValid(formik, "dataSource") || (formErrors["dataSource"])) && (
                     <Message severity="error" text={formik?.errors?.dataSource?.toString()} />
                   )}
                 </div>
@@ -392,7 +392,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     </label>
                   </div>
                   {params.id !== 'new' && <p className="form-field-label">Soft-delete can only be set during initial creation to maintain data integrity</p>}
-                  {isFormFieldValid(formik, "enableSoftDelete") && (
+                  {(isFormFieldValid(formik, "enableSoftDelete") || (formErrors["enableSoftDelete"])) && (
                     <Message
                       severity="error"
                       text={formik?.errors?.enableSoftDelete?.toString()}
@@ -531,12 +531,12 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     }}
                     value={formik.values.displayName}
                     className={classNames("", {
-                      "p-invalid": isFormFieldValid(formik, "displayName"),
+                      "p-invalid": isFormFieldValid(formik, "displayName") || formErrors["displayName"],
                     })}
 
                   />
 
-                  {isFormFieldValid(formik, "displayName") && (
+                  {(isFormFieldValid(formik, "displayName") || (formErrors["displayName"])) && (
                     <Message
                       severity="error"
                       text={formik?.errors?.displayName?.toString()}
@@ -555,10 +555,10 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     onChange={formik.handleChange}
                     value={formik.values.singularName}
                     className={classNames("", {
-                      "p-invalid": isFormFieldValid(formik, "singularName"),
+                      "p-invalid": isFormFieldValid(formik, "singularName") || formErrors["singularName"],
                     })}
                   />
-                  {isFormFieldValid(formik, "singularName") && (
+                  {(isFormFieldValid(formik, "singularName") || (formErrors["singularName"])) && (
                     <Message
                       severity="error"
                       text={formik?.errors?.singularName?.toString()}
@@ -577,10 +577,10 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     onChange={formik.handleChange}
                     value={formik.values.pluralName}
                     className={classNames("", {
-                      "p-invalid": isFormFieldValid(formik, "pluralName"),
+                      "p-invalid": isFormFieldValid(formik, "pluralName") || formErrors["pluralName"],
                     })}
                   />
-                  {isFormFieldValid(formik, "pluralName") && (
+                  {(isFormFieldValid(formik, "pluralName") || (formErrors["pluralName"])) && (
                     <Message severity="error" text={formik?.errors?.pluralName?.toString()} />
                   )}
                 </div>
@@ -615,10 +615,10 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                       onChange={formik.handleChange}
                       value={formik.values.tableName}
                       className={classNames("", {
-                        "p-invalid": isFormFieldValid(formik, "tableName"),
+                        "p-invalid": isFormFieldValid(formik, "tableName") || formErrors["tableName"],
                       })}
                     />
-                    {isFormFieldValid(formik, "tableName") && (
+                    {(isFormFieldValid(formik, "tableName") || (formErrors["tableName"])) && (
                       <Message
                         severity="error"
                         text={formik?.errors?.tableName?.toString()}
@@ -646,12 +646,12 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     onChange={formik.handleChange}
                     value={formik.values.description}
                     className={classNames("", {
-                      "p-invalid": isFormFieldValid(formik, "description"),
+                      "p-invalid": isFormFieldValid(formik, "description") || formErrors["description"],
                     })}
                     rows={5}
                     cols={30}
                   />
-                  {isFormFieldValid(formik, "description") && (
+                  {(isFormFieldValid(formik, "description") || (formErrors["description"])) && (
                     <Message
                       severity="error"
                       text={formik?.errors?.description?.toString()}
