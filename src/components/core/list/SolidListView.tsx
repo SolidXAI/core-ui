@@ -518,7 +518,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                         modelName: params.modelName,
                         moduleName: params.moduleName,
                         rowAction: rowAction,
-                        rowData: rowData,
+                        rowData: solidViewData,
                         closeListViewRowActionPopup: closeListViewRowActionPopup
 
                       });
@@ -778,7 +778,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           {renderColumnsDynamically(listViewMetaData)}
           {actionsAllowed.includes(`${updatePermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.edit !== false &&
             <Column frozen alignFrozen="right" body={(rowData) => (
-              rowData.deletedAt ? (
+              rowData?.deletedAt ? (
                 <a onClick={() => recoverById(rowData.id)} className="retrieve-button">
                   <i className="pi pi-refresh" style={{ fontSize: "1rem" }} />
                 </a>
