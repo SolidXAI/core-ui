@@ -896,7 +896,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
             Are you sure you want to delete this Field ?
           </p>
-          <p className="" style={{ color: 'var{--solid-grey-500}' }}>{solidFieldName}</p>
+          <p className="" style={{ color: 'var{--solid-grey-500}' }}>{selectedSolidViewData?.singularName}</p>
           <div className="flex align-items-center gap-2 mt-3">
             <Button label="Delete" size="small" onClick={() => { deleteSolidSingleEntiry(solidsolidViewDataId); setDeleteEntity(false); }} />
             <Button label="Cancel" size="small" onClick={() => setDeleteEntity(false)} outlined />
