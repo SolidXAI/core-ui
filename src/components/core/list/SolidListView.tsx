@@ -669,7 +669,17 @@ export const SolidListView = (params: SolidListViewParams) => {
             view={view}
           /> */}
           {params.embeded === false &&
-            <SolidConfigureLayoutElement setShowArchived={setShowArchived} showArchived={showArchived} viewData={solidListViewMetaData}></SolidConfigureLayoutElement>
+            <SolidConfigureLayoutElement
+              setShowArchived={setShowArchived}
+              showArchived={showArchived}
+              viewData={solidListViewMetaData}
+              sizeOptions={sizeOptions}
+              setSize={setSize}
+              size={size}
+              viewModes={viewModes}
+              setView={setView}
+              view={view}
+            ></SolidConfigureLayoutElement>
           }
           {/* {params.embeded === false &&
             <SolidListViewOptions></SolidListViewOptions>
