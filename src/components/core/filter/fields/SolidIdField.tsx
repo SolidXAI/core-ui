@@ -18,7 +18,6 @@ const SolidIdField = ({ fieldMetadata, onChange, index, rule }: SolidFilterField
                   <Dropdown
                       value={rule.matchMode}
                       onChange={(e: any) => {
-                          console.log("e", e);
                           onChange(rule.id, 'matchMode', e.value)
                         }}
                       options={filterMatchModeOptions}
@@ -28,7 +27,6 @@ const SolidIdField = ({ fieldMetadata, onChange, index, rule }: SolidFilterField
                   <SolidVarInputsFilterElement
                       values={rule.value}
                       onChange={(e: any) => {
-                          console.log("e", e);
                           onChange(rule.id, 'value', e)
                         }}
                       numberOfInputs={numberOfInputs}

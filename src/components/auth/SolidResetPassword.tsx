@@ -52,7 +52,6 @@ const SolidResetPassword = ({ verificationToken, username }: { verificationToken
                     password: values.password,
                     verificationToken: values.verificationToken,
                 };
-                console.log("Paylod", payload);
                 const response = await confirmForgotPassword(payload).unwrap();
                 if (response?.statusCode === 200) {
                     showToast("success", "Login Successfull", "Password Updated Successfully")
@@ -61,7 +60,6 @@ const SolidResetPassword = ({ verificationToken, username }: { verificationToken
                     showToast("error", "Login Error", response.error)
                 )
             } catch (err: any) {
-                console.log("Error", err);
                 showToast("error", "Login Error", err?.data ? err?.data?.message : "Something Went Wrong");
             }
         },

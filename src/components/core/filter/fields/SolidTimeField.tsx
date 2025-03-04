@@ -17,7 +17,6 @@ const SolidTimeField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFie
             <Dropdown
                 value={rule.matchMode}
                 onChange={(e: any) => {
-                    console.log("e", e);
                     onChange(rule.id, 'matchMode', e.value)
                 }}
                 options={dateFilterMatchModeOptions}
@@ -27,7 +26,6 @@ const SolidTimeField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFie
             <SolidVarInputsFilterElement
                 values={rule.value}
                 onChange={(e: any) => {
-                    console.log("e", e);
                     onChange(rule.id, 'value', e)
                 }}
                 numberOfInputs={numberOfInputs}

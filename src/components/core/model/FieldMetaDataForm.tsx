@@ -2128,7 +2128,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                 virtualScrollerOptions={{ itemSize: 38 }}
                                 field="label"
                                 dropdown
-                                className="small-input"
+                                className="solid-standard-autocomplete"
                                 onChange={(e) => {
                                   setSelectedComputedFieldValueType(e.value);
                                   formik.setFieldValue("computedFieldValueType", e.value.value);

@@ -249,7 +249,6 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
 
   useEffect(() => {
     renderCount.current += 1; // Increment count on every render
-    console.log(`Component rendered ${renderCount.current} times`);
   });
 
 

@@ -6,7 +6,6 @@ import { Button } from 'primereact/button';
 export const CreateButton = () => {
     const router = useRouter();
     const pathName = usePathname();
-    // console.log("pathname", pathName);
     
     const createPAth = pathName.split('/').slice(0, -1).join('/') + '/create';
 

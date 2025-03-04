@@ -61,7 +61,6 @@ const SolidForgotPassword = () => {
                     showToast("error", "Login Error", response.error)
                 )
             } catch (err: any) {
-                console.log("Error", err);
                 showToast("error", "Login Error", err?.data ? err?.data?.message : "Something Went Wrong");
             }
         },

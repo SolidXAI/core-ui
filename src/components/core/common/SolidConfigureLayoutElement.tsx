@@ -1,15 +1,17 @@
 "use client"
+import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
 import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
 import { Divider } from "primereact/divider";
 import { OverlayPanel } from "primereact/overlaypanel";
+import { RadioButton } from "primereact/radiobutton";
 import { useRef, useState } from "react";
 
 interface FilterColumns {
     name: string;
     key: string;
 }
-export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, viewData }: any) => {
+export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, setView, view }: any) => {
 
     // const [visible, setVisible] = useState<boolean>(false);
     const op = useRef(null);
@@ -70,9 +72,62 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                     <p className="mt-3 mb-1 font-medium" style={{ color: 'var(--gray-400)' }}>Saved Layouts</p>
                     <Button text severity="secondary" label="Diet Tracking" icon="pi pi-plus" size="small" />
                     <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}>
-                        <div className="pl-3 pt-2 flex align-items-center justify-content-between">
-                            <p className="m-0 font-bold">Columns</p>
-                            <Button text label="Save Layout" icon="pi pi-plus" />
+                        <div className="solid-layout-accordion">
+                            <Accordion multiple expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up">
+                                <AccordionTab header="Switch Type">
+                                    <div className="flex flex-column gap-1">
+                                        {sizeOptions.map((option: any) => (
+                                            <div key={option.value} className={`flex align-items-center ${option.value === size ? 'solid-active-view' : 'solid-view'}`}>
+                                                <RadioButton
+                                                    inputId={option.value}
+                                                    name="sizes"
+                                                    value={option.value}
+                                                    onChange={(e) => setSize(e.value)}
+                                                    checked={option.value === size}
+                                                />
+                                                <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
+                                                    {option.label}
+                                                    <img
+                                                        src={option.image}
+                                                        alt={option.value}
+                                                        className='img-fluid position-relative'
+                                                        style={{ width: '2.75rem' }}
+                                                    />
+                                                </label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </AccordionTab>
+                                <AccordionTab header="List">
+                                    <div className="flex flex-column gap-1">
+                                        {viewModes.map((option: any) => (
+                                            <div key={option.value} className={`flex align-items-center ${option.value === view ? 'solid-active-view' : 'solid-view'}`}>
+                                                <RadioButton
+                                                    inputId={option.value}
+                                                    name="views"
+                                                    value={option.value}
+                                                    onChange={(e) => setView(e.value)}
+                                                    checked={option.value === view}
+                                                />
+                                                <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
+                                                    {option.label}
+                                                    <img
+                                                        src={option.image}
+                                                        alt={option.value}
+                                                        className='img-fluid position-relative'
+                                                        style={{ width: '2.75rem' }}
+                                                    />
+                                                </label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </AccordionTab>
+                            </Accordion>
+                        </div>
+                        <Divider className="m-0" />
+                        <div className="pl-3 pt-3 flex align-items-center justify-content-between">
+                            <p className="m-0">Column Selector</p>
+                            {/* <Button text label="Save Layout" icon="pi pi-plus" /> */}
                         </div>
                         <div className="flex flex-column gap-3 p-3">
                             {categories.map((category) => {
@@ -100,6 +155,6 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                     </OverlayPanel>
                 </div>
             </OverlayPanel>
-        </div>
+        </div >
     )
 }

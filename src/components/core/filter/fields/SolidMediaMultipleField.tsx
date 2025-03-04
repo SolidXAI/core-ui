@@ -27,7 +27,6 @@ const SolidMediaMultipleField = ({ fieldMetadata, onChange, index, rule }: Solid
             <Dropdown
                 value={rule.matchMode}
                 onChange={(e: any) => {
-                    console.log("e", e);
                     onChange(rule.id, 'matchMode', e.value)
                 }}
                 options={filterMatchModeOptions}
@@ -37,7 +36,6 @@ const SolidMediaMultipleField = ({ fieldMetadata, onChange, index, rule }: Solid
             <SolidVarInputsFilterElement
                 values={rule.value}
                 onChange={(e: any) => {
-                    console.log("e", e);
                     onChange(rule.id, 'value', e)
                 }}
                 numberOfInputs={numberOfInputs}

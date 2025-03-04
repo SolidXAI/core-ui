@@ -27,7 +27,6 @@ const SolidIntField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFiel
                     <Dropdown
                         value={rule.matchMode}
                         onChange={(e: any) => {
-                            console.log("e", e);
                             // updateEnumValues(index, 'operator', e.value)
                             onChange(rule.id, 'matchMode', e.value)
                         }}
@@ -38,7 +37,6 @@ const SolidIntField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFiel
                     <SolidVarInputsFilterElement
                         values={rule.value}
                         onChange={(e: any) => {
-                            console.log("e", e);
                             // updateEnumValues(index, 'value', e)
                             onChange(rule.id, 'value', e)
                         }}

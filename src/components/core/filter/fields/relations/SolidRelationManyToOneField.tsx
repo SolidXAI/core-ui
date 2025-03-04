@@ -52,7 +52,6 @@ const SolidRelationManyToOneField = ({ fieldMetadata, onChange, index, rule }: S
             <Dropdown
                 value={rule.matchMode}
                 onChange={(e: any) => {
-                    console.log("e", e);
                     onChange(rule.id, 'matchMode', e.value)
                 }}
                 options={filterMatchModeOptions}
@@ -62,7 +61,6 @@ const SolidRelationManyToOneField = ({ fieldMetadata, onChange, index, rule }: S
             <SolidVarInputsFilterElement
                 values={rule.value}
                 onChange={(e: any) => {
-                    console.log("e", e);
                     onChange(index, 'value', e)
                 }}
                 numberOfInputs={numberOfInputs}

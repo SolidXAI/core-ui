@@ -362,7 +362,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     useEffect(() => {
         if (solidFormViewMetaData) {
-            console.log(`METADATA: `, solidFormViewMetaData);
             setFormViewMetaData(solidFormViewMetaData);
             if (params.customLayout) {
                 setFormViewLayout(params.customLayout);
@@ -447,11 +446,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
         // Trigger validation and get the updated errors
         const errors = await formik.validateForm();
         const errorMessages = Object.values(errors);
-        console.log(`Error message is: `, errorMessages);
     };
 
     const onFormikSubmit = async (values: any) => {
-        console.log(`Form being submitted with: `, values);
         const solidView = solidFormViewMetaData.data.solidView;
         const solidFieldsMetadata = solidFormViewMetaData.data.solidFieldsMetadata;
         const layoutFieldsObj = getLayoutFieldsAsObject([formViewLayout]);
@@ -546,7 +543,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
     } = useGetSolidEntityByIdQuery({ id: params.id, qs: formViewDataQs }, { skip: !solidFormViewMetaData || params.id === 'new' });
     useEffect(() => {
         if (solidFormViewData) {
-            console.log(`DATA: `, solidFormViewData);
             setInitialEntityData(solidFormViewData.data);
         }
     }, [solidFormViewData]);
@@ -600,8 +596,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
             }
         }
-        console.log("solidFormViewMetaData", solidFormViewMetaData);
-        console.log("layoutFields", layoutFields);
 
         formik = useFormik({
             initialValues: initialValues,
@@ -631,7 +625,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 case "field": {
                     // const fieldMetadata = solidFieldsMetadata[attrs.name];
                     const fieldMetadata = solidFormViewMetaData.data.solidFieldsMetadata[attrs.name];
-                    console.log("initialEntityData", initialEntityData);
 
                     return <SolidField key={key} field={element} formik={formik} fieldMetadata={fieldMetadata} initialEntityData={solidFormViewData ? solidFormViewData.data : null} solidFormViewMetaData={solidFormViewMetaData} modelName={params.modelName} />;
                 }
@@ -685,19 +678,16 @@ const SolidFormView = (params: SolidFormViewProps) => {
             setDeleteDialogVisible(false);
         }
 
-        console.log(`Rendering with formViewLayout:`, formViewLayout);
-        console.log("params.embeded", params.embeded);
-
         return (
             <div className="solid-form-wrapper">
                 <Toast ref={toast} />
 
-                <form style={{ width: '77.5%', borderRight: '1px solid var(--primary-light-color' }} onSubmit={formik.handleSubmit}>
+                <form style={{ width: params.embeded !== true ? '77.5%' : '100%', borderRight: params.embeded !== true ? '1px solid var(--primary-light-color' : '' }} onSubmit={formik.handleSubmit}>
                     <div className="solid-form-header">
                         {params.id === "new" ? (
                             <>
                                 <div className="flex align-items-center gap-3">
-                                    <BackButton />
+                                    {params.embeded !== true && <BackButton />}
                                     <div className="form-wrapper-title"> {createHeaderTitle}</div>
                                 </div>
                                 <div className="gap-3 flex">
@@ -747,7 +737,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                         </div>
                                     }
                                     {params.embeded == true &&
-                                        <Button outlined size="small" type="button" label="Cancel" severity="danger" onClick={() => params.handlePopupClose()} />
+                                        <Button outlined size="small" type="button" label="Cancel" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' />
 
                                     }
                                     {params.embeded !== true &&
@@ -759,7 +749,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         ) : (
                             <>
                                 <div className="flex align-items-center gap-3">
-                                    <BackButton />
+                                    {params.embeded !== true && <BackButton />}
                                     <div className="form-wrapper-title"> {editHeaderTitle}</div>
                                 </div>
                                 <div className="gap-3 flex">
@@ -851,8 +841,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         {renderFormDynamically(formViewMetaData)}
                     </div>
                 </form>
-                <div style={{ width: '22.5%' }}>
-                </div>
+                {params.embeded !== true &&
+                    <div style={{ width: '22.5%' }}>
+                    </div>
+                }
                 <Dialog
                     visible={isDeleteDialogVisible}
                     header="Confirm Delete"

@@ -26,7 +26,6 @@ const SolidShortTextField = ({ fieldMetadata, onChange, index, rule }: SolidFilt
             <Dropdown
                 value={rule.matchMode}
                 onChange={(e: any) => {
-                    console.log("e", e);
                     onChange(rule.id, 'matchMode', e.value)
                 }}
                 options={filterMatchModeOptions}

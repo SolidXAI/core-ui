@@ -59,7 +59,6 @@ export const getNumberOfInputs = (matchMode: any): number | null => {
 // const loadComponentByType = async (type: string) => {
 //     try {
 //         const componentName = `./columns/Solid${type.charAt(0).toUpperCase() + type.slice(1)}Column.tsx`;
-//         console.log(`Loading component: ${componentName}`);
 
 //         // Dynamically import the component based on type
 //         const componentModule = await import(componentName);

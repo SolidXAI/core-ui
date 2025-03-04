@@ -35,7 +35,7 @@ export const AutoCompleteField = ({ multiple, isFormFieldValid, formik, fieldNam
             invalid={isFormFieldValid(formik, fieldName)}
             completeMethod={searchItems}
             virtualScrollerOptions={{ itemSize: 38 }}
-            className="w-full small-input"
+            className="solid-standard-autocomplete w-full"
             // style={{
             //     maxHeight: 39.67
             // }}

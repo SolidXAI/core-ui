@@ -46,9 +46,6 @@ const CreateUser = ({ data, params }: any) => {
     },
   ] = useUpdateUserMutation();
 
-  console.log("isUpdateuserSuceess", isUpdateuserSuceess);
-
-
   const [deleteUser, {
     isLoading: isUserDeleted,
     isSuccess: isDeleteUserSuceess,
