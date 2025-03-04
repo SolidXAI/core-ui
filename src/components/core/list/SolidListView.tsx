@@ -472,6 +472,62 @@ export const SolidListView = (params: SolidListViewParams) => {
             <path d="M4 14C4 14.55 3.80417 15.0208 3.4125 15.4125C3.02083 15.8042 2.55 16 2 16C1.45 16 0.979167 15.8042 0.5875 15.4125C0.195833 15.0208 0 14.55 0 14C0 13.45 0.195833 12.9792 0.5875 12.5875C0.979167 12.1958 1.45 12 2 12C2.55 12 3.02083 12.1958 3.4125 12.5875C3.80417 12.9792 4 13.45 4 14ZM4 8C4 8.55 3.80417 9.02083 3.4125 9.4125C3.02083 9.80417 2.55 10 2 10C1.45 10 0.979167 9.80417 0.5875 9.4125C0.195833 9.02083 0 8.55 0 8C0 7.45 0.195833 6.97917 0.5875 6.5875C0.979167 6.19583 1.45 6 2 6C2.55 6 3.02083 6.19583 3.4125 6.5875C3.80417 6.97917 4 7.45 4 8ZM4 2C4 2.55 3.80417 3.02083 3.4125 3.4125C3.02083 3.80417 2.55 4 2 4C1.45 4 0.979167 3.80417 0.5875 3.4125C0.195833 3.02083 0 2.55 0 2C0 1.45 0.195833 0.979166 0.5875 0.5875C0.979167 0.195833 1.45 0 2 0C2.55 0 3.02083 0.195833 3.4125 0.5875C3.80417 0.979166 4 1.45 4 2Z" fill="#666666" />
           </svg>
         </Button>
+        <OverlayPanel ref={op} className="solid-custom-overlay" style={{ top: 10 }}>
+          <div className="flex flex-column gap-1 p-1">
+            <Button
+              className="w-8rem text-left gap-2"
+              label="Edit"
+              size="small"
+              iconPos="left"
+              icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M3.33333 12.6667H4.28333L10.8 6.15L9.85 5.2L3.33333 11.7167V12.6667ZM2 14V11.1667L10.8 2.38333C10.9333 2.26111 11.0806 2.16667 11.2417 2.1C11.4028 2.03333 11.5722 2 11.75 2C11.9278 2 12.1 2.03333 12.2667 2.1C12.4333 2.16667 12.5778 2.26667 12.7 2.4L13.6167 3.33333C13.75 3.45556 13.8472 3.6 13.9083 3.76667C13.9694 3.93333 14 4.1 14 4.26667C14 4.44444 13.9694 4.61389 13.9083 4.775C13.8472 4.93611 13.75 5.08333 13.6167 5.21667L4.83333 14H2ZM10.3167 5.68333L9.85 5.2L10.8 6.15L10.3167 5.68333Z" fill="#F9F0FF" />
+              </svg>}
+              onClick={() => {
+                console.log("solidViewData.id", solidViewData.id);
+
+                if (params.embeded == true) {
+                  params.handlePopUpOpen(solidsolidViewDataId);
+                } else {
+                  router.push(`${editButtonUrl}/${solidsolidViewDataId}`)
+                }
+              }}
+            />
+            <Button
+              text
+              className="w-8rem text-left gap-2"
+              label="Delete"
+              size="small"
+              iconPos="left"
+              severity="secondary"
+              icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                <path d="M4.66666 14C4.29999 14 3.9861 13.8694 3.72499 13.6083C3.46388 13.3472 3.33332 13.0333 3.33332 12.6667V4H2.66666V2.66667H5.99999V2H9.99999V2.66667H13.3333V4H12.6667V12.6667C12.6667 13.0333 12.5361 13.3472 12.275 13.6083C12.0139 13.8694 11.7 14 11.3333 14H4.66666ZM11.3333 4H4.66666V12.6667H11.3333V4ZM5.99999 11.3333H7.33332V5.33333H5.99999V11.3333ZM8.66666 11.3333H9.99999V5.33333H8.66666V11.3333Z" fill="#4B4D52" />
+              </svg>}
+              onClick={() => setDeleteEntity(true)}
+            />
+            {solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons &&
+              solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons.map((rowAction: any) => {
+                return (
+                  <Button
+                    text
+                    size="small"
+                    icon={rowAction?.attrs?.className ? rowAction?.attrs?.className : "pi pi-pencil"}
+                    onClick={() => {
+                      setListRowActionData({
+                        modelName: params.modelName,
+                        moduleName: params.moduleName,
+                        rowAction: rowAction,
+                        rowData: solidViewData,
+                        closeListViewRowActionPopup: closeListViewRowActionPopup
+
+                      });
+                      setListViewRowActionPopupState(true)
+                    }
+                    }
+                  />
+                );
+              })}
+          </div>
+        </OverlayPanel>
       </div>
       // <a onClick={() => {
       //   if (params.embeded == true) {
@@ -729,7 +785,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           {renderColumnsDynamically(listViewMetaData)}
           {actionsAllowed.includes(`${updatePermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.edit !== false &&
             <Column frozen alignFrozen="right" body={(rowData) => (
-              rowData.deletedAt ? (
+              rowData?.deletedAt ? (
                 <a onClick={() => recoverById(rowData.id)} className="retrieve-button">
                   <i className="pi pi-refresh" style={{ fontSize: "1rem" }} />
                 </a>
