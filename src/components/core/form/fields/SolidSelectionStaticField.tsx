@@ -113,7 +113,9 @@ export class SolidSelectionStaticField implements ISolidField {
                         suggestions={selectionStaticItems}
                         completeMethod={selectionStaticSearch}
                         // onChange={(e) => updateInputs(index, e.value)} />
-                        onChange={formik.handleChange} />
+                        onChange={formik.handleChange}
+                        className="solid-standard-autocomplete"
+                    />
                 </div>
                 {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                     <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />

@@ -21,7 +21,6 @@ const SolidSelectionStaticField = ({ fieldMetadata, onChange, index, rule }: Sol
             <Dropdown
                 value={rule.matchMode}
                 onChange={(e: any) => {
-                    console.log("e", e);
                     onChange(rule.id, 'matchMode', e.value)
                 }}
                 options={filterMatchModeOptions}

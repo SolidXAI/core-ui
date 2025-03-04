@@ -17,7 +17,6 @@ const GenerateModelCodeRowAction = ({ context }: any) => {
     const generateCodeHandler = async () => {
         const response = await generateCode({ id: context?.rowData?.id });
         context.closeListViewRowActionPopup();
-        console.log("response", response);
     }
 
     useEffect(() => {

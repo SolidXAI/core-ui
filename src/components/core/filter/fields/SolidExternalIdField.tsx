@@ -18,7 +18,6 @@ const SolidExternalIdField = ({ fieldMetadata, onChange, index, rule }: SolidFil
             <Dropdown
                 value={rule.matchMode}
                 onChange={(e: any) => {
-                    console.log("e", e);
                     onChange(rule.id, 'matchMode', e.value)
                 }}
                 options={filterMatchModeOptions}
@@ -28,7 +27,6 @@ const SolidExternalIdField = ({ fieldMetadata, onChange, index, rule }: SolidFil
             <SolidVarInputsFilterElement
                 values={rule.value}
                 onChange={(e: any) => {
-                    console.log("e", e);
                     onChange(rule.id, 'value', e)
                 }}
                 numberOfInputs={numberOfInputs}

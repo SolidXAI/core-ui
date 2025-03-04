@@ -38,7 +38,7 @@ export const MultipleSelectAutoCompleteField = ({ formik, isFormFieldValid, rela
             invalid={isFormFieldValid(formik, fieldName)}
             completeMethod={searchItems}
             virtualScrollerOptions={{ itemSize: 38 }}
-            className="w-full"
+            className="solid-standard-autocomplete w-full"
             // style={{
             //     maxHeight: 39.67
             // }}

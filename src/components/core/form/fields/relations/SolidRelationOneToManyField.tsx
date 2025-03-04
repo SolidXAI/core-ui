@@ -168,7 +168,7 @@ export class SolidRelationOneToManyField implements ISolidField {
                     header=""
                     showHeader={false}
                     visible={visibleCreateRelationEntity}
-                    className="many-to-many-creat-form-dialog"
+                    className="solid-dialog"
                     style={{ width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "40vw" }}
                     onHide={() => {
                         if (!visibleCreateRelationEntity) return;

@@ -361,21 +361,25 @@ export class SolidRelationManyToManyField implements ISolidField {
                 <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
 
                 </label>
-                <AutoComplete
-                    readOnly={readOnly}
-                    disabled={disabled}
-                    multiple
-                    {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
-                    id={fieldLayoutInfo.attrs.name}
-                    field="label"
-                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                    dropdown
-                    suggestions={autoCompleteItems}
-                    completeMethod={autoCompleteSearch}
-                    onChange={formik.handleChange} />
-                {fieldLayoutInfo.attrs.inlineCreate === "true" &&
-                    this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
-                }
+                <div className="flex align-items-center gap-3">
+                    <AutoComplete
+                        readOnly={readOnly}
+                        disabled={disabled}
+                        multiple
+                        {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
+                        id={fieldLayoutInfo.attrs.name}
+                        field="label"
+                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                        dropdown
+                        suggestions={autoCompleteItems}
+                        completeMethod={autoCompleteSearch}
+                        onChange={formik.handleChange}
+                        className="solid-standard-autocomplete w-full"
+                    />
+                    {fieldLayoutInfo.attrs.inlineCreate === "true" &&
+                        this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
+                    }
+                </div>
             </div>
         );
     }
@@ -402,7 +406,6 @@ export class SolidRelationManyToManyField implements ISolidField {
             }),
             modelName: camelCase(this.fieldContext.fieldMetadata.relationModelSingularName)
         }
-        // console.log("fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ", fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width);
 
         return (
             <div >
@@ -425,6 +428,7 @@ export class SolidRelationManyToManyField implements ISolidField {
                         if (!visibleCreateRelationEntity) return;
                         setvisibleCreateRelationEntity(false);
                     }}
+                    className="solid-dialog"
                 >
                     <SolidFormView {...params} />
 

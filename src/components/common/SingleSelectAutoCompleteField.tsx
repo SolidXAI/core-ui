@@ -55,6 +55,7 @@ export const SingleSelectAutoCompleteField = ({ disabled, formik, isFormFieldVal
                     }
 
                 }}
+                className="solid-standard-autocomplete"
             />
 
         </>

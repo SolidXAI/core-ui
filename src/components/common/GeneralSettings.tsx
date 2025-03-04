@@ -47,7 +47,6 @@ export const GeneralSettings = ({ solidSettingsData }: { solidSettingsData: any 
         initialValues: initialValues,
         enableReinitialize: true,
         onSubmit: async (values) => {
-            console.log("Formik Values:", formik.values);
             try {
                 const formData = new FormData()
                 Object.entries(values).forEach(([key, value]) => {
@@ -84,7 +83,6 @@ export const GeneralSettings = ({ solidSettingsData }: { solidSettingsData: any 
     useEffect(() => {
 
     }, [pathname])
-    console.log("pathname", pathname);
 
     return (
         <div className="page-parent-wrapper">

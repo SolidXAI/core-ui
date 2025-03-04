@@ -191,6 +191,7 @@ const CreateUserRole = ({ data }: any) => {
                         existingData={{ label: data?.parentCategory?.title, value: data?.parentCategory?.id }}
                         existingDataTitle={data?.parentCategory?.title}
                         existingDataId={data?.parentCategory?.id}
+                        className="solid-standard-autocomplete"
                     ></AutoCompleteField>
                     {isFormFieldValid(formik, "roleName") && (
                         <Message severity="error" text={formik?.errors?.roleName?.toString()} />

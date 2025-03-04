@@ -24,7 +24,6 @@ const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilter
             <Dropdown
                 value={rule.matchMode}
                 onChange={(e: any) => {
-                    console.log("e", e);
                     onChange(rule.id, 'matchMode', e.value)
                 }}
                 options={filterMatchModeOptions}
@@ -35,7 +34,6 @@ const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilter
                 value={rule.value}
                 options={booleanOptions}
                 onChange={(e: any) => {
-                    console.log("e", e);
                     onChange(rule.id, 'value', e.value)
                 }}
                 placeholder="Select"

@@ -103,7 +103,6 @@ export class SolidRelationManyToOneField implements ISolidField {
                 setAutoCompleteItems(autoCompleteItems);
             }
         }
-        console.log("formik", formik.values);
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
@@ -123,6 +122,7 @@ export class SolidRelationManyToOneField implements ISolidField {
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}
                         onChange={formik.handleChange}
+                        className="solid-standard-autocomplete"
                     />
                 </div>
                 {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (

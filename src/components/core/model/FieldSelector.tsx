@@ -34,7 +34,6 @@ const FieldSelector = ({ handleTypeSelect, modelMetaData }: any) => {
 
     const handleFieldSelect = (fieldValue: any) => {
         setSelectedField(fieldValue);
-        console.log('Selected Field:', fieldValue); // You can replace this with any action you want
     };
 
     return (

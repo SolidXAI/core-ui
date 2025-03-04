@@ -11,7 +11,6 @@ export const ListViewRowActionPopup = ({ context }: any) => {
 
     const triggerServerAction = () => {
 
-        console.log("api  called");
     }
 
     return (
