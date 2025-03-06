@@ -237,7 +237,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           groupFilter: {
             limit: kanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsCount,
             offset: 0,
-            filters:filters
+            filters: filters
           }
           // sort: [`id:desc`],
         };
@@ -258,7 +258,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
   // clear Filter
 
-  const clearFilter = async() => {
+  const clearFilter = async () => {
     if (solidKanbanViewMetaData) {
       // initialFilterMethod()
     }
@@ -553,7 +553,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
 
   return (
-    <>
+    <div className="page-parent-wrapper">
       <div className="flex gap-3 mb-4 align-items-center justify-content-between kanban-view">
         <div className="flex gap-3 mb-4 align-items-center" >
 
@@ -610,7 +610,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       >
         <p>Are you sure you want to delete the selected records?</p>
       </Dialog>
-    </>
+    </div>
   );
 };
 

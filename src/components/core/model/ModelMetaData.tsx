@@ -291,7 +291,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   )}
                 </div>
 
-                <div className="field col-12 flex flex-column gap-2 mt-4">
+                <div className="field col-12 flex flex-column gap-1 mt-4">
                   <label htmlFor="dataSource" className="form-field-label">
                     Data Source
                   </label>
@@ -390,7 +390,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                       Enable Soft Delete
                     </label>
                   </div>
-                  {params.id !== 'new' && <p className="form-field-label">Soft-delete can only be set during initial creation to maintain data integrity</p>}
+                  {params.id !== 'new' && <p className="form-field-label mt-2">Soft-delete can only be set during initial creation to maintain data integrity</p>}
                   {isFormFieldValid(formik, "enableSoftDelete") && (
                     <Message
                       severity="error"
@@ -542,7 +542,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     />
                   )}
                 </div>
-                <div className="field col-12 flex flex-column gap-2 mt-4">
+                <div className="field col-12 flex flex-column gap-1 mt-4">
                   <label htmlFor="singularName" className="form-field-label">
                     Singular Name
                   </label>
@@ -564,7 +564,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     />
                   )}
                 </div>
-                <div className="field col-12 flex flex-column gap-2 mt-4">
+                <div className="field col-12 flex flex-column gap-1 mt-4">
                   <label htmlFor="pluralName" className="form-field-label">
                     Plural Name
                   </label>
@@ -602,7 +602,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   </div>
                 </div>
                 {showTableName &&
-                  <div className="field col-12 flex flex-column gap-2 mt-4">
+                  <div className="field col-12 flex flex-column gap-1 mt-4">
                     <label htmlFor="tableName" className="form-field-label">
                       Table Name
                     </label>
@@ -625,7 +625,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     )}
                   </div>
                 }
-                <div className="field col-12 flex flex-column gap-2 mt-4">
+                <div className="field col-12 flex flex-column gap-1 mt-4">
                   <label htmlFor="description" className="form-field-label">
                     Description
                   </label>
