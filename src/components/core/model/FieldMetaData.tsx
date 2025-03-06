@@ -74,6 +74,30 @@ const FieldMetaData = ({ modelMetaData, fieldMetaData, setFieldMetaData, deleteM
     )
   };
 
+    const showToaster = async (message: any, severity: any) => {
+      const errorMessages = Object.values(message);
+      if (errorMessages.length > 0) {
+        toast?.current?.show({
+          severity: severity,
+          summary: "Can you send me the report?",
+          life: 3000,
+          //@ts-ignore
+          content: (props) => (
+            <div
+              className="flex flex-column align-items-left"
+              style={{ flex: "1" }}
+            >
+              {errorMessages.map((m, index) => (
+                <div className="flex align-items-center gap-2" key={index}>
+                  <span className="font-bold text-900">{String(m)}</span>
+                </div>
+              ))}
+            </div>
+          ),
+        });
+      }
+    };
+
 
 
   return (
@@ -131,7 +155,7 @@ const FieldMetaData = ({ modelMetaData, fieldMetaData, setFieldMetaData, deleteM
             }}
             showHeader={false}
           >
-            <FieldMetaDataForm modelMetaData={modelMetaData} fieldMetaData={selectedFieldMetaData} allFields={fieldMetaData} setFieldMetaData={setFieldMetaData} deleteModelFunction={deleteModelFunction} setVisiblePopup={setVisiblePopup} formikFieldsMetadataRef={formikFieldsMetadataRef} params={params} setIsRequiredPopUp={setIsRequiredPopUp}></FieldMetaDataForm>
+            <FieldMetaDataForm modelMetaData={modelMetaData} fieldMetaData={selectedFieldMetaData} allFields={fieldMetaData} setFieldMetaData={setFieldMetaData} deleteModelFunction={deleteModelFunction} setVisiblePopup={setVisiblePopup} formikFieldsMetadataRef={formikFieldsMetadataRef} params={params} setIsRequiredPopUp={setIsRequiredPopUp} showToaster={showToaster}></FieldMetaDataForm>
           </Dialog>
           <Dialog
             visible={isRequiredPopUp}
