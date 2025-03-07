@@ -292,7 +292,7 @@ export class SolidRelationManyToManyField implements ISolidField {
     renderAutoCompleteMode(formik: FormikObject, visibleCreateRelationEntity: any, setvisibleCreateRelationEntity: any) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
+        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
 
@@ -394,7 +394,7 @@ export class SolidRelationManyToManyField implements ISolidField {
 
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
+        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
 
         const params = {

@@ -116,8 +116,8 @@ export class SolidMediaSingleField implements ISolidField {
         };
         const handleCancelUpload = (e: React.MouseEvent) => {
             e.stopPropagation();
-            if (imageToBeDeletedData?.imagesPreview.id) {
-                deleteMedia(imageToBeDeletedData.imagesPreview.id);
+            if (imageToBeDeletedData) {
+                deleteMedia(imageToBeDeletedData);
             }
             e.stopPropagation();
             setUploadProgress(0);
@@ -192,7 +192,7 @@ export class SolidMediaSingleField implements ISolidField {
                     // Set upload progress
                     setUploadProgress(100);
                     setUploadCompleted(true);
-
+                    setImageToBeDeletedData(fieldValue.id)
                     // Ensure Formik has the existing file URL
                     formik.setFieldValue(fieldLayoutInfo.attrs.name, fieldValue);
                 }

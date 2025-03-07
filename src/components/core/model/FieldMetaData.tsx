@@ -124,6 +124,7 @@ const FieldMetaData = ({ modelMetaData, fieldMetaData, setFieldMetaData, deleteM
             header=""
             visible={visiblePopup}
             style={{ width: "40vw" }}
+            className="solid-dialog"
             onHide={() => {
               if (!visiblePopup) return;
 
@@ -149,6 +150,7 @@ const FieldMetaData = ({ modelMetaData, fieldMetaData, setFieldMetaData, deleteM
               </div>
             )}
             onHide={() => setIsRequiredPopUp(false)}
+            className="solid-dialog"
           >
             <p>If there is data against this model this operation might not work and manual intervention will be required</p>
           </Dialog>

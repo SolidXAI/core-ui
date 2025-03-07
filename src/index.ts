@@ -215,6 +215,9 @@ export { SingleSelectAutoCompleteField } from '@/components/common/SingleSelectA
 export { SocialMediaLogin } from '@/components/common/SocialMediaLogin';
 export { BackButton } from '@/components/common/BackButton'
 export { FileReaderExt } from '@/components/common/FileReaderExt'
+export { NotFound } from '@/components/common/NotFound'
+import Error from '@/components/common/error';
+export { Error };
 export { SolidFormStepper } from '@/components/common/SolidFormStepper'
 
 // export { SolidListViewOptions } from '@/components/core/common/SolidListViewOptions';
@@ -468,6 +471,10 @@ export { setIsAuthenticated, setUser } from '@/redux/features/userSlice';
 // export type { AppDispatch} from '@/redux/store';
 // export {initializeStore} from '@/redux/store';
 
+// Admin Parent Layout
+export { AdminLayout } from '@/components/layout/AdminLayout';
+export { SolidAdmin } from '@/components/common/SolidAdmin';
+
 // Re-export default exports
 //Login.tsx
 export { default as Login } from '@/components/auth/Login';
@@ -480,6 +487,9 @@ export { default as CodeEditor } from '@/components/common/CodeEditor';
 // export { default as FilterComponent } from '@/components/common/FilterComponent';
 //MarkdownViewer.tsx
 export { default as MarkdownViewer } from '@/components/common/MarkdownViewer';
+
+
+export { default as SolidFormLayouts } from '@/components/core/form/SolidFormLayouts';
 //SolidFormView.tsx
 export { default as SolidFormView } from '@/components/core/form/SolidFormView';
 //KanbanBoard.tsx
@@ -582,6 +592,7 @@ export { default as UserSidebar } from '@/components/layout/UserSidebar';
 export { default as menu } from '@/helpers/menu';
 
 // Auth 
+export { AuthLayout } from '@/components/auth/AuthLayout';
 export { default as SolidForgotPassword } from '@/components/auth/SolidForgotPassword';
 export { default as SolidLogin } from '@/components/auth/SolidLogin';
 export { default as SolidOTPVerify } from '@/components/auth/SolidOTPVerify';
@@ -590,6 +601,8 @@ export { default as SolidResetPassword } from '@/components/auth/SolidResetPassw
 export { default as SolidChangeForcePassword } from '@/components/auth/SolidChangeForcePassword';
 export { default as SolidInitialLoginOtp } from '@/components/auth/SolidInitialLoginOtp';
 export { default as SolidInitiateRegisterOtp } from '@/components/auth/SolidInitiateRegisterOtp';
+export { GoogleAuthChecking } from '@/components/auth/GoogleAuthChecking';
+export { ForgotPasswordThankYou } from '@/components/auth/ForgotPasswordThankYou';
 
 //redux
 export { default as authenticationReducer } from '@/redux/features/authSlice';
@@ -604,3 +617,6 @@ export { default as GenerateModelCodeRowAction } from '@/components/core/extensi
 // types
 export type { LayoutConfig } from '@/types';
 export { GeneralSettings } from '@/components/common/GeneralSettings';
+
+export { default as authProviders } from '@/nextAuth/authProviders'
+export { SolidThemeLink } from '@/components/common/SolidThemeLink';

@@ -155,7 +155,7 @@ export class SolidRelationManyToOneField implements ISolidField {
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}
                         onChange={formik.handleChange}
-                        className="solid-standard-autocomplete"
+                        className="w-full solid-standard-autocomplete"
                     />
                     {fieldLayoutInfo.attrs.inlineCreate === "true" &&
                         this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)

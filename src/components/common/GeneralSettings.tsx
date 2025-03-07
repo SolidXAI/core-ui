@@ -1,5 +1,5 @@
 "use client"
-import { useCreateSolidSettingsMutation, useUpdateSolidSettingsMutation } from '@/redux/api/solidSettingsApi';
+import { useCreateSolidSettingsMutation, useLazyGetSolidSettingsQuery, useUpdateSolidSettingsMutation } from '@/redux/api/solidSettingsApi';
 import { useFormik } from 'formik';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
@@ -11,7 +11,12 @@ import { RadioButton } from 'primereact/radiobutton';
 import { handleError } from '@/helpers/ToastContainer';
 import { usePathname } from 'next/navigation';
 
-export const GeneralSettings = ({ solidSettingsData }: { solidSettingsData: any }) => {
+export const GeneralSettings = () => {
+    const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery()
+
+    useEffect(() => {
+        trigger("") // Fetch settings on mount
+    }, [trigger])
     const pathname = usePathname();
     const [updateSolidSettings] = useUpdateSolidSettingsMutation();
     const [
