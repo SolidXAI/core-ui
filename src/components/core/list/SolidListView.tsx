@@ -759,7 +759,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           rows={rows}
           rowsPerPageOptions={solidListViewMetaData?.data?.solidView?.layout?.attrs?.pageSizeOptions}
           dataKey="id"
-          emptyMessage="No Entities found."
+          emptyMessage={solidListViewMetaData?.data?.solidView?.model?.description || 'No Entities found.'}
           filterDisplay="menu"
           totalRecords={totalRecords}
           first={first}

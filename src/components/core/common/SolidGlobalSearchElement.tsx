@@ -256,9 +256,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     ];
 
 
-    useEffect(() => {
-        console.log("Input Value", customChip, "Input Value", searchChips, "Input Value", inputValue);
-    }, [chipsToDisplay])
+    // useEffect(() => {
+    //     console.log("Input Value", customChip, "Input Value", searchChips, "Input Value", inputValue);
+    // }, [chipsToDisplay])
 
     const customChipTemplate = (item: any) => {
         if (item === customChip) {
