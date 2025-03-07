@@ -55,6 +55,7 @@ export class SolidSelectionDynamicField implements ISolidField {
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
+        const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
 
         const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
         const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
@@ -94,9 +95,11 @@ export class SolidSelectionDynamicField implements ISolidField {
         return (
             <div className={className}>
                 <div className="flex flex-column gap-2 mt-4">
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                        &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
-                    </label>
+                    {showFieldLabel != false &&
+                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                            &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
+                        </label>
+                    }
                     <AutoComplete
                         readOnly={formReadonly || fieldReadonly}
                         disabled={formDisabled || fieldDisabled}

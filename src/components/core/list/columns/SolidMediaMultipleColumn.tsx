@@ -9,11 +9,29 @@ const SolidMediaMultipleColumn = ({ solidListViewMetaData, fieldMetadata, column
     const showFilterOperator = false;
     const columnDataType = undefined;
     const header = column.attrs.label ?? fieldMetadata.displayName;
+    const imageBodyTemplate = (product: any) => {
+        if (!product?._media?.[fieldMetadata.name]) return null;
 
+        const imageUrls = product._media[fieldMetadata.name].map((i: any) => i._full_url);
+
+        return (
+            <>
+                {imageUrls.map((url: string, index: number) => (
+                    <img
+                        key={index}
+                        src={url}
+                        alt={`product-image-${index}`}
+                        className="w-6rem shadow-2 border-round"
+                    />
+                ))}
+            </>
+        );
+    };
     return (
         <Column
             key={fieldMetadata.name}
             field={fieldMetadata.name}
+            body={imageBodyTemplate}
             header={header}
             // className="text-sm"
             sortable={column.attrs.sortable}
