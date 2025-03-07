@@ -7,7 +7,7 @@ export const modelsApi = createApi({
     endpoints: (builder) => ({
         getModels: builder.query({
             query: (qs) => {
-                return `/model-metadata?populate[0]=module&${qs}`
+                return `/model-metadata?&populate[1]=userKeyField&${qs}`
             },
             transformResponse: (response: any) => {
                 if (response.error) {
@@ -64,7 +64,14 @@ export const modelsApi = createApi({
                 method: 'DELETE',
             }),
         }),
+        updateUserKey: builder.mutation({
+            query: (data) => ({
+                url: `/model-metadata/update-user-key`,
+                method: 'POST',
+                body: data,
+            }), 
+        }),
     })
 })
 
-export const { useGetModelsQuery,useLazyGetModelsQuery, useLazyGetmodelByIdQuery, useGetmodelByIdQuery, useCreatemodelMutation,useGenerateCodeForModelMutation,useUpdatemodelMutation, useDeleteMultipleModelsMutation ,useDeletemodelMutation } = modelsApi  
+export const { useGetModelsQuery,useLazyGetModelsQuery, useLazyGetmodelByIdQuery, useGetmodelByIdQuery, useCreatemodelMutation,useGenerateCodeForModelMutation,useUpdatemodelMutation, useDeleteMultipleModelsMutation ,useDeletemodelMutation, useUpdateUserKeyMutation } = modelsApi  

@@ -4,7 +4,7 @@ import { SingleSelectAutoCompleteField } from "@/components/common/SingleSelectA
 import { getSingularAndPlural } from "@/helpers/helpers";
 import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
 import { useLazyGetMediaStorageProvidersQuery } from "@/redux/api/mediaStorageProviderApi";
-import { useLazyGetModelsQuery } from "@/redux/api/modelApi";
+import { useLazyGetModelsQuery, useUpdateUserKeyMutation } from "@/redux/api/modelApi";
 import { useLazyGetmodulesQuery } from "@/redux/api/moduleApi";
 import { useFormik } from "formik";
 import { capitalize } from "lodash";
@@ -506,7 +506,7 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
   return Yup.object(schema);
 };
 
-const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, allFields, deleteModelFunction, setVisiblePopup, params, setIsRequiredPopUp }: any) => {
+const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, allFields, deleteModelFunction, setVisiblePopup, params, setIsRequiredPopUp, showToaster }: any) => {
 
   const booleanOptions = ["false", "true"];
   const [isBackPopupVisible, setIsBackPopupVisible] = useState(false);
@@ -523,6 +523,10 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
   const [triggerGetMediaStorageProvider, { data: MediaStorageProviderData, isFetching: isMediaStorageProviderFetching, error: MediaStorageProviderError }] = useLazyGetMediaStorageProvidersQuery();
   const [triggerGetModules, { data: moduleData, isFetching: isModuleFetching, error: moduleError }] = useLazyGetmodulesQuery();
   const [triggerGetModels, { data: modelData, isFetching: ismodelFetching, error: modelError }] = useLazyGetModelsQuery();
+  const [
+    updateUserKey,
+    { isLoading: isUpdateUserKeyLoading, isSuccess: isUpdateUserKeySuccess, isError: isUpdateUserKeyError, error: UpdateUserKeyError, data: newModel },
+  ] = useUpdateUserKeyMutation();
 
 
   const [markdownText, setMarkdownText] = useState<string>();
@@ -543,7 +547,8 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
   const [ormTypeOptions, setOrmTypeOptions] = useState([]);
   const [selectedOrmType, setSelectedOrmType] = useState<any>(fieldMetaData?.ormType);
 
-
+  const [isUserKeyFields, setUserKeyFields] = useState(false);
+  const [userKeyData, setUserKeyData] = useState([]);
 
   const [
     filteredExternalIdProvider,
@@ -734,7 +739,9 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
     }
   };
 
-
+  const searchUserKeyField = () => {
+    return userKeyData;
+  }
 
   const searchComputedFieldValueType = async (event: any) => {
     const query = event.query;
@@ -904,7 +911,8 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
     isUserKey: fieldMetaData ? fieldMetaData?.isUserKey : false,
     relationJoinColumnName: fieldMetaData ? fieldMetaData?.relationJoinColumnName : null,
     joinColumnName: fieldMetaData ? fieldMetaData?.joinColumnName : null,
-    relationJoinTableName: fieldMetaData ? fieldMetaData?.relationJoinTableName : null
+    relationJoinTableName: fieldMetaData ? fieldMetaData?.relationJoinTableName : null,
+    userKey: fieldMetaData ? fieldMetaData?.userKey : null
   };
 
 
@@ -914,7 +922,6 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
     enableReinitialize: true,
     onSubmit: async (values) => {
       try {
-
         setFieldMetaData((prevItems: any) => {
           const newFieldData = { ...values, isSystem: values.isSystem == true ? true : '' }
           const formtatedFieldPayload = fieldBasedPayloadFormating(newFieldData, currentFields, fieldMetaData);
@@ -931,6 +938,13 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
             return [...prevItems, formtatedFieldPayload]
           }
         });
+        if (values.userKey) {
+          const data = {
+            modelName: values.relationModelSingularName,
+            fieldName: values.userKey
+          }
+          updateUserKey(data);
+        }
         // nextTab()
         setVisiblePopup(false);
 
@@ -972,7 +986,13 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
     }
   };
 
-
+  useEffect(() => {
+    if (isUpdateUserKeySuccess) {
+      showToaster([newModel?.data?.message], "success");
+    } if (isUpdateUserKeyError) {
+      showToaster(UpdateUserKeyError, 'error')
+    }
+  }, [isUpdateUserKeySuccess, isUpdateUserKeyError])
 
   const handleTypeSelect = (e: any, label: string) => {
 
@@ -1011,6 +1031,40 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
       setShowColumnName(true)
     }
   }, [fieldMetaData])
+
+  useEffect(() => {
+    const fetchFields = async () => {
+      const queryData: any = {
+        limit: 10,
+        offset: 0,
+        filters: {
+          singularName: {
+            $eq: formik.values.relationModelSingularName
+          }
+        },
+        populate: ['fields']
+      };
+      const queryString = qs.stringify(queryData, {
+        encodeValuesOnly: true,
+      });
+  
+      const result = await triggerGetModels(queryString).unwrap();
+  
+      if (result && result.records) {
+        if (!result?.records[0]?.userKeyField) {
+          setUserKeyFields(true);
+          const fieldsWithUnique = result?.records[0]?.fields?.filter((field: any) => field?.unique === true);
+          setUserKeyData(fieldsWithUnique)
+        } else {
+          setUserKeyFields(false);
+          setUserKeyData([]);
+        }
+      }
+    }
+    if (formik.values.relationModelSingularName) {
+      fetchFields();
+    }
+  }, [formik.values.relationModelSingularName])
 
   const updateEnumValues = (index: number, updatedString: string) => {
     const updatedValues = formik.values.selectionStaticValues.map((enumValue: string, i: number) =>
@@ -1826,6 +1880,39 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                               </div>
                             )}
 
+                          {isUserKeyFields && (
+                              <div className="field col-6 flex-flex-column gap-2">
+                                <label
+                                  htmlFor="userKey"
+                                  className="form-field-label"
+                                >
+                                  Set User Key
+                                </label>
+
+
+                                <SingleSelectAutoCompleteField
+                                  key="userKey"
+                                  formik={formik}
+                                  isFormFieldValid={isFormFieldValid}
+                                  fieldName="userKey"
+                                  fieldNameId="userKey"
+                                  labelKey="displayName"
+                                  valueKey="name"
+                                  searchData={searchUserKeyField}
+                                  existingData={formik.values.userKey}
+                                />
+                                {isFormFieldValid(
+                                  formik,
+                                  "userKey"
+                                ) && (
+                                    <Message
+                                      severity="error"
+                                      text={formik?.errors?.userKey?.toString()}
+                                    />
+                                  )}
+                              </div>
+                            )}
+
                           {currentFields.includes("relationCreateInverse") && formik.values.relationType === "many-to-many" && (
                             <div className="field col-6 flex flex-column gap-2 mt-3">
                               <label htmlFor="relationCreateInverse" className="form-field-label">
@@ -1838,7 +1925,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   checked={Boolean(formik.values.relationCreateInverse)}
                                   onChange={(e) => formik.setFieldValue("relationCreateInverse", e.checked)}
                                 />
-                                <label htmlFor="relationCreateInverse" className="ml-2">Enable</label>
+                                <label htmlFor="relationCreateInverse" className="ml-2">Create Inverse</label>
                               </div>
                               {isFormFieldValid(formik, "relationCreateInverse") && (
                                 <Message severity="error" text={formik?.errors?.relationCreateInverse?.toString()} />
@@ -2045,7 +2132,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                     e.value
                                   )
                                 }
-                                placeholder="Select a Data Source"
+                                placeholder="Select Value Type"
                                 className={classNames("", {
                                   "p-invalid": isFormFieldValid(
                                     formik,
@@ -2346,7 +2433,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
 
                         </div>
                       )}
-                      {(currentFields.includes("regexPattern") || currentFields.includes("min") || currentFields.includes("max") || currentFields.includes("ormType")) && ormTypeOptions && formik.values.relationType !== "many-to-many" &&
+                      {(currentFields.includes("regexPattern") || currentFields.includes("min") || currentFields.includes("max") || currentFields.includes("ormType")) && ormTypeOptions && selectedType.value !== 'relation' &&
                         <>
                           <p className="form-wrapper-heading text-base">Validations</p>
                           <div className="formgrid grid">
@@ -2439,7 +2526,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   {currentFields.includes("min") && (
                                       <div className="field col-6 flex-flex-column gap-2 mt-3">
                                         <label htmlFor="min" className="form-field-label">
-                                          Min (Characters Allowed)
+                                          Min {(selectedType.value !== "int" && selectedType.value !== "decimal") && `(Characters Allowed)`}
 
                                         </label>
                                         {/* <InputText
@@ -2472,6 +2559,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                                 "min"
                                               ),
                                             })}
+                                            disabled={fieldMetaData?.id}
                                           />
                                         }
 
@@ -2486,7 +2574,8 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   {currentFields.includes("max") && (
                                       <div className="field col-6 flex-flex-column gap-2 mt-3">
                                         <label htmlFor="max" className="form-field-label">
-                                          Max (Character allowed)
+                                          Max {(selectedType.value !== "int" &&
+                                                selectedType.value !== "decimal") && `(Characters allowed)`}
                                         </label>
                                         {/* <InputText
                                 type="text"
@@ -2517,6 +2606,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                                 "max"
                                               ),
                                             })}
+                                            disabled={fieldMetaData?.id}
                                           />
                                         }
 
@@ -2586,7 +2676,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
 
                       <p className="form-wrapper-heading text-base">Settings</p>
                       <div className="formgrid grid">
-                        {currentFields.includes("required") && (
+                        {currentFields.includes("required") && selectedType.value !== 'relation' && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <div className="flex align-items-center">
                                 <Checkbox
@@ -2610,7 +2700,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                               )}
                             </div>
                         )}
-                        {currentFields.includes("unique") && (
+                        {currentFields.includes("unique") && selectedType.value !== 'relation' && (
                             <div className="field col-6 flex-flex-column gap-2">
                               <div className="flex align-items-center">
                                 <Checkbox
@@ -2634,7 +2724,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                               )}
                             </div>
                         )}
-                        {currentFields.includes("index") && (
+                        {currentFields.includes("index") && selectedType.value !== 'relation' && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <div className="flex align-items-center">
                                 <Checkbox
@@ -2656,7 +2746,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                               )}
                             </div>
                         )}
-                        {currentFields.includes("private") && (
+                        {currentFields.includes("private") && selectedType.value !== 'relation' && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <div className="flex align-items-center">
                                 <Checkbox
@@ -2681,7 +2771,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                               )}
                             </div>
                         )}
-                        {currentFields.includes("encrypt") && (
+                        {currentFields.includes("encrypt") && selectedType.value !== 'relation' && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <div className="flex align-items-center gap-2">
                                 <Checkbox
@@ -2742,7 +2832,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   Is Userkey
                                 </label>
                               </div>
-                              <p className="fieldSubTitle">If userkey already then it will be replaced with this key</p>
+                              <p className="fieldSubTitle">By selecting this option, you are setting this field as the model's user key. Any existing user key configuration will be overwritten</p>
 
                               {isFormFieldValid(formik, "isUserKey") && (
                                 <Message
