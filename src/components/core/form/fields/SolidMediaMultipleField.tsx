@@ -93,6 +93,7 @@ export class SolidMediaMultipleField implements ISolidField {
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
+        const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
 
         const [imagesPreview, setImagesPreview] = useState<Array<string | ArrayBuffer>>([]);
         const [isDeleteImageDialogVisible, setDeleteImageDialogVisible] = useState(false);
@@ -274,10 +275,12 @@ export class SolidMediaMultipleField implements ISolidField {
         return (
             <div className={className}>
                 <div className="flex flex-column gap-2 mt-4">
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                    {showFieldLabel != false &&
+                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
 
-                        &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
-                    </label>
+                            &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
+                        </label>
+                    }
                     <div
                         {...getRootProps()}
                         className="solid-dropzone-wrapper"

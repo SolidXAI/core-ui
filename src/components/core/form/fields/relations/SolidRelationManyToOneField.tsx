@@ -7,6 +7,12 @@ import { useState } from "react";
 import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
+import { camelCase, capitalize } from "lodash";
+import { Button } from "primereact/button";
+import { Checkbox } from "primereact/checkbox";
+import { Dialog } from "primereact/dialog";
+import { Panel } from "primereact/panel";
+import SolidFormView from "../../SolidFormView";
 
 
 export class SolidRelationManyToOneField implements ISolidField {
@@ -57,6 +63,8 @@ export class SolidRelationManyToOneField implements ISolidField {
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
+        const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
 
         // auto complete specific code. 
         const entityApi = createSolidEntityApi(fieldMetadata.relationModelSingularName);
@@ -106,11 +114,36 @@ export class SolidRelationManyToOneField implements ISolidField {
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
+
+
+
+        const disabled = fieldLayoutInfo.attrs?.disabled;
+        const readOnly = fieldLayoutInfo.attrs?.readOnly;
+
+
+        const customCreateHandler = (values: any) => {
+            const currentRelationData = formik.values[fieldLayoutInfo.attrs.name] || [];
+            const jsonValues = Object.fromEntries(values.entries());
+            const updatedRelationData = [
+                ...currentRelationData,
+                {
+                    label: jsonValues[fieldMetadata?.relationModel?.userKeyField?.name],
+                    value: "new",
+                    original: jsonValues,
+                },
+            ];
+
+            formik.setFieldValue(fieldLayoutInfo.attrs.name, updatedRelationData);
+
+        }
         return (
             <div className={className}>
                 <div className="flex flex-column gap-2 mt-4">
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                    </label>
+                    {showFieldLabel != false &&
+                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
+                            {fieldLabel}
+                        </label>
+                    }
                     <AutoComplete
                         readOnly={formReadonly || fieldReadonly}
                         disabled={formDisabled || fieldDisabled}
@@ -124,11 +157,68 @@ export class SolidRelationManyToOneField implements ISolidField {
                         onChange={formik.handleChange}
                         className="w-full solid-standard-autocomplete"
                     />
+                    {fieldLayoutInfo.attrs.inlineCreate === "true" &&
+                        this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
+                    }
                 </div>
                 {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                     <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 )}
             </div>
         );
+    }
+
+
+    renderSolidFormEmbededView(formik: FormikObject, customCreateHandler: any, visibleCreateRelationEntity: any, setvisibleCreateRelationEntity: any) {
+
+        const fieldMetadata = this.fieldContext.fieldMetadata;
+        const fieldLayoutInfo = this.fieldContext.field;
+        const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
+        const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+
+        const params = {
+            moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
+            id: "new",
+            embeded: true,
+            layout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
+            customCreateHandler: ((values: any) => {
+                setvisibleCreateRelationEntity(false);
+                customCreateHandler(values)
+            }),
+            inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
+            handlePopupClose: (() => {
+                setvisibleCreateRelationEntity(false);
+            }),
+            modelName: camelCase(this.fieldContext.fieldMetadata.relationModelSingularName)
+        }
+
+        return (
+            <div >
+                <Button
+                    icon="pi pi-plus"
+                    rounded
+                    outlined
+                    aria-label="Filter"
+                    type="button"
+                    size="small"
+                    onClick={() => setvisibleCreateRelationEntity(true)}
+                    className="custom-add-button"
+                />
+                <Dialog
+                    header=""
+                    showHeader={false}
+                    visible={visibleCreateRelationEntity}
+                    style={{ width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw" }}
+                    onHide={() => {
+                        if (!visibleCreateRelationEntity) return;
+                        setvisibleCreateRelationEntity(false);
+                    }}
+                    className="solid-dialog"
+                >
+                    <SolidFormView {...params} />
+
+                </Dialog>
+            </div>
+        )
     }
 }

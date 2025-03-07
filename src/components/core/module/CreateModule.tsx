@@ -208,7 +208,7 @@ const CreateModule = ({ data }: any) => {
     if (data) {
       setmenuIconPreview(`${process.env.API_URL}/${data.menuIconUrl}`);
 
-      const fileName = data.menuIconUrl.split("/").pop(); // Extract filename from URL
+      const fileName = data?.menuIconUrl?.split("/").pop(); // Extract filename from URL
       setFileDetails({ name: fileName || "Unknown File", type: "Uploaded File" });
 
       // Set the upload progress to 100% since the file is already uploaded

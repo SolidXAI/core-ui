@@ -69,6 +69,7 @@ export class SolidBooleanField implements ISolidField {
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const booleanOptions = ["false", "true"];
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
+        const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
 
         useEffect(() => { formik.setFieldValue(fieldLayoutInfo.attrs.name, "false") }, [])
 
@@ -83,9 +84,11 @@ export class SolidBooleanField implements ISolidField {
         return (
             <div className={className}>
                 <div className="flex flex-column gap-2 mt-4">
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                        &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
-                    </label>
+                    {showFieldLabel != false &&
+                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                            &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
+                        </label>
+                    }
                     {/* <InputText
                         id={fieldLayoutInfo.attrs.name}
                         className="small-input"

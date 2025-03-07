@@ -59,6 +59,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   // const [showGlobalSearchElement, setShowGlobalSearchElement] = useState<boolean>(false);
 
   const [toPopulate, setToPopulate] = useState<string[]>([]);
+  const [toPopulateMedia, setToPopulateMedia] = useState<string[]>([]);
   const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
 
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
@@ -123,6 +124,8 @@ export const SolidListView = (params: SolidListViewParams) => {
 
     const initialFilters: any = {};
     const toPopulate: string[] = [];
+    const toPopulateMedia: string[] = [];
+
     for (let i = 0; i < solidView.layout.children?.length; i++) {
       const column = solidView.layout.children[i];
       const fieldMetadata = solidFieldsMetadata[column.attrs.name];
@@ -155,10 +158,14 @@ export const SolidListView = (params: SolidListViewParams) => {
       if (fieldMetadata.type === 'relation' && fieldMetadata.relationType === 'many-to-one') {
         toPopulate.push(fieldMetadata.name);
       }
+      if (fieldMetadata.type === 'mediaSingle' || fieldMetadata.relationType === 'mediaMultiple') {
+        toPopulateMedia.push(fieldMetadata.name);
+      }
     }
     // setFilters(initialFilters);
     setRows(solidListViewMetaData?.data?.solidView?.layout?.attrs?.defaultPageSize ? solidListViewMetaData?.data?.solidView?.layout?.attrs.defaultPageSize : 25)
     setToPopulate(toPopulate);
+    setToPopulateMedia(toPopulateMedia);
   }
 
   useEffect(() => {
@@ -268,11 +275,12 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   // Fetch data after toPopulate has been populated...
   useEffect(() => {
-    if (toPopulate) {
+    if (toPopulate || toPopulateMedia) {
       const queryData = {
         offset: 0,
         limit: 25,
         populate: toPopulate,
+        populateMedia: toPopulateMedia,
         sort: [`id:desc`],
         filters: { ...params.customFilter }
       };
@@ -288,7 +296,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       setSelectedRecoverRecords([]);
       setShowArchived(false);
     }
-  }, [isDeleteSolidEntitiesSucess, isDeleteSolidSingleEntitySuccess, toPopulate]);
+  }, [isDeleteSolidEntitiesSucess, isDeleteSolidSingleEntitySuccess, toPopulate, toPopulateMedia]);
 
   // Handle pagination event.
   const onPageChange = (event: any) => {
@@ -402,6 +410,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       limit: limit ?? rows,
       filters: filters ?? filters,
       populate: toPopulate,
+      populateMedia: toPopulateMedia
     };
 
     if (sortField) {

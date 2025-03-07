@@ -52,6 +52,7 @@ export class SolidDateField implements ISolidField {
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
+        const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
 
         const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
         // const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
@@ -62,9 +63,11 @@ export class SolidDateField implements ISolidField {
         return (
             <div className={className}>
                 <div className="flex flex-column gap-2 mt-4">
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                        &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
-                    </label>
+                    {showFieldLabel != false &&
+                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                            &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
+                        </label>
+                    }
                     <Calendar
                         disabled={formDisabled || fieldDisabled}
                         ref={calendarRef} // Attach ref to Calendar
