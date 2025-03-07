@@ -9,7 +9,7 @@ import { useEffect, useState } from "react";
 // In case of relationType the Id field will always will be id   
 // Else the value will be whatever valuekey use passed 
 
-export const SingleSelectAutoCompleteField = ({ disabled, formik, isFormFieldValid, relationField, fieldName, fieldNameId, labelKey, valueKey, searchData, existingData, additionalAction }: any) => {
+export const SingleSelectAutoCompleteField = ({ disabled, formik, isFormFieldValid, relationField, fieldName, fieldNameId, labelKey, valueKey, searchData, existingData, additionalAction, formErrors }: any) => {
 
     const [selectedItem, setSelectedItem] = useState(existingData);
     const [filteredItem, setFilteredItem] = useState([]);
@@ -32,7 +32,7 @@ export const SingleSelectAutoCompleteField = ({ disabled, formik, isFormFieldVal
                 disabled={disabled ? disabled : false}
                 value={selectedItem}
                 suggestions={filteredItem}
-                invalid={isFormFieldValid(formik, fieldName)}
+                invalid={(isFormFieldValid(formik, fieldName) || (formErrors[fieldName]))}
                 completeMethod={searchItems}
                 virtualScrollerOptions={{ itemSize: 38 }}
                 // style={{

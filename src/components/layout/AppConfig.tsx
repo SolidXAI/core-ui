@@ -41,7 +41,8 @@ const AppConfig = (props: AppConfigProps) => {
     };
 
     const applyScale = () => {
-        document.documentElement.style.fontSize = layoutConfig.scale + 'px';
+        // document.documentElement.style.fontSize = layoutConfig.scale + 'px';
+        document.documentElement.style.fontSize = 14 + 'px';
     };
 
     useEffect(() => {
@@ -51,7 +52,7 @@ const AppConfig = (props: AppConfigProps) => {
 
     return (
         <>
-            <button className="layout-config-button config-link" type="button" onClick={onConfigButtonClick}>
+            {/* <button className="layout-config-button config-link" type="button" onClick={onConfigButtonClick}>
                 <i className="pi pi-cog"></i>
             </button>
 
@@ -95,7 +96,7 @@ const AppConfig = (props: AppConfigProps) => {
                         </button>
                     </div>
                 </div>
-            </Sidebar>
+            </Sidebar> */}
         </>
     );
 };

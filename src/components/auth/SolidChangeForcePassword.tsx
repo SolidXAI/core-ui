@@ -39,24 +39,34 @@ const SolidChangeForcePassword = () => {
             id: session?.data?.user?.user?.id,
         },
         validationSchema,
-        onSubmit: async (values) => {
+        onSubmit: async (values, { setErrors }) => {
             try {
                 const payload = {
                     id: values.id,
-                    email: values.email,
+                    email: session?.data?.user?.user?.email,
                     currentPassword: values.currentPassword,
                     newPassword: values.newPassword,
                 };
+                console.log("Payload:", payload);
+
                 // Call the mutation and handle the response
                 const response = await changePassword(payload).unwrap(); // Await the API call and unwrap to handle errors.
-                if (response?.statusCode === 200) {
+                if (response?.error) {
+                    showToast("error", "Error", response.error)
+                    setErrors({
+                        currentPassword: "Incorrect Current Password",
+                        newPassword: "Passwords must match",
+                        confirmPassword: "Passwords must match",
+                    })
+                } else {
                     showToast("success", "Force Password Change Success", "Password Change Successfully");
                     signOut({ callbackUrl: "/auth/login" })
-                } else (
-                    showToast("error", "Login Error", response.error)
-                )
-            } catch (err:any) {
+                }
+            } catch (err: any) {
                 showToast("error", "Login Failed", err?.data?.message);
+                setErrors({
+                    currentPassword: "Incorrect Current Password",
+                })
             }
         },
     });
@@ -68,31 +78,16 @@ const SolidChangeForcePassword = () => {
             <Toast ref={toast} />
 
             <form onSubmit={formik.handleSubmit} className='d-flex flex-column gap-3 auth-form'>
-                <div className="flex flex-column gap-2 mt-2">
-                    <label htmlFor="email" className="solid-auth-input-label">Email Id</label>
-                    <InputText
-                        id="email"
-                        name="email"
-                        placeholder="Email ID"
-                        value={formik.values.email}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        readOnly
-                    />
-                </div>
-                <div className="flex flex-column gap-2 mt-4" style={{}}>
+                <div className="flex flex-column gap-2 mt-2" style={{}}>
                     <label htmlFor="currentPassword" className="solid-auth-input-label">Current Password</label>
                     <Password
                         id="currentPassword"
                         name="currentPassword"
-                        placeholder="***************"
                         value={formik.values.currentPassword}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                         toggleMask
-                        className={classNames("", {
-                            "p-invalid": isFormFieldValid(formik, "password"),
-                        })}
+                        invalid={!!formik.errors.currentPassword}
                         inputClassName="w-full"
                         feedback={false}
                     />
@@ -107,14 +102,11 @@ const SolidChangeForcePassword = () => {
                     <Password
                         id="newPassword"
                         name="newPassword"
-                        placeholder="***************"
                         value={formik.values.newPassword}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                         toggleMask
-                        className={classNames("", {
-                            "p-invalid": isFormFieldValid(formik, "newPassword"),
-                        })}
+                        invalid={!!formik.errors.newPassword}
                         inputClassName="w-full"
                         feedback={false}
                     />
@@ -129,14 +121,11 @@ const SolidChangeForcePassword = () => {
                     <Password
                         id="confirmPassword"
                         name="confirmPassword"
-                        placeholder="***************"
                         value={formik.values.confirmPassword}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
                         toggleMask
-                        className={classNames("", {
-                            "p-invalid": isFormFieldValid(formik, "confirmPassword"),
-                        })}
+                        invalid={!!formik.errors.confirmPassword}
                         inputClassName="w-full"
                         feedback={false}
                     />

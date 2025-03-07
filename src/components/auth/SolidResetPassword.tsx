@@ -5,7 +5,7 @@ import { useConfirmForgotPasswordMutation } from "@/redux/api/authApi";
 import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { useFormik } from "formik";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "primereact/button";
 import { Message } from "primereact/message";
 import { Password } from "primereact/password";
@@ -14,7 +14,11 @@ import { classNames } from "primereact/utils";
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
 
-const SolidResetPassword = ({ verificationToken, username }: { verificationToken?: any, username?: any }) => {
+const SolidResetPassword = () => {
+    const searchParams = useSearchParams();
+    const verificationToken = searchParams.get('token');
+    const decodedUsername = searchParams.get('username');
+    const username = decodedUsername ? decodeURIComponent(decodedUsername) : '';
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
     useEffect(() => {
         trigger("")
@@ -52,6 +56,7 @@ const SolidResetPassword = ({ verificationToken, username }: { verificationToken
                     password: values.password,
                     verificationToken: values.verificationToken,
                 };
+                console.log("Paylod", payload);
                 const response = await confirmForgotPassword(payload).unwrap();
                 if (response?.statusCode === 200) {
                     showToast("success", "Login Successfull", "Password Updated Successfully")
@@ -60,6 +65,7 @@ const SolidResetPassword = ({ verificationToken, username }: { verificationToken
                     showToast("error", "Login Error", response.error)
                 )
             } catch (err: any) {
+                console.log("Error", err);
                 showToast("error", "Login Error", err?.data ? err?.data?.message : "Something Went Wrong");
             }
         },
@@ -71,7 +77,7 @@ const SolidResetPassword = ({ verificationToken, username }: { verificationToken
     return (
         <>
             <Toast ref={toast} />
-            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center'  ? 'center' : 'side'}`}>
+            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
                         <div className="solid-logo flex align-items-center gap-3">
@@ -109,7 +115,7 @@ const SolidResetPassword = ({ verificationToken, username }: { verificationToken
                             text={formik?.errors?.password?.toString()}
                         />}
                     </div>
-                    <div className="flex flex-column gap-2 mt-4" style={{}}>
+                    <div className="flex flex-column gap-1 mt-4" style={{}}>
                         <label htmlFor="password" className="solid-auth-input-label">Confirm Password</label>
                         <Password
                             id="confirmPassword"
@@ -137,14 +143,15 @@ const SolidResetPassword = ({ verificationToken, username }: { verificationToken
                                     </div> */}
                     <div className="mt-4">
                         <Button className="w-full font-light auth-submit-button" label="Reset Password" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
+                        <Button type="button" label="Back" className="w-full auth-back-button text-center" link onClick={() => (window.location.href = '/auth/login')} />
                     </div>
                 </form>
             </div>
-            <div className="text-center mt-5">
+            {/* <div className="text-center mt-5">
                 <div className="text-sm text-400 secondary-dark-color">
                     {'<'} Back to <Link className="font-bold" href="/auth/login">Sign In</Link>
                 </div>
-            </div>
+            </div> */}
         </>
     );
 };
