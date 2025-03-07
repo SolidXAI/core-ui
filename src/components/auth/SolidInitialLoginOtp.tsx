@@ -5,7 +5,7 @@ import { useConfirmOtpLoginMutation } from "@/redux/api/authApi";
 import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { Form, Formik } from "formik";
 import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "primereact/button";
 import { InputOtp } from "primereact/inputotp";
 import { Message } from "primereact/message";
@@ -13,7 +13,10 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
 
-const SolidInitialLoginOtp = ({ email }: { email: string }) => {
+const SolidInitialLoginOtp = () => {
+    const searchParams = useSearchParams();
+    const tempEmail = searchParams.get('email');
+    const email = tempEmail ? decodeURIComponent(tempEmail) : '';
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
     useEffect(() => {
         trigger("")
@@ -67,7 +70,7 @@ const SolidInitialLoginOtp = ({ email }: { email: string }) => {
                             otp: "",
                         }}
                         validationSchema={validationSchema}
-                        onSubmit={async (values, { setSubmitting }) => {
+                        onSubmit={async (values, { setSubmitting, setErrors }) => {
                             try {
                                 const payload = {
                                     type: "email",
@@ -81,7 +84,10 @@ const SolidInitialLoginOtp = ({ email }: { email: string }) => {
                                     showToast("success", "Login Successfully", "Login");
                                     router.push(`/admin/core/solid-core/user/list`);
                                 } else {
-                                    showToast("error", "Login Error", response.error);
+                                    showToast("error", "Invalid OTP", response.error);
+                                    setErrors({
+                                        otp: "Invalid OTP",
+                                    });
                                 }
                             } catch (err: any) {
                                 showToast("error", "Login Error", err?.data ? err?.data?.message : "Something Went Wrong");
@@ -92,13 +98,14 @@ const SolidInitialLoginOtp = ({ email }: { email: string }) => {
                     >
                         {(formik) => (
                             <Form>
-                                <div className="flex flex-column gap-2 px-3">
+                                <div className="flex flex-column gap-2">
                                     <label htmlFor="otp" className="solid-auth-input-label">Enter OTP</label>
                                     <InputOtp
                                         value={formik.values.otp}
                                         onChange={(e) => formik.setFieldValue("otp", e.value)}
                                         length={6}
                                         style={{ width: '100%' }}
+                                        invalid={!!formik.errors.otp}
                                     />
                                     {isFormFieldValid(formik, "otp") && (
                                         <Message className="text-red-500 text-sm" severity="error" text={formik.errors.otp?.toString()} />
@@ -112,17 +119,18 @@ const SolidInitialLoginOtp = ({ email }: { email: string }) => {
                                 </div>
                                 <div className="mt-4">
                                     <Button type="submit" className="w-full font-light auth-submit-button" label="Verify" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
+                                    <Button type="button" label="Back" className="w-full auth-back-button text-center" link onClick={() => (window.location.href = '/auth/login')} />
                                 </div>
                             </Form>
                         )}
                     </Formik>
                 </>
             </div>
-            <div className="text-center mt-5">
+            {/* <div className="text-center mt-5">
                 <div className="text-sm text-400 secondary-dark-color">
-                    {'<'} Back to <Link className="font-bold" href="/auth/login">Sign In</Link>
+                    {'<'} Back to <Link className="font-bold" href="/auth/login">Back</Link>
                 </div>
-            </div>
+            </div> */}
         </>
     );
 };

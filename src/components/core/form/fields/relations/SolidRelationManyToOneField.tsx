@@ -122,7 +122,7 @@ export class SolidRelationManyToOneField implements ISolidField {
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}
                         onChange={formik.handleChange}
-                        className="solid-standard-autocomplete"
+                        className="w-full solid-standard-autocomplete"
                     />
                 </div>
                 {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (

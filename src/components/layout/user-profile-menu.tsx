@@ -82,7 +82,7 @@ const UserProfileMenu = () => {
             </div>
             <InputSwitch checked={checked} onChange={handleThemeToggle} />
           </div>
-          <div className="user-profile-body p-3">
+          <div className="user-profile-body py-1">
             <Button
               text
               severity="secondary"

@@ -76,7 +76,7 @@ const SolidLogin = () => {
                                     .required("Email is required"),
                                 password: Yup.string().required("Password is required"),
                             })}
-                            onSubmit={async (values, { setSubmitting }) => {
+                            onSubmit={async (values, { setSubmitting, setErrors }) => {
                                 try {
                                     const response = await signIn("credentials", {
                                         redirect: false,
@@ -86,6 +86,10 @@ const SolidLogin = () => {
 
                                     if (response?.error) {
                                         showToast("error", "Login Error", response.error);
+                                        setErrors({
+                                            email: "Invalid email or password",
+                                            password: "Invalid email or password",
+                                        });
                                     } else {
                                         showToast("success", "Login Success", "Redirecting to dashboard...");
                                         router.push("/admin/core/solid-core/user/list");
@@ -107,6 +111,7 @@ const SolidLogin = () => {
                                             placeholder="Email ID"
                                             onChange={formik.handleChange}
                                             value={formik.values.email}
+                                            invalid={!!formik.errors.email}
                                         />
                                         {isFormFieldValid(formik, "email") && <Message
                                             className="text-red-500 text-sm"
@@ -114,20 +119,17 @@ const SolidLogin = () => {
                                             text={formik?.errors?.email?.toString()}
                                         />}
                                     </div>
-                                    <div className="flex flex-column gap-2 mt-4" style={{}}>
+                                    <div className="flex flex-column gap-1 mt-4" style={{}}>
                                         <label htmlFor="password" className="solid-auth-input-label">Password</label>
                                         <Password
                                             id="password"
-                                            placeholder="***************"
                                             value={password}
                                             onChange={(e) => {
                                                 setPassword(e.target.value);
                                                 formik.setFieldValue("password", e.target.value);
                                             }}
                                             toggleMask
-                                            className={classNames("", {
-                                                "p-invalid": isFormFieldValid(formik, "password"),
-                                            })}
+                                            invalid={!!formik.errors.password}
                                             inputClassName="w-full"
                                             feedback={false}
                                         />
@@ -138,9 +140,9 @@ const SolidLogin = () => {
                                         />}
                                     </div>
                                     {/* <div className="flex align-items-center mt-4">
-                                        <Checkbox inputId="remember" onChange={(e: any) => setChecked(e.checked)} checked={checked} />
-                                        <label htmlFor="remember" className="ml-2">Remember me</label>
-                                    </div> */}
+                                    <Checkbox inputId="remember" onChange={(e: any) => setChecked(e.checked)} checked={checked} />
+                                    <label htmlFor="remember" className="ml-2">Remember me</label>
+                                </div> */}
                                     <div className="mt-4 text-right">
                                         <Link href={"/auth/initiate-forgot-password"} className="solid-auth-input-label">Forgot Password?</Link>
                                     </div>
@@ -160,7 +162,7 @@ const SolidLogin = () => {
                                 email: Yup.string()
                                     .email("Invalid email address")
                             })}
-                            onSubmit={async (values, { setSubmitting }) => {
+                            onSubmit={async (values, { setSubmitting, setErrors }) => {
                                 try {
                                     const payload = {
                                         type: "email",
@@ -178,6 +180,9 @@ const SolidLogin = () => {
                                     }
                                 } catch (err: any) {
                                     showToast("error", "Login Error", err?.data ? err?.data?.message : "Something Went Wrong");
+                                    setErrors({
+                                        email: "Invalid email",
+                                    });
                                 } finally {
                                     setSubmitting(false);
                                 }
@@ -193,6 +198,7 @@ const SolidLogin = () => {
                                             placeholder="Email ID"
                                             onChange={formik.handleChange}
                                             value={formik.values.email}
+                                            invalid={!!formik.errors.email}
                                         />
                                         {isFormFieldValid(formik, "email") && <Message
                                             className="text-red-500 text-sm"

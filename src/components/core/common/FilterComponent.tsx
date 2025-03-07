@@ -94,62 +94,62 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
     // <div style={{ marginLeft: (level - 1) * 10 + 'px' }} className="filter-rule">
 
     <div className='mt-2'>
-      <div className='formgrid grid'>
-        <div className='col-3'>
-          <Dropdown
-            key={rule.id}
-            value={fieldName.name}
-            onChange={e => {
-              setFieldName({ name: e.value, value: e.value })
-              onChange(rule.id, 'fieldName', e.value)
-            }}
-            options={fields}
-            optionLabel='name'
-            optionValue='name'
-            placeholder="Select Field"
-            className='w-full'
-          />
-        </div>
-        <div className='col-7'>
-          <div className='formgrid grid'>
-            {rule.fieldName ?
-              <SolidFilterFields viewData={viewData} fieldMetadata={viewData.data.solidFieldsMetadata[rule.fieldName]} onChange={onChange} index={rule.id} rule={rule}></SolidFilterFields>
-              : <>
-                <div className='col-6'>
-                  <InputText
-                    disabled
-                    value={rule.value || ''}
-                    placeholder="operator"
-                    className='w-full'
-                  />
-                </div>
-                <div className='col-6'>
-                  <InputText
-                    disabled
-                    value={rule.value || ''}
-                    placeholder="value"
-                    className='w-full'
-                  />
-                </div>
-              </>
-            }
+      <div className='flex align-items-center gap-3'>
+        <div className='formgrid grid w-full'>
+          <div className='col-4'>
+            <Dropdown
+              key={rule.id}
+              value={fieldName.value}
+              onChange={e => {
+                setFieldName({ name: e.value, value: e.value })
+                onChange(rule.id, 'fieldName', e.value)
+              }}
+              options={fields}
+              optionLabel='name'
+              optionValue='value'
+              placeholder="Select Field"
+              className='w-full'
+            />
+          </div>
+          <div className='col-8'>
+            <div className='formgrid grid'>
+              {rule.fieldName ?
+                <SolidFilterFields viewData={viewData} fieldMetadata={viewData.data.solidFieldsMetadata[rule.fieldName]} onChange={onChange} index={rule.id} rule={rule}></SolidFilterFields>
+                : <>
+                  <div className='col-6'>
+                    <InputText
+                      disabled
+                      value={rule.value || ''}
+                      placeholder="operator"
+                      className='w-full'
+                    />
+                  </div>
+                  <div className='col-6'>
+                    <InputText
+                      disabled
+                      value={rule.value || ''}
+                      placeholder="value"
+                      className='w-full'
+                    />
+                  </div>
+                </>
+              }
+            </div>
           </div>
         </div>
-        <div className='col-2'>
-          <div className='formgrid grid'>
-            <div className='col-4 flex align-items-center'>
-              <Button text severity='secondary' icon="pi pi-plus" size='small' onClick={() => onAddRule(rule.parentRule)} className='solid-filter-action-btn' />
-            </div>
-            <div className='col-4 flex align-items-center'>
-              <Button text severity='secondary' icon={
-                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                  <path d="M11.6665 13.334H13.3332V11.6673H14.9998V10.0007H13.3332V8.33398H11.6665V10.0007H9.99984V11.6673H11.6665V13.334ZM3.33317 16.6673C2.87484 16.6673 2.48248 16.5041 2.15609 16.1777C1.8297 15.8513 1.6665 15.459 1.6665 15.0007V5.00065C1.6665 4.54232 1.8297 4.14996 2.15609 3.82357C2.48248 3.49718 2.87484 3.33398 3.33317 3.33398H8.33317L9.99984 5.00065H16.6665C17.1248 5.00065 17.5172 5.16385 17.8436 5.49023C18.17 5.81662 18.3332 6.20898 18.3332 6.66732V15.0007C18.3332 15.459 18.17 15.8513 17.8436 16.1777C17.5172 16.5041 17.1248 16.6673 16.6665 16.6673H3.33317ZM3.33317 15.0007H16.6665V6.66732H9.31234L7.64567 5.00065H3.33317V15.0007Z" fill="#4B4D52" />
-                </svg>
-              } size='small' onClick={() => onAddGroup(rule.id)} className='solid-filter-action-btn p-0' />
-            </div>
-            <div className='col-4 flex align-items-center'>
-              <Button text severity='secondary' icon="pi pi-trash" size='small' onClick={() => onDelete(rule.id)} className='solid-filter-action-btn' />
-            </div>
+        <div className='formgrid grid'>
+          <div className='col-4 px-0 flex align-items-center'>
+            <Button text severity='secondary' icon="pi pi-plus" size='small' onClick={() => onAddRule(rule.parentRule)} className='solid-filter-action-btn' />
+          </div>
+          <div className='col-4 px-0 flex align-items-center'>
+            <Button text severity='secondary' icon={
+              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                <path d="M11.6665 13.334H13.3332V11.6673H14.9998V10.0007H13.3332V8.33398H11.6665V10.0007H9.99984V11.6673H11.6665V13.334ZM3.33317 16.6673C2.87484 16.6673 2.48248 16.5041 2.15609 16.1777C1.8297 15.8513 1.6665 15.459 1.6665 15.0007V5.00065C1.6665 4.54232 1.8297 4.14996 2.15609 3.82357C2.48248 3.49718 2.87484 3.33398 3.33317 3.33398H8.33317L9.99984 5.00065H16.6665C17.1248 5.00065 17.5172 5.16385 17.8436 5.49023C18.17 5.81662 18.3332 6.20898 18.3332 6.66732V15.0007C18.3332 15.459 18.17 15.8513 17.8436 16.1777C17.5172 16.5041 17.1248 16.6673 16.6665 16.6673H3.33317ZM3.33317 15.0007H16.6665V6.66732H9.31234L7.64567 5.00065H3.33317V15.0007Z" fill="#4B4D52" />
+              </svg>
+            } size='small' onClick={() => onAddGroup(rule.id)} className='solid-filter-action-btn p-0' />
+          </div>
+          <div className='col-4 px-0 flex align-items-center'>
+            <Button text severity='secondary' icon="pi pi-trash" size='small' onClick={() => onDelete(rule.id)} className='solid-filter-action-btn' />
           </div>
         </div>
       </div>
@@ -380,24 +380,24 @@ const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, transf
 
   return (
     <div className=''>
-        {filterRules.map(rule => (
-          <FilterGroupComponent
-            key={rule.id}
-            viewData={viewData}
-            fields={fields}
-            group={rule}
-            onChange={handleChange}
-            onAddRule={handleAddRule}
-            onAddGroup={handleAddGroup}
-            onDelete={handleDeleteRule}
-            level={0} // Top-level group
-          />
-        ))}
-      <div className='text-center'>
+      {filterRules.map(rule => (
+        <FilterGroupComponent
+          key={rule.id}
+          viewData={viewData}
+          fields={fields}
+          group={rule}
+          onChange={handleChange}
+          onAddRule={handleAddRule}
+          onAddGroup={handleAddGroup}
+          onDelete={handleDeleteRule}
+          level={0} // Top-level group
+        />
+      ))}
+      <div className='text-left mt-3'>
         <Button label="Apply" size="small" onClick={() => transformFilterRules(filterRules)} type="submit" className="small-button" />
-
+        {/* 
         <br></br>
-        <textarea value={printedState} readOnly rows={20} cols={100} style={{ marginTop: '20px' }} />
+        <textarea value={printedState} readOnly rows={20} cols={100} style={{ marginTop: '20px' }} /> */}
       </div>
     </div>
   );

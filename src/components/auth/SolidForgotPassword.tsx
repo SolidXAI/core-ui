@@ -106,14 +106,15 @@ const SolidForgotPassword = () => {
                     </div>
                     <div className="mt-4">
                         <Button className="w-full font-light auth-submit-button" label="Send OTP" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
+                        <Button type="button" label="Back" className="w-full auth-back-button text-center" link onClick={() => (window.location.href = '/auth/login')} />
                     </div>
                 </form>
             </div>
-            <div className="text-center mt-5">
+            {/* <div className="text-center mt-5">
                 <div className="text-sm text-400 secondary-dark-color">
                     {'<'} Back to <Link className="font-bold" href="/auth/login">Sign In</Link>
                 </div>
-            </div>
+            </div> */}
         </>
     );
 };

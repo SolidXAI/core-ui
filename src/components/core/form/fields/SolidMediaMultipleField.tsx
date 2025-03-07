@@ -99,7 +99,7 @@ export class SolidMediaMultipleField implements ISolidField {
         const [imageToBeDeletedData, setImageToBeDeletedData] = useState<any>();
         const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
         const [uploadCompleted, setUploadCompleted] = useState<Record<string, boolean>>({});
-        const [fileDetails, setFileDetails] = useState<{ name: string; type: string; size: number }[]>([]);
+        const [fileDetails, setFileDetails] = useState<{ name: string; type: string; size: number, id: number }[]>([]);
         const [uploadedSize, setUploadedSize] = useState<Record<string, string>>({});
         const [totalSize, setTotalSize] = useState<Record<string, string>>({});
         const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
@@ -118,7 +118,7 @@ export class SolidMediaMultipleField implements ISolidField {
             const fieldValue = formik?.values[fieldLayoutInfo.attrs.name];
             if (Array.isArray(fieldValue) && fieldValue.length > 0) {
                 const urls: string[] = [];
-                const details: { name: string; type: string; size: number }[] = [];
+                const details: { name: string; type: string; size: number, id: any }[] = [];
                 const progress: Record<string, number> = {};
                 const completed: Record<string, boolean> = {};
 
@@ -126,13 +126,14 @@ export class SolidMediaMultipleField implements ISolidField {
                     if (file instanceof File) {
                         // New file (from local upload)
                         urls.push(URL.createObjectURL(file));
-                        details.push({ name: file.name, type: file.type, size: file.size });
+                        details.push({ name: file.name, type: file.type, size: file.size, id: `${file.name}-${file.size}`, });
                     } else if (typeof file === "object" && file._full_url) {
                         urls.push(file._full_url);
                         details.push({
                             name: file.relativeUri || "Unknown", // Use relativeUri or fallback
                             type: file.mediaStorageProviderMetadata?.type || "Unknown", // Extract type if available
                             size: 0, // API doesn't provide size, set 0 or fetch from metadata if available
+                            id: file.id
                         });
                     }
                 });
@@ -147,7 +148,7 @@ export class SolidMediaMultipleField implements ISolidField {
             }
         }, [formik.values, fieldLayoutInfo.attrs.name]);
 
-        const handleDropImages = (acceptedFiles: File[]) => {
+        const handleDropImages = (acceptedFiles: any[]) => {
             if (!acceptedFiles.length) return;
 
             const newFileDetails = [...fileDetails];
@@ -159,7 +160,7 @@ export class SolidMediaMultipleField implements ISolidField {
             acceptedFiles.forEach((file) => {
                 const fileId = `${file.name}-${file.size}`; // Unique identifier for tracking each file
 
-                newFileDetails.push({ name: file.name, type: file.type, size: file.size });
+                newFileDetails.push({ name: file.name, type: file.type, size: file.size, id: file.id });
                 newUploadProgress[fileId] = 0;
                 newUploadedSize[fileId] = "0 KB";
                 newTotalSize[fileId] = formatFileSize(file.size);
@@ -224,18 +225,22 @@ export class SolidMediaMultipleField implements ISolidField {
             formik.setFieldValue(fieldLayoutInfo.attrs.name, fileDetails.filter((file) => `${file.name}-${file.size}` !== fileId));
         };
 
-        const confirmDeleteFile = (fileId: any) => {
+        const confirmDeleteFile = (fileId: any, deleteId: number) => {
             setSelectedFileId(fileId);
             setDeleteImageDialogVisible(true);
+            setImageToBeDeletedData(deleteId)
         };
 
         const deleteFile = () => {
-            if (selectedFileId) {
+            if (selectedFileId && imageToBeDeletedData) {
                 handleCancelUpload(selectedFileId);
+                deleteMedia(imageToBeDeletedData);
                 setDeleteImageDialogVisible(false);
+                setShowAllFiles(false)
                 setSelectedFileId(null);
             }
         };
+
         const {
             getRootProps,
             getInputProps,
@@ -290,7 +295,7 @@ export class SolidMediaMultipleField implements ISolidField {
                                     <div className="font-bold">{fileDetails[0].name}</div>
                                     <div
                                         className="cancel-upload-button"
-                                        onClick={() => confirmDeleteFile(`${fileDetails[0].name}-${fileDetails[0].size}`)}
+                                        onClick={() => confirmDeleteFile(`${fileDetails[0].name}-${fileDetails[0].size}`, fileDetails[0].id)}
                                     >
                                         <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 6 6" fill="none">
                                             <path d="M0.6 6L0 5.4L2.4 3L0 0.6L0.6 0L3 2.4L5.4 0L6 0.6L3.6 3L6 5.4L5.4 6L3 3.6L0.6 6Z" fill="#4B4D52" />
@@ -355,7 +360,7 @@ export class SolidMediaMultipleField implements ISolidField {
                                                 <div className="font-bold">{file.name}</div>
                                                 <div
                                                     className="cancel-upload-button"
-                                                    onClick={() => confirmDeleteFile(fileId)}
+                                                    onClick={() => confirmDeleteFile(fileId, file?.id)}
                                                 >
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 6 6" fill="none">
                                                         <path d="M0.6 6L0 5.4L2.4 3L0 0.6L0.6 0L3 2.4L5.4 0L6 0.6L3.6 3L6 5.4L5.4 6L3 3.6L0.6 6Z" fill="#4B4D52" />

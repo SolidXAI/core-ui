@@ -16,6 +16,7 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
     // const [visible, setVisible] = useState<boolean>(false);
     const op = useRef(null);
     const customizeLayout = useRef(null);
+    const [isOverlayOpen, setIsOverlayOpen] = useState(true);
 
     const categories: FilterColumns[] = [
         { name: 'ID', key: 'A' },
@@ -64,6 +65,7 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                         icon='pi pi-sliders-h'
                         label="Customize Layout"
                         size="small"
+                        text={isOverlayOpen}
                         className="text-left gap-2 w-13rem"
                         // @ts-ignore
                         onClick={(e) => customizeLayout.current.toggle(e)}
@@ -71,7 +73,10 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                     />
                     <p className="mt-3 mb-1 font-medium" style={{ color: 'var(--gray-400)' }}>Saved Layouts</p>
                     <Button text severity="secondary" label="Diet Tracking" icon="pi pi-plus" size="small" />
-                    <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}>
+                    <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}
+                        onShow={() => setIsOverlayOpen(false)}
+                        onHide={() => setIsOverlayOpen(true)}
+                    >
                         <div className="solid-layout-accordion">
                             <Accordion multiple expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up">
                                 <AccordionTab header="Switch Type">

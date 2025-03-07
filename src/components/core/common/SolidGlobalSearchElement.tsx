@@ -149,7 +149,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     useEffect(() => {
         if (viewData?.data?.solidFieldsMetadata) {
             const fieldsData = viewData?.data?.solidFieldsMetadata
-            const fieldsList = Object.entries(fieldsData).map(([key, value]: any) => ({ name: key, value: key }));
+            const fieldsList = Object.entries(fieldsData).map(([key, value]: any) => ({ name: value.displayName, value: key }));
             setFields(fieldsList)
         }
     }, [])
@@ -196,10 +196,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         if (inputValue?.trim()) {
             const newChip = { columnName: columnName || firstFilterableFieldName, value: inputValue.trim() };
 
-            setSearchChips((prevChips) => {
-                const updatedChips = [...prevChips, newChip];
-                return updatedChips
-            });
+            setSearchChips((prevChips) => [...prevChips, newChip]);
+            setInputValue(""); // Clear input value
         }
     }
 
@@ -228,7 +226,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             children: searchChips.map((chip) => ({
                 children: [],
                 fieldName: chip.columnName,
-                id: null,
+                id: Date.now() + getRandomInt(1, 500),
                 matchMode: "$containsi",
                 parentRule: 1,
                 type: "rule",
@@ -275,9 +273,25 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         return <div className="flex align-items-center gap-2 text-base" dangerouslySetInnerHTML={{ __html: item }}></div>;
     };
 
+    const handleRemoveChip = (removedChipValue: any) => {
+        console.log("Removing chip:", removedChipValue);
+
+        setSearchChips((prevChips) => {
+            const updatedChips = prevChips.filter((chip) => chip.value !== removedChipValue);
+            console.log("Updated searchChips after removal:", updatedChips);
+            return updatedChips;
+        });
+
+        // Prevent clearing customChip if it is different from the removed chip
+        if (customChip === removedChipValue) {
+            console.log("Clearing custom chip:", customChip);
+            setCustomChip("");
+        }
+    };
+
     return (
         <div className="flex justify-content-center solid-custom-filter-wrapper">
-            <div className="p-inputgroup flex-1"
+            <div className="p-inputgroup flex-1 custom-input-group"
                 ref={chipsRef}
                 onClick={(e) => {
                     e.preventDefault();
@@ -288,11 +302,23 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             >
                 <Chips
                     value={chipsToDisplay}
-                    onChange={handleChipChange}
-                    onRemove={(e) => {
-                        setCustomChip("");
-                        setSearchChips([]);
-                        clearFilter();
+                    onChange={(e: any) => {
+                        // Compare previous and new values to detect removal
+                        if (e.value.length < searchChips.length) {
+                            const removedChip = searchChips.find(chip => !e.value.includes(chip.value));
+                            if (removedChip) {
+                                handleRemoveChip(removedChip.value);
+                            }
+                        } else {
+                            setSearchChips(e.value.map((val: any) => ({ columnName: firstFilterableFieldName, value: val })));
+                        }
+                    }}
+                    onRemove={(event) => {
+                        setSearchChips((prevChips) => prevChips.filter((chip) => chip.value !== event.value));
+                        if (searchChips.length === 1) {
+                            setCustomChip("");
+                            clearFilter();
+                        }
                     }}
                     itemTemplate={customChipTemplate}
                     onKeyDown={handleKeyDown}
@@ -303,13 +329,15 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 />
                 <Button
                     icon="pi pi-search"
+                    style={{ fontSize: 10 }}
                     severity="secondary"
                     outlined size="small"
-                    onClick={(e) => {
-                        if (op.current && e.target) {
-                            op.current.toggle(e);
-                        }
-                    }}
+                    onClick={() => setShowGlobalSearchElement(true)}
+                // onClick={(e) => {
+                //     if (op.current && e.target) {
+                //         op.current.toggle(e);
+                //     }
+                // }}
                 />
             </div>
             <OverlayPanel ref={op} className="solid-custom-overlay" style={{ minWidth: 378 }}>

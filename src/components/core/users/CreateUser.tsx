@@ -317,7 +317,7 @@ const CreateUser = ({ data, params }: any) => {
                     />
                   )}
                 </div>
-                <div className="field col-6 flex flex-column gap-2 mt-4">
+                <div className="field col-6 flex flex-column gap-1 mt-4">
                   <label htmlFor="email" className="form-field-label">
                     Email
                   </label>
@@ -340,7 +340,7 @@ const CreateUser = ({ data, params }: any) => {
                     />
                   )}
                 </div>
-                <div className="field col-6 flex flex-column gap-2 mt-4">
+                <div className="field col-6 flex flex-column gap-1 mt-4">
                   <label htmlFor="mobile" className="form-field-label">
                     Mobile
                   </label>
