@@ -59,7 +59,7 @@ export class SolidRelationManyToOneField implements ISolidField {
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
 
         // auto complete specific code. 
-        const entityApi = createSolidEntityApi(fieldMetadata.relationModelSingularName);
+        const entityApi = createSolidEntityApi(fieldMetadata.relationCoModelSingularName);
         const { useLazyGetSolidEntitiesQuery } = entityApi;
         const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
 

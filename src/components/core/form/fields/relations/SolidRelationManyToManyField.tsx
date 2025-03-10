@@ -138,7 +138,7 @@ export class SolidRelationManyToManyField implements ISolidField {
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
 
         // auto complete specific code. 
-        const entityApi = createSolidEntityApi(fieldMetadata.relationModelSingularName);
+        const entityApi = createSolidEntityApi(fieldMetadata.relationCoModelSingularName);
         const { useLazyGetSolidEntitiesQuery } = entityApi;
         const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
 
@@ -293,7 +293,7 @@ export class SolidRelationManyToManyField implements ISolidField {
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
 
         // auto complete specific code. 
-        const entityApi = createSolidEntityApi(fieldMetadata.relationModelSingularName);
+        const entityApi = createSolidEntityApi(fieldMetadata.relationCoModelSingularName);
         const { useLazyGetSolidEntitiesQuery } = entityApi;
         const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
 
@@ -406,7 +406,7 @@ export class SolidRelationManyToManyField implements ISolidField {
             handlePopupClose: (() => {
                 setvisibleCreateRelationEntity(false);
             }),
-            modelName: camelCase(this.fieldContext.fieldMetadata.relationModelSingularName)
+            modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName)
         }
 
         return (

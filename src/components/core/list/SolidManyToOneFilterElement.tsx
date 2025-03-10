@@ -7,7 +7,7 @@ import qs from "qs";
 
 export const SolidManyToOneFilterElement = ({ value, updateInputs, index, fieldMetadata }: any) => {
 
-    const entityApi = createSolidEntityApi(fieldMetadata.relationModelSingularName);
+    const entityApi = createSolidEntityApi(fieldMetadata.relationCoModelSingularName);
     const { useLazyGetSolidEntitiesQuery } = entityApi;
     const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
 
