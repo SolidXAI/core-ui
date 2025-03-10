@@ -43,6 +43,13 @@ export class SolidIntegerField implements ISolidField {
         } else {
             schema = schema.nullable(); // Allow null when not required
         }
+        // 2. length (min/max)
+        if (fieldMetadata.min && fieldMetadata.min > 0) {
+            schema = schema.min(fieldMetadata.min, `${fieldLabel} should be at-least ${fieldMetadata.min} characters long.`);
+        }
+        if (fieldMetadata.max && fieldMetadata.max > 0) {
+            schema = schema.max(fieldMetadata.max, `${fieldLabel} should not be more than ${fieldMetadata.max} characters long.`);
+        }
         return schema;
     }
 

@@ -543,7 +543,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const {
         data: solidFormViewData,
         isLoading: solidFormViewDataIsLoading,
-    } = useGetSolidEntityByIdQuery({ id: params.id, qs: formViewDataQs }, { skip: !solidFormViewMetaData || params.id === 'new' });
+        refetch: refetchSolidFormViewData,
+    } = useGetSolidEntityByIdQuery({ id: params.id, qs: formViewDataQs });
+    useEffect(()=>{
+        refetchSolidFormViewData()
+    },[formViewDataQs])
+
+
     useEffect(() => {
         if (solidFormViewData) {
             setInitialEntityData(solidFormViewData.data);
