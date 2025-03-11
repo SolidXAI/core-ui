@@ -175,8 +175,9 @@ const authProviders: NextAuthOptions = {
     callbacks: {
         // @ts-ignore
         jwt: async ({ token, user }) => {
-            if (Date.now() >= (token.accessTokenExpires as number)) {
-                return refreshAccessToken(token); // Call the refresh token function
+            const bufferTime = 60000;
+            if (Date.now() >= (token.accessTokenExpires as number - bufferTime)) {
+                return await refreshAccessToken(token); // Call the refresh token function
             }
 
             // If there is no user (first time login or session), we return the user data
