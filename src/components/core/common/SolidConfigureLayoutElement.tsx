@@ -5,7 +5,7 @@ import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
 import { Divider } from "primereact/divider";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { RadioButton } from "primereact/radiobutton";
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 
 interface FilterColumns {
     name: string;
@@ -15,9 +15,26 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
 
     // const [visible, setVisible] = useState<boolean>(false);
     const op = useRef(null);
-    const customizeLayout = useRef(null);
-    const [isOverlayOpen, setIsOverlayOpen] = useState(true);
+    const customizeLayout = useRef<OverlayPanel | null>(null);
+    const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+    useEffect(() => {
+        const handleClickOutside = (event: MouseEvent) => {
+            if (
+                customizeLayout.current &&
+                !customizeLayout.current.getElement()?.contains(event.target as Node)
+            ) {
+                setIsOverlayOpen(false);
+            }
+        };
 
+        if (isOverlayOpen) {
+            document.addEventListener("click", handleClickOutside);
+        } else {
+            document.removeEventListener("click", handleClickOutside);
+        }
+
+        return () => document.removeEventListener("click", handleClickOutside);
+    }, [isOverlayOpen])
     const categories: FilterColumns[] = [
         { name: 'ID', key: 'A' },
         { name: 'Tracker Date', key: 'M' },
@@ -48,63 +65,61 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                 // @ts-ignore
                 onClick={(e) => op.current.toggle(e)}
             />
-            <OverlayPanel ref={op}>
+            <OverlayPanel ref={op} className="listview-cogwheel-panel">
                 <div className="p-2">
                     <div className="flex flex-column">
                         <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2" />
                         <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2" />
-                        <Button text icon='pi pi-share-alt' label="Share" size="small" severity="secondary" className="text-left gap-2" />
+                        {/* <Button text icon='pi pi-share-alt' label="Share" size="small" severity="secondary" className="text-left gap-2" /> */}
+                        {/* {viewData?.data?.solidView?.model?.enableSoftDelete &&
+                            <Button text severity="secondary" size="small" className="text-left w-13rem" label={showArchived ? "Hide Archived Records" : "Show Archived Records"} iconPos="left" onClick={() => { setShowArchived(!showArchived); }} />
+                        } */}
+                        {viewData?.data?.solidView?.model?.enableSoftDelete && (
+                            <div className="flex align-items-center px-3 gap-2 mt-2 mb-1">
+                                <Checkbox
+                                    inputId="showArchived"
+                                    checked={showArchived}
+                                    onChange={() => setShowArchived(!showArchived)}
+                                />
+                                <label htmlFor="showArchived" className="ml-2 text-base solid-secondary-text-color">
+                                    Show Archived Records
+                                </label>
+                            </div>
+                        )}
+
+
                     </div>
                 </div>
                 <Divider className="m-0" />
                 <div className="p-2 position-relative flex flex-column gap-1">
-                    {viewData?.data?.solidView?.model?.enableSoftDelete &&
-                        <Button text size="small" className="text-left w-13rem" label={showArchived ? "Hide Archived Records" : "Show Archived Records"} iconPos="left" onClick={() => { setShowArchived(!showArchived); }} />
-                    }
                     <Button
                         icon='pi pi-sliders-h'
                         label="Customize Layout"
+                        severity={isOverlayOpen ? undefined : "secondary"}
                         size="small"
-                        text={isOverlayOpen}
-                        className="text-left gap-2 w-13rem"
+                        text={isOverlayOpen ? false : true}
+                        className="text-left gap-2 w-full"
                         // @ts-ignore
-                        onClick={(e) => customizeLayout.current.toggle(e)}
-                    // onMouseEnter={(e) => customizeLayout.current.show(e)}
-                    />
-                    <p className="mt-3 mb-1 font-medium" style={{ color: 'var(--gray-400)' }}>Saved Layouts</p>
-                    <Button text severity="secondary" label="Diet Tracking" icon="pi pi-plus" size="small" />
+                        onClick={(e) => {
+                            customizeLayout.current?.toggle(e);
+                            setIsOverlayOpen((prev) => !prev); // ✅ Ensure state updates when toggled
+                        }}
+                    >
+                        <i className="pi pi-chevron-right text-sm"></i>
+                    </Button>
+                    {/* <p className="mt-3 mb-1 font-medium" style={{ color: 'var(--gray-400)' }}>Saved Layouts</p> */}
+                    {/* <Button text severity="secondary" label="Diet Tracking" icon="pi pi-plus" size="small" /> */}
                     <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}
-                        onShow={() => setIsOverlayOpen(false)}
-                        onHide={() => setIsOverlayOpen(true)}
+                        onShow={() => setIsOverlayOpen(true)}
+                        onHide={() => {
+                            console.log("Overlay closed");
+                            setTimeout(() => setIsOverlayOpen(false), 50); // ✅ Ensure state updates
+                        }}
                     >
                         <div className="solid-layout-accordion">
                             <Accordion multiple expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up">
                                 <AccordionTab header="Switch Type">
-                                    <div className="flex flex-column gap-1">
-                                        {sizeOptions.map((option: any) => (
-                                            <div key={option.value} className={`flex align-items-center ${option.value === size ? 'solid-active-view' : 'solid-view'}`}>
-                                                <RadioButton
-                                                    inputId={option.value}
-                                                    name="sizes"
-                                                    value={option.value}
-                                                    onChange={(e) => setSize(e.value)}
-                                                    checked={option.value === size}
-                                                />
-                                                <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
-                                                    {option.label}
-                                                    <img
-                                                        src={option.image}
-                                                        alt={option.value}
-                                                        className='img-fluid position-relative'
-                                                        style={{ width: '2.75rem' }}
-                                                    />
-                                                </label>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </AccordionTab>
-                                <AccordionTab header="List">
-                                    <div className="flex flex-column gap-1">
+                                    <div className="flex flex-column gap-1 p-1">
                                         {viewModes.map((option: any) => (
                                             <div key={option.value} className={`flex align-items-center ${option.value === view ? 'solid-active-view' : 'solid-view'}`}>
                                                 <RadioButton
@@ -127,6 +142,31 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                                         ))}
                                     </div>
                                 </AccordionTab>
+                                <AccordionTab header="List">
+                                    <div className="flex flex-column gap-1 p-1">
+                                        <p className="m-0 px-3">Row Spacing</p>
+                                        {sizeOptions.map((option: any) => (
+                                            <div key={option.value} className={`flex align-items-center ${option.value === size ? 'solid-active-view' : 'solid-view'}`}>
+                                                <RadioButton
+                                                    inputId={option.value}
+                                                    name="sizes"
+                                                    value={option.value}
+                                                    onChange={(e) => setSize(e.value)}
+                                                    checked={option.value === size}
+                                                />
+                                                <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
+                                                    {option.label}
+                                                    <img
+                                                        src={option.image}
+                                                        alt={option.value}
+                                                        className='img-fluid position-relative'
+                                                        style={{ width: '2.75rem' }}
+                                                    />
+                                                </label>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </AccordionTab>
                             </Accordion>
                         </div>
                         <Divider className="m-0" />
@@ -134,7 +174,7 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                             <p className="m-0">Column Selector</p>
                             {/* <Button text label="Save Layout" icon="pi pi-plus" /> */}
                         </div>
-                        <div className="flex flex-column gap-3 p-3">
+                        <div className="flex flex-column gap-3 p-3 cogwheel-column-filter">
                             {categories.map((category) => {
                                 return (
                                     <div key={category.key} className="flex align-items-center gap-1">
@@ -144,8 +184,9 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                                             value={category}
                                             onChange={onCategoryChange}
                                             checked={selectedCategories.some((item) => item.key === category.key)}
+                                            className="text-base"
                                         />
-                                        <label htmlFor={category.key} className="ml-2">
+                                        <label htmlFor={category.key} className="ml-2 text-base">
                                             {category.name}
                                         </label>
                                     </div>

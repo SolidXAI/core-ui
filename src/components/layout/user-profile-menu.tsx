@@ -86,15 +86,14 @@ const UserProfileMenu = () => {
             <Button
               text
               severity="secondary"
-              className="flex align-items-center gap-2"
-              icon={
-                <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
-                  <path d="M3.75 15.75C3.3375 15.75 2.98438 15.6031 2.69063 15.3094C2.39687 15.0156 2.25 14.6625 2.25 14.25V3.75C2.25 3.3375 2.39687 2.98438 2.69063 2.69063C2.98438 2.39687 3.3375 2.25 3.75 2.25H9V3.75H3.75V14.25H9V15.75H3.75ZM12 12.75L10.9688 11.6625L12.8813 9.75H6.75V8.25H12.8813L10.9688 6.3375L12 5.25L15.75 9L12 12.75Z" fill="#F04A4A" />
-                </svg>
-              }
+              className="flex align-items-center gap-2 w-full px-3"
               onClick={() => setConfirmLogout(true)}
-              label="Logout"
-            />
+            >
+              <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
+                <path d="M3.75 15.75C3.3375 15.75 2.98438 15.6031 2.69063 15.3094C2.39687 15.0156 2.25 14.6625 2.25 14.25V3.75C2.25 3.3375 2.39687 2.98438 2.69063 2.69063C2.98438 2.39687 3.3375 2.25 3.75 2.25H9V3.75H3.75V14.25H9V15.75H3.75ZM12 12.75L10.9688 11.6625L12.8813 9.75H6.75V8.25H12.8813L10.9688 6.3375L12 5.25L15.75 9L12 12.75Z" fill="#F04A4A" />
+              </svg>
+              <span className="p-button-label flex-none ">Logout</span>
+            </Button>
           </div>
         </OverlayPanel>
       </div>

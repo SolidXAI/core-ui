@@ -119,7 +119,7 @@ const SolidInitiateRegisterOtp = () => {
                                 </div>
                                 <div className="mt-4">
                                     <Button type="submit" className="w-full font-light auth-submit-button" label="Verify" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
-                                    <Button type="button" label="Back" className="w-full auth-back-button text-center" link onClick={() => (window.location.href = '/auth/login')} />
+                                    <Button type="button" label="Back" className="w-full auth-back-button text-center mt-1" link onClick={() => (window.location.href = '/auth/login')} />
                                 </div>
                             </Form>
                         )}

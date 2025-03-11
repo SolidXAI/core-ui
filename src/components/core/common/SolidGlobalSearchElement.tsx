@@ -340,7 +340,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 // }}
                 />
             </div>
-            <OverlayPanel ref={op} className="solid-custom-overlay" style={{ minWidth: 378 }}>
+            <OverlayPanel ref={op} className="solid-custom-overlay" style={{ minWidth: 405 }}>
                 {inputValue ? (
                     <>
                         <div className="custom-filter-search-options px-2 py-2 flex flex-column">
@@ -353,6 +353,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                                         onClick={() => handleAddChip(value?.attrs?.name)}
                                         text
                                         severity="secondary"
+                                        size="small"
                                     >
                                         Search <strong>{value?.attrs?.name}</strong> for :
                                         <span className="font-bold" style={{ color: '#000' }}>{inputValue}</span>
@@ -364,12 +365,12 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     </>
                 ) :
                     <>
-                        <div className="p-3">Search Here...</div>
+                        <div className="p-3 text-base">Search Here...</div>
                         <Divider className="m-0" />
                     </>
                 }
                 <div className="px-2 py-1">
-                    <Button text size="small" label="Custom Filter" iconPos="left" icon='pi pi-plus' onClick={() => setShowGlobalSearchElement(true)} />
+                    <Button text size="small" label="Custom Filter" iconPos="left" icon='pi pi-plus' onClick={() => setShowGlobalSearchElement(true)} className="font-bold" />
                 </div>
                 <Divider className="m-0" />
             </OverlayPanel>
