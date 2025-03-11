@@ -63,6 +63,7 @@ export class SolidRelationOneToManyField implements ISolidField {
         const [formViewParams, setformViewParams] = useState<any>()
         const [refreshList, setRefreshList] = useState(false); // Added state for rerender
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const readOnlyPermission = this.fieldContext.readOnly;
 
 
         const handlePopupOpen = (id: any) => {
@@ -143,7 +144,8 @@ export class SolidRelationOneToManyField implements ISolidField {
                 {listViewParams &&
                     <SolidListView key={refreshList.toString()}  {...listViewParams} handlePopUpOpen={handlePopupOpen} />
                 }
-                {this.renderSolidFormEmbededView(visibleCreateRelationEntity, setvisibleCreateRelationEntity, formViewParams, handlePopupClose)}
+                {readOnlyPermission !== true &&
+                    this.renderSolidFormEmbededView(visibleCreateRelationEntity, setvisibleCreateRelationEntity, formViewParams, handlePopupClose)}
 
             </div>
         );

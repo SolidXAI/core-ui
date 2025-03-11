@@ -70,6 +70,7 @@ export class SolidBooleanField implements ISolidField {
         const booleanOptions = ["false", "true"];
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const readOnlyPermission = this.fieldContext.readOnly;
 
         useEffect(() => { formik.setFieldValue(fieldLayoutInfo.attrs.name, "false") }, [])
 
@@ -97,7 +98,7 @@ export class SolidBooleanField implements ISolidField {
                         value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                     /> */}
                     <SelectButton
-                        readOnly={formReadonly || fieldReadonly}
+                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                         disabled={formDisabled || fieldDisabled}
                         id={fieldLayoutInfo.attrs.name}
                         aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}

@@ -62,6 +62,7 @@ export class SolidRichTextField implements ISolidField {
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const readOnlyPermission = this.fieldContext.readOnly;
 
         const [text, setText] = useState();
 
@@ -82,7 +83,7 @@ export class SolidRichTextField implements ISolidField {
                         </label>
                     }
                     <Editor
-                        readOnly={formReadonly || fieldReadonly}
+                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                         disabled={formDisabled || fieldDisabled}
                         key={fieldLayoutInfo.attrs.name}  // React will re-render the component whenever this value changes
                         id={fieldLayoutInfo.attrs.name}

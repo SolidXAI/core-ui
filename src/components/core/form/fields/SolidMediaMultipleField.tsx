@@ -94,6 +94,7 @@ export class SolidMediaMultipleField implements ISolidField {
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const readOnlyPermission = this.fieldContext.readOnly;
 
         const [imagesPreview, setImagesPreview] = useState<Array<string | ArrayBuffer>>([]);
         const [isDeleteImageDialogVisible, setDeleteImageDialogVisible] = useState(false);

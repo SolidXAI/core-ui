@@ -137,6 +137,7 @@ export class SolidRelationManyToManyField implements ISolidField {
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const readOnlyPermission = this.fieldContext.readOnly;
 
         // auto complete specific code. 
         const entityApi = createSolidEntityApi(fieldMetadata.relationModelSingularName);
@@ -273,6 +274,7 @@ export class SolidRelationManyToManyField implements ISolidField {
                             return (
                                 <div key={a.label} className={`field col-6 flex gap-2 ${i >= 2 ? 'mt-3' : ''}`}>
                                     <Checkbox
+                                        readOnly={readOnlyPermission}
                                         inputId={a.label}
                                         checked={formik.values[fieldLayoutInfo.attrs.name].some((item: any) => item.label === a.label)}
                                         onChange={() => handleCheckboxChange(a)}
@@ -295,6 +297,7 @@ export class SolidRelationManyToManyField implements ISolidField {
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const readOnlyPermission = this.fieldContext.readOnly;
 
         // auto complete specific code. 
         const entityApi = createSolidEntityApi(fieldMetadata.relationModelSingularName);
@@ -369,7 +372,7 @@ export class SolidRelationManyToManyField implements ISolidField {
                 }
                 <div className="flex align-items-center gap-3">
                     <AutoComplete
-                        readOnly={readOnly}
+                        readOnly={readOnly || readOnlyPermission}
                         disabled={disabled}
                         multiple
                         {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
@@ -382,7 +385,7 @@ export class SolidRelationManyToManyField implements ISolidField {
                         onChange={formik.handleChange}
                         className="solid-standard-autocomplete w-full"
                     />
-                    {fieldLayoutInfo.attrs.inlineCreate === "true" &&
+                    {fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false && 
                         this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
                     }
                 </div>

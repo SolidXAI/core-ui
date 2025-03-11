@@ -64,6 +64,7 @@ export class SolidRelationManyToOneField implements ISolidField {
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const readOnlyPermission = this.fieldContext.readOnly;
         const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
 
         // auto complete specific code. 
@@ -117,8 +118,6 @@ export class SolidRelationManyToOneField implements ISolidField {
 
 
 
-        const disabled = fieldLayoutInfo.attrs?.disabled;
-        const readOnly = fieldLayoutInfo.attrs?.readOnly;
 
 
         const customCreateHandler = (values: any) => {
@@ -145,7 +144,7 @@ export class SolidRelationManyToOneField implements ISolidField {
                         </label>
                     }
                     <AutoComplete
-                        readOnly={formReadonly || fieldReadonly}
+                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                         disabled={formDisabled || fieldDisabled}
                         {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                         id={fieldLayoutInfo.attrs.name}
@@ -157,7 +156,7 @@ export class SolidRelationManyToOneField implements ISolidField {
                         onChange={formik.handleChange}
                         className="w-full solid-standard-autocomplete"
                     />
-                    {fieldLayoutInfo.attrs.inlineCreate === "true" &&
+                    {fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false &&
                         this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
                     }
                 </div>

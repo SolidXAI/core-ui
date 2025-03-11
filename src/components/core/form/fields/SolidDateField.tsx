@@ -53,6 +53,7 @@ export class SolidDateField implements ISolidField {
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const readOnlyPermission = this.fieldContext.readOnly;
 
         const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
         // const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
@@ -69,7 +70,7 @@ export class SolidDateField implements ISolidField {
                         </label>
                     }
                     <Calendar
-                        disabled={formDisabled || fieldDisabled}
+                        disabled={formDisabled || fieldDisabled || readOnlyPermission}
                         ref={calendarRef} // Attach ref to Calendar
                         id={fieldLayoutInfo.attrs.name}
                         aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}

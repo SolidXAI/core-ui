@@ -60,6 +60,7 @@ export class SolidDecimalField implements ISolidField {
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const readOnlyPermission = this.fieldContext.readOnly;
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
@@ -78,7 +79,7 @@ export class SolidDecimalField implements ISolidField {
                         </label>
                     }
                     <InputNumber
-                        readOnly={formReadonly || fieldReadonly}
+                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                         disabled={formDisabled || fieldDisabled}
                         id={fieldLayoutInfo.attrs.name}
                         minFractionDigits={2}

@@ -130,7 +130,7 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps): ISolidField 
 }
 
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
-const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName }: any) => {
+const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly }: any) => {
     const fieldContext: SolidFieldProps = {
         // field metadata - coming from the field-metadata table.
         fieldMetadata: fieldMetadata,
@@ -141,6 +141,7 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
         // complete form view metadata - this includes layout of the whole form & metadata about all fields in the corresponding model.
         solidFormViewMetaData: solidFormViewMetaData,
         modelName: modelName,
+        readOnly: readOnly
     }
     const solidField = fieldFactory(fieldMetadata?.type, fieldContext);
 
@@ -545,9 +546,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
         isLoading: solidFormViewDataIsLoading,
         refetch: refetchSolidFormViewData,
     } = useGetSolidEntityByIdQuery({ id: params.id, qs: formViewDataQs });
-    useEffect(()=>{
+    useEffect(() => {
         refetchSolidFormViewData()
-    },[formViewDataQs])
+    }, [formViewDataQs])
 
 
     useEffect(() => {
@@ -635,7 +636,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     // const fieldMetadata = solidFieldsMetadata[attrs.name];
                     const fieldMetadata = solidFormViewMetaData.data.solidFieldsMetadata[attrs.name];
 
-                    return <SolidField key={key} field={element} formik={formik} fieldMetadata={fieldMetadata} initialEntityData={solidFormViewData ? solidFormViewData.data : null} solidFormViewMetaData={solidFormViewMetaData} modelName={params.modelName} />;
+                    return <SolidField key={key} field={element} formik={formik} fieldMetadata={fieldMetadata} initialEntityData={solidFormViewData ? solidFormViewData.data : null} solidFormViewMetaData={solidFormViewMetaData} modelName={params.modelName} readOnly={!actionsAllowed.includes(`${updatePermission(params.modelName)}`)} />;
                 }
                 case "notebook":
                     return <SolidNotebook key={key}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData))}</SolidNotebook>;
