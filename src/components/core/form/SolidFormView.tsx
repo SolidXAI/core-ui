@@ -703,8 +703,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         size="small"
                         className="bg-primary-reverse p-0"
                         style={{
-                            height: 32,
-                            width: 32
+                            height: 33.06,
+                            width: 33.06
                         }}
                         onClick={(e) =>
                             // @ts-ignore 
@@ -900,11 +900,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             </>
                         )}
                     </div>
-                    {params.embeded !== true &&
+                    {/* {params.embeded !== true &&
                         <div className="solid-form-stepper">
                             <SolidFormStepper />
                         </div>
-                    }
+                    } */}
                     <div className="p-4 solid-form-content">
                         {renderFormDynamically(formViewMetaData)}
                     </div>

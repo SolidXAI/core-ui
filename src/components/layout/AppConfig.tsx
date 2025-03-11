@@ -42,7 +42,7 @@ const AppConfig = (props: AppConfigProps) => {
 
     const applyScale = () => {
         // document.documentElement.style.fontSize = layoutConfig.scale + 'px';
-        document.documentElement.style.fontSize = 14 + 'px';
+        document.documentElement.style.fontSize = 15 + 'px';
     };
 
     useEffect(() => {

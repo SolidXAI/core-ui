@@ -264,9 +264,9 @@ const CreateUser = ({ data, params }: any) => {
             </>
           )}
         </div>
-        <div className="solid-form-stepper">
+        {/* <div className="solid-form-stepper">
           <SolidFormStepper />
-        </div>
+        </div> */}
         <div className="p-4 solid-form-content">
           <div className="grid">
             <div className="col-8 mx-auto">

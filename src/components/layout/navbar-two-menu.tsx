@@ -18,7 +18,7 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
     // currentItem === activeParentPath ?' p-highlight' : ''
         return (
             <div key={item?.key} className={`flex align-items-center cursor-pointer menuHead px-3 ${isSettingsPage ? ' p-highlight' : ''}`} onClick={options.onClick}>
-                <Link href={item?.url ? item?.url : '#'} className="w-full flex justify-content-between font-medium">
+                <Link href={item?.url ? item?.url : '#'} className="w-full flex justify-content-between font-normal">
                     <div className="flex align-items-center gap-3">
                         <span className={item.icon} />
                         <span className="">

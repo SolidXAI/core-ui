@@ -12,6 +12,9 @@ import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { FileReaderExt } from "@/components/common/FileReaderExt";
 import { ProgressBar } from "primereact/progressbar";
+import getAcceptedFileTypes from "@/helpers/getAcceptedFileTypes";
+import Link from "next/link";
+import { downloadMediaFile } from "@/helpers/downloadMediaFile";
 export class SolidMediaMultipleField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
@@ -96,15 +99,14 @@ export class SolidMediaMultipleField implements ISolidField {
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
         const readOnlyPermission = this.fieldContext.readOnly;
 
-        const [imagesPreview, setImagesPreview] = useState<Array<string | ArrayBuffer>>([]);
         const [isDeleteImageDialogVisible, setDeleteImageDialogVisible] = useState(false);
         const [imageToBeDeletedData, setImageToBeDeletedData] = useState<any>();
-        const [uploadProgress, setUploadProgress] = useState<Record<string, number>>({});
         const [uploadCompleted, setUploadCompleted] = useState<Record<string, boolean>>({});
-        const [fileDetails, setFileDetails] = useState<{ name: string; type: string; size: number, id: number }[]>([]);
+        const [fileDetails, setFileDetails] = useState<{ name: string; type: string; size: number, id: number, fileUrl: string }[]>([]);
         const [uploadedSize, setUploadedSize] = useState<Record<string, string>>({});
         const [totalSize, setTotalSize] = useState<Record<string, string>>({});
         const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
+
 
         const formatFileSize = (size: number) => {
             return size >= 1024 * 1024
@@ -120,32 +122,29 @@ export class SolidMediaMultipleField implements ISolidField {
             const fieldValue = formik?.values[fieldLayoutInfo.attrs.name];
             if (Array.isArray(fieldValue) && fieldValue.length > 0) {
                 const urls: string[] = [];
-                const details: { name: string; type: string; size: number, id: any }[] = [];
-                const progress: Record<string, number> = {};
+                const details: { name: string; type: string; size: number, id: any, fileUrl: string }[] = [];
                 const completed: Record<string, boolean> = {};
 
                 fieldValue.forEach((file: File | any) => {
                     if (file instanceof File) {
                         // New file (from local upload)
                         urls.push(URL.createObjectURL(file));
-                        details.push({ name: file.name, type: file.type, size: file.size, id: `${file.name}-${file.size}`, });
+                        details.push({ name: file.name, type: file.type, size: file.size, id: `${file.name}-${file.size}`, fileUrl: "" });
                     } else if (typeof file === "object" && file._full_url) {
                         urls.push(file._full_url);
                         details.push({
                             name: file.relativeUri || "Unknown", // Use relativeUri or fallback
                             type: file.mediaStorageProviderMetadata?.type || "Unknown", // Extract type if available
                             size: 0, // API doesn't provide size, set 0 or fetch from metadata if available
-                            id: file.id
+                            id: file.id,
+                            fileUrl: file._full_url
                         });
                     }
                 });
                 details.forEach(file => {
-                    progress[`${file.name}-${file.size}`] = 100;
                     completed[`${file.name}-${file.size}`] = true;
                 });
-                setUploadProgress(progress);
                 setUploadCompleted(completed);
-                setImagesPreview(urls);
                 setFileDetails(details);
             }
         }, [formik.values, fieldLayoutInfo.attrs.name]);
@@ -154,7 +153,6 @@ export class SolidMediaMultipleField implements ISolidField {
             if (!acceptedFiles.length) return;
 
             const newFileDetails = [...fileDetails];
-            const newUploadProgress = { ...uploadProgress };
             const newUploadedSize = { ...uploadedSize };
             const newTotalSize = { ...totalSize };
             const newUploadCompleted = { ...uploadCompleted };
@@ -162,8 +160,7 @@ export class SolidMediaMultipleField implements ISolidField {
             acceptedFiles.forEach((file) => {
                 const fileId = `${file.name}-${file.size}`; // Unique identifier for tracking each file
 
-                newFileDetails.push({ name: file.name, type: file.type, size: file.size, id: file.id });
-                newUploadProgress[fileId] = 0;
+                newFileDetails.push({ name: file.name, type: file.type, size: file.size, id: file.id, fileUrl: file._full_url });
                 newUploadedSize[fileId] = "0 KB";
                 newTotalSize[fileId] = formatFileSize(file.size);
                 newUploadCompleted[fileId] = false;
@@ -171,20 +168,16 @@ export class SolidMediaMultipleField implements ISolidField {
                 const reader = new FileReader();
 
                 reader.onloadstart = () => {
-                    setUploadProgress((prev) => ({ ...prev, [fileId]: 0 }));
                     setUploadedSize((prev) => ({ ...prev, [fileId]: "0 KB" }));
                 };
 
                 reader.onprogress = (event) => {
                     if (event.loaded && event.total) {
-                        const percent = Math.round((event.loaded / event.total) * 100);
-                        setUploadProgress((prev) => ({ ...prev, [fileId]: percent }));
                         setUploadedSize((prev) => ({ ...prev, [fileId]: formatFileSize(event.loaded) }));
                     }
                 };
 
                 reader.onloadend = () => {
-                    setUploadProgress((prev) => ({ ...prev, [fileId]: 100 }));
                     setUploadCompleted((prev) => ({ ...prev, [fileId]: true }));
                     setUploadedSize((prev) => ({ ...prev, [fileId]: newTotalSize[fileId] }));
                 };
@@ -193,7 +186,6 @@ export class SolidMediaMultipleField implements ISolidField {
             });
 
             setFileDetails(newFileDetails);
-            setUploadProgress(newUploadProgress);
             setUploadedSize(newUploadedSize);
             setTotalSize(newTotalSize);
             setUploadCompleted(newUploadCompleted);
@@ -204,11 +196,6 @@ export class SolidMediaMultipleField implements ISolidField {
 
         const handleCancelUpload = (fileId: string) => {
             setFileDetails((prev) => prev.filter((file) => fileId !== `${file.name}-${file.size}`));
-            setUploadProgress((prev) => {
-                const newProgress = { ...prev };
-                delete newProgress[fileId];
-                return newProgress;
-            });
             setUploadCompleted((prev) => {
                 const newCompleted = { ...prev };
                 delete newCompleted[fileId];
@@ -235,13 +222,47 @@ export class SolidMediaMultipleField implements ISolidField {
 
         const deleteFile = () => {
             if (selectedFileId && imageToBeDeletedData) {
-                handleCancelUpload(selectedFileId);
-                deleteMedia(imageToBeDeletedData);
+                // Remove file from UI before making API call
+                setFileDetails((prev) => prev.filter((file) => `${file.name}-${file.size}` !== selectedFileId));
+
+                deleteMedia(imageToBeDeletedData)
+                    .unwrap()
+                    .then(() => {
+                        // Ensure UI state updates only after successful deletion
+                        setUploadCompleted((prev) => {
+                            const newCompleted = { ...prev };
+                            delete newCompleted[selectedFileId];
+                            return newCompleted;
+                        });
+
+                        setUploadedSize((prev) => {
+                            const newSize = { ...prev };
+                            delete newSize[selectedFileId];
+                            return newSize;
+                        });
+
+                        setTotalSize((prev) => {
+                            const newSize = { ...prev };
+                            delete newSize[selectedFileId];
+                            return newSize;
+                        });
+
+                        // Update form state
+                        formik.setFieldValue(
+                            fieldLayoutInfo.attrs.name,
+                            fileDetails.filter((file) => `${file.name}-${file.size}` !== selectedFileId)
+                        );
+                    })
+                    .catch((error) => {
+                        console.error("Error deleting file:", error);
+                    });
+
                 setDeleteImageDialogVisible(false);
-                setShowAllFiles(false)
+                setShowAllFiles(false);
                 setSelectedFileId(null);
             }
         };
+
 
         const {
             getRootProps,
@@ -249,28 +270,11 @@ export class SolidMediaMultipleField implements ISolidField {
             isDragActive,
         } = useDropzone({
             onDrop: handleDropImages,
-            accept: {
-                "image/jpeg": [],
-                "image/png": [],
-            },
-            maxSize: 2 * 1024 * 1024, // 2MB
+            accept: getAcceptedFileTypes(fieldMetadata.mediaTypes),
+            maxSize: fieldMetadata.mediaMaxSizeKb * 1024,
         });
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-
-
-        const imageFormatHandler = (preview: any) => {
-            if (typeof preview === 'string') {
-                return preview; // Existing URLs
-            }
-            if (preview instanceof File) {
-                return URL.createObjectURL(preview); // Generate preview URL for File
-            }
-            if (typeof preview === "object") {
-                return preview._full_url
-            }
-            return ""; // Fallback for invalid cases
-        }
 
         const [isShowAllFiles, setShowAllFiles] = useState(false);
         return (
@@ -287,7 +291,10 @@ export class SolidMediaMultipleField implements ISolidField {
                         className="solid-dropzone-wrapper"
                     >
                         <input {...getInputProps()} />
-                        <DropzonePlaceholder />
+                        <DropzonePlaceholder
+                            mediaTypes={fieldMetadata.mediaTypes}
+                            mediaMaxSizeKb={fieldMetadata.mediaMaxSizeKb}
+                        />
                     </div>
                 </div>
                 {fileDetails.length > 0 &&
@@ -296,17 +303,39 @@ export class SolidMediaMultipleField implements ISolidField {
                             <FileReaderExt fileDetails={fileDetails[0]} />
                             <div className="w-full flex flex-column gap-1">
                                 <div className="flex align-items-center justify-content-between">
-                                    <div className="font-bold">{fileDetails[0].name}</div>
-                                    <div
-                                        className="cancel-upload-button"
-                                        onClick={() => confirmDeleteFile(`${fileDetails[0].name}-${fileDetails[0].size}`, fileDetails[0].id)}
-                                    >
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 6 6" fill="none">
-                                            <path d="M0.6 6L0 5.4L2.4 3L0 0.6L0.6 0L3 2.4L5.4 0L6 0.6L3.6 3L6 5.4L5.4 6L3 3.6L0.6 6Z" fill="#4B4D52" />
-                                        </svg>
+                                    <Link className="font-bold w-11" href={process.env.NEXT_PUBLIC_BACKEND_API_URL + `/${fileDetails[0]?.fileUrl}`} target="_blank">{fileDetails[0].name}</Link>
+                                    <div className="flex align-items-center gap-2">
+                                        <div>
+                                            <Button
+                                                type="button"
+                                                text
+                                                icon={"pi pi-download"}
+                                                size="small"
+                                                style={{
+                                                    height: 16,
+                                                    width: 16
+                                                }}
+                                                onClick={() => downloadMediaFile(fileDetails[0]?.fileUrl, fileDetails[0]?.name)}
+                                            />
+                                        </div>
+                                        <div>
+                                            <Button
+                                                type="button"
+                                                text
+                                                icon={"pi pi-times"}
+                                                size="small"
+                                                severity="secondary"
+                                                // className="p-2"
+                                                style={{
+                                                    height: 16,
+                                                    width: 16
+                                                }}
+                                                onClick={() => confirmDeleteFile(`${fileDetails[0].name}-${fileDetails[0].size}`, fileDetails[0].id)}
+                                            />
+                                        </div>
                                     </div>
                                 </div>
-                                {uploadCompleted[`${fileDetails[0].name}-${fileDetails[0].size}`] ? (
+                                {uploadCompleted[`${fileDetails[0].name}-${fileDetails[0].size}`] && (
                                     <div className="flex align-items-center gap-2 text-sm">
                                         {totalSize[`${fileDetails[0].name}-${fileDetails[0].size}`]} of {totalSize[`${fileDetails[0].name}-${fileDetails[0].size}`]}
                                         <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
@@ -314,25 +343,12 @@ export class SolidMediaMultipleField implements ISolidField {
                                         </svg>
                                         Completed
                                     </div>
-                                ) : (
-                                    <div className="flex align-items-center gap-2 text-sm">
-                                        {uploadedSize[`${fileDetails[0].name}-${fileDetails[0].size}`]} of {totalSize[`${fileDetails[0].name}-${fileDetails[0].size}`]}
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                            <path d="M7.375 10.5V5.40625L5.75 7.03125L4.875 6.125L8 3L11.125 6.125L10.25 7.03125L8.625 5.40625V10.5H7.375ZM4.25 13C3.90625 13 3.61198 12.8776 3.36719 12.6328C3.1224 12.388 3 12.0938 3 11.75V9.875H4.25V11.75H11.75V9.875H13V11.75C13 12.0938 12.8776 12.388 12.6328 12.6328C12.388 12.8776 12.0938 13 11.75 13H4.25Z" fill="black" />
-                                        </svg>
-                                        Uploading {uploadProgress[`${fileDetails[0].name}-${fileDetails[0].size}`]}% Completed
-                                    </div>
                                 )}
                             </div>
                         </div>
-                        <ProgressBar
-                            value={uploadProgress[`${fileDetails[0].name}-${fileDetails[0].size}`]}
-                            showValue={false}
-                            style={{ height: 4 }}
-                            className="mt-2"
-                        />
                     </div>
                 }
+
 
                 {fileDetails.length > 1 &&
                     <div className="flex align-items-center">
@@ -361,17 +377,39 @@ export class SolidMediaMultipleField implements ISolidField {
                                         <FileReaderExt fileDetails={file} />
                                         <div className="w-full flex flex-column gap-1">
                                             <div className="flex align-items-center justify-content-between">
-                                                <div className="font-bold">{file.name}</div>
-                                                <div
-                                                    className="cancel-upload-button"
-                                                    onClick={() => confirmDeleteFile(fileId, file?.id)}
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 6 6" fill="none">
-                                                        <path d="M0.6 6L0 5.4L2.4 3L0 0.6L0.6 0L3 2.4L5.4 0L6 0.6L3.6 3L6 5.4L5.4 6L3 3.6L0.6 6Z" fill="#4B4D52" />
-                                                    </svg>
+                                                <Link className="font-bold w-11" href={process.env.NEXT_PUBLIC_BACKEND_API_URL + `/${file?.fileUrl}`} target="_blank">{file.name}</Link>
+                                                <div className="flex align-items-center gap-2">
+                                                    <div>
+                                                        <Button
+                                                            type="button"
+                                                            text
+                                                            icon={"pi pi-download"}
+                                                            size="small"
+                                                            style={{
+                                                                height: 16,
+                                                                width: 16
+                                                            }}
+                                                            onClick={() => downloadMediaFile(file?.fileUrl, file?.name)}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Button
+                                                            type="button"
+                                                            text
+                                                            icon={"pi pi-times"}
+                                                            size="small"
+                                                            severity="secondary"
+                                                            // className="p-2"
+                                                            style={{
+                                                                height: 16,
+                                                                width: 16
+                                                            }}
+                                                            onClick={() => confirmDeleteFile(fileId, file?.id)}
+                                                        />
+                                                    </div>
                                                 </div>
                                             </div>
-                                            {uploadCompleted[fileId] ? (
+                                            {uploadCompleted[fileId] && (
                                                 <div className="flex align-items-center gap-2 text-sm">
                                                     {totalSize[fileId]} of {totalSize[fileId]}
                                                     <svg xmlns="http://www.w3.org/2000/svg" width="4" height="4" viewBox="0 0 4 4" fill="none">
@@ -382,26 +420,9 @@ export class SolidMediaMultipleField implements ISolidField {
                                                     </svg>
                                                     Completed
                                                 </div>
-                                            ) : (
-                                                <div className="flex align-items-center gap-2 text-sm">
-                                                    {uploadedSize[fileId]} of {totalSize[fileId]}
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="4" height="4" viewBox="0 0 4 4" fill="none">
-                                                        <circle cx="2" cy="2" r="2" fill="#C1C1C1" />
-                                                    </svg>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                                        <path d="M7.375 10.5V5.40625L5.75 7.03125L4.875 6.125L8 3L11.125 6.125L10.25 7.03125L8.625 5.40625V10.5H7.375ZM4.25 13C3.90625 13 3.61198 12.8776 3.36719 12.6328C3.1224 12.388 3 12.0938 3 11.75V9.875H4.25V11.75H11.75V9.875H13V11.75C13 12.0938 12.8776 12.388 12.6328 12.6328C12.388 12.8776 12.0938 13 11.75 13H4.25Z" fill="black" />
-                                                    </svg>
-                                                    Uploading {uploadProgress[fileId]}% Completed
-                                                </div>
                                             )}
                                         </div>
                                     </div>
-                                    <ProgressBar
-                                        value={uploadProgress[fileId]}
-                                        showValue={false}
-                                        style={{ height: 4 }}
-                                        className="mt-2"
-                                    />
                                 </div>
                             );
                         })
