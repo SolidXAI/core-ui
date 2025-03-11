@@ -68,6 +68,8 @@ export class SolidShortTextField implements ISolidField {
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
+        const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
         const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
@@ -79,11 +81,13 @@ export class SolidShortTextField implements ISolidField {
         return (
             <div className={className}>
                 <div className="flex flex-column gap-2 mt-4">
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                        &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
+                    {showFieldLabel != false &&
+                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                            &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
 
-                        {/* &nbsp;   {fieldDescription &&  <span  className="form_field_help_text">`(${fieldDescription})` </span>} */}
-                    </label>
+                            {/* &nbsp;   {fieldDescription &&  <span  className="form_field_help_text">`(${fieldDescription})` </span>} */}
+                        </label>
+                    }
                     <InputText
                         readOnly={formReadonly || fieldReadonly}
                         disabled={formDisabled || fieldDisabled}

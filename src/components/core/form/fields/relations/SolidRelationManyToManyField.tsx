@@ -136,6 +136,7 @@ export class SolidRelationManyToManyField implements ISolidField {
         const fieldLayoutInfo = this.fieldContext.field;
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+        const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
 
         // auto complete specific code. 
         const entityApi = createSolidEntityApi(fieldMetadata.relationCoModelSingularName);
@@ -235,9 +236,11 @@ export class SolidRelationManyToManyField implements ISolidField {
             return (
                 <div className={className}>
                     <div className="flex align-items-center gap-3">
-                        <label className="form-field-label">
-                            {capitalize(fieldLayoutInfo.attrs.name)}
-                        </label>
+                        {showFieldLabel != false &&
+                            <label className="form-field-label">
+                                {capitalize(fieldLayoutInfo.attrs.name)}
+                            </label>
+                        }
                         {fieldLayoutInfo.attrs.inlineCreate === "true" &&
                             this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
                         }
@@ -291,6 +294,7 @@ export class SolidRelationManyToManyField implements ISolidField {
         const fieldLayoutInfo = this.fieldContext.field;
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+        const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
 
         // auto complete specific code. 
         const entityApi = createSolidEntityApi(fieldMetadata.relationCoModelSingularName);
@@ -358,29 +362,29 @@ export class SolidRelationManyToManyField implements ISolidField {
 
         return (
             <div className={className}>
-                <div className="flex flex-column gap-2 mt-4">
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-
+                {showFieldLabel != false &&
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
+                        {fieldLabel}
                     </label>
-                    <div className="flex align-items-center gap-3">
-                        <AutoComplete
-                            readOnly={readOnly}
-                            disabled={disabled}
-                            multiple
-                            {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
-                            id={fieldLayoutInfo.attrs.name}
-                            field="label"
-                            value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                            dropdown
-                            suggestions={autoCompleteItems}
-                            completeMethod={autoCompleteSearch}
-                            onChange={formik.handleChange}
-                            className="solid-standard-autocomplete w-full"
-                        />
-                        {fieldLayoutInfo.attrs.inlineCreate === "true" &&
-                            this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
-                        }
-                    </div>
+                }
+                <div className="flex align-items-center gap-3">
+                    <AutoComplete
+                        readOnly={readOnly}
+                        disabled={disabled}
+                        multiple
+                        {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
+                        id={fieldLayoutInfo.attrs.name}
+                        field="label"
+                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                        dropdown
+                        suggestions={autoCompleteItems}
+                        completeMethod={autoCompleteSearch}
+                        onChange={formik.handleChange}
+                        className="solid-standard-autocomplete w-full"
+                    />
+                    {fieldLayoutInfo.attrs.inlineCreate === "true" &&
+                        this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
+                    }
                 </div>
             </div>
         );

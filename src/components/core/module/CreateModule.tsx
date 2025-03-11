@@ -208,7 +208,7 @@ const CreateModule = ({ data }: any) => {
     if (data) {
       setmenuIconPreview(`${process.env.API_URL}/${data.menuIconUrl}`);
 
-      const fileName = data.menuIconUrl.split("/").pop(); // Extract filename from URL
+      const fileName = data?.menuIconUrl?.split("/").pop(); // Extract filename from URL
       setFileDetails({ name: fileName || "Unknown File", type: "Uploaded File" });
 
       // Set the upload progress to 100% since the file is already uploaded
@@ -340,8 +340,8 @@ const CreateModule = ({ data }: any) => {
           size="small"
           className="bg-primary-reverse p-0"
           style={{
-            height: 32,
-            width: 32
+            height: 33.06,
+            width: 33.06
           }}
           onClick={(e) =>
             // @ts-ignore 
@@ -414,9 +414,9 @@ const CreateModule = ({ data }: any) => {
             </>
           }
         </div>
-        <div className="solid-form-stepper">
+        {/* <div className="solid-form-stepper">
           <SolidFormStepper />
-        </div>
+        </div> */}
         <div className="p-4 solid-form-content">
           <p className="form-wrapper-heading text-base">Basic Info</p>
           <div className="formgrid grid">
