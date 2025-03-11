@@ -86,7 +86,7 @@ export class SolidRelationOneToManyField implements ISolidField {
             const lisviewparams = {
                 moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
                 modelName: camelCase(this.fieldContext.fieldMetadata.relationModelSingularName),
-                inlineCreate: true,
+                inlineCreate: readOnlyPermission === false ?  true : false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
                 embeded: true
             }
@@ -99,7 +99,7 @@ export class SolidRelationOneToManyField implements ISolidField {
             const listviewparams = {
                 moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
                 modelName: camelCase(this.fieldContext.fieldMetadata.relationModelSingularName),
-                inlineCreate: true,
+                inlineCreate: readOnlyPermission === false ?  true : false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
                 embeded: true,
                 customFilter: {

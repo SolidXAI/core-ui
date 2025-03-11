@@ -13,6 +13,7 @@ import * as Yup from 'yup';
 import { Schema } from "yup";
 import SolidFormView from "../../SolidFormView";
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
+import { useRouter } from "next/router";
 
 
 
@@ -137,7 +138,11 @@ export class SolidRelationManyToManyField implements ISolidField {
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const router = useRouter();
+        console.log("router",router);
+        
         const readOnlyPermission = this.fieldContext.readOnly;
+
 
         // auto complete specific code. 
         const entityApi = createSolidEntityApi(fieldMetadata.relationModelSingularName);
@@ -373,13 +378,13 @@ export class SolidRelationManyToManyField implements ISolidField {
                 <div className="flex align-items-center gap-3">
                     <AutoComplete
                         readOnly={readOnly || readOnlyPermission}
-                        disabled={disabled}
+                        disabled={disabled || readOnlyPermission}
                         multiple
                         {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                         id={fieldLayoutInfo.attrs.name}
                         field="label"
                         value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                        dropdown
+                        dropdown={!readOnlyPermission}
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}
                         onChange={formik.handleChange}

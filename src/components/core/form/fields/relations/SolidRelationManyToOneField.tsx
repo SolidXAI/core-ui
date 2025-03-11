@@ -145,12 +145,12 @@ export class SolidRelationManyToOneField implements ISolidField {
                     }
                     <AutoComplete
                         readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                        disabled={formDisabled || fieldDisabled}
+                        disabled={formDisabled || fieldDisabled || readOnlyPermission}
                         {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                         id={fieldLayoutInfo.attrs.name}
                         field="label"
                         value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                        dropdown
+                        dropdown={!readOnlyPermission}
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}
                         onChange={formik.handleChange}

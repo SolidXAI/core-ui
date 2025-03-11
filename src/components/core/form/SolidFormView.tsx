@@ -635,8 +635,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 case "field": {
                     // const fieldMetadata = solidFieldsMetadata[attrs.name];
                     const fieldMetadata = solidFormViewMetaData.data.solidFieldsMetadata[attrs.name];
-
-                    return <SolidField key={key} field={element} formik={formik} fieldMetadata={fieldMetadata} initialEntityData={solidFormViewData ? solidFormViewData.data : null} solidFormViewMetaData={solidFormViewMetaData} modelName={params.modelName} readOnly={!actionsAllowed.includes(`${updatePermission(params.modelName)}`)} />;
+                    // Read only permission if there is no update permission on model and router doesnt contains new
+                    const readOnlyPermission  = !actionsAllowed.includes(`${updatePermission(params.modelName)}`) && params.id !== "new" 
+                    return <SolidField key={key} field={element} formik={formik} fieldMetadata={fieldMetadata} initialEntityData={solidFormViewData ? solidFormViewData.data : null} solidFormViewMetaData={solidFormViewMetaData} modelName={params.modelName} readOnly={readOnlyPermission} />;
                 }
                 case "notebook":
                     return <SolidNotebook key={key}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData))}</SolidNotebook>;
