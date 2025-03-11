@@ -1,8 +1,9 @@
 import React from 'react'
+import FileSvg from '../Svg/FileSvg'
 
 export const FileReaderExt = ({ fileDetails }: { fileDetails: any }) => {
-    const renderFile =()=>{
-        const type =fileDetails.type
+    const renderFile = () => {
+        const type = fileDetails.type
         switch (type) {
             case "image/png":
                 return '/images/fileReader/image-jpg.png'
@@ -12,7 +13,8 @@ export const FileReaderExt = ({ fileDetails }: { fileDetails: any }) => {
     }
     return (
         <div>
-            <img src={renderFile()} style={{height: 50, width:50}}/>
+            <FileSvg />
+            {/* <img src={renderFile()} style={{height: 50, width:50}}/> */}
         </div>
     )
 }

@@ -321,8 +321,8 @@ const CreateModel = ({ data, params }: any) => {
           size="small"
           className="bg-primary-reverse p-0"
           style={{
-            height: 32,
-            width: 32
+            height: 33.06,
+            width: 33.06
           }}
           onClick={(e) =>
             // @ts-ignore 
@@ -400,9 +400,9 @@ const CreateModel = ({ data, params }: any) => {
             </>
           }
         </div>
-        <div className="solid-form-stepper">
+        {/* <div className="solid-form-stepper">
           <SolidFormStepper />
-        </div>
+        </div> */}
         <div className="p-4 solid-form-content">
           <TabView
             activeIndex={activeIndex}

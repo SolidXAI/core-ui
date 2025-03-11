@@ -143,7 +143,7 @@ const SolidResetPassword = () => {
                                     </div> */}
                     <div className="mt-4">
                         <Button className="w-full font-light auth-submit-button" label="Reset Password" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
-                        <Button type="button" label="Back" className="w-full auth-back-button text-center" link onClick={() => (window.location.href = '/auth/login')} />
+                        <Button type="button" label="Back" className="w-full auth-back-button text-center mt-1" link onClick={() => (window.location.href = '/auth/login')} />
                     </div>
                 </form>
             </div>
