@@ -909,8 +909,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
     isSystem: fieldMetaData ? fieldMetaData?.isSystem : false,
     columnName: fieldMetaData ? fieldMetaData?.columnName : null,
     isUserKey: fieldMetaData ? fieldMetaData?.isUserKey : false,
-    relationJoinColumnName: fieldMetaData ? fieldMetaData?.relationJoinColumnName : null,
-    joinColumnName: fieldMetaData ? fieldMetaData?.joinColumnName : null,
+    relationCoModelColumnName: fieldMetaData ? fieldMetaData?.relationCoModelColumnName : null,
     relationJoinTableName: fieldMetaData ? fieldMetaData?.relationJoinTableName : null,
     userKey: fieldMetaData ? fieldMetaData?.userKey : null
   };
@@ -1792,8 +1791,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                 existingData={formik.values.relationModelModuleName}
                                 additionalAction={(e: any) => {
                                   formik.setFieldValue("relationCoModelSingularName", "");
-                                  formik.setFieldValue("relationJoinColumnName", "");
-                                  formik.setFieldValue("joinColumnName", "");
+                                  formik.setFieldValue("relationCoModelColumnName", "");
                                   formik.setFieldValue("relationJoinTableName", "");
                                 }}
                               />
@@ -1981,7 +1979,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                             </div>
                           )}
 
-                          {currentFields.includes("joinColumnName") && formik.values.relationType === "many-to-many" && (
+                          {/* {currentFields.includes("joinColumnName") && formik.values.relationType === "many-to-many" && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="joinColumnName"
@@ -2010,33 +2008,33 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                               )}
 
                             </div>
-                          )}
+                          )} */}
 
-                          {currentFields.includes("relationJoinColumnName") && formik.values.relationType === "many-to-many" && (
+                          {currentFields.includes("relationCoModelColumnName") && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
-                                htmlFor="relationJoinColumnName"
+                                htmlFor="relationCoModelColumnName"
                                 className="form-field-label"
                               >
-                                Relation Join Column Name
+                                Relation Co-Model Column Name
                               </label>
                               <InputText
                                 type="text"
-                                id="relationJoinColumnName"
-                                name="relationJoinColumnName"
+                                id="relationCoModelColumnName"
+                                name="relationCoModelColumnName"
                                 onChange={formik.handleChange}
-                                value={formik.values.relationJoinColumnName}
+                                value={formik.values.relationCoModelColumnName}
                                 className={classNames("", {
                                   "p-invalid": isFormFieldValid(
                                     formik,
-                                    "relationJoinColumnName"
+                                    "relationCoModelColumnName"
                                   ),
                                 })}
                               />
-                              {isFormFieldValid(formik, "relationJoinColumnName") && (
+                              {isFormFieldValid(formik, "relationCoModelColumnName") && (
                                 <Message
                                   severity="error"
-                                  text={formik?.errors?.relationJoinColumnName?.toString()}
+                                  text={formik?.errors?.relationCoModelColumnName?.toString()}
                                 />
                               )}
 
