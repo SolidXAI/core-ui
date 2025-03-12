@@ -65,6 +65,7 @@ export const {
     useLazyGetSolidViewByIdQuery,
     useGetSolidViewByIdQuery,
     useGetSolidViewLayoutQuery,
+    useLazyGetSolidViewLayoutQuery,
     useCreateSolidViewMutation,
     useUpdateSolidViewMutation,
     useDeleteSolidViewMutation,

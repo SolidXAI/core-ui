@@ -42,6 +42,13 @@ export class SolidDecimalField implements ISolidField {
         } else {
             schema = schema.nullable(); // Allow null when not required
         }
+         // 2. length (min/max)
+         if (fieldMetadata.min && fieldMetadata.min > 0) {
+            schema = schema.min(fieldMetadata.min, `${fieldLabel} should be at-least ${fieldMetadata.min} characters long.`);
+        }
+        if (fieldMetadata.max && fieldMetadata.max > 0) {
+            schema = schema.max(fieldMetadata.max, `${fieldLabel} should not be more than ${fieldMetadata.max} characters long.`);
+        }
         return schema;
     }
 
@@ -53,6 +60,7 @@ export class SolidDecimalField implements ISolidField {
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const readOnlyPermission = this.fieldContext.readOnly;
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
@@ -71,7 +79,7 @@ export class SolidDecimalField implements ISolidField {
                         </label>
                     }
                     <InputNumber
-                        readOnly={formReadonly || fieldReadonly}
+                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                         disabled={formDisabled || fieldDisabled}
                         id={fieldLayoutInfo.attrs.name}
                         minFractionDigits={2}
