@@ -261,7 +261,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       sort: [`id:desc`],
     };
     if (showArchived) {
-      queryData.showSoftDeleted = 'true';
+      queryData.showSoftDeleted = 'inclusive';
     }
     const queryString = qs.stringify(queryData, {
       encodeValuesOnly: true

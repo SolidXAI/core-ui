@@ -388,13 +388,13 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
     ...(currentFields.includes("relationType") && {
       relationType: Yup.string().required("Relation Type is required"),
     }),
-    ...(currentFields.includes("relationModelSingularName") && {
-      relationModelSingularName: Yup.string().required(
+    ...(currentFields.includes("relationCoModelSingularName") && {
+      relationCoModelSingularName: Yup.string().required(
         "Relation Model Singular Name is required"
       ),
     }),
-    ...(currentFields.includes("relationModelFieldName") && {
-      relationModelFieldName: Yup.string()
+    ...(currentFields.includes("relationCoModelFieldName") && {
+      relationCoModelFieldName: Yup.string()
       // .required(
       //   "Relation Model Field Name is required"
       // ),
@@ -703,7 +703,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
     }
   };
 
-  const searchRelationModelSingularNames = async (event: any) => {
+  const searchrelationCoModelSingularNames = async (event: any) => {
     try {
       const query = event.query;
       const queryData: any = {
@@ -892,8 +892,8 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
     mediaStorageProvider: fieldMetaData ? fieldMetaData?.mediaStorageProvider : null,
     mediaEmbedded: fieldMetaData ? (fieldMetaData?.mediaEmbedded && fieldMetaData?.mediaEmbedded.toString()) : "true",
     relationType: fieldMetaData ? fieldMetaData?.relationType : null,
-    relationModelSingularName: fieldMetaData ? fieldMetaData?.relationModelSingularName : null,
-    relationModelFieldName: fieldMetaData ? fieldMetaData?.relationModelFieldName : modelMetaData.pluralName || '',
+    relationCoModelSingularName: fieldMetaData ? fieldMetaData?.relationCoModelSingularName : null,
+    relationCoModelFieldName: fieldMetaData ? fieldMetaData?.relationCoModelFieldName : modelMetaData.pluralName || '',
     relationCreateInverse: fieldMetaData ? fieldMetaData?.relationCreateInverse : false,
     relationCascade: fieldMetaData ? fieldMetaData?.relationCascade : 'cascade',
     relationModelModuleName: fieldMetaData ? fieldMetaData?.relationModelModuleName : modelMetaData?.module.name,
@@ -909,8 +909,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
     isSystem: fieldMetaData ? fieldMetaData?.isSystem : false,
     columnName: fieldMetaData ? fieldMetaData?.columnName : null,
     isUserKey: fieldMetaData ? fieldMetaData?.isUserKey : false,
-    relationJoinColumnName: fieldMetaData ? fieldMetaData?.relationJoinColumnName : null,
-    joinColumnName: fieldMetaData ? fieldMetaData?.joinColumnName : null,
+    relationCoModelColumnName: fieldMetaData ? fieldMetaData?.relationCoModelColumnName : null,
     relationJoinTableName: fieldMetaData ? fieldMetaData?.relationJoinTableName : null,
     userKey: fieldMetaData ? fieldMetaData?.userKey : null
   };
@@ -940,7 +939,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
         });
         if (values.userKey) {
           const data = {
-            modelName: values.relationModelSingularName,
+            modelName: values.relationCoModelSingularName,
             fieldName: values.userKey
           }
           updateUserKey(data);
@@ -1039,7 +1038,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
         offset: 0,
         filters: {
           singularName: {
-            $eq: formik.values.relationModelSingularName
+            $eq: formik.values.relationCoModelSingularName
           }
         },
         populate: ['fields']
@@ -1061,10 +1060,10 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
         }
       }
     }
-    if (formik.values.relationModelSingularName) {
+    if (formik.values.relationCoModelSingularName) {
       fetchFields();
     }
-  }, [formik.values.relationModelSingularName])
+  }, [formik.values.relationCoModelSingularName])
 
   const updateEnumValues = (index: number, updatedString: string) => {
     const updatedValues = formik.values.selectionStaticValues.map((enumValue: string, i: number) =>
@@ -1791,9 +1790,8 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                 searchData={searchRelationModelModuleNames}
                                 existingData={formik.values.relationModelModuleName}
                                 additionalAction={(e: any) => {
-                                  formik.setFieldValue("relationModelSingularName", "");
-                                  formik.setFieldValue("relationJoinColumnName", "");
-                                  formik.setFieldValue("joinColumnName", "");
+                                  formik.setFieldValue("relationCoModelSingularName", "");
+                                  formik.setFieldValue("relationCoModelColumnName", "");
                                   formik.setFieldValue("relationJoinTableName", "");
                                 }}
                               />
@@ -1832,11 +1830,11 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                           )}
 
                           {currentFields.includes(
-                            "relationModelSingularName"
+                            "relationCoModelSingularName"
                           ) && (
                               <div className="field col-6 flex-flex-column gap-2 mt-3">
                                 <label
-                                  htmlFor="relationModelSingularName"
+                                  htmlFor="relationCoModelSingularName"
                                   className="form-field-label"
                                 >
                                   Co-Model Name
@@ -1844,37 +1842,23 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
 
 
                                 <SingleSelectAutoCompleteField
-                                  key="relationModelSingularName"
+                                  key="relationCoModelSingularName"
                                   formik={formik}
                                   isFormFieldValid={isFormFieldValid}
-                                  fieldName="relationModelSingularName"
-                                  fieldNameId="relationModelSingularName"
+                                  fieldName="relationCoModelSingularName"
+                                  fieldNameId="relationCoModelSingularName"
                                   labelKey="displayName"
                                   valueKey="singularName"
-                                  searchData={searchRelationModelSingularNames}
-                                  existingData={formik.values.relationModelSingularName}
+                                  searchData={searchrelationCoModelSingularNames}
+                                  existingData={formik.values.relationCoModelSingularName}
                                 />
-
-                                {/* <InputText
-                                        type="text"
-                                        id="relationModelSingularName"
-                                        name="relationModelSingularName"
-                                        onChange={formik.handleChange}
-                                        value={formik.values.relationModelSingularName}
-                                        className={classNames("", {
-                                          "p-invalid": isFormFieldValid(
-                                            formik,
-                                            "relationModelSingularName"
-                                          ),
-                                        })}
-                                      /> */}
                                 {isFormFieldValid(
                                   formik,
-                                  "relationModelSingularName"
+                                  "relationCoModelSingularName"
                                 ) && (
                                     <Message
                                       severity="error"
-                                      text={formik?.errors?.relationModelSingularName?.toString()}
+                                      text={formik?.errors?.relationCoModelSingularName?.toString()}
                                     />
                                   )}
                               </div>
@@ -1913,7 +1897,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                               </div>
                             )}
 
-                          {currentFields.includes("relationCreateInverse") && formik.values.relationType === "many-to-many" && (
+                          {currentFields.includes("relationCreateInverse") && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one")&& (
                             <div className="field col-6 flex flex-column gap-2 mt-3">
                               <label htmlFor="relationCreateInverse" className="form-field-label">
                                 Relation Create Inverse
@@ -1933,31 +1917,31 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                             </div>
                           )}
 
-                          {currentFields.includes("relationModelFieldName") && formik.values.relationCreateInverse && formik.values.relationType === "many-to-many" && (
+                          {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
-                                htmlFor="relationModelFieldName"
+                                htmlFor="relationCoModelFieldName"
                                 className="form-field-label"
                               >
                                 Field Name on Inverse Side
                               </label>
                               <InputText
                                 type="text"
-                                id="relationModelFieldName"
-                                name="relationModelFieldName"
+                                id="relationCoModelFieldName"
+                                name="relationCoModelFieldName"
                                 onChange={formik.handleChange}
-                                value={formik.values.relationModelFieldName}
+                                value={formik.values.relationCoModelFieldName}
                                 className={classNames("", {
                                   "p-invalid": isFormFieldValid(
                                     formik,
-                                    "relationModelFieldName"
+                                    "relationCoModelFieldName"
                                   ),
                                 })}
                               />
-                              {isFormFieldValid(formik, "relationModelFieldName") && (
+                              {isFormFieldValid(formik, "relationCoModelFieldName") && (
                                 <Message
                                   severity="error"
-                                  text={formik?.errors?.relationModelFieldName?.toString()}
+                                  text={formik?.errors?.relationCoModelFieldName?.toString()}
                                 />
                               )}
 
@@ -1995,7 +1979,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                             </div>
                           )}
 
-                          {currentFields.includes("joinColumnName") && formik.values.relationType === "many-to-many" && (
+                          {/* {currentFields.includes("joinColumnName") && formik.values.relationType === "many-to-many" && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="joinColumnName"
@@ -2024,33 +2008,33 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                               )}
 
                             </div>
-                          )}
+                          )} */}
 
-                          {currentFields.includes("relationJoinColumnName") && formik.values.relationType === "many-to-many" && (
+                          {currentFields.includes("relationCoModelColumnName") && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
-                                htmlFor="relationJoinColumnName"
+                                htmlFor="relationCoModelColumnName"
                                 className="form-field-label"
                               >
-                                Relation Join Column Name
+                                Relation Co-Model Column Name
                               </label>
                               <InputText
                                 type="text"
-                                id="relationJoinColumnName"
-                                name="relationJoinColumnName"
+                                id="relationCoModelColumnName"
+                                name="relationCoModelColumnName"
                                 onChange={formik.handleChange}
-                                value={formik.values.relationJoinColumnName}
+                                value={formik.values.relationCoModelColumnName}
                                 className={classNames("", {
                                   "p-invalid": isFormFieldValid(
                                     formik,
-                                    "relationJoinColumnName"
+                                    "relationCoModelColumnName"
                                   ),
                                 })}
                               />
-                              {isFormFieldValid(formik, "relationJoinColumnName") && (
+                              {isFormFieldValid(formik, "relationCoModelColumnName") && (
                                 <Message
                                   severity="error"
-                                  text={formik?.errors?.relationJoinColumnName?.toString()}
+                                  text={formik?.errors?.relationCoModelColumnName?.toString()}
                                 />
                               )}
 
@@ -2707,6 +2691,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   name="unique"
                                   onChange={(e) => {
                                     formik.setFieldValue("unique", e.checked);
+                                    formik.setFieldValue("isUserKey", false);
                                   }}
                                   checked={formik.values.unique}
                                 ></Checkbox>
@@ -2818,7 +2803,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                             </div>
                           </div>
                         )} */}
-                        {currentFields.includes("isUserKey") && (
+                        {currentFields.includes("isUserKey") && formik.values.unique && (
                          <div className="field col-6 flex-flex-column gap-2 mt-3">
                          <div className="flex align-items-center gap-2">
                                 <Checkbox

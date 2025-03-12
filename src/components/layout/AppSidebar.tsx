@@ -147,11 +147,31 @@ const AppSidebar = () => {
                                         alt={m.title}
                                     />
                                     :
-                                    <img
-                                        style={{ cursor: "pointer", width: '30px' }}
-                                        src={`/images/menu/app-builder.svg`}
-                                        alt={m.title}
-                                    />
+                                    // <img
+                                    //     style={{ cursor: "pointer", width: '50px' }}
+                                    //     src={`/images/menu/app-builder.svg`}
+                                    //     alt={m.title}
+                                    // />
+                                    ((
+                                        <div
+                                          style={{
+                                            width: "40px",
+                                            height: "40px",
+                                            display: "flex",
+                                            alignItems: "center",
+                                            justifyContent: "center",
+                                            backgroundColor: "#722ED1", 
+                                            color: "white",
+                                            fontWeight: "bold",
+                                            borderRadius: "50%",
+                                            fontSize: "18px",
+                                            textTransform: "uppercase",
+                                            cursor: "pointer",
+                                          }}
+                                        >
+                                          {m.title.charAt(0)}
+                                        </div>
+                                    ))
                                 }
                             </a>
                         </div>

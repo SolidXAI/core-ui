@@ -73,7 +73,7 @@ export class SolidRelationOneToManyField implements ISolidField {
                 embeded: true,
                 isCustomCreate: false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
-                modelName: camelCase(this.fieldContext.fieldMetadata.relationModelSingularName)
+                modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName)
             }
             setformViewParams(formviewparams);
             setvisibleCreateRelationEntity(true);
@@ -95,7 +95,7 @@ export class SolidRelationOneToManyField implements ISolidField {
         //Intial Params 
         useEffect(() => {
 
-            const customFilter = this.fieldContext.fieldMetadata.relationModelFieldName ? this.fieldContext.fieldMetadata.relationModelFieldName : `${this.fieldContext.modelName}`
+            const customFilter = this.fieldContext.fieldMetadata.relationCoModelFieldName ? this.fieldContext.fieldMetadata.relationCoModelFieldName : `${this.fieldContext.modelName}`
             const listviewparams = {
                 moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
                 modelName: camelCase(this.fieldContext.fieldMetadata.relationModelSingularName),
@@ -117,7 +117,7 @@ export class SolidRelationOneToManyField implements ISolidField {
                 embeded: true,
                 isCustomCreate: false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
-                modelName: camelCase(this.fieldContext.fieldMetadata.relationModelSingularName)
+                modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName)
             }
             setformViewParams(formviewparams)
 

@@ -68,7 +68,7 @@ export class SolidRelationManyToOneField implements ISolidField {
         const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
 
         // auto complete specific code. 
-        const entityApi = createSolidEntityApi(fieldMetadata.relationModelSingularName);
+        const entityApi = createSolidEntityApi(fieldMetadata.relationCoModelSingularName);
         const { useLazyGetSolidEntitiesQuery } = entityApi;
         const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
 
