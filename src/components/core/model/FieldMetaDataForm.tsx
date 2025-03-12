@@ -2691,6 +2691,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   name="unique"
                                   onChange={(e) => {
                                     formik.setFieldValue("unique", e.checked);
+                                    formik.setFieldValue("isUserKey", false);
                                   }}
                                   checked={formik.values.unique}
                                 ></Checkbox>
@@ -2802,7 +2803,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                             </div>
                           </div>
                         )} */}
-                        {currentFields.includes("isUserKey") && (
+                        {currentFields.includes("isUserKey") && formik.values.unique && (
                          <div className="field col-6 flex-flex-column gap-2 mt-3">
                          <div className="flex align-items-center gap-2">
                                 <Checkbox
