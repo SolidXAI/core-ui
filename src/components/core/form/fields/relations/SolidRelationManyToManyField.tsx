@@ -139,7 +139,6 @@ export class SolidRelationManyToManyField implements ISolidField {
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
         const router = useRouter();
-        console.log("router",router);
         
         const readOnlyPermission = this.fieldContext.readOnly;
 
