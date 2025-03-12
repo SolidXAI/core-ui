@@ -1,3 +1,4 @@
+
 import { createApi, fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 import { baseQueryWithAuth } from "./fetchBaseQuery";
 
@@ -61,7 +62,7 @@ export const authApi = createApi({
     }),
     updateUser: builder.mutation({
       query: ({ id, data }) => ({
-        url: `/user/${id}`,
+        url: `/user/${id}/update-user-and-roles`,
         method: 'PATCH',
         body: data,
       }),

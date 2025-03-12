@@ -63,6 +63,7 @@ export class SolidRelationOneToManyField implements ISolidField {
         const [formViewParams, setformViewParams] = useState<any>()
         const [refreshList, setRefreshList] = useState(false); // Added state for rerender
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const readOnlyPermission = this.fieldContext.readOnly;
 
 
         const handlePopupOpen = (id: any) => {
@@ -84,8 +85,8 @@ export class SolidRelationOneToManyField implements ISolidField {
             setRefreshList((prev) => !prev);
             const lisviewparams = {
                 moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
-                modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName),
-                inlineCreate: true,
+                modelName: camelCase(this.fieldContext.fieldMetadata.relationModelSingularName),
+                inlineCreate: readOnlyPermission === false ?  true : false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
                 embeded: true
             }
@@ -97,8 +98,8 @@ export class SolidRelationOneToManyField implements ISolidField {
             const customFilter = this.fieldContext.fieldMetadata.relationCoModelFieldName ? this.fieldContext.fieldMetadata.relationCoModelFieldName : `${this.fieldContext.modelName}`
             const listviewparams = {
                 moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
-                modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName),
-                inlineCreate: true,
+                modelName: camelCase(this.fieldContext.fieldMetadata.relationModelSingularName),
+                inlineCreate: readOnlyPermission === false ?  true : false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
                 embeded: true,
                 customFilter: {
@@ -143,7 +144,8 @@ export class SolidRelationOneToManyField implements ISolidField {
                 {listViewParams &&
                     <SolidListView key={refreshList.toString()}  {...listViewParams} handlePopUpOpen={handlePopupOpen} />
                 }
-                {this.renderSolidFormEmbededView(visibleCreateRelationEntity, setvisibleCreateRelationEntity, formViewParams, handlePopupClose)}
+                {readOnlyPermission !== true &&
+                    this.renderSolidFormEmbededView(visibleCreateRelationEntity, setvisibleCreateRelationEntity, formViewParams, handlePopupClose)}
 
             </div>
         );
