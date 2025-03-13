@@ -138,51 +138,59 @@ const AppSidebar = () => {
 
             <div className="sidebar-left">
                 <div className="navbar-menu">
-                    {updatedMenuData.length > 0 && updatedMenuData.map((m: any) => (
-                        <div
-                            key={m.title}
-                            className={`menu-item ${currentMainMenu === m.title ? "active-menu-image" : ""}`}
-                        >
-                            <a onClick={() => handleMenu(m)}>
-                                {m.icon ?
-                                    <Image
-                                        style={{ cursor: "pointer", mixBlendMode: "multiply" }}
-                                        src={(m.icon && m.icon.startsWith("/")) ? m.icon : `${process.env.API_URL}/${m.icon}`}
-                                        // src={m.icon}
-                                        alt={m.title}
-                                        fill
-                                        className="relative"
-                                    />
-                                    :
-                                    // <img
-                                    //     style={{ cursor: "pointer", width: '50px' }}
-                                    //     src={`/images/menu/app-builder.svg`}
-                                    //     alt={m.title}
-                                    // />
-                                    ((
-                                        <div
-                                          style={{
-                                            width: "40px",
-                                            height: "40px",
-                                            display: "flex",
-                                            alignItems: "center",
-                                            justifyContent: "center",
-                                            backgroundColor: "#722ED1", 
-                                            color: "white",
-                                            fontWeight: "bold",
-                                            borderRadius: "50%",
-                                            fontSize: "18px",
-                                            textTransform: "uppercase",
-                                            cursor: "pointer",
-                                          }}
-                                        >
-                                          {m.title.charAt(0)}
-                                        </div>
-                                    ))
-                                }
-                            </a>
-                        </div>
-                    ))}
+                    {updatedMenuData.length > 0 && updatedMenuData.map((m: any) => {
+                        const iconSrc =
+                            typeof m.icon === "string"
+                                ? m.icon
+                                : m.icon && typeof m.icon.src === "string"
+                                    ? m.icon.src
+                                    : null;
+                        return (
+                            <div
+                                key={m.title}
+                                className={`menu-item ${currentMainMenu === m.title ? "active-menu-image" : ""}`}
+                            >
+                                <a onClick={() => handleMenu(m)}>
+                                    {m.icon ?
+                                        <Image
+                                            style={{ cursor: "pointer", mixBlendMode: "multiply" }}
+                                            // src={(m.icon && m.icon.startsWith("/")) ? m.icon : `${process.env.API_URL}/${m.icon}`}
+                                            src={iconSrc.startsWith("/") ? iconSrc : `${process.env.API_URL}/${iconSrc}`}
+                                            alt={m.title}
+                                            fill
+                                            className="relative"
+                                        />
+                                        :
+                                        // <img
+                                        //     style={{ cursor: "pointer", width: '50px' }}
+                                        //     src={`/images/menu/app-builder.svg`}
+                                        //     alt={m.title}
+                                        // />
+                                        ((
+                                            <div
+                                                style={{
+                                                    width: "40px",
+                                                    height: "40px",
+                                                    display: "flex",
+                                                    alignItems: "center",
+                                                    justifyContent: "center",
+                                                    backgroundColor: "#722ED1",
+                                                    color: "white",
+                                                    fontWeight: "bold",
+                                                    borderRadius: "50%",
+                                                    fontSize: "18px",
+                                                    textTransform: "uppercase",
+                                                    cursor: "pointer",
+                                                }}
+                                            >
+                                                {m.title.charAt(0)}
+                                            </div>
+                                        ))
+                                    }
+                                </a>
+                            </div>
+                        )
+                    })}
                 </div>
 
                 <UserProfileMenu></UserProfileMenu>
