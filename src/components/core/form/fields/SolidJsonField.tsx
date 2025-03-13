@@ -60,7 +60,7 @@ export class SolidJsonField implements ISolidField {
                     {showFieldLabel != false &&
                         <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
 
-                            &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
+                            {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                         </label>
                     }
                     <CodeEditor

@@ -32,6 +32,11 @@ import { FilterIcon } from '../../modelsComponents/filterIcon';
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Toast } from "primereact/toast";
 import { Divider } from "primereact/divider";
+import CompactImage from '../../../resources/images/layout/images/compact.png';
+import CozyImage from '../../../resources/images/layout/images/cozy.png';
+import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
+import ListImage from '../../../resources/images/layout/images/cozy.png';
+import KanbanImage from '../../../resources/images/layout/images/kanban.png';
 
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -611,14 +616,14 @@ export const SolidListView = (params: SolidListViewParams) => {
   }
 
   const sizeOptions = [
-    { label: 'Compact', value: 'small', image: '/images/layout/images/compact.png' },
-    { label: 'Cozy', value: 'normal', image: '/images/layout/images/cozy.png' },
-    { label: 'Comfortable', value: 'large', image: '/images/layout/images/comfortable.png' }
+    { label: 'Compact', value: 'small', image: CompactImage},
+    { label: 'Cozy', value: 'normal', image: CozyImage },
+    { label: 'Comfortable', value: 'large', image: ComfortableImage }
   ]
 
   const viewModes = [
-    { label: 'List ', value: 'list', image: '/images/layout/images/cozy.png' },
-    { label: 'Kanban', value: 'kanban', image: '/images/layout/images/kanban.png' },
+    { label: 'List ', value: 'list', image: ListImage },
+    { label: 'Kanban', value: 'kanban', image: KanbanImage },
   ]
 
   const [size, setSize] = useState<string | any>(sizeOptions[1].value);
@@ -629,27 +634,6 @@ export const SolidListView = (params: SolidListViewParams) => {
       <div className="page-header">
         <Toast ref={toast} />
         <div className="flex gap-3 align-items-center">
-
-
-          {actionsAllowed.includes(`${deletePermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.delete !== false && selectedRecords.length > 0 && <Button
-            type="button"
-            label="Delete"
-            size="small"
-            onClick={() => setDialogVisible(true)}
-            severity="danger"
-          />}
-          {/* {isFilterApplied &&
-            <Button
-              type="button"
-              icon="pi pi-filter-slash"
-              label="Clear"
-              size="small"
-              outlined
-              onClick={clearFilter}
-              className="small-button"
-            />
-          } */}
-
           {solidListViewMetaData?.data?.solidView?.layout?.attrs?.enableGlobalSearch === true && params.embeded === false &&
             <SolidGlobalSearchElement filters={filters} clearFilter={clearFilter} ref={solidGlobalSearchElementRef} viewData={solidListViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}></SolidGlobalSearchElement>
           }
@@ -668,14 +652,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           {showArchived && <Button type="button" icon="pi pi-refresh" label="Recover" size='small' severity="secondary"
             onClick={() => setRecoverDialogVisible(true)}
           ></Button>}
-          {/* <SolidLayoutViews
-            sizeOptions={sizeOptions}
-            setSize={setSize}
-            size={size}
-            viewModes={viewModes}
-            setView={setView}
-            view={view}
-          /> */}
+
           {params.embeded === false &&
             <SolidConfigureLayoutElement
               setShowArchived={setShowArchived}
@@ -687,11 +664,13 @@ export const SolidListView = (params: SolidListViewParams) => {
               viewModes={viewModes}
               setView={setView}
               view={view}
+              params={params}
+              actionsAllowed={actionsAllowed}
+              selectedRecords={selectedRecords}
+              setDialogVisible={setDialogVisible}
             ></SolidConfigureLayoutElement>
           }
-          {/* {params.embeded === false &&
-            <SolidListViewOptions></SolidListViewOptions>
-          } */}
+
         </div>
       </div>
       <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);} .greyed-out-row { background-color: #f5f5f5 !important; color: #a0a0a0 !important; opacity: 0.6;}`}</style>
@@ -744,16 +723,15 @@ export const SolidListView = (params: SolidListViewParams) => {
               ) :
                 <>
                   {detailsBodyTemplate(rowData)}
-                  <OverlayPanel ref={op} className="solid-custom-overlay" style={{ top: 10 }}>
+                  <OverlayPanel ref={op} className="solid-custom-overlay" style={{ top: 10, minWidth: 120 }}>
                     <div className="flex flex-column gap-1 p-1">
                       <Button
-                        className="w-8rem text-left gap-2"
+                        type="button"
+                        className="w-full text-left gap-1"
                         label="Edit"
                         size="small"
                         iconPos="left"
-                        icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                          <path d="M3.33333 12.6667H4.28333L10.8 6.15L9.85 5.2L3.33333 11.7167V12.6667ZM2 14V11.1667L10.8 2.38333C10.9333 2.26111 11.0806 2.16667 11.2417 2.1C11.4028 2.03333 11.5722 2 11.75 2C11.9278 2 12.1 2.03333 12.2667 2.1C12.4333 2.16667 12.5778 2.26667 12.7 2.4L13.6167 3.33333C13.75 3.45556 13.8472 3.6 13.9083 3.76667C13.9694 3.93333 14 4.1 14 4.26667C14 4.44444 13.9694 4.61389 13.9083 4.775C13.8472 4.93611 13.75 5.08333 13.6167 5.21667L4.83333 14H2ZM10.3167 5.68333L9.85 5.2L10.8 6.15L10.3167 5.68333Z" fill="#F9F0FF" />
-                        </svg>}
+                        icon={"pi pi-pencil"}
                         onClick={() => {
                           if (params.embeded == true) {
                             params.handlePopUpOpen(selectedSolidViewData?.id);
@@ -762,18 +740,19 @@ export const SolidListView = (params: SolidListViewParams) => {
                           }
                         }}
                       />
-                      <Button
-                        text
-                        className="w-8rem text-left gap-2"
-                        label="Delete"
-                        size="small"
-                        iconPos="left"
-                        severity="secondary"
-                        icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                          <path d="M4.66666 14C4.29999 14 3.9861 13.8694 3.72499 13.6083C3.46388 13.3472 3.33332 13.0333 3.33332 12.6667V4H2.66666V2.66667H5.99999V2H9.99999V2.66667H13.3333V4H12.6667V12.6667C12.6667 13.0333 12.5361 13.3472 12.275 13.6083C12.0139 13.8694 11.7 14 11.3333 14H4.66666ZM11.3333 4H4.66666V12.6667H11.3333V4ZM5.99999 11.3333H7.33332V5.33333H5.99999V11.3333ZM8.66666 11.3333H9.99999V5.33333H8.66666V11.3333Z" fill="#4B4D52" />
-                        </svg>}
-                        onClick={() => setDeleteEntity(true)}
-                      />
+                      {actionsAllowed.includes(`${deletePermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.delete !== false &&
+                        <Button
+                          text
+                          type="button"
+                          className="w-full text-left gap-1"
+                          label="Delete"
+                          size="small"
+                          iconPos="left"
+                          severity="danger"
+                          icon={'pi pi-trash'}
+                          onClick={() => setDeleteEntity(true)}
+                        />
+                      }
                       {solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons &&
                         solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons.map((rowAction: any) => {
                           return (
@@ -793,6 +772,8 @@ export const SolidListView = (params: SolidListViewParams) => {
                                 setListViewRowActionPopupState(true)
                               }
                               }
+                              className="w-full text-left gap-2"
+                              label="Generate Code"
                             />
                           );
                         })}

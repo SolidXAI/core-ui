@@ -4,6 +4,7 @@ import { AppTitle } from "@/helpers/AppTitle";
 import { useConfirmForgotPasswordMutation } from "@/redux/api/authApi";
 import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { useFormik } from "formik";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "primereact/button";
@@ -13,6 +14,7 @@ import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
+import SolidLogo from '../../resources/images/SS-Logo.png'
 
 const SolidResetPassword = () => {
     const searchParams = useSearchParams();
@@ -81,10 +83,11 @@ const SolidResetPassword = () => {
                 {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
                         <div className="solid-logo flex align-items-center gap-3">
-                            <img
+                            <Image
                                 alt="solid logo"
-                                src={'/images/SS-Logo-1 1.png'}
-                                className="position-relative img-fluid"
+                                src={SolidLogo}
+                                className="relative"
+                                fill
                             />
                             <AppTitle title={solidSettingsData} />
                         </div>

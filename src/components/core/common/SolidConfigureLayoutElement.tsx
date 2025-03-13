@@ -1,4 +1,6 @@
 "use client"
+import { deleteManyPermission, deletePermission } from "@/helpers/permissions";
+import Image from "next/image";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
 import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
@@ -11,12 +13,13 @@ interface FilterColumns {
     name: string;
     key: string;
 }
-export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, setView, view }: any) => {
+export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, setView, view, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
 
     // const [visible, setVisible] = useState<boolean>(false);
     const op = useRef(null);
     const customizeLayout = useRef<OverlayPanel | null>(null);
     const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+    console.log("isOverlayOpen", isOverlayOpen);
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
@@ -35,6 +38,7 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
 
         return () => document.removeEventListener("click", handleClickOutside);
     }, [isOverlayOpen])
+
     const categories: FilterColumns[] = [
         { name: 'ID', key: 'A' },
         { name: 'Tracker Date', key: 'M' },
@@ -68,8 +72,20 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
             <OverlayPanel ref={op} className="listview-cogwheel-panel">
                 <div className="p-2">
                     <div className="flex flex-column">
-                        <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2" />
-                        <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2" />
+                        {actionsAllowed.includes(`${deleteManyPermission(params.modelName)}`) && viewData?.data?.solidView?.layout?.attrs?.delete !== false && selectedRecords.length > 0 &&
+                            <Button
+                                text
+                                type="button"
+                                className="text-left gap-2 text-base"
+                                label="Delete"
+                                size="small"
+                                iconPos="left"
+                                severity="danger"
+                                icon={'pi pi-trash'}
+                                onClick={() => setDialogVisible(true)}
+                            />}
+                        <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2 text-base" />
+                        <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base" />
                         {/* <Button text icon='pi pi-share-alt' label="Share" size="small" severity="secondary" className="text-left gap-2" /> */}
                         {/* {viewData?.data?.solidView?.model?.enableSoftDelete &&
                             <Button text severity="secondary" size="small" className="text-left w-13rem" label={showArchived ? "Hide Archived Records" : "Show Archived Records"} iconPos="left" onClick={() => { setShowArchived(!showArchived); }} />
@@ -98,7 +114,7 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                         severity={isOverlayOpen ? undefined : "secondary"}
                         size="small"
                         text={isOverlayOpen ? false : true}
-                        className="text-left gap-2 w-full"
+                        className="text-left gap-2 w-full text-base"
                         // @ts-ignore
                         onClick={(e) => {
                             customizeLayout.current?.toggle(e);
@@ -131,11 +147,11 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                                                 />
                                                 <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
                                                     {option.label}
-                                                    <img
+                                                    <Image
                                                         src={option.image}
                                                         alt={option.value}
-                                                        className='img-fluid position-relative'
-                                                        style={{ width: '2.75rem' }}
+                                                        fill
+                                                        className='relative row-spacing-img'
                                                     />
                                                 </label>
                                             </div>
@@ -156,11 +172,11 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                                                 />
                                                 <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
                                                     {option.label}
-                                                    <img
+                                                    <Image
                                                         src={option.image}
                                                         alt={option.value}
-                                                        className='img-fluid position-relative'
-                                                        style={{ width: '2.75rem' }}
+                                                        fill
+                                                        className='relative row-spacing-img'
                                                     />
                                                 </label>
                                             </div>
@@ -196,11 +212,14 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                         <Divider className="m-0" />
                         <div className="p-3 flex gap-2">
                             <Button label="Apply" size="small" />
-                            <Button outlined label="Cancel" size="small" />
+                            <Button outlined label="Cancel" size="small"
+                                // @ts-ignore
+                                onClick={(e) => op.current.hide(e)}
+                            />
                         </div>
                     </OverlayPanel>
                 </div>
             </OverlayPanel>
-        </div >
+        </div>
     )
 }

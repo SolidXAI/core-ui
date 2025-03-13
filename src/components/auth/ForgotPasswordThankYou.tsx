@@ -4,6 +4,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useContext } from "react";
 import { LayoutContext } from "../layout/context/layoutcontext";
+import Image from "next/image";
+import SolidLogo from '../../resources/images/SS-Logo.png'
 
 
 export const ForgotPasswordThankYou = () => {
@@ -18,10 +20,12 @@ export const ForgotPasswordThankYou = () => {
                 {authLayout === 'Center' &&
                     <div className="flex justify-content-center">
                         <div className="solid-logo flex align-items-center gap-3">
-                            GoogleAuthChecking                <img
+                            GoogleAuthChecking
+                            <Image
                                 alt="solid logo"
-                                src={'/images/SS-Logo-1 1.png'}
-                                className="position-relative img-fluid"
+                                src={SolidLogo}
+                                className="relative"
+                                fill
                             />
                             <div>
                                 <p className="solid-logo-title">

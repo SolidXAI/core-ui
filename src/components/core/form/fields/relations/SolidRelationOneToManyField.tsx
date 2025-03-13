@@ -135,7 +135,9 @@ export class SolidRelationOneToManyField implements ISolidField {
             <div className={className}>
                 {/* <div className="justify-content-center align-items-center"> */}
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}&nbsp;{fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}</label>
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                    {/* &nbsp;{fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
+                    </label>
                 }
 
                 {/* </div>

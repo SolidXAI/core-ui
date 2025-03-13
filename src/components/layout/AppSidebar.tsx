@@ -7,6 +7,10 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import NavbarTwoMenu from "./navbar-two-menu";
 import UserProfileMenu from "./user-profile-menu";
+import Image from "next/image";
+import AppBuilderSvg from '../../resources/images/menu/app-builder.svg'
+import SettingImage from '../../resources/images/Navigation/settings.png'
+
 // import menu from "@/helpers/menu";
 
 const AppSidebar = () => {
@@ -107,7 +111,7 @@ const AppSidebar = () => {
                 ]
             }
         ],
-        icon: "/images/Navigation/settings.png" // Default icon (optional)
+        icon: SettingImage
     };
     const updatedMenuData = menu?.data ? [...menu.data, additionalMenu] : [additionalMenu];
 
@@ -141,16 +145,21 @@ const AppSidebar = () => {
                         >
                             <a onClick={() => handleMenu(m)}>
                                 {m.icon ?
-                                    <img
-                                        style={{ cursor: "pointer", width: '30px', mixBlendMode: "multiply" }}
-                                        src={(m.icon && m.icon.startsWith("/")) ? m.icon : `${process.env.API_URL}/${m.icon}`}
+                                    <Image
+                                        style={{ cursor: "pointer", mixBlendMode: "multiply" }}
+                                        // src={(m.icon && m.icon.startsWith("/")) ? m.icon : `${process.env.API_URL}/${m.icon}`}
+                                        src={m.icon}
                                         alt={m.title}
+                                        fill
+                                        className="relative"
                                     />
                                     :
-                                    <img
-                                        style={{ cursor: "pointer", width: '30px' }}
-                                        src={`/images/menu/app-builder.svg`}
+                                    <Image
+                                        style={{ cursor: "pointer" }}
+                                        src={AppBuilderSvg}
                                         alt={m.title}
+                                        fill
+                                        className="relative"
                                     />
                                 }
                             </a>

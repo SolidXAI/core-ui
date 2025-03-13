@@ -1,6 +1,7 @@
 'use client';
 import { BackButton } from "@/components/common/BackButton";
 import { CancelButton } from "@/components/common/CancelButton";
+import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
 import { SolidFormStepper } from "@/components/common/SolidFormStepper";
 import { useRegisterPrivateMutation, useUpdateUserMutation } from "@/redux/api/authApi";
 import { useGetrolesQuery } from "@/redux/api/roleApi";
@@ -230,6 +231,11 @@ const CreateUser = ({ data, params }: any) => {
     }
   }, [isSuccess, isDeleteUserSuceess, isUpdateuserSuceess])
 
+  const breadcrumbData = [
+    { label: 'User', link: '/admin/core/solid-core/model-metadata/list' },
+    { label: params.id === "new" ? 'Create User' : 'Edit User' },
+  ];
+
   return (
     <div className="solid-form-wrapper">
       <Toast ref={toast} />
@@ -242,7 +248,9 @@ const CreateUser = ({ data, params }: any) => {
                 <div className="form-wrapper-title">Create User</div>
               </div>
               <div className="gap-3 flex">
-                <Button label="Save" size="small" type="submit" />
+                {formik.dirty &&
+                  <Button label="Save" size="small" type="submit" />
+                }
                 <CancelButton />
               </div>
             </>
@@ -254,7 +262,9 @@ const CreateUser = ({ data, params }: any) => {
               </div>
               <div>
                 <div className="gap-3 flex">
-                  <Button label="Save" size="small" type="submit" />
+                  {formik.dirty &&
+                    <Button label="Save" size="small" type="submit" />
+                  }
                   {data &&
                     <Button outlined label="Delete" size="small" severity="danger" type="button" onClick={() => deleteUser(data.id)} />
                   }
@@ -264,6 +274,7 @@ const CreateUser = ({ data, params }: any) => {
             </>
           )}
         </div>
+        <SolidBreadcrumb breadcrumbItems={breadcrumbData} />
         {/* <div className="solid-form-stepper">
           <SolidFormStepper />
         </div> */}
