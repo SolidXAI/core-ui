@@ -154,11 +154,14 @@ const AppSidebar = () => {
                                     {m.icon ?
                                         <Image
                                             style={{ cursor: "pointer", mixBlendMode: "multiply" }}
-                                            // src={(m.icon && m.icon.startsWith("/")) ? m.icon : `${process.env.API_URL}/${m.icon}`}
                                             src={iconSrc.startsWith("/") ? iconSrc : `${process.env.API_URL}/${iconSrc}`}
+                                            // src={m.icon}
                                             alt={m.title}
-                                            fill
+                                            // fill
+                                            height={30}
+                                            width={30}
                                             className="relative"
+                                            unoptimized
                                         />
                                         :
                                         // <img
