@@ -20,7 +20,6 @@ export const ForgotPasswordThankYou = () => {
                 {authLayout === 'Center' &&
                     <div className="flex justify-content-center">
                         <div className="solid-logo flex align-items-center gap-3">
-                            GoogleAuthChecking
                             <Image
                                 alt="solid logo"
                                 src={SolidLogo}
