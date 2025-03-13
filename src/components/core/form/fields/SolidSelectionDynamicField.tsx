@@ -56,6 +56,7 @@ export class SolidSelectionDynamicField implements ISolidField {
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const readOnlyPermission = this.fieldContext.readOnly;
 
         const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
         const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
@@ -101,7 +102,7 @@ export class SolidSelectionDynamicField implements ISolidField {
                         </label>
                     }
                     <AutoComplete
-                        readOnly={formReadonly || fieldReadonly}
+                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                         disabled={formDisabled || fieldDisabled}
                         {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                         id={fieldLayoutInfo.attrs.name}

@@ -48,6 +48,7 @@ export class SolidJsonField implements ISolidField {
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const readOnlyPermission = this.fieldContext.readOnly;
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
@@ -68,7 +69,7 @@ export class SolidJsonField implements ISolidField {
                         field={fieldLayoutInfo.attrs.name}
                         height={fieldLayoutInfo.attrs?.height}
                         fontSize={fieldLayoutInfo.attrs?.fontSize}
-                        readOnly={formReadonly || fieldReadonly}
+                        readOnly={formReadonly || fieldReadonly  || readOnlyPermission}
                     >
                     </CodeEditor>
                 </div>

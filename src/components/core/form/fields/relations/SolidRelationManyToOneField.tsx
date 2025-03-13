@@ -64,10 +64,11 @@ export class SolidRelationManyToOneField implements ISolidField {
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const readOnlyPermission = this.fieldContext.readOnly;
         const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
 
         // auto complete specific code. 
-        const entityApi = createSolidEntityApi(fieldMetadata.relationModelSingularName);
+        const entityApi = createSolidEntityApi(fieldMetadata.relationCoModelSingularName);
         const { useLazyGetSolidEntitiesQuery } = entityApi;
         const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
 
@@ -117,8 +118,6 @@ export class SolidRelationManyToOneField implements ISolidField {
 
 
 
-        const disabled = fieldLayoutInfo.attrs?.disabled;
-        const readOnly = fieldLayoutInfo.attrs?.readOnly;
 
 
         const customCreateHandler = (values: any) => {
@@ -145,20 +144,20 @@ export class SolidRelationManyToOneField implements ISolidField {
                         </label>
                     }
                     <AutoComplete
-                        readOnly={formReadonly || fieldReadonly}
-                        disabled={formDisabled || fieldDisabled}
+                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                        disabled={formDisabled || fieldDisabled || readOnlyPermission}
                         {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                         id={fieldLayoutInfo.attrs.name}
                         field="label"
                         value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                        dropdown
+                        dropdown={!readOnlyPermission}
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}
                         onChange={formik.handleChange}
                         onFocus={(e) => e.target.select()}
                         className="w-full solid-standard-autocomplete"
                     />
-                    {fieldLayoutInfo.attrs.inlineCreate === "true" &&
+                    {fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false &&
                         this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
                     }
                 </div>

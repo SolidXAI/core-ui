@@ -413,7 +413,6 @@ const CreateUser = ({ data, params }: any) => {
                         inputId={role.name}
                         checked={selectedRoles.includes(role.name)}
                         onChange={() => handleCheckboxChange(role.name)}
-                        disabled={data ? true : false}
                       />
                       <label htmlFor={role.name}> {role.name}</label>
                     </div>

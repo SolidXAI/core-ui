@@ -97,6 +97,7 @@ export class SolidMediaMultipleField implements ISolidField {
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const readOnlyPermission = this.fieldContext.readOnly;
 
         const [isDeleteImageDialogVisible, setDeleteImageDialogVisible] = useState(false);
         const [imageToBeDeletedData, setImageToBeDeletedData] = useState<any>();
@@ -277,7 +278,7 @@ export class SolidMediaMultipleField implements ISolidField {
 
         const [isShowAllFiles, setShowAllFiles] = useState(false);
         return (
-            <div className={className}>
+            <div className={className} style={readOnlyPermission === true ? { filter: 'opacity(50%)', pointerEvents: 'none' } : {}}>
                 <div className="flex flex-column gap-2 mt-4">
                     {showFieldLabel != false &&
                         <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
