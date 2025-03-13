@@ -17,7 +17,7 @@ import qs from "qs";
 import React, { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 
-const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allModelsNames, deleteModelFunction, nextTab, formikModelMetadataRef, params, formErrors }: any, ref) => {
+const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allModelsNames, deleteModelFunction, nextTab, formikModelMetadataRef, params, formErrors, setIsDirty }: any, ref) => {
 
   // const ModelMetaData = ({ modelMetaData, setModelMetaData, deleteModelFunction, nextTab, formikModelMetadataRef }: any) => {   
 
@@ -255,6 +255,12 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     setModelMetaData(formik.values);
 
   }, [formik.values])
+
+  useEffect(() => {
+    if (formik.dirty) {
+      setIsDirty(true);
+    }
+  }, [formik.dirty]);
 
   return (
 

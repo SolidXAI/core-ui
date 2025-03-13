@@ -19,6 +19,8 @@ import { LayoutContext } from "../layout/context/layoutcontext";
 import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { useInitateLoginMutation } from "@/redux/api/authApi";
 import { AppTitle } from "@/helpers/AppTitle";
+import Image from "next/image";
+import SolidLogo from '../../resources/images/SS-Logo.png'
 
 const SolidLogin = () => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
@@ -51,10 +53,11 @@ const SolidLogin = () => {
                 {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
                         <div className="solid-logo flex align-items-center gap-3">
-                            <img
+                            <Image
                                 alt="solid logo"
-                                src={'/images/SS-Logo-1 1.png'}
-                                className="position-relative img-fluid"
+                                src={SolidLogo}
+                                className="relative"
+                                fill
                             />
                             <AppTitle title={solidSettingsData} />
                         </div>

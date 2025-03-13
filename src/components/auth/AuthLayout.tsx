@@ -11,6 +11,8 @@ import { Dialog } from "primereact/dialog";
 import { useContext, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { LayoutContext } from "../layout/context/layoutcontext";
+import Image from "next/image";
+import SolidLogo from '../../resources/images/SS-Logo.png'
 
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
@@ -82,10 +84,11 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 >
                     {solidSettingsData?.data?.authPagesLayout !== 'center' &&
                         <div className="solid-logo flex align-items-center gap-3">
-                            <img
+                            <Image
                                 alt="solid logo"
-                                src={'/images/SS-Logo-1 1.png'}
-                                className="position-relative img-fluid"
+                                src={SolidLogo}
+                                className="relative"
+                                fill
                             />
                             <AppTitle title={solidSettingsData} />
                         </div>
@@ -109,8 +112,8 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 </div>
                 <div className={solidSettingsData?.data?.authPagesLayout !== 'center' ? 'col-6 flex justify-content-center' : ''}>
                     <div className={`flex align-items-center gap-5 solid-auth-subtitle ${solidSettingsData?.data?.authPagesLayout === 'left' ? 'left' : ''}`}>
-                        <p className="m-0"> <Link href={solidSettingsData ? solidSettingsData?.data?.appTnc : "#"}>Terms of Service</Link></p>
-                        <p className="m-0"> <Link href={solidSettingsData ? solidSettingsData?.data?.appPrivacyPolicy : "#"}>Privacy Policy.</Link></p>
+                        <p className="m-0 "> <Link className="text-sm no-underline font-normal" href={solidSettingsData ? solidSettingsData?.data?.appTnc : "#"}>Terms of Service</Link></p>
+                        <p className="m-0 "> <Link className="text-sm no-underline font-normal" href={solidSettingsData ? solidSettingsData?.data?.appPrivacyPolicy : "#"}>Privacy Policy.</Link></p>
                     </div>
                 </div>
             </div>

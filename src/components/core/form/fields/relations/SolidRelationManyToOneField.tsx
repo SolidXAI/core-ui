@@ -154,6 +154,7 @@ export class SolidRelationManyToOneField implements ISolidField {
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}
                         onChange={formik.handleChange}
+                        onFocus={(e) => e.target.select()}
                         className="w-full solid-standard-autocomplete"
                     />
                     {fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false &&

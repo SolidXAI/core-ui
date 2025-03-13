@@ -14,3 +14,6 @@ export const deletePermission = (modelName: string) => {
     return `${pascalCase(modelName)}Controller.delete`
 };
 
+export const deleteManyPermission = (modelName: string) => {
+    return `${pascalCase(modelName)}Controller.deleteMany`
+};

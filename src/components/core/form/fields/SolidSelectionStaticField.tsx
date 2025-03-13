@@ -103,7 +103,7 @@ export class SolidSelectionStaticField implements ISolidField {
                 <div className="flex flex-column gap-2 mt-4">
                     {showFieldLabel != false &&
                         <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                            &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
+                            {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                         </label>
                     }
                     <AutoComplete
