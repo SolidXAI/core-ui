@@ -18,6 +18,7 @@ import { SolidFormStepper } from "@/components/common/SolidFormStepper";
 import { Dialog } from "primereact/dialog";
 import { Divider } from "primereact/divider";
 import { OverlayPanel } from "primereact/overlaypanel";
+import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
 
 interface ErrorResponseData {
   message: string;
@@ -145,17 +146,17 @@ const CreateModel = ({ data, params }: any) => {
           errorMessages.forEach((error) => {
             handleError([error]); // Call handleError for each error separately
           });
-      
+
           firstErrorTab = 0; // Model Metadata tab has errors
         } else {
-          setFormErrors({}); 
+          setFormErrors({});
         }
-  
+
         if (fieldMetaData.length === 0) {
           handleError(["Please add at least one field"]);
           firstErrorTab = firstErrorTab ?? 1; // If no prior error, set to Field tab
         }
-  
+
         if (firstErrorTab !== undefined) {
           setTabErrors({ [firstErrorTab]: true }); // Set error only on the first tab with an issue
           setActiveIndex(firstErrorTab); // Switch to the tab with an error
@@ -313,13 +314,9 @@ const CreateModel = ({ data, params }: any) => {
           outlined
           severity="secondary"
           type="button"
-          icon={
-            <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-              <path d="M6 14C5.45 14 4.97917 13.8042 4.5875 13.4125C4.19583 13.0208 4 12.55 4 12C4 11.45 4.19583 10.9792 4.5875 10.5875C4.97917 10.1958 5.45 10 6 10C6.55 10 7.02083 10.1958 7.4125 10.5875C7.80417 10.9792 8 11.45 8 12C8 12.55 7.80417 13.0208 7.4125 13.4125C7.02083 13.8042 6.55 14 6 14ZM12 14C11.45 14 10.9792 13.8042 10.5875 13.4125C10.1958 13.0208 10 12.55 10 12C10 11.45 10.1958 10.9792 10.5875 10.5875C10.9792 10.1958 11.45 10 12 10C12.55 10 13.0208 10.1958 13.4125 10.5875C13.8042 10.9792 14 11.45 14 12C14 12.55 13.8042 13.0208 13.4125 13.4125C13.0208 13.8042 12.55 14 12 14ZM18 14C17.45 14 16.9792 13.8042 16.5875 13.4125C16.1958 13.0208 16 12.55 16 12C16 11.45 16.1958 10.9792 16.5875 10.5875C16.9792 10.1958 17.45 10 18 10C18.55 10 19.0208 10.1958 19.4125 10.5875C19.8042 10.9792 20 11.45 20 12C20 12.55 19.8042 13.0208 19.4125 13.4125C19.0208 13.8042 18.55 14 18 14Z" fill="#4B4D52" />
-            </svg>
-          }
+          icon={'pi pi-cog'}
           size="small"
-          className="bg-primary-reverse p-0"
+          className="surface-card p-0"
           style={{
             height: 33.06,
             width: 33.06
@@ -331,7 +328,7 @@ const CreateModel = ({ data, params }: any) => {
         />
         <OverlayPanel ref={op} className="solid-custom-overlay">
           <div className="flex flex-column gap-1 p-1">
-            <Button
+            {/* <Button
               text
               type="button"
               className="w-8rem text-left gap-2 text-color"
@@ -341,18 +338,16 @@ const CreateModel = ({ data, params }: any) => {
               icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
                 <path d="M6 11.9997C5.63333 11.9997 5.31944 11.8691 5.05833 11.608C4.79722 11.3469 4.66667 11.033 4.66667 10.6663V2.66634C4.66667 2.29967 4.79722 1.98579 5.05833 1.72467C5.31944 1.46356 5.63333 1.33301 6 1.33301H12C12.3667 1.33301 12.6806 1.46356 12.9417 1.72467C13.2028 1.98579 13.3333 2.29967 13.3333 2.66634V10.6663C13.3333 11.033 13.2028 11.3469 12.9417 11.608C12.6806 11.8691 12.3667 11.9997 12 11.9997H6ZM6 10.6663H12V2.66634H6V10.6663ZM3.33333 14.6663C2.96667 14.6663 2.65278 14.5358 2.39167 14.2747C2.13056 14.0136 2 13.6997 2 13.333V3.99967H3.33333V13.333H10.6667V14.6663H3.33333Z" fill="black" fill-opacity="0.88" />
               </svg>}
-            />
+            /> */}
             <Button
               text
               type="button"
-              className="w-8rem text-left gap-2 text-color"
+              className="w-8rem text-left gap-2"
               label="Delete"
               size="small"
               iconPos="left"
-              icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M4.66666 14C4.29999 14 3.9861 13.8694 3.72499 13.6083C3.46388 13.3472 3.33332 13.0333 3.33332 12.6667V4H2.66666V2.66667H5.99999V2H9.99999V2.66667H13.3333V4H12.6667V12.6667C12.6667 13.0333 12.5361 13.3472 12.275 13.6083C12.0139 13.8694 11.7 14 11.3333 14H4.66666ZM11.3333 4H4.66666V12.6667H11.3333V4ZM5.99999 11.3333H7.33332V5.33333H5.99999V11.3333ZM8.66666 11.3333H9.99999V5.33333H8.66666V11.3333Z" fill="#4B4D52" />
-              </svg>
-              }
+              severity="danger"
+              icon={'pi pi-trash'}
               onClick={() => setDeleteEntity(true)}
             />
           </div>
@@ -360,6 +355,14 @@ const CreateModel = ({ data, params }: any) => {
       </div>
     )
   }
+
+  const breadcrumbData = [
+    { label: 'Model', link: '/admin/core/solid-core/model-metadata/list' },
+    { label: params.id === "new" ? 'Create Model' : 'Edit Model' },
+  ];
+
+  const [isDirty, setIsDirty] = useState(false);
+
 
   return (
     <div className="solid-form-wrapper">
@@ -373,7 +376,9 @@ const CreateModel = ({ data, params }: any) => {
                 <div className="form-wrapper-title">Create Model</div>
               </div>
               <div className="gap-3 flex">
-                <Button label="Save" size="small" onClick={handleSubmit} type="submit" />
+                {isDirty &&
+                  <Button label="Save" size="small" onClick={handleSubmit} type="submit" />
+                }
                 <CancelButton />
               </div>
             </>
@@ -387,7 +392,9 @@ const CreateModel = ({ data, params }: any) => {
                 {data?.isSystem !== true &&
                   <>
                     <div>
-                      <Button label="Save" size="small" type="submit" onClick={handleSubmit} />
+                      {isDirty &&
+                        <Button label="Save" size="small" type="submit" onClick={handleSubmit} />
+                      }
                     </div>
                     <div>
                       <Button outlined label="Delete" size="small" severity="danger" type="button" onClick={() => setDeleteEntity(true)} />
@@ -400,6 +407,7 @@ const CreateModel = ({ data, params }: any) => {
             </>
           }
         </div>
+        <SolidBreadcrumb breadcrumbItems={breadcrumbData} />
         {/* <div className="solid-form-stepper">
           <SolidFormStepper />
         </div> */}
@@ -418,8 +426,8 @@ const CreateModel = ({ data, params }: any) => {
 
             }}
           >
-            <TabPanel header="Model" 
-             headerClassName={tabErrors[0] ? "tab-error" : ""}>
+            <TabPanel header="Model"
+              headerClassName={tabErrors[0] ? "tab-error" : ""}>
               <ModelMetaData
                 modelMetaData={modelMetaData}
                 setModelMetaData={setModelMetaData}
@@ -428,10 +436,11 @@ const CreateModel = ({ data, params }: any) => {
                 nextTab={nextTab}
                 formikModelMetadataRef={formikModelMetadataRef}
                 params={params}
-                formErrors= {formErrors}
+                formErrors={formErrors}
+                setIsDirty={setIsDirty}
               ></ModelMetaData>
             </TabPanel>
-            <TabPanel header="Fields" 
+            <TabPanel header="Fields"
               headerClassName={tabErrors[1] ? "tab-error" : ""}>
               <FieldMetaData
                 modelMetaData={modelMetaData}

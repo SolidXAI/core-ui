@@ -13,7 +13,8 @@ import { Button } from "primereact/button";
 import { useRouter } from "next/navigation";
 import { Dialog } from "primereact/dialog";
 import { Divider } from "primereact/divider";
-
+import Image from "next/image";
+import AvatarImage from '../../resources/images/Profile/Avatar.png'
 const UserProfileMenu = () => {
   const router = useRouter();
 
@@ -50,10 +51,11 @@ const UserProfileMenu = () => {
           //@ts-ignore
           onClick={(e: any) => op?.current?.toggle(e)}
         >
-          <img
-            src={`/images/Profile/Avatar.png`}
+          <Image
+            src={AvatarImage}
             alt="Solid"
-            className="profile-icon"
+            className="profile-icon relative"
+            fill
           />
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M7 5.83301L3.5 9.33301H10.5L7 5.83301Z" fill="black" />
@@ -61,11 +63,12 @@ const UserProfileMenu = () => {
         </div>
         <OverlayPanel ref={op} className="user-profile-panel">
           <div className="flex align-items-center p-3 gap-2 user-profile-title">
-            <img
+            <Image
               alt="avatar"
-              src={`/images/Profile/Avatar.png`}
-              className="w-2rem"
-            ></img>
+              src={AvatarImage}
+              className="w-2rem relative"
+              fill
+            />
             <div className="flex flex-column align">
               <span className="font-bold">{user?.user?.username}</span>
               <span className="mt-1">{user?.user?.email}</span>

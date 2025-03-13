@@ -1,10 +1,12 @@
 {
   "name": "@solidstarters/solid-core-ui",
-  "version": "1.1.19",
+  "version": "1.1.21",
   "scripts": {
+    "prebuild": "npm run copy-styles",
     "build": "tsc && tsc-alias",
     "clean": "rm -rf dist",
-    "prepare": "npm run build"
+    "prepare": "npm run build",
+    "copy-styles": "copyfiles -u 1 \"src/resources/**/*\" dist"
   },
   "keywords": [],
   "author": "",
@@ -25,6 +27,7 @@
     "change-case": "^5.4.4",
     "chart.js": "^4.4.3",
     "cloudinary": "^1.40.0",
+    "copyfiles": "^2.4.1",
     "html2canvas": "^1.4.1",
     "jspdf": "^2.5.1",
     "jwt-decode": "^4.0.0",
@@ -71,7 +74,6 @@
     "react-transition-group": "^4.4.5"
   },
   "devDependencies": {
-    "@types/react-js-pagination": "^3.0.7",
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/theme-one-dark": "^6.1.2",
     "@reduxjs/toolkit": "^1.9.5",
@@ -81,6 +83,7 @@
     "@types/qs": "^6.9.15",
     "@types/react": "18.2.21",
     "@types/react-dom": "18.2.7",
+    "@types/react-js-pagination": "^3.0.7",
     "@types/uuid": "^10.0.0",
     "@uiw/react-codemirror": "^4.23.3",
     "codemirror": "^6.0.1",

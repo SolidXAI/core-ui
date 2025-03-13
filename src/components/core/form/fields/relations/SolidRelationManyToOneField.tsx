@@ -68,7 +68,7 @@ export class SolidRelationManyToOneField implements ISolidField {
         const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
 
         // auto complete specific code. 
-        const entityApi = createSolidEntityApi(fieldMetadata.relationModelSingularName);
+        const entityApi = createSolidEntityApi(fieldMetadata.relationCoModelSingularName);
         const { useLazyGetSolidEntitiesQuery } = entityApi;
         const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
 
@@ -154,6 +154,7 @@ export class SolidRelationManyToOneField implements ISolidField {
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}
                         onChange={formik.handleChange}
+                        onFocus={(e) => e.target.select()}
                         className="w-full solid-standard-autocomplete"
                     />
                     {fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false &&

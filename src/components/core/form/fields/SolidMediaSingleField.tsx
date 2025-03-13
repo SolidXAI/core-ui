@@ -202,7 +202,7 @@ export class SolidMediaSingleField implements ISolidField {
                 <div className="flex flex-column gap-2 mt-4">
                     {showFieldLabel != false &&
                         <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                            &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
+                            {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                         </label>
                     }
                     <div
@@ -224,7 +224,7 @@ export class SolidMediaSingleField implements ISolidField {
                                 <FileReaderExt fileDetails={fileDetails} />
                                 <div className="w-full flex flex-column gap-1">
                                     <div className="flex align-items-start justify-content-between">
-                                        <Link className="font-bold w-9" href={process.env.NEXT_PUBLIC_BACKEND_API_URL + `/${fileDetails?.fileUrl}`} target="_blank">{fileDetails.name}</Link>
+                                        <Link className="font-normal w-9" href={process.env.NEXT_PUBLIC_BACKEND_API_URL + `/${fileDetails?.fileUrl}`} target="_blank">{fileDetails.name}</Link>
                                         <div className="flex align-items-center gap-2">
                                             <div>
                                                 <Button
