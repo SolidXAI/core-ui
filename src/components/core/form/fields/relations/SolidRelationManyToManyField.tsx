@@ -13,7 +13,6 @@ import * as Yup from 'yup';
 import { Schema } from "yup";
 import SolidFormView from "../../SolidFormView";
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
-import { useRouter } from "next/router";
 
 
 
@@ -138,7 +137,6 @@ export class SolidRelationManyToManyField implements ISolidField {
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
-        const router = useRouter();
         
         const readOnlyPermission = this.fieldContext.readOnly;
 

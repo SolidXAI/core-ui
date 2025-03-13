@@ -759,8 +759,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 <div className="gap-3 flex">
                                     {params.embeded !== true &&
                                         actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
-                                        !formViewLayout.attrs.readonly &&
-                                        !formViewLayout.attrs.readonly &&
+                                        !formViewLayout?.attrs?.readonly &&
+                                        !formViewLayout?.attrs?.readonly &&
                                         <div>
                                             <Button
                                                 label="Save"
@@ -772,8 +772,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     }
                                     {params.embeded !== true &&
                                         actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
-                                        !formViewLayout.attrs.readonly &&
-                                        !formViewLayout.attrs.readonly &&
+                                        !formViewLayout?.attrs?.readonly &&
+                                        !formViewLayout?.attrs?.readonly &&
                                         <div>
                                             <Button
                                                 label="Save & Close"
@@ -788,8 +788,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     }
                                     {params.embeded == true &&
                                         actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
-                                        !formViewLayout.attrs.readonly &&
-                                        !formViewLayout.attrs.readonly &&
+                                        !formViewLayout?.attrs?.readonly &&
+                                        !formViewLayout?.attrs?.readonly &&
                                         <div>
                                             <Button
                                                 label="Save"
@@ -821,8 +821,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 <div className="gap-3 flex">
                                     {params.embeded !== true &&
                                         actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
-                                        !formViewLayout.attrs.readonly &&
-                                        !formViewLayout.attrs.readonly &&
+                                        !formViewLayout?.attrs?.readonly &&
+                                        !formViewLayout?.attrs?.readonly &&
                                         <div>
                                             <Button
                                                 label="Save"
@@ -834,8 +834,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     }
                                     {params.embeded == true &&
                                         actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
-                                        !formViewLayout.attrs.readonly &&
-                                        !formViewLayout.attrs.readonly &&
+                                        !formViewLayout?.attrs?.readonly &&
+                                        !formViewLayout?.attrs?.readonly &&
                                         <div>
                                             <Button
                                                 label="Save"
@@ -847,8 +847,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     }
                                     {params.embeded !== true &&
                                         actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
-                                        !formViewLayout.attrs.readonly &&
-                                        !formViewLayout.attrs.readonly &&
+                                        !formViewLayout?.attrs?.readonly &&
+                                        !formViewLayout?.attrs?.readonly &&
                                         <div>
                                             <Button
                                                 label="Save & Close"
@@ -863,8 +863,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     }
                                     {params.embeded !== true &&
                                         actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
-                                        !formViewLayout.attrs.readonly &&
-                                        !formViewLayout.attrs.readonly &&
+                                        !formViewLayout?.attrs?.readonly &&
+                                        !formViewLayout?.attrs?.readonly &&
                                         <div>
                                             <Button
                                                 size="small"
@@ -877,8 +877,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     }
                                     {params.embeded == true &&
                                         actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
-                                        !formViewLayout.attrs.readonly &&
-                                        !formViewLayout.attrs.readonly &&
+                                        !formViewLayout?.attrs?.readonly &&
+                                        !formViewLayout?.attrs?.readonly &&
                                         <div>
                                             <Button
                                                 size="small"
