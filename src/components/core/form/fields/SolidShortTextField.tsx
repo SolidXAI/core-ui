@@ -29,7 +29,6 @@ export class SolidShortTextField implements ISolidField {
         return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
     }
 
-
     validationSchema(): Schema {
         let schema: Yup.StringSchema<string | null | undefined> = Yup.string();
 
@@ -94,7 +93,8 @@ export class SolidShortTextField implements ISolidField {
                         disabled={formDisabled || fieldDisabled}
                         id={fieldLayoutInfo.attrs.name}
                         aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                        onChange={formik.handleChange}
+                        // onChange={formik.handleChange}
+                        onChange={this.fieldContext.changeHandler}
                         value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                     />
                 </div>

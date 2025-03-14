@@ -1,0 +1,89 @@
+// Base type of all Solid entities
+export type CommonEntity = {
+    id: number;
+    createdAt: string;
+    updatedAt: string;
+    deletedAt: string | null;
+    deletedTracker: string;
+};
+
+// Model
+export type ModelMetadata = CommonEntity & {
+    singularName: string;
+    tableName: string;
+    pluralName: string;
+    displayName: string;
+    description: string;
+    dataSource: string;
+    dataSourceType: string;
+    enableSoftDelete: boolean;
+    enableAuditTracking: boolean;
+    internationalisation: boolean;
+    isSystem: boolean;
+    userKeyField: string | null;
+};
+
+// Module 
+export type ModuleMetadata = CommonEntity & {
+    displayName: string;
+    name: string;
+    description: string;
+    menuIconUrl: string | null;
+    menuSequenceNumber: number;
+    defaultDataSource: string;
+    isSystem: boolean;
+};
+
+// Define a general Field type with id and name as required properties
+export type FieldMetadata = CommonEntity & {
+    id: number;
+    name: string;
+    displayName: string;
+
+    // For now we have kept it flexible allowing any number of other key / value pairs...
+    [key: string]: any;
+};
+
+// Represents a collection of fields.
+export type FieldsMetadata = {
+    [key: string]: Field;
+};
+
+// Solid View
+export type SolidView = CommonEntity & {
+    name: string;
+    displayName: string;
+    type: string;
+    // TODO: maybe change this in the future to set this to a json object...
+    context: string;
+    layout: LayoutNode;
+    model: Model;
+    module: Module;
+};
+
+// Layout Types
+export type LayoutAttribute = {
+    name: string;
+    label?: string;
+    className?: string;
+    inlineCreate?: string;
+};
+
+// Generic representation of any node in our layout 
+export type LayoutNodeType = "form" | "sheet" | "notebook" | "page" | "row" | "column" | "field";
+export type LayoutNode = {
+    type: LayoutNodeType;
+    attrs: LayoutAttribute;
+    children?: LayoutNode[];
+};
+
+// Event type
+export type SolidUiEvents = "onFieldUpdate"
+export type SolidUiEvent = {
+    type: SolidUiEvents;
+    modifiedField: string;
+    // This comes from Formik...
+    formData: Record<string, any>;
+    viewMetadata: SolidView;
+    fieldsMetadata: FieldsMetadata;
+};

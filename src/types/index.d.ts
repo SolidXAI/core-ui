@@ -14,6 +14,10 @@ import {
     AppConfigProps
 } from './layout';
 
+import {
+    SolidUiEvent
+} from './solid-core';
+
 type ChildContainerProps = {
     children: ReactNode;
 };
@@ -29,5 +33,6 @@ export type {
     LayoutContextProps,
     ChildContainerProps,
     AppConfigProps,
-    MenuContextProps
+    MenuContextProps,
+    SolidUiEvent
 };

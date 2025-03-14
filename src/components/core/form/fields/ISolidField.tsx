@@ -8,7 +8,8 @@ export type SolidFieldProps = {
     field: any,
     data: any,
     modelName?: any,
-    readOnly?: any
+    readOnly?: any,
+    changeHandler: any
 };
 
 export type FormikObject = {

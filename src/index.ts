@@ -375,6 +375,7 @@ export { addCommasToAmount, calculateDaysOfStay, getSingularAndPlural } from '@/
 // export * from '@/helpers/menu';
 export { createPermission, deletePermission, updatePermission } from '@/helpers/permissions';
 export { revalidateTag } from '@/helpers/revalidate';
+export { registerExtensionComponent, registerExtensionFunction } from '@/helpers/registry';
 
 // redux
 // ├── api
@@ -615,7 +616,7 @@ export { default as userReducer } from '@/redux/features/userSlice';
 export { default as GenerateModelCodeRowAction } from '@/components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction'
 
 // types
-export type { LayoutConfig } from '@/types';
+export type { LayoutConfig, SolidUiEvent } from '@/types';
 export { GeneralSettings } from '@/components/common/GeneralSettings';
 
 export { default as authProviders } from '@/nextAuth/authProviders'

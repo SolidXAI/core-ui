@@ -14,7 +14,7 @@ import { Dialog } from "primereact/dialog";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import qs from "qs";
-import { useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./fields/ISolidField";
 import { SolidBooleanField } from "./fields/SolidBooleanField";
@@ -33,9 +33,10 @@ import { SolidSelectionStaticField } from "./fields/SolidSelectionStaticField";
 import { SolidShortTextField } from "./fields/SolidShortTextField";
 import { SolidTimeField } from "./fields/SolidTimeField";
 import { BackButton } from "@/components/common/BackButton";
-import { SolidFormStepper } from "@/components/common/SolidFormStepper";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
+import { SolidUiEvent } from "@/types";
+import { getExtensionComponent, getExtensionFunction } from "@/helpers/registry";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -131,7 +132,7 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps): ISolidField 
 }
 
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
-const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly }: any) => {
+const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, changeHandler }: any) => {
     const fieldContext: SolidFieldProps = {
         // field metadata - coming from the field-metadata table.
         fieldMetadata: fieldMetadata,
@@ -142,7 +143,8 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
         // complete form view metadata - this includes layout of the whole form & metadata about all fields in the corresponding model.
         solidFormViewMetaData: solidFormViewMetaData,
         modelName: modelName,
-        readOnly: readOnly
+        readOnly: readOnly,
+        changeHandler: changeHandler
     }
     const solidField = fieldFactory(fieldMetadata?.type, fieldContext);
 
@@ -471,6 +473,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     data: initialEntityData,
                     solidFormViewMetaData: solidFormViewMetaData,
                     modelName: params.modelName,
+                    // TODO: do we need to pass the change handler?
+                    changeHandler: null
                 }
 
                 let solidField = fieldFactory(fieldMetadata?.type, fieldContext);
@@ -538,6 +542,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
         }
     }
+    // TODO: Possible optimisation here, we are firing 2 queries to load the form view data object. 
+    // once without populate & populateMedia and then again once after that.
     const formViewDataQs = qs.stringify({ populate: toPopulate, populateMedia: toPopulateMedia }, {
         encodeValuesOnly: true,
     });
@@ -560,6 +566,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     let formik: FormikObject;
 
+    // If either the metadata or the data of this form is loading, then we simply render a loading screen...
     if (solidFormViewMetaDataIsLoading || solidFormViewDataIsLoading || !formViewLayout) {
         formik = useFormik({
             initialValues: {},
@@ -570,6 +577,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         return <div>Rendering form...</div>;
     }
+    // At this point everything required to render the form is loaded, so we go ahead and start rendering things dynamically...
     else {
 
         // Initialize formik...
@@ -591,6 +599,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 data: initialEntityData,
                 solidFormViewMetaData: solidFormViewMetaData,
                 modelName: params.modelName,
+                // TODO: do we need to pass the change handler?
+                changeHandler: null,
             }
             let solidField = fieldFactory(fieldMetadata?.type, fieldContext);
             if (!fieldMetadata?.type) {
@@ -615,6 +625,43 @@ const SolidFormView = (params: SolidFormViewProps) => {
             onSubmit: onFormikSubmit,
         });
 
+        const formChangeHandler = async (event: ChangeEvent<HTMLInputElement>) => {
+            // get details from the form event
+            const { name: fieldName, value, type, checked } = event.target;
+            console.log(`formChangeHandler invoked for change in ${fieldName}, with updated value: ${value}`);
+
+            // TODO: check if there is a change handler registered with this form view, load it and fire it.
+            const changeHandler = solidView.layout?.changeHandler;
+            console.log(`changeHandler for this form is ${changeHandler}`);
+
+            if (changeHandler) {
+                // Get hold of the dynamic module...
+                // const dynamicChangeHandler = await loadDynamicModule(changeHandler);
+                const dynamicChangeHandler = getExtensionFunction(changeHandler);
+
+                // Invoke the dynamic module...
+                if (dynamicChangeHandler) {
+                    const event: SolidUiEvent = {
+                        fieldsMetadata: solidFieldsMetadata,
+                        formData: formik.values,
+                        modifiedField: fieldName,
+                        type: 'onFieldUpdate',
+                        viewMetadata: solidView
+                    }
+                    const updatedFormInfo = dynamicChangeHandler(event);
+                    console.log(`I have triggered on change hander: `, updatedFormInfo);
+
+                }
+                else {
+                    console.log(`Unable to load dynamic module:`, changeHandler);
+                }
+
+            }
+
+            // Invoke the formik change 
+            formik.handleChange(event);
+        }
+
         // Now render the form dynamically...
         const renderFormElementDynamically: any = (element: any, solidFormViewMetaData: any) => {
             const { type, attrs, children } = element;
@@ -637,8 +684,18 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     // const fieldMetadata = solidFieldsMetadata[attrs.name];
                     const fieldMetadata = solidFormViewMetaData.data.solidFieldsMetadata[attrs.name];
                     // Read only permission if there is no update permission on model and router doesnt contains new
-                    const readOnlyPermission  = !actionsAllowed.includes(`${updatePermission(params.modelName)}`) && params.id !== "new" 
-                    return <SolidField key={key} field={element} formik={formik} fieldMetadata={fieldMetadata} initialEntityData={solidFormViewData ? solidFormViewData.data : null} solidFormViewMetaData={solidFormViewMetaData} modelName={params.modelName} readOnly={readOnlyPermission} />;
+                    const readOnlyPermission = !actionsAllowed.includes(`${updatePermission(params.modelName)}`) && params.id !== "new"
+                    return <SolidField
+                        key={key}
+                        field={element}
+                        formik={formik}
+                        fieldMetadata={fieldMetadata}
+                        initialEntityData={solidFormViewData ? solidFormViewData.data : null}
+                        solidFormViewMetaData={solidFormViewMetaData}
+                        modelName={params.modelName}
+                        readOnly={readOnlyPermission}
+                        changeHandler={formChangeHandler}
+                    />;
                 }
                 case "notebook":
                     return <SolidNotebook key={key}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData))}</SolidNotebook>;
@@ -762,6 +819,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
             { label: 'Book', link: '/admin/core/library-management/book/list' },
             { label: params.id === "new" ? `Add ${params.modelName}` : `Edit ${params.modelName}` },
         ];
+
+        // see if we have an injected dynamic component.s
+        const dynamicHeader = solidView.layout?.header;
+        // const dynamicHeader = "BookFormViewDynamicComponent";
+        let DynamicHeaderComponent = null;
+        if (dynamicHeader) {
+            DynamicHeaderComponent = getExtensionComponent(dynamicHeader);
+        }
 
         return (
             <div className="solid-form-wrapper">
@@ -897,6 +962,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         </div>
                     } */}
                     <div className="p-4 solid-form-content">
+                        {DynamicHeaderComponent && <DynamicHeaderComponent />}
                         {renderFormDynamically(formViewMetaData)}
                     </div>
                 </form>

@@ -1,5 +1,3 @@
-import React from 'react'
-
 export const AppTitle = ({ title }: { title: any }) => {
     const appTitle = title ? title?.data?.appTitle : "Solid Starters";
     return (
