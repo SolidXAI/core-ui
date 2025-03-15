@@ -737,21 +737,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     onClick={() => setDeleteDialogVisible(true)}
                                 />
                             }
-                            {params.embeded == true &&
-                                actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
-                                !formViewLayout.attrs.readonly &&
-                                <Button
-                                    text
-                                    type="button"
-                                    className="w-8rem text-left gap-2"
-                                    label="Delete"
-                                    size="small"
-                                    iconPos="left"
-                                    severity="danger"
-                                    icon={'pi pi-trash'}
-                                    onClick={() => setDeleteDialogVisible(true)}
-                                />
-                            }
                         </div>
                     </OverlayPanel>
                 </div>
@@ -878,6 +863,19 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                             />
                                         </div>
                                     } */}
+                                     {params.embeded == true &&
+                                        actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
+                                        !formViewLayout.attrs.readonly &&
+                                        <div>
+                                            <Button
+                                                size="small"
+                                                type="button"
+                                                label="Delete"
+                                                severity="danger"
+                                                onClick={() => setDeleteDialogVisible(true)}
+                                            />
+                                        </div>
+                                    }
                                     {params.embeded == true &&
                                         <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' />
 
