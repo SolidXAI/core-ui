@@ -704,7 +704,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         // Now render the form dynamically...
         const renderFormElementDynamically: any = (element: any, solidFormViewMetaData: any) => {
-            const { type, attrs, children } = element;
+            let { type, attrs, body, children } = element;
 
             // const key = attrs?.name ?? generateRandomKey();
             const key = attrs?.name;
@@ -717,7 +717,27 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
             switch (type) {
                 case "form":
+                    if (!children)
+                        children = [];
                     return <div key={key}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData))}</div>;
+                case "div":
+                    if (!children)
+                        children = [];
+                    return <div key={key} {...attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData))}</div>
+                case "span":
+                    return <span key={key} {...attrs}>{body}</span>
+                case "p":
+                    return <p key={key} {...attrs}>{body}</p>
+                case "h1":
+                    return <h1 key={key} {...attrs}>{body}</h1>
+                case "h2":
+                    return <h2 key={key} {...attrs}>{body}</h2>
+                case "ul":
+                    if (!children)
+                        children = [];
+                    return <ul key={key} {...attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData))}</ul>
+                case "li":
+                    return <li key={key} {...attrs}>{body}</li>
                 case "sheet":
                     return <SolidSheet key={key}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData))}</SolidSheet>;
                 case "group":
