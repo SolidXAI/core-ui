@@ -92,9 +92,11 @@ export class SolidShortTextField implements ISolidField {
                         readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                         disabled={formDisabled || fieldDisabled}
                         id={fieldLayoutInfo.attrs.name}
+                        name={fieldMetadata.name}
                         aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
                         // onChange={formik.handleChange}
-                        onChange={this.fieldContext.changeHandler}
+                        onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
+                        onBlur={(e) => this.fieldContext.onBlur(e, 'onFieldBlur')}
                         value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                     />
                 </div>

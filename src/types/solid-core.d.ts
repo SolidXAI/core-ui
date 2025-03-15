@@ -78,10 +78,11 @@ export type LayoutNode = {
 };
 
 // Event type
-export type SolidUiEvents = "onFieldUpdate"
+export type SolidUiEvents = "onFieldChange" | "onFieldBlur";
 export type SolidUiEvent = {
     type: SolidUiEvents;
     modifiedField: string;
+    modifiedFieldValue: any;
     // This comes from Formik...
     formData: Record<string, any>;
     viewMetadata: SolidView;

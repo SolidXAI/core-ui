@@ -15,6 +15,16 @@ import {
 } from './layout';
 
 import {
+    CommonEntity,
+    ModelMetadata,
+    ModuleMetadata,
+    FieldMetadata,
+    FieldsMetadata,
+    SolidView,
+    LayoutAttribute,
+    LayoutNode,
+    LayoutNodeType,
+    SolidUiEvents,
     SolidUiEvent
 } from './solid-core';
 
@@ -34,5 +44,15 @@ export type {
     ChildContainerProps,
     AppConfigProps,
     MenuContextProps,
+    CommonEntity,
+    ModelMetadata,
+    ModuleMetadata,
+    FieldMetadata,
+    FieldsMetadata,
+    SolidView,
+    LayoutAttribute,
+    LayoutNode,
+    LayoutNodeType,
+    SolidUiEvents,
     SolidUiEvent
 };

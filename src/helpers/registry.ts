@@ -11,12 +11,12 @@ const extensionRegistry: ExtensionRegistry = {
 };
 
 export const registerExtensionComponent = (name: string, component: React.ComponentType<any>) => {
-    console.log(`registerExtensionComponent invoked... ${name}`);
+    // console.log(`registerExtensionComponent invoked... ${name}`);
     extensionRegistry.components[name] = component;
 };
 
 export const registerExtensionFunction = (name: string, fn: (...args: any[]) => any) => {
-    console.log(`registerExtensionFunction invoked... ${name}`);
+    // console.log(`registerExtensionFunction invoked... ${name}`);
     extensionRegistry.functions[name] = fn;
 };
 
@@ -47,6 +47,6 @@ export const getExtensionComponent = (name: string): React.ComponentType<any> | 
 };
 
 export const getExtensionFunction = (name: string) => {
-    console.log(`Registry state: `, extensionRegistry);
+    // console.log(`Registry state: `, extensionRegistry);
     return extensionRegistry.functions[name];
 };

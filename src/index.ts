@@ -219,6 +219,7 @@ export { NotFound } from '@/components/common/NotFound'
 import Error from '@/components/common/error';
 export { Error };
 export { SolidFormStepper } from '@/components/common/SolidFormStepper'
+export { SolidViewLayoutManager } from '@/components/core/common/SolidViewLayoutManager';
 
 // export { SolidListViewOptions } from '@/components/core/common/SolidListViewOptions';
 export { SolidConfigureLayoutElement } from '@/components/core/common/SolidConfigureLayoutElement';
@@ -616,7 +617,20 @@ export { default as userReducer } from '@/redux/features/userSlice';
 export { default as GenerateModelCodeRowAction } from '@/components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction'
 
 // types
-export type { LayoutConfig, SolidUiEvent } from '@/types';
+export type {
+    LayoutConfig,
+    CommonEntity,
+    ModelMetadata,
+    ModuleMetadata,
+    FieldMetadata,
+    FieldsMetadata,
+    SolidView,
+    LayoutAttribute,
+    LayoutNode,
+    LayoutNodeType,
+    SolidUiEvents,
+    SolidUiEvent
+} from '@/types';
 export { GeneralSettings } from '@/components/common/GeneralSettings';
 
 export { default as authProviders } from '@/nextAuth/authProviders'

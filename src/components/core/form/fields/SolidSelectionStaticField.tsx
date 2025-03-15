@@ -117,7 +117,8 @@ export class SolidSelectionStaticField implements ISolidField {
                         suggestions={selectionStaticItems}
                         completeMethod={selectionStaticSearch}
                         // onChange={(e) => updateInputs(index, e.value)} />
-                        onChange={formik.handleChange}
+                        // onChange={formik.handleChange}
+                        onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
                         className="solid-standard-autocomplete"
                     />
                 </div>
