@@ -146,7 +146,6 @@ const fieldBasedPayloadFormating = (values: any, currentFields: string[], fieldM
     // }
     return acc;
   }, {});
-
   transformedPayload.displayName = transformedPayload.displayName.trim()
 
   transformedPayload.identifier = fieldMetaData ? fieldMetaData.identifier : Date.now();
@@ -167,10 +166,11 @@ const fieldBasedPayloadFormating = (values: any, currentFields: string[], fieldM
     transformedPayload.computedFieldValueProviderCtxt = prettified
   }
   if (currentFields.includes("relationCreateInverse")) {
-    transformedPayload.relationCreateInverse = values.relationCreateInverse == "false" ? "" : true
+    transformedPayload.relationCreateInverse = values.relationCreateInverse == false ? false : true
   }
-
-
+  if (transformedPayload.relationType == "many-to-one") {
+    transformedPayload.relationCascade = values.relationCascade;
+  }
 
   return transformedPayload
 
@@ -893,9 +893,9 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
     mediaEmbedded: fieldMetaData ? (fieldMetaData?.mediaEmbedded && fieldMetaData?.mediaEmbedded.toString()) : "true",
     relationType: fieldMetaData ? fieldMetaData?.relationType : null,
     relationCoModelSingularName: fieldMetaData ? fieldMetaData?.relationCoModelSingularName : null,
-    relationCoModelFieldName: fieldMetaData ? fieldMetaData?.relationCoModelFieldName : modelMetaData.pluralName || '',
+    relationCoModelFieldName: fieldMetaData ? fieldMetaData?.relationCoModelFieldName : null,
     relationCreateInverse: fieldMetaData ? fieldMetaData?.relationCreateInverse : false,
-    relationCascade: fieldMetaData ? fieldMetaData?.relationCascade : 'cascade',
+    relationCascade: fieldMetaData ? fieldMetaData?.relationCascade : 'set null',
     relationModelModuleName: fieldMetaData ? fieldMetaData?.relationModelModuleName : modelMetaData?.module.name,
     selectionDynamicProvider: fieldMetaData ? fieldMetaData?.selectionDynamicProvider : null,
     selectionDynamicProviderCtxt: fieldMetaData ? fieldMetaData?.selectionDynamicProviderCtxt : "",
@@ -1906,7 +1906,7 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                 <Checkbox
                                   inputId="relationCreateInverse"
                                   name="relationCreateInverse"
-                                  checked={Boolean(formik.values.relationCreateInverse)}
+                                  checked={formik.values.relationCreateInverse}
                                   onChange={(e) => formik.setFieldValue("relationCreateInverse", e.checked)}
                                 />
                                 <label htmlFor="relationCreateInverse" className="ml-2">Create Inverse</label>
@@ -1917,13 +1917,13 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                             </div>
                           )}
 
-                          {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
+                          {currentFields.includes("relationCoModelFieldName") && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="relationCoModelFieldName"
                                 className="form-field-label"
                               >
-                                Field Name on Inverse Side
+                                Relation Co-Model Field Name
                               </label>
                               <InputText
                                 type="text"
