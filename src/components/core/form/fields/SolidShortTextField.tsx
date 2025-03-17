@@ -64,6 +64,7 @@ export class SolidShortTextField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+        const includeWrapper = fieldLayoutInfo.attrs?.includeWrapper || 'yes';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
@@ -79,31 +80,54 @@ export class SolidShortTextField implements ISolidField {
         const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
         return (
-            <div className={className}>
-                <div className="flex flex-column gap-2 mt-4">
-                    {showFieldLabel != false &&
-                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                            {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
+            <>
+                {includeWrapper === 'yes' && <div className={className}>
+                    <div className="flex flex-column gap-2 mt-4">
+                        {showFieldLabel != false &&
+                            <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                                {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
+                                {/* &nbsp;   {fieldDescription &&  <span  className="form_field_help_text">`(${fieldDescription})` </span>} */}
+                            </label>
+                        }
+                        <InputText
+                            readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                            disabled={formDisabled || fieldDisabled}
+                            id={fieldLayoutInfo.attrs.name}
+                            name={fieldMetadata.name}
+                            aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
+                            // onChange={formik.handleChange}
+                            onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
+                            onBlur={(e) => this.fieldContext.onBlur(e, 'onFieldBlur')}
+                            value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                        />
+                    </div>
+                    {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    )}
+                </div>}
+                {includeWrapper === 'no' &&
+                    <>
+                        {showFieldLabel != false &&
+                            <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                                {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
 
-                            {/* &nbsp;   {fieldDescription &&  <span  className="form_field_help_text">`(${fieldDescription})` </span>} */}
-                        </label>
-                    }
-                    <InputText
-                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                        disabled={formDisabled || fieldDisabled}
-                        id={fieldLayoutInfo.attrs.name}
-                        name={fieldMetadata.name}
-                        aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                        // onChange={formik.handleChange}
-                        onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
-                        onBlur={(e) => this.fieldContext.onBlur(e, 'onFieldBlur')}
-                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                    />
-                </div>
-                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                )}
-            </div>
+                                {/* &nbsp;   {fieldDescription &&  <span  className="form_field_help_text">`(${fieldDescription})` </span>} */}
+                            </label>
+                        }
+                        <InputText
+                            readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                            disabled={formDisabled || fieldDisabled}
+                            id={fieldLayoutInfo.attrs.name}
+                            name={fieldMetadata.name}
+                            aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
+                            // onChange={formik.handleChange}
+                            onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
+                            onBlur={(e) => this.fieldContext.onBlur(e, 'onFieldBlur')}
+                            value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                        />
+                    </>
+                }
+            </>
         );
     }
 }
