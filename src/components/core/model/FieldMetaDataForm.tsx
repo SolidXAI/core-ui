@@ -109,7 +109,6 @@ const SelectionStaticValues = ({ enumValue, onUpdate, onDelete, onAdd }: any) =>
       <Button
         icon="pi pi-plus"
         size="small"
-        className="small-button"
         onClick={onAdd}
         type="button"
       />
@@ -118,7 +117,6 @@ const SelectionStaticValues = ({ enumValue, onUpdate, onDelete, onAdd }: any) =>
       <Button
         icon="pi pi-trash"
         size="small"
-        className="small-button"
         onClick={onDelete}
         outlined
         severity="danger"
@@ -1189,7 +1187,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                     >
                       <div className="formgrid grid">
                         {currentFields.includes("displayName") && (
-                          <div className="field col-6 flex-flex-column gap-2">
+                          <div className="field col-6 flex-flex-column gap-2 mt-2">
                             <label htmlFor="displayName" className="form-field-label">
                               Display Name
                             </label>
@@ -1408,7 +1406,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
                           {currentFields.includes("defaultValue") && (
-                            <div className="field col-6 flex-flex-column gap-2">
+                            <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="defaultValue"
                                 className="form-field-label"
@@ -1472,7 +1470,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   value={formik.values.defaultValue ? formik.values.defaultValue : "false"}
                                   onChange={(e) => formik.setFieldValue("defaultValue", e.value)} // Custom handling for boolean input
                                   options={booleanOptions}
-                                  className={classNames(" flex boolean-switch", {
+                                  className={classNames("", {
                                     "p-invalid": isFormFieldValid(formik, "defaultValue"),
                                   })}
                                 />
@@ -1657,7 +1655,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   formik.setFieldValue("mediaEmbedded", e.value);
                                 }}
                                 options={booleanOptions}
-                                className={classNames(" flex boolean-switch", {
+                                className={classNames("", {
                                   "p-invalid": isFormFieldValid(
                                     formik,
                                     "mediaEmbedded"
@@ -2425,7 +2423,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                       )}
                       {(currentFields.includes("regexPattern") || currentFields.includes("min") || currentFields.includes("max") || currentFields.includes("ormType")) && ormTypeOptions && selectedType.value !== 'relation' &&
                         <>
-                          <p className="form-wrapper-heading text-base">Validations</p>
+                          <p className="form-wrapper-heading text-base mt-3">Validations</p>
                           <div className="formgrid grid">
                             {(currentFields.includes("regexPattern") && selectedType.value === "password") &&
                               <>
