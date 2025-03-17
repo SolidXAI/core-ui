@@ -10,6 +10,7 @@ import UserProfileMenu from "./user-profile-menu";
 import Image from "next/image";
 import AppBuilderSvg from '../../resources/images/menu/app-builder.svg'
 import SettingImage from '../../resources/images/Navigation/settings.png'
+import { Avatar } from "primereact/avatar";
 
 // import menu from "@/helpers/menu";
 
@@ -169,26 +170,7 @@ const AppSidebar = () => {
                                         //     src={`/images/menu/app-builder.svg`}
                                         //     alt={m.title}
                                         // />
-                                        ((
-                                            <div
-                                                style={{
-                                                    width: "40px",
-                                                    height: "40px",
-                                                    display: "flex",
-                                                    alignItems: "center",
-                                                    justifyContent: "center",
-                                                    backgroundColor: "#722ED1",
-                                                    color: "white",
-                                                    fontWeight: "bold",
-                                                    borderRadius: "50%",
-                                                    fontSize: "18px",
-                                                    textTransform: "uppercase",
-                                                    cursor: "pointer",
-                                                }}
-                                            >
-                                                {m.title.charAt(0)}
-                                            </div>
-                                        ))
+                                        <Avatar label={m.title.charAt(0)}shape="circle" style={{backgroundColor:'var(--primary-color)'}}/>
                                     }
                                 </a>
                             </div>
@@ -196,7 +178,7 @@ const AppSidebar = () => {
                     })}
                 </div>
 
-                <UserProfileMenu></UserProfileMenu>
+                {/* <UserProfileMenu></UserProfileMenu> */}
             </div>
             {currentMenu && (
                 <div className={`sidebar-right ${visibleNavbar ? "open" : ""}`}>

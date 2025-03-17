@@ -629,7 +629,8 @@ export type {
     LayoutNode,
     LayoutNodeType,
     SolidUiEvents,
-    SolidUiEvent
+    SolidUiEvent,
+    SolidFormWidgetProps
 } from '@/types';
 export { GeneralSettings } from '@/components/common/GeneralSettings';
 

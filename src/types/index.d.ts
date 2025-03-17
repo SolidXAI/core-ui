@@ -25,7 +25,8 @@ import {
     LayoutNode,
     LayoutNodeType,
     SolidUiEvents,
-    SolidUiEvent
+    SolidUiEvent,
+    SolidFormWidgetProps
 } from './solid-core';
 
 type ChildContainerProps = {
@@ -54,5 +55,6 @@ export type {
     LayoutNode,
     LayoutNodeType,
     SolidUiEvents,
-    SolidUiEvent
+    SolidUiEvent,
+    SolidFormWidgetProps
 };

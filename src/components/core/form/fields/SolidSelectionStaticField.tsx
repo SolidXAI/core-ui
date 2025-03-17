@@ -111,6 +111,7 @@ export class SolidSelectionStaticField implements ISolidField {
                         disabled={formDisabled || fieldDisabled}
                         {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                         id={fieldLayoutInfo.attrs.name}
+                        name={fieldLayoutInfo.attrs.name}
                         field="label"
                         value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                         dropdown

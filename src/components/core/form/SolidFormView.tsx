@@ -37,6 +37,7 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
 import { SolidUiEvent } from "@/types";
 import { getExtensionComponent, getExtensionFunction } from "@/helpers/registry";
+import { SolidFormWidgetProps } from "@/types/solid-core";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -226,6 +227,7 @@ const SolidSheet = ({ children }: any) => (
         {children}
     </div>
 );
+
 const SolidNotebook = ({ children }: any) => {
 
     return (
@@ -233,6 +235,26 @@ const SolidNotebook = ({ children }: any) => {
             <TabView>
                 {children}
             </TabView>
+        </div>
+    )
+};
+
+const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData }: any) => {
+    const solidView = solidFormViewMetaData.data.solidView;
+    const solidFieldsMetadata = solidFormViewMetaData.data.solidFieldsMetadata;
+
+    let DynamicWidget = getExtensionComponent(widgetName);
+
+    const widgetProps: SolidFormWidgetProps = {
+        formData: formik.values,
+        field: field,
+        fieldsMetadata: solidFieldsMetadata,
+        viewMetadata: solidView
+    }
+
+    return (
+        <div className="solid-tab-view w-full">
+            {DynamicWidget && <DynamicWidget {...widgetProps} />}
         </div>
     )
 };
@@ -654,23 +676,25 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         type: eventType,
                         viewMetadata: solidView
                     }
+
+                    // Invoke the dynamic change handler: 
+                    // TODO: encapsulate in try/catch, catch the exception render in the UI as an error & stop form rendering.
                     const updatedFormInfo = dynamicChangeHandler(event);
                     // console.log(`${eventType}: formFieldOnXXX response received: `, updatedFormInfo);
 
                     // If dataChanged is true, update Formik values
                     if (updatedFormInfo?.dataChanged && updatedFormInfo.newFormData) {
                         // This does one field at a time.
+                        // TODO: does the below fire change events again?
                         Object.entries(updatedFormInfo.newFormData).forEach(([key, newValue]) => {
                             formik.setFieldValue(key, newValue);
                         });
 
                         // This does all at once.
-                        // if (updatedFormInfo?.dataChanged && updatedFormInfo.newData) {
-                        //     formik.setValues({
-                        //         ...formik.values,
-                        //         ...updatedFormInfo.newFormData
-                        //     });
-                        // }
+                        // formik.setValues({
+                        //     ...formik.values,
+                        //     ...updatedFormInfo.newFormData
+                        // });
                     }
 
                     // if layout has changed then we need to re-render.
@@ -678,7 +702,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         // setFormViewMetaData({ ...formViewMetaData, layout: updatedFormInfo.newLayout });
                         // console.log(`Existing form view metadata is: `, formViewMetaData);
 
-                        // TODO: this will trigger a useEffect dependent on formViewMetadata that invokes setFormViewLayout, which means that this will not work if custom layout has been injected as a prop.
+                        // TODO: this will trigger a useEffect dependent on formViewMetadata that invokes setFormViewLayout, 
+                        // TODO: which means that this will not work if custom layout has been injected as a prop.
                         setFormViewLayout(updatedFormInfo.newLayout);
                         setFormViewMetaData((prevMetaData: any) => {
                             const updatedFormViewMetadata = {
@@ -697,6 +722,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     }
                 }
                 else {
+                    // TODO: Show an error popup and stop form rendering ideallly...
                     console.log(`Unable to load dynamic module:`, changeHandler);
                 }
             }
@@ -783,6 +809,24 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         const pageChildren = children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData));
                         return SolidPage({ children: pageChildren, attrs: attrs, key: key });
                     }
+                case "custom":
+                    if (visible === true) {
+                        const widgetName = attrs?.widget;
+                        const fieldMetadata = solidFormViewMetaData.data.solidFieldsMetadata[attrs.name];
+
+                        if (widgetName) {
+                            // widgetName, formik, field, fieldMetadata, solidFormViewMetaData
+                            return <SolidDynamicWidget
+                                key={key}
+                                widgetName={widgetName}
+                                field={element}
+                                formik={formik}
+                                fieldMetadata={fieldMetadata}
+                                solidFormViewMetaData={solidFormViewMetaData}
+                            />
+                        }
+                    }
+
                 default:
                     return null;
             }
@@ -876,31 +920,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     onClick={() => setDeleteDialogVisible(true)}
                                 />
                             }
-                            {params.embeded == true &&
-                                actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
-                                !formViewLayout.attrs.readonly &&
-                                <Button
-                                    text
-                                    type="button"
-                                    className="w-8rem text-left gap-2"
-                                    label="Delete"
-                                    size="small"
-                                    iconPos="left"
-                                    severity="danger"
-                                    icon={'pi pi-trash'}
-                                    onClick={() => setDeleteDialogVisible(true)}
-                                />
-                            }
                         </div>
                     </OverlayPanel>
                 </div>
             )
         }
-
-        const breadcrumbData = [
-            { label: 'Book', link: '/admin/core/library-management/book/list' },
-            { label: params.id === "new" ? `Add ${params.modelName}` : `Edit ${params.modelName}` },
-        ];
 
         // TODO: This was simply to demonstrate how we can use dynamic components, we will remove this and use it in a more sensible way in the layout. 
         // TODO: to demonstrated this you can simply add the below to the layout of the book form view.
@@ -1026,6 +1050,19 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                         </div>
                                     } */}
                                     {params.embeded == true &&
+                                        actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
+                                        !formViewLayout.attrs.readonly &&
+                                        <div>
+                                            <Button
+                                                size="small"
+                                                type="button"
+                                                label="Delete"
+                                                severity="danger"
+                                                onClick={() => setDeleteDialogVisible(true)}
+                                            />
+                                        </div>
+                                    }
+                                    {params.embeded == true &&
                                         <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' />
 
                                     }
@@ -1037,7 +1074,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             </>
                         )}
                     </div>
-                    <SolidBreadcrumb breadcrumbItems={breadcrumbData} />
+                    <SolidBreadcrumb />
                     {/* {params.embeded !== true &&
                         <div className="solid-form-stepper">
                             <SolidFormStepper />

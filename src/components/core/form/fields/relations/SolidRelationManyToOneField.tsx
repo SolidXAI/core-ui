@@ -137,12 +137,12 @@ export class SolidRelationManyToOneField implements ISolidField {
         }
         return (
             <div className={className}>
-                <div className="flex flex-column gap-2 mt-4">
-                    {showFieldLabel != false &&
-                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
-                            {fieldLabel}
-                        </label>
-                    }
+                {showFieldLabel != false &&
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
+                        {fieldLabel}
+                    </label>
+                }
+                <div className="flex align-items-center gap-3">
                     <AutoComplete
                         readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                         disabled={formDisabled || fieldDisabled || readOnlyPermission}

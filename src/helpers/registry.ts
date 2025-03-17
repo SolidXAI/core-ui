@@ -1,3 +1,4 @@
+import { CustomHtml } from "@/components/core/form/widgets/CustomHtml";
 import React from "react";
 
 type ExtensionRegistry = {
@@ -50,3 +51,14 @@ export const getExtensionFunction = (name: string) => {
     // console.log(`Registry state: `, extensionRegistry);
     return extensionRegistry.functions[name];
 };
+
+
+// Register all the dynamic widget & functions from inside solid-core-ui
+// Common
+registerExtensionComponent("CustomHtml", CustomHtml);
+
+
+// ModuleMetadata
+
+
+// ModelMetadata

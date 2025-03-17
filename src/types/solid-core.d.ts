@@ -70,7 +70,7 @@ export type LayoutAttribute = {
 };
 
 // Generic representation of any node in our layout 
-export type LayoutNodeType = "form" | "sheet" | "notebook" | "page" | "row" | "column" | "field";
+export type LayoutNodeType = "form" | "sheet" | "notebook" | "page" | "row" | "column" | "field" | "div" | "p" | "span" | "h1" | "h2" | "h3";
 export type LayoutNode = {
     type: LayoutNodeType;
     attrs: LayoutAttribute;
@@ -78,11 +78,19 @@ export type LayoutNode = {
 };
 
 // Event type
-export type SolidUiEvents = "onFieldChange" | "onFieldBlur";
+export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender";
 export type SolidUiEvent = {
     type: SolidUiEvents;
-    modifiedField: string;
-    modifiedFieldValue: any;
+    modifiedField?: string;
+    modifiedFieldValue?: any;
+    // This comes from Formik...
+    formData: Record<string, any>;
+    viewMetadata: SolidView;
+    fieldsMetadata: FieldsMetadata;
+};
+
+export type SolidFormWidgetProps = {
+    field: any;
     // This comes from Formik...
     formData: Record<string, any>;
     viewMetadata: SolidView;
