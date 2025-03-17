@@ -90,7 +90,7 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps): ISolidField 
     if (type === 'longText') {
         return new SolidLongTextField(fieldContext);
     }
-    if (type === 'int') {
+    if (type === 'int' || type === 'bigint' ) {
         return new SolidIntegerField(fieldContext);
     }
     if (type === 'decimal' || type === 'float') {
@@ -951,7 +951,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     {params.embeded !== true &&
                                         actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
                                         !formViewLayout.attrs.readonly &&
-                                        formik.dirty &&
                                         <div>
                                             <Button
                                                 label="Save"
