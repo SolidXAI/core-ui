@@ -356,11 +356,6 @@ const CreateModel = ({ data, params }: any) => {
     )
   }
 
-  const breadcrumbData = [
-    { label: 'Model', link: '/admin/core/solid-core/model-metadata/list' },
-    { label: params.id === "new" ? 'Create Model' : 'Edit Model' },
-  ];
-
   const [isDirty, setIsDirty] = useState(false);
 
 
@@ -407,7 +402,7 @@ const CreateModel = ({ data, params }: any) => {
             </>
           }
         </div>
-        <SolidBreadcrumb breadcrumbItems={breadcrumbData} />
+        <SolidBreadcrumb />
         {/* <div className="solid-form-stepper">
           <SolidFormStepper />
         </div> */}
@@ -450,6 +445,7 @@ const CreateModel = ({ data, params }: any) => {
                 nextTab={nextTab}
                 formikFieldsMetadataRef={formikFieldsMetadataRef}
                 params={params}
+                setIsDirty={setIsDirty}
               ></FieldMetaData>
             </TabPanel>
           </TabView>

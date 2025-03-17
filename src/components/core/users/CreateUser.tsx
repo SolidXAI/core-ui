@@ -231,11 +231,6 @@ const CreateUser = ({ data, params }: any) => {
     }
   }, [isSuccess, isDeleteUserSuceess, isUpdateuserSuceess])
 
-  const breadcrumbData = [
-    { label: 'User', link: '/admin/core/solid-core/model-metadata/list' },
-    { label: params.id === "new" ? 'Create User' : 'Edit User' },
-  ];
-
   return (
     <div className="solid-form-wrapper">
       <Toast ref={toast} />
@@ -274,7 +269,7 @@ const CreateUser = ({ data, params }: any) => {
             </>
           )}
         </div>
-        <SolidBreadcrumb breadcrumbItems={breadcrumbData} />
+        <SolidBreadcrumb />
         {/* <div className="solid-form-stepper">
           <SolidFormStepper />
         </div> */}

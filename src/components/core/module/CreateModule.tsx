@@ -375,11 +375,6 @@ const CreateModule = ({ data }: any) => {
     )
   }
 
-  const breadcrumbData = [
-    { label: 'Module', link: '/admin/core/solid-core/model-metadata/list' },
-    { label: pathname.includes('new') ? 'Create Module' : 'Edit Module' },
-  ];
-
   return (
     <div className="solid-form-wrapper">
       <Toast ref={toast} />
@@ -418,7 +413,7 @@ const CreateModule = ({ data }: any) => {
             </>
           }
         </div>
-        <SolidBreadcrumb breadcrumbItems={breadcrumbData} />
+        <SolidBreadcrumb />
         {/* <div className="solid-form-stepper">
           <SolidFormStepper />
         </div> */}

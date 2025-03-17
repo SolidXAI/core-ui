@@ -11,7 +11,7 @@ import { useRef, useState } from "react";
 import FieldMetaDataForm from "./FieldMetaDataForm";
 
 
-const FieldMetaData = ({ modelMetaData, fieldMetaData, setFieldMetaData, deleteModelFunction, nextTab, formikFieldsMetadataRef, params }: any) => {
+const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaData, deleteModelFunction, nextTab, formikFieldsMetadataRef, params }: any) => {
   const pathname = usePathname();
   const msgs = useRef<Messages>(null);
 
@@ -156,7 +156,7 @@ const FieldMetaData = ({ modelMetaData, fieldMetaData, setFieldMetaData, deleteM
             }}
             showHeader={false}
           >
-            <FieldMetaDataForm modelMetaData={modelMetaData} fieldMetaData={selectedFieldMetaData} allFields={fieldMetaData} setFieldMetaData={setFieldMetaData} deleteModelFunction={deleteModelFunction} setVisiblePopup={setVisiblePopup} formikFieldsMetadataRef={formikFieldsMetadataRef} params={params} setIsRequiredPopUp={setIsRequiredPopUp} showToaster={showToaster}></FieldMetaDataForm>
+            <FieldMetaDataForm setIsDirty={setIsDirty} modelMetaData={modelMetaData} fieldMetaData={selectedFieldMetaData} allFields={fieldMetaData} setFieldMetaData={setFieldMetaData} deleteModelFunction={deleteModelFunction} setVisiblePopup={setVisiblePopup} formikFieldsMetadataRef={formikFieldsMetadataRef} params={params} setIsRequiredPopUp={setIsRequiredPopUp} showToaster={showToaster}></FieldMetaDataForm>
           </Dialog>
           <Dialog
             visible={isRequiredPopUp}

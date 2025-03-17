@@ -882,11 +882,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
             )
         }
 
-        const breadcrumbData = [
-            { label: 'Book', link: '/admin/core/library-management/book/list' },
-            { label: params.id === "new" ? `Add ${params.modelName}` : `Edit ${params.modelName}` },
-        ];
-
         // TODO: This was simply to demonstrate how we can use dynamic components, we will remove this and use it in a more sensible way in the layout. 
         // TODO: to demonstrated this you can simply add the below to the layout of the book form view.
         // TODO: "header": "BookFormViewDynamicComponent",
@@ -1036,7 +1031,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             </>
                         )}
                     </div>
-                    <SolidBreadcrumb breadcrumbItems={breadcrumbData} />
+                    <SolidBreadcrumb />
                     {/* {params.embeded !== true &&
                         <div className="solid-form-stepper">
                             <SolidFormStepper />
