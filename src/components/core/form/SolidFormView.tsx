@@ -876,31 +876,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     onClick={() => setDeleteDialogVisible(true)}
                                 />
                             }
-                            {params.embeded == true &&
-                                actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
-                                !formViewLayout.attrs.readonly &&
-                                <Button
-                                    text
-                                    type="button"
-                                    className="w-8rem text-left gap-2"
-                                    label="Delete"
-                                    size="small"
-                                    iconPos="left"
-                                    severity="danger"
-                                    icon={'pi pi-trash'}
-                                    onClick={() => setDeleteDialogVisible(true)}
-                                />
-                            }
                         </div>
                     </OverlayPanel>
                 </div>
             )
         }
-
-        const breadcrumbData = [
-            { label: 'Book', link: '/admin/core/library-management/book/list' },
-            { label: params.id === "new" ? `Add ${params.modelName}` : `Edit ${params.modelName}` },
-        ];
 
         // TODO: This was simply to demonstrate how we can use dynamic components, we will remove this and use it in a more sensible way in the layout. 
         // TODO: to demonstrated this you can simply add the below to the layout of the book form view.
@@ -1026,6 +1006,19 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                             />
                                         </div>
                                     } */}
+                                     {params.embeded == true &&
+                                        actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
+                                        !formViewLayout.attrs.readonly &&
+                                        <div>
+                                            <Button
+                                                size="small"
+                                                type="button"
+                                                label="Delete"
+                                                severity="danger"
+                                                onClick={() => setDeleteDialogVisible(true)}
+                                            />
+                                        </div>
+                                    }
                                     {params.embeded == true &&
                                         <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' />
 
@@ -1038,7 +1031,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             </>
                         )}
                     </div>
-                    <SolidBreadcrumb breadcrumbItems={breadcrumbData} />
+                    <SolidBreadcrumb />
                     {/* {params.embeded !== true &&
                         <div className="solid-form-stepper">
                             <SolidFormStepper />

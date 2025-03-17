@@ -702,7 +702,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           loadingIcon="pi pi-spinner"
           selection={[...selectedRecords, ...selectedRecoverRecords]}
           onSelectionChange={onSelectionChange}
-          selectionMode="multiple"
+          selectionMode="checkbox"
           removableSort
           filterIcon={<FilterIcon />}
           tableClassName="solid-data-table"

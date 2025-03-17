@@ -86,7 +86,7 @@ const SelectionStaticValues = ({ enumValue, onUpdate, onDelete, onAdd }: any) =>
 
   return (
     <div className="flex align-items-center gap-2 mt-2">
-      
+
       {/* Input field for Value */}
       <InputText
         value={value || ""}
@@ -94,7 +94,7 @@ const SelectionStaticValues = ({ enumValue, onUpdate, onDelete, onAdd }: any) =>
         placeholder="Value"
         className="w-full"
       />
-      
+
       {/* Input field for Display */}
       <InputText
         value={display || ""}
@@ -103,7 +103,7 @@ const SelectionStaticValues = ({ enumValue, onUpdate, onDelete, onAdd }: any) =>
         className="w-full"
       />
 
-      
+
 
       {/* Plus Button to add a new row */}
       <Button
@@ -506,7 +506,7 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
   return Yup.object(schema);
 };
 
-const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, allFields, deleteModelFunction, setVisiblePopup, params, setIsRequiredPopUp, showToaster }: any) => {
+const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaData, allFields, deleteModelFunction, setVisiblePopup, params, setIsRequiredPopUp, showToaster }: any) => {
 
   const booleanOptions = ["false", "true"];
   const [isBackPopupVisible, setIsBackPopupVisible] = useState(false);
@@ -1046,9 +1046,9 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
       const queryString = qs.stringify(queryData, {
         encodeValuesOnly: true,
       });
-  
+
       const result = await triggerGetModels(queryString).unwrap();
-  
+
       if (result && result.records) {
         if (!result?.records[0]?.userKeyField) {
           setUserKeyFields(true);
@@ -1084,6 +1084,12 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
 
     }
   };
+
+  useEffect(() => {
+    if (formik.dirty) {
+      setIsDirty(true);
+    }
+  }, [formik.dirty]);
 
   return (
     <div>
@@ -1865,39 +1871,39 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                             )}
 
                           {isUserKeyFields && (
-                              <div className="field col-6 flex-flex-column gap-2">
-                                <label
-                                  htmlFor="userKey"
-                                  className="form-field-label"
-                                >
-                                  Set User Key
-                                </label>
+                            <div className="field col-6 flex-flex-column gap-2">
+                              <label
+                                htmlFor="userKey"
+                                className="form-field-label"
+                              >
+                                Set User Key
+                              </label>
 
 
-                                <SingleSelectAutoCompleteField
-                                  key="userKey"
-                                  formik={formik}
-                                  isFormFieldValid={isFormFieldValid}
-                                  fieldName="userKey"
-                                  fieldNameId="userKey"
-                                  labelKey="displayName"
-                                  valueKey="name"
-                                  searchData={searchUserKeyField}
-                                  existingData={formik.values.userKey}
-                                />
-                                {isFormFieldValid(
-                                  formik,
-                                  "userKey"
-                                ) && (
-                                    <Message
-                                      severity="error"
-                                      text={formik?.errors?.userKey?.toString()}
-                                    />
-                                  )}
-                              </div>
-                            )}
+                              <SingleSelectAutoCompleteField
+                                key="userKey"
+                                formik={formik}
+                                isFormFieldValid={isFormFieldValid}
+                                fieldName="userKey"
+                                fieldNameId="userKey"
+                                labelKey="displayName"
+                                valueKey="name"
+                                searchData={searchUserKeyField}
+                                existingData={formik.values.userKey}
+                              />
+                              {isFormFieldValid(
+                                formik,
+                                "userKey"
+                              ) && (
+                                  <Message
+                                    severity="error"
+                                    text={formik?.errors?.userKey?.toString()}
+                                  />
+                                )}
+                            </div>
+                          )}
 
-                          {currentFields.includes("relationCreateInverse") && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one")&& (
+                          {currentFields.includes("relationCreateInverse") && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
                             <div className="field col-6 flex flex-column gap-2 mt-3">
                               <label htmlFor="relationCreateInverse" className="form-field-label">
                                 Relation Create Inverse
@@ -2423,97 +2429,97 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                           <div className="formgrid grid">
                             {(currentFields.includes("regexPattern") && selectedType.value === "password") &&
                               <>
-                                  <div className="field col-6 flex-flex-column gap-2 mt-3">
-                                    <label
-                                      htmlFor="regexPattern"
-                                      className="form-field-label"
-                                    >
-                                      Password Policy
-                                    </label>
-                                    <Dropdown value={selectedPasswordPolicy} onChange={(e: DropdownChangeEvent) => {
-                                      setSelectedPasswordPolicy(e.value)
-                                      if (e.value !== "custom") {
-                                        formik.setFieldValue('regexPattern', e.value)
-                                      }
-                                    }} options={passwordPolicyOptions} optionLabel="label"
-                                      placeholder="Select a Password Policy"
-                                      // className="w-full md:w-14rem"
-                                      className=""
-                                      checkmark={true} highlightOnSelect={false} />
+                                <div className="field col-6 flex-flex-column gap-2 mt-3">
+                                  <label
+                                    htmlFor="regexPattern"
+                                    className="form-field-label"
+                                  >
+                                    Password Policy
+                                  </label>
+                                  <Dropdown value={selectedPasswordPolicy} onChange={(e: DropdownChangeEvent) => {
+                                    setSelectedPasswordPolicy(e.value)
+                                    if (e.value !== "custom") {
+                                      formik.setFieldValue('regexPattern', e.value)
+                                    }
+                                  }} options={passwordPolicyOptions} optionLabel="label"
+                                    placeholder="Select a Password Policy"
+                                    // className="w-full md:w-14rem"
+                                    className=""
+                                    checkmark={true} highlightOnSelect={false} />
 
-                                  </div>
+                                </div>
                               </>
                             }
                             {currentFields.includes("regexPattern") && (
                               <>
-                                  <div className="field col-6 flex-flex-column gap-2 mt-3">
+                                <div className="field col-6 flex-flex-column gap-2 mt-3">
+                                  <label
+                                    htmlFor="regexPattern"
+                                    className="form-field-label"
+                                  >
+                                    Regex Pattern
+                                  </label>
+                                  <InputText
+                                    type="text"
+                                    id="regexPattern"
+                                    name="regexPattern"
+                                    onChange={formik.handleChange}
+                                    value={formik.values.regexPattern}
+                                    className={classNames("", {
+                                      "p-invalid": isFormFieldValid(
+                                        formik,
+                                        "regexPattern"
+                                      ),
+                                    })}
+                                  />
+                                  {isFormFieldValid(formik, "regexPattern") && (
+                                    <Message
+                                      severity="error"
+                                      text={formik?.errors?.regexPattern?.toString()}
+                                    />
+                                  )}
+                                </div>
+                                {currentFields.includes("regexPattern") && (
+                                  <div className="field col-6 flex-flex-column gap-2">
                                     <label
-                                      htmlFor="regexPattern"
+                                      htmlFor="regexPatternNotMatchingErrorMsg"
                                       className="form-field-label"
                                     >
-                                      Regex Pattern
+                                      Regex Pattern Not Matching Error Msg
                                     </label>
                                     <InputText
                                       type="text"
-                                      id="regexPattern"
-                                      name="regexPattern"
+                                      id="regexPatternNotMatchingErrorMsg"
+                                      name="regexPatternNotMatchingErrorMsg"
                                       onChange={formik.handleChange}
-                                      value={formik.values.regexPattern}
+                                      value={formik.values.regexPatternNotMatchingErrorMsg}
                                       className={classNames("", {
                                         "p-invalid": isFormFieldValid(
                                           formik,
-                                          "regexPattern"
+                                          "regexPatternNotMatchingErrorMsg"
                                         ),
                                       })}
                                     />
-                                    {isFormFieldValid(formik, "regexPattern") && (
+                                    {isFormFieldValid(formik, "regexPatternNotMatchingErrorMsg") && (
                                       <Message
                                         severity="error"
-                                        text={formik?.errors?.regexPattern?.toString()}
+                                        text={formik?.errors?.regexPatternNotMatchingErrorMsg?.toString()}
                                       />
                                     )}
                                   </div>
-                                {currentFields.includes("regexPattern") && (
-                                    <div className="field col-6 flex-flex-column gap-2">
-                                      <label
-                                        htmlFor="regexPatternNotMatchingErrorMsg"
-                                        className="form-field-label"
-                                      >
-                                        Regex Pattern Not Matching Error Msg
-                                      </label>
-                                      <InputText
-                                        type="text"
-                                        id="regexPatternNotMatchingErrorMsg"
-                                        name="regexPatternNotMatchingErrorMsg"
-                                        onChange={formik.handleChange}
-                                        value={formik.values.regexPatternNotMatchingErrorMsg}
-                                        className={classNames("", {
-                                          "p-invalid": isFormFieldValid(
-                                            formik,
-                                            "regexPatternNotMatchingErrorMsg"
-                                          ),
-                                        })}
-                                      />
-                                      {isFormFieldValid(formik, "regexPatternNotMatchingErrorMsg") && (
-                                        <Message
-                                          severity="error"
-                                          text={formik?.errors?.regexPatternNotMatchingErrorMsg?.toString()}
-                                        />
-                                      )}
-                                    </div>
                                 )}
                               </>
 
                             )}
                             {(currentFields.includes("min") || currentFields.includes("max")) &&
-                                <>
-                                  {currentFields.includes("min") && (
-                                      <div className="field col-6 flex-flex-column gap-2 mt-3">
-                                        <label htmlFor="min" className="form-field-label">
-                                          Min {(selectedType.value !== "int" && selectedType.value !== "decimal") && `(Characters Allowed)`}
+                              <>
+                                {currentFields.includes("min") && (
+                                  <div className="field col-6 flex-flex-column gap-2 mt-3">
+                                    <label htmlFor="min" className="form-field-label">
+                                      Min {(selectedType.value !== "int" && selectedType.value !== "decimal") && `(Characters Allowed)`}
 
-                                        </label>
-                                        {/* <InputText
+                                    </label>
+                                    {/* <InputText
                                 type="text"
                                 id="min"
                                 name="min"
@@ -2523,45 +2529,45 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   "p-invalid": isFormFieldValid(formik, "min"),
                                 })}
                               /> */}
-                                        {/* <RenderMinValueInput></RenderMinValueInput> */}
-                                        {(selectedType.value === "int" ||
-                                          selectedType.value === "decimal" ||
-                                          selectedType.value === "shortText" ||
-                                          selectedType.value === "decimal" ||
-                                          selectedType.value === "longText" ||
-                                          selectedType.value === "richText" ||
-                                          selectedType.value === "password" ||
-                                          selectedType.value === "json") &&
-                                          <InputNumber
-                                            id="min"
-                                            name="min"
-                                            onValueChange={formik.handleChange}
-                                            value={formik.values.min}
-                                            className={classNames("", {
-                                              "p-invalid": isFormFieldValid(
-                                                formik,
-                                                "min"
-                                              ),
-                                            })}
-                                            disabled={fieldMetaData?.id}
-                                          />
-                                        }
+                                    {/* <RenderMinValueInput></RenderMinValueInput> */}
+                                    {(selectedType.value === "int" ||
+                                      selectedType.value === "decimal" ||
+                                      selectedType.value === "shortText" ||
+                                      selectedType.value === "decimal" ||
+                                      selectedType.value === "longText" ||
+                                      selectedType.value === "richText" ||
+                                      selectedType.value === "password" ||
+                                      selectedType.value === "json") &&
+                                      <InputNumber
+                                        id="min"
+                                        name="min"
+                                        onValueChange={formik.handleChange}
+                                        value={formik.values.min}
+                                        className={classNames("", {
+                                          "p-invalid": isFormFieldValid(
+                                            formik,
+                                            "min"
+                                          ),
+                                        })}
+                                        disabled={fieldMetaData?.id}
+                                      />
+                                    }
 
-                                        {isFormFieldValid(formik, "min") && (
-                                          <Message
-                                            severity="error"
-                                            text={formik?.errors?.min?.toString()}
-                                          />
-                                        )}
-                                      </div>
-                                  )}
-                                  {currentFields.includes("max") && (
-                                      <div className="field col-6 flex-flex-column gap-2 mt-3">
-                                        <label htmlFor="max" className="form-field-label">
-                                          Max {(selectedType.value !== "int" &&
-                                                selectedType.value !== "decimal") && `(Characters allowed)`}
-                                        </label>
-                                        {/* <InputText
+                                    {isFormFieldValid(formik, "min") && (
+                                      <Message
+                                        severity="error"
+                                        text={formik?.errors?.min?.toString()}
+                                      />
+                                    )}
+                                  </div>
+                                )}
+                                {currentFields.includes("max") && (
+                                  <div className="field col-6 flex-flex-column gap-2 mt-3">
+                                    <label htmlFor="max" className="form-field-label">
+                                      Max {(selectedType.value !== "int" &&
+                                        selectedType.value !== "decimal") && `(Characters allowed)`}
+                                    </label>
+                                    {/* <InputText
                                 type="text"
                                 id="max"
                                 name="max"
@@ -2571,38 +2577,38 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                                   "p-invalid": isFormFieldValid(formik, "max"),
                                 })}
                               /> */}
-                                        {(selectedType.value === "int" ||
-                                          selectedType.value === "decimal" ||
-                                          selectedType.value === "shortText" ||
-                                          selectedType.value === "decimal" ||
-                                          selectedType.value === "longText" ||
-                                          selectedType.value === "richText" ||
-                                          selectedType.value === "password" ||
-                                          selectedType.value === "json") &&
-                                          <InputNumber
-                                            id="max"
-                                            name="max"
-                                            onValueChange={formik.handleChange}
-                                            value={formik.values.max}
-                                            className={classNames("", {
-                                              "p-invalid": isFormFieldValid(
-                                                formik,
-                                                "max"
-                                              ),
-                                            })}
-                                            disabled={fieldMetaData?.id}
-                                          />
-                                        }
+                                    {(selectedType.value === "int" ||
+                                      selectedType.value === "decimal" ||
+                                      selectedType.value === "shortText" ||
+                                      selectedType.value === "decimal" ||
+                                      selectedType.value === "longText" ||
+                                      selectedType.value === "richText" ||
+                                      selectedType.value === "password" ||
+                                      selectedType.value === "json") &&
+                                      <InputNumber
+                                        id="max"
+                                        name="max"
+                                        onValueChange={formik.handleChange}
+                                        value={formik.values.max}
+                                        className={classNames("", {
+                                          "p-invalid": isFormFieldValid(
+                                            formik,
+                                            "max"
+                                          ),
+                                        })}
+                                        disabled={fieldMetaData?.id}
+                                      />
+                                    }
 
-                                        {isFormFieldValid(formik, "max") && (
-                                          <Message
-                                            severity="error"
-                                            text={formik?.errors?.max?.toString()}
-                                          />
-                                        )}
-                                      </div>
-                                  )}
-                                </>
+                                    {isFormFieldValid(formik, "max") && (
+                                      <Message
+                                        severity="error"
+                                        text={formik?.errors?.max?.toString()}
+                                      />
+                                    )}
+                                  </div>
+                                )}
+                              </>
                             }
                             {currentFields.includes("ormType") && (
                               <div className="md:col-12 sm:col-12">
@@ -2661,123 +2667,123 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                       {(formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && <p className="form-wrapper-heading text-base">Settings</p>}
                       <div className="formgrid grid">
                         {currentFields.includes("required") && (formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
-                              <div className="flex align-items-center">
-                                <Checkbox
-                                  name="required"
-                                  onChange={(e) => {
-                                    formik.setFieldValue("required", e.checked);
-                                  }}
-                                  checked={formik.values.required}
-                                ></Checkbox>
-                                <label htmlFor="ingredient1" className="form-field-label ml-2">
-                                  Required
-                                </label>
-                              </div>
-                              <p className="text-xs mt-2">You won't be able to create an entry if this field is empty</p>
-
-                              {isFormFieldValid(formik, "required") && (
-                                <Message
-                                  severity="error"
-                                  text={formik?.errors?.required?.toString()}
-                                />
-                              )}
+                          <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="flex align-items-center">
+                              <Checkbox
+                                name="required"
+                                onChange={(e) => {
+                                  formik.setFieldValue("required", e.checked);
+                                }}
+                                checked={formik.values.required}
+                              ></Checkbox>
+                              <label htmlFor="ingredient1" className="form-field-label ml-2">
+                                Required
+                              </label>
                             </div>
+                            <p className="text-xs mt-2">You won't be able to create an entry if this field is empty</p>
+
+                            {isFormFieldValid(formik, "required") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.required?.toString()}
+                              />
+                            )}
+                          </div>
                         )}
                         {currentFields.includes("unique") && selectedType.value !== 'relation' && (
-                            <div className="field col-6 flex-flex-column gap-2">
-                              <div className="flex align-items-center">
-                                <Checkbox
-                                  name="unique"
-                                  onChange={(e) => {
-                                    formik.setFieldValue("unique", e.checked);
-                                    formik.setFieldValue("isUserKey", false);
-                                  }}
-                                  checked={formik.values.unique}
-                                ></Checkbox>
-                                <label htmlFor="ingredient1" className="form-field-label ml-2">
-                                  Unique
-                                </label>
-                              </div>
-                              <p className="text-xs mt-2">You won't be able to create an entry if there is an existing entry with identical content</p>
-
-                              {isFormFieldValid(formik, "unique") && (
-                                <Message
-                                  severity="error"
-                                  text={formik?.errors?.unique?.toString()}
-                                />
-                              )}
+                          <div className="field col-6 flex-flex-column gap-2">
+                            <div className="flex align-items-center">
+                              <Checkbox
+                                name="unique"
+                                onChange={(e) => {
+                                  formik.setFieldValue("unique", e.checked);
+                                  formik.setFieldValue("isUserKey", false);
+                                }}
+                                checked={formik.values.unique}
+                              ></Checkbox>
+                              <label htmlFor="ingredient1" className="form-field-label ml-2">
+                                Unique
+                              </label>
                             </div>
+                            <p className="text-xs mt-2">You won't be able to create an entry if there is an existing entry with identical content</p>
+
+                            {isFormFieldValid(formik, "unique") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.unique?.toString()}
+                              />
+                            )}
+                          </div>
                         )}
                         {currentFields.includes("index") && selectedType.value !== 'relation' && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
-                              <div className="flex align-items-center">
-                                <Checkbox
-                                  name="index"
-                                  onChange={(e) => {
-                                    formik.setFieldValue("index", e.checked);
-                                  }}
-                                  checked={formik.values.index}
-                                ></Checkbox>
-                                <label htmlFor="ingredient1" className="form-field-label ml-2">
-                                  Index
-                                </label>
-                              </div>
-                              {isFormFieldValid(formik, "index") && (
-                                <Message
-                                  severity="error"
-                                  text={formik?.errors?.index?.toString()}
-                                />
-                              )}
+                          <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="flex align-items-center">
+                              <Checkbox
+                                name="index"
+                                onChange={(e) => {
+                                  formik.setFieldValue("index", e.checked);
+                                }}
+                                checked={formik.values.index}
+                              ></Checkbox>
+                              <label htmlFor="ingredient1" className="form-field-label ml-2">
+                                Index
+                              </label>
                             </div>
+                            {isFormFieldValid(formik, "index") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.index?.toString()}
+                              />
+                            )}
+                          </div>
                         )}
                         {currentFields.includes("private") && selectedType.value !== 'relation' && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
-                              <div className="flex align-items-center">
-                                <Checkbox
-                                  name="private"
-                                  onChange={(e) => {
-                                    formik.setFieldValue("private", e.checked);
-                                  }}
-                                  checked={formik.values.private}
-                                ></Checkbox>
-                                <label htmlFor="ingredient1" className="form-field-label ml-2">
-                                  Private
-                                </label>
-                              </div>
-                              <p className="text-xs mt-2">This field will not show up in the API response</p>
-
-
-                              {isFormFieldValid(formik, "private") && (
-                                <Message
-                                  severity="error"
-                                  text={formik?.errors?.private?.toString()}
-                                />
-                              )}
+                          <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="flex align-items-center">
+                              <Checkbox
+                                name="private"
+                                onChange={(e) => {
+                                  formik.setFieldValue("private", e.checked);
+                                }}
+                                checked={formik.values.private}
+                              ></Checkbox>
+                              <label htmlFor="ingredient1" className="form-field-label ml-2">
+                                Private
+                              </label>
                             </div>
+                            <p className="text-xs mt-2">This field will not show up in the API response</p>
+
+
+                            {isFormFieldValid(formik, "private") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.private?.toString()}
+                              />
+                            )}
+                          </div>
                         )}
                         {currentFields.includes("encrypt") && selectedType.value !== 'relation' && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
-                              <div className="flex align-items-center gap-2">
-                                <Checkbox
-                                  name="encrypt"
-                                  onChange={(e) => {
-                                    formik.setFieldValue("encrypt", e.checked);
-                                    setEncryptState(e.checked);
-                                  }}
-                                  checked={formik.values.encrypt}
-                                ></Checkbox>
-                                <label htmlFor="ingredient1" className="form-field-label">
-                                  Encrypt
-                                </label>
-                              </div>
-                              {isFormFieldValid(formik, "encrypt") && (
-                                <Message
-                                  severity="error"
-                                  text={formik?.errors?.encrypt?.toString()}
-                                />
-                              )}
+                          <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="flex align-items-center gap-2">
+                              <Checkbox
+                                name="encrypt"
+                                onChange={(e) => {
+                                  formik.setFieldValue("encrypt", e.checked);
+                                  setEncryptState(e.checked);
+                                }}
+                                checked={formik.values.encrypt}
+                              ></Checkbox>
+                              <label htmlFor="ingredient1" className="form-field-label">
+                                Encrypt
+                              </label>
                             </div>
+                            {isFormFieldValid(formik, "encrypt") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.encrypt?.toString()}
+                              />
+                            )}
+                          </div>
                         )}
                         {/* {currentFields.includes("isSystem") && (
                           <div className="md:col-6 sm:col-12">
@@ -2804,28 +2810,28 @@ const FieldMetaDataForm = ({ modelMetaData, fieldMetaData, setFieldMetaData, all
                           </div>
                         )} */}
                         {currentFields.includes("isUserKey") && formik.values.unique && (
-                         <div className="field col-6 flex-flex-column gap-2 mt-3">
-                         <div className="flex align-items-center gap-2">
-                                <Checkbox
-                                  name="isUserKey"
-                                  onChange={(e) => {
-                                    formik.setFieldValue("isUserKey", e.checked);
-                                  }}
-                                  checked={formik.values.isUserKey}
-                                ></Checkbox>
-                                <label htmlFor="ingredient1" className="form-field-label">
-                                  Is Userkey
-                                </label>
-                              </div>
-                              <p className="fieldSubTitle">By selecting this option, you are setting this field as the model's user key. Any existing user key configuration will be overwritten</p>
-
-                              {isFormFieldValid(formik, "isUserKey") && (
-                                <Message
-                                  severity="error"
-                                  text={formik?.errors?.isUserKey?.toString()}
-                                />
-                              )}
+                          <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="flex align-items-center gap-2">
+                              <Checkbox
+                                name="isUserKey"
+                                onChange={(e) => {
+                                  formik.setFieldValue("isUserKey", e.checked);
+                                }}
+                                checked={formik.values.isUserKey}
+                              ></Checkbox>
+                              <label htmlFor="ingredient1" className="form-field-label">
+                                Is Userkey
+                              </label>
                             </div>
+                            <p className="fieldSubTitle">By selecting this option, you are setting this field as the model's user key. Any existing user key configuration will be overwritten</p>
+
+                            {isFormFieldValid(formik, "isUserKey") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.isUserKey?.toString()}
+                              />
+                            )}
+                          </div>
                         )}
                       </div>
 
