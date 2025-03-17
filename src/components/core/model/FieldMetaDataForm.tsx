@@ -146,7 +146,6 @@ const fieldBasedPayloadFormating = (values: any, currentFields: string[], fieldM
     // }
     return acc;
   }, {});
-
   transformedPayload.displayName = transformedPayload.displayName.trim()
 
   transformedPayload.identifier = fieldMetaData ? fieldMetaData.identifier : Date.now();
@@ -167,10 +166,11 @@ const fieldBasedPayloadFormating = (values: any, currentFields: string[], fieldM
     transformedPayload.computedFieldValueProviderCtxt = prettified
   }
   if (currentFields.includes("relationCreateInverse")) {
-    transformedPayload.relationCreateInverse = values.relationCreateInverse == "false" ? "" : true
+    transformedPayload.relationCreateInverse = values.relationCreateInverse == false ? false : true
   }
-
-
+  if (transformedPayload.relationType == "many-to-one") {
+    transformedPayload.relationCascade = values.relationCascade;
+  }
 
   return transformedPayload
 
@@ -893,7 +893,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     mediaEmbedded: fieldMetaData ? (fieldMetaData?.mediaEmbedded && fieldMetaData?.mediaEmbedded.toString()) : "true",
     relationType: fieldMetaData ? fieldMetaData?.relationType : null,
     relationCoModelSingularName: fieldMetaData ? fieldMetaData?.relationCoModelSingularName : null,
-    relationCoModelFieldName: fieldMetaData ? fieldMetaData?.relationCoModelFieldName : modelMetaData.pluralName || '',
+    relationCoModelFieldName: fieldMetaData ? fieldMetaData?.relationCoModelFieldName : null,
     relationCreateInverse: fieldMetaData ? fieldMetaData?.relationCreateInverse : false,
     relationCascade: fieldMetaData ? fieldMetaData?.relationCascade : 'cascade',
     relationModelModuleName: fieldMetaData ? fieldMetaData?.relationModelModuleName : modelMetaData?.module.name,
@@ -1912,7 +1912,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 <Checkbox
                                   inputId="relationCreateInverse"
                                   name="relationCreateInverse"
-                                  checked={Boolean(formik.values.relationCreateInverse)}
+                                  checked={formik.values.relationCreateInverse}
                                   onChange={(e) => formik.setFieldValue("relationCreateInverse", e.checked)}
                                 />
                                 <label htmlFor="relationCreateInverse" className="ml-2">Create Inverse</label>
@@ -1929,7 +1929,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 htmlFor="relationCoModelFieldName"
                                 className="form-field-label"
                               >
-                                Field Name on Inverse Side
+                                Relation Co-Model Field Name
                               </label>
                               <InputText
                                 type="text"
@@ -1948,37 +1948,6 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 <Message
                                   severity="error"
                                   text={formik?.errors?.relationCoModelFieldName?.toString()}
-                                />
-                              )}
-
-                            </div>
-                          )}
-
-                          {currentFields.includes("relationJoinTableName") && formik.values.relationType === "many-to-many" && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
-                              <label
-                                htmlFor="relationJoinTableName"
-                                className="form-field-label"
-                              >
-                                Relation Join Table Name
-                              </label>
-                              <InputText
-                                type="text"
-                                id="relationJoinTableName"
-                                name="relationJoinTableName"
-                                onChange={formik.handleChange}
-                                value={formik.values.relationJoinTableName}
-                                className={classNames("", {
-                                  "p-invalid": isFormFieldValid(
-                                    formik,
-                                    "relationJoinTableName"
-                                  ),
-                                })}
-                              />
-                              {isFormFieldValid(formik, "relationJoinTableName") && (
-                                <Message
-                                  severity="error"
-                                  text={formik?.errors?.relationJoinTableName?.toString()}
                                 />
                               )}
 
@@ -2016,7 +1985,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )} */}
 
-                          {currentFields.includes("relationCoModelColumnName") && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
+                          {currentFields.includes("relationCoModelColumnName") && formik.values.relationCreateInverse && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="relationCoModelColumnName"
@@ -2041,6 +2010,37 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 <Message
                                   severity="error"
                                   text={formik?.errors?.relationCoModelColumnName?.toString()}
+                                />
+                              )}
+
+                            </div>
+                          )}
+
+                          {currentFields.includes("relationJoinTableName") && formik.values.relationType === "many-to-many" && (
+                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                              <label
+                                htmlFor="relationJoinTableName"
+                                className="form-field-label"
+                              >
+                                Relation Join Table Name
+                              </label>
+                              <InputText
+                                type="text"
+                                id="relationJoinTableName"
+                                name="relationJoinTableName"
+                                onChange={formik.handleChange}
+                                value={formik.values.relationJoinTableName}
+                                className={classNames("", {
+                                  "p-invalid": isFormFieldValid(
+                                    formik,
+                                    "relationJoinTableName"
+                                  ),
+                                })}
+                              />
+                              {isFormFieldValid(formik, "relationJoinTableName") && (
+                                <Message
+                                  severity="error"
+                                  text={formik?.errors?.relationJoinTableName?.toString()}
                                 />
                               )}
 
@@ -2664,9 +2664,9 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                         </>
                       }
 
-                      <p className="form-wrapper-heading text-base">Settings</p>
+                      {(formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && <p className="form-wrapper-heading text-base">Settings</p>}
                       <div className="formgrid grid">
-                        {currentFields.includes("required") && selectedType.value !== 'relation' && (
+                        {currentFields.includes("required") && (formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && (
                           <div className="field col-6 flex-flex-column gap-2 mt-3">
                             <div className="flex align-items-center">
                               <Checkbox

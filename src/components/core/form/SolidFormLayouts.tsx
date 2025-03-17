@@ -18,7 +18,6 @@ type SolidViewParams = {
 };
 
 const SolidFormLayouts = ({ params }: any) => {
-
     const {
         data: modelData,
         error,
@@ -27,7 +26,9 @@ const SolidFormLayouts = ({ params }: any) => {
         refetch
     } = useGetmodelByIdQuery(params.id);
     useEffect(() => {
-        refetch();
+        if (params?.id !== 'new') {
+            refetch();
+        }
     }, [refetch]);
 
     const {
@@ -49,7 +50,9 @@ const SolidFormLayouts = ({ params }: any) => {
         refetch: refetchuser
     } = useGetusersByIdQuery(params.id);
     useEffect(() => {
-        refetchuser();
+        if (params?.modelName === 'user') {
+            refetchuser();
+        }
     }, [refetchuser]);
 
     return (
