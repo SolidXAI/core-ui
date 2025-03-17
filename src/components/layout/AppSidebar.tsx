@@ -178,7 +178,7 @@ const AppSidebar = () => {
                     })}
                 </div>
 
-                {/* <UserProfileMenu></UserProfileMenu> */}
+                <UserProfileMenu></UserProfileMenu>
             </div>
             {currentMenu && (
                 <div className={`sidebar-right ${visibleNavbar ? "open" : ""}`}>
