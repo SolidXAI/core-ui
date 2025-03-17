@@ -59,7 +59,11 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
 
   // Function to delete a row
   const deleteRow = (rowData: any) => {
-    setFieldMetaData((prevData: any) => prevData.filter((item: any) => item.name !== rowData.name)); // Remove the row from the data array
+    setFieldMetaData((prevData: any) => {
+      const updatedData = prevData.filter((item: any) => item.name !== rowData.name);
+      setIsDirty(true); // Ensure dirty state is updated immediately
+      return updatedData;
+    });
   };
 
   // Template for the trash (delete) icon column
