@@ -256,11 +256,11 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
 
   }, [formik.values])
 
-  useEffect(() => {
-    if (formik.dirty) {
-      setIsDirty(true);
-    }
-  }, [formik.dirty]);
+  // useEffect(() => {
+  //   if (formik.dirty) {
+  //     setIsDirty(true);
+  //   }
+  // }, [formik.dirty]);
 
   return (
 

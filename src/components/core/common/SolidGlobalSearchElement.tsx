@@ -1,3 +1,5 @@
+"use client"
+
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Dialog } from "primereact/dialog";
 import { TabPanel, TabView } from "primereact/tabview";
