@@ -90,7 +90,7 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps): ISolidField 
     if (type === 'longText') {
         return new SolidLongTextField(fieldContext);
     }
-    if (type === 'int' || type === 'bigint' ) {
+    if (type === 'int' || type === 'bigint') {
         return new SolidIntegerField(fieldContext);
     }
     if (type === 'decimal' || type === 'float') {
@@ -478,6 +478,15 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const errorMessages = Object.values(errors);
     };
 
+    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
+        toast.current?.show({
+            severity,
+            summary,
+            detail,
+            life: 3000,
+        });
+    };
+
     const onFormikSubmit = async (values: any) => {
         const solidView = solidFormViewMetaData.data.solidView;
         const solidFieldsMetadata = solidFormViewMetaData.data.solidFieldsMetadata;
@@ -510,10 +519,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 params.customCreateHandler(formData);
             } else {
                 if (params.id === 'new') {
-                    createEntity(formData);
+                    // createEntity(formData);
+                    const result = await createEntity(formData).unwrap();
+                    showToast("success", "Form saved", "Form saved successfully!");
+                    const updatedUrl = pathname.replace("new", result?.data?.id);
+                    router.push(updatedUrl);
                 }
                 else {
-                    updateEntity({ id: +params.id, data: formData });
+                    // updateEntity({ id: +params.id, data: formData });
+                    await updateEntity({ id: +params.id, data: formData }).unwrap();
+                    // const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
+                    showToast("success", "Entity Updated", "Entity updated successfully!");
                 }
             }
 
@@ -955,6 +971,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     {params.embeded !== true &&
                                         actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
                                         !formViewLayout.attrs.readonly &&
+                                        formik.dirty &&
                                         <div>
                                             <Button
                                                 label="Save"

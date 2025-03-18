@@ -103,6 +103,7 @@ export class SolidSelectionStaticField implements ISolidField {
                 <div className="flex flex-column gap-2 mt-4">
                     {showFieldLabel != false &&
                         <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
                             {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                         </label>
                     }
@@ -124,7 +125,9 @@ export class SolidSelectionStaticField implements ISolidField {
                     />
                 </div>
                 {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    <div className="absolute mt-1">
+                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    </div>
                 )}
             </div>
         );

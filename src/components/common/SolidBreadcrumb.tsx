@@ -3,14 +3,13 @@
 import Link from "next/link";
 import { usePathname } from "next/navigation";
 import { BreadCrumb } from "primereact/breadcrumb";
-import React from "react";
 
 interface BreadcrumbItem {
     label: string;
     link?: string;
 }
 
-export const SolidBreadcrumb: React.FC = () => {
+export const SolidBreadcrumb = () => {
     const pathname = usePathname();
     const segments = pathname.split("/").filter(Boolean); // Remove empty segments
 
@@ -20,16 +19,20 @@ export const SolidBreadcrumb: React.FC = () => {
         const moduleName = segments[2].replace(/-/g, " "); // Convert kebab-case to normal text
         const modelName = segments[3].replace(/-/g, " ");
 
-        breadcrumbItems.push({ label: moduleName, link: `/admin/core/${segments[2]}` });
-        breadcrumbItems.push({ label: modelName, link: `/admin/core/${segments[2]}/${segments[3]}` });
+        // 4th segment: Add "/home" instead of 5th and 6th segments
+        breadcrumbItems.push({ label: moduleName, link: `/admin/core/${segments[2]}/home` });
 
-        if (segments.length === 5) {
-            // List or Kanban View
-            breadcrumbItems.push({ label: segments[4] === "kanban" ? "Kanban" : "List" });
+        // 5th segment: Replace "form/new" or "form/[id]" with "List" and update link
+        if (segments.length >= 5) {
+            if (segments[4] === "form" && segments.length === 6) {
+                breadcrumbItems.push({ label: "List", link: `/admin/core/${segments[2]}/${segments[3]}/list` });
+            } else {
+                breadcrumbItems.push({ label: modelName, link: `/admin/core/${segments[2]}/${segments[3]}` });
+            }
         }
 
-        if (segments.length === 6 && segments[4] === "form") {
-            // Form View with ID or "New"
+        // 6th segment: Keep as it is
+        if (segments.length === 6) {
             breadcrumbItems.push({ label: segments[5] });
         }
     }
@@ -38,12 +41,12 @@ export const SolidBreadcrumb: React.FC = () => {
         label: item.label,
         ...(item.link
             ? {
-                  template: () => (
-                      <Link href={item.link as string}> {/* Ensuring item.link is a string */}
-                          <p className="text-primary font-normal">{item.label}</p>
-                      </Link>
-                  ),
-              }
+                template: () => (
+                    <Link href={item.link!}>
+                        <p className="text-primary font-normal">{item.label}</p>
+                    </Link>
+                ),
+            }
             : {}),
     }));
 

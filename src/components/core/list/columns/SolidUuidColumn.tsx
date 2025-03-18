@@ -4,6 +4,7 @@ import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { FormEvent } from "primereact/ts-helpers";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
+import SolidTableRowCell from '../SolidTableRowCell';
 
 const SolidUuidColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
@@ -27,6 +28,8 @@ const SolidUuidColumn = ({ solidListViewMetaData, fieldMetadata, column }: Solid
             </SolidVarInputsFilterElement>
         )
     }
+
+    const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
     return (
@@ -34,7 +37,7 @@ const SolidUuidColumn = ({ solidListViewMetaData, fieldMetadata, column }: Solid
             key={fieldMetadata.name}
             field={fieldMetadata.name}
             header={header}
-            className="text-sm"
+            // className="text-sm"
             sortable={column.attrs.sortable}
             // filter={filterable}
             dataType={columnDataType}
@@ -42,8 +45,14 @@ const SolidUuidColumn = ({ solidListViewMetaData, fieldMetadata, column }: Solid
             filterMatchModeOptions={filterMatchModeOptions}
             filterElement={filterTemplate}
             filterPlaceholder={`Search by ${fieldMetadata.displayName}`}
-            style={{ minWidth: "12rem" }}
+            // style={{ minWidth: "12rem" }}
             headerClassName="table-header-fs"
+            body={(rowData) => (
+                <SolidTableRowCell
+                    value={rowData[fieldMetadata.name]}
+                    truncateAfter={truncateAfter}
+                />
+            )}
         ></Column>
     );
 
