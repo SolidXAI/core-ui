@@ -577,7 +577,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
         skip: params.id === 'new'
     });
     useEffect(() => {
-        refetchSolidFormViewData()
+        if (params.id !== 'new') {
+            refetchSolidFormViewData()
+        }
     }, [formViewDataQs])
 
 
