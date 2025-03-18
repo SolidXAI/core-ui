@@ -85,7 +85,7 @@ export class SolidRelationOneToManyField implements ISolidField {
             setRefreshList((prev) => !prev);
             const lisviewparams = {
                 moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
-                modelName: camelCase(this.fieldContext.fieldMetadata.relationModelSingularName),
+                modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName),
                 inlineCreate: readOnlyPermission === false ?  true : false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
                 embeded: true
@@ -98,7 +98,7 @@ export class SolidRelationOneToManyField implements ISolidField {
             const customFilter = this.fieldContext.fieldMetadata.relationCoModelFieldName ? this.fieldContext.fieldMetadata.relationCoModelFieldName : `${this.fieldContext.modelName}`
             const listviewparams = {
                 moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
-                modelName: camelCase(this.fieldContext.fieldMetadata.relationModelSingularName),
+                modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName),
                 inlineCreate: readOnlyPermission === false ?  true : false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
                 embeded: true,

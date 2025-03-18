@@ -523,7 +523,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     }
 
     const showFieldError = () => {
-        if (errorFields.length === 0) return;
+        if (errorFields?.length === 0) return;
         errorFields.forEach((error) => {
             toast?.current?.show({
                 severity: "error",
@@ -537,7 +537,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         // errorFields.length = 0;
     };
     useEffect(() => {
-        if (errorFields.length > 0) {
+        if (errorFields?.length > 0) {
             showFieldError();
         }
     }, [errorFields])
@@ -552,7 +552,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const solidView = solidFormViewMetaData.data.solidView;
         const solidFieldsMetadata = solidFormViewMetaData.data.solidFieldsMetadata;
         layoutFields = [formViewLayout].flatMap(getLayoutFields);
-        for (let i = 0; i < layoutFields.length; i++) {
+        for (let i = 0; i < layoutFields?.length; i++) {
             const formLayoutField = layoutFields[i];
             const fieldMetadata = solidFieldsMetadata[formLayoutField.attrs.name];
             if (fieldMetadata?.type === 'relation') {
@@ -573,9 +573,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
         data: solidFormViewData,
         isLoading: solidFormViewDataIsLoading,
         refetch: refetchSolidFormViewData,
-    } = useGetSolidEntityByIdQuery({ id: params.id, qs: formViewDataQs });
+    } = useGetSolidEntityByIdQuery({ id: params.id, qs: formViewDataQs }, {
+        skip: params.id === 'new'
+    });
     useEffect(() => {
-        refetchSolidFormViewData()
+        if (params.id !== 'new') {
+            refetchSolidFormViewData()
+        }
     }, [formViewDataQs])
 
 
@@ -611,7 +615,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const validationSchema = {};
         const initialValues = {};
 
-        for (let i = 0; i < layoutFields.length; i++) {
+        for (let i = 0; i < layoutFields?.length; i++) {
             const formLayoutField = layoutFields[i];
             const fieldMetadata = solidFieldsMetadata[formLayoutField.attrs.name];
             const fieldContext: SolidFieldProps = {

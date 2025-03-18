@@ -189,7 +189,7 @@ export class SolidRelationManyToOneField implements ISolidField {
             handlePopupClose: (() => {
                 setvisibleCreateRelationEntity(false);
             }),
-            modelName: camelCase(this.fieldContext.fieldMetadata.relationModelSingularName)
+            modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName)
         }
 
         return (

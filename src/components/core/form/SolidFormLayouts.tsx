@@ -24,12 +24,14 @@ const SolidFormLayouts = ({ params }: any) => {
         isLoading,
         isError,
         refetch
-    } = useGetmodelByIdQuery(params.id);
+    } = useGetmodelByIdQuery(params.id, {
+        skip: params.id === 'new' || params.modelName !== 'model-metadata',
+    });
     useEffect(() => {
-        if (params?.id !== 'new') {
+        if (params?.id !== 'new' && params.modelName === 'model-metadata') {
             refetch();
         }
-    }, [refetch]);
+    }, [params.id, refetch]);
 
     const {
         data: moduleData,
@@ -37,9 +39,13 @@ const SolidFormLayouts = ({ params }: any) => {
         isLoading: isModuleLoading,
         isError: isModuleError,
         refetch: refetchModule
-    } = useGetmoduleByIdQuery(params.id);
+    } = useGetmoduleByIdQuery(params.id, {
+        skip: params.id === 'new' || params.modelName !== 'module-metadata',
+    });
     useEffect(() => {
-        refetchModule();
+        if (params?.id !== 'new' && params.modelName === 'module-metadata') {
+            refetchModule();
+        }
     }, [refetchModule]);
 
     const {
@@ -48,9 +54,11 @@ const SolidFormLayouts = ({ params }: any) => {
         isLoading: isuserLoading,
         isError: isuserError,
         refetch: refetchuser
-    } = useGetusersByIdQuery(params.id);
+    } = useGetusersByIdQuery(params.id, {
+        skip: params.id === 'new' || params.modelName !== 'user',
+    });
     useEffect(() => {
-        if (params?.modelName === 'user') {
+        if (params?.id !== 'new' && params?.modelName === 'user') {
             refetchuser();
         }
     }, [refetchuser]);
