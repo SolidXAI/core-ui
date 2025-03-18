@@ -86,7 +86,7 @@ export class SolidRelationOneToManyField implements ISolidField {
             const lisviewparams = {
                 moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
                 modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName),
-                inlineCreate: readOnlyPermission === false ?  true : false,
+                inlineCreate: readOnlyPermission === false ? true : false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
                 embeded: true
             }
@@ -99,7 +99,7 @@ export class SolidRelationOneToManyField implements ISolidField {
             const listviewparams = {
                 moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
                 modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName),
-                inlineCreate: readOnlyPermission === false ?  true : false,
+                inlineCreate: readOnlyPermission === false ? true : false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
                 embeded: true,
                 customFilter: {
@@ -137,7 +137,8 @@ export class SolidRelationOneToManyField implements ISolidField {
                 {/* <div className="justify-content-center align-items-center"> */}
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                    {/* &nbsp;{fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
+                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        {/* &nbsp;{fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
 

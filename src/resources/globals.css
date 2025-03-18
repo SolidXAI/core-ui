@@ -431,7 +431,7 @@ a {
   white-space: nowrap !important;
   overflow: hidden !important;
   text-overflow: ellipsis !important;
-  max-width: 30ch !important;
+  /* max-width: 30ch !important; */
 }
 
 .form-field-label {
@@ -1700,6 +1700,7 @@ li.header-li-px {
   padding: 0.8rem 1rem;
   font-size: 14px;
   font-weight: 500;
+  text-transform: capitalize;
 }
 
 .solid-breadcrumb.p-breadcrumb .p-menuitem a {

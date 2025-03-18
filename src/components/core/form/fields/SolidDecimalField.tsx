@@ -42,8 +42,8 @@ export class SolidDecimalField implements ISolidField {
         } else {
             schema = schema.nullable(); // Allow null when not required
         }
-         // 2. length (min/max)
-         if (fieldMetadata.min && fieldMetadata.min > 0) {
+        // 2. length (min/max)
+        if (fieldMetadata.min && fieldMetadata.min > 0) {
             schema = schema.min(fieldMetadata.min, `${fieldLabel} should be at-least ${fieldMetadata.min} characters long.`);
         }
         if (fieldMetadata.max && fieldMetadata.max > 0) {
@@ -75,6 +75,7 @@ export class SolidDecimalField implements ISolidField {
                 <div className="flex flex-column gap-2 mt-4">
                     {showFieldLabel != false &&
                         <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
                             {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                         </label>
                     }
@@ -90,7 +91,9 @@ export class SolidDecimalField implements ISolidField {
                         value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                     />
                     {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                        <div className="absolute mt-1">
+                            <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                        </div>
                     )}
                 </div>
             </div>

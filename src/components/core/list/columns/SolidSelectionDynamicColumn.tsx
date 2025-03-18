@@ -4,6 +4,7 @@ import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { FormEvent } from "primereact/ts-helpers";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
+import SolidTableRowCell from '../SolidTableRowCell';
 
 const SolidSelectionDynamicColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
@@ -28,6 +29,8 @@ const SolidSelectionDynamicColumn = ({ solidListViewMetaData, fieldMetadata, col
             </SolidVarInputsFilterElement>
         )
     }
+
+    const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
     return (
@@ -43,8 +46,14 @@ const SolidSelectionDynamicColumn = ({ solidListViewMetaData, fieldMetadata, col
             filterMatchModeOptions={filterMatchModeOptions}
             filterElement={filterTemplate}
             filterPlaceholder={`Search by ${fieldMetadata.displayName}`}
-            style={{ minWidth: "12rem" }}
+            // style={{ minWidth: "12rem" }}
             headerClassName="table-header-fs"
+            body={(rowData) => (
+                <SolidTableRowCell
+                    value={rowData[fieldMetadata.name]}
+                    truncateAfter={truncateAfter}
+                />
+            )}
         ></Column>
     );
 

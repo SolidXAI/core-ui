@@ -101,12 +101,8 @@ export class SolidMediaMultipleField implements ISolidField {
 
         const [isDeleteImageDialogVisible, setDeleteImageDialogVisible] = useState(false);
         const [imageToBeDeletedData, setImageToBeDeletedData] = useState<any>();
-        const [uploadCompleted, setUploadCompleted] = useState<Record<string, boolean>>({});
         const [fileDetails, setFileDetails] = useState<{ name: string; type: string; size: number, id: number, fileUrl: string }[]>([]);
-        const [uploadedSize, setUploadedSize] = useState<Record<string, string>>({});
-        const [totalSize, setTotalSize] = useState<Record<string, string>>({});
         const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
-
 
         const formatFileSize = (size: number) => {
             return size >= 1024 * 1024
@@ -117,101 +113,54 @@ export class SolidMediaMultipleField implements ISolidField {
             deleteMedia,
             { isLoading: isMediaDeleted, isSuccess: isDeleteMediaSuceess, isError: isMediaDeleteError, error: mediaDeleteError, data: DeletedMedia },
         ] = useDeleteMediaMutation();
-
         useEffect(() => {
             const fieldValue = formik?.values[fieldLayoutInfo.attrs.name];
+
             if (Array.isArray(fieldValue) && fieldValue.length > 0) {
                 const urls: string[] = [];
                 const details: { name: string; type: string; size: number, id: any, fileUrl: string }[] = [];
-                const completed: Record<string, boolean> = {};
-
+                const objectUrls: string[] = [];
                 fieldValue.forEach((file: File | any) => {
                     if (file instanceof File) {
                         // New file (from local upload)
-                        urls.push(URL.createObjectURL(file));
-                        details.push({ name: file.name, type: file.type, size: file.size, id: `${file.name}-${file.size}`, fileUrl: "" });
+                        const fileUrl = URL.createObjectURL(file);
+                        objectUrls.push(fileUrl); // Store URL for cleanup
+                        urls.push(fileUrl);
+
+                        details.push({
+                            name: file.name,
+                            type: file.type,
+                            size: file.size,
+                            id: `${file.name}-${file.size}`,
+                            fileUrl: fileUrl // ✅ Store the generated object URL
+                        });
                     } else if (typeof file === "object" && file._full_url) {
                         urls.push(file._full_url);
                         details.push({
-                            name: file.relativeUri || "Unknown", // Use relativeUri or fallback
-                            type: file.mediaStorageProviderMetadata?.type || "Unknown", // Extract type if available
-                            size: 0, // API doesn't provide size, set 0 or fetch from metadata if available
+                            name: file.originalFileName,
+                            type: file.mimeType,
+                            size: file.fileSize,
                             id: file.id,
                             fileUrl: file._full_url
                         });
                     }
                 });
-                details.forEach(file => {
-                    completed[`${file.name}-${file.size}`] = true;
-                });
-                setUploadCompleted(completed);
                 setFileDetails(details);
             }
         }, [formik.values, fieldLayoutInfo.attrs.name]);
 
         const handleDropImages = (acceptedFiles: any[]) => {
             if (!acceptedFiles.length) return;
-
             const newFileDetails = [...fileDetails];
-            const newUploadedSize = { ...uploadedSize };
-            const newTotalSize = { ...totalSize };
-            const newUploadCompleted = { ...uploadCompleted };
-
             acceptedFiles.forEach((file) => {
-                const fileId = `${file.name}-${file.size}`; // Unique identifier for tracking each file
-
                 newFileDetails.push({ name: file.name, type: file.type, size: file.size, id: file.id, fileUrl: file._full_url });
-                newUploadedSize[fileId] = "0 KB";
-                newTotalSize[fileId] = formatFileSize(file.size);
-                newUploadCompleted[fileId] = false;
-
                 const reader = new FileReader();
-
-                reader.onloadstart = () => {
-                    setUploadedSize((prev) => ({ ...prev, [fileId]: "0 KB" }));
-                };
-
-                reader.onprogress = (event) => {
-                    if (event.loaded && event.total) {
-                        setUploadedSize((prev) => ({ ...prev, [fileId]: formatFileSize(event.loaded) }));
-                    }
-                };
-
-                reader.onloadend = () => {
-                    setUploadCompleted((prev) => ({ ...prev, [fileId]: true }));
-                    setUploadedSize((prev) => ({ ...prev, [fileId]: newTotalSize[fileId] }));
-                };
-
                 reader.readAsDataURL(file);
             });
 
             setFileDetails(newFileDetails);
-            setUploadedSize(newUploadedSize);
-            setTotalSize(newTotalSize);
-            setUploadCompleted(newUploadCompleted);
 
             formik.setFieldValue(fieldLayoutInfo.attrs.name, acceptedFiles);
-        };
-
-
-        const handleCancelUpload = (fileId: string) => {
-            setFileDetails((prev) => prev.filter((file) => fileId !== `${file.name}-${file.size}`));
-            setUploadCompleted((prev) => {
-                const newCompleted = { ...prev };
-                delete newCompleted[fileId];
-                return newCompleted;
-            });
-            setUploadedSize((prev) => {
-                const newSize = { ...prev };
-                delete newSize[fileId];
-                return newSize;
-            });
-            setTotalSize((prev) => {
-                const newSize = { ...prev };
-                delete newSize[fileId];
-                return newSize;
-            });
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, fileDetails.filter((file) => `${file.name}-${file.size}` !== fileId));
         };
 
         const confirmDeleteFile = (fileId: any, deleteId: number) => {
@@ -228,25 +177,6 @@ export class SolidMediaMultipleField implements ISolidField {
                 deleteMedia(imageToBeDeletedData)
                     .unwrap()
                     .then(() => {
-                        // Ensure UI state updates only after successful deletion
-                        setUploadCompleted((prev) => {
-                            const newCompleted = { ...prev };
-                            delete newCompleted[selectedFileId];
-                            return newCompleted;
-                        });
-
-                        setUploadedSize((prev) => {
-                            const newSize = { ...prev };
-                            delete newSize[selectedFileId];
-                            return newSize;
-                        });
-
-                        setTotalSize((prev) => {
-                            const newSize = { ...prev };
-                            delete newSize[selectedFileId];
-                            return newSize;
-                        });
-
                         // Update form state
                         formik.setFieldValue(
                             fieldLayoutInfo.attrs.name,
@@ -262,7 +192,6 @@ export class SolidMediaMultipleField implements ISolidField {
                 setSelectedFileId(null);
             }
         };
-
 
         const {
             getRootProps,
@@ -282,7 +211,7 @@ export class SolidMediaMultipleField implements ISolidField {
                 <div className="flex flex-column gap-2 mt-4">
                     {showFieldLabel != false &&
                         <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-
+                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
                             {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                         </label>
                     }
@@ -303,7 +232,7 @@ export class SolidMediaMultipleField implements ISolidField {
                             <FileReaderExt fileDetails={fileDetails[0]} />
                             <div className="w-full flex flex-column gap-1">
                                 <div className="flex align-items-center justify-content-between">
-                                    <Link className="font-normal w-11" href={process.env.NEXT_PUBLIC_BACKEND_API_URL + `/${fileDetails[0]?.fileUrl}`} target="_blank">{fileDetails[0].name}</Link>
+                                    <Link className="font-normal w-11" href={`${fileDetails[0]?.fileUrl}`} target="_blank">{fileDetails[0].name}</Link>
                                     <div className="flex align-items-center gap-2">
                                         <div>
                                             <Button
@@ -335,28 +264,21 @@ export class SolidMediaMultipleField implements ISolidField {
                                         </div>
                                     </div>
                                 </div>
-                                {uploadCompleted[`${fileDetails[0].name}-${fileDetails[0].size}`] && (
-                                    <div className="flex align-items-center gap-2 text-sm">
-                                        {totalSize[`${fileDetails[0].name}-${fileDetails[0].size}`]} of {totalSize[`${fileDetails[0].name}-${fileDetails[0].size}`]}
-                                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                            <path d="M9.16 12.76L13.39 8.53L12.55 7.69L9.16 11.08L7.45 9.37L6.61 10.21L9.16 12.76ZM10 16C9.17 16 8.39 15.8424 7.66 15.5272C6.93 15.2124 6.295 14.785 5.755 14.245C5.215 13.705 4.7876 13.07 4.4728 12.34C4.1576 11.61 4 10.83 4 10C4 9.17 4.1576 8.39 4.4728 7.66C4.7876 6.93 5.215 6.295 5.755 5.755C6.295 5.215 6.93 4.7874 7.66 4.4722C8.39 4.1574 9.17 4 10 4C10.83 4 11.61 4.1574 12.34 4.4722C13.07 4.7874 13.705 5.215 14.245 5.755C14.785 6.295 15.2124 6.93 15.5272 7.66C15.8424 8.39 16 9.17 16 10C16 10.83 15.8424 11.61 15.5272 12.34C15.2124 13.07 14.785 13.705 14.245 14.245C13.705 14.785 13.07 15.2124 12.34 15.5272C11.61 15.8424 10.83 16 10 16Z" fill="#722ED1" />
-                                        </svg>
-                                        Completed
-                                    </div>
-                                )}
+                                <div className="flex align-items-center gap-2 text-sm">
+                                    {formatFileSize(fileDetails[0].size)}
+                                </div>
                             </div>
                         </div>
                     </div>
                 }
 
-
                 {fileDetails.length > 1 &&
-                    <div className="flex align-items-center">
+                    <div className="flex align-items-center mt-1">
                         <p className="m-0">
-                            {fileDetails.length - 1} items {uploadCompleted ? 'Uploaded' : 'Uploading'}
+                            {fileDetails.length - 1} items
                         </p>
                         <div>
-                            <Button type="button" text label="View" onClick={() => setShowAllFiles(true)} />
+                            <Button type="button" size="small" text label="View" onClick={() => setShowAllFiles(true)} />
                         </div>
                     </div>
                 }
@@ -377,7 +299,7 @@ export class SolidMediaMultipleField implements ISolidField {
                                         <FileReaderExt fileDetails={file} />
                                         <div className="w-full flex flex-column gap-1">
                                             <div className="flex align-items-center justify-content-between">
-                                                <Link className="font-normal w-11" href={process.env.NEXT_PUBLIC_BACKEND_API_URL + `/${file?.fileUrl}`} target="_blank">{file.name}</Link>
+                                                <Link className="font-normal w-11" href={file?.fileUrl} target="_blank">{file.name}</Link>
                                                 <div className="flex align-items-center gap-2">
                                                     <div>
                                                         <Button
@@ -409,18 +331,9 @@ export class SolidMediaMultipleField implements ISolidField {
                                                     </div>
                                                 </div>
                                             </div>
-                                            {uploadCompleted[fileId] && (
-                                                <div className="flex align-items-center gap-2 text-sm">
-                                                    {totalSize[fileId]} of {totalSize[fileId]}
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="4" height="4" viewBox="0 0 4 4" fill="none">
-                                                        <circle cx="2" cy="2" r="2" fill="#C1C1C1" />
-                                                    </svg>
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                                        <path d="M9.16 12.76L13.39 8.53L12.55 7.69L9.16 11.08L7.45 9.37L6.61 10.21L9.16 12.76ZM10 16C9.17 16 8.39 15.8424 7.66 15.5272C6.93 15.2124 6.295 14.785 5.755 14.245C5.215 13.705 4.7876 13.07 4.4728 12.34C4.1576 11.61 4 10.83 4 10C4 9.17 4.1576 8.39 4.4728 7.66C4.7876 6.93 5.215 6.295 5.755 5.755C6.295 5.215 6.93 4.7874 7.66 4.4722C8.39 4.1574 9.17 4 10 4C10.83 4 11.61 4.1574 12.34 4.4722C13.07 4.7874 13.705 5.215 14.245 5.755C14.785 6.295 15.2124 6.93 15.5272 7.66C15.8424 8.39 16 9.17 16 10C16 10.83 15.8424 11.61 15.5272 12.34C15.2124 13.07 14.785 13.705 14.245 14.245C13.705 14.785 13.07 15.2124 12.34 15.5272C11.61 15.8424 10.83 16 10 16Z" fill="#722ED1" />
-                                                    </svg>
-                                                    Completed
-                                                </div>
-                                            )}
+                                            <div className="flex align-items-center gap-2 text-sm">
+                                                {formatFileSize(file.size)}
+                                            </div>
                                         </div>
                                     </div>
                                 </div>
@@ -429,7 +342,9 @@ export class SolidMediaMultipleField implements ISolidField {
                     }
                 </Dialog>
                 {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    <div className="absolute mt-1">
+                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    </div>
                 )}
                 <Dialog
                     visible={isDeleteImageDialogVisible}
@@ -437,8 +352,8 @@ export class SolidMediaMultipleField implements ISolidField {
                     modal
                     footer={() => (
                         <div className="flex justify-content-center">
-                            <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteFile} />
-                            <Button label="No" icon="pi pi-times" className='small-button' onClick={() => setDeleteImageDialogVisible(false)} />
+                            <Button type="button" label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteFile} />
+                            <Button type="button" label="No" icon="pi pi-times" className='small-button' onClick={() => setDeleteImageDialogVisible(false)} />
                         </div>
                     )}
                     onHide={() => setDeleteImageDialogVisible(false)}

@@ -4,6 +4,7 @@ import { FormEvent } from "primereact/ts-helpers";
 import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 import { dateFilterMatchModeOptions } from './SolidDateColumn';
+import SolidTableRowCell from "../SolidTableRowCell";
 
 const SolidTimeColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
@@ -27,6 +28,7 @@ const SolidTimeColumn = ({ solidListViewMetaData, fieldMetadata, column }: Solid
     };
 
     // TODO: the body template to be controlled based on the format that one is expecting the date to be displayed in.
+    const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
     return (
@@ -42,8 +44,14 @@ const SolidTimeColumn = ({ solidListViewMetaData, fieldMetadata, column }: Solid
             filterMatchModeOptions={dateFilterMatchModeOptions}
             filterElement={filterTemplate}
             filterPlaceholder={`Search by ${fieldMetadata.displayName}`}
-            style={{ minWidth: "12rem" }}
+            // style={{ minWidth: "12rem" }}
             headerClassName="table-header-fs"
+            body={(rowData) => (
+                <SolidTableRowCell
+                    value={rowData[fieldMetadata.name]}
+                    truncateAfter={truncateAfter}
+                />
+            )}
         ></Column>
     );
 

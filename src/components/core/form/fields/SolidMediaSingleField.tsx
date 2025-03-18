@@ -87,9 +87,7 @@ export class SolidMediaSingleField implements ISolidField {
 
         const [isDeleteImageDialogVisible, setDeleteImageDialogVisible] = useState(false);
         const [imageToBeDeletedData, setImageToBeDeletedData] = useState<any>();
-        const [uploadCompleted, setUploadCompleted] = useState<boolean>(false);
-        const [fileDetails, setFileDetails] = useState<{ name: string; type: string, fileUrl: string } | null>(null);
-        const [totalSize, setTotalSize] = useState<string>("0 KB");
+        const [fileDetails, setFileDetails] = useState<{ name: string; type: string, fileUrl: string, fileSize: number } | null>(null);
         const [isReplaceImageDialogVisible, setReplaceImageDialogVisible] = useState(false);
         const [newFileToUpload, setNewFileToUpload] = useState<any>(null);
 
@@ -110,7 +108,6 @@ export class SolidMediaSingleField implements ISolidField {
                 deleteMedia(imageToBeDeletedData);
             }
             e.stopPropagation();
-            setUploadCompleted(false);
             setFileDetails(null);
             formik.setFieldValue(fieldLayoutInfo.attrs.name, null);
             setDeleteImageDialogVisible(false);
@@ -129,25 +126,24 @@ export class SolidMediaSingleField implements ISolidField {
             }
         };
 
-        const uploadFile = (file: any) => {
-            setUploadCompleted(false);
-            setTotalSize(formatFileSize(file.size));
-            setFileDetails({ name: file.name, type: file.type, fileUrl: file.fileUrl });
+        const uploadFile = (file: File) => {
+            setFileDetails({
+                name: file.name,
+                type: file.type,
+                fileUrl: URL.createObjectURL(file),
+                fileSize: file.size
+            });
 
             const reader = new FileReader();
-            reader.onloadend = () => {
-                setUploadCompleted(true);
-            };
             reader.readAsDataURL(file);
             formik.setFieldValue(fieldLayoutInfo.attrs.name, file);
         };
+
         const handleReplaceFile = () => {
             // Delete the existing file first
             if (imageToBeDeletedData) {
                 deleteMedia(imageToBeDeletedData);
             }
-
-            setUploadCompleted(false);
             setFileDetails(null);
             formik.setFieldValue(fieldLayoutInfo.attrs.name, null);
 
@@ -159,28 +155,36 @@ export class SolidMediaSingleField implements ISolidField {
 
             setReplaceImageDialogVisible(false);
         };
+
         useEffect(() => {
             const fieldValue = formik?.values[fieldLayoutInfo.attrs.name];
 
             if (fieldValue && typeof fieldValue === "object") {
                 let fileUrl = "";
                 let fileName = "Unknown File";
+                let fileSize = 0;
 
                 if (fieldValue instanceof File) {
-                    // Handle new file upload
-                    fileUrl = fieldValue.name;
-                    fileName = fileUrl;
+                    fileUrl = URL.createObjectURL(fieldValue);
+                    fileName = fieldValue.name;
+                    fileSize = fieldValue.size;
                 } else if (fieldValue._full_url) {
-                    // Handle updated file from backend
                     fileUrl = fieldValue._full_url;
-                    fileName = fieldValue.relativeUri?.split("/").pop() || "Unknown File";
+                    fileName = fieldValue.originalFileName;
+                    fileSize = fieldValue.fileSize;
                 }
 
-                setFileDetails({ name: fileName, type: "Uploaded File", fileUrl });
+                setFileDetails({
+                    name: fileName,
+                    type: fieldValue.mimeType,
+                    fileUrl,
+                    fileSize
+                });
 
-                // Set upload progress
-                setUploadCompleted(true);
+                // Set file ID for delete operation
                 setImageToBeDeletedData(fieldValue.id);
+
+                // Ensure formik has the correct value
                 formik.setFieldValue(fieldLayoutInfo.attrs.name, fieldValue);
             }
         }, [formik.values, fieldLayoutInfo.attrs.name]);
@@ -202,6 +206,7 @@ export class SolidMediaSingleField implements ISolidField {
                 <div className="flex flex-column gap-2 mt-4">
                     {showFieldLabel != false &&
                         <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
                             {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                         </label>
                     }
@@ -216,7 +221,9 @@ export class SolidMediaSingleField implements ISolidField {
                         />
                     </div>
                     {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                        <div className="absolute mt-1">
+                            <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                        </div>
                     )}
                     {fileDetails && (
                         <div className="solid-file-upload-wrapper">
@@ -224,10 +231,11 @@ export class SolidMediaSingleField implements ISolidField {
                                 <FileReaderExt fileDetails={fileDetails} />
                                 <div className="w-full flex flex-column gap-1">
                                     <div className="flex align-items-start justify-content-between">
-                                        <Link className="font-normal w-9" href={process.env.NEXT_PUBLIC_BACKEND_API_URL + `/${fileDetails?.fileUrl}`} target="_blank">{fileDetails.name}</Link>
+                                        <Link className="font-normal w-9 text-primary" href={fileDetails.fileUrl} target="_blank">{fileDetails.name}</Link>
                                         <div className="flex align-items-center gap-2">
                                             <div>
                                                 <Button
+                                                    type="button"
                                                     text
                                                     icon={"pi pi-download"}
                                                     size="small"
@@ -242,6 +250,7 @@ export class SolidMediaSingleField implements ISolidField {
                                             </div>
                                             <div>
                                                 <Button
+                                                    type="button"
                                                     text
                                                     icon={"pi pi-times"}
                                                     size="small"
@@ -256,12 +265,9 @@ export class SolidMediaSingleField implements ISolidField {
                                             </div>
                                         </div>
                                     </div>
-                                    {
-                                        uploadCompleted &&
-                                        <div className="flex align-items-center gap-2 text-sm">
-                                            {totalSize}
-                                        </div>
-                                    }
+                                    <div className="flex align-items-center gap-2 text-sm">
+                                        {fileDetails && formatFileSize(fileDetails.fileSize)}
+                                    </div>
                                 </div>
                             </div>
                         </div>
@@ -273,8 +279,8 @@ export class SolidMediaSingleField implements ISolidField {
                     modal
                     footer={() => (
                         <div className="flex justify-content-center">
-                            <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={handleCancelUpload} />
-                            <Button label="No" icon="pi pi-times" className='small-button' onClick={() => setDeleteImageDialogVisible(false)} />
+                            <Button type="button" label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={handleCancelUpload} />
+                            <Button type="button" label="No" icon="pi pi-times" className='small-button' onClick={() => setDeleteImageDialogVisible(false)} />
                         </div>
                     )}
                     onHide={() => setDeleteImageDialogVisible(false)}
@@ -287,8 +293,8 @@ export class SolidMediaSingleField implements ISolidField {
                     modal
                     footer={() => (
                         <div className="flex justify-content-center">
-                            <Button label="Yes, Replace" icon="pi pi-check" className='small-button' severity="danger" onClick={handleReplaceFile} />
-                            <Button label="Cancel" icon="pi pi-times" className='small-button' onClick={() => setReplaceImageDialogVisible(false)} />
+                            <Button type="button" label="Yes, Replace" icon="pi pi-check" className='small-button' severity="danger" onClick={handleReplaceFile} />
+                            <Button type="button" label="Cancel" icon="pi pi-times" className='small-button' onClick={() => setReplaceImageDialogVisible(false)} />
                         </div>
                     )}
                     onHide={() => setReplaceImageDialogVisible(false)}
