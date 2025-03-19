@@ -96,3 +96,11 @@ export type SolidFormWidgetProps = {
     viewMetadata: SolidView;
     fieldsMetadata: FieldsMetadata;
 };
+
+export type SolidRelationManyToManyFieldWidgetProps = {
+    field: any;
+    // This comes from Formik...
+    formData: Record<string, any>;
+    viewMetadata: SolidView;
+    fieldsMetadata: FieldsMetadata;
+};

@@ -1,3 +1,5 @@
+import { SolidRelationManyToManyAutocompleteWidget } from "@/components/core/form/fields/relations/widgets/SolidRelationManyToManyAutocompleteWidget";
+import { SolidRelationManyToManyCheckboxWidget } from "@/components/core/form/fields/relations/widgets/SolidRelationManyToManyCheckboxWidget";
 import { CustomHtml } from "@/components/core/form/widgets/CustomHtml";
 import React from "react";
 
@@ -11,9 +13,13 @@ const extensionRegistry: ExtensionRegistry = {
     functions: {},
 };
 
-export const registerExtensionComponent = (name: string, component: React.ComponentType<any>) => {
+export const registerExtensionComponent = (name: string, component: React.ComponentType<any>, aliases: string[] = []) => {
     // console.log(`registerExtensionComponent invoked... ${name}`);
     extensionRegistry.components[name] = component;
+    for (let i = 0; i < aliases.length; i++) {
+        const alias = aliases[i];
+        extensionRegistry.components[alias] = component;
+    }
 };
 
 export const registerExtensionFunction = (name: string, fn: (...args: any[]) => any) => {
@@ -55,10 +61,15 @@ export const getExtensionFunction = (name: string) => {
 
 // Register all the dynamic widget & functions from inside solid-core-ui
 // Common
-registerExtensionComponent("CustomHtml", CustomHtml);
+registerExtensionComponent("CustomHtml", CustomHtml, []);
+registerExtensionComponent("SolidRelationManyToManyCheckboxWidget", SolidRelationManyToManyCheckboxWidget, ["checkbox"]);
+registerExtensionComponent("SolidRelationManyToManyAutocompleteWidget", SolidRelationManyToManyAutocompleteWidget, ["autocomplete"]);
 
 
 // ModuleMetadata
 
 
 // ModelMetadata
+
+
+// RoleMetadata

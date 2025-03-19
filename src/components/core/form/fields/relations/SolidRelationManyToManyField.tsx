@@ -13,6 +13,7 @@ import * as Yup from 'yup';
 import { Schema } from "yup";
 import SolidFormView from "../../SolidFormView";
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
+import { getExtensionComponent } from "@/helpers/registry";
 
 
 
@@ -101,7 +102,7 @@ export class SolidRelationManyToManyField implements ISolidField {
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
-        const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
+        const [visibleCreateRelationEntity, setVisibleCreateRelationEntity] = useState(false);
 
 
         const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
@@ -113,18 +114,31 @@ export class SolidRelationManyToManyField implements ISolidField {
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
+        const renderMode = fieldLayoutInfo.attrs.renderMode;
+        let inferredRenderMode = 'autocomplete';
+        let isStandardRenderMode = false;
+        if (fieldLayoutInfo.attrs.renderMode) {
+            if (renderMode === 'checkbox' || renderMode === 'autocomplete') {
+                isStandardRenderMode = true;
+                inferredRenderMode = renderMode;
+            }
+        }
+
+        // 
+        let DynamicWidget = getExtensionComponent(inferredRenderMode);
 
         return (
             <>
                 {/* <div className={className}> */}
-                {fieldLayoutInfo.attrs.renderMode === "checkbox" &&
+                {isStandardRenderMode && inferredRenderMode === "checkbox" &&
                     <div className={className}>
-                        {this.renderCheckBoxMode(formik, visibleCreateRelationEntity, setvisibleCreateRelationEntity)}
+                        {this.renderCheckBoxMode(formik, visibleCreateRelationEntity, setVisibleCreateRelationEntity)}
                     </div>
                 }
-                {(!fieldLayoutInfo.attrs.renderMode || fieldLayoutInfo.attrs.renderMode === "autocomplete") &&
-                    this.renderAutoCompleteMode(formik, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
+                {isStandardRenderMode && inferredRenderMode === "autocomplete" &&
+                    this.renderAutoCompleteMode(formik, visibleCreateRelationEntity, setVisibleCreateRelationEntity)
                 }
+                {!isStandardRenderMode && this.renderExtensionRenderMode(inferredRenderMode, formik, visibleCreateRelationEntity, setVisibleCreateRelationEntity)}
                 {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                     <div className="absolute mt-1">
                         <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
@@ -135,7 +149,16 @@ export class SolidRelationManyToManyField implements ISolidField {
         );
     }
 
-    renderCheckBoxMode(formik: FormikObject, visibleCreateRelationEntity: any, setvisibleCreateRelationEntity: any) {
+    renderExtensionRenderMode(widgetName: string, formik: FormikObject, visibleCreateRelationEntity: any, setvisibleCreateRelationEntity: any) { 
+        let DynamicWidget = getExtensionComponent(widgetName);
+
+        // TODO: Create the shape of the props for a widget SolidRelationManyToManyFieldWidgetProps
+        // 1. formik
+        // 2. 
+
+    }
+
+    renderCheckBoxMode(formik: FormikObject, visibleCreateRelationEntity: any, setVisibleCreateRelationEntity: any) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
@@ -250,7 +273,7 @@ export class SolidRelationManyToManyField implements ISolidField {
                             </label>
                         }
                         {fieldLayoutInfo.attrs.inlineCreate === "true" &&
-                            this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
+                            this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setVisibleCreateRelationEntity)
                         }
                         <div className="many-to-many-add" >
                             {/* <Button icon="pi pi-plus"
@@ -268,8 +291,6 @@ export class SolidRelationManyToManyField implements ISolidField {
                 </div>
             );
         };
-
-
 
         return (
             <div>
@@ -293,12 +314,10 @@ export class SolidRelationManyToManyField implements ISolidField {
                     </div>
                 </Panel>
             </div>
-
         )
     }
 
-
-    renderAutoCompleteMode(formik: FormikObject, visibleCreateRelationEntity: any, setvisibleCreateRelationEntity: any) {
+    renderAutoCompleteMode(formik: FormikObject, visibleCreateRelationEntity: any, setVisibleCreateRelationEntity: any) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
@@ -368,8 +387,6 @@ export class SolidRelationManyToManyField implements ISolidField {
 
         }
 
-
-
         return (
             <div className={className}>
                 <div className="mt-4">
@@ -395,7 +412,7 @@ export class SolidRelationManyToManyField implements ISolidField {
                             className="solid-standard-autocomplete w-full"
                         />
                         {fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false &&
-                            this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
+                            this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setVisibleCreateRelationEntity)
                         }
                     </div>
                 </div>
@@ -403,7 +420,7 @@ export class SolidRelationManyToManyField implements ISolidField {
         );
     }
 
-    renderSolidFormEmbededView(formik: FormikObject, customCreateHandler: any, visibleCreateRelationEntity: any, setvisibleCreateRelationEntity: any) {
+    renderSolidFormEmbededView(formik: FormikObject, customCreateHandler: any, visibleCreateRelationEntity: any, setVisibleCreateRelationEntity: any) {
 
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
@@ -416,12 +433,12 @@ export class SolidRelationManyToManyField implements ISolidField {
             embeded: true,
             layout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
             customCreateHandler: ((values: any) => {
-                setvisibleCreateRelationEntity(false);
+                setVisibleCreateRelationEntity(false);
                 customCreateHandler(values)
             }),
             inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
             handlePopupClose: (() => {
-                setvisibleCreateRelationEntity(false);
+                setVisibleCreateRelationEntity(false);
             }),
             modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName)
         }
@@ -435,7 +452,7 @@ export class SolidRelationManyToManyField implements ISolidField {
                     aria-label="Filter"
                     type="button"
                     size="small"
-                    onClick={() => setvisibleCreateRelationEntity(true)}
+                    onClick={() => setVisibleCreateRelationEntity(true)}
                     className="custom-add-button"
                 />
                 <Dialog
@@ -445,7 +462,7 @@ export class SolidRelationManyToManyField implements ISolidField {
                     style={{ width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw" }}
                     onHide={() => {
                         if (!visibleCreateRelationEntity) return;
-                        setvisibleCreateRelationEntity(false);
+                        setVisibleCreateRelationEntity(false);
                     }}
                     className="solid-dialog"
                 >
