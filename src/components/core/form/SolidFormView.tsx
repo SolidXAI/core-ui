@@ -38,6 +38,8 @@ import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
 import { SolidUiEvent } from "@/types";
 import { getExtensionComponent, getExtensionFunction } from "@/helpers/registry";
 import { SolidFormWidgetProps } from "@/types/solid-core";
+import { SolidPasswordField } from "./fields/SolidPasswordField";
+import { SolidEmailField } from "./fields/SolidEmailField";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -128,6 +130,12 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps): ISolidField 
     }
     if (type === 'mediaMultiple') {
         return new SolidMediaMultipleField(fieldContext);
+    }
+    if (type === 'password') {
+        return new SolidPasswordField(fieldContext);
+    }
+    if (type === 'email') {
+        return new SolidEmailField(fieldContext);
     }
     return null;
 }
@@ -1095,7 +1103,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             </>
                         )}
                     </div>
-                    <SolidBreadcrumb />
+                    {params.embeded !== true &&
+                        <SolidBreadcrumb
+                            solidViewData={solidFormViewMetaData?.data?.solidView?.model}
+                            initialEntityData={initialEntityData}
+                        />
+                    }
                     {/* {params.embeded !== true &&
                         <div className="solid-form-stepper">
                             <SolidFormStepper />

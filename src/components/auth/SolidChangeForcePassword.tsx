@@ -64,9 +64,9 @@ const SolidChangeForcePassword = () => {
                 }
             } catch (err: any) {
                 showToast("error", "Login Failed", err?.data?.message);
-                setErrors({
-                    currentPassword: "Incorrect Current Password",
-                })
+                // setErrors({
+                //     currentPassword: "Incorrect Current Password",
+                // })
             }
         },
     });

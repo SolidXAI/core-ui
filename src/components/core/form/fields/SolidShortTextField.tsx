@@ -82,30 +82,32 @@ export class SolidShortTextField implements ISolidField {
         return (
             <>
                 {includeWrapper === 'yes' && <div className={className}>
-                    <div className="flex flex-column gap-2 mt-4">
-                        {showFieldLabel != false &&
-                            <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                                {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                                {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                            </label>
-                        }
-                        <InputText
-                            readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                            disabled={formDisabled || fieldDisabled}
-                            id={fieldLayoutInfo.attrs.name}
-                            name={fieldMetadata.name}
-                            aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                            // onChange={formik.handleChange}
-                            onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
-                            onBlur={(e) => this.fieldContext.onBlur(e, 'onFieldBlur')}
-                            value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                        />
-                    </div>
-                    {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                        <div className="absolute mt-1">
-                            <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    <div className="relative">
+                        <div className="flex flex-column gap-2 mt-4">
+                            {showFieldLabel != false &&
+                                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                                    {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
+                                </label>
+                            }
+                            <InputText
+                                readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                                disabled={formDisabled || fieldDisabled}
+                                id={fieldLayoutInfo.attrs.name}
+                                name={fieldMetadata.name}
+                                aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
+                                // onChange={formik.handleChange}
+                                onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
+                                onBlur={(e) => this.fieldContext.onBlur(e, 'onFieldBlur')}
+                                value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                            />
                         </div>
-                    )}
+                        {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                            <div className="absolute mt-1">
+                                <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                            </div>
+                        )}
+                    </div>
                 </div>}
                 {includeWrapper === 'no' &&
                     <>

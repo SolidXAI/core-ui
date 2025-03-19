@@ -203,7 +203,7 @@ export class SolidMediaSingleField implements ISolidField {
 
         return (
             <div className={className} style={readOnlyPermission === true ? { filter: 'opacity(50%)', pointerEvents: 'none' } : {}}>
-                <div className="flex flex-column gap-2 mt-4">
+                <div className="flex flex-column gap-2 mt-4 relative">
                     {showFieldLabel != false &&
                         <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                             {fieldMetadata.required && <span className="text-red-500"> *</span>}
@@ -226,7 +226,7 @@ export class SolidMediaSingleField implements ISolidField {
                         </div>
                     )}
                     {fileDetails && (
-                        <div className="solid-file-upload-wrapper">
+                        <div className="solid-file-upload-wrapper mt-4">
                             <div className="flex align-items-center gap-2">
                                 <FileReaderExt fileDetails={fileDetails} />
                                 <div className="w-full flex flex-column gap-1">

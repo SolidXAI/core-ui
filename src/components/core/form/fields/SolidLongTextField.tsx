@@ -78,29 +78,31 @@ export class SolidLongTextField implements ISolidField {
 
         return (
             <div className={className}>
-                <div className="flex flex-column gap-2 mt-4">
-                    {showFieldLabel != false &&
-                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                            {/* &nbsp;   {fieldDescription && <span>({fieldDescription}) </span>} */}
-                        </label>
-                    }
-                    <InputTextarea
-                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                        disabled={formDisabled || fieldDisabled}
-                        id={fieldLayoutInfo.attrs.name}
-                        aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                        onChange={formik.handleChange}
-                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                        rows={5}
-                        cols={30}
-                    />
-                </div>
-                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                    <div className="absolute mt-1">
-                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                <div className="relative">
+                    <div className="flex flex-column gap-2 mt-4">
+                        {showFieldLabel != false &&
+                            <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                                {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                                {/* &nbsp;   {fieldDescription && <span>({fieldDescription}) </span>} */}
+                            </label>
+                        }
+                        <InputTextarea
+                            readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                            disabled={formDisabled || fieldDisabled}
+                            id={fieldLayoutInfo.attrs.name}
+                            aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
+                            onChange={formik.handleChange}
+                            value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                            rows={5}
+                            cols={30}
+                        />
                     </div>
-                )}
+                    {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                        <div className="absolute mt-1">
+                            <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                        </div>
+                    )}
+                </div>
             </div>
         );
     }

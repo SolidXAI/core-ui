@@ -1,13 +1,12 @@
 'use client';
+import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
-import { SelectButton } from "primereact/selectbutton";
-import { classNames } from "primereact/utils";
-import { useEffect } from "react";
 import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
+import { Password } from "primereact/password";
 
-export class SolidBooleanField implements ISolidField {
+export class SolidPasswordField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
 
@@ -18,7 +17,7 @@ export class SolidBooleanField implements ISolidField {
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
         if (value) {
-            formData.append(fieldLayoutInfo.attrs.name, value === "true" ? "true" : "");
+            formData.append(fieldLayoutInfo.attrs.name, value);
         }
     }
 
@@ -39,18 +38,20 @@ export class SolidBooleanField implements ISolidField {
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
 
         // 1. required 
+        // 1. required
         if (fieldMetadata.required) {
             schema = schema.required(`${fieldLabel} is required.`);
         } else {
             schema = schema.nullable(); // Allow null when not required
         }
-        // // 2. length (min/max)
-        // if (fieldMetadata.min && fieldMetadata.min > 0) {
-        //     schema = schema.min(fieldMetadata.min, `${fieldLabel} should be at-least ${fieldMetadata.min} characters long.`);
-        // }
-        // if (fieldMetadata.max && fieldMetadata.max > 0) {
-        //     schema = schema.max(fieldMetadata.max, `${fieldLabel} should not be more than ${fieldMetadata.max} characters long.`);
-        // }
+
+        // 2. length (min/max)
+        if (fieldMetadata.min && fieldMetadata.min > 0) {
+            schema = schema.min(fieldMetadata.min, `${fieldLabel} should be at-least ${fieldMetadata.min} characters long.`);
+        }
+        if (fieldMetadata.max && fieldMetadata.max > 0) {
+            schema = schema.max(fieldMetadata.max, `${fieldLabel} should not be more than ${fieldMetadata.max} characters long.`);
+        }
         // 3. regular expression
         if (fieldMetadata.regexPattern) {
             const regexPatternNotMatchingErrorMsg = fieldMetadata.regexPatternNotMatchingErrorMsg ?? `${fieldLabel} has invalid data.`
@@ -61,18 +62,14 @@ export class SolidBooleanField implements ISolidField {
     }
 
     render(formik: FormikObject) {
-
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
-        const booleanOptions = ["false", "true"];
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
         const readOnlyPermission = this.fieldContext.readOnly;
-
-        useEffect(() => { formik.setFieldValue(fieldLayoutInfo.attrs.name, "false") }, [])
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
@@ -87,31 +84,22 @@ export class SolidBooleanField implements ISolidField {
                 <div className="relative">
                     <div className="flex flex-column gap-2 mt-4">
                         {showFieldLabel != false &&
-                            <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                            <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
+                                {fieldLabel}
                                 {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                                {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                             </label>
                         }
-                        {/* <InputText
-                        id={fieldLayoutInfo.attrs.name}
-                        className="small-input"
-                        aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                        onChange={formik.handleChange}
-                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                    /> */}
-                        <SelectButton
+                        <Password
+                            id={fieldLayoutInfo.attrs.name}
+                            name={fieldMetadata.name}
+                            value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                            onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
+                            onBlur={(e) => this.fieldContext.onBlur(e, 'onFieldBlur')}
                             readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                             disabled={formDisabled || fieldDisabled}
-                            id={fieldLayoutInfo.attrs.name}
-                            aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                            onChange={(e) => formik.setFieldValue(fieldLayoutInfo.attrs.name, e.value)} // Custom handling for boolean input
-                            value={formik.values[fieldLayoutInfo.attrs.name] ? formik.values[fieldLayoutInfo.attrs.name].toString() : "false"}
-                            options={booleanOptions}
-                            className={classNames("", {
-                                "p-invalid": isFormFieldValid(formik, "defaultValue"),
-                            })}
-
+                            toggleMask
                         />
+
                     </div>
                     {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                         <div className="absolute mt-1">
