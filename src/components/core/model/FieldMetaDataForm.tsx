@@ -1032,7 +1032,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
   useEffect(() => {
     const fetchFields = async () => {
       const queryData: any = {
-        limit: 10,
+        limit: 100,
         offset: 0,
         filters: {
           singularName: {
@@ -1044,14 +1044,15 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
       const queryString = qs.stringify(queryData, {
         encodeValuesOnly: true,
       });
-
       const result = await triggerGetModels(queryString).unwrap();
 
       if (result && result.records) {
         if (!result?.records[0]?.userKeyField) {
           setUserKeyFields(true);
-          const fieldsWithUnique = result?.records[0]?.fields?.filter((field: any) => field?.unique === true);
-          setUserKeyData(fieldsWithUnique)
+          const validUserKeyFields = result?.records[0]?.fields?.filter(
+            (field: any) => field?.unique === true && field?.type === 'shortText'
+          );
+          setUserKeyData(validUserKeyFields)
         } else {
           setUserKeyFields(false);
           setUserKeyData([]);

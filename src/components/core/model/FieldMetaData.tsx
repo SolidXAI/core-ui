@@ -135,7 +135,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
               />
             }
           </div>
-          <DataTable value={fieldMetaData} dataKey="id"
+          <DataTable value={fieldMetaData.filter((item: any) => item.isMarkedForRemoval !== true)} dataKey="id"
             tableStyle={{ minWidth: '50rem' }} size="small">
             <Column field="displayName" header="Display Name" headerClassName="table-header-fs"></Column>
             <Column field="name" header="Name" headerClassName="table-header-fs"></Column>

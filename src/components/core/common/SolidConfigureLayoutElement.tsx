@@ -19,7 +19,6 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
     const op = useRef(null);
     const customizeLayout = useRef<OverlayPanel | null>(null);
     const [isOverlayOpen, setIsOverlayOpen] = useState(false);
-    console.log("isOverlayOpen", isOverlayOpen);
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
