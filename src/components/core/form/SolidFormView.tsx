@@ -552,11 +552,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         // errorFields.length = 0;
     };
-    useEffect(() => {
-        if (errorFields?.length > 0) {
-            showFieldError();
-        }
-    }, [errorFields])
+    // useEffect(() => {
+    //     if (errorFields?.length > 0) {
+    //         showFieldError();
+    //     }
+    // }, [errorFields])
 
     // - - - - - - - - - - - -- - - - - - - - - - - - DATA here
     // Fetch the actual data here. 

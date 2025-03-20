@@ -1,3 +1,4 @@
+import hanldeEmailFormTypeChange from "@/components/core/extension/solid-core/emailTemplate/emailFormTypeChangeHandler";
 import { CustomHtml } from "@/components/core/form/widgets/CustomHtml";
 import React from "react";
 
@@ -62,3 +63,7 @@ registerExtensionComponent("CustomHtml", CustomHtml);
 
 
 // ModelMetadata
+
+
+// Email Template
+registerExtensionFunction("emailFormTypeChangeHandler", hanldeEmailFormTypeChange);
