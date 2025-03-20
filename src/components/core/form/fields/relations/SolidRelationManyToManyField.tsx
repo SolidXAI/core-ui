@@ -242,28 +242,30 @@ export class SolidRelationManyToManyField implements ISolidField {
 
             return (
                 <div className={className}>
-                    <div className="flex align-items-center gap-3">
-                        {showFieldLabel != false &&
-                            <label className="form-field-label">
-                                {capitalize(fieldLayoutInfo.attrs.name)}
-                                {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                            </label>
-                        }
-                        {fieldLayoutInfo.attrs.inlineCreate === "true" &&
-                            this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
-                        }
-                        <div className="many-to-many-add" >
-                            {/* <Button icon="pi pi-plus"
+                    <div className="relative">
+                        <div className="flex align-items-center gap-3">
+                            {showFieldLabel != false &&
+                                <label className="form-field-label">
+                                    {capitalize(fieldLayoutInfo.attrs.name)}
+                                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                                </label>
+                            }
+                            {fieldLayoutInfo.attrs.inlineCreate === "true" &&
+                                this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
+                            }
+                            <div className="many-to-many-add" >
+                                {/* <Button icon="pi pi-plus"
                                 rounded
                                 outlined
                                 aria-label="Filter"
                                 type="button"
                                 onClick={() => autoCompleteSearch()}
                             /> */}
+                            </div>
                         </div>
-                    </div>
-                    <div>
-                        {options.togglerElement}
+                        <div>
+                            {options.togglerElement}
+                        </div>
                     </div>
                 </div>
             );

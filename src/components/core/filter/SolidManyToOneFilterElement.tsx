@@ -48,12 +48,13 @@ export const SolidManyToOneFilterElement = ({ value, updateInputs, index, fieldM
 
     return (
         <AutoComplete
-            field="label"
-            value={value}
-            suggestions={autoCompleteItems}
-            completeMethod={autoCompleteSearch}
-            onChange={(e) => updateInputs(index, e.value)}
-            className="solid-standard-autocomplete w-full"
-        />
+        field="label"
+        value={value}
+        suggestions={autoCompleteItems}
+        completeMethod={autoCompleteSearch}
+        onChange={(e) => updateInputs(index, e.value)}
+        className="w-full"
+        inputClassName="w-full p-inputtext-sm"
+    />
     )
 }

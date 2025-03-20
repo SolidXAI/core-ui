@@ -18,14 +18,15 @@ export const SolidSelectionStaticFilterElement = ({ value, updateInputs, index, 
     }
 
     return (
-
         <AutoComplete
             field="label"
             value={value}
             dropdown
-            className="solid-standard-autocomplete w-full"
             suggestions={selectionStaticItems}
             completeMethod={selectionStaticSearch}
-            onChange={(e) => updateInputs(index, e.value)} />
+            onChange={(e) => updateInputs(index, e.value)}
+            className="w-full"
+            inputClassName="w-full p-inputtext-sm"
+        />
     )
 }

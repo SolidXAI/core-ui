@@ -48,7 +48,7 @@ const SolidRelationManyToOneField = ({ fieldMetadata, onChange, index, rule }: S
     // const header = column.attrs.label ?? fieldMetadata.displayName;
 
     return (
-        <>
+        <div className='flex align-items-start gap-3 w-full'>
             <Dropdown
                 value={rule.matchMode}
                 onChange={(e: any) => {
@@ -57,18 +57,22 @@ const SolidRelationManyToOneField = ({ fieldMetadata, onChange, index, rule }: S
                 options={filterMatchModeOptions}
                 optionLabel='label'
                 optionValue='value'
-                placeholder="Select Operator" className="w-full md:w-14rem" />
-            <SolidVarInputsFilterElement
-                values={rule.value}
-                onChange={(e: any) => {
-                    onChange(index, 'value', e)
-                }}
-                numberOfInputs={numberOfInputs}
-                inputType={InputTypes.RelationManyToOne}
-                fieldMetadata={fieldMetadata}
-            >
-            </SolidVarInputsFilterElement>
-        </>
+                placeholder="Select Operator"
+                className="w-full p-inputtext-sm"
+            />
+            <div className='flex flex-column gap-2 w-full'>
+                <SolidVarInputsFilterElement
+                    values={rule.value}
+                    onChange={(e: any) => {
+                        onChange(index, 'value', e)
+                    }}
+                    numberOfInputs={numberOfInputs}
+                    inputType={InputTypes.RelationManyToOne}
+                    fieldMetadata={fieldMetadata}
+                >
+                </SolidVarInputsFilterElement>
+            </div>
+        </div>
     );
 
 };

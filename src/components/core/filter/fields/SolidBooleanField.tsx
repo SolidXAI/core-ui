@@ -13,14 +13,14 @@ const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilter
     ];
     const filterMatchModeOptions = [
         { label: 'Equals', value: "$eqi" },
-  ];
+    ];
 
 
     // const header = column.attrs.label ?? fieldMetadata.displayName;
 
 
     return (
-        <>
+        <div className='flex align-items-start gap-3 w-full'>
             <Dropdown
                 value={rule.matchMode}
                 onChange={(e: any) => {
@@ -29,17 +29,21 @@ const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilter
                 options={filterMatchModeOptions}
                 optionLabel='label'
                 optionValue='value'
-                placeholder="Select Operator" className="w-full md:w-14rem" />
-            <Dropdown
-                value={rule.value}
-                options={booleanOptions}
-                onChange={(e: any) => {
-                    onChange(rule.id, 'value', e.value)
-                }}
-                placeholder="Select"
-                className="p-column-filter"
+                placeholder="Select Operator"
+                className="w-full p-inputtext-sm"
             />
-        </>
+            <div className='flex flex-column gap-2 w-full'>
+                <Dropdown
+                    value={rule.value}
+                    options={booleanOptions}
+                    onChange={(e: any) => {
+                        onChange(rule.id, 'value', e.value)
+                    }}
+                    placeholder="Select"
+                    className="p-column-filter"
+                />
+            </div>
+        </div>
     );
 };
 

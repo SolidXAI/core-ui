@@ -100,35 +100,37 @@ export class SolidSelectionStaticField implements ISolidField {
 
         return (
             <div className={className}>
-                <div className="flex flex-column gap-2 mt-4">
-                    {showFieldLabel != false &&
-                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                            {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                        </label>
-                    }
-                    <AutoComplete
-                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                        disabled={formDisabled || fieldDisabled}
-                        {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
-                        id={fieldLayoutInfo.attrs.name}
-                        name={fieldLayoutInfo.attrs.name}
-                        field="label"
-                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                        dropdown
-                        suggestions={selectionStaticItems}
-                        completeMethod={selectionStaticSearch}
-                        // onChange={(e) => updateInputs(index, e.value)} />
-                        // onChange={formik.handleChange}
-                        onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
-                        className="solid-standard-autocomplete"
-                    />
-                </div>
-                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                    <div className="absolute mt-1">
-                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                <div className="relative">
+                    <div className="flex flex-column gap-2 mt-4">
+                        {showFieldLabel != false &&
+                            <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                                {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                                {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
+                            </label>
+                        }
+                        <AutoComplete
+                            readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                            disabled={formDisabled || fieldDisabled}
+                            {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
+                            id={fieldLayoutInfo.attrs.name}
+                            name={fieldLayoutInfo.attrs.name}
+                            field="label"
+                            value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                            dropdown
+                            suggestions={selectionStaticItems}
+                            completeMethod={selectionStaticSearch}
+                            // onChange={(e) => updateInputs(index, e.value)} />
+                            // onChange={formik.handleChange}
+                            onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
+                            className="solid-standard-autocomplete"
+                        />
                     </div>
-                )}
+                    {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                        <div className="absolute mt-1">
+                            <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                        </div>
+                    )}
+                </div>
             </div>
         );
     }

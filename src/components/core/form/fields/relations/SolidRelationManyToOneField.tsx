@@ -137,7 +137,7 @@ export class SolidRelationManyToOneField implements ISolidField {
         }
         return (
             <div className={className}>
-                <div className="mt-4">
+                <div className="mt-4 relative">
                     {showFieldLabel != false &&
                         <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
                             {fieldLabel}

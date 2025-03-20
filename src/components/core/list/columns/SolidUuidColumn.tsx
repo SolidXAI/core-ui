@@ -36,7 +36,7 @@ const SolidUuidColumn = ({ solidListViewMetaData, fieldMetadata, column }: Solid
         <Column
             key={fieldMetadata.name}
             field={fieldMetadata.name}
-            header={header}
+            // header={header}
             // className="text-sm"
             sortable={column.attrs.sortable}
             // filter={filterable}
@@ -46,7 +46,10 @@ const SolidUuidColumn = ({ solidListViewMetaData, fieldMetadata, column }: Solid
             filterElement={filterTemplate}
             filterPlaceholder={`Search by ${fieldMetadata.displayName}`}
             // style={{ minWidth: "12rem" }}
-            headerClassName="table-header-fs"
+            // headerClassName="table-header-fs"
+            header={() => {
+                return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace:'nowrap', textOverflow:'ellipsis', overflow:'hidden'}}>{header}</div>)
+            }}
             body={(rowData) => (
                 <SolidTableRowCell
                     value={rowData[fieldMetadata.name]}

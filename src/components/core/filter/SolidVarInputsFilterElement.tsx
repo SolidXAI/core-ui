@@ -71,13 +71,13 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
     return (
         <>
             {inputs && inputs.map((value: any, index: number) => (
-                <>
+                <div className="flex">
                     {inputType === InputTypes.Text &&
                         <InputText
                             value={value}
                             onChange={(e) => updateInputs(index, e.target.value)}
                             placeholder=""
-                            className='w-full'
+                            className='w-full p-inputtext-sm'
                         />
                     }
                     {inputType === InputTypes.Numeric &&
@@ -85,7 +85,7 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                             value={value}
                             onChange={(e) => updateInputs(index, e.value)}
                             placeholder=""
-                            className='w-full'
+                            className='w-full p-inputtext-sm'
                         />
                     }
                     {inputType === InputTypes.Date &&
@@ -95,6 +95,8 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                             dateFormat="mm/dd/yy"
                             placeholder="mm/dd/yyyy"
                             mask="99/99/9999"
+                            className="w-full"
+                            inputClassName="w-full p-inputtext-sm"
                         />
                     }
                     {inputType === InputTypes.DateTime &&
@@ -106,6 +108,8 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                             mask="99/99/9999 99:99"
                             showTime
                             hourFormat="24"
+                            className="w-full"
+                            inputClassName="w-full p-inputtext-sm"
                         />
                     }
                     {inputType === InputTypes.Time &&
@@ -116,6 +120,8 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                             mask="99:99"
                             timeOnly
                             hourFormat="24"
+                            className="w-full"
+                            inputClassName="w-full p-inputtext-sm"
                         />
                     }
                     {inputType === InputTypes.RelationManyToOne &&
@@ -163,12 +169,11 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                                     severity="danger"
                                     type="button"
                                 /> */}
-                            <Button text icon="pi pi-plus-circle" size="small" onClick={() => addInput()} />
-                            <Button text icon="pi pi-trash" size="small" onClick={() => deleteInput(index)} />
+                            <Button text severity='secondary' icon="pi pi-plus" size='small' onClick={() => addInput()} className='solid-filter-action-btn' />
+                            <Button text severity='secondary' icon="pi pi-trash" size='small' onClick={() => deleteInput(index)} className='solid-filter-action-btn' />
                         </>
                     }
-                </>
-
+                </div>
             ))}
         </>
     )

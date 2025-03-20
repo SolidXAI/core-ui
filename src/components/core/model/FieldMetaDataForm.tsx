@@ -1870,7 +1870,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             )}
 
                           {isUserKeyFields && (
-                            <div className="field col-6 flex-flex-column gap-2">
+                            <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="userKey"
                                 className="form-field-label"

@@ -196,11 +196,11 @@ export class SolidLongTextField implements ISolidField {
                         style={{ height: "320px" }}
                     />
                 </div>
-                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                    <div className="absolute mt-1">
-                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                    </div>
-                )}
+                    {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                        <div className="absolute mt-1">
+                            <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                        </div>
+                    )}
             </div>
         );
     }

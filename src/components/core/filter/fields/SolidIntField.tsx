@@ -23,29 +23,33 @@ const SolidIntField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFiel
     const numberOfInputs = getNumberOfInputs(rule.matchMode);
 
     return (
-        <>
-                    <Dropdown
-                        value={rule.matchMode}
-                        onChange={(e: any) => {
-                            // updateEnumValues(index, 'operator', e.value)
-                            onChange(rule.id, 'matchMode', e.value)
-                        }}
-                        options={filterMatchModeOptions}
-                        optionLabel='label'
-                        optionValue='value'
-                        placeholder="Select Operator" className="w-full filter-small-input md:w-14rem" />
-                    <SolidVarInputsFilterElement
-                        values={rule.value}
-                        onChange={(e: any) => {
-                            // updateEnumValues(index, 'value', e)
-                            onChange(rule.id, 'value', e)
-                        }}
-                        numberOfInputs={numberOfInputs}
-                        inputType={InputTypes.Numeric}
-                        fieldMetadata={fieldMetadata}
-                    >
-                    </SolidVarInputsFilterElement>
-        </>
+        <div className='flex align-items-start gap-3 w-full'>
+            <Dropdown
+                value={rule.matchMode}
+                onChange={(e: any) => {
+                    // updateEnumValues(index, 'operator', e.value)
+                    onChange(rule.id, 'matchMode', e.value)
+                }}
+                options={filterMatchModeOptions}
+                optionLabel='label'
+                optionValue='value'
+                placeholder="Select Operator"
+                className="w-full p-inputtext-sm"
+            />
+            <div className='flex flex-column gap-2 w-full'>
+                <SolidVarInputsFilterElement
+                    values={rule.value}
+                    onChange={(e: any) => {
+                        // updateEnumValues(index, 'value', e)
+                        onChange(rule.id, 'value', e)
+                    }}
+                    numberOfInputs={numberOfInputs}
+                    inputType={InputTypes.Numeric}
+                    fieldMetadata={fieldMetadata}
+                >
+                </SolidVarInputsFilterElement>
+            </div>
+        </div>
     );
 };
 

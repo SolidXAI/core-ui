@@ -37,6 +37,11 @@ import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
 import ListImage from '../../../resources/images/layout/images/cozy.png';
 import KanbanImage from '../../../resources/images/layout/images/kanban.png';
+import Lightbox from "yet-another-react-lightbox";
+import Counter from "yet-another-react-lightbox/plugins/counter";
+import Download from "yet-another-react-lightbox/plugins/download";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/counter.css";
 
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -163,7 +168,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       if (fieldMetadata.type === 'relation' && fieldMetadata.relationType === 'many-to-one') {
         toPopulate.push(fieldMetadata.name);
       }
-      if (fieldMetadata.type === 'mediaSingle' || fieldMetadata.relationType === 'mediaMultiple') {
+      if (fieldMetadata.type === 'mediaSingle' || fieldMetadata.type === 'mediaMultiple') {
         toPopulateMedia.push(fieldMetadata.name);
       }
     }
@@ -475,6 +480,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           onClick={(e) =>
           // @ts-ignore 
           {
+            e.stopPropagation();
             op.current.toggle(e);
             setSelectedSolidViewData(solidViewData)
           }
@@ -582,6 +588,9 @@ export const SolidListView = (params: SolidListViewParams) => {
     setSelectedRecoverRecords([]);
   }
 
+  const [openLightbox, setOpenLightbox] = useState(false);
+  const [lightboxUrls, setLightboxUrls] = useState({});
+
   // Render columns dynamically based on metadata
   const renderColumnsDynamically = (solidListViewMetaData: any) => {
     if (!solidListViewMetaData) {
@@ -601,7 +610,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         return;
       }
 
-      return SolidListViewColumn({ solidListViewMetaData, fieldMetadata, column });
+      return SolidListViewColumn({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox });
 
     });
   };
@@ -616,7 +625,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   }
 
   const sizeOptions = [
-    { label: 'Compact', value: 'small', image: CompactImage},
+    { label: 'Compact', value: 'small', image: CompactImage },
     { label: 'Cozy', value: 'normal', image: CozyImage },
     { label: 'Comfortable', value: 'large', image: ComfortableImage }
   ]
@@ -709,6 +718,22 @@ export const SolidListView = (params: SolidListViewParams) => {
           paginatorClassName="solid-paginator"
           paginatorTemplate="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink"
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
+          onRowClick={(e) => {
+            const rowData = e.data;
+            if (
+              !(
+                actionsAllowed.includes(updatePermission(params.modelName)) &&
+                solidListViewMetaData?.data?.solidView?.layout?.attrs?.edit !== false
+              )
+            ) {
+              return;
+            }
+            if (params.embeded == true) {
+              params.handlePopUpOpen(rowData?.id);
+            } else {
+              router.push(`${editButtonUrl}/${rowData?.id}`);
+            }
+          }}
         >
 
           <Column selectionMode="multiple" headerStyle={{ width: "3em" }} />
@@ -717,7 +742,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           {actionsAllowed.includes(`${updatePermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.edit !== false &&
             <Column frozen alignFrozen="right" body={(rowData) => (
               rowData?.deletedAt ? (
-                <a onClick={() => recoverById(rowData.id)} className="retrieve-button">
+                <a onClick={(event) => { event.stopPropagation(); recoverById(rowData.id) }} className="retrieve-button">
                   <i className="pi pi-refresh" style={{ fontSize: "1rem" }} />
                 </a>
               ) :
@@ -836,6 +861,14 @@ export const SolidListView = (params: SolidListViewParams) => {
           </div>
         </div>
       </Dialog>
+      {openLightbox &&
+        <Lightbox
+          open={openLightbox}
+          plugins={[Counter, Download]}
+          close={() => setOpenLightbox(false)}
+          slides={lightboxUrls}
+        />
+      }
     </div>
   );
 };
