@@ -8,10 +8,13 @@ interface Props {
 }
 
 export const SolidFormHeader = (props: Props) => {
+    const { solidFormViewMetaData } = props;
     return (
         <div className='flex align-items-center justify-content-between'>
             <SolidBreadcrumb {...props} />
-            <SolidFormStepper {...props} />
+            {solidFormViewMetaData?.data?.solidFormViewWorkflowData.length > 0 &&
+                <SolidFormStepper {...props} />
+            }
         </div>
     )
 }

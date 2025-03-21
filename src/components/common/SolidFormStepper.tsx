@@ -6,17 +6,23 @@ import { SolidBreadcrumb } from './SolidBreadcrumb';
 
 interface Props {
     solidFormViewMetaData?: any;
-    initialEntityData?: any;
 }
 
 export const SolidFormStepper = (props: Props) => {
+    const { solidFormViewMetaData } = props;
+    const solidFormViewWorkflowData = solidFormViewMetaData?.data?.solidFormViewWorkflowData;
     const formStepperOverlay = useRef(null);
 
     return (
         <div className='flex'>
-            <Button type='button' severity='secondary' className='solid-step-button btn-step-first'>Step 1</Button>
-            <Button type='button' className='solid-step-button btn-step'>Step 2</Button>
-            <Button type='button' className='solid-step-button btn-step-last relative'>
+            {solidFormViewWorkflowData.map((step: any, index: number) => {
+                return (
+                    <Button type='button' key={step.value} label={step.label} className={`solid-step-button ${index == 0 ? 'btn-step' : 'btn-step-last'}`} />
+                )
+            })}
+            {/* <Button type='button' severity='secondary' className='solid-step-button btn-step-first'>Step 1</Button> */}
+            {/* <Button type='button' className='solid-step-button btn-step'>Step 2</Button> */}
+            {/* <Button type='button' className='solid-step-button btn-step-last relative'>
                 Step 3
                 <div className='absolute' style={{ right: 8 }}>
                     <Button
@@ -65,7 +71,7 @@ export const SolidFormStepper = (props: Props) => {
                         </div>
                     </OverlayPanel>
                 </div>
-            </Button>
+            </Button> */}
         </div>
     )
 }
