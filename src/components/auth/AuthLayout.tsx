@@ -13,6 +13,7 @@ import { useDispatch } from "react-redux";
 import { LayoutContext } from "../layout/context/layoutcontext";
 import Image from "next/image";
 import SolidLogo from '../../resources/images/SS-Logo.png'
+import { Divider } from "primereact/divider";
 
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
@@ -121,10 +122,18 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 visible={isRestricted}
                 onHide={handleRegistration}
                 header="Access Restricted"
-                footer={<Button label="Close" onClick={handleRegistration} size="small" />}
+                headerClassName="py-2" contentClassName="px-0 pb-0"
+                footer={
+                    <div className="flex align-items-center justify-content-start">
+                        <Button label="Close" onClick={handleRegistration} size="small" />
+                    </div>
+                }
                 draggable={false}
             >
-                <p>Sign-up is not available. Please contact the admin.</p>
+                <Divider className="m-0" />
+                <div className="p-4">
+                    <p>Sign-up is not available. Please contact the admin.</p>
+                </div>
             </Dialog>
         </div>
     )

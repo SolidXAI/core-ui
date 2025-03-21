@@ -395,8 +395,9 @@ const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, transf
           level={0} // Top-level group
         />
       ))}
-      <div className='text-left mt-3'>
-        <Button label="Apply" size="small" onClick={() => transformFilterRules(filterRules)} type="submit" className="small-button" />
+      <div className='flex gap-3 mt-3'>
+        <Button label="Apply" size="small" onClick={() => transformFilterRules(filterRules)} type="submit" />
+        <Button type='button' label='Cancel' outlined size='small' onClick={closeDialog} />
         {/* 
         <br></br>
         <textarea value={printedState} readOnly rows={20} cols={100} style={{ marginTop: '20px' }} /> */}

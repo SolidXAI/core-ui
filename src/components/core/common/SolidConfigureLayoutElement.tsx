@@ -106,7 +106,7 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                     </div>
                 </div>
                 <Divider className="m-0" />
-                <div className="p-2 position-relative flex flex-column gap-1">
+                <div className="p-2 relative flex flex-column gap-1">
                     <Button
                         icon='pi pi-sliders-h'
                         label="Customize Layout"

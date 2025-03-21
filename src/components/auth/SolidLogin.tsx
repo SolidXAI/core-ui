@@ -106,7 +106,7 @@ const SolidLogin = () => {
                         >
                             {(formik) => (
                                 <Form>
-                                    <div className="flex flex-column gap-2">
+                                    <div className="flex flex-column gap-2 mt-3">
                                         <label htmlFor="email" className="solid-auth-input-label">Username or Email</label>
                                         <InputText
                                             id="email"
@@ -193,7 +193,7 @@ const SolidLogin = () => {
                         >
                             {(formik) => (
                                 <Form>
-                                    <div className="flex flex-column gap-2">
+                                    <div className="flex flex-column gap-2 mt-3">
                                         <label htmlFor="email" className="solid-auth-input-label">Email</label>
                                         <InputText
                                             id="email"
