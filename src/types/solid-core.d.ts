@@ -97,3 +97,8 @@ export type SolidFormWidgetProps = {
     viewMetadata: SolidView;
     fieldsMetadata: FieldsMetadata;
 };
+
+export type SolidRelationManyToManyFieldWidgetProps = {
+    formik: any;
+    fieldContext?: SolidFieldProps;
+};

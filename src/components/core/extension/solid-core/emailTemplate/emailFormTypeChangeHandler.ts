@@ -2,9 +2,8 @@ import { SolidViewLayoutManager } from "@/components/core/common/SolidViewLayout
 
 const hanldeEmailFormTypeChange = (event: any) => {
 
-    const { type, modifiedField, modifiedFieldValue, formData, viewMetadata, fieldsMetadata } = event;
+    const { modifiedField, modifiedFieldValue, viewMetadata, } = event;
     const layout = viewMetadata.layout;
-    // TODO: make an api call to get title & pageCount given the ISBN.
     if (modifiedField === 'type') {
         const layoutManager = new SolidViewLayoutManager(layout);
         const renderMode = modifiedFieldValue.value === 'text' ? 'longText' : 'richText';
