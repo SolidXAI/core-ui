@@ -638,11 +638,14 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [size, setSize] = useState<string | any>(sizeOptions[1].value);
   const [view, setView] = useState<string | any>(viewModes[0].value);
 
+  const listViewTitle = solidListViewMetaData?.data?.solidView?.displayName
+
   return (
     <div className="page-parent-wrapper">
       <div className="page-header">
         <Toast ref={toast} />
         <div className="flex gap-3 align-items-center">
+          <p className="m-0 view-title">{listViewTitle}</p>
           {solidListViewMetaData?.data?.solidView?.layout?.attrs?.enableGlobalSearch === true && params.embeded === false &&
             <SolidGlobalSearchElement filters={filters} clearFilter={clearFilter} ref={solidGlobalSearchElementRef} viewData={solidListViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}></SolidGlobalSearchElement>
           }
@@ -658,6 +661,17 @@ export const SolidListView = (params: SolidListViewParams) => {
               onClick={() => params.handlePopUpOpen("new")}
             ></Button>
           }
+          {/* Button For Manual Refresh */}
+          <Button
+            type="button"
+            size="small"
+            icon="pi pi-refresh"
+            severity="secondary"
+            outlined
+            onClick={() => {
+              setQueryString(first, rows, sortField, sortOrder, filters);
+            }}
+          />
           {showArchived && <Button type="button" icon="pi pi-refresh" label="Recover" size='small' severity="secondary"
             onClick={() => setRecoverDialogVisible(true)}
           ></Button>}

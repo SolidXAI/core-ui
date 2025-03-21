@@ -40,6 +40,7 @@ import { getExtensionComponent, getExtensionFunction } from "@/helpers/registry"
 import { SolidFormWidgetProps } from "@/types/solid-core";
 import { SolidPasswordField } from "./fields/SolidPasswordField";
 import { SolidEmailField } from "./fields/SolidEmailField";
+import { Panel } from "primereact/panel";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -211,6 +212,8 @@ const SolidColumn = ({ children, attrs }: any) => {
     const className = attrs.className;
 
     return (
+        // first fieldset ui
+
         // <div className={`${className}`}>
         //     <div className="s_group">
         //         <fieldset>
@@ -218,15 +221,31 @@ const SolidColumn = ({ children, attrs }: any) => {
         //             <div className="grid">{children}</div>
         //         </fieldset>
         //     </div>
+        // </div>
 
+        //second fieldset ui
+        // <div className={`${className}`}>
+        //     {attrs.label && <p>{attrs.label}</p>}
+        //     <div className="grid">{children}</div>
         // </div>
-        <div className={`${className}`}>
-            {attrs.label && <p>{attrs.label}</p>}
-            <div className="grid">{children}</div>
-        </div>
-        // <div className="formgrid grid">
-        //     {children}
-        // </div>
+
+        //figma fieldset ui
+        attrs.label ?
+            <div className={`${className}`}>
+                <Panel header={attrs.label} className="solid-column-panel">
+                    <div className="grid">{children}</div>
+                </Panel>
+                {/* <div className="p-fieldset">
+                    <div className="solid-fieldset-header">
+                        <div>{attrs.label}</div>
+                    </div>
+                    <div className="grid solid-fieldset-content">{children}</div>
+                </div> */}
+            </div>
+            :
+            <div className={`${className}`}>
+                <div className="grid">{children}</div>
+            </div>
     );
 };
 

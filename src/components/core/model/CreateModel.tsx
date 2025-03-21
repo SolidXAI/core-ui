@@ -420,6 +420,8 @@ const CreateModel = ({ data, params }: any) => {
               }
 
             }}
+            panelContainerClassName="px-0"
+            className="relative"
           >
             <TabPanel header="Model"
               headerClassName={tabErrors[0] ? "tab-error" : ""}>

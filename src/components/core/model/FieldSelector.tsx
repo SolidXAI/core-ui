@@ -37,7 +37,7 @@ const FieldSelector = ({ handleTypeSelect, modelMetaData }: any) => {
     };
 
     return (
-        <div className='p-4'>
+        <div className='p-4' style={{ height: '80vh', overflowY: 'scroll' }}>
             <p className="form-wrapper-heading text-base m-0">Select Field Type</p>
             <div className='formgrid grid'>
                 {solidFieldOptions.map((field, index) => (

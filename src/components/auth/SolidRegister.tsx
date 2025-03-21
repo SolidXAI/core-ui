@@ -134,52 +134,58 @@ const SolidRegister = () => {
             >
                 {(formik) => (
                     <Form>
-                        <div className="flex flex-column gap-2 mt-3">
-                            <label htmlFor="email" className="solid-auth-input-label">Username</label>
-                            <InputText
-                                id="username"
-                                name="username"
-                                placeholder="username"
-                                onChange={formik.handleChange}
-                                value={formik.values.username}
-                                invalid={!!formik.errors.username}
-                            />
+                        <div>
+                            <div className="flex flex-column gap-2 mt-3">
+                                <label htmlFor="email" className="solid-auth-input-label">Username</label>
+                                <InputText
+                                    id="username"
+                                    name="username"
+                                    placeholder="username"
+                                    onChange={formik.handleChange}
+                                    value={formik.values.username}
+                                    invalid={!!formik.errors.username}
+                                />
+                            </div>
                             {isFormFieldValid(formik, "username") && <Message
-                                className="text-red-500 text-sm"
+                                className="text-red-500 text-sm mt-1 py-0"
                                 severity="error"
                                 text={formik?.errors?.username?.toString()}
                             />}
                         </div>
-                        <div className="flex flex-column gap-2 mt-3">
-                            <label htmlFor="email" className="solid-auth-input-label">Email</label>
-                            <InputText
-                                id="email"
-                                name="email"
-                                placeholder="Yourgmail@123.com"
-                                onChange={formik.handleChange}
-                                value={formik.values.email}
-                                invalid={!!formik.errors.email}
-                            />
+                        <div>
+                            <div className="flex flex-column gap-2 mt-3">
+                                <label htmlFor="email" className="solid-auth-input-label">Email</label>
+                                <InputText
+                                    id="email"
+                                    name="email"
+                                    placeholder="Yourgmail@123.com"
+                                    onChange={formik.handleChange}
+                                    value={formik.values.email}
+                                    invalid={!!formik.errors.email}
+                                />
+                            </div>
                             {isFormFieldValid(formik, "email") && <Message
-                                className="text-red-500 text-sm"
+                                className="text-red-500 text-sm mt-1 py-0"
                                 severity="error"
                                 text={formik?.errors?.email?.toString()}
                             />}
                         </div>
-                        <div className="flex flex-column gap-2 mt-3">
-                            <label htmlFor="password" className="solid-auth-input-label">Password</label>
-                            <Password
-                                id="password"
-                                name="password"
-                                value={formik.values.password}
-                                onChange={formik.handleChange}
-                                toggleMask
-                                inputClassName="w-full"
-                                feedback={false}
-                                invalid={!!formik.errors.password}
-                            />
+                        <div>
+                            <div className="flex flex-column gap-2 mt-3">
+                                <label htmlFor="password" className="solid-auth-input-label">Password</label>
+                                <Password
+                                    id="password"
+                                    name="password"
+                                    value={formik.values.password}
+                                    onChange={formik.handleChange}
+                                    toggleMask
+                                    inputClassName="w-full"
+                                    feedback={false}
+                                    invalid={!!formik.errors.password}
+                                />
+                            </div>
                             {isFormFieldValid(formik, "password") && <Message
-                                className="text-red-500 text-sm"
+                                className="text-red-500 text-sm mt-1 py-0"
                                 severity="error"
                                 text={formik?.errors?.password?.toString()}
                             />}
@@ -324,7 +330,7 @@ const SolidRegister = () => {
                     </>
                 }
             </div>
-            <div className="text-center mt-5">
+            <div className="text-center mt-4">
                 <div className="text-sm text-400 secondary-dark-color">
                     Already have an account ? <Link className="font-bold" href="/auth/login">Sign In</Link>
                 </div>
