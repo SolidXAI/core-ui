@@ -1664,11 +1664,11 @@ li.header-li-px {
 }
 
 .solid-form-wrapper .solid-form-content {
-  height: calc(100vh - 111px);
+  /* height: calc(100vh - 111px); */
   /* If No Breadcrumb */
   /* height: calc(100vh - 64px); */
   /* if Stepper */
-  /* height: calc(100vh - 124px); */
+  height: calc(100vh - 127px);
   overflow-y: auto;
 }
 
@@ -1682,18 +1682,21 @@ li.header-li-px {
 
 .solid-form-stepper {
   padding: 7.5px 14px 7.5px 24px;
-  background-color: var(--solid-light-100);
+  background-color: #fff;
+  /* background-color: var(--solid-light-100); */
   border-top: 1px solid var(--primary-light-color);
   border-bottom: 1px solid var(--primary-light-color);
 }
 
 .solid-breadcrumb.p-breadcrumb {
-  border-bottom: 1px solid #CED0D6;
+  /* border-bottom: 1px solid #CED0D6;
   border-right: none;
   border-left: none;
-  border-top: none;
+  border-top: none; */
+  border: 0;
   border-radius: 0;
-  padding: 0.8rem 1.5rem;
+  /* padding: 0.8rem 1.5rem; */
+  padding: 0rem 1.5rem;
   font-size: 14px;
   font-weight: 500;
   text-transform: capitalize;

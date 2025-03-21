@@ -41,6 +41,7 @@ import { SolidFormWidgetProps } from "@/types/solid-core";
 import { SolidPasswordField } from "./fields/SolidPasswordField";
 import { SolidEmailField } from "./fields/SolidEmailField";
 import { Panel } from "primereact/panel";
+import { SolidFormStepper } from "@/components/common/SolidFormStepper";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -1122,17 +1123,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             </>
                         )}
                     </div>
-                    {params.embeded !== true &&
+                    {/* {params.embeded !== true &&
                         <SolidBreadcrumb
                             solidViewData={solidFormViewMetaData?.data?.solidView?.model}
                             initialEntityData={initialEntityData}
                         />
-                    }
-                    {/* {params.embeded !== true &&
+                    } */}
+                    {params.embeded !== true &&
                         <div className="solid-form-stepper">
                             <SolidFormStepper />
                         </div>
-                    } */}
+                    }
                     <div className="p-4 solid-form-content">
                         {DynamicHeaderComponent && <DynamicHeaderComponent />}
                         {renderFormDynamically(formViewMetaData)}

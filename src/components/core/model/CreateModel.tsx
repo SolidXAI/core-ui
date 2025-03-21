@@ -402,10 +402,10 @@ const CreateModel = ({ data, params }: any) => {
             </>
           }
         </div>
-        <SolidBreadcrumb />
-        {/* <div className="solid-form-stepper">
+        {/* <SolidBreadcrumb /> */}
+        <div className="solid-form-stepper">
           <SolidFormStepper />
-        </div> */}
+        </div>
         <div className="p-4 solid-form-content">
           <TabView
             activeIndex={activeIndex}
