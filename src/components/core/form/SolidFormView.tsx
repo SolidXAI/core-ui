@@ -42,6 +42,7 @@ import { SolidPasswordField } from "./fields/SolidPasswordField";
 import { SolidEmailField } from "./fields/SolidEmailField";
 import { Panel } from "primereact/panel";
 import { SolidFormStepper } from "@/components/common/SolidFormStepper";
+import { SolidFormHeader } from "@/components/common/SolidFormHeader";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -1131,7 +1132,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     } */}
                     {params.embeded !== true &&
                         <div className="solid-form-stepper">
-                            <SolidFormStepper />
+                            <SolidFormHeader 
+                                // solidFormViewMetaData={solidFormViewMetaData?.data?.solidView?.model}
+                                solidFormViewMetaData={solidFormViewMetaData}
+                                initialEntityData={initialEntityData}
+                            />
                         </div>
                     }
                     <div className="p-4 solid-form-content">
