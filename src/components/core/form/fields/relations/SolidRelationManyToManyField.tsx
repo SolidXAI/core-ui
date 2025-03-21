@@ -120,7 +120,7 @@ export class SolidRelationManyToManyField implements ISolidField {
         if (fieldLayoutInfo.attrs.renderMode) {
             if (renderMode === 'checkbox' || renderMode === 'autocomplete') {
                 isStandardRenderMode = true;
-                inferredRenderMode = renderMode;
+                inferredRenderMode = `relation_many_to_many_${renderMode}`;
             }
         }
 

@@ -130,12 +130,14 @@ export class SolidRelationOneToManyField implements ISolidField {
         const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
+        console.log(`Rendering SolidRelationOneToMany field with showFieldLabel: ${showFieldLabel}`);
+        
 
 
         return (
             <div className={className}>
                 {/* <div className="justify-content-center align-items-center"> */}
-                {showFieldLabel != false &&
+                {showFieldLabel !== false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         {/* &nbsp;{fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}

@@ -62,8 +62,10 @@ export const getExtensionFunction = (name: string) => {
 // Register all the dynamic widget & functions from inside solid-core-ui
 // Common
 registerExtensionComponent("CustomHtml", CustomHtml, []);
-registerExtensionComponent("SolidRelationManyToManyCheckboxWidget", SolidRelationManyToManyCheckboxWidget, ["checkbox"]);
-registerExtensionComponent("SolidRelationManyToManyAutocompleteWidget", SolidRelationManyToManyAutocompleteWidget, ["autocomplete"]);
+registerExtensionComponent("SolidRelationManyToManyCheckboxWidget", SolidRelationManyToManyCheckboxWidget, ["relation_many_to_many_checkbox"]);
+registerExtensionComponent("SolidRelationManyToManyAutocompleteWidget", SolidRelationManyToManyAutocompleteWidget, ["relation_many_to_many_autocomplete"]);
+registerExtensionComponent("SolidSelectionStaticAutocompleteWidget", SolidRelationManyToManyAutocompleteWidget, ["selectionStatic_autocomplete"]);
+registerExtensionComponent("SolidSelectionStaticRadioWidget", SolidRelationManyToManyAutocompleteWidget, ["selectionStatic_radio"]);
 
 
 // ModuleMetadata
