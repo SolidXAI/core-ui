@@ -32,7 +32,14 @@ export class SolidBooleanField implements ISolidField {
 
         const existingValue = this.fieldContext.data[fieldName];
 
-        return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
+        // return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
+
+        // Ensure the value is always a string "true" or "false"
+        const result = existingValue !== undefined && existingValue !== null 
+        ? (existingValue === true || existingValue === "true" ? "true" : "false") 
+        : (fieldDefaultValue === true || fieldDefaultValue === "true" ? "true" : "false");
+
+        return result;
     }
 
     validationSchema(): Schema {
