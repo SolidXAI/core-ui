@@ -152,9 +152,7 @@ export class SolidBooleanField implements ISolidField {
         }, []);
 
         const handleChange = (e: CheckboxChangeEvent) => {
-            const newValue = e.checked; // This returns `true` or `false`
-            console.log(`${fieldLayoutInfo.attrs.name}, new value:`, newValue);
-            
+            const newValue = e.checked; // This returns `true` or `false`  
             formik.setFieldValue(fieldLayoutInfo.attrs.name, newValue);
             formik.setTouched({ ...formik.touched, [fieldLayoutInfo.attrs.name]: true }); // Ensure Formik registers the change
         };

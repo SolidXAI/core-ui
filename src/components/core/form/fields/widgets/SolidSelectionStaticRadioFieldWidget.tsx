@@ -5,6 +5,7 @@ import { Message } from "primereact/message";
 import { classNames } from "primereact/utils";
 import { SelectButton } from "primereact/selectbutton";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
+import { RadioButton } from "primereact/radiobutton";
 
 export const SolidSelectionStaticRadioWidget = ({ formik, fieldContext }: SolidSelectionStaticFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
@@ -41,23 +42,22 @@ export const SolidSelectionStaticRadioWidget = ({ formik, fieldContext }: SolidS
                         </label>
                     )}
                     <div className="flex flex-wrap gap-3">
-                        {radioOptions.map((option:any) => (
-                            <div key={option.value} className="flex items-center">
-                                <input
-                                    type="radio"
-                                    id={`${fieldName}-${option.value}`}
-                                    name={fieldName}
-                                    value={option.value}
-                                    checked={formik.values[fieldName] === option.value}
-                                    onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-                                    disabled={formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled}
-                                    className="mr-2"
-                                />
-                                <label htmlFor={`${fieldName}-${option.value}`} className="cursor-pointer">
-                                    {option.label}
-                                </label>
-                            </div>
-                        ))}
+                    {radioOptions.map((option: any) => (
+                        <div key={option.value} className="flex items-center">
+                            <RadioButton
+                                id={`${fieldName}-${option.value}`}
+                                name={fieldName}
+                                value={option} 
+                                checked={formik.values[fieldName]?.value === option.value} 
+                                onChange={(e) => formik.setFieldValue(fieldName, e.value)} 
+                                disabled={formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled}
+                                className="mr-2"
+                            />
+                            <label htmlFor={`${fieldName}-${option.value}`} className="cursor-pointer">
+                                {option.label}
+                            </label>
+                        </div>
+                    ))}
                     </div>
                 </div>
                 {isFormFieldValid(formik, fieldName) && (
