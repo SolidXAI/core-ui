@@ -654,26 +654,36 @@ const SolidFormView = (params: SolidFormViewProps) => {
     }, [solidFormViewMetaData, solidFormViewData]);
 
     useEffect(() => {
-        if (solidFormViewData) {
-            const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormDataLoad;
-            let DynamicFunctionComponent = null;
-            let formViewData = solidFormViewData?.data;
-            const event: SolidLoadForm = {
-                fieldsMetadata: solidFormViewMetaData,
-                formData: solidFormViewData?.data,
-                type: dynamicHeader,
-                viewMetadata: solidFormViewMetaData?.data?.solidView
-            }
-            if (dynamicHeader) {
-                DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
-                if (DynamicFunctionComponent) {
-                    const updatedFormData = DynamicFunctionComponent(event);
-                    if (updatedFormData && updatedFormData?.dataChanged && updatedFormData.newFormData)
-                    formViewData = updatedFormData.newFormData;
+        const handleDynamicFunction = async () => {
+            if (solidFormViewData) {
+                const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormDataLoad;
+    
+                let DynamicFunctionComponent = null;
+                let formViewData = solidFormViewData?.data;
+    
+                const event: SolidLoadForm = {
+                    fieldsMetadata: solidFormViewMetaData,
+                    formData: solidFormViewData?.data,
+                    type: dynamicHeader,
+                    viewMetadata: solidFormViewMetaData?.data?.solidView
+                };
+    
+                if (dynamicHeader) {
+                    DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
+    
+                    if (DynamicFunctionComponent) {
+                        const updatedFormData = await DynamicFunctionComponent(event);
+    
+                        if (updatedFormData && updatedFormData?.dataChanged && updatedFormData?.newFormData) {
+                            formViewData = updatedFormData.newFormData;
+                        }
+                    }
                 }
+                setInitialEntityData(formViewData);
             }
-            setInitialEntityData(formViewData);
-        }
+        };
+    
+        handleDynamicFunction();
     }, [solidFormViewData]);
 
     let formik: FormikObject;
