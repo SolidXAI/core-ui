@@ -1,4 +1,5 @@
 import hanldeEmailFormTypeChange from "@/components/core/extension/solid-core/emailTemplate/emailFormTypeChangeHandler";
+import hanldeEmailFormTypeLoad from "@/components/core/extension/solid-core/emailTemplate/emailFormTypeLoad";
 import { RolePermissionsManyToManyFieldWidget } from "@/components/core/extension/solid-core/roleMetadata/RolePermissionsManyToManyFieldWidget";
 import { SolidRelationManyToManyAutocompleteWidget } from "@/components/core/form/fields/relations/widgets/SolidRelationManyToManyAutocompleteWidget";
 import { SolidRelationManyToManyCheckboxWidget } from "@/components/core/form/fields/relations/widgets/SolidRelationManyToManyCheckboxWidget";
@@ -76,6 +77,7 @@ registerExtensionComponent("SolidRelationManyToManyAutocompleteWidget", SolidRel
 
 // Email Template
 registerExtensionFunction("emailFormTypeChangeHandler", hanldeEmailFormTypeChange);
+registerExtensionFunction("emailFormTypeLoad", hanldeEmailFormTypeLoad);
 
 // RoleMetadata
 registerExtensionComponent("RolePermissionsManyToManyFieldWidget", RolePermissionsManyToManyFieldWidget, ["inputSwitch"]);
