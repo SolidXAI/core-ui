@@ -37,7 +37,7 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
 import { SolidUiEvent } from "@/types";
 import { getExtensionComponent, getExtensionFunction } from "@/helpers/registry";
-import { SolidFormWidgetProps } from "@/types/solid-core";
+import { SolidFormWidgetProps, SolidLoadForm } from "@/types/solid-core";
 import { SolidPasswordField } from "./fields/SolidPasswordField";
 import { SolidEmailField } from "./fields/SolidEmailField";
 import { Panel } from "primereact/panel";
@@ -418,17 +418,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
     } = useGetSolidViewLayoutQuery(formViewMetaDataQs);
 
     useEffect(() => {
-        if (solidFormViewMetaData) {
-            setFormViewMetaData(solidFormViewMetaData);
-            if (params.customLayout) {
-                setFormViewLayout(params.customLayout);
-            } else {
-                setFormViewLayout(solidFormViewMetaData.data.solidView.layout);
-            }
-        }
-    }, [solidFormViewMetaData]);
-
-    useEffect(() => {
         if (
             isEntityCreateSuccess == true ||
             isEntityUpdateSuceess == true ||
@@ -579,11 +568,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         // errorFields.length = 0;
     };
-    useEffect(() => {
-        if (errorFields?.length > 0) {
-            showFieldError();
-        }
-    }, [errorFields])
+    // useEffect(() => {
+    //     if (errorFields?.length > 0) {
+    //         showFieldError();
+    //     }
+    // }, [errorFields])
 
     // - - - - - - - - - - - -- - - - - - - - - - - - DATA here
     // Fetch the actual data here. 
@@ -625,10 +614,65 @@ const SolidFormView = (params: SolidFormViewProps) => {
         }
     }, [formViewDataQs])
 
+    useEffect(() => {
+        if (solidFormViewMetaData) {
+            let formLayout = solidFormViewMetaData; 
+            const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormLayoutLoad;
+            let DynamicFunctionComponent = null;
+            const event: SolidLoadForm = {
+                fieldsMetadata: solidFormViewMetaData,
+                formData: solidFormViewData?.data,
+                type: dynamicHeader,
+                viewMetadata: solidFormViewMetaData?.data?.solidView
+            }
+            if (dynamicHeader) {
+                DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
+                if (DynamicFunctionComponent) {
+                    const updatedFormLayout = DynamicFunctionComponent(event);
+                    if (updatedFormLayout && updatedFormLayout?.layoutChanged && updatedFormLayout?.newLayout) {
+                        const newFormLayout = {
+                            ...formLayout,
+                            data : {
+                                ...formLayout.data,
+                                solidView: {
+                                    ...formLayout.data.solidView,
+                                    layout: updatedFormLayout.newLayout
+                                }
+                            }
+                        };
+                        formLayout = newFormLayout;
+                    }
+                }
+            }
+            setFormViewMetaData(formLayout);
+            if (params.customLayout) {
+                setFormViewLayout(params.customLayout);
+            } else {
+                setFormViewLayout(formLayout.data.solidView.layout);
+            }
+        }
+    }, [solidFormViewMetaData, solidFormViewData]);
 
     useEffect(() => {
         if (solidFormViewData) {
-            setInitialEntityData(solidFormViewData.data);
+            const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormDataLoad;
+            let DynamicFunctionComponent = null;
+            let formViewData = solidFormViewData?.data;
+            const event: SolidLoadForm = {
+                fieldsMetadata: solidFormViewMetaData,
+                formData: solidFormViewData?.data,
+                type: dynamicHeader,
+                viewMetadata: solidFormViewMetaData?.data?.solidView
+            }
+            if (dynamicHeader) {
+                DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
+                if (DynamicFunctionComponent) {
+                    const updatedFormData = DynamicFunctionComponent(event);
+                    if (updatedFormData && updatedFormData?.dataChanged && updatedFormData.newFormData)
+                    formViewData = updatedFormData.newFormData;
+                }
+            }
+            setInitialEntityData(formViewData);
         }
     }, [solidFormViewData]);
 
