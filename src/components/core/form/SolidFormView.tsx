@@ -780,7 +780,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
                     // Invoke the dynamic change handler: 
                     // TODO: encapsulate in try/catch, catch the exception render in the UI as an error & stop form rendering.
-                    const updatedFormInfo = dynamicChangeHandler(event);
+                    const updatedFormInfo = await dynamicChangeHandler(event);
                     // console.log(`${eventType}: formFieldOnXXX response received: `, updatedFormInfo);
 
                     // If dataChanged is true, update Formik values
