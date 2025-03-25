@@ -6,6 +6,7 @@ import { DropzoneUpload } from "@/components/common/DropzoneUpload";
 import { FileReaderExt } from "@/components/common/FileReaderExt";
 import { SingleSelectAutoCompleteField } from "@/components/common/SingleSelectAutoCompleteField";
 import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
+import { SolidFormHeader } from "@/components/common/SolidFormHeader";
 import { SolidFormStepper } from "@/components/common/SolidFormStepper";
 import { getSingularAndPlural } from "@/helpers/helpers";
 import { handleError } from "@/helpers/ToastContainer";
@@ -414,7 +415,7 @@ const CreateModule = ({ data }: any) => {
             </>
           }
         </div>
-        <SolidBreadcrumb />
+        <SolidFormHeader />
         {/* <div className="solid-form-stepper">
           <SolidFormStepper />
         </div> */}

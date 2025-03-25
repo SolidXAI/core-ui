@@ -78,7 +78,13 @@ export const createSolidEntityApi = (entityName: string) => {
                     method: 'POST',
                     body: data
                 })
-
+            }),
+            patchUpdateSolidEntity: builder.mutation({
+                query: ({ id, data }) => ({
+                    url: `/${kebabEntityName}/${id}`,
+                    method: 'PATCH',
+                    body: data,
+                }),
             }),
         }),
     });

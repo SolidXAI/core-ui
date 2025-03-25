@@ -1131,13 +1131,15 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         />
                     } */}
                     {params.embeded !== true &&
-                        <div className="solid-form-stepper">
+                        // <div className="solid-form-stepper">
                             <SolidFormHeader 
                                 // solidFormViewMetaData={solidFormViewMetaData?.data?.solidView?.model}
                                 solidFormViewMetaData={solidFormViewMetaData}
                                 initialEntityData={initialEntityData}
+                                modelName={params.modelName}
+                                id={params.id}
                             />
-                        </div>
+                        // </div>
                     }
                     <div className="p-4 solid-form-content">
                         {DynamicHeaderComponent && <DynamicHeaderComponent />}
