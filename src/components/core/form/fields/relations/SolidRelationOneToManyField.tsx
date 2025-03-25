@@ -83,12 +83,20 @@ export class SolidRelationOneToManyField implements ISolidField {
         const handlePopupClose = () => {
             setvisibleCreateRelationEntity(false);
             setRefreshList((prev) => !prev);
+            const customFilter = this.fieldContext.fieldMetadata.relationCoModelFieldName ? this.fieldContext.fieldMetadata.relationCoModelFieldName : `${this.fieldContext.modelName}`
             const lisviewparams = {
                 moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
                 modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName),
                 inlineCreate: readOnlyPermission === false ? true : false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
-                embeded: true
+                embeded: true,
+                customFilter: {
+                    [customFilter]: {
+                        id: {
+                            $eq: this.fieldContext.data ? this?.fieldContext?.data?.id : -1
+                        }
+                    }
+                }
             }
             setListViewParams(lisviewparams)
         }
@@ -96,7 +104,7 @@ export class SolidRelationOneToManyField implements ISolidField {
         useEffect(() => {
 
             const customFilter = this.fieldContext.fieldMetadata.relationCoModelFieldName ? this.fieldContext.fieldMetadata.relationCoModelFieldName : `${this.fieldContext.modelName}`
-            const listviewparams = {
+            const listviewparams = { 
                 moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
                 modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName),
                 inlineCreate: readOnlyPermission === false ? true : false,
