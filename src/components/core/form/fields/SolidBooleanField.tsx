@@ -6,6 +6,10 @@ import { useEffect } from "react";
 import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
+import { Panel } from "primereact/panel";
+import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
+import { getExtensionComponent } from "@/helpers/registry";
+import { SolidBooleanFieldWidgetProps } from "@/types/solid-core";
 
 export class SolidBooleanField implements ISolidField {
 
@@ -28,7 +32,13 @@ export class SolidBooleanField implements ISolidField {
 
         const existingValue = this.fieldContext.data[fieldName];
 
-        return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
+        // return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
+
+        // Ensure the value is always a string "true" or "false"
+        const result = existingValue
+        ? (existingValue === true || existingValue === "true" ? "true" : "false") 
+        : (fieldDefaultValue === true || fieldDefaultValue === "true" ? "true" : "false");
+        return result;
     }
 
     validationSchema(): Schema {
@@ -82,44 +92,42 @@ export class SolidBooleanField implements ISolidField {
         const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
         const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
+        let renderMode = fieldLayoutInfo.attrs.renderMode;
+        if (!renderMode) {
+            renderMode = 'field-selectbox';
+        }
         return (
-            <div className={className}>
-                <div className="relative">
-                    <div className="flex flex-column gap-2 mt-4">
-                        {showFieldLabel != false &&
-                            <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                                {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                                {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                            </label>
-                        }
-                        {/* <InputText
-                        id={fieldLayoutInfo.attrs.name}
-                        className="small-input"
-                        aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                        onChange={formik.handleChange}
-                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                    /> */}
-                        <SelectButton
-                            readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                            disabled={formDisabled || fieldDisabled}
-                            id={fieldLayoutInfo.attrs.name}
-                            aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                            onChange={(e) => formik.setFieldValue(fieldLayoutInfo.attrs.name, e.value)} // Custom handling for boolean input
-                            value={formik.values[fieldLayoutInfo.attrs.name] ? formik.values[fieldLayoutInfo.attrs.name].toString() : "false"}
-                            options={booleanOptions}
-                            className={classNames("", {
-                                "p-invalid": isFormFieldValid(formik, "defaultValue"),
-                            })}
-
-                        />
+            <>
+                {renderMode &&
+                    this.renderExtensionRenderMode(renderMode, formik) 
+                }
+                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                    <div className="absolute mt-1">
+                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                     </div>
-                    {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                        <div className="absolute mt-1">
-                            <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                        </div>
-                    )}
-                </div>
-            </div>
+                )}
+            </>
         );
+
+        
     }
+
+
+    renderExtensionRenderMode(widgetName: string, formik: FormikObject) { 
+            let DynamicWidget = getExtensionComponent(widgetName);
+            if (!DynamicWidget) {
+                DynamicWidget = getExtensionComponent('field-selectbox');
+            }
+            const widgetProps: SolidBooleanFieldWidgetProps = {
+                formik: formik,
+                fieldContext: this.fieldContext,
+            }
+            return (
+                <>
+                    {DynamicWidget && <DynamicWidget {...widgetProps} />}
+                </>
+            )
+        }
+
+    
 }

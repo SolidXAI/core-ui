@@ -5,6 +5,8 @@ import { useState } from "react";
 import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
+import { getExtensionComponent } from "@/helpers/registry";
+import { SolidSelectionStaticFieldWidgetProps } from "@/types/solid-core";
 
 export class SolidSelectionStaticField implements ISolidField {
 
@@ -84,54 +86,39 @@ export class SolidSelectionStaticField implements ISolidField {
 
         const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
         const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
-
-        const [selectionStaticItems, setSelectionStaticItems] = useState([]);
-        const selectionStaticSearch = (event: AutoCompleteCompleteEvent) => {
-            const selectionStaticData = fieldMetadata.selectionStaticValues.map((i: string) => {
-                return {
-                    label: i.split(":")[1],
-                    value: i.split(":")[0]
-                }
-            });
-            const suggestionData = selectionStaticData.filter((t: any) => t.value.toLowerCase().startsWith(event.query.toLowerCase()));
-            setSelectionStaticItems(suggestionData)
-        }
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-
+        let renderMode = fieldLayoutInfo.attrs.renderMode;
+        if (!renderMode) {
+            renderMode = 'field-autocomplete';
+        }
         return (
-            <div className={className}>
-                <div className="relative">
-                    <div className="flex flex-column gap-2 mt-4">
-                        {showFieldLabel != false &&
-                            <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                                {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                                {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                            </label>
-                        }
-                        <AutoComplete
-                            readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                            disabled={formDisabled || fieldDisabled}
-                            {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
-                            id={fieldLayoutInfo.attrs.name}
-                            name={fieldLayoutInfo.attrs.name}
-                            field="label"
-                            value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                            dropdown
-                            suggestions={selectionStaticItems}
-                            completeMethod={selectionStaticSearch}
-                            // onChange={(e) => updateInputs(index, e.value)} />
-                            // onChange={formik.handleChange}
-                            onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
-                            className="solid-standard-autocomplete"
-                        />
+            <>
+                {renderMode &&
+                    this.renderExtensionRenderMode(renderMode, formik) 
+                }
+                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                    <div className="absolute mt-1">
+                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                     </div>
-                    {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                        <div className="absolute mt-1">
-                            <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                        </div>
-                    )}
-                </div>
-            </div>
+                )}
+            </>
         );
     }
-}
+
+    renderExtensionRenderMode(widgetName: string, formik: FormikObject) { 
+            let DynamicWidget = getExtensionComponent(widgetName);
+            if (!DynamicWidget) {
+                DynamicWidget = getExtensionComponent('field-autocomplete');
+            }
+            const widgetProps: SolidSelectionStaticFieldWidgetProps = {
+                formik: formik,
+                fieldContext: this.fieldContext,
+            }
+            return (
+                <>
+                    {DynamicWidget && <DynamicWidget {...widgetProps} />}
+                </>
+            )
+        }
+
+    }

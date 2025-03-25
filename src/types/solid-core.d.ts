@@ -109,3 +109,12 @@ export type SolidRelationManyToManyFieldWidgetProps = {
     formik: any;
     fieldContext?: SolidFieldProps;
 };
+
+export type SolidBooleanFieldWidgetProps = {
+    formik: any;
+    fieldContext?: SolidFieldProps;
+};
+export type SolidSelectionStaticFieldWidgetProps = {
+    formik: any;
+    fieldContext?: SolidFieldProps;
+};
