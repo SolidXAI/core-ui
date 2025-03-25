@@ -58,6 +58,7 @@ const SolidLogin = () => {
                     email: "",
                     password: "",
                 }}
+                enableReinitialize={false}
                 validationSchema={Yup.object({
                     email: Yup.string()
                         .email("Invalid email address")
@@ -100,6 +101,7 @@ const SolidLogin = () => {
                                 onChange={formik.handleChange}
                                 value={formik.values.email}
                                 invalid={!!formik.errors.email}
+                                onBlur={formik.handleBlur}
                             />
                             {isFormFieldValid(formik, "email") && <Message
                                 className="text-red-500 text-sm"
@@ -111,11 +113,9 @@ const SolidLogin = () => {
                             <label htmlFor="password" className="solid-auth-input-label">Password</label>
                             <Password
                                 id="password"
-                                value={password}
-                                onChange={(e) => {
-                                    setPassword(e.target.value);
-                                    formik.setFieldValue("password", e.target.value);
-                                }}
+                                name="password"
+                                value={formik.values.password}
+                                onChange={formik.handleChange} 
                                 toggleMask
                                 invalid={!!formik.errors.password}
                                 inputClassName="w-full"
@@ -153,6 +153,7 @@ const SolidLogin = () => {
                     email: Yup.string()
                         .email("Invalid email address")
                 })}
+                enableReinitialize={false}
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
                     try {
                         const payload = {
