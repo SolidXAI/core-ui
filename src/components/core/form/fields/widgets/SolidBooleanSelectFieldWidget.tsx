@@ -5,7 +5,7 @@ import { Message } from "primereact/message";
 import { classNames } from "primereact/utils";
 import { SelectButton } from "primereact/selectbutton";
 
-export const SolidBolleanFieldSelectWidget = ({ formik, fieldContext }: SolidBooleanFieldWidgetProps) => {
+export const SolidBooleanFieldSelectWidget = ({ formik, fieldContext }: SolidBooleanFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const className = fieldLayoutInfo.attrs?.className || 'field col-12';

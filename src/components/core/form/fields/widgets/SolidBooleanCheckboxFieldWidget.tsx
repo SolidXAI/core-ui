@@ -5,7 +5,7 @@ import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
 import { Message } from "primereact/message";
 import { classNames } from "primereact/utils";
 
-export const SolidBolleanFieldCheckboxWidget = ({ formik, fieldContext }: SolidBooleanFieldWidgetProps) => {
+export const SolidBooleanFieldCheckboxWidget = ({ formik, fieldContext }: SolidBooleanFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const className = fieldLayoutInfo.attrs?.className || "field col-12";

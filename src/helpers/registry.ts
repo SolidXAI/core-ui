@@ -5,8 +5,8 @@ import { SolidRelationManyToManyAutocompleteWidget } from "@/components/core/for
 import { SolidRelationManyToManyCheckboxWidget } from "@/components/core/form/fields/relations/widgets/SolidRelationManyToManyCheckboxWidget";
 import { CustomHtml } from "@/components/core/form/widgets/CustomHtml";
 import React from "react";
-import { SolidBolleanFieldCheckboxWidget } from "@/components/core/form/fields/widgets/SolidBooleanCheckboxFieldWidget";
-import { SolidBolleanFieldSelectWidget } from "@/components/core/form/fields/widgets/SolidBooleanSelectFieldWidget";
+import { SolidBooleanFieldCheckboxWidget } from "@/components/core/form/fields/widgets/SolidBooleanCheckboxFieldWidget";
+import { SolidBooleanFieldSelectWidget } from "@/components/core/form/fields/widgets/SolidBooleanSelectFieldWidget";
 import { SolidSelectionStaticAutocompleteWidget } from "@/components/core/form/fields/widgets/SolidSelectionStaticAutocompleteFieldWidget";
 import { SolidSelectionStaticRadioWidget } from "@/components/core/form/fields/widgets/SolidSelectionStaticRadioFieldWidget";
 
@@ -71,8 +71,8 @@ export const getExtensionFunction = (name: string) => {
 registerExtensionComponent("CustomHtml", CustomHtml, []);
 registerExtensionComponent("SolidRelationManyToManyCheckboxWidget", SolidRelationManyToManyCheckboxWidget, ["checkbox"]);
 registerExtensionComponent("SolidRelationManyToManyAutocompleteWidget", SolidRelationManyToManyAutocompleteWidget, ["autocomplete"]);
-registerExtensionComponent("SolidBooleanCheckboxFieldWidget", SolidBolleanFieldCheckboxWidget, ["field-checkbox"]);
-registerExtensionComponent("SolidBolleanFieldSelectWidget", SolidBolleanFieldSelectWidget, ["field-selectbox"]);
+registerExtensionComponent("SolidBooleanFieldCheckboxWidget", SolidBooleanFieldCheckboxWidget, ["field-checkbox"]);
+registerExtensionComponent("SolidBooleanFieldSelectWidget", SolidBooleanFieldSelectWidget, ["field-selectbox"]);
 registerExtensionComponent("SolidSelectionStaticAutocompleteWidget", SolidSelectionStaticAutocompleteWidget, ["field-autocomplete"]);
 registerExtensionComponent("SolidSelectionStaticRadioWidget", SolidSelectionStaticRadioWidget, ["field-radio"]);
 
