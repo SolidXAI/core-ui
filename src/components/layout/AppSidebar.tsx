@@ -114,7 +114,11 @@ const AppSidebar = () => {
         ],
         icon: SettingImage
     };
-    const updatedMenuData = menu?.data ? [...menu.data, additionalMenu] : [additionalMenu];
+    const updatedMenuData = menu?.data
+        ? [...menu.data, ...(process.env.NEXT_PUBLIC_SHOW_SETTINGS === "true" ? [additionalMenu] : [])]
+        : process.env.NEXT_PUBLIC_SHOW_SETTINGS === "true"
+            ? [additionalMenu]
+            : [];
 
 
     return (
@@ -170,7 +174,7 @@ const AppSidebar = () => {
                                         //     src={`/images/menu/app-builder.svg`}
                                         //     alt={m.title}
                                         // />
-                                        <Avatar label={m.title.charAt(0)}shape="circle" style={{backgroundColor:'var(--primary-color)'}}/>
+                                        <Avatar label={m.title.charAt(0)} shape="circle" style={{ backgroundColor: 'var(--primary-color)' }} />
                                     }
                                 </a>
                             </div>
