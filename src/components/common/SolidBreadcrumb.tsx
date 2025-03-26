@@ -11,12 +11,13 @@ interface BreadcrumbItem {
 }
 
 interface Props {
-    solidViewData?: any;
+    solidFormViewMetaData?: any;
     initialEntityData?: any;
 }
 
 export const SolidBreadcrumb = (props: Props) => {
-    const { solidViewData, initialEntityData } = props;
+    const { solidFormViewMetaData, initialEntityData } = props;
+    const modelMetadata = solidFormViewMetaData?.data?.solidView?.model;
     const pathname = usePathname();
     const router = useRouter();
     const searchParams = useSearchParams();
@@ -24,8 +25,8 @@ export const SolidBreadcrumb = (props: Props) => {
 
     let userKeyFieldValue: string | null = null;
 
-    if (solidViewData?.userKeyField) {
-        const userKeyFieldName = solidViewData.userKeyField.name; // Get the name from userKeyField
+    if (modelMetadata?.userKeyField) {
+        const userKeyFieldName = modelMetadata.userKeyField.name; // Get the name from userKeyField
         if (userKeyFieldName && initialEntityData?.[userKeyFieldName] !== undefined) {
             userKeyFieldValue = initialEntityData[userKeyFieldName]; // Get the value from initialEntityData
         }

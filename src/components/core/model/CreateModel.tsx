@@ -19,6 +19,7 @@ import { Dialog } from "primereact/dialog";
 import { Divider } from "primereact/divider";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
+import { SolidFormHeader } from "@/components/common/SolidFormHeader";
 
 interface ErrorResponseData {
   message: string;
@@ -402,7 +403,7 @@ const CreateModel = ({ data, params }: any) => {
             </>
           }
         </div>
-        <SolidBreadcrumb />
+        <SolidFormHeader />
         {/* <div className="solid-form-stepper">
           <SolidFormStepper />
         </div> */}
