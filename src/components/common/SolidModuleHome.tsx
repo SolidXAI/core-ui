@@ -12,7 +12,6 @@ export const SolidModuleHome = (params: SolidModuleParams) => {
     };
     return (
         <div className="page-parent-wrapper">
-
             <div className="surface-0 text-center">
                 <div className="mb-3 font-bold text-3xl">
                     <span className="text-900">One Product, </span>
