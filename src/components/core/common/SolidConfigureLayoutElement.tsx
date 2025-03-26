@@ -1,6 +1,7 @@
 "use client"
 import { deleteManyPermission, deletePermission } from "@/helpers/permissions";
 import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
 import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
@@ -13,11 +14,33 @@ interface FilterColumns {
     name: string;
     key: string;
 }
-export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, setView, view, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
+export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
 
     // const [visible, setVisible] = useState<boolean>(false);
     const op = useRef(null);
     const customizeLayout = useRef<OverlayPanel | null>(null);
+    const pathname = usePathname();
+    const router = useRouter();
+    const [view, setView] = useState<string>("");
+
+    const handleViewChange = (newView: string) => {
+        if (view === newView) return; // Prevent unnecessary updates
+        const pathSegments = pathname.split('/').filter(Boolean);
+        pathSegments[pathSegments.length - 1] = newView; // Replace the last part with new view
+        const newPath = '/' + pathSegments.join('/');
+        router.push(newPath);
+    };
+
+    useEffect(() => {
+        if (typeof pathname === 'string') {
+            const pathSegments = pathname.split('/').filter(Boolean);
+            if (pathSegments.length > 0) {
+                setView(pathSegments[pathSegments.length - 1]);
+            }
+        }
+    }, [])
+    
+
     const [isOverlayOpen, setIsOverlayOpen] = useState(false);
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -131,59 +154,62 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                             setTimeout(() => setIsOverlayOpen(false), 50); // ✅ Ensure state updates
                         }}
                     >
-                        <div className="solid-layout-accordion">
-                            <Accordion multiple expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up">
-                                <AccordionTab header="Switch Type">
-                                    <div className="flex flex-column gap-1 p-1">
-                                        {viewModes.map((option: any) => (
-                                            <div key={option.value} className={`flex align-items-center ${option.value === view ? 'solid-active-view' : 'solid-view'}`}>
-                                                <RadioButton
-                                                    inputId={option.value}
-                                                    name="views"
-                                                    value={option.value}
-                                                    onChange={(e) => setView(e.value)}
-                                                    checked={option.value === view}
-                                                />
-                                                <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
-                                                    {option.label}
-                                                    <Image
-                                                        src={option.image}
-                                                        alt={option.value}
-                                                        fill
-                                                        className='relative row-spacing-img'
+                        {viewModes && viewModes.length > 0 &&
+                            <div className="solid-layout-accordion">
+                                <Accordion multiple expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up">
+                                    <AccordionTab header="Switch Type">
+                                        <div className="flex flex-column gap-1 p-1">
+                                            {viewModes.map((option: any) => (
+                                                <div key={option.value} className={`flex align-items-center ${option.value === view ? 'solid-active-view' : 'solid-view'}`}>
+                                                    <RadioButton
+                                                        inputId={option.value}
+                                                        name="views"
+                                                        value={option.value}
+                                                        // onChange={(e) => router}
+                                                        onChange={() => handleViewChange(option.value)}
+                                                        checked={option.value === view}
                                                     />
-                                                </label>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </AccordionTab>
-                                <AccordionTab header="List">
-                                    <div className="flex flex-column gap-1 p-1">
-                                        <p className="m-0 px-3">Row Spacing</p>
-                                        {sizeOptions.map((option: any) => (
-                                            <div key={option.value} className={`flex align-items-center ${option.value === size ? 'solid-active-view' : 'solid-view'}`}>
-                                                <RadioButton
-                                                    inputId={option.value}
-                                                    name="sizes"
-                                                    value={option.value}
-                                                    onChange={(e) => setSize(e.value)}
-                                                    checked={option.value === size}
-                                                />
-                                                <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
-                                                    {option.label}
-                                                    <Image
-                                                        src={option.image}
-                                                        alt={option.value}
-                                                        fill
-                                                        className='relative row-spacing-img'
+                                                    <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
+                                                        {option.label}
+                                                        {/* <Image
+                                                            src={option.image}
+                                                            alt={option.value}
+                                                            fill
+                                                            className='relative row-spacing-img'
+                                                        /> */}
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </AccordionTab>
+                                    <AccordionTab header="List">
+                                        <div className="flex flex-column gap-1 p-1">
+                                            <p className="m-0 px-3">Row Spacing</p>
+                                            {sizeOptions.map((option: any) => (
+                                                <div key={option.value} className={`flex align-items-center ${option.value === size ? 'solid-active-view' : 'solid-view'}`}>
+                                                    <RadioButton
+                                                        inputId={option.value}
+                                                        name="sizes"
+                                                        value={option.value}
+                                                        onChange={(e) => setSize(e.value)}
+                                                        checked={option.value === size}
                                                     />
-                                                </label>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </AccordionTab>
-                            </Accordion>
-                        </div>
+                                                    <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
+                                                        {option.label}
+                                                        <Image
+                                                            src={option.image}
+                                                            alt={option.value}
+                                                            fill
+                                                            className='relative row-spacing-img'
+                                                        />
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </AccordionTab>
+                                </Accordion>
+                            </div>
+                        }
                         <Divider className="m-0" />
                         <div className="pl-3 pt-3 flex align-items-center justify-content-between">
                             <p className="m-0">Column Selector</p>

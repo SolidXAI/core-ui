@@ -5,8 +5,10 @@ import { FormEvent } from "primereact/ts-helpers";
 import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 import SolidTableRowCell from '../SolidTableRowCell';
+import { getExtensionComponent } from '@/helpers/registry';
+import { SolidShortTextImageRenderModeWidgetProps } from '@/types/solid-core';
 
-const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {    
+const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
     const showFilterOperator = false;
     const columnDataType = 'text';
@@ -39,7 +41,7 @@ const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column }: 
 
     const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter
     const header = column.attrs.label ?? fieldMetadata.displayName;
-        
+
     return (
         <Column
             key={fieldMetadata.name}
@@ -56,15 +58,48 @@ const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column }: 
             // style={{ minWidth: "12rem" }}
             // headerClassName="table-header-fs"
             header={() => {
-                return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace:'nowrap', textOverflow:'ellipsis', overflow:'hidden'}}>{header}</div>)
+                return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{header}</div>)
             }}
-            body={(rowData) => (
-                <SolidTableRowCell
-                    value={rowData[fieldMetadata.name]} 
-                    truncateAfter={truncateAfter} 
-                />
-            )}
-        ></Column>
+            body={(rowData) => {
+                const renderMode = column.attrs.renderMode || "text";
+                const data = rowData;
+                const widgetName = renderMode == "text" ? "SolidShortTextFieldTextRenderModeWidget" : "SolidShortTextFieldImageRenderModeWidget";
+                let DynamicWidget = getExtensionComponent(widgetName);
+                const widgetProps = {
+                    value: data[fieldMetadata.name],
+                    setLightboxUrls: setLightboxUrls,
+                    setOpenLightbox: setOpenLightbox
+                }
+                return (
+                    <>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
+                    </>
+                )
+
+                // if (renderMode === "text") {
+                //     return <SolidTableRowCell
+                //         value={rowData[fieldMetadata.name]}
+                //         truncateAfter={truncateAfter}
+                //     />
+                // } else {
+                //     return (
+                //         <img
+                //             src={data[fieldMetadata.name]}
+                //             alt="product-image-single"
+                //             className="shadow-2 border-round"
+                //             width={40}
+                //             height={40}
+                //             style={{ objectFit: "cover" }}
+                //             onClick={(event) => {
+                //                 event.stopPropagation();
+                //                 setLightboxUrls([{ src: data[fieldMetadata.name], downloadUrl: data[fieldMetadata.name] }]);
+                //                 setOpenLightbox(true);
+                //             }}
+                //         />
+                //     );
+                // }
+            }}
+        ></Column >
     );
 
 };
