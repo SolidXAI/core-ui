@@ -676,7 +676,7 @@ export const SolidListView = (params: SolidListViewParams) => {
             onClick={() => setRecoverDialogVisible(true)}
           ></Button>}
 
-          {params.embeded === false &&
+          {params.embeded === false && (solidListViewMetaData?.data?.solidView?.layout?.attrs?.configureView !== false) &&
             <SolidConfigureLayoutElement
               setShowArchived={setShowArchived}
               showArchived={showArchived}
