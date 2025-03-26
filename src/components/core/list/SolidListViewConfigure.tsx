@@ -1,6 +1,7 @@
 "use client"
 import { deleteManyPermission, deletePermission } from "@/helpers/permissions";
 import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
 import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
@@ -13,7 +14,7 @@ interface FilterColumns {
     name: string;
     key: string;
 }
-export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, setView, view, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
+export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
     if (!listViewMetaData) {
         return;
     }
@@ -29,6 +30,28 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
     // const [visible, setVisible] = useState<boolean>(false);
     const op = useRef(null);
     const customizeLayout = useRef<OverlayPanel | null>(null);
+    const pathname = usePathname();
+    const router = useRouter();
+    const [view, setView] = useState<string>("");
+
+    const handleViewChange = (newView: string) => {
+        if (view === newView) return; // Prevent unnecessary updates
+        const pathSegments = pathname.split('/').filter(Boolean);
+        pathSegments[pathSegments.length - 1] = newView; // Replace the last part with new view
+        const newPath = '/' + pathSegments.join('/');
+        router.push(newPath);
+    };
+
+    useEffect(() => {
+        if (typeof pathname === 'string') {
+            const pathSegments = pathname.split('/').filter(Boolean);
+            if (pathSegments.length > 0) {
+                setView(pathSegments[pathSegments.length - 1]);
+            }
+        }
+    }, [])
+
+
     const [isOverlayOpen, setIsOverlayOpen] = useState(false);
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
@@ -100,8 +123,8 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
                         <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base" />
                         {/* <Button text icon='pi pi-share-alt' label="Share" size="small" severity="secondary" className="text-left gap-2" /> */}
                         {/* {viewData?.data?.solidView?.model?.enableSoftDelete &&
-                            <Button text severity="secondary" size="small" className="text-left w-13rem" label={showArchived ? "Hide Archived Records" : "Show Archived Records"} iconPos="left" onClick={() => { setShowArchived(!showArchived); }} />
-                        } */}
+                        <Button text severity="secondary" size="small" className="text-left w-13rem" label={showArchived ? "Hide Archived Records" : "Show Archived Records"} iconPos="left" onClick={() => { setShowArchived(!showArchived); }} />
+                    } */}
                         {viewData?.data?.solidView?.model?.enableSoftDelete && (
                             <div className="flex align-items-center px-3 gap-2 mt-2 mb-1">
                                 <Checkbox
@@ -144,32 +167,36 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
                             setTimeout(() => setIsOverlayOpen(false), 50); // ✅ Ensure state updates
                         }}
                     >
+
                         <div className="solid-layout-accordion">
                             <Accordion multiple expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up" activeIndex={[2]}>
-                                <AccordionTab header="Switch Type">
-                                    <div className="flex flex-column gap-1 p-1">
-                                        {viewModes.map((option: any) => (
-                                            <div key={option.value} className={`flex align-items-center ${option.value === view ? 'solid-active-view' : 'solid-view'}`}>
-                                                <RadioButton
-                                                    inputId={option.value}
-                                                    name="views"
-                                                    value={option.value}
-                                                    onChange={(e) => setView(e.value)}
-                                                    checked={option.value === view}
-                                                />
-                                                <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
-                                                    {option.label}
-                                                    <Image
+                                {viewModes && viewModes.length > 0 &&
+                                    <AccordionTab header="Switch Type">
+                                        <div className="flex flex-column gap-1 p-1">
+                                            {viewModes.map((option: any) => (
+                                                <div key={option.value} className={`flex align-items-center ${option.value === view ? 'solid-active-view' : 'solid-view'}`}>
+                                                    <RadioButton
+                                                        inputId={option.value}
+                                                        name="views"
+                                                        value={option.value}
+                                                        // onChange={(e) => router}
+                                                        onChange={() => handleViewChange(option.value)}
+                                                        checked={option.value === view}
+                                                    />
+                                                    <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
+                                                        {option.label}
+                                                        {/* <Image
                                                         src={option.image}
                                                         alt={option.value}
                                                         fill
                                                         className='relative row-spacing-img'
-                                                    />
-                                                </label>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </AccordionTab>
+                                                    /> */}
+                                                    </label>
+                                                </div>
+                                            ))}
+                                        </div>
+                                    </AccordionTab>
+                                }
                                 <AccordionTab header="Row Spacing">
                                     <div className="flex flex-column gap-1 p-1flex flex-column gap-1 p-1">
                                         {/* <p className="m-0 px-3">Row Spacing</p> */}
