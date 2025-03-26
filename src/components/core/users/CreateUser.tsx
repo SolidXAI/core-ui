@@ -2,6 +2,7 @@
 import { BackButton } from "@/components/common/BackButton";
 import { CancelButton } from "@/components/common/CancelButton";
 import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
+import { SolidFormHeader } from "@/components/common/SolidFormHeader";
 import { SolidFormStepper } from "@/components/common/SolidFormStepper";
 import { useRegisterPrivateMutation, useUpdateUserMutation } from "@/redux/api/authApi";
 import { useGetrolesQuery } from "@/redux/api/roleApi";
@@ -269,7 +270,7 @@ const CreateUser = ({ data, params }: any) => {
             </>
           )}
         </div>
-        <SolidBreadcrumb />
+        <SolidFormHeader />
         {/* <div className="solid-form-stepper">
           <SolidFormStepper />
         </div> */}
@@ -399,10 +400,10 @@ const CreateUser = ({ data, params }: any) => {
 
                 </div>
               </Panel>
-              
+
               {/* <Divider /> */}
               {/* <p className="form-wrapper-heading text-base" style={{ fontSize: 16 }}>Roles</p> */}
-             
+
               <Panel toggleable header="Roles" className="solid-column-panel mt-5">
                 <div className="formgrid grid mt-4">
                   {rolesData?.data?.records && rolesData?.data?.records.map((role: any, i: number) => (
