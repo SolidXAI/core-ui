@@ -27,6 +27,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   // TODO: The initial filter state will be created based on the fields which are present on this kanban view. 
   const [filters, setFilters] = useState<any>();
   const [toPopulate, setToPopulate] = useState<string[]>([]);
+  const [toPopulateMedia, setToPopulateMedia] = useState<string[]>([]);
   const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
   const [showGlobalSearchElement, setShowGlobalSearchElement] = useState<boolean>(false);
 
@@ -93,6 +94,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
     const initialFilters: any = {};
     const toPopulate: string[] = [];
+    const toPopulateMedia: string[] = [];
     function extractFields(node: any, result: any = []) {
       if (node.type === "field") {
         result.push(node);
@@ -135,17 +137,27 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       if (fieldMetadata.type === 'relation' && fieldMetadata.relationType === 'many-to-one') {
         toPopulate.push(fieldMetadata.name);
       }
+      if (fieldMetadata.type === 'mediaSingle' || fieldMetadata.relationType === 'mediaMultiple') {
+        toPopulateMedia.push(fieldMetadata.name);
+      }
     }
     // setFilters(initialFilters);
-    setRows(kanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsCount ? kanbanViewMetaData?.data?.solidView?.layout?.attrs.recordsCount : 25)
-    setToPopulate(toPopulate);
+    const rows = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsCount ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsCount : 25;
+    // setToPopulate(toPopulate);
+    // setToPopulateMedia(toPopulateMedia);
+    return { rows, toPopulate, toPopulateMedia }
   }
 
+
+  // Initial Filter data 
   useEffect(() => {
 
     if (solidKanbanViewMetaData) {
       setKanbanViewMetaData(solidKanbanViewMetaData);
-      initialFilterMethod()
+      const { rows, toPopulate, toPopulateMedia } = initialFilterMethod()
+      setRows(rows);
+      setToPopulate(toPopulate);
+      setToPopulateMedia(toPopulateMedia);
     }
   }, [solidKanbanViewMetaData]);
 
@@ -155,8 +167,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   // All kanban view state.
   const [kanbanViewData, setKanbanViewData] = useState<any>([]);
   const [kanbanLoadMoreData, setKanbanLoadMoreData] = useState<any>({});
-  const [filterValues, setFilterValues] = useState([{ field: '', operator: '', value: '' }]);
-  const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(25);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
@@ -169,6 +179,19 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   // Get the kanban view data.
   // const [triggerGetSolidEntitiesForKanban, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidKanbanEntitiesQuery();
   const [triggerGetSolidEntities, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidEntitiesQuery();
+
+
+  // Delete mutation 
+  const [
+    deleteManySolidEntities,
+    {
+      isLoading: isSolidEntitiesDeleted,
+      isSuccess: isDeleteSolidEntitiesSucess,
+      isError: isSolidEntitiesDeleteError,
+      error: SolidEntitiesDeleteError,
+      data: DeletedSolidEntities,
+    },
+  ] = useDeleteMultipleSolidEntitiesMutation();
 
 
   // After data is fetched populate the kanban view state so as to be able to render the data. 
@@ -190,18 +213,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     }
   }, [solidEntityKanbanViewData]);
 
-  // Delete mutation 
-  const [
-    deleteManySolidEntities,
-    {
-      isLoading: isSolidEntitiesDeleted,
-      isSuccess: isDeleteSolidEntitiesSucess,
-      isError: isSolidEntitiesDeleteError,
-      error: SolidEntitiesDeleteError,
-      data: DeletedSolidEntities,
-    },
-  ] = useDeleteMultipleSolidEntitiesMutation();
-
 
 
 
@@ -221,21 +232,21 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       if (editActionUrl) {
         setEditButtonUrl(editActionUrl)
       }
-    }
-    if (solidKanbanViewMetaData) {
+
       const groupByFieldName = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.groupBy;
       const columnsToLoadCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.pageSize || 5;
+      if (toPopulate || toPopulateMedia) {
 
-      if (toPopulate) {
         const queryData = {
           offset: 0,
           limit: columnsToLoadCount,
           fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
           groupBy: groupByFieldName,
           populate: toPopulate,
+          populateMedia: toPopulateMedia,
           populateGroup: true,
           groupFilter: {
-            limit: kanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsCount,
+            limit: kanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsCount || 10,
             offset: 0,
             filters: filters
           }
@@ -250,7 +261,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         setSelectedRecords([]);
       }
     }
-
   }, [isDeleteSolidEntitiesSucess, toPopulate, solidKanbanViewMetaData]);
 
 
@@ -267,17 +277,20 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       const groupByFieldName = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.groupBy;
       const columnsToLoadCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.pageSize || 5;
 
-      if (toPopulate) {
+      if (toPopulate || toPopulateMedia) {
+
         const queryData = {
           offset: 0,
           limit: columnsToLoadCount,
           fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
           groupBy: groupByFieldName,
           populate: toPopulate,
+          populateMedia: toPopulateMedia,
           populateGroup: true,
           groupFilter: {
             limit: rows,
             offset: 0,
+
           }
           // sort: [`id:desc`],
         };
@@ -317,6 +330,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     selectedRecords.forEach((element: any) => {
       deleteList.push(element.id);
     });
+    console.log(deleteList);
     deleteManySolidEntities(deleteList);
     setDialogVisible(false);
   };
@@ -346,6 +360,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       const queryData = {
         offset: offset + limit,
         limit: limit,
+        populateMedia: toPopulateMedia,
+        populateGroup: true,
         filters: {
           [groupByFieldName]: {
             $in: [status],
@@ -426,6 +442,29 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
     if (sourceGroupIndex === -1 || destinationGroupIndex === -1) return;
 
+    // If dragging within the same group
+    if (sourceGroupName === destinationGroupName) {
+      setKanbanViewData((prevData: typeof kanbanViewData) =>
+        prevData.map((group: any) => {
+          if (group.groupName === sourceGroupName) {
+            const updatedRecords = [...group.groupData.records];
+            const [movedItem] = updatedRecords.splice(source.index, 1); // Remove the item
+            updatedRecords.splice(destination.index, 0, movedItem); // Insert at the new position
+
+            return {
+              ...group,
+              groupData: {
+                ...group.groupData,
+                records: updatedRecords,
+              },
+            };
+          }
+          return group;
+        })
+      );
+      return;
+    }
+
     // Deep clone the source and destination groups
     const sourceGroup = JSON.parse(JSON.stringify(kanbanViewData[sourceGroupIndex]));
     const destinationGroup = JSON.parse(JSON.stringify(kanbanViewData[destinationGroupIndex]));
@@ -462,6 +501,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   };
 
 
+
   const handleSwimLinPagination = async () => {
 
     if (solidKanbanViewMetaData) {
@@ -473,6 +513,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
         groupBy: groupByFieldName,
         populate: toPopulate,
+        populateMedia: toPopulateMedia,
         populateGroup: true,
         groupFilter: {
           limit: rows,
@@ -508,6 +549,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
         groupBy: groupByFieldName,
         populate: toPopulate,
+        populateMedia: toPopulateMedia,
         populateGroup: true,
         groupFilter: {
           limit: rows,
@@ -553,7 +595,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
 
   return (
-    <div className="page-parent-wrapper">
+    <>
       <div className="flex gap-3 mb-4 align-items-center justify-content-between kanban-view">
         <div className="flex gap-3 mb-4 align-items-center" >
 
@@ -588,12 +630,12 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           }
         </div>
 
-        {/* <SolidConfigureLayoutElement></SolidConfigureLayoutElement> */}
+        <SolidConfigureLayoutElement></SolidConfigureLayoutElement>
 
       </div>
       <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
       {solidKanbanViewMetaData && kanbanViewData &&
-        <KanbanBoard kanbanViewData={kanbanViewData} solidViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLinPagination={handleSwimLinPagination}></KanbanBoard>
+        <KanbanBoard kanbanViewData={kanbanViewData} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLinPagination={handleSwimLinPagination}></KanbanBoard>
       }
 
       <Dialog
@@ -610,7 +652,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       >
         <p>Are you sure you want to delete the selected records?</p>
       </Dialog>
-    </div>
+    </>
   );
 };
 

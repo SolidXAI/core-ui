@@ -31,7 +31,7 @@ interface KanbanColumnProps {
   handleLoadMore: (groupByField: string) => void;
 }
 
-const KanbanColumn = ({ groupByField, solidViewMetaData, group, groupData, toggleFold, handleLoadMore }: KanbanColumnProps) => {
+const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData, toggleFold, handleLoadMore }: KanbanColumnProps) => {
   const op = useRef<any>(null);
 
 
@@ -108,10 +108,10 @@ const KanbanColumn = ({ groupByField, solidViewMetaData, group, groupData, toggl
               style={{ minHeight: "100px" }}
             >
               {groupData.map((data, index) => (
-                <KanbanCard key={data.id} data={data} solidViewMetaData={solidViewMetaData} index={index} />
+                <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} />
               ))}
               {provided.placeholder}
-              {group.count > 0 &&
+              {group.count > 0 && (group.count >(group.limit * group.currentPage)) && 
                 <a
                   className="load-more-button"
                   onClick={() => handleLoadMore(groupByField)}

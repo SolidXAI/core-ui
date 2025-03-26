@@ -37,6 +37,7 @@ import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
 import ListImage from '../../../resources/images/layout/images/cozy.png';
 import KanbanImage from '../../../resources/images/layout/images/kanban.png';
+import {  capitalize } from "lodash";
 
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -207,6 +208,22 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [editButtonUrl, setEditButtonUrl] = useState<string>();
   const [showArchived, setShowArchived] = useState(false);
 
+  const sizeOptions = [
+    { label: 'Compact', value: 'small', image: CompactImage},
+    { label: 'Cozy', value: 'normal', image: CozyImage },
+    { label: 'Comfortable', value: 'large', image: ComfortableImage }
+  ]
+
+  // const viewModes = [
+  //   { label: 'List ', value: 'list', image: ListImage },
+  //   { label: 'Kanban', value: 'kanban', image: KanbanImage },
+  // ]
+
+  const [size, setSize] = useState<string | any>(sizeOptions[1].value);
+  const [viewModes, setViewModes] = useState<string | any>();
+  
+
+
   // Custom Row Action
   const [listViewRowActionPopupState, setListViewRowActionPopupState] = useState(false);
   const [listViewRowActionData, setListRowActionData] = useState<any>();
@@ -235,6 +252,8 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (solidListViewMetaData) {
       const createActionUrl = solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction && solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.type === "custom" ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.customComponent : "form/new";
       const editActionUrl = solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction && solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.type === "custom" ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.customComponent : "form";
+      const viewModes = solidListViewMetaData?.data?.solidView?.layout?.attrs.allowedViews.map((view) => {return { label: capitalize(view), value: view }});
+      setViewModes(viewModes);
       if (createActionUrl) {
         setCreateButtonUrl(createActionUrl)
       }
@@ -615,19 +634,6 @@ export const SolidListView = (params: SolidListViewParams) => {
     setListViewRowActionPopupState(false)
   }
 
-  const sizeOptions = [
-    { label: 'Compact', value: 'small', image: CompactImage},
-    { label: 'Cozy', value: 'normal', image: CozyImage },
-    { label: 'Comfortable', value: 'large', image: ComfortableImage }
-  ]
-
-  const viewModes = [
-    { label: 'List ', value: 'list', image: ListImage },
-    { label: 'Kanban', value: 'kanban', image: KanbanImage },
-  ]
-
-  const [size, setSize] = useState<string | any>(sizeOptions[1].value);
-  const [view, setView] = useState<string | any>(viewModes[0].value);
 
   return (
     <div className="page-parent-wrapper">
@@ -646,7 +652,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true &&
             // < SolidCreateButton url={createButtonUrl} />
             <Button type="button" icon="pi pi-plus" label="Add" size='small'
-              onClick={() => params.handlePopUpOpen(true)}
+              onClick={() => params.handlePopUpOpen("new")}
             ></Button>
           }
           {showArchived && <Button type="button" icon="pi pi-refresh" label="Recover" size='small' severity="secondary"
@@ -662,8 +668,6 @@ export const SolidListView = (params: SolidListViewParams) => {
               setSize={setSize}
               size={size}
               viewModes={viewModes}
-              setView={setView}
-              view={view}
               params={params}
               actionsAllowed={actionsAllowed}
               selectedRecords={selectedRecords}

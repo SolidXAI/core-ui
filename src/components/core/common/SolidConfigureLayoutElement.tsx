@@ -1,6 +1,7 @@
 "use client"
 import { deleteManyPermission, deletePermission } from "@/helpers/permissions";
 import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
 import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
@@ -13,11 +14,16 @@ interface FilterColumns {
     name: string;
     key: string;
 }
-export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, setView, view, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
+export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
 
     // const [visible, setVisible] = useState<boolean>(false);
     const op = useRef(null);
     const customizeLayout = useRef<OverlayPanel | null>(null);
+    const pathname = usePathname();
+    const router = useRouter();
+    const [view,setView] = useState<string>("");
+    console.log("pathname",pathname);
+    
     const [isOverlayOpen, setIsOverlayOpen] = useState(false);
     console.log("isOverlayOpen", isOverlayOpen);
     useEffect(() => {
@@ -132,6 +138,7 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                             setTimeout(() => setIsOverlayOpen(false), 50); // ✅ Ensure state updates
                         }}
                     >
+                        {viewModes.length > 0 && 
                         <div className="solid-layout-accordion">
                             <Accordion multiple expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up">
                                 <AccordionTab header="Switch Type">
@@ -142,7 +149,7 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                                                     inputId={option.value}
                                                     name="views"
                                                     value={option.value}
-                                                    onChange={(e) => setView(e.value)}
+                                                    onChange={(e) => router}
                                                     checked={option.value === view}
                                                 />
                                                 <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
@@ -185,6 +192,7 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                                 </AccordionTab>
                             </Accordion>
                         </div>
+                        }
                         <Divider className="m-0" />
                         <div className="pl-3 pt-3 flex align-items-center justify-content-between">
                             <p className="m-0">Column Selector</p>
