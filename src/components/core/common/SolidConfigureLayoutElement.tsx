@@ -158,7 +158,7 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                                     </div>
                                 </AccordionTab>
                                 <AccordionTab header="Row Spacing">
-                                    <div className="flex flex-column gap-1 p-1">
+                                    <div className="flex flex-column gap-1 p-1flex flex-column gap-1 p-1">
                                         {/* <p className="m-0 px-3">Row Spacing</p> */}
                                         {sizeOptions.map((option: any) => (
                                             <div key={option.value} className={`flex align-items-center ${option.value === size ? 'solid-active-view' : 'solid-view'}`}>
@@ -182,39 +182,37 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                                         ))}
                                     </div>
                                 </AccordionTab>
-                            </Accordion>
-                        </div>
-                        <Divider className="m-0" />
-                        <div className="pl-3 pt-3 flex align-items-center justify-content-between">
-                            <p className="m-0">Column Selector</p>
-                            {/* <Button text label="Save Layout" icon="pi pi-plus" /> */}
-                        </div>
-                        <div className="flex flex-column gap-3 p-3 cogwheel-column-filter">
-                            {categories.map((category) => {
-                                return (
-                                    <div key={category.key} className="flex align-items-center gap-1">
-                                        <Checkbox
-                                            inputId={category.key}
-                                            name="category"
-                                            value={category}
-                                            onChange={onCategoryChange}
-                                            checked={selectedCategories.some((item) => item.key === category.key)}
-                                            className="text-base"
-                                        />
-                                        <label htmlFor={category.key} className="ml-2 text-base">
-                                            {category.name}
-                                        </label>
+                                <AccordionTab header="Column Selector">
+                                    <div className="flex flex-column gap-1 p-1">
+                                        <div className="flex flex-column gap-3 px-3 cogwheel-column-filter">
+                                            {categories.map((category) => {
+                                                return (
+                                                    <div key={category.key} className="flex align-items-center gap-1">
+                                                        <Checkbox
+                                                            inputId={category.key}
+                                                            name="category"
+                                                            value={category}
+                                                            onChange={onCategoryChange}
+                                                            checked={selectedCategories.some((item) => item.key === category.key)}
+                                                            className="text-base"
+                                                        />
+                                                        <label htmlFor={category.key} className="ml-2 text-base">
+                                                            {category.name}
+                                                        </label>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                        <div className="p-3 flex gap-2">
+                                            <Button label="Apply" size="small" />
+                                            <Button outlined label="Cancel" size="small"
+                                                // @ts-ignore
+                                                onClick={(e) => op.current.hide(e)}
+                                            />
+                                        </div>
                                     </div>
-                                );
-                            })}
-                        </div>
-                        <Divider className="m-0" />
-                        <div className="p-3 flex gap-2">
-                            <Button label="Apply" size="small" />
-                            <Button outlined label="Cancel" size="small"
-                                // @ts-ignore
-                                onClick={(e) => op.current.hide(e)}
-                            />
+                                </AccordionTab>
+                            </Accordion>
                         </div>
                     </OverlayPanel>
                 </div>
