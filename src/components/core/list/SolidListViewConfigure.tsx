@@ -15,6 +15,11 @@ interface FilterColumns {
 }
 export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, setView, view, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
     console.log("check listviewmetadata", listViewMetaData);
+    // This contains the layout.
+    const solidView = listViewMetaData.data.solidView;
+
+    // This is a key value map of field name vs field metadata.
+    const solidFieldsMetadata = listViewMetaData.data.solidFieldsMetadata;
 
     // const [visible, setVisible] = useState<boolean>(false);
     const op = useRef(null);
@@ -39,6 +44,8 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
         return () => document.removeEventListener("click", handleClickOutside);
     }, [isOverlayOpen])
 
+    // TODO: change this to be an array of fields from the solidView.layout.children
+    // TODO: loop over children from layout and create name & key for name you can use the solidFieldsMetadata[name].displayName
     const categories: FilterColumns[] = [
         { name: 'ID', key: 'A' },
         { name: 'Tracker Date', key: 'M' },
