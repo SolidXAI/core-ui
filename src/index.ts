@@ -281,6 +281,7 @@ export { SolidKanbanView } from '@/components/core/kanban/SolidKanbanView';
 
 // export * from '@/components/core/kanban/columns/relations/SolidRelationManyToOneColumn';
 
+export { SolidModuleHome } from '@/components/common/SolidModuleHome';
 export { SolidListView } from '@/components/core/list/SolidListView';
 export { SolidListViewColumn, getNumberOfInputs } from '@/components/core/list/SolidListViewColumn';
 export type { SolidListViewColumnParams } from '@/components/core/list/SolidListViewColumn';
