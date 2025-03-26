@@ -13,7 +13,8 @@ interface FilterColumns {
     name: string;
     key: string;
 }
-export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, setView, view, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
+export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, setView, view, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
+    console.log("check listviewmetadata", listViewMetaData);
 
     // const [visible, setVisible] = useState<boolean>(false);
     const op = useRef(null);
