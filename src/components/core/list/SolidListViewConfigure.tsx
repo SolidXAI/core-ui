@@ -16,10 +16,17 @@ interface FilterColumns {
 export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, setView, view, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
     console.log("check listviewmetadata", listViewMetaData);
     // This contains the layout.
-    const solidView = listViewMetaData.data.solidView;
+    if (!listViewMetaData) {
+        return;
+    }
+    if (!listViewMetaData.data) {
+        return;
+    }
+
+    const solidView = listViewMetaData?.data?.solidView;
 
     // This is a key value map of field name vs field metadata.
-    const solidFieldsMetadata = listViewMetaData.data.solidFieldsMetadata;
+    const solidFieldsMetadata = listViewMetaData?.data?.solidFieldsMetadata;
 
     // const [visible, setVisible] = useState<boolean>(false);
     const op = useRef(null);
@@ -46,23 +53,26 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
 
     // TODO: change this to be an array of fields from the solidView.layout.children
     // TODO: loop over children from layout and create name & key for name you can use the solidFieldsMetadata[name].displayName
-    const categories: FilterColumns[] = [
-        { name: 'ID', key: 'A' },
-        { name: 'Tracker Date', key: 'M' },
-        { name: 'Production', key: 'P' },
-        { name: 'Research', key: 'R' }
-    ];
-    const [selectedCategories, setSelectedCategories] = useState<FilterColumns[]>([categories[1]]);
+
+    if (!solidView || !solidFieldsMetadata) {
+        return;
+    }
+
+    const solidListColumns: FilterColumns[] = solidView?.layout?.children?.map((column: { attrs: { name: string } }) => ({
+        name: solidFieldsMetadata[column?.attrs?.name]?.displayName,
+        key: column?.attrs?.name,
+    }));
+    const [selectedColumns, setSelectedColumns] = useState<FilterColumns[]>([]);
 
     const onCategoryChange = (e: CheckboxChangeEvent) => {
-        let _selectedCategories = [...selectedCategories];
+        let _selectedColumns = [...selectedColumns];
 
         if (e.checked)
-            _selectedCategories.push(e.value);
+            _selectedColumns.push(e.value);
         else
-            _selectedCategories = _selectedCategories.filter(category => category.key !== e.value.key);
+            _selectedColumns = _selectedColumns.filter(column => column.key !== e.value.key);
 
-        setSelectedCategories(_selectedCategories);
+        setSelectedColumns(_selectedColumns);
     };
 
     return (
@@ -193,19 +203,19 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
                                 <AccordionTab header="Column Selector">
                                     <div className="flex flex-column gap-1 p-1">
                                         <div className="flex flex-column gap-3 px-3 cogwheel-column-filter">
-                                            {categories.map((category) => {
+                                            {solidListColumns.map((column) => {
                                                 return (
-                                                    <div key={category.key} className="flex align-items-center gap-1">
+                                                    <div key={column.key} className="flex align-items-center gap-1">
                                                         <Checkbox
-                                                            inputId={category.key}
-                                                            name="category"
-                                                            value={category}
+                                                            inputId={column.key}
+                                                            name="column"
+                                                            value={column}
                                                             onChange={onCategoryChange}
-                                                            checked={selectedCategories.some((item) => item.key === category.key)}
+                                                            checked={selectedColumns.some((item) => item.key === column.key)}
                                                             className="text-base"
                                                         />
-                                                        <label htmlFor={category.key} className="ml-2 text-base">
-                                                            {category.name}
+                                                        <label htmlFor={column.key} className="ml-2 text-base">
+                                                            {column.name}
                                                         </label>
                                                     </div>
                                                 );
