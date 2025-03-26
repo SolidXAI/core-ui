@@ -19,10 +19,12 @@ const SolidMediaSingleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, f
     // const mimeType: string = "excel";
     // const url = "http://localhost:8080/media-files-storage/Holiday List 2025.pdf";
     // const url = "http://localhost:8080/media-files-storage/PF Form.xls";
+    
+    
 
     return (
         <>
-            {mimeType.startsWith("image/") &&
+            {mimeType && mimeType.includes("image/") &&
                 <img className='image-preview'
                     src={url}
                     onClick={(event) => {
@@ -33,7 +35,7 @@ const SolidMediaSingleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, f
                     alt={header} />}
 
             {/* Render PDF - Open Lightbox on Click */}
-            {mimeType.includes("pdf") && (
+            {mimeType && mimeType.includes("pdf") && (
                 <>
                     <i className="pi pi-file-pdf" style={{ fontSize: "24px", color: "red", cursor: "pointer" }} onClick={() => setVisible(true)}></i>
                     <Dialog header="PDF Preview" visible={visible} style={{ width: "" }} onHide={() => setVisible(false)} modal>
@@ -44,7 +46,7 @@ const SolidMediaSingleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, f
                 </>
             )}
             {/* Excel or Other Files - Show Download Icon */}
-            {(mimeType.includes("excel") || mimeType.includes("spreadsheet")) && (
+            {mimeType && (mimeType.includes("excel") || mimeType.includes("spreadsheet")) && (
                 <a href={url} download target="_blank" rel="noopener noreferrer">
                     <i className="pi pi-file-excel">Download</i>
                 </a>

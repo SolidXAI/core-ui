@@ -2897,7 +2897,7 @@ li.header-li-px {
   gap: 10px;
 }
 
-.kanban-card-container {
+.kanban-ungrouped-column .kanban-card-container {
   flex: 1 1 calc(20% - 10px);
   max-width: calc(20% - 10px);
 }

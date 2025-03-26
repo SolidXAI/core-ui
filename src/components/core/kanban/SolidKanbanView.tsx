@@ -171,7 +171,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       }
     }
     // setFilters(initialFilters);
-    const rows = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsCount ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsCount : 25;
+    const rows = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsInSwimlane ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsInSwimlane : 25;
     // setToPopulate(toPopulate);
     // setToPopulateMedia(toPopulateMedia);
     return { rows, toPopulate, toPopulateMedia }
@@ -256,8 +256,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     if (solidKanbanViewMetaData) {
       const createActionUrl = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.type === "custom" ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.customComponent : "form/new";
       const editActionUrl = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.type === "custom" ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.customComponent : "form";
-      if (solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.pageSize) {
-        setColumnsCount(solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.pageSize)
+      if (solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.swimlanesCount) {
+        setColumnsCount(solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.swimlanesCount)
       }
       if (createActionUrl) {
         setCreateButtonUrl(createActionUrl)
@@ -267,17 +267,18 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       }
 
 
-      const columnsToLoadCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.pageSize || 5;
-      if (toPopulate || toPopulateMedia) {
+      const columnsToLoadCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.swimlanesCount || 5;
+      if (groupByFieldName &&( toPopulate || toPopulateMedia)) {
 
         const queryData = {
           offset: 0,
           limit: columnsToLoadCount,
           fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
           groupBy: groupByFieldName,
+          populateMedia: toPopulateMedia,
           populateGroup: true,
           groupFilter: {
-            limit: kanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsCount || 10,
+            limit: kanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsInSwimlane || 10,
             offset: 0,
             filters: filters,
             populate: toPopulate,
@@ -294,7 +295,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         setSelectedRecords([]);
       }
     }
-  }, [isDeleteSolidEntitiesSucess, toPopulate, solidKanbanViewMetaData]);
+  }, [isDeleteSolidEntitiesSucess, toPopulate, groupByFieldName,solidKanbanViewMetaData]);
 
 
 
@@ -308,7 +309,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   //   setFilters(null);
   //   if (solidKanbanViewMetaData) {
   //     
-  //     const columnsToLoadCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.pageSize || 5;
+  //     const columnsToLoadCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.swimlanesCount || 5;
 
   //     if (toPopulate || toPopulateMedia) {
 
@@ -393,6 +394,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       const queryData = {
         offset: offset + limit,
         limit: limit,
+        populate:toPopulate,
         populateMedia: toPopulateMedia,
         populateGroup: true,
         filters: {
@@ -539,7 +541,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
     if (solidKanbanViewMetaData) {
 
-      const columnsToLoadCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.pageSize || 5;
+      const columnsToLoadCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.swimlanesCount || 5;
       const queryData = {
         offset: swimLaneCurrentPageNumber * columnsToLoadCount,
         limit: columnsToLoadCount,
@@ -573,7 +575,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const handleApplyCustomFilter = async (filters: any) => {
 
 
-    const columnsToLoadCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.pageSize || 5;
+    const columnsToLoadCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.swimlanesCount || 5;
     setFilters(filters)
 
     if (toPopulate) {

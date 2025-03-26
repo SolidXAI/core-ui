@@ -5,6 +5,8 @@ import { FormEvent } from "primereact/ts-helpers";
 import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 import SolidTableRowCell from '../SolidTableRowCell';
+import { getExtensionComponent } from '@/helpers/registry';
+import { SolidShortTextImageRenderModeWidgetProps } from '@/types/solid-core';
 
 const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
@@ -61,29 +63,41 @@ const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column, se
             body={(rowData) => {
                 const renderMode = column.attrs.renderMode || "text";
                 const data = rowData;
-              
-                if (renderMode === "text") {
-                    return <SolidTableRowCell
-                        value={rowData[fieldMetadata.name]}
-                        truncateAfter={truncateAfter}
-                    />
-                } else {
-                    return (
-                        <img
-                        src={data[fieldMetadata.name]}
-                        alt="product-image-single"
-                        className="shadow-2 border-round"
-                        width={40}
-                        height={40}
-                        style={{ objectFit: "cover" }}
-                        onClick={(event) => {
-                            event.stopPropagation();
-                             setLightboxUrls([{ src: data[fieldMetadata.name], downloadUrl: data[fieldMetadata.name] }]);
-                            setOpenLightbox(true);
-                        }}
-                    />
-                    );
+                const widgetName = renderMode == "text" ? "SolidShortTextFieldTextRenderModeWidget" : "SolidShortTextFieldImageRenderModeWidget";
+                let DynamicWidget = getExtensionComponent(widgetName);
+                const widgetProps = {
+                    value: data[fieldMetadata.name],
+                    setLightboxUrls: setLightboxUrls,
+                    setOpenLightbox: setOpenLightbox
                 }
+                return (
+                    <>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
+                    </>
+                )
+
+                // if (renderMode === "text") {
+                //     return <SolidTableRowCell
+                //         value={rowData[fieldMetadata.name]}
+                //         truncateAfter={truncateAfter}
+                //     />
+                // } else {
+                //     return (
+                //         <img
+                //             src={data[fieldMetadata.name]}
+                //             alt="product-image-single"
+                //             className="shadow-2 border-round"
+                //             width={40}
+                //             height={40}
+                //             style={{ objectFit: "cover" }}
+                //             onClick={(event) => {
+                //                 event.stopPropagation();
+                //                 setLightboxUrls([{ src: data[fieldMetadata.name], downloadUrl: data[fieldMetadata.name] }]);
+                //                 setOpenLightbox(true);
+                //             }}
+                //         />
+                //     );
+                // }
             }}
         ></Column >
     );
