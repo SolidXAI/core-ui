@@ -211,24 +211,24 @@ const SolidLogin = () => {
     }
 
     const AuthTabs: React.FC<AuthTabsProps> = ({ iamPasswordRegistrationEnabled, iamPasswordLessRegistrationEnabled }) => {
-        // if (iamPasswordRegistrationEnabled && iamPasswordLessRegistrationEnabled) {
-        //     return (
-        //         <TabView className="solid-auth-tabview">
-        //             <TabPanel header="With Password">
-        //                 <PasswordLogin />
-        //             </TabPanel>
-        //             <TabPanel header="Without Password">
-        //                 <PasswordLessLogin />
-        //             </TabPanel>
-        //         </TabView>
-        //     );
-        // } else if (iamPasswordRegistrationEnabled) {
+        if (iamPasswordRegistrationEnabled && iamPasswordLessRegistrationEnabled) {
+            return (
+                <TabView className="solid-auth-tabview">
+                    <TabPanel header="With Password">
+                        <PasswordLogin />
+                    </TabPanel>
+                    <TabPanel header="Without Password">
+                        <PasswordLessLogin />
+                    </TabPanel>
+                </TabView>
+            );
+        } else if (iamPasswordRegistrationEnabled) {
             return <PasswordLogin />;
-        // } else if (iamPasswordLessRegistrationEnabled) {
+        } else if (iamPasswordLessRegistrationEnabled) {
             return <PasswordLessLogin />;
-        // } else {
-            // return <p>No authentication method available</p>;
-        // }
+        } else {
+            return <p>No authentication method available</p>;
+        }
     };
 
     return (
