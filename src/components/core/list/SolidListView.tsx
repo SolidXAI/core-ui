@@ -42,7 +42,7 @@ import Counter from "yet-another-react-lightbox/plugins/counter";
 import Download from "yet-another-react-lightbox/plugins/download";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
-import { SolidListViewConfigure } from "./SolidConfigureLayoutElement";
+import { SolidListViewConfigure } from "./SolidListViewConfigure";
 
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
