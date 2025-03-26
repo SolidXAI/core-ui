@@ -132,7 +132,7 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                         }}
                     >
                         <div className="solid-layout-accordion">
-                            <Accordion multiple expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up">
+                            <Accordion multiple expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up" activeIndex={2}>
                                 <AccordionTab header="Switch Type">
                                     <div className="flex flex-column gap-1 p-1">
                                         {viewModes.map((option: any) => (
