@@ -22,7 +22,9 @@ import SolidUuidColumn from "./columns/SolidUuidColumn";
 export type SolidListViewColumnParams = {
     solidListViewMetaData: any;
     fieldMetadata: any,
-    column: any
+    column: any,
+    setLightboxUrls?: any,
+    setOpenLightbox?: any
 };
 
 export const getNumberOfInputs = (matchMode: any): number | null => {
@@ -70,7 +72,7 @@ export const getNumberOfInputs = (matchMode: any): number | null => {
 //     }
 // };
 
-export const SolidListViewColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
+export const SolidListViewColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidListViewColumnParams) => {
 
     // And finally we can implement additional switching logic based on certain special fields. 
     if (fieldMetadata.name === 'id') {
@@ -90,7 +92,7 @@ export const SolidListViewColumn = ({ solidListViewMetaData, fieldMetadata, colu
         return SolidDecimalColumn({ solidListViewMetaData, fieldMetadata, column });
     }
     if (fieldMetadata.type === 'shortText') {
-        return SolidShortTextColumn({ solidListViewMetaData, fieldMetadata, column });
+        return SolidShortTextColumn({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox });
     }
     if (fieldMetadata.type === 'longText') {
         return SolidLongTextColumn({ solidListViewMetaData, fieldMetadata, column });
@@ -114,10 +116,10 @@ export const SolidListViewColumn = ({ solidListViewMetaData, fieldMetadata, colu
         return SolidRelationColumn({ solidListViewMetaData, fieldMetadata, column });
     }
     if (fieldMetadata.type === 'mediaSingle') {
-        return SolidMediaSingleColumn({ solidListViewMetaData, fieldMetadata, column });
+        return SolidMediaSingleColumn({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox });
     }
     if (fieldMetadata.type === 'mediaMultiple') {
-        return SolidMediaMultipleColumn({ solidListViewMetaData, fieldMetadata, column });
+        return SolidMediaMultipleColumn({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox });
     }
     if (fieldMetadata.type === 'selectionStatic') {
         return SolidSelectionStaticColumn({ solidListViewMetaData, fieldMetadata, column });

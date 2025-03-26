@@ -19,42 +19,42 @@ interface KanbanCardProps {
   index: number;
 }
 
-  // Render columns dynamically based on metadata
-  const renderFieldsDynamically = (field:any, data:any, solidKanbanViewMetaData: any) => {
-    if (!solidKanbanViewMetaData) {
-      return;
-    }
-    
-    const solidView = solidKanbanViewMetaData.solidView;
-    const solidFieldsMetadata = solidKanbanViewMetaData.solidFieldsMetadata;
-    if (!solidView || !solidFieldsMetadata) {
-      return;
-    }
-      const fieldMetadata = solidFieldsMetadata[field.attrs.name];
-      const fieldLayout = field;
-    return SolidKanbanViewFields({solidKanbanViewMetaData,fieldMetadata,fieldLayout ,data});
-    // return solidView.layout.children?.map((column: any) => {
-    //   const fieldMetadata = solidFieldsMetadata[column.attrs.name];
-    //   if (!fieldMetadata) {
-    //     return;
-    //   }
+// Render columns dynamically based on metadata
+const renderFieldsDynamically = (field: any, data: any, solidKanbanViewMetaData: any, setLightboxUrls?: any, setOpenLightbox?: any) => {
+  if (!solidKanbanViewMetaData) {
+    return;
+  }
 
-    //   return SolidKanbanViewFields({ solidKanbanViewMetaData, fieldMetadata, column });
+  const solidView = solidKanbanViewMetaData.solidView;
+  const solidFieldsMetadata = solidKanbanViewMetaData.solidFieldsMetadata;
+  if (!solidView || !solidFieldsMetadata) {
+    return;
+  }
+  const fieldMetadata = solidFieldsMetadata[field.attrs.name];
+  const fieldLayout = field;
+  return SolidKanbanViewFields({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data, setLightboxUrls, setOpenLightbox });
+  // return solidView.layout.children?.map((column: any) => {
+  //   const fieldMetadata = solidFieldsMetadata[column.attrs.name];
+  //   if (!fieldMetadata) {
+  //     return;
+  //   }
 
-    // });
-  };
+  //   return SolidKanbanViewFields({ solidKanbanViewMetaData, fieldMetadata, column });
 
-const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index }) => {
+  // });
+};
+
+const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, setLightboxUrls, setOpenLightbox }) => {
 
   const SolidRow = ({ children, attrs }: any) => {
     const className = attrs.className;
     return (
       <div className={`row ${className}`}>
         <div className="s_group">
-          <fieldset>
+          <div>
             {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
             <div className="grid">{children}</div>
-          </fieldset>
+          </div>
         </div>
       </div>
     );
@@ -64,10 +64,10 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
     return (
       <div className={`${className}`}>
         <div className="s_group">
-          <fieldset>
+          <div>
             {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
             <div className="grid">{children}</div>
-          </fieldset>
+          </div>
         </div>
 
       </div>
@@ -78,10 +78,10 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
     return (
       <div className={`${className}`}>
         <div className="s_group">
-          <fieldset>
+          <div>
             {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
             <div className="grid">{children}</div>
-          </fieldset>
+          </div>
         </div>
 
       </div>
@@ -90,7 +90,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
 
   const SolidField = ({ field, data, solidKanbanViewMetaData }: any) => {
 
-    return renderFieldsDynamically(field, data,solidKanbanViewMetaData)
+    return renderFieldsDynamically(field, data, solidKanbanViewMetaData, setLightboxUrls, setOpenLightbox)
     // switch (solidKanbanViewMetaData[field.attrs.name].type) {
     //   case "mediaSingle":
     //     return <img src=""></img>
@@ -158,6 +158,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
           {...provided.draggableProps}
           {...provided.dragHandleProps}
           style={{ marginBottom: "1rem", ...provided.draggableProps.style }}
+          className="kanban-card-container"
         >
           {/* <p className="kanban-card-heading">{data.title}</p> */}
           {/* <p className="kanban-card-content">{data.content}</p> */}

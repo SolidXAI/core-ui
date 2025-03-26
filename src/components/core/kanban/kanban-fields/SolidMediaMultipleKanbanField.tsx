@@ -8,7 +8,7 @@ import { Document, Page, pdfjs } from "react-pdf";
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 
-const SolidMediaMultipleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data }: SolidKanbanViewFieldsParams) => {
+const SolidMediaMultipleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data, setLightboxUrls, setOpenLightbox }: SolidKanbanViewFieldsParams) => {
     // const filterable = column.attrs.filterable;
     const [visible, setVisible] = useState(false);
     const header = fieldMetadata.displayName;
@@ -29,7 +29,15 @@ const SolidMediaMultipleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata,
                 return (
                     <>
                         <div>
-                            {file.mimeType.startsWith("image/") && <img src={file.url} alt={header} />}
+                            {file.mimeType.startsWith("image/") &&
+                                <img src={file.url}
+                                    onClick={(event) => {
+                                        event.stopPropagation();
+                                        setLightboxUrls([{ src: file.url }]);
+                                        setOpenLightbox(true);
+                                    }}
+                                    className='image-preview'
+                                    alt={header} />}
                             {/* Render PDF - Open Lightbox on Click */}
                             {file.mimeType.includes("pdf") && (
                                 <>

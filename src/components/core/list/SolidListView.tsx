@@ -37,7 +37,12 @@ import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
 import ListImage from '../../../resources/images/layout/images/cozy.png';
 import KanbanImage from '../../../resources/images/layout/images/kanban.png';
-import {  capitalize } from "lodash";
+import { capitalize } from "lodash";
+import Lightbox from "yet-another-react-lightbox";
+import Counter from "yet-another-react-lightbox/plugins/counter";
+import Download from "yet-another-react-lightbox/plugins/download";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/counter.css";
 
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -164,7 +169,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       if (fieldMetadata.type === 'relation' && fieldMetadata.relationType === 'many-to-one') {
         toPopulate.push(fieldMetadata.name);
       }
-      if (fieldMetadata.type === 'mediaSingle' || fieldMetadata.relationType === 'mediaMultiple') {
+      if (fieldMetadata.type === 'mediaSingle' || fieldMetadata.type === 'mediaMultiple') {
         toPopulateMedia.push(fieldMetadata.name);
       }
     }
@@ -209,7 +214,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [showArchived, setShowArchived] = useState(false);
 
   const sizeOptions = [
-    { label: 'Compact', value: 'small', image: CompactImage},
+    { label: 'Compact', value: 'small', image: CompactImage },
     { label: 'Cozy', value: 'normal', image: CozyImage },
     { label: 'Comfortable', value: 'large', image: ComfortableImage }
   ]
@@ -220,8 +225,8 @@ export const SolidListView = (params: SolidListViewParams) => {
   // ]
 
   const [size, setSize] = useState<string | any>(sizeOptions[1].value);
-  const [viewModes, setViewModes] = useState<string | any>();
-  
+  const [viewModes, setViewModes] = useState<any>([]);
+
 
 
   // Custom Row Action
@@ -251,8 +256,8 @@ export const SolidListView = (params: SolidListViewParams) => {
   useEffect(() => {
     if (solidListViewMetaData) {
       const createActionUrl = solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction && solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.type === "custom" ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.customComponent : "form/new";
-      const editActionUrl = solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction && solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.type === "custom" ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.customComponent : "form";
-      const viewModes = solidListViewMetaData?.data?.solidView?.layout?.attrs.allowedViews.map((view) => {return { label: capitalize(view), value: view }});
+      const editActionUrl = solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction && solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.type === "custom" ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.customComponent : "form";    
+      const viewModes = solidListViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews && solidListViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.length > 0 && solidListViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view } });
       setViewModes(viewModes);
       if (createActionUrl) {
         setCreateButtonUrl(createActionUrl)
@@ -494,6 +499,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           onClick={(e) =>
           // @ts-ignore 
           {
+            e.stopPropagation();
             op.current.toggle(e);
             setSelectedSolidViewData(solidViewData)
           }
@@ -601,6 +607,9 @@ export const SolidListView = (params: SolidListViewParams) => {
     setSelectedRecoverRecords([]);
   }
 
+  const [openLightbox, setOpenLightbox] = useState(false);
+  const [lightboxUrls, setLightboxUrls] = useState({});
+
   // Render columns dynamically based on metadata
   const renderColumnsDynamically = (solidListViewMetaData: any) => {
     if (!solidListViewMetaData) {
@@ -620,7 +629,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         return;
       }
 
-      return SolidListViewColumn({ solidListViewMetaData, fieldMetadata, column });
+      return SolidListViewColumn({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox });
 
     });
   };
@@ -635,11 +644,14 @@ export const SolidListView = (params: SolidListViewParams) => {
   }
 
 
+  const listViewTitle = solidListViewMetaData?.data?.solidView?.displayName
+
   return (
     <div className="page-parent-wrapper">
       <div className="page-header">
         <Toast ref={toast} />
         <div className="flex gap-3 align-items-center">
+          <p className="m-0 view-title">{listViewTitle}</p>
           {solidListViewMetaData?.data?.solidView?.layout?.attrs?.enableGlobalSearch === true && params.embeded === false &&
             <SolidGlobalSearchElement filters={filters} clearFilter={clearFilter} ref={solidGlobalSearchElementRef} viewData={solidListViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}></SolidGlobalSearchElement>
           }
@@ -655,6 +667,17 @@ export const SolidListView = (params: SolidListViewParams) => {
               onClick={() => params.handlePopUpOpen("new")}
             ></Button>
           }
+          {/* Button For Manual Refresh */}
+          <Button
+            type="button"
+            size="small"
+            icon="pi pi-refresh"
+            severity="secondary"
+            outlined
+            onClick={() => {
+              setQueryString(first, rows, sortField, sortOrder, filters);
+            }}
+          />
           {showArchived && <Button type="button" icon="pi pi-refresh" label="Recover" size='small' severity="secondary"
             onClick={() => setRecoverDialogVisible(true)}
           ></Button>}
@@ -713,6 +736,22 @@ export const SolidListView = (params: SolidListViewParams) => {
           paginatorClassName="solid-paginator"
           paginatorTemplate="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink"
           currentPageReportTemplate="{first} - {last} of {totalRecords}"
+          onRowClick={(e) => {
+            const rowData = e.data;
+            if (
+              !(
+                actionsAllowed.includes(updatePermission(params.modelName)) &&
+                solidListViewMetaData?.data?.solidView?.layout?.attrs?.edit !== false
+              )
+            ) {
+              return;
+            }
+            if (params.embeded == true) {
+              params.handlePopUpOpen(rowData?.id);
+            } else {
+              router.push(`${editButtonUrl}/${rowData?.id}`);
+            }
+          }}
         >
 
           <Column selectionMode="multiple" headerStyle={{ width: "3em" }} />
@@ -721,7 +760,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           {actionsAllowed.includes(`${updatePermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.edit !== false &&
             <Column frozen alignFrozen="right" body={(rowData) => (
               rowData?.deletedAt ? (
-                <a onClick={() => recoverById(rowData.id)} className="retrieve-button">
+                <a onClick={(event) => { event.stopPropagation(); recoverById(rowData.id) }} className="retrieve-button">
                   <i className="pi pi-refresh" style={{ fontSize: "1rem" }} />
                 </a>
               ) :
@@ -840,6 +879,14 @@ export const SolidListView = (params: SolidListViewParams) => {
           </div>
         </div>
       </Dialog>
+      {openLightbox &&
+        <Lightbox
+          open={openLightbox}
+          plugins={[Counter, Download]}
+          close={() => setOpenLightbox(false)}
+          slides={lightboxUrls}
+        />
+      }
     </div>
   );
 };

@@ -108,20 +108,22 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
               optionLabel='name'
               optionValue='value'
               placeholder="Select Field"
-              className='w-full'
+              className='w-full p-inputtext-sm'
             />
           </div>
           <div className='col-8'>
-            <div className='formgrid grid'>
+            <div className='formgrid grid w-full'>
               {rule.fieldName ?
-                <SolidFilterFields viewData={viewData} fieldMetadata={viewData.data.solidFieldsMetadata[rule.fieldName]} onChange={onChange} index={rule.id} rule={rule}></SolidFilterFields>
+                <div className='col-12'>
+                  <SolidFilterFields viewData={viewData} fieldMetadata={viewData.data.solidFieldsMetadata[rule.fieldName]} onChange={onChange} index={rule.id} rule={rule}></SolidFilterFields>
+                </div>
                 : <>
                   <div className='col-6'>
                     <InputText
                       disabled
                       value={rule.value || ''}
                       placeholder="operator"
-                      className='w-full'
+                      className='w-full p-inputtext-sm'
                     />
                   </div>
                   <div className='col-6'>
@@ -129,7 +131,7 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
                       disabled
                       value={rule.value || ''}
                       placeholder="value"
-                      className='w-full'
+                      className='w-full p-inputtext-sm'
                     />
                   </div>
                 </>
@@ -155,7 +157,7 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
       </div>
 
       {rule.children && rule.children.map(nestedRule => (
-        <div className='p-3 nested-custom-filter' key={nestedRule.id}>
+        <div className='py-3 nested-custom-filter' key={nestedRule.id}>
           {nestedRule.type === FilterRuleType.RULE
             ? <FilterRuleComponent key={nestedRule.id} viewData={viewData} fields={fields} rule={nestedRule} onChange={onChange} onAddRule={onAddRule} onAddGroup={onAddGroup} onDelete={onDelete} level={level + 1} />
             : <FilterGroupComponent key={nestedRule.id} viewData={viewData} fields={fields} group={nestedRule} onChange={onChange} onAddRule={onAddRule} onAddGroup={onAddGroup} onDelete={onDelete} level={level + 1} />
@@ -393,8 +395,9 @@ const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, transf
           level={0} // Top-level group
         />
       ))}
-      <div className='text-left mt-3'>
-        <Button label="Apply" size="small" onClick={() => transformFilterRules(filterRules)} type="submit" className="small-button" />
+      <div className='flex gap-3 mt-3'>
+        <Button label="Apply" size="small" onClick={() => transformFilterRules(filterRules)} type="submit" />
+        <Button type='button' label='Cancel' outlined size='small' onClick={closeDialog} />
         {/* 
         <br></br>
         <textarea value={printedState} readOnly rows={20} cols={100} style={{ marginTop: '20px' }} /> */}

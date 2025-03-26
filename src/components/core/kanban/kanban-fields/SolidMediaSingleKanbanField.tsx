@@ -11,7 +11,7 @@ import { Dialog } from "primereact/dialog";
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
 
-const SolidMediaSingleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data }: SolidKanbanViewFieldsParams) => {
+const SolidMediaSingleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data, setLightboxUrls, setOpenLightbox }: SolidKanbanViewFieldsParams) => {
     const [visible, setVisible] = useState(false);
     const header = fieldMetadata.displayName;
     const url = data && data._media && data._media[fieldMetadata.name].length > 0 && data._media[fieldMetadata.name].map((i: any) => i._full_url)[0];
@@ -19,10 +19,18 @@ const SolidMediaSingleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, f
     // const mimeType: string = "excel";
     // const url = "http://localhost:8080/media-files-storage/Holiday List 2025.pdf";
     // const url = "http://localhost:8080/media-files-storage/PF Form.xls";
-    
+
     return (
         <>
-            {mimeType.startsWith("image/") && <img style={{maxWidth: "100px"}} src={url} alt={header} />}
+            {mimeType.startsWith("image/") &&
+                <img className='image-preview'
+                    src={url}
+                    onClick={(event) => {
+                        event.stopPropagation();
+                        setLightboxUrls([{ src: url }]);
+                        setOpenLightbox(true);
+                    }} 
+                    alt={header} />}
 
             {/* Render PDF - Open Lightbox on Click */}
             {mimeType.includes("pdf") && (

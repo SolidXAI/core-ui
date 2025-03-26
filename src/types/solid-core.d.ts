@@ -67,6 +67,7 @@ export type LayoutAttribute = {
     label?: string;
     className?: string;
     inlineCreate?: string;
+    renderMode?: string;
 };
 
 // Generic representation of any node in our layout 
@@ -78,7 +79,7 @@ export type LayoutNode = {
 };
 
 // Event type
-export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender";
+export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender" | "onFormDataLoad" | "onFormLayoutLoad";
 export type SolidUiEvent = {
     type: SolidUiEvents;
     modifiedField?: string;
@@ -89,10 +90,31 @@ export type SolidUiEvent = {
     fieldsMetadata: FieldsMetadata;
 };
 
+export type SolidLoadForm = {
+    type: SolidUiEvents;
+    formData: Record<string, any>;
+    viewMetadata: SolidView;
+    fieldsMetadata: FieldsMetadata;
+}
+
 export type SolidFormWidgetProps = {
     field: any;
     // This comes from Formik...
     formData: Record<string, any>;
     viewMetadata: SolidView;
     fieldsMetadata: FieldsMetadata;
+};
+
+export type SolidRelationManyToManyFieldWidgetProps = {
+    formik: any;
+    fieldContext?: SolidFieldProps;
+};
+
+export type SolidBooleanFieldWidgetProps = {
+    formik: any;
+    fieldContext?: SolidFieldProps;
+};
+export type SolidSelectionStaticFieldWidgetProps = {
+    formik: any;
+    fieldContext?: SolidFieldProps;
 };

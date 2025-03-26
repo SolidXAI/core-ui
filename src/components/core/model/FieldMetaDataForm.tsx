@@ -1032,7 +1032,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
   useEffect(() => {
     const fetchFields = async () => {
       const queryData: any = {
-        limit: 10,
+        limit: 100,
         offset: 0,
         filters: {
           singularName: {
@@ -1044,14 +1044,15 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
       const queryString = qs.stringify(queryData, {
         encodeValuesOnly: true,
       });
-
       const result = await triggerGetModels(queryString).unwrap();
 
       if (result && result.records) {
         if (!result?.records[0]?.userKeyField) {
           setUserKeyFields(true);
-          const fieldsWithUnique = result?.records[0]?.fields?.filter((field: any) => field?.unique === true);
-          setUserKeyData(fieldsWithUnique)
+          const validUserKeyFields = result?.records[0]?.fields?.filter(
+            (field: any) => field?.unique === true && field?.type === 'shortText'
+          );
+          setUserKeyData(validUserKeyFields)
         } else {
           setUserKeyFields(false);
           setUserKeyData([]);
@@ -1151,10 +1152,9 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                   }
                   {fieldMetaData ?
 
-                    <div className="form-wrapper-title text-base">{capitalize(modelMetaData?.displayName)} &gt; {capitalize(fieldMetaData?.displayName)}</div>
-
+                    <div className="form-wrapper-title text-base">Edit {capitalize(fieldMetaData?.displayName)}</div>
                     :
-                    <div className="form-wrapper-title text-base">Add New Field to {capitalize(modelMetaData?.displayName)}</div>
+                    <div className="form-wrapper-title text-base">Add New {selectedType?.label && !showTypeFilter && capitalize(selectedType.label)} Field to {capitalize(modelMetaData?.displayName)}</div>
                   }
                 </div>
                 <div className="flex align-items-center gap-3 close-popup">
@@ -1171,15 +1171,13 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
               modelMetaData={modelMetaData}
             ></FieldSelector>
             :
-            <div className="field-popup-form" >
+            <div className="p-4" style={{ maxHeight: '80vh', overflowY: 'auto', overflowX: 'hidden' }}>
               <div className="p-d-flex p-jc-center creat-field-for form-dem">
                 <div className="p-fluid" style={{ position: 'relative' }}>
-                  <div className="mb-3">
+                  {/* <div className="mb-3">
                     <div className="form-wrapper-title">{fieldMetaData ? `Edit ${capitalize(selectedType.label)} Field` : `Add a new ${capitalize(selectedType.label)} Field`}</div>
-                  </div>
-
-
-                  <TabView>
+                  </div> */}
+                  <TabView panelContainerClassName="px-0">
                     <TabPanel
                       header="Basic Info"
                       className={(formik.touched.hasOwnProperty("name") && formik.errors.hasOwnProperty("name")) || (formik.touched.hasOwnProperty("displayName") && formik.errors.hasOwnProperty("displayName")) || (formik.touched.hasOwnProperty("displayName") && formik.errors.hasOwnProperty("ormType")) ? "tab-error-heading" : ""}
@@ -1869,7 +1867,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             )}
 
                           {isUserKeyFields && (
-                            <div className="field col-6 flex-flex-column gap-2">
+                            <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="userKey"
                                 className="form-field-label"
@@ -2924,12 +2922,12 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                       )}
                     </TabPanel>
                   </TabView>
-                  <div className="flex gap-3 justify-content-between">
-                    <div className="flex align-items-center gap-3 mt-3">
-                      <Button label="Cancel" size="small" severity="secondary" type="reset" onClick={() => setVisiblePopup(false)} outlined className="small-button" />
+                  <div className="flex gap-3">
+                    <div>
+                      <Button label="Finish" size="small" onClick={() => showError()} type="submit"  />
                     </div>
-                    <div className="flex align-items-center gap-3 mt-3">
-                      <Button label="Finish" size="small" onClick={() => showError()} type="submit" className="small-button" />
+                    <div>
+                      <Button label="Cancel" size="small" severity="secondary" type="reset" onClick={() => setVisiblePopup(false)} outlined  />
                     </div>
                   </div>
                 </div>
@@ -2952,13 +2950,13 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
         headerClassName="text-center"
         modal
         footer={() => (
-          <div className="flex justify-content-center">
-            <Button label="Yes" icon="pi pi-check" className='small-button' type="reset" severity="danger" autoFocus onClick={() => {
+          <div className="flex gap-3">
+            <Button label="Yes" icon="pi pi-check" size="small" type="reset" severity="danger" autoFocus onClick={() => {
               formik.resetForm()
               setIsBackPopupVisible(false);
               setShowTypeFilter(true);
             }} />
-            <Button label="No" icon="pi pi-times" className='small-button' onClick={() => setIsBackPopupVisible(false)} />
+            <Button label="No" icon="pi pi-times" size="small" onClick={() => setIsBackPopupVisible(false)} />
           </div>
         )}
         onHide={() => setIsBackPopupVisible(false)}

@@ -37,7 +37,10 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
 import { SolidUiEvent } from "@/types";
 import { getExtensionComponent, getExtensionFunction } from "@/helpers/registry";
-import { SolidFormWidgetProps } from "@/types/solid-core";
+import { SolidFormWidgetProps, SolidLoadForm } from "@/types/solid-core";
+import { SolidPasswordField } from "./fields/SolidPasswordField";
+import { SolidEmailField } from "./fields/SolidEmailField";
+import { Panel } from "primereact/panel";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -90,7 +93,7 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps): ISolidField 
     if (type === 'longText') {
         return new SolidLongTextField(fieldContext);
     }
-    if (type === 'int' || type === 'bigint' ) {
+    if (type === 'int' || type === 'bigint') {
         return new SolidIntegerField(fieldContext);
     }
     if (type === 'decimal' || type === 'float') {
@@ -128,6 +131,12 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps): ISolidField 
     }
     if (type === 'mediaMultiple') {
         return new SolidMediaMultipleField(fieldContext);
+    }
+    if (type === 'password') {
+        return new SolidPasswordField(fieldContext);
+    }
+    if (type === 'email') {
+        return new SolidEmailField(fieldContext);
     }
     return null;
 }
@@ -203,6 +212,8 @@ const SolidColumn = ({ children, attrs }: any) => {
     const className = attrs.className;
 
     return (
+        // first fieldset ui
+
         // <div className={`${className}`}>
         //     <div className="s_group">
         //         <fieldset>
@@ -210,15 +221,31 @@ const SolidColumn = ({ children, attrs }: any) => {
         //             <div className="grid">{children}</div>
         //         </fieldset>
         //     </div>
+        // </div>
 
+        //second fieldset ui
+        // <div className={`${className}`}>
+        //     {attrs.label && <p>{attrs.label}</p>}
+        //     <div className="grid">{children}</div>
         // </div>
-        <div className={`${className}`}>
-            {attrs.label && <p>{attrs.label}</p>}
-            <div className="grid">{children}</div>
-        </div>
-        // <div className="formgrid grid">
-        //     {children}
-        // </div>
+
+        //figma fieldset ui
+        attrs.label ?
+            <div className={`${className}`}>
+                <Panel header={attrs.label} className="solid-column-panel">
+                    <div className="grid">{children}</div>
+                </Panel>
+                {/* <div className="p-fieldset">
+                    <div className="solid-fieldset-header">
+                        <div>{attrs.label}</div>
+                    </div>
+                    <div className="grid solid-fieldset-content">{children}</div>
+                </div> */}
+            </div>
+            :
+            <div className={`${className}`}>
+                <div className="grid">{children}</div>
+            </div>
     );
 };
 
@@ -391,17 +418,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
     } = useGetSolidViewLayoutQuery(formViewMetaDataQs);
 
     useEffect(() => {
-        if (solidFormViewMetaData) {
-            setFormViewMetaData(solidFormViewMetaData);
-            if (params.customLayout) {
-                setFormViewLayout(params.customLayout);
-            } else {
-                setFormViewLayout(solidFormViewMetaData.data.solidView.layout);
-            }
-        }
-    }, [solidFormViewMetaData]);
-
-    useEffect(() => {
         if (
             isEntityCreateSuccess == true ||
             isEntityUpdateSuceess == true ||
@@ -478,6 +494,15 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const errorMessages = Object.values(errors);
     };
 
+    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
+        toast.current?.show({
+            severity,
+            summary,
+            detail,
+            life: 3000,
+        });
+    };
+
     const onFormikSubmit = async (values: any) => {
         const solidView = solidFormViewMetaData.data.solidView;
         const solidFieldsMetadata = solidFormViewMetaData.data.solidFieldsMetadata;
@@ -510,10 +535,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 params.customCreateHandler(formData);
             } else {
                 if (params.id === 'new') {
-                    createEntity(formData);
+                    // createEntity(formData);
+                    const result = await createEntity(formData).unwrap();
+                    showToast("success", "Form saved", "Form saved successfully!");
+                    const updatedUrl = pathname.replace("new", result?.data?.id);
+                    router.push(updatedUrl);
                 }
                 else {
-                    updateEntity({ id: +params.id, data: formData });
+                    // updateEntity({ id: +params.id, data: formData });
+                    await updateEntity({ id: +params.id, data: formData }).unwrap();
+                    // const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
+                    showToast("success", "Form Updated", "Form updated successfully!");
                 }
             }
 
@@ -536,11 +568,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         // errorFields.length = 0;
     };
-    useEffect(() => {
-        if (errorFields?.length > 0) {
-            showFieldError();
-        }
-    }, [errorFields])
+    // useEffect(() => {
+    //     if (errorFields?.length > 0) {
+    //         showFieldError();
+    //     }
+    // }, [errorFields])
 
     // - - - - - - - - - - - -- - - - - - - - - - - - DATA here
     // Fetch the actual data here. 
@@ -582,11 +614,76 @@ const SolidFormView = (params: SolidFormViewProps) => {
         }
     }, [formViewDataQs])
 
+    useEffect(() => {
+        if (solidFormViewMetaData) {
+            let formLayout = solidFormViewMetaData; 
+            const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormLayoutLoad;
+            let DynamicFunctionComponent = null;
+            const event: SolidLoadForm = {
+                fieldsMetadata: solidFormViewMetaData,
+                formData: solidFormViewData?.data,
+                type: dynamicHeader,
+                viewMetadata: solidFormViewMetaData?.data?.solidView
+            }
+            if (dynamicHeader) {
+                DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
+                if (DynamicFunctionComponent) {
+                    const updatedFormLayout = DynamicFunctionComponent(event);
+                    if (updatedFormLayout && updatedFormLayout?.layoutChanged && updatedFormLayout?.newLayout) {
+                        const newFormLayout = {
+                            ...formLayout,
+                            data : {
+                                ...formLayout.data,
+                                solidView: {
+                                    ...formLayout.data.solidView,
+                                    layout: updatedFormLayout.newLayout
+                                }
+                            }
+                        };
+                        formLayout = newFormLayout;
+                    }
+                }
+            }
+            setFormViewMetaData(formLayout);
+            if (params.customLayout) {
+                setFormViewLayout(params.customLayout);
+            } else {
+                setFormViewLayout(formLayout.data.solidView.layout);
+            }
+        }
+    }, [solidFormViewMetaData, solidFormViewData]);
 
     useEffect(() => {
-        if (solidFormViewData) {
-            setInitialEntityData(solidFormViewData.data);
-        }
+        const handleDynamicFunction = async () => {
+            if (solidFormViewData) {
+                const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormDataLoad;
+    
+                let DynamicFunctionComponent = null;
+                let formViewData = solidFormViewData?.data;
+    
+                const event: SolidLoadForm = {
+                    fieldsMetadata: solidFormViewMetaData,
+                    formData: solidFormViewData?.data,
+                    type: dynamicHeader,
+                    viewMetadata: solidFormViewMetaData?.data?.solidView
+                };
+    
+                if (dynamicHeader) {
+                    DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
+    
+                    if (DynamicFunctionComponent) {
+                        const updatedFormData = await DynamicFunctionComponent(event);
+    
+                        if (updatedFormData && updatedFormData?.dataChanged && updatedFormData?.newFormData) {
+                            formViewData = updatedFormData.newFormData;
+                        }
+                    }
+                }
+                setInitialEntityData(formViewData);
+            }
+        };
+    
+        handleDynamicFunction();
     }, [solidFormViewData]);
 
     let formik: FormikObject;
@@ -683,7 +780,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
                     // Invoke the dynamic change handler: 
                     // TODO: encapsulate in try/catch, catch the exception render in the UI as an error & stop form rendering.
-                    const updatedFormInfo = dynamicChangeHandler(event);
+                    const updatedFormInfo = await dynamicChangeHandler(event);
                     // console.log(`${eventType}: formFieldOnXXX response received: `, updatedFormInfo);
 
                     // If dataChanged is true, update Formik values
@@ -955,6 +1052,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     {params.embeded !== true &&
                                         actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
                                         !formViewLayout.attrs.readonly &&
+                                        formik.dirty &&
                                         <div>
                                             <Button
                                                 label="Save"
@@ -1078,7 +1176,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             </>
                         )}
                     </div>
-                    <SolidBreadcrumb />
+                    {params.embeded !== true &&
+                        <SolidBreadcrumb
+                            solidViewData={solidFormViewMetaData?.data?.solidView?.model}
+                            initialEntityData={initialEntityData}
+                        />
+                    }
                     {/* {params.embeded !== true &&
                         <div className="solid-form-stepper">
                             <SolidFormStepper />

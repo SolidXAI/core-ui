@@ -112,8 +112,8 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
           <Messages ref={msgs} />
         </div>
         :
-        <div>
-          <div className="flex justify-content-end mb-4">
+        <>
+          <div className="absolute" style={{top: -3, right: 0}}>
             {/* <h3>All Fields</h3> */}
             {modelMetaData.isSystem !== true &&
               <Button
@@ -135,7 +135,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
               />
             }
           </div>
-          <DataTable value={fieldMetaData} dataKey="id"
+          <DataTable value={fieldMetaData.filter((item: any) => item.isMarkedForRemoval !== true)} dataKey="id"
             tableStyle={{ minWidth: '50rem' }} size="small">
             <Column field="displayName" header="Display Name" headerClassName="table-header-fs"></Column>
             <Column field="name" header="Name" headerClassName="table-header-fs"></Column>
@@ -182,7 +182,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
           >
             <p>If there is data against this model this operation might not work and manual intervention will be required</p>
           </Dialog>
-        </div >
+        </>
       }
     </>
 

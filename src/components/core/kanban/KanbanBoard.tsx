@@ -24,7 +24,7 @@ interface ApiResponse {
     };
 }
 
-export const KanbanBoard = ({ kanbanViewData, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLinPagination }: any) => {
+export const KanbanBoard = ({ groupedView, kanbanViewData, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLinPagination ,setLightboxUrls, setOpenLightbox }: any) => {
     const [loading, setLoading] = useState<boolean>(true);
     // State to manage the folded status of each column
     const [foldedStates, setFoldedStates] = useState<Record<string, boolean>>({});
@@ -102,17 +102,22 @@ export const KanbanBoard = ({ kanbanViewData, solidKanbanViewMetaData, setKanban
                     return (
                         <KanbanColumn
                             key={data.groupName}
+                            groupedView={groupedView}
                             groupByField={data.groupName}
                             group={group}
                             solidKanbanViewMetaData={solidKanbanViewMetaData}
                             groupData={data.groupData.records}
                             toggleFold={toggleFold}
                             handleLoadMore={handleLoadMore}
+                            setLightboxUrls={setLightboxUrls}
+                             setOpenLightbox={setOpenLightbox}
                         />
                     );
                 })}
-                <div className="kanban-load-more-folded">
-                    <a className="kaban-load-more" onClick={handleSwimLinPagination}>load More</a></div>
+                {groupedView !== false &&
+                    <div className="kanban-load-more-folded">
+                        <a className="kaban-load-more" onClick={handleSwimLinPagination}>load More</a></div>
+                }
             </div>
         </DragDropContext>
     );

@@ -23,7 +23,9 @@ export type SolidKanbanViewFieldsParams = {
     solidKanbanViewMetaData: any;
     fieldMetadata: any,
     fieldLayout: any,
-    data: any
+    data: any,
+    setLightboxUrls?: any,
+        setOpenLightbox?:any
 };
 
 export const getNumberOfInputs = (matchMode: any): number | null => {
@@ -71,7 +73,7 @@ export const getNumberOfInputs = (matchMode: any): number | null => {
 //     }
 // };
 
-export const SolidKanbanViewFields = ({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data }: SolidKanbanViewFieldsParams) => {
+export const SolidKanbanViewFields = ({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data, setLightboxUrls, setOpenLightbox }: SolidKanbanViewFieldsParams) => {
 
     // And finally we can implement additional switching logic based on certain special fields. 
     if (fieldMetadata.name === 'id') {
@@ -91,7 +93,7 @@ export const SolidKanbanViewFields = ({ solidKanbanViewMetaData, fieldMetadata, 
         return SolidDecimalKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
     }
     if (fieldMetadata.type === 'shortText') {
-        return SolidShortTextKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidShortTextKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data,setLightboxUrls, setOpenLightbox });
     }
     if (fieldMetadata.type === 'longText') {
         return SolidLongTextKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
@@ -115,10 +117,10 @@ export const SolidKanbanViewFields = ({ solidKanbanViewMetaData, fieldMetadata, 
         return SolidRelationKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
     }
     if (fieldMetadata.type === 'mediaSingle') {
-        return SolidMediaSingleKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidMediaSingleKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data ,setLightboxUrls, setOpenLightbox});
     }
     if (fieldMetadata.type === 'mediaMultiple') {
-        return SolidMediaMultipleKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidMediaMultipleKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data,setLightboxUrls, setOpenLightbox });
     }
     if (fieldMetadata.type === 'selectionStatic') {
         return SolidSelectionStaticKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });

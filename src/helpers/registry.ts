@@ -1,5 +1,14 @@
+import hanldeEmailFormTypeChange from "@/components/core/extension/solid-core/emailTemplate/emailFormTypeChangeHandler";
+import hanldeEmailFormTypeLoad from "@/components/core/extension/solid-core/emailTemplate/emailFormTypeLoad";
+import { RolePermissionsManyToManyFieldWidget } from "@/components/core/extension/solid-core/roleMetadata/RolePermissionsManyToManyFieldWidget";
+import { SolidRelationManyToManyAutocompleteWidget } from "@/components/core/form/fields/relations/widgets/SolidRelationManyToManyAutocompleteWidget";
+import { SolidRelationManyToManyCheckboxWidget } from "@/components/core/form/fields/relations/widgets/SolidRelationManyToManyCheckboxWidget";
 import { CustomHtml } from "@/components/core/form/widgets/CustomHtml";
 import React from "react";
+import { SolidBooleanFieldCheckboxWidget } from "@/components/core/form/fields/widgets/SolidBooleanCheckboxFieldWidget";
+import { SolidBooleanFieldSelectWidget } from "@/components/core/form/fields/widgets/SolidBooleanSelectFieldWidget";
+import { SolidSelectionStaticAutocompleteWidget } from "@/components/core/form/fields/widgets/SolidSelectionStaticAutocompleteFieldWidget";
+import { SolidSelectionStaticRadioWidget } from "@/components/core/form/fields/widgets/SolidSelectionStaticRadioFieldWidget";
 
 type ExtensionRegistry = {
     components: Record<string, React.ComponentType<any>>;
@@ -11,9 +20,13 @@ const extensionRegistry: ExtensionRegistry = {
     functions: {},
 };
 
-export const registerExtensionComponent = (name: string, component: React.ComponentType<any>) => {
+export const registerExtensionComponent = (name: string, component: React.ComponentType<any>, aliases: string[] = []) => {
     // console.log(`registerExtensionComponent invoked... ${name}`);
     extensionRegistry.components[name] = component;
+    for (let i = 0; i < aliases.length; i++) {
+        const alias = aliases[i];
+        extensionRegistry.components[alias] = component;
+    }
 };
 
 export const registerExtensionFunction = (name: string, fn: (...args: any[]) => any) => {
@@ -55,10 +68,24 @@ export const getExtensionFunction = (name: string) => {
 
 // Register all the dynamic widget & functions from inside solid-core-ui
 // Common
-registerExtensionComponent("CustomHtml", CustomHtml);
+registerExtensionComponent("CustomHtml", CustomHtml, []);
+registerExtensionComponent("SolidRelationManyToManyCheckboxWidget", SolidRelationManyToManyCheckboxWidget, ["checkbox"]);
+registerExtensionComponent("SolidRelationManyToManyAutocompleteWidget", SolidRelationManyToManyAutocompleteWidget, ["autocomplete"]);
+registerExtensionComponent("SolidBooleanFieldCheckboxWidget", SolidBooleanFieldCheckboxWidget, ["field-checkbox"]);
+registerExtensionComponent("SolidBooleanFieldSelectWidget", SolidBooleanFieldSelectWidget, ["field-selectbox"]);
+registerExtensionComponent("SolidSelectionStaticAutocompleteWidget", SolidSelectionStaticAutocompleteWidget, ["field-autocomplete"]);
+registerExtensionComponent("SolidSelectionStaticRadioWidget", SolidSelectionStaticRadioWidget, ["field-radio"]);
 
 
 // ModuleMetadata
 
 
 // ModelMetadata
+
+
+// Email Template
+registerExtensionFunction("emailFormTypeChangeHandler", hanldeEmailFormTypeChange);
+registerExtensionFunction("emailFormTypeLoad", hanldeEmailFormTypeLoad);
+
+// RoleMetadata
+registerExtensionComponent("RolePermissionsManyToManyFieldWidget", RolePermissionsManyToManyFieldWidget, ["inputSwitch"]);

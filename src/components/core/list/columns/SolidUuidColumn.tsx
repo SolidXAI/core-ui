@@ -4,6 +4,7 @@ import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { FormEvent } from "primereact/ts-helpers";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
+import SolidTableRowCell from '../SolidTableRowCell';
 
 const SolidUuidColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
@@ -27,14 +28,16 @@ const SolidUuidColumn = ({ solidListViewMetaData, fieldMetadata, column }: Solid
             </SolidVarInputsFilterElement>
         )
     }
+
+    const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
     return (
         <Column
             key={fieldMetadata.name}
             field={fieldMetadata.name}
-            header={header}
-            className="text-sm"
+            // header={header}
+            // className="text-sm"
             sortable={column.attrs.sortable}
             // filter={filterable}
             dataType={columnDataType}
@@ -42,8 +45,17 @@ const SolidUuidColumn = ({ solidListViewMetaData, fieldMetadata, column }: Solid
             filterMatchModeOptions={filterMatchModeOptions}
             filterElement={filterTemplate}
             filterPlaceholder={`Search by ${fieldMetadata.displayName}`}
-            style={{ minWidth: "12rem" }}
-            headerClassName="table-header-fs"
+            // style={{ minWidth: "12rem" }}
+            // headerClassName="table-header-fs"
+            header={() => {
+                return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace:'nowrap', textOverflow:'ellipsis', overflow:'hidden'}}>{header}</div>)
+            }}
+            body={(rowData) => (
+                <SolidTableRowCell
+                    value={rowData[fieldMetadata.name]}
+                    truncateAfter={truncateAfter}
+                />
+            )}
         ></Column>
     );
 

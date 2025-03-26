@@ -53,7 +53,7 @@ export class SolidTimeField implements ISolidField {
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
         const readOnlyPermission = this.fieldContext.readOnly;
-        
+
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
         const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
@@ -61,33 +61,37 @@ export class SolidTimeField implements ISolidField {
 
         return (
             <div className={className}>
-                <div className="flex flex-column gap-2 mt-4">
-                    {showFieldLabel != false &&
-                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                <div className="relative">
+                    <div className="flex flex-column gap-2 mt-4">
+                        {showFieldLabel != false &&
+                            <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                                {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                                {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
+                            </label>
+                        }
+                        <Calendar
+                            disabled={formDisabled || fieldDisabled || readOnlyPermission}
+                            ref={calendarRef} // Attach ref to Calendar
+                            id={fieldLayoutInfo.attrs.name}
+                            aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
+                            onChange={formik.handleChange}
+                            //@ts-ignore
+                            value={formik.values[fieldLayoutInfo.attrs.name] ? formik.values[fieldLayoutInfo.attrs.name] : Date()}
+                            // dateFormat="mm/dd/yy"
+                            // placeholder="mm/dd/yyyy hh:mm"
+                            hideOnDateTimeSelect
+                            timeOnly
+                            showTime className=""
+                            hourFormat="24"
 
-                            {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                        </label>
-                    }
-                    <Calendar
-                        disabled={formDisabled || fieldDisabled || readOnlyPermission}
-                        ref={calendarRef} // Attach ref to Calendar
-                        id={fieldLayoutInfo.attrs.name}
-                        aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                        onChange={formik.handleChange}
-                        //@ts-ignore
-                        value={formik.values[fieldLayoutInfo.attrs.name] ? formik.values[fieldLayoutInfo.attrs.name] : Date()}
-                        // dateFormat="mm/dd/yy"
-                        // placeholder="mm/dd/yyyy hh:mm"
-                        hideOnDateTimeSelect
-                        timeOnly
-                        showTime className=""
-                        hourFormat="24"
-
-                    />
+                        />
+                    </div>
+                    {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                        <div className="absolute mt-1">
+                            <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                        </div>
+                    )}
                 </div>
-                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                )}
             </div>
         );
     }

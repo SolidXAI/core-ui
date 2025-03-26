@@ -4,8 +4,9 @@ import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { FormEvent } from "primereact/ts-helpers";
 import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
+import SolidTableRowCell from '../SolidTableRowCell';
 
-const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {    
+const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
     const showFilterOperator = false;
     const columnDataType = 'text';
@@ -36,13 +37,14 @@ const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column }: 
         )
     };
 
+    const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter
     const header = column.attrs.label ?? fieldMetadata.displayName;
-        
+
     return (
         <Column
             key={fieldMetadata.name}
             field={fieldMetadata.name}
-            header={header}
+            // header={header}
             // className="text-sm"
             sortable={column.attrs.sortable}
             // filter={filterable}
@@ -51,12 +53,39 @@ const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column }: 
             filterMatchModeOptions={filterMatchModeOptions}
             filterElement={filterTemplate}
             filterPlaceholder={`Search by ${fieldMetadata.displayName}`}
-            style={{ minWidth: "12rem" }}
-            headerClassName="table-header-fs"
-            body={(rowData) => {
-                return <div className="solid-table-row">{rowData[fieldMetadata.name]}</div>;
+            // style={{ minWidth: "12rem" }}
+            // headerClassName="table-header-fs"
+            header={() => {
+                return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{header}</div>)
             }}
-        ></Column>
+            body={(rowData) => {
+                const renderMode = column.attrs.renderMode || "text";
+                const data = rowData;
+              
+                if (renderMode === "text") {
+                    return <SolidTableRowCell
+                        value={rowData[fieldMetadata.name]}
+                        truncateAfter={truncateAfter}
+                    />
+                } else {
+                    return (
+                        <img
+                        src={data[fieldMetadata.name]}
+                        alt="product-image-single"
+                        className="shadow-2 border-round"
+                        width={40}
+                        height={40}
+                        style={{ objectFit: "cover" }}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                             setLightboxUrls([{ src: data[fieldMetadata.name], downloadUrl: data[fieldMetadata.name] }]);
+                            setOpenLightbox(true);
+                        }}
+                    />
+                    );
+                }
+            }}
+        ></Column >
     );
 
 };

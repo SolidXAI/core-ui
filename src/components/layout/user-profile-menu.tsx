@@ -100,16 +100,17 @@ const UserProfileMenu = () => {
           </div>
         </OverlayPanel>
       </div>
-      <Dialog header="Logout" headerClassName="py-2" contentClassName="px-0 pb-0" visible={confirmLogout} style={{ width: '20vw' }} onHide={() => { if (!confirmLogout) return; setConfirmLogout(false); }}>
+      <Dialog header="Logout" headerClassName="py-2" contentClassName="px-0 pb-0" visible={confirmLogout} style={{ width: '20vw' }} onHide={() => { if (!confirmLogout) return; setConfirmLogout(false); }}
+        footer={<div className="flex align-items-center gap-2">
+          <Button label="Logout" size="small" onClick={e => logoutHandler()} />
+          <Button label="Cancel" size="small" onClick={() => setConfirmLogout(false)} outlined />
+        </div>}
+      >
         <Divider className="m-0" />
         <div className="p-4">
           <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
             Are you sure you want to log out?
           </p>
-          <div className="flex align-items-center gap-2 mt-3">
-            <Button label="Logout" size="small" onClick={e => logoutHandler()} />
-            <Button label="Cancel" size="small" onClick={() => setConfirmLogout(false)} outlined />
-          </div>
         </div>
       </Dialog>
     </div>
