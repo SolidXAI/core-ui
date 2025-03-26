@@ -2886,3 +2886,22 @@ li.header-li-px {
     top: 14% !important;
   }
 }
+
+.kanban-ungrouped-column {
+  max-width: 100%;
+}
+
+.kanban-ungrouped-column-content {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.kanban-ungrouped-column .kanban-card-container {
+  flex: 1 1 calc(20% - 10px);
+  max-width: calc(20% - 10px);
+}
+
+.image-preview{
+  max-width: 100px;
+}

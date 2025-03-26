@@ -36,6 +36,7 @@ import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
 import ListImage from '../../../resources/images/layout/images/cozy.png';
 import KanbanImage from '../../../resources/images/layout/images/kanban.png';
+import { capitalize } from "lodash";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import Download from "yet-another-react-lightbox/plugins/download";
@@ -212,6 +213,22 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [editButtonUrl, setEditButtonUrl] = useState<string>();
   const [showArchived, setShowArchived] = useState(false);
 
+  const sizeOptions = [
+    { label: 'Compact', value: 'small', image: CompactImage },
+    { label: 'Cozy', value: 'normal', image: CozyImage },
+    { label: 'Comfortable', value: 'large', image: ComfortableImage }
+  ]
+
+  // const viewModes = [
+  //   { label: 'List ', value: 'list', image: ListImage },
+  //   { label: 'Kanban', value: 'kanban', image: KanbanImage },
+  // ]
+
+  const [size, setSize] = useState<string | any>(sizeOptions[1].value);
+  const [viewModes, setViewModes] = useState<any>([]);
+
+
+
   // Custom Row Action
   const [listViewRowActionPopupState, setListViewRowActionPopupState] = useState(false);
   const [listViewRowActionData, setListRowActionData] = useState<any>();
@@ -239,7 +256,9 @@ export const SolidListView = (params: SolidListViewParams) => {
   useEffect(() => {
     if (solidListViewMetaData) {
       const createActionUrl = solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction && solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.type === "custom" ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.customComponent : "form/new";
-      const editActionUrl = solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction && solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.type === "custom" ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.customComponent : "form";
+      const editActionUrl = solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction && solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.type === "custom" ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.customComponent : "form";    
+      const viewModes = solidListViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews && solidListViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.length > 0 && solidListViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view } });
+      setViewModes(viewModes);
       if (createActionUrl) {
         setCreateButtonUrl(createActionUrl)
       }
@@ -624,19 +643,6 @@ export const SolidListView = (params: SolidListViewParams) => {
     setListViewRowActionPopupState(false)
   }
 
-  const sizeOptions = [
-    { label: 'Compact', value: 'small', image: CompactImage },
-    { label: 'Cozy', value: 'normal', image: CozyImage },
-    { label: 'Comfortable', value: 'large', image: ComfortableImage }
-  ]
-
-  const viewModes = [
-    { label: 'List ', value: 'list', image: ListImage },
-    { label: 'Kanban', value: 'kanban', image: KanbanImage },
-  ]
-
-  const [size, setSize] = useState<string | any>(sizeOptions[1].value);
-  const [view, setView] = useState<string | any>(viewModes[0].value);
 
   const listViewTitle = solidListViewMetaData?.data?.solidView?.displayName
 
@@ -686,8 +692,6 @@ export const SolidListView = (params: SolidListViewParams) => {
               setSize={setSize}
               size={size}
               viewModes={viewModes}
-              setView={setView}
-              view={view}
               params={params}
               actionsAllowed={actionsAllowed}
               selectedRecords={selectedRecords}

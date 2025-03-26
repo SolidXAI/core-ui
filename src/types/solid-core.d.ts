@@ -118,3 +118,7 @@ export type SolidSelectionStaticFieldWidgetProps = {
     formik: any;
     fieldContext?: SolidFieldProps;
 };
+
+export type SolidShortTextImageRenderModeWidgetProps = {
+data: string;
+}

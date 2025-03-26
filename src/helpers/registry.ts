@@ -9,6 +9,8 @@ import { SolidBooleanFieldCheckboxWidget } from "@/components/core/form/fields/w
 import { SolidBooleanFieldSelectWidget } from "@/components/core/form/fields/widgets/SolidBooleanSelectFieldWidget";
 import { SolidSelectionStaticAutocompleteWidget } from "@/components/core/form/fields/widgets/SolidSelectionStaticAutocompleteFieldWidget";
 import { SolidSelectionStaticRadioWidget } from "@/components/core/form/fields/widgets/SolidSelectionStaticRadioFieldWidget";
+import { SolidShortTextFieldTextRenderModeWidget } from "@/components/core/list/widgets/SolidShortTextFieldTextRenderModeWidget copy";
+import { SolidShortTextFieldImageRenderModeWidget } from "@/components/core/list/widgets/SolidShortTextFieldImageRenderModeWidget";
 
 type ExtensionRegistry = {
     components: Record<string, React.ComponentType<any>>;
@@ -75,6 +77,8 @@ registerExtensionComponent("SolidBooleanFieldCheckboxWidget", SolidBooleanFieldC
 registerExtensionComponent("SolidBooleanFieldSelectWidget", SolidBooleanFieldSelectWidget, ["field-selectbox"]);
 registerExtensionComponent("SolidSelectionStaticAutocompleteWidget", SolidSelectionStaticAutocompleteWidget, ["field-autocomplete"]);
 registerExtensionComponent("SolidSelectionStaticRadioWidget", SolidSelectionStaticRadioWidget, ["field-radio"]);
+registerExtensionComponent("SolidShortTextFieldTextRenderModeWidget", SolidShortTextFieldTextRenderModeWidget, []);
+registerExtensionComponent("SolidShortTextFieldImageRenderModeWidget", SolidShortTextFieldImageRenderModeWidget, []);
 
 
 // ModuleMetadata

@@ -13,20 +13,7 @@ interface FilterColumns {
     name: string;
     key: string;
 }
-export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, setView, view, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
-    console.log("check listviewmetadata", listViewMetaData);
-    // This contains the layout.
-    if (!listViewMetaData) {
-        return;
-    }
-    if (!listViewMetaData.data) {
-        return;
-    }
-
-    const solidView = listViewMetaData?.data?.solidView;
-
-    // This is a key value map of field name vs field metadata.
-    const solidFieldsMetadata = listViewMetaData?.data?.solidFieldsMetadata;
+export const SolidListViewConfigure = ({ setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, setView, view, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
 
     // const [visible, setVisible] = useState<boolean>(false);
     const op = useRef(null);
@@ -51,28 +38,23 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
         return () => document.removeEventListener("click", handleClickOutside);
     }, [isOverlayOpen])
 
-    // TODO: change this to be an array of fields from the solidView.layout.children
-    // TODO: loop over children from layout and create name & key for name you can use the solidFieldsMetadata[name].displayName
-
-    if (!solidView || !solidFieldsMetadata) {
-        return;
-    }
-
-    const solidListColumns: FilterColumns[] = solidView?.layout?.children?.map((column: { attrs: { name: string } }) => ({
-        name: solidFieldsMetadata[column?.attrs?.name]?.displayName,
-        key: column?.attrs?.name,
-    }));
-    const [selectedColumns, setSelectedColumns] = useState<FilterColumns[]>([]);
+    const categories: FilterColumns[] = [
+        { name: 'ID', key: 'A' },
+        { name: 'Tracker Date', key: 'M' },
+        { name: 'Production', key: 'P' },
+        { name: 'Research', key: 'R' }
+    ];
+    const [selectedCategories, setSelectedCategories] = useState<FilterColumns[]>([categories[1]]);
 
     const onCategoryChange = (e: CheckboxChangeEvent) => {
-        let _selectedColumns = [...selectedColumns];
+        let _selectedCategories = [...selectedCategories];
 
         if (e.checked)
-            _selectedColumns.push(e.value);
+            _selectedCategories.push(e.value);
         else
-            _selectedColumns = _selectedColumns.filter(column => column.key !== e.value.key);
+            _selectedCategories = _selectedCategories.filter(category => category.key !== e.value.key);
 
-        setSelectedColumns(_selectedColumns);
+        setSelectedCategories(_selectedCategories);
     };
 
     return (
@@ -150,7 +132,7 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
                         }}
                     >
                         <div className="solid-layout-accordion">
-                            <Accordion multiple expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up" activeIndex={[2]}>
+                            <Accordion multiple expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up" activeIndex={2}>
                                 <AccordionTab header="Switch Type">
                                     <div className="flex flex-column gap-1 p-1">
                                         {viewModes.map((option: any) => (
@@ -203,19 +185,19 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
                                 <AccordionTab header="Column Selector">
                                     <div className="flex flex-column gap-1 p-1">
                                         <div className="flex flex-column gap-3 px-3 cogwheel-column-filter">
-                                            {solidListColumns.map((column) => {
+                                            {categories.map((category) => {
                                                 return (
-                                                    <div key={column.key} className="flex align-items-center gap-1">
+                                                    <div key={category.key} className="flex align-items-center gap-1">
                                                         <Checkbox
-                                                            inputId={column.key}
-                                                            name="column"
-                                                            value={column}
+                                                            inputId={category.key}
+                                                            name="category"
+                                                            value={category}
                                                             onChange={onCategoryChange}
-                                                            checked={selectedColumns.some((item) => item.key === column.key)}
+                                                            checked={selectedCategories.some((item) => item.key === category.key)}
                                                             className="text-base"
                                                         />
-                                                        <label htmlFor={column.key} className="ml-2 text-base">
-                                                            {column.name}
+                                                        <label htmlFor={category.key} className="ml-2 text-base">
+                                                            {category.name}
                                                         </label>
                                                     </div>
                                                 );

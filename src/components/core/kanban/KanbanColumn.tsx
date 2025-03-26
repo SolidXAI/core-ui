@@ -24,81 +24,86 @@ interface GroupData {
 }
 
 interface KanbanColumnProps {
+  groupedView: boolean;
   groupByField: string;
   group: Group;
   groupData: GroupData[];
   toggleFold: (groupByField: string) => void;
   handleLoadMore: (groupByField: string) => void;
+  setLightboxUrls: any,
+  setOpenLightbox: any
 }
 
-const KanbanColumn = ({ groupByField, solidViewMetaData, group, groupData, toggleFold, handleLoadMore }: KanbanColumnProps) => {
+const KanbanColumn = ({ groupedView, groupByField, solidKanbanViewMetaData, group, groupData, toggleFold, handleLoadMore, setLightboxUrls, setOpenLightbox }: KanbanColumnProps) => {
   const op = useRef<any>(null);
 
 
   return (
-    <div className={group.folded ? "kanban-column kanban-column-folded" : "kanban-column"}>
-      <div className="kaban-heading-area">
-        {group.folded &&
-          <a onClick={e => toggleFold(groupByField)}>
-            <div className="flex align-items-center">
-              <div className="kanban-arrow-icon-container">
-                <i className="pi pi-sort-up-fill"></i>
-                <i className="pi pi-sort-down-fill"></i>
+    <div className={group.folded ? (groupedView === false ? "kanban-column kanban-ungrouped-column kanban-column-folded" : "kanban-column kanban-column-folded") : (groupedView === false ? "kanban-column kanban-ungrouped-column" : "kanban-column")}>
+      {groupedView !== false &&
+        <div className="kaban-heading-area">
+          {group.folded &&
+            <a onClick={e => toggleFold(groupByField)}>
+              <div className="flex align-items-center">
+                <div className="kanban-arrow-icon-container">
+                  <i className="pi pi-sort-up-fill"></i>
+                  <i className="pi pi-sort-down-fill"></i>
+                </div>
+                <p className="kanban-group-heading">{`${group.label}`}<span className="count">{group.count}</span></p>
               </div>
+            </a>
+          }
+
+          {!group.folded &&
+            <div className="flex align-items-center">
               <p className="kanban-group-heading">{`${group.label}`}<span className="count">{group.count}</span></p>
             </div>
-          </a>
-        }
+          }
+          {!group.folded &&
+            <a onClick={(e: any) => op?.current?.toggle(e)}>
+              < i className="pi pi-cog" />
+            </a>
+          }
+          <OverlayPanel ref={op} className="kanban-options-panel">
 
-        {!group.folded &&
-          <div className="flex align-items-center">
-            <p className="kanban-group-heading">{`${group.label}`}<span className="count">{group.count}</span></p>
-          </div>
-        }
-        {!group.folded &&
-          <a onClick={(e: any) => op?.current?.toggle(e)}>
-            < i className="pi pi-cog" />
-          </a>
-        }
-        <OverlayPanel ref={op} className="kanban-options-panel">
-
-          <div
-            className="w-full md:w-10rem p-menu p-component"
-            data-pc-name="menu"
-            data-pc-section="root"
-          >
-            <ul
-              className="p-menu-list p-reset"
-              id="pr_id_11_list"
-              role="menu"
-              data-pc-section="menu"
+            <div
+              className="w-full md:w-10rem p-menu p-component"
+              data-pc-name="menu"
+              data-pc-section="root"
             >
-              <li
-                className="p-menuitem"
-                role="menuitem"
-                data-pc-section="menuitem"
-                data-p-focused="false"
-                data-p-disabled="false"
+              <ul
+                className="p-menu-list p-reset"
+                id="pr_id_11_list"
+                role="menu"
+                data-pc-section="menu"
               >
-                <button className="p-menuitem-link w-full p-link flex align-items-center pl-2 text-color hover:surface-200 border-noround">
-                  <div
-                    className="mr-2 p-avatar p-component p-avatar-image p-avatar-circle"
-                    data-pc-name="avatar"
-                    data-pc-section="root"
-                  >
-                  </div>
-                  <div className="flex flex-column align">
+                <li
+                  className="p-menuitem"
+                  role="menuitem"
+                  data-pc-section="menuitem"
+                  data-p-focused="false"
+                  data-p-disabled="false"
+                >
+                  <button className="p-menuitem-link w-full p-link flex align-items-center pl-2 text-color hover:surface-200 border-noround">
+                    <div
+                      className="mr-2 p-avatar p-component p-avatar-image p-avatar-circle"
+                      data-pc-name="avatar"
+                      data-pc-section="root"
+                    >
+                    </div>
+                    <div className="flex flex-column align">
 
-                    <a className="flex align-items-center p-menuitem-link" onClick={e => { toggleFold(groupByField); op?.current?.toggle(e) }}>
-                      <span className="">Fold</span>
-                    </a>
-                  </div>
-                </button>
-              </li>
-            </ul>
-          </div>
-        </OverlayPanel>
-      </div>
+                      <a className="flex align-items-center p-menuitem-link" onClick={e => { toggleFold(groupByField); op?.current?.toggle(e) }}>
+                        <span className="">Fold</span>
+                      </a>
+                    </div>
+                  </button>
+                </li>
+              </ul>
+            </div>
+          </OverlayPanel>
+        </div>
+      }
       {!group.folded && (
         <Droppable droppableId={groupByField}>
           {(provided: DroppableProvided) => (
@@ -106,12 +111,13 @@ const KanbanColumn = ({ groupByField, solidViewMetaData, group, groupData, toggl
               ref={provided.innerRef}
               {...provided.droppableProps}
               style={{ minHeight: "100px" }}
+              className={groupedView === false && "kanban-ungrouped-column-content"}
             >
               {groupData.map((data, index) => (
-                <KanbanCard key={data.id} data={data} solidViewMetaData={solidViewMetaData} index={index} />
+                <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} />
               ))}
               {provided.placeholder}
-              {group.count > 0 &&
+              {group.count > 0 && (group.count > (group.limit * group.currentPage)) &&
                 <a
                   className="load-more-button"
                   onClick={() => handleLoadMore(groupByField)}

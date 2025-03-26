@@ -92,7 +92,7 @@ export const SolidListViewColumn = ({ solidListViewMetaData, fieldMetadata, colu
         return SolidDecimalColumn({ solidListViewMetaData, fieldMetadata, column });
     }
     if (fieldMetadata.type === 'shortText') {
-        return SolidShortTextColumn({ solidListViewMetaData, fieldMetadata, column });
+        return SolidShortTextColumn({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox });
     }
     if (fieldMetadata.type === 'longText') {
         return SolidLongTextColumn({ solidListViewMetaData, fieldMetadata, column });
