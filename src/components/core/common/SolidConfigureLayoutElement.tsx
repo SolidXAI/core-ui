@@ -157,9 +157,9 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                                         ))}
                                     </div>
                                 </AccordionTab>
-                                <AccordionTab header="List">
+                                <AccordionTab header="Row Spacing">
                                     <div className="flex flex-column gap-1 p-1">
-                                        <p className="m-0 px-3">Row Spacing</p>
+                                        {/* <p className="m-0 px-3">Row Spacing</p> */}
                                         {sizeOptions.map((option: any) => (
                                             <div key={option.value} className={`flex align-items-center ${option.value === size ? 'solid-active-view' : 'solid-view'}`}>
                                                 <RadioButton
