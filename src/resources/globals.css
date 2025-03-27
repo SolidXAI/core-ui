@@ -2547,7 +2547,7 @@ li.header-li-px {
   background-color: transparent;
 }
 
-.solid-layout-accordion .p-accordion-tab:first-child {
+.solid-layout-accordion .p-accordion-tab:not(:last-child) {
   border-bottom: 1px solid var(--primary-light-color);
 }
 

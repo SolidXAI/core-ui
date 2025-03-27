@@ -10,11 +10,27 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { RadioButton } from "primereact/radiobutton";
 import { useEffect, useRef, useState } from "react";
 
+interface FieldMetadata {
+    displayName: string;
+}
+
 interface FilterColumns {
     name: string;
     key: string;
+    isChecked: boolean;
 }
-export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
+export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
+    if (!listViewMetaData) {
+        return;
+    }
+    if (!listViewMetaData.data) {
+        return;
+    }
+
+    const solidView = listViewMetaData?.data?.solidView;
+
+    // This is a key value map of field name vs field metadata.
+    const solidFieldsMetadata = listViewMetaData?.data?.solidFieldsMetadata as Record<string, FieldMetadata>;
 
     // const [visible, setVisible] = useState<boolean>(false);
     const op = useRef(null);
@@ -39,7 +55,7 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
             }
         }
     }, [])
-    
+
 
     const [isOverlayOpen, setIsOverlayOpen] = useState(false);
     useEffect(() => {
@@ -61,23 +77,30 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
         return () => document.removeEventListener("click", handleClickOutside);
     }, [isOverlayOpen])
 
-    const categories: FilterColumns[] = [
-        { name: 'ID', key: 'A' },
-        { name: 'Tracker Date', key: 'M' },
-        { name: 'Production', key: 'P' },
-        { name: 'Research', key: 'R' }
-    ];
-    const [selectedCategories, setSelectedCategories] = useState<FilterColumns[]>([categories[1]]);
+    if (!solidView || !solidFieldsMetadata) {
+        return;
+    }
+
+    const checkedFieldNames = new Set(solidView.layout.children.map((col: { attrs: { name: string } }) => col.attrs.name));
+
+
+    const solidListColumns: FilterColumns[] = Object.entries(solidFieldsMetadata).map(([key, field]) => ({
+        name: field.displayName,
+        key,
+        isChecked: checkedFieldNames.has(key),
+    }));
+
+    const [selectedColumns, setSelectedColumns] = useState<FilterColumns[]>(solidListColumns.filter(col => col.isChecked));
 
     const onCategoryChange = (e: CheckboxChangeEvent) => {
-        let _selectedCategories = [...selectedCategories];
+        let _selectedColumns = [...selectedColumns];
 
         if (e.checked)
-            _selectedCategories.push(e.value);
+            _selectedColumns.push(e.value);
         else
-            _selectedCategories = _selectedCategories.filter(category => category.key !== e.value.key);
+            _selectedColumns = _selectedColumns.filter(column => column.key !== e.value.key);
 
-        setSelectedCategories(_selectedCategories);
+        setSelectedColumns(_selectedColumns);
     };
 
     return (
@@ -110,8 +133,8 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                         <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base" />
                         {/* <Button text icon='pi pi-share-alt' label="Share" size="small" severity="secondary" className="text-left gap-2" /> */}
                         {/* {viewData?.data?.solidView?.model?.enableSoftDelete &&
-                            <Button text severity="secondary" size="small" className="text-left w-13rem" label={showArchived ? "Hide Archived Records" : "Show Archived Records"} iconPos="left" onClick={() => { setShowArchived(!showArchived); }} />
-                        } */}
+                        <Button text severity="secondary" size="small" className="text-left w-13rem" label={showArchived ? "Hide Archived Records" : "Show Archived Records"} iconPos="left" onClick={() => { setShowArchived(!showArchived); }} />
+                    } */}
                         {viewData?.data?.solidView?.model?.enableSoftDelete && (
                             <div className="flex align-items-center px-3 gap-2 mt-2 mb-1">
                                 <Checkbox
@@ -154,9 +177,10 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                             setTimeout(() => setIsOverlayOpen(false), 50); // ✅ Ensure state updates
                         }}
                     >
-                        {viewModes && viewModes.length > 0 &&
-                            <div className="solid-layout-accordion">
-                                <Accordion multiple expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up">
+
+                        <div className="solid-layout-accordion">
+                            <Accordion multiple expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up" activeIndex={[2]}>
+                                {viewModes && viewModes.length > 0 &&
                                     <AccordionTab header="Switch Type">
                                         <div className="flex flex-column gap-1 p-1">
                                             {viewModes.map((option: any) => (
@@ -172,75 +196,73 @@ export const SolidConfigureLayoutElement = ({ setShowArchived, showArchived, vie
                                                     <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
                                                         {option.label}
                                                         {/* <Image
-                                                            src={option.image}
-                                                            alt={option.value}
-                                                            fill
-                                                            className='relative row-spacing-img'
-                                                        /> */}
+                                                        src={option.image}
+                                                        alt={option.value}
+                                                        fill
+                                                        className='relative row-spacing-img'
+                                                    /> */}
                                                     </label>
                                                 </div>
                                             ))}
                                         </div>
                                     </AccordionTab>
-                                    <AccordionTab header="List">
-                                        <div className="flex flex-column gap-1 p-1">
-                                            <p className="m-0 px-3">Row Spacing</p>
-                                            {sizeOptions.map((option: any) => (
-                                                <div key={option.value} className={`flex align-items-center ${option.value === size ? 'solid-active-view' : 'solid-view'}`}>
-                                                    <RadioButton
-                                                        inputId={option.value}
-                                                        name="sizes"
-                                                        value={option.value}
-                                                        onChange={(e) => setSize(e.value)}
-                                                        checked={option.value === size}
+                                }
+                                <AccordionTab header="Row Spacing">
+                                    <div className="flex flex-column gap-1 p-1flex flex-column gap-1 p-1">
+                                        {/* <p className="m-0 px-3">Row Spacing</p> */}
+                                        {sizeOptions.map((option: any) => (
+                                            <div key={option.value} className={`flex align-items-center ${option.value === size ? 'solid-active-view' : 'solid-view'}`}>
+                                                <RadioButton
+                                                    inputId={option.value}
+                                                    name="sizes"
+                                                    value={option.value}
+                                                    onChange={(e) => setSize(e.value)}
+                                                    checked={option.value === size}
+                                                />
+                                                <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
+                                                    {option.label}
+                                                    <Image
+                                                        src={option.image}
+                                                        alt={option.value}
+                                                        fill
+                                                        className='relative row-spacing-img'
                                                     />
-                                                    <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
-                                                        {option.label}
-                                                        <Image
-                                                            src={option.image}
-                                                            alt={option.value}
-                                                            fill
-                                                            className='relative row-spacing-img'
-                                                        />
-                                                    </label>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </AccordionTab>
-                                </Accordion>
-                            </div>
-                        }
-                        <Divider className="m-0" />
-                        <div className="pl-3 pt-3 flex align-items-center justify-content-between">
-                            <p className="m-0">Column Selector</p>
-                            {/* <Button text label="Save Layout" icon="pi pi-plus" /> */}
-                        </div>
-                        <div className="flex flex-column gap-3 p-3 cogwheel-column-filter">
-                            {categories.map((category) => {
-                                return (
-                                    <div key={category.key} className="flex align-items-center gap-1">
-                                        <Checkbox
-                                            inputId={category.key}
-                                            name="category"
-                                            value={category}
-                                            onChange={onCategoryChange}
-                                            checked={selectedCategories.some((item) => item.key === category.key)}
-                                            className="text-base"
-                                        />
-                                        <label htmlFor={category.key} className="ml-2 text-base">
-                                            {category.name}
-                                        </label>
+                                                </label>
+                                            </div>
+                                        ))}
                                     </div>
-                                );
-                            })}
-                        </div>
-                        <Divider className="m-0" />
-                        <div className="p-3 flex gap-2">
-                            <Button label="Apply" size="small" />
-                            <Button outlined label="Cancel" size="small"
-                                // @ts-ignore
-                                onClick={(e) => op.current.hide(e)}
-                            />
+                                </AccordionTab>
+                                <AccordionTab header="Column Selector">
+                                    <div className="flex flex-column gap-1 p-1">
+                                        <div className="flex flex-column gap-3 px-3 cogwheel-column-filter">
+                                            {solidListColumns.map((column) => {
+                                                return (
+                                                    <div key={column.key} className="flex align-items-center gap-1">
+                                                        <Checkbox
+                                                            inputId={column.key}
+                                                            name="column"
+                                                            value={column}
+                                                            onChange={onCategoryChange}
+                                                            checked={selectedColumns.some((item) => item.key === column.key)}
+                                                            className="text-base"
+                                                        />
+                                                        <label htmlFor={column.key} className="ml-2 text-base">
+                                                            {column.name}
+                                                        </label>
+                                                    </div>
+                                                );
+                                            })}
+                                        </div>
+                                        <div className="p-3 flex gap-2">
+                                            <Button label="Apply" size="small" />
+                                            <Button outlined label="Cancel" size="small"
+                                                // @ts-ignore
+                                                onClick={(e) => op.current.hide(e)}
+                                            />
+                                        </div>
+                                    </div>
+                                </AccordionTab>
+                            </Accordion>
                         </div>
                     </OverlayPanel>
                 </div>

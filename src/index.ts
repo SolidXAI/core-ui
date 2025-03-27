@@ -222,7 +222,7 @@ export { SolidFormStepper } from '@/components/common/SolidFormStepper'
 export { SolidViewLayoutManager } from '@/components/core/common/SolidViewLayoutManager';
 
 // export { SolidListViewOptions } from '@/components/core/common/SolidListViewOptions';
-export { SolidConfigureLayoutElement } from '@/components/core/common/SolidConfigureLayoutElement';
+export { SolidListViewConfigure } from '@/components/core/list/SolidListViewConfigure';
 export { SolidCreateButton } from '@/components/core/common/SolidCreateButton';
 export { SolidGlobalSearchElement } from '@/components/core/common/SolidGlobalSearchElement';
 export { SolidSearchBox } from '@/components/core/common/SolidSearchBox';

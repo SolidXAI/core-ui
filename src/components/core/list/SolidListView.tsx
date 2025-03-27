@@ -27,7 +27,6 @@ import { useRouter } from "next/navigation";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@/components/core/common/FilterComponent";
 import { SolidLayoutViews } from '../common/SolidLayoutViews'
-import { SolidConfigureLayoutElement } from '../common/SolidConfigureLayoutElement'
 import { FilterIcon } from '../../modelsComponents/filterIcon';
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Toast } from "primereact/toast";
@@ -43,6 +42,7 @@ import Counter from "yet-another-react-lightbox/plugins/counter";
 import Download from "yet-another-react-lightbox/plugins/download";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
+import { SolidListViewConfigure } from "./SolidListViewConfigure";
 
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -256,7 +256,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   useEffect(() => {
     if (solidListViewMetaData) {
       const createActionUrl = solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction && solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.type === "custom" ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.customComponent : "form/new";
-      const editActionUrl = solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction && solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.type === "custom" ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.customComponent : "form";    
+      const editActionUrl = solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction && solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.type === "custom" ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.customComponent : "form";
       const viewModes = solidListViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews && solidListViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.length > 0 && solidListViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view } });
       setViewModes(viewModes);
       if (createActionUrl) {
@@ -683,7 +683,8 @@ export const SolidListView = (params: SolidListViewParams) => {
           ></Button>}
 
           {params.embeded === false && (solidListViewMetaData?.data?.solidView?.layout?.attrs?.configureView !== false) &&
-            <SolidConfigureLayoutElement
+            <SolidListViewConfigure
+              listViewMetaData={listViewMetaData}
               setShowArchived={setShowArchived}
               showArchived={showArchived}
               viewData={solidListViewMetaData}
@@ -695,7 +696,7 @@ export const SolidListView = (params: SolidListViewParams) => {
               actionsAllowed={actionsAllowed}
               selectedRecords={selectedRecords}
               setDialogVisible={setDialogVisible}
-            ></SolidConfigureLayoutElement>
+            />
           }
 
         </div>
@@ -890,4 +891,3 @@ export const SolidListView = (params: SolidListViewParams) => {
     </div>
   );
 };
-

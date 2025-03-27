@@ -15,7 +15,6 @@ import { useEffect, useRef, useState } from "react";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import KanbanBoard from "./KanbanBoard";
-import { SolidConfigureLayoutElement } from "../common/SolidConfigureLayoutElement";
 import CompactImage from '../../../resources/images/layout/images/compact.png';
 import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
@@ -667,7 +666,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           }
         </div>
 
-        <SolidConfigureLayoutElement
+        {/* <SolidListViewConfigure
           setShowArchived={setShowArchived}
           showArchived={showArchived}
           viewData={solidKanbanViewMetaData}
@@ -679,7 +678,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           actionsAllowed={actionsAllowed}
           selectedRecords={selectedRecords}
           setDialogVisible={setDialogVisible}
-        ></SolidConfigureLayoutElement>
+        ></SolidListViewConfigure> */}
         {/* <SolidConfigureLayoutElement></SolidConfigureLayoutElement> */}
 
       </div>
