@@ -2914,6 +2914,7 @@
     background: #1f2937;
     color: rgba(255, 255, 255, 0.87);
     transition: box-shadow 0.2s;
+    cursor: pointer;
   }
 
   .p-datatable .p-datatable-tbody>tr>td {

@@ -2864,7 +2864,7 @@
     border-width: 1px 0 1px 0;
     font-weight: 600;
     color: #374151;
-    background: #F5F5F5;
+    background: #FFFFFF;
     transition: box-shadow 0.2s;
   }
 
@@ -2905,7 +2905,7 @@
   }
 
   .p-datatable .p-sortable-column:not(.p-highlight):not(.p-sortable-disabled):hover {
-    background: #F5F5F5;
+    background: #FFF;
     color: #374151;
   }
 
@@ -2914,7 +2914,7 @@
   }
 
   .p-datatable .p-sortable-column.p-highlight {
-    background: #F5F5F5;
+    background: #FFFFFF;
     color: #4c1b94;
   }
 
@@ -2923,7 +2923,7 @@
   }
 
   .p-datatable .p-sortable-column.p-highlight:not(.p-sortable-disabled):hover {
-    background: #F5F5F5;
+    background: #FFFFFF;
     color: #4c1b94;
   }
 
@@ -2940,6 +2940,7 @@
     background: #ffffff;
     color: #4B4D52;
     transition: box-shadow 0.2s;
+    cursor: pointer;
   }
 
   .p-datatable .p-datatable-tbody>tr>td {

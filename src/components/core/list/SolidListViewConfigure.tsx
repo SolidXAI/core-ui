@@ -10,9 +10,14 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { RadioButton } from "primereact/radiobutton";
 import { useEffect, useRef, useState } from "react";
 
+interface FieldMetadata {
+    displayName: string;
+}
+
 interface FilterColumns {
     name: string;
     key: string;
+    isChecked: boolean;
 }
 export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
     if (!listViewMetaData) {
@@ -25,7 +30,7 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
     const solidView = listViewMetaData?.data?.solidView;
 
     // This is a key value map of field name vs field metadata.
-    const solidFieldsMetadata = listViewMetaData?.data?.solidFieldsMetadata;
+    const solidFieldsMetadata = listViewMetaData?.data?.solidFieldsMetadata as Record<string, FieldMetadata>;
 
     // const [visible, setVisible] = useState<boolean>(false);
     const op = useRef(null);
@@ -76,11 +81,16 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
         return;
     }
 
-    const solidListColumns: FilterColumns[] = solidView?.layout?.children?.map((column: { attrs: { name: string } }) => ({
-        name: solidFieldsMetadata[column?.attrs?.name]?.displayName,
-        key: column?.attrs?.name,
+    const checkedFieldNames = new Set(solidView.layout.children.map((col: { attrs: { name: string } }) => col.attrs.name));
+
+
+    const solidListColumns: FilterColumns[] = Object.entries(solidFieldsMetadata).map(([key, field]) => ({
+        name: field.displayName,
+        key,
+        isChecked: checkedFieldNames.has(key),
     }));
-    const [selectedColumns, setSelectedColumns] = useState<FilterColumns[]>([]);
+
+    const [selectedColumns, setSelectedColumns] = useState<FilterColumns[]>(solidListColumns.filter(col => col.isChecked));
 
     const onCategoryChange = (e: CheckboxChangeEvent) => {
         let _selectedColumns = [...selectedColumns];
