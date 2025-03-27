@@ -391,12 +391,12 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
         "Relation Model Singular Name is required"
       ),
     }),
-    ...(currentFields.includes("relationCoModelFieldName") && {
-      relationCoModelFieldName: Yup.string()
-      // .required(
-      //   "Relation Model Field Name is required"
-      // ),
-    }),
+    // ...(currentFields.includes("relationCoModelFieldName") && {
+    //   relationCoModelFieldName: Yup.string()
+    //   // .required(
+    //   //   "Relation Model Field Name is required"
+    //   // ),
+    // }),
 
     ...(currentFields.includes("relationCreateInverse") && {
       relationCreateInverse: Yup.boolean(),
