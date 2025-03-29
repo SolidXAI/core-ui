@@ -137,6 +137,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     const [filterRules, setFilterRules] = useState<FilterRule[]>(initialState);
     const [fields, setFields] = useState<any[]>([]);
+    const [searchableFields, setSearchableFields] = useState<any[]>([]);
     const [showGlobalSearchElement, setShowGlobalSearchElement] = useState<boolean>(false);
     const [customChip, setCustomChip] = useState("");
     const [searchChips, setSearchChips] = useState<{ columnName?: string; value: string }[]>([]);
@@ -150,9 +151,12 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     useEffect(() => {
         if (viewData?.data?.solidFieldsMetadata) {
-            const fieldsData = viewData?.data?.solidFieldsMetadata
-            const fieldsList = Object.entries(fieldsData).map(([key, value]: any) => ({ name: value.displayName, value: key }));
-            setFields(fieldsList)
+            const fieldsData = viewData?.data?.solidFieldsMetadata;
+            const fieldsList = Object.entries(fieldsData).map(([key, value]: any) => ({ name: value.displayName, value: key, type: value.type }));
+            setFields(fieldsList);
+            const searchableFieldsList = fieldsList.filter((field: any) => field.type === "longText" || field.type === "shortText" );
+            const finalsearchableFieldsList = searchableFieldsList.filter((field: any) => field.value && viewData?.data?.solidView?.layout?.children?.some((child: any) => child?.attrs?.name === field.value && child?.attrs?.isSearchable)).map((field: any) => field.value);
+            setSearchableFields(finalsearchableFieldsList);
         }
     }, [])
 
@@ -190,9 +194,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         }
     };
 
-    const firstFilterableFieldName = viewData?.data?.solidView?.layout?.children?.find(
-        (value: any) => value?.attrs?.filterable
-    )?.attrs?.name;
+    // const firstFilterableFieldName = viewData?.data?.solidView?.layout?.children?.find(
+    //     (value: any) => value?.attrs?.isSearchable
+    // )?.attrs?.name;
+    const firstFilterableFieldName = searchableFields[0]; // First searchable field
 
     const handleAddChip = (columnName?: string) => {
         if (inputValue?.trim()) {
@@ -346,18 +351,17 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 {inputValue ? (
                     <>
                         <div className="custom-filter-search-options px-2 py-2 flex flex-column">
-                            {viewData?.data?.solidView?.layout?.children
-                                .filter((value: any) => value?.attrs?.filterable) // Only keep filterable fields
-                                .map((value: any, index: any) => (
+                            {
+                                searchableFields.map((value: any, index: any) => (
                                     <Button
                                         key={index}
                                         className="p-2 flex gap-1 text-color"
-                                        onClick={() => handleAddChip(value?.attrs?.name)}
+                                        onClick={() => handleAddChip(value)}
                                         text
                                         severity="secondary"
                                         size="small"
                                     >
-                                        Search <strong>{value?.attrs?.name}</strong> for :
+                                        Search <strong>{value}</strong> for :
                                         <span className="font-bold" style={{ color: '#000' }}>{inputValue}</span>
                                     </Button>
                                 ))

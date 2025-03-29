@@ -4,6 +4,7 @@ import { Message } from "primereact/message";
 import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
+import { getExtensionComponent } from "@/helpers/registry";
 
 export class SolidShortTextField implements ISolidField {
 
@@ -78,59 +79,73 @@ export class SolidShortTextField implements ISolidField {
 
         const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
         const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
-
+        const viewMode: string = this.fieldContext.viewMode;
+        let DynamicWidget = getExtensionComponent("SolidFormFieldViewModeWidget");
+        const widgetProps = {
+            label: fieldLabel,
+            value: formik.values[fieldLayoutInfo.attrs.name],
+        }
         return (
             <>
-                {includeWrapper === 'yes' && <div className={className}>
-                    <div className="relative">
-                        <div className="flex flex-column gap-2 mt-4">
-                            {showFieldLabel != false &&
-                                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                                    {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                                </label>
-                            }
-                            <InputText
-                                readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                                disabled={formDisabled || fieldDisabled}
-                                id={fieldLayoutInfo.attrs.name}
-                                name={fieldMetadata.name}
-                                aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                                // onChange={formik.handleChange}
-                                onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
-                                onBlur={(e) => this.fieldContext.onBlur(e, 'onFieldBlur')}
-                                value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                            />
-                        </div>
-                        {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                            <div className="absolute mt-1">
-                                <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                            </div>
-                        )}
+               {viewMode === "view" &&
+                    <div className={className}>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
                     </div>
-                </div>}
-                {includeWrapper === 'no' &&
-                    <>
-                        {showFieldLabel != false &&
-                            <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                                {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                                {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                            </label>
-                        }
-                        <InputText
-                            readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                            disabled={formDisabled || fieldDisabled}
-                            id={fieldLayoutInfo.attrs.name}
-                            name={fieldMetadata.name}
-                            aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                            // onChange={formik.handleChange}
-                            onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
-                            onBlur={(e) => this.fieldContext.onBlur(e, 'onFieldBlur')}
-                            value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                        />
-                    </>
                 }
+                {viewMode === "edit" &&
+                    <>
+                        {includeWrapper === 'yes' && <div className={className}>
+                            <div className="relative">
+                                <div className="flex flex-column gap-2 mt-4">
+                                    {showFieldLabel != false &&
+                                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                                            {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
+                                        </label>
+                                    }
+                                    <InputText
+                                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                                        disabled={formDisabled || fieldDisabled}
+                                        id={fieldLayoutInfo.attrs.name}
+                                        name={fieldMetadata.name}
+                                        aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
+                                        // onChange={formik.handleChange}
+                                        onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
+                                        onBlur={(e) => this.fieldContext.onBlur(e, 'onFieldBlur')}
+                                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                                    />
+                                </div>
+                                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                                    <div className="absolute mt-1">
+                                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                                    </div>
+                                )}
+                            </div>
+                        </div>}
+                        {includeWrapper === 'no' &&
+                            <>
+                                {showFieldLabel != false &&
+                                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                                        {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
+                                    </label>
+                                }
+                                <InputText
+                                    readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                                    disabled={formDisabled || fieldDisabled}
+                                    id={fieldLayoutInfo.attrs.name}
+                                    name={fieldMetadata.name}
+                                    aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
+                                    // onChange={formik.handleChange}
+                                    onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
+                                    onBlur={(e) => this.fieldContext.onBlur(e, 'onFieldBlur')}
+                                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                                />
+                            </>
+                        }
+                    </>}
             </>
+
         );
     }
 }

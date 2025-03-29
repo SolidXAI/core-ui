@@ -36,8 +36,8 @@ export class SolidBooleanField implements ISolidField {
 
         // Ensure the value is always a string "true" or "false"
         const result = existingValue
-        ? (existingValue === true || existingValue === "true" ? "true" : "false") 
-        : (fieldDefaultValue === true || fieldDefaultValue === "true" ? "true" : "false");
+            ? (existingValue === true || existingValue === "true" ? "true" : "false")
+            : (fieldDefaultValue === true || fieldDefaultValue === "true" ? "true" : "false");
         return result;
     }
 
@@ -96,38 +96,52 @@ export class SolidBooleanField implements ISolidField {
         if (!renderMode) {
             renderMode = 'field-selectbox';
         }
+        const viewMode: string = this.fieldContext.viewMode;
+        let DynamicWidget = getExtensionComponent("SolidFormFieldViewModeWidget");
+        const widgetProps = {
+            label: fieldLabel,
+            value: formik.values[fieldLayoutInfo.attrs.name],
+        }
         return (
             <>
-                {renderMode &&
-                    this.renderExtensionRenderMode(renderMode, formik) 
+                {viewMode === "view" &&
+                    DynamicWidget && <DynamicWidget {...widgetProps} />
                 }
-                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                    <div className="absolute mt-1">
-                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                    </div>
-                )}
+                {viewMode === "edit" && (
+                    <>
+                        {renderMode &&
+                            this.renderExtensionRenderMode(renderMode, formik)
+                        }
+                        {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                            <div className="absolute mt-1">
+                                <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                            </div>
+                        )}
+                    </>
+                )
+                }
             </>
         );
 
-        
+
     }
 
 
-    renderExtensionRenderMode(widgetName: string, formik: FormikObject) { 
-            let DynamicWidget = getExtensionComponent(widgetName);
-            if (!DynamicWidget) {
-                DynamicWidget = getExtensionComponent('field-selectbox');
-            }
-            const widgetProps: SolidBooleanFieldWidgetProps = {
-                formik: formik,
-                fieldContext: this.fieldContext,
-            }
-            return (
-                <>
-                    {DynamicWidget && <DynamicWidget {...widgetProps} />}
-                </>
-            )
+    renderExtensionRenderMode(widgetName: string, formik: FormikObject) {
+        let DynamicWidget = getExtensionComponent(widgetName);
+        if (!DynamicWidget) {
+            DynamicWidget = getExtensionComponent('field-selectbox');
         }
+        const widgetProps: SolidBooleanFieldWidgetProps = {
+            formik: formik,
+            fieldContext: this.fieldContext,
+        }
+        return (
+            <>
+                {DynamicWidget && <DynamicWidget {...widgetProps} />}
+            </>
+        )
+    }
 
-    
+
 }
