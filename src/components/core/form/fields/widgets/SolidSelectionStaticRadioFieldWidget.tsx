@@ -49,7 +49,8 @@ export const SolidSelectionStaticRadioWidget = ({ formik, fieldContext }: SolidS
                                 name={fieldName}
                                 value={option} 
                                 checked={formik.values[fieldName]?.value === option.value} 
-                                onChange={(e) => formik.setFieldValue(fieldName, e.value)} 
+                                // onChange={(e) => formik.setFieldValue(fieldName, e.value)} 
+                                onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
                                 disabled={formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled}
                                 className="mr-2"
                             />
