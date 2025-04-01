@@ -5,7 +5,7 @@ const SolidSelectionDynamicKanbanField = ({ solidKanbanViewMetaData, fieldMetada
  
 
     return (
-        <p>{data && data[fieldMetadata.name] ? `${data[fieldMetadata.name]}`: ""}</p>
+        <p className='m-0'>{data && data[fieldMetadata.name] ? `${data[fieldMetadata.name]}`: ""}</p>
     );
 
 };
