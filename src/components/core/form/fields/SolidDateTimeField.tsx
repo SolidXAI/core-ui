@@ -74,7 +74,9 @@ export class SolidDateTimeField implements ISolidField {
                             ref={calendarRef} // Attach ref to Calendar
                             id={fieldLayoutInfo.attrs.name}
                             aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                            onChange={formik.handleChange}
+                            // onChange={formik.handleChange}
+                            name={fieldLayoutInfo.attrs.name}
+                            onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
                             //@ts-ignore
                             value={formik.values[fieldLayoutInfo.attrs.name] ? new Date(formik.values[fieldLayoutInfo.attrs.name]) : Date()}
                             // dateFormat="mm/dd/yy"
