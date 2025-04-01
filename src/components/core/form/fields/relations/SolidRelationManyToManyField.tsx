@@ -83,30 +83,52 @@ export class SolidRelationManyToManyField implements ISolidField {
     }
 
     render(formik: FormikObject) {
+        const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const [visibleCreateRelationEntity, setVisibleCreateRelationEntity] = useState(false);
+        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
+        const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
 
         let renderMode = fieldLayoutInfo.attrs.renderMode;
         if (!renderMode) {
             renderMode = 'autocomplete';
         }
+
+        const viewMode: string = this.fieldContext.viewMode;
+        let DynamicWidget = getExtensionComponent("SolidFormFieldRelationViewModeWidget");
+        const widgetProps = {
+            label: fieldLabel,
+            value: formik.values[fieldLayoutInfo.attrs.name],
+        }
+
         return (
+
             <>
-                {renderMode &&
-                    this.renderExtensionRenderMode(renderMode, formik, visibleCreateRelationEntity, setVisibleCreateRelationEntity) 
-                }
-                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                    <div className="absolute mt-1">
-                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                {viewMode === "view" &&
+                    <div className={className}>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
                     </div>
-                )}
+                }
+                {viewMode === "edit" &&
+                    (
+                        <>
+                            {renderMode &&
+                                this.renderExtensionRenderMode(renderMode, formik, visibleCreateRelationEntity, setVisibleCreateRelationEntity)
+                            }
+                            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                                <div className="absolute mt-1">
+                                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                                </div>
+                            )}
+                        </>
+                    )}
             </>
         );
     }
 
-    renderExtensionRenderMode(widgetName: string, formik: FormikObject, visibleCreateRelationEntity: any, setvisibleCreateRelationEntity: any) { 
+    renderExtensionRenderMode(widgetName: string, formik: FormikObject, visibleCreateRelationEntity: any, setvisibleCreateRelationEntity: any) {
         let DynamicWidget = getExtensionComponent(widgetName);
         if (!DynamicWidget) {
             DynamicWidget = getExtensionComponent('autocomplete');
