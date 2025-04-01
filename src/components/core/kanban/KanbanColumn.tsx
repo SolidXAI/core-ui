@@ -49,20 +49,25 @@ const KanbanColumn = ({ groupedView, groupByField, solidKanbanViewMetaData, grou
                   <i className="pi pi-sort-up-fill"></i>
                   <i className="pi pi-sort-down-fill"></i>
                 </div>
-                <p className="kanban-group-heading">{`${group.label}`}<span className="count">{group.count}</span></p>
+                <p className="kanban-group-heading">{`${group.label}`}<span className="kanban-count-badge">{group.count}</span></p>
               </div>
             </a>
           }
 
           {!group.folded &&
             <div className="flex align-items-center">
-              <p className="kanban-group-heading">{`${group.label}`}<span className="count">{group.count}</span></p>
+              <p className="kanban-group-heading">{`${group.label}`}<span className="kanban-count-badge">{group.count}</span></p>
             </div>
           }
           {!group.folded &&
-            <a onClick={(e: any) => op?.current?.toggle(e)}>
-              < i className="pi pi-cog" />
-            </a>
+              <Button
+              onClick={(e: any) => op?.current?.toggle(e)}
+              icon='pi pi-cog'
+              text
+              className="p-0 kanban-column-cogwheel"
+              rounded
+              severity="secondary"
+            />
           }
           <OverlayPanel ref={op} className="kanban-options-panel">
 
