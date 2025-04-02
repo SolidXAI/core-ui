@@ -229,7 +229,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         }
 
         // If there are multiple filters, wrap them in an $and condition
-        return filters.length > 1 ? { $and: filters } : filters[0] || {};
+        return filters.length > 0 ? { $and: filters } : filters[0] || {};
     }
 
 
