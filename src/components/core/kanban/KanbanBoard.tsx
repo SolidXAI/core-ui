@@ -24,7 +24,7 @@ interface ApiResponse {
     };
 }
 
-export const KanbanBoard = ({ groupedView, kanbanViewData, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLinPagination ,setLightboxUrls, setOpenLightbox }: any) => {
+export const KanbanBoard = ({ groupedView, kanbanViewData, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLinPagination, setLightboxUrls, setOpenLightbox }: any) => {
     const [loading, setLoading] = useState<boolean>(true);
     // State to manage the folded status of each column
     const [foldedStates, setFoldedStates] = useState<Record<string, boolean>>({});
@@ -70,9 +70,10 @@ export const KanbanBoard = ({ groupedView, kanbanViewData, solidKanbanViewMetaDa
     // Render the Kanban board
     return (
         //@ts-ignore
-        <DragDropContext onDragEnd={onDragEnd}>
-            <div style={{ display: "flex", gap: "1rem", background: "#f0f0f5", padding: "20px" }}>
-                {/* {Object.entries(kanbanViewData).map(([groupVal, data]) => {
+        <div className="solid-kanban-board-wrapper">
+            <DragDropContext onDragEnd={onDragEnd}>
+                <div className="flex gap-4 px-5 py-4 solid-kanban-board-scroll-context">
+                    {/* {Object.entries(kanbanViewData).map(([groupVal, data]) => {
                     const group = {
                         label: groupVal,
                         count: data.count,
@@ -90,36 +91,37 @@ export const KanbanBoard = ({ groupedView, kanbanViewData, solidKanbanViewMetaDa
                         />
                     );
                 })} */}
-                {kanbanViewData.map((data) => {
-                    const group = {
-                        label: data.groupName,
-                        count: data.groupData.meta.totalRecords,
-                        limit: data.groupData.meta.perPage,
-                        currentPage: data.groupData.meta.currentPage,
-                        folded: foldedStates[data.groupName] || false,
-                    };
+                    {kanbanViewData.map((data) => {
+                        const group = {
+                            label: data.groupName,
+                            count: data.groupData.meta.totalRecords,
+                            limit: data.groupData.meta.perPage,
+                            currentPage: data.groupData.meta.currentPage,
+                            folded: foldedStates[data.groupName] || false,
+                        };
 
-                    return (
-                        <KanbanColumn
-                            key={data.groupName}
-                            groupedView={groupedView}
-                            groupByField={data.groupName}
-                            group={group}
-                            solidKanbanViewMetaData={solidKanbanViewMetaData}
-                            groupData={data.groupData.records}
-                            toggleFold={toggleFold}
-                            handleLoadMore={handleLoadMore}
-                            setLightboxUrls={setLightboxUrls}
-                             setOpenLightbox={setOpenLightbox}
-                        />
-                    );
-                })}
-                {groupedView !== false &&
-                    <div className="kanban-load-more-folded">
-                        <a className="kaban-load-more" onClick={handleSwimLinPagination}>load More</a></div>
-                }
-            </div>
-        </DragDropContext>
+                        return (
+                            <KanbanColumn
+                                key={data.groupName}
+                                groupedView={groupedView}
+                                groupByField={data.groupName}
+                                group={group}
+                                solidKanbanViewMetaData={solidKanbanViewMetaData}
+                                groupData={data.groupData.records}
+                                toggleFold={toggleFold}
+                                handleLoadMore={handleLoadMore}
+                                setLightboxUrls={setLightboxUrls}
+                                setOpenLightbox={setOpenLightbox}
+                            />
+                        );
+                    })}
+                    {groupedView !== false &&
+                        <div className="kanban-load-more-folded">
+                            <a className="kaban-load-more" onClick={handleSwimLinPagination}>load More</a></div>
+                    }
+                </div>
+            </DragDropContext>
+        </div>
     );
 }
 

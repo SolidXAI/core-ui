@@ -1000,7 +1000,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     setSelectedType({ label: label, value: e });
     formik.setFieldValue("type", e);
     if (e == "email") {
-      formik.setFieldValue("regexPattern", "/^[a-zA-Z0-9. _%+-]+@[a-zA-Z0-9. -]+\\. [a-zA-Z]{2,}$/");
+      formik.setFieldValue("regexPattern", "^[a-zA-Z0-9. _%+-]+@[a-zA-Z0-9. -]+\\. [a-zA-Z]{2,}$");
     } else {
       formik.setFieldValue("regexPattern", "");
     }
@@ -2479,7 +2479,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   )}
                                 </div>
                                 {currentFields.includes("regexPattern") && (
-                                  <div className="field col-6 flex-flex-column gap-2">
+                                  <div className="field col-6 flex-flex-column gap-2 mt-3">
                                     <label
                                       htmlFor="regexPatternNotMatchingErrorMsg"
                                       className="form-field-label"

@@ -55,7 +55,7 @@ export class SolidEmailField implements ISolidField {
         // 3. regular expression
         if (fieldMetadata.regexPattern) {
             const regexPatternNotMatchingErrorMsg = fieldMetadata.regexPatternNotMatchingErrorMsg ?? `${fieldLabel} has invalid data.`
-            schema = schema.matches(fieldMetadata.regexPattern, regexPatternNotMatchingErrorMsg);
+            schema = schema.matches(new RegExp(fieldMetadata.regexPattern), regexPatternNotMatchingErrorMsg);
         }
 
         return schema;
