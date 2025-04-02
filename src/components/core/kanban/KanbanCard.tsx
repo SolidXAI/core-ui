@@ -49,41 +49,53 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
   const SolidRow = ({ children, attrs }: any) => {
     const className = attrs.className;
     return (
-      <div className={`row ${className}`}>
-        <div className="s_group">
-          <div>
-            {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
-            <div className="grid">{children}</div>
-          </div>
+      // <div className={`row ${className}`}>
+      //   <div className="s_group">
+      //     <div>
+      //       {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
+      //       <div className="grid">{children}</div>
+      //     </div>
+      //   </div>
+      // </div>
+      <>
+        {attrs.label && <p className="">{attrs.label}</p>}
+        <div className={`row ${className}`}>
+          {children}
         </div>
-      </div>
+      </>
     );
   };
   const SolidColumn = ({ children, attrs }: any) => {
     const className = attrs.className;
     return (
+      // <div className={`${className}`}>
+      //   <div className="s_group">
+      //     <div>
+      //       {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
+      //       <div className="grid">{children}</div>
+      //     </div>
+      //   </div>
+      // </div>
       <div className={`${className}`}>
-        <div className="s_group">
-          <div>
-            {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
-            <div className="grid">{children}</div>
-          </div>
-        </div>
-
+        {attrs.label && <p className="">{attrs.label}</p>}
+        {children}
       </div>
     );
   };
   const SolidImage = ({ children, attrs }: any) => {
     const className = attrs.className;
     return (
+      // <div className={`${className}`}>
+      //   <div className="s_group">
+      //     <div>
+      //       {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
+      //       <div className="grid">{children}</div>
+      //     </div>
+      //   </div>
+      // </div>
       <div className={`${className}`}>
-        <div className="s_group">
-          <div>
-            {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
-            <div className="grid">{children}</div>
-          </div>
-        </div>
-
+        {attrs.label && <p className="">{attrs.label}</p>}
+        {children}
       </div>
     );
   };
@@ -157,17 +169,18 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
           ref={provided.innerRef}
           {...provided.draggableProps}
           {...provided.dragHandleProps}
-          style={{ marginBottom: "1rem", ...provided.draggableProps.style }}
+          style={{ marginTop: "1rem", ...provided.draggableProps.style }}
           className="kanban-card-container"
         >
           {/* <p className="kanban-card-heading">{data.title}</p> */}
           {/* <p className="kanban-card-content">{data.content}</p> */}
-          <Card
+          <div
             style={{
               opacity: snapshot.isDragging ? 0.9 : 1,
               transform: snapshot.isDragging ? "rotate(-2deg)" : "",
             }}
             elevation={snapshot.isDragging ? 3 : 1}
+            className="solid-kanban-card"
           >
             {renderFormDynamically(solidKanbanViewMetaData)}
 
@@ -177,7 +190,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
               ))
             } */}
             {/* <p className="kanban-card-content">{data.content}</p> */}
-          </Card>
+          </div>
         </div>
       )}
     </Draggable>

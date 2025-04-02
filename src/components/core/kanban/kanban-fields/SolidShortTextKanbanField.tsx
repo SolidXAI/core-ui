@@ -5,23 +5,24 @@ const SolidShortTextKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fie
     const renderMode = fieldLayout?.attrs?.renderMode ? fieldLayout?.attrs?.renderMode : "text";
 
     return (
-        <>
+        <div>
             {renderMode === "text" &&
-                <p>{data && data[fieldMetadata.name] ? `${data[fieldMetadata.name]}` : ""}</p>
+                <p className='font-medium'>{data && data[fieldMetadata.name] ? `${data[fieldMetadata.name]}` : ""}</p>
             }
             {renderMode === "image" &&
-                <img
-                    src={data[fieldMetadata.name]}
-                    onClick={(event) => {
-                        event.stopPropagation();
-                        setLightboxUrls([{ src: data[fieldMetadata.name] }]);
-                        setOpenLightbox(true);
-                    }}
-                    className='image-preview'
-                ></img>
-
+                <div className='my-2'>
+                    <img
+                        src={data[fieldMetadata.name]}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            setLightboxUrls([{ src: data[fieldMetadata.name] }]);
+                            setOpenLightbox(true);
+                        }}
+                        className='kanban-image-preview'
+                    ></img>
+                </div>
             }
-        </>
+        </div>
     );
 
 };

@@ -165,7 +165,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       if (fieldMetadata.type === 'relation' && fieldMetadata.relationType === 'many-to-one') {
         toPopulate.push(fieldMetadata.name);
       }
-      if (fieldMetadata.type === 'mediaSingle' || fieldMetadata.relationType === 'mediaMultiple') {
+      if (fieldMetadata.type === 'mediaSingle' || fieldMetadata.type === 'mediaMultiple') {
         toPopulateMedia.push(fieldMetadata.name);
       }
     }
@@ -267,7 +267,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
 
       const columnsToLoadCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.swimlanesCount || 5;
-      if (groupByFieldName &&( toPopulate || toPopulateMedia)) {
+      if (groupByFieldName && (toPopulate || toPopulateMedia)) {
 
         const queryData = {
           offset: 0,
@@ -294,7 +294,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         setSelectedRecords([]);
       }
     }
-  }, [isDeleteSolidEntitiesSucess, toPopulate, groupByFieldName,solidKanbanViewMetaData]);
+  }, [isDeleteSolidEntitiesSucess, toPopulate, groupByFieldName, solidKanbanViewMetaData]);
 
 
 
@@ -393,7 +393,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       const queryData = {
         offset: offset + limit,
         limit: limit,
-        populate:toPopulate,
+        populate: toPopulate,
         populateMedia: toPopulateMedia,
         populateGroup: true,
         filters: {
@@ -628,13 +628,20 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     // }
   }
 
-
+  const kanbanViewTitle = solidKanbanViewMetaData?.data?.solidView?.displayName
 
   return (
-    <>
-      <div className="flex gap-3 mb-4 align-items-center justify-content-between kanban-view">
-        <div className="flex gap-3 mb-4 align-items-center" >
+    <div className="page-parent-wrapper">
+      <div className="page-header">
+        <div className="flex gap-3 align-items-center">
+          <p className="m-0 view-title">{kanbanViewTitle}</p>
+          {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
+            // <SolidGlobalSearchElement viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} ></SolidGlobalSearchElement>
+            <SolidGlobalSearchElement ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
 
+          }
+        </div>
+        <div className="flex align-items-center gap-3">
           {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.create !== false &&
             <SolidCreateButton url={createButtonUrl} />
           }
@@ -647,40 +654,21 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             className="small-button"
             severity="danger"
           />}
-          {/* {isFilterApplied &&
-            <Button
-              type="button"
-              icon="pi pi-filter-slash"
-              label="Clear"
-              size="small"
-              outlined
-              onClick={clearFilter}
-              className="small-button"
-            />
-          } */}
-
-          {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
-            // <SolidGlobalSearchElement viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} ></SolidGlobalSearchElement>
-            <SolidGlobalSearchElement ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
-
-          }
+          {/* <SolidListViewConfigure
+        setShowArchived={setShowArchived}
+        showArchived={showArchived}
+        viewData={solidKanbanViewMetaData}
+        sizeOptions={sizeOptions}
+        setSize={setSize}
+        size={size}
+        viewModes={viewModes}
+        params={params}
+        actionsAllowed={actionsAllowed}
+        selectedRecords={selectedRecords}
+        setDialogVisible={setDialogVisible}
+      ></SolidListViewConfigure> */}
+          {/* <SolidConfigureLayoutElement></SolidConfigureLayoutElement> */}
         </div>
-
-        {/* <SolidListViewConfigure
-          setShowArchived={setShowArchived}
-          showArchived={showArchived}
-          viewData={solidKanbanViewMetaData}
-          sizeOptions={sizeOptions}
-          setSize={setSize}
-          size={size}
-          viewModes={viewModes}
-          params={params}
-          actionsAllowed={actionsAllowed}
-          selectedRecords={selectedRecords}
-          setDialogVisible={setDialogVisible}
-        ></SolidListViewConfigure> */}
-        {/* <SolidConfigureLayoutElement></SolidConfigureLayoutElement> */}
-
       </div>
       <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
       {solidKanbanViewMetaData && kanbanViewData &&
@@ -709,7 +697,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           slides={lightboxUrls}
         />
       }
-    </>
+    </div>
   );
 };
 

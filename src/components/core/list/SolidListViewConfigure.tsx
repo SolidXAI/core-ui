@@ -234,7 +234,7 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
                                 </AccordionTab>
                                 <AccordionTab header="Column Selector">
                                     <div className="flex flex-column gap-1 p-1">
-                                        <div className="flex flex-column gap-3 px-3 cogwheel-column-filter">
+                                    <div className="flex flex-column gap-3 px-3 cogwheel-column-filter"  style={{maxHeight: 400, overflowY:'auto'}}>
                                             {solidListColumns.map((column) => {
                                                 return (
                                                     <div key={column.key} className="flex align-items-center gap-1">
