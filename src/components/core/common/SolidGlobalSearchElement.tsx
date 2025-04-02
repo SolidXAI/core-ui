@@ -142,7 +142,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     const [customChip, setCustomChip] = useState("");
     const [searchChips, setSearchChips] = useState<{ columnName?: string; value: string }[]>([]);
     const [inputValue, setInputValue] = useState<string | null>("");
-
+    const [searchFilter, setSearchFilter] = useState<any | null>(null);
+    const [customFilter, setCustomFilter] = useState<any | null>(null);
     useImperativeHandle(ref, () => ({
         clearFilter: () => {
             setFilterRules(initialState);
@@ -154,7 +155,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             const fieldsData = viewData?.data?.solidFieldsMetadata;
             const fieldsList = Object.entries(fieldsData).map(([key, value]: any) => ({ name: value.displayName, value: key, type: value.type }));
             setFields(fieldsList);
-            const searchableFieldsList = fieldsList.filter((field: any) => field.type === "longText" || field.type === "shortText" );
+            const searchableFieldsList = fieldsList.filter((field: any) => field.type === "longText" || field.type === "shortText");
             const finalsearchableFieldsList = searchableFieldsList.filter((field: any) => field.value && viewData?.data?.solidView?.layout?.children?.some((child: any) => child?.attrs?.name === field.value && child?.attrs?.isSearchable)).map((field: any) => field.value);
             setSearchableFields(finalsearchableFieldsList);
         }
@@ -216,10 +217,29 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         }
     };
 
+    const mergeSearchAndCustomFilters = (transformedFilter: any, newFilter: any) => {
+        const filters = [];
+
+        // Add only non-null filters
+        if (transformedFilter && Object.keys(transformedFilter).length > 0) {
+            filters.push(transformedFilter);
+        }
+        if (newFilter && Object.keys(newFilter).length > 0) {
+            filters.push(newFilter);
+        }
+
+        // If there are multiple filters, wrap them in an $and condition
+        return filters.length > 1 ? { $and: filters } : filters[0] || {};
+    }
+
+
     const transformFilterRules = (filterRules: any) => {
         const transformedFilter = transformRulesToFilters(filterRules[0]);
+        console.log("transformedFilter from custom filter", transformedFilter);
+        setCustomFilter(transformedFilter);
         if (transformedFilter) {
-            handleApplyCustomFilter(transformedFilter)
+            const finalFilter = mergeSearchAndCustomFilters(transformedFilter, searchFilter);
+            handleApplyCustomFilter(finalFilter)
         }
         setShowGlobalSearchElement(false)
     }
@@ -242,7 +262,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         };
         if (formattedChips.children.length > 0) {
             const transformedFilter = transformRulesToFilters(formattedChips);
-            handleApplyCustomFilter(transformedFilter);
+            setSearchFilter(transformedFilter);
+            const finalFilter = mergeSearchAndCustomFilters(transformedFilter, customFilter);
+            handleApplyCustomFilter(finalFilter);
         }
     }, [searchChips]);
 

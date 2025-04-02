@@ -169,7 +169,10 @@ const fieldBasedPayloadFormating = (values: any, currentFields: string[], fieldM
   if (transformedPayload.relationType == "many-to-one") {
     transformedPayload.relationCascade = values.relationCascade;
   }
-
+  if (transformedPayload.relationType == "many-to-many") {
+    transformedPayload.isRelationManyToManyOwner = true;
+  }
+ 
   return transformedPayload
 
 }

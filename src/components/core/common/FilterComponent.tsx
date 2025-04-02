@@ -99,9 +99,9 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
           <div className='col-4'>
             <Dropdown
               key={rule.id}
-              value={fieldName.value}
+              value={fieldName.name}
               onChange={e => {
-                setFieldName({ name: e.value, value: e.value })
+                setFieldName({ name: e.value})
                 onChange(rule.id, 'fieldName', e.value)
               }}
               options={fields}

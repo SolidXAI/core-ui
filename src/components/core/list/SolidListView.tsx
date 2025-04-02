@@ -36,7 +36,7 @@ import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
 import ListImage from '../../../resources/images/layout/images/cozy.png';
 import KanbanImage from '../../../resources/images/layout/images/kanban.png';
-import { capitalize } from "lodash";
+import { capitalize, filter } from "lodash";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import Download from "yet-another-react-lightbox/plugins/download";
@@ -66,6 +66,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const router = useRouter()
   // TODO: The initial filter state will be created based on the fields which are present on this list view. 
   const [filters, setFilters] = useState<any>();
+  const [filterQueryString, setFilterQueryString] = useState<any>();
   // const [customFilter, setCustomFilter] = useState<FilterRule[]>(initialState);
   // const [showGlobalSearchElement, setShowGlobalSearchElement] = useState<boolean>(false);
 
@@ -74,8 +75,17 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
 
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
-  useEffect(() => {
 
+  const pushFiltersToRouter = (filterQueryString: any) => {
+    router.push(`?${filterQueryString}`, undefined, { shallow: true });
+  };
+
+  useEffect(() => {
+    if (filters) {
+      pushFiltersToRouter(filterQueryString);
+    }
+  }, [filters]);
+  useEffect(() => {
     const fetchPermissions = async () => {
       if (params.modelName) {
         const permissionNames = [
@@ -130,8 +140,8 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   const initialFilterMethod = () => {
 
-    const solidView = solidListViewMetaData.data.solidView;
-    const solidFieldsMetadata = solidListViewMetaData.data.solidFieldsMetadata;
+    const solidView = solidListViewMetaData?.data?.solidView;
+    const solidFieldsMetadata = solidListViewMetaData?.data?.solidFieldsMetadata;
 
     const initialFilters: any = {};
     const toPopulate: string[] = [];
@@ -139,7 +149,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
     for (let i = 0; i < solidView.layout.children?.length; i++) {
       const column = solidView.layout.children[i];
-      const fieldMetadata = solidFieldsMetadata[column.attrs.name];
+      const fieldMetadata = solidFieldsMetadata?.[column.attrs.name];
       if (!fieldMetadata?.type) {
         showFieldError(`${column.attrs.label} is not present in metadata`)
         return;
@@ -174,24 +184,24 @@ export const SolidListView = (params: SolidListViewParams) => {
       }
     }
     // setFilters(initialFilters);
-    setRows(solidListViewMetaData?.data?.solidView?.layout?.attrs?.defaultPageSize ? solidListViewMetaData?.data?.solidView?.layout?.attrs.defaultPageSize : 25)
+    setRows(solidListViewMetaData?.data?.solidView?.layout?.attrs?.defaultPageSize ?? 25);
     setToPopulate(toPopulate);
     setToPopulateMedia(toPopulateMedia);
   }
 
+  // Set the initial filter state based on the metadata.
   useEffect(() => {
     // refetch();
     if (solidListViewMetaData) {
       if (params.customLayout) {
-        const upatedSolidListViewMetaData = structuredClone(solidListViewMetaData);
-        upatedSolidListViewMetaData.data.solidView.layout = params.customLayout;
-        setListViewMetaData(upatedSolidListViewMetaData);
-
+        const updatedSolidListViewMetaData = structuredClone(solidListViewMetaData);
+        if (updatedSolidListViewMetaData?.data?.solidView?.layout) {
+          updatedSolidListViewMetaData.data.solidView.layout = params.customLayout;
+        }
+        setListViewMetaData(updatedSolidListViewMetaData);
       } else {
         setListViewMetaData(solidListViewMetaData);
-
       }
-
       initialFilterMethod()
     }
   }, [solidListViewMetaData]);
@@ -248,11 +258,11 @@ export const SolidListView = (params: SolidListViewParams) => {
       setListViewData(solidEntityListViewData?.records);
       setTotalRecords(solidEntityListViewData?.meta.totalRecords);
       setLoading(false);
-
     }
   }, [solidEntityListViewData]);
 
 
+  // set layout and actions for create and edit buttons and view modes
   useEffect(() => {
     if (solidListViewMetaData) {
       const createActionUrl = solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction && solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.type === "custom" ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.customComponent : "form/new";
@@ -267,6 +277,8 @@ export const SolidListView = (params: SolidListViewParams) => {
       }
     }
   }, [solidListViewMetaData])
+
+
   const [deleteSolidSingleEntiry, { isSuccess: isDeleteSolidSingleEntitySuccess }] = useDeleteSolidEntityMutation()
 
   // Delete mutation 
@@ -287,7 +299,9 @@ export const SolidListView = (params: SolidListViewParams) => {
       offset: 0,
       limit: 25,
       populate: toPopulate,
+      populateMedia: toPopulateMedia,
       sort: [`id:desc`],
+      filters: filters
     };
     if (showArchived) {
       queryData.showSoftDeleted = 'inclusive';
@@ -295,7 +309,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     const queryString = qs.stringify(queryData, {
       encodeValuesOnly: true
     });
-
+    setFilterQueryString(queryString);
     triggerGetSolidEntities(queryString);
     setSelectedRecords([]);
     setSelectedRecoverRecords([]);
@@ -311,15 +325,12 @@ export const SolidListView = (params: SolidListViewParams) => {
         populate: toPopulate,
         populateMedia: toPopulateMedia,
         sort: [`id:desc`],
-        filters: { ...params.customFilter }
+        filters: { ...(params.customFilter || {}), ...filters }
       };
-      if (params.embeded) {
-
-      }
       const queryString = qs.stringify(queryData, {
         encodeValuesOnly: true
       });
-
+      setFilterQueryString(queryString);
       triggerGetSolidEntities(queryString);
       setSelectedRecords([]);
       setSelectedRecoverRecords([]);
@@ -458,19 +469,22 @@ export const SolidListView = (params: SolidListViewParams) => {
     const queryString = qs.stringify(queryData, {
       encodeValuesOnly: true,
     });
-
+    setFilterQueryString(queryString);
     triggerGetSolidEntities(queryString);
   };
 
   // handle filter...
-  const handleApplyCustomFilter = (filters) => {
-    setFilters(filters);
+  const handleApplyCustomFilter = (transformedFilter: any) => {
+    console.log("transformedFilter",transformedFilter);
+    
+    const updatedFilter = { ...(filters || {}), ...(transformedFilter || {}) };
+    setFilters((prevFilters) => ({ ...(prevFilters || {}), ...(transformedFilter || {}) }));
     setQueryString(
       0,
       rows,
       sortField,
       sortOrder === 1 || sortOrder === -1 ? sortOrder : 0,
-      filters
+      updatedFilter
     );
   };
 
@@ -634,24 +648,17 @@ export const SolidListView = (params: SolidListViewParams) => {
     });
   };
 
-  //   const handlCustomRowAction = ((i, rowData) : any) => {
-
-  // }
-
   //Note -  Custom Row Action Popup 
   const closeListViewRowActionPopup = () => {
     setListViewRowActionPopupState(false)
   }
-
-
-  const listViewTitle = solidListViewMetaData?.data?.solidView?.displayName
 
   return (
     <div className="page-parent-wrapper">
       <div className="page-header">
         <Toast ref={toast} />
         <div className="flex gap-3 align-items-center">
-          <p className="m-0 view-title">{listViewTitle}</p>
+          <p className="m-0 view-title">{solidListViewMetaData?.data?.solidView?.displayName}</p>
           {solidListViewMetaData?.data?.solidView?.layout?.attrs?.enableGlobalSearch === true && params.embeded === false &&
             <SolidGlobalSearchElement filters={filters} clearFilter={clearFilter} ref={solidGlobalSearchElementRef} viewData={solidListViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}></SolidGlobalSearchElement>
           }
