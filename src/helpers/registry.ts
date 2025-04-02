@@ -17,6 +17,8 @@ import { SolidFormFieldPasswordViewModeWidget } from "@/components/core/form/fie
 import { SolidFormFieldRichTextViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldRichTextViewModeWidget";
 import { SolidFormFieldMediaViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldMediaViewModeWidget";
 import { SolidFormFieldRelationViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldRelationViewModeWidget";
+import { SolidFormFieldViewMediaSingleWidget } from "@/components/core/form/fields/widgets/SolidFormFieldViewMediaSingleWidget";
+import { SolidFormFieldViewMediaMultipleWidget } from "@/components/core/form/fields/widgets/SolidFormFieldViewMediaMultipleWidget";
 
 type ExtensionRegistry = {
     components: Record<string, React.ComponentType<any>>;
@@ -91,7 +93,8 @@ registerExtensionComponent("SolidFormFieldPasswordViewModeWidget", SolidFormFiel
 registerExtensionComponent("SolidFormFieldRichTextViewModeWidget", SolidFormFieldRichTextViewModeWidget, []);
 registerExtensionComponent("SolidFormFieldMediaViewModeWidget", SolidFormFieldMediaViewModeWidget, []);
 registerExtensionComponent("SolidFormFieldRelationViewModeWidget", SolidFormFieldRelationViewModeWidget, []);
-
+registerExtensionComponent("SolidFormFieldViewMediaSingleWidget", SolidFormFieldViewMediaSingleWidget, []);
+registerExtensionComponent("SolidFormFieldViewMediaMultipleWidget", SolidFormFieldViewMediaMultipleWidget, []);
 
 
 // ModuleMetadata

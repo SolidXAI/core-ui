@@ -7,7 +7,7 @@ import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct impor
 export const SolidFormFieldJsonViewModeWidget = ({ label, value }: any) => {
     return (
         <div>
-            <p>{label}</p>
+            <p className="mt-2 mb-0"><span className="form-field-label">{label}</span></p>
             <CodeMirror
                 id={label}
                 value={value}

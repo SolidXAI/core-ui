@@ -2476,7 +2476,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   )}
                                 </div>
                                 {currentFields.includes("regexPattern") && (
-                                  <div className="field col-6 flex-flex-column gap-2">
+                                  <div className="field col-6 flex-flex-column gap-2 mt-3">
                                     <label
                                       htmlFor="regexPatternNotMatchingErrorMsg"
                                       className="form-field-label"

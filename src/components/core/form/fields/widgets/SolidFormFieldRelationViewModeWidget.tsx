@@ -19,11 +19,11 @@ export const SolidFormFieldRelationViewModeWidget = ({ label, value }: any) => {
 
 
     return (
-        <div>
-            <p>{label}: </p>
-            <div className="card flex flex-wrap gap-2">
+        <div className="flex align-items-center mt-2 gap-3">
+            <p className="mb-0"><span className="form-field-label">{label}</span>: </p>
+            <div className="flex flex-wrap gap-2">
                 {fieldValue.map((v: any) => (
-                    <Chip key={v} label={v}/>
+                    <Chip key={v} label={v} className="view-widget-chip"/>
                 ))}
             </div>
         </div>
