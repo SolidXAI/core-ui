@@ -10,6 +10,7 @@ import { InputText } from "primereact/inputtext";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Divider } from "primereact/divider";
 import { Chips } from "primereact/chips";
+import { useSearchParams } from "next/navigation";
 
 const getRandomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -131,10 +132,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             ]
         }
     ];
+    const searchParams = useSearchParams().toString(); // Converts the query params to a string
 
     const op = useRef<OverlayPanel>(null);
     const chipsRef = useRef<HTMLDivElement | null>(null);
-
     const [filterRules, setFilterRules] = useState<FilterRule[]>(initialState);
     const [fields, setFields] = useState<any[]>([]);
     const [searchableFields, setSearchableFields] = useState<any[]>([]);
@@ -217,12 +218,12 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         }
     };
 
-    const mergeSearchAndCustomFilters = (transformedFilter: any, newFilter: any) => {
+    const mergeSearchAndCustomFilters = (transformedFilter: any, newFilter: any, filterName: string) => {
         const filters = [];
 
         // Add only non-null filters
         if (transformedFilter && Object.keys(transformedFilter).length > 0) {
-            filters.push(transformedFilter);
+            filters.push({ [filterName]: transformedFilter });
         }
         if (newFilter && Object.keys(newFilter).length > 0) {
             filters.push(newFilter);
@@ -238,7 +239,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         console.log("transformedFilter from custom filter", transformedFilter);
         setCustomFilter(transformedFilter);
         if (transformedFilter) {
-            const finalFilter = mergeSearchAndCustomFilters(transformedFilter, searchFilter);
+            const finalFilter = mergeSearchAndCustomFilters(transformedFilter, searchFilter, "c_filter");
             handleApplyCustomFilter(finalFilter)
         }
         setShowGlobalSearchElement(false)
@@ -263,7 +264,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         if (formattedChips.children.length > 0) {
             const transformedFilter = transformRulesToFilters(formattedChips);
             setSearchFilter(transformedFilter);
-            const finalFilter = mergeSearchAndCustomFilters(transformedFilter, customFilter);
+            const finalFilter = mergeSearchAndCustomFilters(transformedFilter, customFilter, "s_filter");
             handleApplyCustomFilter(finalFilter);
         }
     }, [searchChips]);

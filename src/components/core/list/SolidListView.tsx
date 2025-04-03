@@ -23,7 +23,7 @@ import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { pascalCase } from "change-case";
 import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
 import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@/components/core/common/FilterComponent";
 import { SolidLayoutViews } from '../common/SolidLayoutViews'
@@ -64,6 +64,8 @@ export const SolidListView = (params: SolidListViewParams) => {
 
 
   const router = useRouter()
+  const searchParams = useSearchParams().toString(); // Converts the query params to a string
+
   // TODO: The initial filter state will be created based on the fields which are present on this list view. 
   const [filters, setFilters] = useState<any>();
   const [filterQueryString, setFilterQueryString] = useState<any>();
@@ -81,10 +83,13 @@ export const SolidListView = (params: SolidListViewParams) => {
   };
 
   useEffect(() => {
-    if (filters) {
+    if (filterQueryString) {
       pushFiltersToRouter(filterQueryString);
     }
-  }, [filters]);
+  }, [filterQueryString]);
+
+
+
   useEffect(() => {
     const fetchPermissions = async () => {
       if (params.modelName) {
@@ -252,6 +257,13 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   const [triggerRecoverSolidEntities, { data: recoverByData, isLoading: recoverByIsLoading, error: recoverError, isError: recoverIsError, isSuccess: recoverByIsSuccess }] = useRecoverSolidEntityMutation();
 
+  // Get the solid entity by query string from router.
+  useEffect(() => {
+    if (searchParams) {
+      triggerGetSolidEntities(searchParams);
+    }
+  }, [searchParams]); // Use router.asPath to trigger re-render on query string changes
+
   // After data is fetched populate the list view state so as to be able to render the data. 
   useEffect(() => {
     if (solidEntityListViewData) {
@@ -310,7 +322,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       encodeValuesOnly: true
     });
     setFilterQueryString(queryString);
-    triggerGetSolidEntities(queryString);
+    // triggerGetSolidEntities(queryString);
     setSelectedRecords([]);
     setSelectedRecoverRecords([]);
   }, [showArchived, recoverByIdIsSuccess, recoverByIsSuccess]);
@@ -330,8 +342,13 @@ export const SolidListView = (params: SolidListViewParams) => {
       const queryString = qs.stringify(queryData, {
         encodeValuesOnly: true
       });
-      setFilterQueryString(queryString);
-      triggerGetSolidEntities(queryString);
+
+      if (searchParams) {
+        setFilterQueryString(searchParams);
+      } else {
+        setFilterQueryString(queryString);
+      }
+      // triggerGetSolidEntities(queryString);
       setSelectedRecords([]);
       setSelectedRecoverRecords([]);
       setShowArchived(false);
@@ -470,13 +487,11 @@ export const SolidListView = (params: SolidListViewParams) => {
       encodeValuesOnly: true,
     });
     setFilterQueryString(queryString);
-    triggerGetSolidEntities(queryString);
+    // triggerGetSolidEntities(queryString);
   };
 
   // handle filter...
   const handleApplyCustomFilter = (transformedFilter: any) => {
-    console.log("transformedFilter",transformedFilter);
-    
     const updatedFilter = { ...(filters || {}), ...(transformedFilter || {}) };
     setFilters((prevFilters) => ({ ...(prevFilters || {}), ...(transformedFilter || {}) }));
     setQueryString(
