@@ -6094,6 +6094,10 @@
     padding: 54px;
   } */
 
+  .solid-auth-theme-wrapper.center {
+    background-image: url('./solid-login-light.png');
+  }
+
   .auth-container {
     border: 1px solid #E0E0E0;
     background: rgba(255, 255, 255, 0.10);
