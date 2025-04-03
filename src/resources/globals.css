@@ -2217,9 +2217,6 @@ li.header-li-px {
   align-items: center;
   justify-content: center;
 } */
-.solid-auth-theme-wrapper.center {
-  background-image: url(../resources/images/auth/solid-login-light.png);
-}
 
 .auth-container {
   min-width: 525px;
