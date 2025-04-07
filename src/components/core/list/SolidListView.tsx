@@ -36,7 +36,7 @@ import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
 import ListImage from '../../../resources/images/layout/images/cozy.png';
 import KanbanImage from '../../../resources/images/layout/images/kanban.png';
-import { capitalize, filter } from "lodash";
+import { capitalize, filter, set } from "lodash";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import Download from "yet-another-react-lightbox/plugins/download";
@@ -44,9 +44,39 @@ import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 import { SolidListViewConfigure } from "./SolidListViewConfigure";
 
+
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+export const queryStringToQueryObject = () => {
+  const currentPageUrl = window.location.href; // Get the current page URL
+  const encodedQueryString = localStorage.getItem(currentPageUrl); // Retrieve the encoded query string from local storage
+
+  if (encodedQueryString) {
+    try {
+      const decodedQueryString = atob(encodedQueryString); // Base64 decode the string
+      const parsedParams = qs.parse(decodedQueryString); // Parse the decoded string into an object
+      console.log("Parsed Params from Local Storage:", parsedParams);
+      return parsedParams;
+    } catch (error) {
+      console.error("Error decoding or parsing query string from local storage:", error);
+    }
+  };
+
+};
+export const queryObjectToQueryString = (queryObject: string) => {
+  if (queryObject) {
+    const stringifiedObject = qs.stringify(queryObject);
+    const encodedQueryString = btoa(stringifiedObject); // Base64 encode the stringified object
+    const currentPageUrl = window.location.href; // Get the current page URL
+    localStorage.setItem(currentPageUrl, encodedQueryString); // Store in local storage with the URL as the key
+    console.log("Encoded and stored queryObject in localStorage:", encodedQueryString);
+
+    return encodedQueryString;
+  }
+  return null;
+};
 
 type SolidListViewParams = {
   moduleName: string;
@@ -67,8 +97,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const searchParams = useSearchParams().toString(); // Converts the query params to a string
 
   // TODO: The initial filter state will be created based on the fields which are present on this list view. 
-  const [filters, setFilters] = useState<any>();
-  const [filterQueryString, setFilterQueryString] = useState<any>();
+  const [filters, setFilters] = useState<any>(params.customFilter || null);
   // const [customFilter, setCustomFilter] = useState<FilterRule[]>(initialState);
   // const [showGlobalSearchElement, setShowGlobalSearchElement] = useState<boolean>(false);
 
@@ -77,18 +106,6 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
 
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
-
-  const pushFiltersToRouter = (filterQueryString: any) => {
-    router.push(`?${filterQueryString}`, undefined, { shallow: true });
-  };
-
-  useEffect(() => {
-    if (filterQueryString) {
-      pushFiltersToRouter(filterQueryString);
-    }
-  }, [filterQueryString]);
-
-
 
   useEffect(() => {
     const fetchPermissions = async () => {
@@ -189,9 +206,15 @@ export const SolidListView = (params: SolidListViewParams) => {
       }
     }
     // setFilters(initialFilters);
-    setRows(solidListViewMetaData?.data?.solidView?.layout?.attrs?.defaultPageSize ?? 25);
-    setToPopulate(toPopulate);
-    setToPopulateMedia(toPopulateMedia);
+    const rows = solidListViewMetaData?.data?.solidView?.layout?.attrs?.defaultPageSize ?? 25;
+    const populate = toPopulate;
+    const populateMedia = toPopulateMedia;
+    setRows(rows);
+    setToPopulate(populate);
+    setToPopulateMedia(populateMedia);
+    setSortField('id');
+    setSortOrder(-1);
+    return { rows, populate, populateMedia }
   }
 
   // Set the initial filter state based on the metadata.
@@ -207,72 +230,9 @@ export const SolidListView = (params: SolidListViewParams) => {
       } else {
         setListViewMetaData(solidListViewMetaData);
       }
-      initialFilterMethod()
+      // initialFilterMethod()
     }
   }, [solidListViewMetaData]);
-
-
-  // All list view state.
-  const [listViewData, setListViewData] = useState<any[]>([]);
-  const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(25);
-  const [totalRecords, setTotalRecords] = useState(0);
-  const [sortField, setSortField] = useState("");
-  const [sortOrder, setSortOrder] = useState(0);
-  const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
-  const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [isDialogVisible, setDialogVisible] = useState(false);
-  const [isRecoverDialogVisible, setRecoverDialogVisible] = useState(false);
-  const [createButtonUrl, setCreateButtonUrl] = useState<string>();
-  const [editButtonUrl, setEditButtonUrl] = useState<string>();
-  const [showArchived, setShowArchived] = useState(false);
-
-  const sizeOptions = [
-    { label: 'Compact', value: 'small', image: CompactImage },
-    { label: 'Cozy', value: 'normal', image: CozyImage },
-    { label: 'Comfortable', value: 'large', image: ComfortableImage }
-  ]
-
-  // const viewModes = [
-  //   { label: 'List ', value: 'list', image: ListImage },
-  //   { label: 'Kanban', value: 'kanban', image: KanbanImage },
-  // ]
-
-  const [size, setSize] = useState<string | any>(sizeOptions[1].value);
-  const [viewModes, setViewModes] = useState<any>([]);
-
-
-
-  // Custom Row Action
-  const [listViewRowActionPopupState, setListViewRowActionPopupState] = useState(false);
-  const [listViewRowActionData, setListRowActionData] = useState<any>();
-
-  const toast = useRef<Toast>(null);
-
-  // Get the list view data.
-  const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading, error }] = useLazyGetSolidEntitiesQuery();
-
-  const [triggerRecoverSolidEntitiesById, { data: recoverByIdData, isLoading: recoverByIdIsLoading, error: recoverByIdError, isError: recoverByIdIsError, isSuccess: recoverByIdIsSuccess }] = useLazyRecoverSolidEntityByIdQuery();
-
-  const [triggerRecoverSolidEntities, { data: recoverByData, isLoading: recoverByIsLoading, error: recoverError, isError: recoverIsError, isSuccess: recoverByIsSuccess }] = useRecoverSolidEntityMutation();
-
-  // Get the solid entity by query string from router.
-  useEffect(() => {
-    if (searchParams) {
-      triggerGetSolidEntities(searchParams);
-    }
-  }, [searchParams]); // Use router.asPath to trigger re-render on query string changes
-
-  // After data is fetched populate the list view state so as to be able to render the data. 
-  useEffect(() => {
-    if (solidEntityListViewData) {
-      setListViewData(solidEntityListViewData?.records);
-      setTotalRecords(solidEntityListViewData?.meta.totalRecords);
-      setLoading(false);
-    }
-  }, [solidEntityListViewData]);
-
 
   // set layout and actions for create and edit buttons and view modes
   useEffect(() => {
@@ -291,6 +251,59 @@ export const SolidListView = (params: SolidListViewParams) => {
   }, [solidListViewMetaData])
 
 
+  // All list view state.
+  const [listViewData, setListViewData] = useState<any[]>([]);
+  const [first, setFirst] = useState(0);
+  const [rows, setRows] = useState(25);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [sortField, setSortField] = useState("");
+  const [sortOrder, setSortOrder] = useState(0);
+  const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
+  const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>([]);
+  const [loading, setLoading] = useState<boolean>(true);
+  const [isDialogVisible, setDialogVisible] = useState(false);
+  const [isRecoverDialogVisible, setRecoverDialogVisible] = useState(false);
+  const [createButtonUrl, setCreateButtonUrl] = useState<string>();
+  const [editButtonUrl, setEditButtonUrl] = useState<string>();
+  const [showArchived, setShowArchived] = useState(false);
+  const [queryDataLoaded, setQueryDataLoaded] = useState(false);
+  const [customFilter, setCustomFilter] = useState(null);
+  const sizeOptions = [
+    { label: 'Compact', value: 'small', image: CompactImage },
+    { label: 'Cozy', value: 'normal', image: CozyImage },
+    { label: 'Comfortable', value: 'large', image: ComfortableImage }
+  ]
+
+  // const viewModes = [
+  //   { label: 'List ', value: 'list', image: ListImage },
+  //   { label: 'Kanban', value: 'kanban', image: KanbanImage },
+  // ]
+
+  const [size, setSize] = useState<string | any>(sizeOptions[1].value);
+  const [viewModes, setViewModes] = useState<any>([]);
+
+  // Custom Row Action
+  const [listViewRowActionPopupState, setListViewRowActionPopupState] = useState(false);
+  const [listViewRowActionData, setListRowActionData] = useState<any>();
+
+  const toast = useRef<Toast>(null);
+
+  // Get the list view data.
+  const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading, error }] = useLazyGetSolidEntitiesQuery();
+
+  const [triggerRecoverSolidEntitiesById, { data: recoverByIdData, isLoading: recoverByIdIsLoading, error: recoverByIdError, isError: recoverByIdIsError, isSuccess: recoverByIdIsSuccess }] = useLazyRecoverSolidEntityByIdQuery();
+
+  const [triggerRecoverSolidEntities, { data: recoverByData, isLoading: recoverByIsLoading, error: recoverError, isError: recoverIsError, isSuccess: recoverByIsSuccess }] = useRecoverSolidEntityMutation();
+
+  // After data is fetched populate the list view state so as to be able to render the data. 
+  useEffect(() => {
+    if (solidEntityListViewData) {
+      setListViewData(solidEntityListViewData?.records);
+      setTotalRecords(solidEntityListViewData?.meta.totalRecords);
+      setLoading(false);
+    }
+  }, [solidEntityListViewData]);
+
   const [deleteSolidSingleEntiry, { isSuccess: isDeleteSolidSingleEntitySuccess }] = useDeleteSolidEntityMutation()
 
   // Delete mutation 
@@ -305,61 +318,69 @@ export const SolidListView = (params: SolidListViewParams) => {
     },
   ] = useDeleteMultipleSolidEntitiesMutation();
 
-  // Fetch Soft Deleted data
-  useEffect(() => {
-    const queryData = {
-      offset: 0,
-      limit: 25,
-      populate: toPopulate,
-      populateMedia: toPopulateMedia,
-      sort: [`id:desc`],
-      filters: filters
-    };
-    if (showArchived) {
-      queryData.showSoftDeleted = 'inclusive';
-    }
-    const queryString = qs.stringify(queryData, {
-      encodeValuesOnly: true
-    });
-    setFilterQueryString(queryString);
-    // triggerGetSolidEntities(queryString);
-    setSelectedRecords([]);
-    setSelectedRecoverRecords([]);
-  }, [showArchived, recoverByIdIsSuccess, recoverByIsSuccess]);
-
 
   // Fetch data after toPopulate has been populated...
   useEffect(() => {
-    if (toPopulate || toPopulateMedia) {
-      const queryData = {
-        offset: 0,
-        limit: 25,
-        populate: toPopulate,
-        populateMedia: toPopulateMedia,
-        sort: [`id:desc`],
-        filters: { ...(params.customFilter || {}), ...filters }
-      };
-      const queryString = qs.stringify(queryData, {
-        encodeValuesOnly: true
-      });
+    if (solidListViewMetaData) {
+      const queryObject = queryStringToQueryObject();
 
-      if (searchParams) {
-        setFilterQueryString(searchParams);
+      if (queryObject) {
+        const queryData = {
+          offset: queryObject.offset || 0,
+          limit: queryObject.limit || 25,
+          populate: queryObject.populate,
+          populateMedia: queryObject.populateMedia,
+          sort: queryObject.sort ? queryObject.sort?.map((sortItem: string) => {
+            const [field, order] = sortItem.split(":");
+            return { field, order };
+          }) : [`id:desc`],
+          filters: queryObject.filters
+        };
+        const filters = {
+          $and: []
+        }
+        if (queryObject.s_filter) {
+          filters.$and.push(queryObject.s_filter);
+        }
+        if (queryObject.c_filter) {
+          filters.$and.push(queryObject.c_filter);
+        }
+        setRows(queryData.limit);
+        setToPopulate(queryData?.populate);
+        setToPopulateMedia(queryData?.populateMedia);
+        setFirst(queryData?.offset);
+        setSortField(queryData?.sort[0]?.field);
+        setSortOrder(queryData?.sort[0]?.order);
+        setFilters(filters);
+        setQueryDataLoaded(true);
       } else {
-        setFilterQueryString(queryString);
+        initialFilterMethod();
+        setQueryDataLoaded(true)
       }
-      // triggerGetSolidEntities(queryString);
       setSelectedRecords([]);
       setSelectedRecoverRecords([]);
-      setShowArchived(false);
+
     }
-  }, [isDeleteSolidEntitiesSucess, isDeleteSolidSingleEntitySuccess, toPopulate, toPopulateMedia]);
+  }, [isDeleteSolidEntitiesSucess, isDeleteSolidSingleEntitySuccess, recoverByIdIsSuccess, recoverByIsSuccess, solidListViewMetaData]);
+
+  useEffect(() => {
+    if (queryDataLoaded) {
+      setQueryString(
+        first,
+        rows,
+        sortField,
+        sortOrder,
+        filters,
+        showArchived
+      );
+    }
+  }, [first, rows, sortField, sortOrder, showArchived, toPopulate, toPopulateMedia, customFilter, queryDataLoaded]);
 
   // Handle pagination event.
   const onPageChange = (event: any) => {
     setFirst(event.first);
     setRows(event.rows);
-    setQueryString(event.first, event.rows, sortField, sortOrder, filters);
+    // setQueryString(event.first, event.rows, sortField, sortOrder, filters, showArchived);
   };
 
   // Handle sort event.
@@ -369,13 +390,13 @@ export const SolidListView = (params: SolidListViewParams) => {
     setSortField(sortField);
     setSortOrder(validSortOrder);
     setFirst(0);
-    setQueryString(
-      0,
-      rows,
-      sortField,
-      sortOrder === 1 || sortOrder === -1 ? sortOrder : 0,
-      filters
-    );
+    // setQueryString(
+    //   0,
+    //   rows,
+    //   sortField,
+    //   sortOrder === 1 || sortOrder === -1 ? sortOrder : 0,
+    //   filters
+    // );
   };
 
   // handle change in the records which are currently selected...
@@ -456,10 +477,11 @@ export const SolidListView = (params: SolidListViewParams) => {
     limit?: number,
     sortField?: string,
     sortOrder?: number,
-    filters?: any
+    filters?: any,
+    showArchived?: boolean,
   ) => {
 
-    const solidFieldsMetadata = solidListViewMetaData.data.solidFieldsMetadata;
+    const solidFieldsMetadata = solidListViewMetaData?.data?.solidFieldsMetadata;
 
 
     const queryData: any = {
@@ -483,24 +505,40 @@ export const SolidListView = (params: SolidListViewParams) => {
       queryData.sort = [`id:desc`];
     }
 
-    const queryString = qs.stringify(queryData, {
-      encodeValuesOnly: true,
-    });
-    setFilterQueryString(queryString);
-    // triggerGetSolidEntities(queryString);
+    if (showArchived) {
+      queryData.showSoftDeleted = 'inclusive';
+    }
+    const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
+
+    if (customFilter) {
+      let url
+      const urlData = queryData;
+      delete urlData.filters;
+      urlData.s_filter = customFilter.s_filter || {};
+      urlData.c_filter = customFilter.c_filter || {};
+      queryObjectToQueryString(urlData);
+    }
+    triggerGetSolidEntities(queryString);
   };
 
   // handle filter...
   const handleApplyCustomFilter = (transformedFilter: any) => {
-    const updatedFilter = { ...(filters || {}), ...(transformedFilter || {}) };
-    setFilters((prevFilters) => ({ ...(prevFilters || {}), ...(transformedFilter || {}) }));
-    setQueryString(
-      0,
-      rows,
-      sortField,
-      sortOrder === 1 || sortOrder === -1 ? sortOrder : 0,
-      updatedFilter
-    );
+
+    const queryfilter = {
+      $and: [
+      ]
+    }
+    if (transformedFilter.s_filter) {
+      queryfilter.$and.push(transformedFilter.s_filter)
+    }
+    if (transformedFilter.c_filter) {
+      queryfilter.$and.push(transformedFilter.c_filter)
+    }
+
+    const customFilter = transformedFilter;
+    const updatedFilter = { ...(filters || {}), ...(queryfilter || {}) };
+    setFilters((prevFilters) => ({ ...(prevFilters || {}), ...(queryfilter || {}) }));
+    setCustomFilter(customFilter)
   };
 
   // clear Filter
@@ -697,7 +735,7 @@ export const SolidListView = (params: SolidListViewParams) => {
             severity="secondary"
             outlined
             onClick={() => {
-              setQueryString(first, rows, sortField, sortOrder, filters);
+              setQueryString(first, rows, sortField, sortOrder, filters, showArchived);
             }}
           />
           {showArchived && <Button type="button" icon="pi pi-refresh" label="Recover" size='small' severity="secondary"

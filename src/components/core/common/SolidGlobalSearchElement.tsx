@@ -2,19 +2,69 @@
 
 import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Dialog } from "primereact/dialog";
-import { TabPanel, TabView } from "primereact/tabview";
-import { SolidSearchBox } from "./SolidSearchBox";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@/components/core/common/FilterComponent";
 import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Divider } from "primereact/divider";
-import { Chips } from "primereact/chips";
 import { useSearchParams } from "next/navigation";
+import { queryStringToQueryObject } from "../list/SolidListView";
+import { InputText } from "primereact/inputtext";
 
 const getRandomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
+
+
+const transformFiltersToRules = (filter: any, parentRule: number | null = null): FilterRule => {
+    const currentId = idCounter++;
+
+    if (filter["$or"]) {
+        return {
+            id: currentId,
+            type: FilterRuleType.RULE_GROUP,
+            matchOperator: FilterOperator.OR,
+            parentRule,
+            children: filter["$or"].map((subFilter: any) => transformFiltersToRules(subFilter, currentId))
+        };
+    }
+
+    if (filter["$and"]) {
+        return {
+            id: currentId,
+            type: FilterRuleType.RULE_GROUP,
+            matchOperator: FilterOperator.AND,
+            parentRule,
+            children: filter["$and"].map((subFilter: any) => transformFiltersToRules(subFilter, currentId))
+        };
+    }
+
+    // Handle single rule condition
+    for (const key in filter) {
+        const condition = filter[key];
+
+        for (const matchMode in condition) {
+            return {
+                id: currentId,
+                type: FilterRuleType.RULE,
+                fieldName: key,
+                //@ts-ignore
+                matchMode,
+                value: [condition[matchMode]],
+                parentRule,
+                children: []
+            };
+        }
+    }
+
+    throw new Error("Invalid filter structure");
+}
+
+
+
+
+let idCounter = 1;
+const generateId = () => Date.now() + Math.floor(Math.random() * 1000);
+
 
 const transformRulesToFilters = (input: any) => {
 
@@ -103,8 +153,28 @@ const transformRulesToFilters = (input: any) => {
 
 }
 
+const tranformSearchToFilters = (input: any) => {
+
+    if (!input || !input.$and) return input; // Return as-is if invalid
+
+    return {
+        $and: input.$and.map((condition: any) => {
+            const { fieldName, matchMode, value } = condition;
+
+            // Ensure value is a single string (if it's an array with one element, extract it)
+            const formattedValue = Array.isArray(value) && value.length === 1 ? value[0] : value;
+
+            return {
+                [fieldName]: {
+                    [matchMode]: formattedValue
+                }
+            };
+        })
+    };
+}
+
 export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCustomFilter, filters, clearFilter }: any, ref) => {
-    const initialState: FilterRule[] = [
+    const defaultState: FilterRule[] = [
         {
             id: 1,
             type: FilterRuleType.RULE_GROUP,
@@ -132,10 +202,15 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             ]
         }
     ];
+    const [initialState, setInitialState] = useState(defaultState);
+
     const searchParams = useSearchParams().toString(); // Converts the query params to a string
+
+    console.log("searchParams", searchParams);
 
     const op = useRef<OverlayPanel>(null);
     const chipsRef = useRef<HTMLDivElement | null>(null);
+
     const [filterRules, setFilterRules] = useState<FilterRule[]>(initialState);
     const [fields, setFields] = useState<any[]>([]);
     const [searchableFields, setSearchableFields] = useState<any[]>([]);
@@ -150,6 +225,34 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             setFilterRules(initialState);
         }
     }));
+
+    useEffect(() => {
+        const queryObject = queryStringToQueryObject();
+        if (queryObject) {
+            const searchChips: any = queryObject?.s_filter || null;
+            const customChips = queryObject?.c_filter || null;
+            if (searchChips) {
+                const formattedChips = searchChips?.$and.map((chip: any, key: any) => {
+                    const chipKey = Object.keys(chip)[0]; // Get the key, e.g., "displayName"
+                    const chipValue = chip[chipKey]?.$containsi; // Get the value of "$containsi"
+                    const chipdata = {
+                        columnName: chipKey,
+                        value: chipValue
+                    };
+                    return chipdata
+                }
+                );
+                setSearchChips(formattedChips);
+            }
+            if (customChips) {
+                const formatedCustomChips: FilterRule = transformFiltersToRules(customChips);
+                console.log("formatedCustomChips", formatedCustomChips);
+                setFilterRules([formatedCustomChips]);
+
+            }
+        }
+    }, [searchParams])
+
 
     useEffect(() => {
         if (viewData?.data?.solidFieldsMetadata) {
@@ -183,54 +286,44 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         }
     }, [filters]);
 
-    const handleChipChange = (e: any) => {
-        setInputValue(e.target.value);
-        if (op.current && e.target) {
-            op.current.show;
-        }
-        if (e.value && e.value.length > 0) {
-            const newChip = e.value[e.value.length - 1];
-            if (!searchChips.some(chip => chip.value === newChip.value)) {
-                setSearchChips([...searchChips, newChip]);
-            }
-        }
-    };
-
-    // const firstFilterableFieldName = viewData?.data?.solidView?.layout?.children?.find(
-    //     (value: any) => value?.attrs?.isSearchable
-    // )?.attrs?.name;
     const firstFilterableFieldName = searchableFields[0]; // First searchable field
 
     const handleAddChip = (columnName?: string) => {
         if (inputValue?.trim()) {
-            const newChip = { columnName: columnName || firstFilterableFieldName, value: inputValue.trim() };
-
-            setSearchChips((prevChips) => [...prevChips, newChip]);
-            setInputValue(""); // Clear input value
-        }
-    }
-
-    const handleKeyDown = (e: any) => {
-        if (e.key === "Enter" && inputValue?.trim()) {
-            handleAddChip();
-            setInputValue(null);
-            e.preventDefault(); // Prevent form submission or unexpected behavior
+            const newChip = {
+                columnName: columnName || firstFilterableFieldName,
+                value: inputValue.trim(),
+            };
+            setSearchChips((prev) => [...prev, newChip]);
+            setInputValue("");
+            op.current?.hide();
         }
     };
 
-    const mergeSearchAndCustomFilters = (transformedFilter: any, newFilter: any, filterName: string) => {
-        const filters = [];
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter" && inputValue?.trim()) {
+            handleAddChip();
+            e.preventDefault();
+        } else if (e.key === "Backspace" && inputValue === "") {
+            setSearchChips((prev) => prev.slice(0, -1));
+        }
+
+
+    };
+
+    const mergeSearchAndCustomFilters = (transformedFilter: any, newFilter: any, transformedFilterName: string, newFilterName: string) => {
+        const filters: any = {};
 
         // Add only non-null filters
         if (transformedFilter && Object.keys(transformedFilter).length > 0) {
-            filters.push({ [filterName]: transformedFilter });
+            filters[transformedFilterName] = transformedFilter;
         }
         if (newFilter && Object.keys(newFilter).length > 0) {
-            filters.push(newFilter);
+            filters[newFilterName] = newFilter;
         }
 
-        // If there are multiple filters, wrap them in an $and condition
-        return filters.length > 0 ? { $and: filters } : filters[0] || {};
+        // Return the combined filters object
+        return filters;
     }
 
 
@@ -239,7 +332,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         console.log("transformedFilter from custom filter", transformedFilter);
         setCustomFilter(transformedFilter);
         if (transformedFilter) {
-            const finalFilter = mergeSearchAndCustomFilters(transformedFilter, searchFilter, "c_filter");
+            const finalFilter = mergeSearchAndCustomFilters(transformedFilter, searchFilter, "c_filter", "s_filter");
             handleApplyCustomFilter(finalFilter)
         }
         setShowGlobalSearchElement(false)
@@ -247,26 +340,18 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     useEffect(() => {
         const formattedChips = {
-            id: 1,
-            matchOperator: "and",
-            parentRule: null,
-            type: "rule_group",
-            children: searchChips.map((chip) => ({
-                children: [],
+            $and: searchChips.map((chip) => ({
                 fieldName: chip.columnName,
-                id: Date.now() + getRandomInt(1, 500),
                 matchMode: "$containsi",
-                parentRule: 1,
-                type: "rule",
                 value: [chip.value]
             }))
         };
-        if (formattedChips.children.length > 0) {
-            const transformedFilter = transformRulesToFilters(formattedChips);
+        // if (formattedChips.$and.length > 0) {
+            const transformedFilter = tranformSearchToFilters(formattedChips);
             setSearchFilter(transformedFilter);
-            const finalFilter = mergeSearchAndCustomFilters(transformedFilter, customFilter, "s_filter");
+            const finalFilter = mergeSearchAndCustomFilters(transformedFilter, customFilter, "s_filter", "c_filter");
             handleApplyCustomFilter(finalFilter);
-        }
+        // }
     }, [searchChips]);
 
     const groupedSearchChips = searchChips.reduce((acc, chip) => {
@@ -278,97 +363,76 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         return acc;
     }, {} as Record<string, string[]>);
 
-    const chipsToDisplay = [
-        ...(customChip ? [customChip] : []),
-        ...Object.entries(groupedSearchChips).map(([columnName, values]) => `<div class="custom-chip-column">${columnName}</div> <div class="custom-chip-value">${values.join("<span class='custom-chip-or'> or</span> ")}</div>`)
-    ];
-
-
-    // useEffect(() => {
-    //     console.log("Input Value", customChip, "Input Value", searchChips, "Input Value", inputValue);
-    // }, [chipsToDisplay])
-
-    const customChipTemplate = (item: any) => {
-        if (item === customChip) {
-            return (
+    const CustomChip = () => (
+        <li>
+            <div className="custom-filter-chip-type">
                 <div className="flex align-items-center gap-2 text-base">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none" onClick={() => setShowGlobalSearchElement(true)} >
+                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"
+                        onClick={() => setShowGlobalSearchElement(true)}>
                         <rect width="20" height="20" rx="4" fill="#722ED1" />
-                        <path d="M8.66667 15V13.3333H11.3333V15H8.66667ZM6 10.8333V9.16667H14V10.8333H6ZM4 6.66667V5H16V6.66667H4Z" fill="white" />
+                        <path d="M8.66667 15V13.3333H11.3333V15H8.66667ZM6 10.8333V9.16667H14V10.8333H6ZM4 6.66667V5H16V6.66667H4Z"
+                            fill="white" />
                     </svg>
-                    <span><strong>{customChip}</strong> rule{customChip === "1" ? '' : 's'} applied</span>
+                    <span><strong>{customChip}</strong> rules applied</span>
                 </div>
-            );
-        }
-        return <div className="flex align-items-center gap-2 text-base" dangerouslySetInnerHTML={{ __html: item }}></div>;
-    };
+            </div>
+        </li>
+    );
 
-    const handleRemoveChip = (removedChipValue: any) => {
-        console.log("Removing chip:", removedChipValue);
 
-        setSearchChips((prevChips) => {
-            const updatedChips = prevChips.filter((chip) => chip.value !== removedChipValue);
-            console.log("Updated searchChips after removal:", updatedChips);
-            return updatedChips;
-        });
+    const SearchChip = () => (
+        <>
+            {Object.entries(groupedSearchChips).map(([column, values]) => (
+                <li key={column}>
+                    <div className="search-filter-chip-type">
+                        <div>{column}</div>
+                        {values.map((value, index) => (
+                            <span key={index} className="custom-chip-value mx-1">{value}</span>
+                        ))}
+                    </div>
+                </li>
+            ))}
+        </>
+    );
 
-        // Prevent clearing customChip if it is different from the removed chip
-        if (customChip === removedChipValue) {
-            console.log("Clearing custom chip:", customChip);
-            setCustomChip("");
-        }
-    };
+
+
 
     return (
         <div className="flex justify-content-center solid-custom-filter-wrapper">
-            <div className="p-inputgroup flex-1 custom-input-group"
-                ref={chipsRef}
-                onClick={(e) => {
-                    e.preventDefault();
-                    if (op.current && e.target) {
-                        op.current.toggle(e);
-                    }
-                }}
-            >
-                <Chips
-                    value={chipsToDisplay}
-                    onChange={(e: any) => {
-                        // Compare previous and new values to detect removal
-                        if (e.value.length < searchChips.length) {
-                            const removedChip = searchChips.find(chip => !e.value.includes(chip.value));
-                            if (removedChip) {
-                                handleRemoveChip(removedChip.value);
-                            }
-                        } else {
-                            setSearchChips(e.value.map((val: any) => ({ columnName: firstFilterableFieldName, value: val })));
-                        }
-                    }}
-                    onRemove={(event) => {
-                        setSearchChips((prevChips) => prevChips.filter((chip) => chip.value !== event.value));
-                        if (searchChips.length === 1) {
-                            setCustomChip("");
-                            clearFilter();
-                        }
-                    }}
-                    itemTemplate={customChipTemplate}
-                    onKeyDown={handleKeyDown}
-                    className="custom-filter-chip"
-                    placeholder="Search..."
-                    removeIcon='pi pi-times'
-                    removable
-                />
-                <Button
-                    icon="pi pi-search"
-                    style={{ fontSize: 10 }}
-                    severity="secondary"
-                    outlined size="small"
-                    onClick={() => setShowGlobalSearchElement(true)}
-                // onClick={(e) => {
-                //     if (op.current && e.target) {
-                //         op.current.toggle(e);
-                //     }
-                // }}
-                />
+            <div className="solid-global-search-element">
+                <ul className="">
+                    {customChip && <CustomChip />}
+                    <SearchChip />
+                    <li ref={chipsRef}>
+                        <div className="relative">
+                            <InputText
+                                value={inputValue || ""}
+                                placeholder="Search..."
+                                onChange={(e) => {
+                                    setInputValue(e.target.value);
+                                    if (e.target.value.trim() !== "") {
+                                      op.current?.show(e.currentTarget);
+                                    } else {
+                                      op.current?.hide();
+                                    }
+                                  }}
+                                  onFocus={(e) => {
+                                    if (inputValue?.trim()) op.current?.show(e.currentTarget);
+                                  }}
+                                  onKeyDown={handleKeyDown}
+                            />
+                            <Button
+                                icon="pi pi-search"
+                                style={{ fontSize: 10 }}
+                                severity="secondary"
+                                outlined size="small"
+                                onClick={() => setShowGlobalSearchElement(true)}
+                                className="custom-filter-button"
+                            />
+                        </div>
+                    </li>
+                </ul>
             </div>
             <OverlayPanel ref={op} className="solid-custom-overlay" style={{ minWidth: 405 }}>
                 {inputValue ? (

@@ -101,7 +101,7 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
               key={rule.id}
               value={fieldName.name}
               onChange={e => {
-                setFieldName({ name: e.value})
+                setFieldName({ name: e.value })
                 onChange(rule.id, 'fieldName', e.value)
               }}
               options={fields}
@@ -351,26 +351,55 @@ const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, transf
   //   setFilterRules(prev => deleteRecursively(prev, id));
   // };
 
+
+  const removeEmptyGroups = (rule) => { 
+    if (rule.type === "rule_group" && rule.children.length === 0) {
+      return null;
+    }
+
+    rule.children = rule.children
+      .map(removeEmptyGroups) // Recursively process children
+      .filter(child => child !== null); // Remove null values
+
+    return rule;
+  };
+
+
   const handleDeleteRule = (id) => {
-    const deleteRecursively = (rules, id) => {
-      return rules
-        .filter(rule => rule.id !== id) // Remove the target rule
+    if(filterRules[0].children.length === 1 && filterRules[0].children[0].id === id ){
+      return
+    }
+    const deleteRecursively = (rules, id, isRoot = false) => {
+      const mappedData = rules
         .map(rule => {
+          if (rule.id === id) {
+            return null; // Remove the target rule
+          }
+
           if (rule.children) {
             const updatedChildren = deleteRecursively(rule.children, id);
-            // If the rule had only one child and it's now empty, remove the parent
-            if (rule.children.length === 1 && updatedChildren.length === 0) {
-              return null;
+
+            // If this rule had children and now has none, keep it but set children to []
+            if (rule.children.length > 0 && updatedChildren.length === 0) {
+              return { ...rule, children: [] };
             }
+
             return { ...rule, children: updatedChildren };
           }
+
           return rule;
         })
-        .filter(Boolean); // Remove null values
+        .filter(rule => rule !== null); // Remove null values
+
+      return mappedData
     };
 
-    setFilterRules(prev => deleteRecursively(prev, id));
+    setFilterRules(prevRules => [removeEmptyGroups(deleteRecursively(prevRules, id, true)[0])]);
   };
+
+
+
+
 
   // const handlePrintState = () => {
   //   // setPrintedState(JSON.stringify(filterRules, null, 2)); // Pretty format the state
