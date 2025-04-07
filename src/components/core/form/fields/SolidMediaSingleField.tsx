@@ -92,6 +92,7 @@ export class SolidMediaSingleField implements ISolidField {
         const [fileDetails, setFileDetails] = useState<{ name: string; type: string, fileUrl: string, fileSize: number } | null>(null);
         const [isReplaceImageDialogVisible, setReplaceImageDialogVisible] = useState(false);
         const [newFileToUpload, setNewFileToUpload] = useState<any>(null);
+        const [fileSizeError, setFileSizeError] = useState<string | null>(null);
 
         const formatFileSize = (size: number) => {
             return size >= 1024 * 1024
@@ -118,6 +119,7 @@ export class SolidMediaSingleField implements ISolidField {
         const handleDropImage = (acceptedFiles: any[]) => {
             const file = acceptedFiles[0];
             if (!file) return;
+            setFileSizeError(null);
             if (fileDetails) {
                 // If a file is already uploaded, show the confirmation dialog
                 setNewFileToUpload(file);
@@ -197,6 +199,15 @@ export class SolidMediaSingleField implements ISolidField {
             isDragActive: isDragActive,
         } = useDropzone({
             onDrop: handleDropImage,
+            onDropRejected: (fileRejections) => {
+                const rejection = fileRejections[0];
+                const sizeError = rejection.errors.find(err => err.code === 'file-too-large');
+                if (sizeError) {
+                    setFileSizeError(`File is too large. Max size is ${fieldMetadata.mediaMaxSizeKb} KB.`);
+                } else {
+                    setFileSizeError(rejection.errors[0]?.message || "File not accepted.");
+                }
+            },
             accept: getAcceptedFileTypes(fieldMetadata.mediaTypes),
             maxSize: fieldMetadata.mediaMaxSizeKb * 1024,
         });
@@ -212,7 +223,7 @@ export class SolidMediaSingleField implements ISolidField {
             <>
                 {viewMode === "view" &&
                     <div className={className}>
-                          {DynamicWidget && <DynamicWidget {...widgetProps} />}
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
                     </div>
                 }
                 {viewMode === "edit" &&
@@ -239,6 +250,10 @@ export class SolidMediaSingleField implements ISolidField {
                                     <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                                 </div>
                             )}
+                            {
+                                fileSizeError &&
+                                <Message severity="error" text={fileSizeError?.toString()} />
+                            }
                             {fileDetails && (
                                 <div className="solid-file-upload-wrapper mt-4">
                                     <div className="flex align-items-center gap-2">

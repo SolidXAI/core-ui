@@ -367,8 +367,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
         } else {
             setViewMode("view"); // Default to 'view' if not present
         }
-        if(params.id === 'new'){
-            setViewMode("edit"); 
+        if (params.id === 'new') {
+            setViewMode("edit");
         }
     }, [viewModeFromURL]);
 
@@ -568,14 +568,18 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     // createEntity(formData);
                     const result = await createEntity(formData).unwrap();
                     showToast("success", "Form saved", "Form saved successfully!");
-                    const updatedUrl = pathname.replace("new", result?.data?.id);
-                    router.push(updatedUrl);
+                    if (!params.embeded) {
+                        const updatedUrl = pathname.replace("new", result?.data?.id);
+                        router.push(updatedUrl);
+                    }
                 }
                 else {
                     // updateEntity({ id: +params.id, data: formData });
                     await updateEntity({ id: +params.id, data: formData }).unwrap();
                     // const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
-                    showToast("success", "Form Updated", "Form updated successfully!");
+                    if (!params.embeded) {
+                        showToast("success", "Form Updated", "Form updated successfully!");
+                    }
                 }
             }
 
@@ -1108,6 +1112,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                             />
                                         </div>
                                     } */}
+
+                                    {/* Inline */}
                                     {params.embeded == true &&
                                         actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
                                         !formViewLayout.attrs.readonly &&
@@ -1165,6 +1171,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                             />
                                         </div>
                                     }
+
+                                    {/* Inline */}
                                     {params.embeded == true &&
                                         actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
                                         !formViewLayout.attrs.readonly &&

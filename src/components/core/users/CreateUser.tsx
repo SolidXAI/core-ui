@@ -244,9 +244,9 @@ const CreateUser = ({ data, params }: any) => {
                 <div className="form-wrapper-title">Create User</div>
               </div>
               <div className="gap-3 flex">
-                {formik.dirty &&
+                {/* {formik.dirty && */}
                   <Button label="Save" size="small" type="submit" />
-                }
+                {/* } */}
                 <CancelButton />
               </div>
             </>
@@ -254,13 +254,13 @@ const CreateUser = ({ data, params }: any) => {
             <>
               <div className="flex align-items-center gap-3">
                 <BackButton />
-                <h1 className="m-0">Update User</h1>
+                <div className="form-wrapper-title">Update User</div>
               </div>
               <div>
                 <div className="gap-3 flex">
-                  {formik.dirty &&
+                  {/* {formik.dirty && */}
                     <Button label="Save" size="small" type="submit" />
-                  }
+                  {/* } */}
                   {data &&
                     <Button outlined label="Delete" size="small" severity="danger" type="button" onClick={() => deleteUser(data.id)} />
                   }

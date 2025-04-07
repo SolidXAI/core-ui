@@ -105,6 +105,7 @@ export class SolidMediaMultipleField implements ISolidField {
         const [imageToBeDeletedData, setImageToBeDeletedData] = useState<any>();
         const [fileDetails, setFileDetails] = useState<{ name: string; type: string; size: number, id: number, fileUrl: string }[]>([]);
         const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
+        const [fileSizeError, setFileSizeError] = useState<string | null>(null);
 
         const formatFileSize = (size: number) => {
             return size >= 1024 * 1024
@@ -153,6 +154,7 @@ export class SolidMediaMultipleField implements ISolidField {
 
         const handleDropImages = (acceptedFiles: any[]) => {
             if (!acceptedFiles.length) return;
+            setFileSizeError(null);
             const newFileDetails = [...fileDetails];
             acceptedFiles.forEach((file) => {
                 newFileDetails.push({ name: file.name, type: file.type, size: file.size, id: file.id, fileUrl: file._full_url });
@@ -201,6 +203,15 @@ export class SolidMediaMultipleField implements ISolidField {
             isDragActive,
         } = useDropzone({
             onDrop: handleDropImages,
+            onDropRejected: (fileRejections) => {
+                const rejection = fileRejections[0];
+                const sizeError = rejection.errors.find(err => err.code === 'file-too-large');
+                if (sizeError) {
+                    setFileSizeError(`File is too large. Max size is ${fieldMetadata.mediaMaxSizeKb} KB.`);
+                } else {
+                    setFileSizeError(rejection.errors[0]?.message || "File not accepted.");
+                }
+            },
             accept: getAcceptedFileTypes(fieldMetadata.mediaTypes),
             maxSize: fieldMetadata.mediaMaxSizeKb * 1024,
         });
@@ -244,6 +255,10 @@ export class SolidMediaMultipleField implements ISolidField {
                                     <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                                 </div>
                             )}
+                            {
+                                fileSizeError &&
+                                <Message severity="error" text={fileSizeError?.toString()} />
+                            }
                         </div>
                         {fileDetails.length > 0 &&
                             <div className="solid-file-upload-wrapper">
