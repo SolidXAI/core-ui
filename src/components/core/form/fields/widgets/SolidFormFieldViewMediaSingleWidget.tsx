@@ -56,7 +56,7 @@ export const SolidFormFieldViewMediaSingleWidget = ({ formik, fieldContext }: So
         <div className={className}>
             <div className="flex flex-column gap-2 mt-4 relative">
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label font-medium">{fieldLabel}
                     </label>
                 }
 

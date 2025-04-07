@@ -63,7 +63,7 @@ export const SolidFormFieldViewMediaMultipleWidget = ({ formik, fieldContext }: 
     return (
         <div className={className}>
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label mt-4">{fieldLabel}
+                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label mt-4 font-medium">{fieldLabel}
                 </label>
             }
             {fileDetails.length > 0 &&

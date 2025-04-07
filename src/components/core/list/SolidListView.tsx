@@ -560,6 +560,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     return (
       <div>
         <Button
+          type="button"
           text
           size="small"
           className=""
