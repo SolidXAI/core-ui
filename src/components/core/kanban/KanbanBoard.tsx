@@ -24,7 +24,7 @@ interface ApiResponse {
     };
 }
 
-export const KanbanBoard = ({ groupedView, kanbanViewData, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLinPagination, setLightboxUrls, setOpenLightbox }: any) => {
+export const KanbanBoard = ({ groupedView, kanbanViewData, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLanePagination, setLightboxUrls, setOpenLightbox, editButtonUrl }: any) => {
     const [loading, setLoading] = useState<boolean>(true);
     // State to manage the folded status of each column
     const [foldedStates, setFoldedStates] = useState<Record<string, boolean>>({});
@@ -112,6 +112,7 @@ export const KanbanBoard = ({ groupedView, kanbanViewData, solidKanbanViewMetaDa
                                 handleLoadMore={handleLoadMore}
                                 setLightboxUrls={setLightboxUrls}
                                 setOpenLightbox={setOpenLightbox}
+                                editButtonUrl={editButtonUrl}
                             />
                         );
                     })}
