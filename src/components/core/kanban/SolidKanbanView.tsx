@@ -26,6 +26,7 @@ import Counter from "yet-another-react-lightbox/plugins/counter";
 import Download from "yet-another-react-lightbox/plugins/download";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
+import { useRouter, useSearchParams } from "next/navigation";
 
 
 
@@ -38,7 +39,8 @@ type SolidKanbanViewParams = {
 
 export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const solidGlobalSearchElementRef = useRef();
-
+  const searchParams = useSearchParams().toString(); // Converts the query params to a string
+  const router = useRouter();
   // TODO: The initial filter state will be created based on the fields which are present on this kanban view. 
   const [filters, setFilters] = useState<any>();
   const [toPopulate, setToPopulate] = useState<string[]>([]);
@@ -58,8 +60,21 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
   const [openLightbox, setOpenLightbox] = useState(false);
   const [lightboxUrls, setLightboxUrls] = useState({});
+  const [filterQueryString, setFilterQueryString] = useState<any>();
 
 
+
+    const pushFiltersToRouter = (filterQueryString: any) => {
+      router.push(`?${filterQueryString}`, undefined, { shallow: true });
+    };
+  
+    useEffect(() => {
+      if (filterQueryString) {
+        pushFiltersToRouter(filterQueryString);
+      }
+    }, [filterQueryString]);
+  
+  
 
   useEffect(() => {
     const fetchPermissions = async () => {
@@ -286,10 +301,15 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           // sort: [`id:desc`],
         };
         // fields=status&groupBy=status&fields=count(status)&populateGroup=true
-        const queryString = qs.stringify(queryData, {
+        let queryString = qs.stringify(queryData, {
           encodeValuesOnly: true
         });
-
+        if(searchParams) {
+          queryString = searchParams;
+          setFilterQueryString(searchParams)
+        }else{
+          setFilterQueryString(queryString)
+        }
         triggerGetSolidEntities(queryString);
         setSelectedRecords([]);
       }
@@ -408,7 +428,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       const queryString = qs.stringify(queryData, {
         encodeValuesOnly: true
       });
-
+      setFilterQueryString(queryString);
       const data: any = await triggerGetSolidEntities(queryString);
       const newRecords = data.data.records;
       const currentData = kanbanViewData;
@@ -561,7 +581,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       const queryString = qs.stringify(queryData, {
         encodeValuesOnly: true
       });
-
+      setFilterQueryString(queryString);
       const data: any = await triggerGetSolidEntities(queryString);
       if (data && data?.data?.groupRecords.length > 0) {
         const updatedData = [...kanbanViewData, ...data.data.groupRecords];
@@ -600,6 +620,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       });
 
       // triggerGetSolidEntities(queryString);
+      setFilterQueryString(queryString);
       const data: any = await triggerGetSolidEntities(queryString);
       if (data && data?.data?.groupRecords.length > 0) {
         const updatedData = [...data.data.groupRecords];

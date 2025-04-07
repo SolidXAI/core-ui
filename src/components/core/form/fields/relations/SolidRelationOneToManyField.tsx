@@ -7,6 +7,8 @@ import * as Yup from 'yup';
 import { Schema } from "yup";
 import SolidFormView from "../../SolidFormView";
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
+import { usePathname } from "next/navigation";
+import { getExtensionComponent } from "@/helpers/registry";
 
 
 export class SolidRelationOneToManyField implements ISolidField {
@@ -64,7 +66,8 @@ export class SolidRelationOneToManyField implements ISolidField {
         const [refreshList, setRefreshList] = useState(false); // Added state for rerender
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
         const readOnlyPermission = this.fieldContext.readOnly;
-
+        const pathname = usePathname();
+        const lastPathSegment = pathname.split('/').pop();
 
         const handlePopupOpen = (id: any) => {
             const formviewparams = {
@@ -104,7 +107,7 @@ export class SolidRelationOneToManyField implements ISolidField {
         useEffect(() => {
 
             const customFilter = this.fieldContext.fieldMetadata.relationCoModelFieldName ? this.fieldContext.fieldMetadata.relationCoModelFieldName : `${this.fieldContext.modelName}`
-            const listviewparams = { 
+            const listviewparams = {
                 moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
                 modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName),
                 inlineCreate: readOnlyPermission === false ? true : false,
@@ -138,27 +141,43 @@ export class SolidRelationOneToManyField implements ISolidField {
         const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-
+        const viewMode: string = this.fieldContext.viewMode;
+        let DynamicWidget = getExtensionComponent("SolidFormFieldRelationViewModeWidget");
+        const widgetProps = {
+            label: fieldLabel,
+            value: formik.values[fieldLayoutInfo.attrs.name],
+        }
 
         return (
-            <div className={className}>
-                {/* <div className="justify-content-center align-items-center"> */}
-                {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                        {/* &nbsp;{fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                    </label>
+            <>
+                {viewMode === "view" &&
+                    <div className={className}>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
+                    </div>
                 }
+                {viewMode === "edit" &&
+                    (
+                        <div className={className}>
+                            {/* <div className="justify-content-center align-items-center"> */}
+                            {showFieldLabel != false &&
+                                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                                    {/* &nbsp;{fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
+                                </label>
+                            }
 
-                {/* </div>
+                            {/* </div>
                 <br></br> */}
-                {listViewParams &&
-                    <SolidListView key={refreshList.toString()}  {...listViewParams} handlePopUpOpen={handlePopupOpen} />
-                }
-                {readOnlyPermission !== true &&
-                    this.renderSolidFormEmbededView(visibleCreateRelationEntity, setvisibleCreateRelationEntity, formViewParams, handlePopupClose)}
+                            {lastPathSegment === 'new' && <p>Please save the {solidFormViewMetaData.data.solidView.model.displayName} to be able to save {fieldMetadata.displayName}</p>}
+                            {listViewParams && lastPathSegment !== 'new' &&
+                                <SolidListView key={refreshList.toString()}  {...listViewParams} handlePopUpOpen={handlePopupOpen} />
+                            }
+                            {readOnlyPermission !== true &&
+                                this.renderSolidFormEmbededView(visibleCreateRelationEntity, setvisibleCreateRelationEntity, formViewParams, handlePopupClose)}
 
-            </div>
+                        </div>
+                    )}
+            </>
         );
 
     }

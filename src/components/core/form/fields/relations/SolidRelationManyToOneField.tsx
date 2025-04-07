@@ -13,6 +13,7 @@ import { Checkbox } from "primereact/checkbox";
 import { Dialog } from "primereact/dialog";
 import { Panel } from "primereact/panel";
 import SolidFormView from "../../SolidFormView";
+import { getExtensionComponent } from "@/helpers/registry";
 
 
 export class SolidRelationManyToOneField implements ISolidField {
@@ -135,41 +136,58 @@ export class SolidRelationManyToOneField implements ISolidField {
             formik.setFieldValue(fieldLayoutInfo.attrs.name, updatedRelationData);
 
         }
+
+        const viewMode: string = this.fieldContext.viewMode;
+        let DynamicWidget = getExtensionComponent("SolidFormFieldRelationViewModeWidget");
+        const widgetProps = {
+            label: fieldLabel,
+            value: formik.values[fieldLayoutInfo.attrs.name],
+        }
         return (
-            <div className={className}>
-                <div className="mt-4 relative">
-                    {showFieldLabel != false &&
-                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
-                            {fieldLabel}
-                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                        </label>
-                    }
-                    <div className="flex align-items-center gap-3 mt-2">
-                        <AutoComplete
-                            readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                            disabled={formDisabled || fieldDisabled || readOnlyPermission}
-                            {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
-                            id={fieldLayoutInfo.attrs.name}
-                            field="label"
-                            value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                            dropdown={!readOnlyPermission}
-                            suggestions={autoCompleteItems}
-                            completeMethod={autoCompleteSearch}
-                            onChange={formik.handleChange}
-                            onFocus={(e) => e.target.select()}
-                            className="w-full solid-standard-autocomplete"
-                        />
-                        {fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false &&
-                            this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
-                        }
+            <>
+                {viewMode === "view" &&
+                    <div className={className}>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
                     </div>
-                    {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                        <div className="absolute mt-1">
-                            <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                }
+                {viewMode === "edit" &&
+                    (
+                        <div className={className}>
+                            <div className="mt-4 relative">
+                                {showFieldLabel != false &&
+                                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
+                                        {fieldLabel}
+                                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                                    </label>
+                                }
+                                <div className="flex align-items-center gap-3 mt-2">
+                                    <AutoComplete
+                                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                                        disabled={formDisabled || fieldDisabled || readOnlyPermission}
+                                        {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
+                                        id={fieldLayoutInfo.attrs.name}
+                                        field="label"
+                                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                                        dropdown={!readOnlyPermission}
+                                        suggestions={autoCompleteItems}
+                                        completeMethod={autoCompleteSearch}
+                                        onChange={formik.handleChange}
+                                        onFocus={(e) => e.target.select()}
+                                        className="w-full solid-standard-autocomplete"
+                                    />
+                                    {fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false &&
+                                        this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
+                                    }
+                                </div>
+                                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                                    <div className="absolute mt-1">
+                                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
-                </div>
-            </div>
+            </>
         );
     }
 

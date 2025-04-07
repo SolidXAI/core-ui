@@ -7,7 +7,7 @@ import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
 import { useFormik } from "formik";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import "primeflex/primeflex.css";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -52,7 +52,7 @@ export type SolidFormViewProps = {
     handlePopupClose?: any,
     customCreateHandler?: any
     inlineCreateAutoSave?: boolean,
-    customLayout?: any
+    customLayout?: any,
 };
 
 
@@ -144,7 +144,7 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps): ISolidField 
 }
 
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
-const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, onChange, onBlur }: any) => {
+const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur }: any) => {
     const fieldContext: SolidFieldProps = {
         // field metadata - coming from the field-metadata table.
         fieldMetadata: fieldMetadata,
@@ -156,6 +156,7 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
         solidFormViewMetaData: solidFormViewMetaData,
         modelName: modelName,
         readOnly: readOnly,
+        viewMode: viewMode,
         onChange: onChange,
         onBlur: onBlur
     }
@@ -345,11 +346,15 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const pathname = usePathname();
     const router = useRouter();
     const toast = useRef<Toast>(null);
+    const searchParams = useSearchParams();
+    const viewModeFromURL = searchParams.get("viewMode");
+
     const [redirectToList, setRedirectToList] = useState(false);
 
     const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
 
     const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
+    const [viewMode, setViewMode] = useState<"view" | "edit">("view");
 
     const errorFields: string[] = [];
 
@@ -357,7 +362,30 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const op = useRef(null);
 
     useEffect(() => {
+        if (viewModeFromURL === "edit" || viewModeFromURL === "view") {
+            setViewMode(viewModeFromURL);
+        } else {
+            setViewMode("view"); // Default to 'view' if not present
+        }
+        if (params.id === 'new') {
+            setViewMode("edit");
+        }
+    }, [viewModeFromURL]);
 
+
+    // function that updates view mode 
+    const updateViewMode = (newMode: "view" | "edit") => {
+        setViewMode(newMode);
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("viewMode", newMode);
+        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+    };
+
+
+
+
+
+    useEffect(() => {
         const fetchPermissions = async () => {
             if (params.modelName) {
                 const permissionNames = [
@@ -540,14 +568,18 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     // createEntity(formData);
                     const result = await createEntity(formData).unwrap();
                     showToast("success", "Form saved", "Form saved successfully!");
-                    const updatedUrl = pathname.replace("new", result?.data?.id);
-                    router.push(updatedUrl);
+                    if (!params.embeded) {
+                        const updatedUrl = pathname.replace("new", result?.data?.id);
+                        router.push(updatedUrl);
+                    }
                 }
                 else {
                     // updateEntity({ id: +params.id, data: formData });
                     await updateEntity({ id: +params.id, data: formData }).unwrap();
                     // const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
-                    showToast("success", "Form Updated", "Form updated successfully!");
+                    if (!params.embeded) {
+                        showToast("success", "Form Updated", "Form updated successfully!");
+                    }
                 }
             }
 
@@ -618,7 +650,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     useEffect(() => {
         if (solidFormViewMetaData) {
-            let formLayout = solidFormViewMetaData; 
+            let formLayout = solidFormViewMetaData;
             const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormLayoutLoad;
             let DynamicFunctionComponent = null;
             const event: SolidLoadForm = {
@@ -634,7 +666,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     if (updatedFormLayout && updatedFormLayout?.layoutChanged && updatedFormLayout?.newLayout) {
                         const newFormLayout = {
                             ...formLayout,
-                            data : {
+                            data: {
                                 ...formLayout.data,
                                 solidView: {
                                     ...formLayout.data.solidView,
@@ -659,23 +691,23 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const handleDynamicFunction = async () => {
             if (solidFormViewData) {
                 const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormDataLoad;
-    
+
                 let DynamicFunctionComponent = null;
                 let formViewData = solidFormViewData?.data;
-    
+
                 const event: SolidLoadForm = {
                     fieldsMetadata: solidFormViewMetaData,
                     formData: solidFormViewData?.data,
                     type: dynamicHeader,
                     viewMetadata: solidFormViewMetaData?.data?.solidView
                 };
-    
+
                 if (dynamicHeader) {
                     DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
-    
+
                     if (DynamicFunctionComponent) {
                         const updatedFormData = await DynamicFunctionComponent(event);
-    
+
                         if (updatedFormData && updatedFormData?.dataChanged && updatedFormData?.newFormData) {
                             formViewData = updatedFormData.newFormData;
                         }
@@ -684,7 +716,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 setInitialEntityData(formViewData);
             }
         };
-    
+
         handleDynamicFunction();
     }, [solidFormViewData]);
 
@@ -897,6 +929,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             solidFormViewMetaData={solidFormViewMetaData}
                             modelName={params.modelName}
                             readOnly={readOnlyPermission}
+                            viewMode={viewMode}
                             onChange={formFieldOnXXX}
                             onBlur={formFieldOnXXX}
                         />;
@@ -1079,6 +1112,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                             />
                                         </div>
                                     } */}
+
+                                    {/* Inline */}
                                     {params.embeded == true &&
                                         actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
                                         !formViewLayout.attrs.readonly &&
@@ -1112,6 +1147,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     <div className="form-wrapper-title"> {editHeaderTitle}</div>
                                 </div>
                                 <div className="gap-3 flex">
+                                    {params.embeded !== true && viewMode === "view" &&
+                                        <div>
+                                            <Button
+                                                label="Edit"
+                                                size="small"
+                                                onClick={() => updateViewMode("edit")}
+                                                type="button"
+                                            />
+                                        </div>
+                                    }
+
                                     {params.embeded !== true &&
                                         actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
                                         !formViewLayout.attrs.readonly &&
@@ -1125,6 +1171,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                             />
                                         </div>
                                     }
+
+                                    {/* Inline */}
                                     {params.embeded == true &&
                                         actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
                                         !formViewLayout.attrs.readonly &&
@@ -1186,13 +1234,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     } */}
                     {params.embeded !== true &&
                         // <div className="solid-form-stepper">
-                            <SolidFormHeader 
-                                // solidFormViewMetaData={solidFormViewMetaData?.data?.solidView?.model}
-                                solidFormViewMetaData={solidFormViewMetaData}
-                                initialEntityData={initialEntityData}
-                                modelName={params.modelName}
-                                id={params.id}
-                            />
+                        <SolidFormHeader
+                            // solidFormViewMetaData={solidFormViewMetaData?.data?.solidView?.model}
+                            solidFormViewMetaData={solidFormViewMetaData}
+                            initialEntityData={initialEntityData}
+                            modelName={params.modelName}
+                            id={params.id}
+                        />
                         // </div>
                     }
                     <div className="p-4 solid-form-content">

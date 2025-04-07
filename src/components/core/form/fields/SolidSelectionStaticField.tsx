@@ -91,34 +91,50 @@ export class SolidSelectionStaticField implements ISolidField {
         if (!renderMode) {
             renderMode = 'field-autocomplete';
         }
+        const viewMode: string = this.fieldContext.viewMode;
+        let DynamicWidget = getExtensionComponent("SolidFormFieldViewModeWidget");
+        const widgetProps = {
+            label: fieldLabel,
+            value: formik.values[fieldLayoutInfo.attrs.name] && formik.values[fieldLayoutInfo.attrs.name].value,
+        }
         return (
             <>
-                {renderMode &&
-                    this.renderExtensionRenderMode(renderMode, formik) 
-                }
-                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                    <div className="absolute mt-1">
-                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+              {viewMode === "view" &&
+                    <div className={className}>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
                     </div>
-                )}
+                }
+                {viewMode === "edit" &&
+                    (
+                        <>
+                            {renderMode &&
+                                this.renderExtensionRenderMode(renderMode, formik)
+                            }
+                            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                                <div className="absolute mt-1">
+                                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                                </div>
+                            )}
+                        </>)
+                }
             </>
         );
     }
 
-    renderExtensionRenderMode(widgetName: string, formik: FormikObject) { 
-            let DynamicWidget = getExtensionComponent(widgetName);
-            if (!DynamicWidget) {
-                DynamicWidget = getExtensionComponent('field-autocomplete');
-            }
-            const widgetProps: SolidSelectionStaticFieldWidgetProps = {
-                formik: formik,
-                fieldContext: this.fieldContext,
-            }
-            return (
-                <>
-                    {DynamicWidget && <DynamicWidget {...widgetProps} />}
-                </>
-            )
+    renderExtensionRenderMode(widgetName: string, formik: FormikObject) {
+        let DynamicWidget = getExtensionComponent(widgetName);
+        if (!DynamicWidget) {
+            DynamicWidget = getExtensionComponent('field-autocomplete');
         }
-
+        const widgetProps: SolidSelectionStaticFieldWidgetProps = {
+            formik: formik,
+            fieldContext: this.fieldContext,
+        }
+        return (
+            <>
+                {DynamicWidget && <DynamicWidget {...widgetProps} />}
+            </>
+        )
     }
+
+}

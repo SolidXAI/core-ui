@@ -11,6 +11,14 @@ import { SolidSelectionStaticAutocompleteWidget } from "@/components/core/form/f
 import { SolidSelectionStaticRadioWidget } from "@/components/core/form/fields/widgets/SolidSelectionStaticRadioFieldWidget";
 import { SolidShortTextFieldTextRenderModeWidget } from "@/components/core/list/widgets/SolidShortTextFieldTextRenderModeWidget copy";
 import { SolidShortTextFieldImageRenderModeWidget } from "@/components/core/list/widgets/SolidShortTextFieldImageRenderModeWidget";
+import { SolidFormFieldViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldViewModeWidget";
+import { SolidFormFieldJsonViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldJsonViewModeWidget";
+import { SolidFormFieldPasswordViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldPasswordViewModeWidget";
+import { SolidFormFieldRichTextViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldRichTextViewModeWidget";
+import { SolidFormFieldMediaViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldMediaViewModeWidget";
+import { SolidFormFieldRelationViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldRelationViewModeWidget";
+import { SolidFormFieldViewMediaSingleWidget } from "@/components/core/form/fields/widgets/SolidFormFieldViewMediaSingleWidget";
+import { SolidFormFieldViewMediaMultipleWidget } from "@/components/core/form/fields/widgets/SolidFormFieldViewMediaMultipleWidget";
 
 type ExtensionRegistry = {
     components: Record<string, React.ComponentType<any>>;
@@ -79,6 +87,14 @@ registerExtensionComponent("SolidSelectionStaticAutocompleteWidget", SolidSelect
 registerExtensionComponent("SolidSelectionStaticRadioWidget", SolidSelectionStaticRadioWidget, ["field-radio"]);
 registerExtensionComponent("SolidShortTextFieldTextRenderModeWidget", SolidShortTextFieldTextRenderModeWidget, []);
 registerExtensionComponent("SolidShortTextFieldImageRenderModeWidget", SolidShortTextFieldImageRenderModeWidget, []);
+registerExtensionComponent("SolidFormFieldViewModeWidget", SolidFormFieldViewModeWidget, []);
+registerExtensionComponent("SolidFormFieldJsonViewModeWidget", SolidFormFieldJsonViewModeWidget, []);
+registerExtensionComponent("SolidFormFieldPasswordViewModeWidget", SolidFormFieldPasswordViewModeWidget, []);
+registerExtensionComponent("SolidFormFieldRichTextViewModeWidget", SolidFormFieldRichTextViewModeWidget, []);
+registerExtensionComponent("SolidFormFieldMediaViewModeWidget", SolidFormFieldMediaViewModeWidget, []);
+registerExtensionComponent("SolidFormFieldRelationViewModeWidget", SolidFormFieldRelationViewModeWidget, []);
+registerExtensionComponent("SolidFormFieldViewMediaSingleWidget", SolidFormFieldViewMediaSingleWidget, []);
+registerExtensionComponent("SolidFormFieldViewMediaMultipleWidget", SolidFormFieldViewMediaMultipleWidget, []);
 
 
 // ModuleMetadata
