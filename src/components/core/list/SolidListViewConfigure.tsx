@@ -9,29 +9,9 @@ import { Divider } from "primereact/divider";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { RadioButton } from "primereact/radiobutton";
 import { useEffect, useRef, useState } from "react";
+import { SolidListColumnSelector } from "./SolidListColumnSelector";
 
-interface FieldMetadata {
-    displayName: string;
-}
-
-interface FilterColumns {
-    name: string;
-    key: string;
-    isChecked: boolean;
-}
 export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
-    if (!listViewMetaData) {
-        return;
-    }
-    if (!listViewMetaData.data) {
-        return;
-    }
-
-    const solidView = listViewMetaData?.data?.solidView;
-
-    // This is a key value map of field name vs field metadata.
-    const solidFieldsMetadata = listViewMetaData?.data?.solidFieldsMetadata as Record<string, FieldMetadata>;
-
     // const [visible, setVisible] = useState<boolean>(false);
     const op = useRef(null);
     const customizeLayout = useRef<OverlayPanel | null>(null);
@@ -77,32 +57,6 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
         return () => document.removeEventListener("click", handleClickOutside);
     }, [isOverlayOpen])
 
-    if (!solidView || !solidFieldsMetadata) {
-        return;
-    }
-
-    const checkedFieldNames = new Set(solidView.layout.children.map((col: { attrs: { name: string } }) => col.attrs.name));
-
-
-    const solidListColumns: FilterColumns[] = Object.entries(solidFieldsMetadata).map(([key, field]) => ({
-        name: field.displayName,
-        key,
-        isChecked: checkedFieldNames.has(key),
-    }));
-
-    const [selectedColumns, setSelectedColumns] = useState<FilterColumns[]>(solidListColumns.filter(col => col.isChecked));
-
-    const onCategoryChange = (e: CheckboxChangeEvent) => {
-        let _selectedColumns = [...selectedColumns];
-
-        if (e.checked)
-            _selectedColumns.push(e.value);
-        else
-            _selectedColumns = _selectedColumns.filter(column => column.key !== e.value.key);
-
-        setSelectedColumns(_selectedColumns);
-    };
-
     return (
         <div className="position-relative">
             <Button
@@ -147,8 +101,6 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
                                 </label>
                             </div>
                         )}
-
-
                     </div>
                 </div>
                 <Divider className="m-0" />
@@ -233,34 +185,7 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
                                     </div>
                                 </AccordionTab>
                                 <AccordionTab header="Column Selector">
-                                    <div className="flex flex-column gap-1 p-1">
-                                    <div className="flex flex-column gap-3 px-3 cogwheel-column-filter"  style={{maxHeight: 400, overflowY:'auto'}}>
-                                            {solidListColumns.map((column) => {
-                                                return (
-                                                    <div key={column.key} className="flex align-items-center gap-1">
-                                                        <Checkbox
-                                                            inputId={column.key}
-                                                            name="column"
-                                                            value={column}
-                                                            onChange={onCategoryChange}
-                                                            checked={selectedColumns.some((item) => item.key === column.key)}
-                                                            className="text-base"
-                                                        />
-                                                        <label htmlFor={column.key} className="ml-2 text-base">
-                                                            {column.name}
-                                                        </label>
-                                                    </div>
-                                                );
-                                            })}
-                                        </div>
-                                        <div className="p-3 flex gap-2">
-                                            <Button label="Apply" size="small" />
-                                            <Button outlined label="Cancel" size="small"
-                                                // @ts-ignore
-                                                onClick={(e) => op.current.hide(e)}
-                                            />
-                                        </div>
-                                    </div>
+                                    <SolidListColumnSelector listViewMetaData={listViewMetaData} />
                                 </AccordionTab>
                             </Accordion>
                         </div>
