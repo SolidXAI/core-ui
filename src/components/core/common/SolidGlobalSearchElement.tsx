@@ -209,7 +209,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     console.log("searchParams", searchParams);
 
     const op = useRef<OverlayPanel>(null);
-    const chipsRef = useRef<HTMLDivElement | null>(null);
+    const chipsRef = useRef<HTMLDivElement | null | any>(null);
 
     const [filterRules, setFilterRules] = useState<FilterRule[]>(initialState);
     const [fields, setFields] = useState<any[]>([]);
@@ -269,7 +269,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         if (chipsRef.current) {
             const inputElement = chipsRef.current.querySelector("input");
             if (inputElement) {
-                inputElement.addEventListener("input", (e) => {
+                inputElement.addEventListener("input", (e: any) => {
                     setInputValue((e.target as HTMLInputElement).value);
                 });
             }
@@ -347,10 +347,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             }))
         };
         // if (formattedChips.$and.length > 0) {
-            const transformedFilter = tranformSearchToFilters(formattedChips);
-            setSearchFilter(transformedFilter);
-            const finalFilter = mergeSearchAndCustomFilters(transformedFilter, customFilter, "s_filter", "c_filter");
-            handleApplyCustomFilter(finalFilter);
+        const transformedFilter = tranformSearchToFilters(formattedChips);
+        setSearchFilter(transformedFilter);
+        const finalFilter = mergeSearchAndCustomFilters(transformedFilter, customFilter, "s_filter", "c_filter");
+        handleApplyCustomFilter(finalFilter);
         // }
     }, [searchChips]);
 
@@ -412,15 +412,17 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                                 onChange={(e) => {
                                     setInputValue(e.target.value);
                                     if (e.target.value.trim() !== "") {
-                                      op.current?.show(e.currentTarget);
+                                        //@ts-ignore
+                                        op.current?.show(e.currentTarget);
                                     } else {
-                                      op.current?.hide();
+                                        op.current?.hide();
                                     }
-                                  }}
-                                  onFocus={(e) => {
+                                }}
+                                onFocus={(e: any) => {
+                                        //@ts-ignore
                                     if (inputValue?.trim()) op.current?.show(e.currentTarget);
-                                  }}
-                                  onKeyDown={handleKeyDown}
+                                }}
+                                onKeyDown={handleKeyDown}
                             />
                             <Button
                                 icon="pi pi-search"
