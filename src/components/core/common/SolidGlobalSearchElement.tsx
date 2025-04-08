@@ -303,18 +303,30 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     };
 
+    const clearCustomFilter = () => {
+        const finalFilter = mergeSearchAndCustomFilters(null, searchFilter, "c_filter", "s_filter");
+        handleApplyCustomFilter(finalFilter)
+        setFilterRules(initialState);
+        setCustomFilter(null)
+
+    }
+
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter" && inputValue?.trim()) {
             handleAddChip();
             e.preventDefault();
         } else if (e.key === "Backspace" && inputValue === "") {
-            setSearchChips((prev) => prev.slice(0, -1));
-            setHasSearched(true)
-
+            if (searchChips.length > 0) {
+                // Remove last search chip only
+                setSearchChips((prev) => prev.slice(0, -1));
+                setHasSearched(true);
+            } else if (customFilter) {
+                // If no search chips, remove custom filter
+                clearCustomFilter();
+            }
         }
-
-
     };
+
 
     const mergeSearchAndCustomFilters = (transformedFilter: any, newFilter: any, transformedFilterName: string, newFilterName: string) => {
         const filters: any = {};
@@ -385,8 +397,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 </div>
 
                 {/* button to clear filter */}
-                <i className="pi pi-times ml-1">
-                </i>
+                <a onClick={clearCustomFilter}>
+                    <i className="pi pi-times ml-1">
+                    </i></a>
             </div>
         </li>
     );
