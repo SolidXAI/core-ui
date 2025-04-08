@@ -27,6 +27,7 @@ import Download from "yet-another-react-lightbox/plugins/download";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 import { useRouter, useSearchParams } from "next/navigation";
+import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
 
 
 
