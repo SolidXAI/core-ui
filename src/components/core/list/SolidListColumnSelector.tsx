@@ -110,6 +110,7 @@ export const SolidListColumnSelector = ({ listViewMetaData }: any) => {
                     }).unwrap();
                     if (response.statusCode === 200) {
                         showToast("success", "Layout", "Form Layout Updated successfully!");
+                        window.location.reload();
                     }
                     console.log("Successfully updated:", response);
                 } else {
