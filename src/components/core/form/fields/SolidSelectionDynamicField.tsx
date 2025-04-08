@@ -63,6 +63,7 @@ export class SolidSelectionDynamicField implements ISolidField {
 
         const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
         const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+        const whereClause = fieldLayoutInfo.attrs.whereClause;
 
         // selection dynamic specific code. 
         const [triggerGetSelectionDynamicValues] = useLazyGetSelectionDynamicValuesQuery();
@@ -76,11 +77,18 @@ export class SolidSelectionDynamicField implements ISolidField {
                 query: event.query,
                 fieldId: fieldMetadata.id
             };
-
-            const sdQs = qs.stringify(queryData, {
+            if (whereClause) {
+                queryData.query = whereClause;
+            }
+            let sdQs = qs.stringify(queryData, {
                 encodeValuesOnly: true,
+                encoder: (str, defaultEncoder, charset, type) => {
+                    if (type === 'key' || type === 'value') {
+                      if (str === queryData.query) return str;
+                    }
+                    return defaultEncoder(str);
+                }
             });
-
             // TODO: do error handling here, possible errors like modelname is incorrect etc...
             const sdResponse = await triggerGetSelectionDynamicValues(sdQs);
 

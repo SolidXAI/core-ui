@@ -77,6 +77,7 @@ export class SolidRelationManyToOneField implements ISolidField {
 
         const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
         const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+        const whereClause = fieldLayoutInfo.attrs.whereClause;
 
         const [autoCompleteItems, setAutoCompleteItems] = useState([]);
         const autoCompleteSearch = async (event: AutoCompleteCompleteEvent) => {
@@ -92,10 +93,12 @@ export class SolidRelationManyToOneField implements ISolidField {
                 }
             };
 
-            const autocompleteQs = qs.stringify(queryData, {
+            let autocompleteQs = qs.stringify(queryData, {
                 encodeValuesOnly: true,
             });
-
+            if (whereClause) {
+                autocompleteQs = `${autocompleteQs}&${whereClause}`;
+            }
             // TODO: do error handling here, possible errors like modelname is incorrect etc...
             const autocompleteResponse = await triggerGetSolidEntities(autocompleteQs);
 

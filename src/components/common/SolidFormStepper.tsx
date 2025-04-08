@@ -112,7 +112,6 @@ export const SolidFormStepper = (props: Props) => {
                     const isLastVisible = index === visibleSteps.length - 1;
                     const isNextAfterActive = index === activeIndex + 1;
                     const isTwoStepsOnly = visibleSteps.length === 2;
-                    console.log("isActive", isActive);
 
                     return (
                         <Button
