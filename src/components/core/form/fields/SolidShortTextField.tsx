@@ -103,7 +103,6 @@ export class SolidShortTextField implements ISolidField {
                                             {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                                         </label>
                                     }
-                                    &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>}
                                     <InputText
                                         readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                                         disabled={formDisabled || fieldDisabled}
