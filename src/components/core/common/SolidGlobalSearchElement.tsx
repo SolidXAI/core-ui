@@ -383,6 +383,13 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         return acc;
     }, {} as Record<string, string[]>);
 
+    const handleRemoveChipGroup = (columnName: string) => {
+        const updatedChips = searchChips.filter(chip => chip.columnName !== columnName);
+        setSearchChips(updatedChips);
+        setHasSearched(true);
+    };
+
+
     const CustomChip = () => (
         <li>
             <div className="custom-filter-chip-type">
@@ -397,7 +404,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 </div>
 
                 {/* button to clear filter */}
-                <a onClick={clearCustomFilter}>
+                <a onClick={clearCustomFilter}
+                    style={{ cursor: "pointer" }}
+                >
                     <i className="pi pi-times ml-1">
                     </i></a>
             </div>
@@ -421,8 +430,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                             </React.Fragment>
                         ))}
                         {/* button to clear filter */}
-                        <i className="pi pi-times ml-1">
-                        </i>
+                        <i className="pi pi-times ml-1"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => handleRemoveChipGroup(column)}
+                        >                        </i>
                     </div>
                 </li>
             ))}
