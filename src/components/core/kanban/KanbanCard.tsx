@@ -5,6 +5,7 @@ import { Draggable, DraggableProvided } from "@hello-pangea/dnd";
 import { Card } from "primereact/card";
 import React from "react";
 import { SolidKanbanViewFields } from "./SolidKanbanViewFields";
+import { useRouter } from "next/navigation";
 
 // Define the types for the data and props
 interface Data {
@@ -44,7 +45,8 @@ const renderFieldsDynamically = (field: any, data: any, solidKanbanViewMetaData:
   // });
 };
 
-const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, setLightboxUrls, setOpenLightbox }) => {
+const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, setLightboxUrls, setOpenLightbox, editButtonUrl }) => {
+  const router = useRouter()
 
   const SolidRow = ({ children, attrs }: any) => {
     const className = attrs.className;
@@ -181,6 +183,9 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
             }}
             elevation={snapshot.isDragging ? 3 : 1}
             className="solid-kanban-card"
+            onClick={() =>
+              router.push(`${editButtonUrl}/${data?.id}`)
+            }
           >
             {renderFormDynamically(solidKanbanViewMetaData)}
 
