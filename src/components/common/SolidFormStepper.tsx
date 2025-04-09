@@ -34,10 +34,8 @@ export const SolidFormStepper = (props: Props) => {
 
         setSolidWorkflowFieldValue(() => {
             if (initialEntityData?.[solidWorkflowField] !== undefined) {
-                console.log("checkloginitial", initialEntityData[solidWorkflowField]);
                 return initialEntityData[solidWorkflowField];
             } else if (defaultWorkflowFieldValue !== undefined) {
-                console.log("checklogdefault", defaultWorkflowFieldValue);
                 return defaultWorkflowFieldValue;
             } else {
                 return activeStep;
@@ -98,7 +96,6 @@ export const SolidFormStepper = (props: Props) => {
 
     const activeIndex = solidFormViewWorkflowData.findIndex((step: any) => step.value === solidWorkflowFieldValue);
     const visibleSteps = solidFormViewWorkflowData.length > 5 ? solidFormViewWorkflowData.slice(0, 5) : solidFormViewWorkflowData;
-    console.log("activeIndex:", activeIndex, "solidWorkflowFieldValue:", solidWorkflowFieldValue);
 
     return (
         <>
