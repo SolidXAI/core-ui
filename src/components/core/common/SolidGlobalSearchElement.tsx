@@ -1,6 +1,6 @@
 "use client"
 
-import { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Dialog } from "primereact/dialog";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@/components/core/common/FilterComponent";
 import { Button } from "primereact/button";
@@ -206,9 +206,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     const searchParams = useSearchParams().toString(); // Converts the query params to a string
 
-    console.log("searchParams", searchParams);
 
-    const op = useRef<OverlayPanel>(null);
     const chipsRef = useRef<HTMLDivElement | null | any>(null);
 
     const [filterRules, setFilterRules] = useState<FilterRule[]>(initialState);
@@ -220,6 +218,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     const [inputValue, setInputValue] = useState<string | null>("");
     const [searchFilter, setSearchFilter] = useState<any | null>(null);
     const [customFilter, setCustomFilter] = useState<any | null>(null);
+    const [hasSearched, setHasSearched] = useState<boolean>(false);
     useImperativeHandle(ref, () => ({
         clearFilter: () => {
             setFilterRules(initialState);
@@ -245,6 +244,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 setSearchChips(formattedChips);
             }
             if (customChips) {
+                setCustomFilter(customChips);
                 const formatedCustomChips: FilterRule = transformFiltersToRules(customChips);
                 console.log("formatedCustomChips", formatedCustomChips);
                 setFilterRules([formatedCustomChips]);
@@ -256,6 +256,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     useEffect(() => {
         if (viewData?.data?.solidFieldsMetadata) {
+            if (searchParams && (searchParams.includes("list") || searchParams.includes("kanban"))) {
+            }
             const fieldsData = viewData?.data?.solidFieldsMetadata;
             const fieldsList = Object.entries(fieldsData).map(([key, value]: any) => ({ name: value.displayName, value: key, type: value.type }));
             setFields(fieldsList);
@@ -296,20 +298,35 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             };
             setSearchChips((prev) => [...prev, newChip]);
             setInputValue("");
-            op.current?.hide();
+            setHasSearched(true)
         }
+
     };
+
+    const clearCustomFilter = () => {
+        const finalFilter = mergeSearchAndCustomFilters(null, searchFilter, "c_filter", "s_filter");
+        handleApplyCustomFilter(finalFilter)
+        setFilterRules(initialState);
+        setCustomFilter(null)
+
+    }
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
         if (e.key === "Enter" && inputValue?.trim()) {
             handleAddChip();
             e.preventDefault();
         } else if (e.key === "Backspace" && inputValue === "") {
-            setSearchChips((prev) => prev.slice(0, -1));
+            if (searchChips.length > 0) {
+                // Remove last search chip only
+                setSearchChips((prev) => prev.slice(0, -1));
+                setHasSearched(true);
+            } else if (customFilter) {
+                // If no search chips, remove custom filter
+                clearCustomFilter();
+            }
         }
-
-
     };
+
 
     const mergeSearchAndCustomFilters = (transformedFilter: any, newFilter: any, transformedFilterName: string, newFilterName: string) => {
         const filters: any = {};
@@ -339,19 +356,22 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     }
 
     useEffect(() => {
-        const formattedChips = {
-            $and: searchChips.map((chip) => ({
-                fieldName: chip.columnName,
-                matchMode: "$containsi",
-                value: [chip.value]
-            }))
-        };
-        // if (formattedChips.$and.length > 0) {
-        const transformedFilter = tranformSearchToFilters(formattedChips);
-        setSearchFilter(transformedFilter);
-        const finalFilter = mergeSearchAndCustomFilters(transformedFilter, customFilter, "s_filter", "c_filter");
-        handleApplyCustomFilter(finalFilter);
-        // }
+        if (hasSearched === true) {
+
+            const formattedChips = {
+                $and: searchChips.map((chip) => ({
+                    fieldName: chip.columnName,
+                    matchMode: "$containsi",
+                    value: [chip.value]
+                }))
+            };
+            // if (formattedChips.$and.length > 0) {
+            const transformedFilter = tranformSearchToFilters(formattedChips);
+            setSearchFilter(transformedFilter);
+            const finalFilter = mergeSearchAndCustomFilters(transformedFilter, customFilter, "s_filter", "c_filter");
+            handleApplyCustomFilter(finalFilter);
+            // }
+        }
     }, [searchChips]);
 
     const groupedSearchChips = searchChips.reduce((acc, chip) => {
@@ -363,6 +383,13 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         return acc;
     }, {} as Record<string, string[]>);
 
+    const handleRemoveChipGroup = (columnName: string) => {
+        const updatedChips = searchChips.filter(chip => chip.columnName !== columnName);
+        setSearchChips(updatedChips);
+        setHasSearched(true);
+    };
+
+
     const CustomChip = () => (
         <li>
             <div className="custom-filter-chip-type">
@@ -373,8 +400,15 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                         <path d="M8.66667 15V13.3333H11.3333V15H8.66667ZM6 10.8333V9.16667H14V10.8333H6ZM4 6.66667V5H16V6.66667H4Z"
                             fill="white" />
                     </svg>
-                    <span><strong>{customChip}</strong> rules applied</span>
+                    <span><strong>{customFilter.$or.length > 0 ? `${customFilter.$or.length}` : customFilter.$and.length}</strong> rules applied</span>
                 </div>
+
+                {/* button to clear filter */}
+                <a onClick={clearCustomFilter}
+                    style={{ cursor: "pointer" }}
+                >
+                    <i className="pi pi-times ml-1">
+                    </i></a>
             </div>
         </li>
     );
@@ -387,22 +421,35 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     <div className="search-filter-chip-type">
                         <div>{column}</div>
                         {values.map((value, index) => (
-                            <span key={index} className="custom-chip-value mx-1">{value}</span>
+                            <React.Fragment>
+                                <span key={index} className="custom-chip-value">{value}
+                                </span>
+                                {values.length > 1 &&
+                                    <span className="custom-chip-or">and</span>
+                                }
+                            </React.Fragment>
                         ))}
+                        {/* button to clear filter */}
+                        <i className="pi pi-times ml-1"
+                            style={{ cursor: "pointer" }}
+                            onClick={() => handleRemoveChipGroup(column)}
+                        >                        </i>
                     </div>
                 </li>
             ))}
         </>
     );
 
+    console.log("custom chip", customFilter);
 
+    const [showOverlay, setShowOverlay] = useState(false);
 
 
     return (
-        <div className="flex justify-content-center solid-custom-filter-wrapper">
+        <div className="flex justify-content-center solid-custom-filter-wrapper relative">
             <div className="solid-global-search-element">
                 <ul className="">
-                    {customChip && <CustomChip />}
+                    {customFilter && <CustomChip />}
                     <SearchChip />
                     <li ref={chipsRef}>
                         <div className="relative">
@@ -411,17 +458,16 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                                 placeholder="Search..."
                                 onChange={(e) => {
                                     setInputValue(e.target.value);
-                                    if (e.target.value.trim() !== "") {
-                                        //@ts-ignore
-                                        op.current?.show(e.currentTarget);
-                                    } else {
-                                        op.current?.hide();
-                                    }
+                                    setShowOverlay(true);
                                 }}
-                                onFocus={(e: any) => {
-                                        //@ts-ignore
-                                    if (inputValue?.trim()) op.current?.show(e.currentTarget);
+                                onFocus={() => {
+                                    if (inputValue?.trim()) setShowOverlay(true);
                                 }}
+                                onBlur={() => {
+                                    // Delay so you can click buttons inside overlay
+                                    setTimeout(() => setShowOverlay(false), 150);
+                                }}
+
                                 onKeyDown={handleKeyDown}
                             />
                             <Button
@@ -436,39 +482,41 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     </li>
                 </ul>
             </div>
-            <OverlayPanel ref={op} className="solid-custom-overlay" style={{ minWidth: 405 }}>
-                {inputValue ? (
-                    <>
-                        <div className="custom-filter-search-options px-2 py-2 flex flex-column">
-                            {
-                                searchableFields.map((value: any, index: any) => (
-                                    <Button
-                                        key={index}
-                                        className="p-2 flex gap-1 text-color"
-                                        onClick={() => handleAddChip(value)}
-                                        text
-                                        severity="secondary"
-                                        size="small"
-                                    >
-                                        Search <strong>{value}</strong> for :
-                                        <span className="font-bold" style={{ color: '#000' }}>{inputValue}</span>
-                                    </Button>
-                                ))
-                            }
-                        </div>
-                        <Divider className="m-0" />
-                    </>
-                ) :
-                    <>
-                        <div className="p-3 text-base">Search Here...</div>
-                        <Divider className="m-0" />
-                    </>
-                }
-                <div className="px-2 py-1">
-                    <Button text size="small" label="Custom Filter" iconPos="left" icon='pi pi-plus' onClick={() => setShowGlobalSearchElement(true)} className="font-bold" />
+            {showOverlay && inputValue?.trim() && (
+                <div className="absolute w-full z-5 bg-white border-round border-1 border-300 shadow-2" style={{ top: 35 }}>
+                    {inputValue ? (
+                        <>
+                            <div className="custom-filter-search-options px-2 py-2 flex flex-column">
+                                {
+                                    searchableFields.map((value: any, index: any) => (
+                                        <Button
+                                            key={index}
+                                            className="p-2 flex gap-1 text-color"
+                                            onClick={() => handleAddChip(value)}
+                                            text
+                                            severity="secondary"
+                                            size="small"
+                                        >
+                                            Search <strong>{value}</strong> for :
+                                            <span className="font-bold" style={{ color: '#000' }}>{inputValue}</span>
+                                        </Button>
+                                    ))
+                                }
+                            </div>
+                            <Divider className="m-0" />
+                        </>
+                    ) :
+                        <>
+                            <div className="p-3 text-base">Search Here...</div>
+                            <Divider className="m-0" />
+                        </>
+                    }
+                    <div className="px-2 py-1">
+                        <Button text size="small" label="Custom Filter" iconPos="left" icon='pi pi-plus' onClick={() => setShowGlobalSearchElement(true)} className="font-bold" />
+                    </div>
                 </div>
-                <Divider className="m-0" />
-            </OverlayPanel>
+            )
+            }
             <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={showGlobalSearchElement} style={{ width: '65vw' }} onHide={() => { if (!showGlobalSearchElement) return; setShowGlobalSearchElement(false); }}>
                 <div className="flex align-items-center justify-content-between px-3">
                     <h5 className="solid-custom-title m-0">Add Custom Filter</h5>
