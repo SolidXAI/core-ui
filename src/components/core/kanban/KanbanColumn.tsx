@@ -34,7 +34,7 @@ interface KanbanColumnProps {
   setOpenLightbox: any
 }
 
-const KanbanColumn = ({ groupedView, groupByField, solidKanbanViewMetaData, group, groupData, toggleFold, handleLoadMore, setLightboxUrls, setOpenLightbox }: KanbanColumnProps) => {
+const KanbanColumn = ({ groupedView, groupByField, solidKanbanViewMetaData, group, groupData, toggleFold, handleLoadMore, setLightboxUrls, setOpenLightbox, editButtonUrl }: KanbanColumnProps) => {
   const op = useRef<any>(null);
 
 
@@ -119,7 +119,7 @@ const KanbanColumn = ({ groupedView, groupByField, solidKanbanViewMetaData, grou
               className={groupedView === false && "kanban-ungrouped-column-content"}
             >
               {groupData.map((data, index) => (
-                <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} />
+                <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox}  editButtonUrl={editButtonUrl}/>
               ))}
               {provided.placeholder}
               {group.count > 0 && (group.count > (group.limit * group.currentPage)) &&

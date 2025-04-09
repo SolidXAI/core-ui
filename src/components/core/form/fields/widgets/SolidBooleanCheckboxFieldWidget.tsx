@@ -47,7 +47,7 @@ export const SolidBooleanFieldCheckboxWidget = ({ formik, fieldContext }: SolidB
             <div className="relative">
                 <div className="flex flex-column gap-2 mt-4">
                     {showFieldLabel !== false && (
-                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
+                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label font-medium">
                             {fieldLabel}
                             {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         </label>

@@ -5,6 +5,7 @@ import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { Password } from "primereact/password";
+import { getExtensionComponent } from "@/helpers/registry";
 
 export class SolidPasswordField implements ISolidField {
 
@@ -79,35 +80,51 @@ export class SolidPasswordField implements ISolidField {
         const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
         const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
+        const viewMode: string = this.fieldContext.viewMode;
+        let DynamicWidget = getExtensionComponent("SolidFormFieldPasswordViewModeWidget");
+        const widgetProps = {
+            label: fieldLabel,
+            value: formik.values[fieldLayoutInfo.attrs.name],
+        }
         return (
-            <div className={className}>
-                <div className="relative">
-                    <div className="flex flex-column gap-2 mt-4">
-                        {showFieldLabel != false &&
-                            <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
-                                {fieldLabel}
-                                {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                            </label>
-                        }
-                        <Password
-                            id={fieldLayoutInfo.attrs.name}
-                            name={fieldMetadata.name}
-                            value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                            onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
-                            onBlur={(e) => this.fieldContext.onBlur(e, 'onFieldBlur')}
-                            readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                            disabled={formDisabled || fieldDisabled}
-                            toggleMask
-                        />
-
+            <>
+              {viewMode === "view" &&
+                    <div className={className}>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
                     </div>
-                    {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                        <div className="absolute mt-1">
-                            <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                }
+                {viewMode === "edit" &&
+                    (
+                        <div className={className}>
+                            <div className="relative">
+                                <div className="flex flex-column gap-2 mt-4">
+                                    {showFieldLabel != false &&
+                                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
+                                            {fieldLabel}
+                                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                                        </label>
+                                    }
+                                    <Password
+                                        id={fieldLayoutInfo.attrs.name}
+                                        name={fieldMetadata.name}
+                                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                                        onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
+                                        onBlur={(e) => this.fieldContext.onBlur(e, 'onFieldBlur')}
+                                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                                        disabled={formDisabled || fieldDisabled}
+                                        toggleMask
+                                    />
+
+                                </div>
+                                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                                    <div className="absolute mt-1">
+                                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                                    </div>
+                                )}
+                            </div>
                         </div>
                     )}
-                </div>
-            </div>
+            </>
         );
     }
 }

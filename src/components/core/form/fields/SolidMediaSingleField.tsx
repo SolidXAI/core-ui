@@ -14,6 +14,7 @@ import { ProgressBar } from "primereact/progressbar";
 import Link from "next/link";
 import getAcceptedFileTypes from "@/helpers/getAcceptedFileTypes";
 import { downloadMediaFile } from "@/helpers/downloadMediaFile";
+import { getExtensionComponent } from "@/helpers/registry";
 
 export class SolidMediaSingleField implements ISolidField {
 
@@ -84,12 +85,14 @@ export class SolidMediaSingleField implements ISolidField {
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
         const readOnlyPermission = this.fieldContext.readOnly;
+        const viewMode: string = this.fieldContext.viewMode;
 
         const [isDeleteImageDialogVisible, setDeleteImageDialogVisible] = useState(false);
         const [imageToBeDeletedData, setImageToBeDeletedData] = useState<any>();
         const [fileDetails, setFileDetails] = useState<{ name: string; type: string, fileUrl: string, fileSize: number } | null>(null);
         const [isReplaceImageDialogVisible, setReplaceImageDialogVisible] = useState(false);
         const [newFileToUpload, setNewFileToUpload] = useState<any>(null);
+        const [fileSizeError, setFileSizeError] = useState<string | null>(null);
 
         const formatFileSize = (size: number) => {
             return size >= 1024 * 1024
@@ -116,6 +119,7 @@ export class SolidMediaSingleField implements ISolidField {
         const handleDropImage = (acceptedFiles: any[]) => {
             const file = acceptedFiles[0];
             if (!file) return;
+            setFileSizeError(null);
             if (fileDetails) {
                 // If a file is already uploaded, show the confirmation dialog
                 setNewFileToUpload(file);
@@ -195,113 +199,140 @@ export class SolidMediaSingleField implements ISolidField {
             isDragActive: isDragActive,
         } = useDropzone({
             onDrop: handleDropImage,
+            onDropRejected: (fileRejections) => {
+                const rejection = fileRejections[0];
+                const sizeError = rejection.errors.find(err => err.code === 'file-too-large');
+                if (sizeError) {
+                    setFileSizeError(`File is too large. Max size is ${fieldMetadata.mediaMaxSizeKb} KB.`);
+                } else {
+                    setFileSizeError(rejection.errors[0]?.message || "File not accepted.");
+                }
+            },
             accept: getAcceptedFileTypes(fieldMetadata.mediaTypes),
             maxSize: fieldMetadata.mediaMaxSizeKb * 1024,
         });
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
+        let DynamicWidget = getExtensionComponent("SolidFormFieldViewMediaSingleWidget");
+        const widgetProps = {
+            formik: formik,
+            fieldContext: this.fieldContext,
+        }
 
         return (
-            <div className={className} style={readOnlyPermission === true ? { filter: 'opacity(50%)', pointerEvents: 'none' } : {}}>
-                <div className="flex flex-column gap-2 mt-4 relative">
-                    {showFieldLabel != false &&
-                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                            {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                        </label>
-                    }
-                    <div
-                        {...getRootProps()}
-                        className="solid-dropzone-wrapper"
-                    >
-                        <input {...getInputProps()} />
-                        <DropzonePlaceholder
-                            mediaTypes={fieldMetadata.mediaTypes}
-                            mediaMaxSizeKb={fieldMetadata.mediaMaxSizeKb}
-                        />
+            <>
+                {viewMode === "view" &&
+                    <div className={className}>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
                     </div>
-                    {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                        <div className="absolute mt-1">
-                            <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                        </div>
-                    )}
-                    {fileDetails && (
-                        <div className="solid-file-upload-wrapper mt-4">
-                            <div className="flex align-items-center gap-2">
-                                <FileReaderExt fileDetails={fileDetails} />
-                                <div className="w-full flex flex-column gap-1">
-                                    <div className="flex align-items-start justify-content-between">
-                                        <Link className="font-normal w-9 text-primary" href={fileDetails.fileUrl} target="_blank">{fileDetails.name}</Link>
-                                        <div className="flex align-items-center gap-2">
-                                            <div>
-                                                <Button
-                                                    type="button"
-                                                    text
-                                                    icon={"pi pi-download"}
-                                                    size="small"
-                                                    severity="secondary"
-                                                    // className="p-2"
-                                                    style={{
-                                                        height: 16,
-                                                        width: 16
-                                                    }}
-                                                    onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
-                                                />
+                }
+                {viewMode === "edit" &&
+                    <div className={className} style={readOnlyPermission === true ? { filter: 'opacity(50%)', pointerEvents: 'none' } : {}}>
+                        <div className="flex flex-column gap-2 mt-4 relative">
+                            {showFieldLabel != false &&
+                                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                                    {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
+                                </label>
+                            }
+                            <div
+                                {...getRootProps()}
+                                className="solid-dropzone-wrapper"
+                            >
+                                <input {...getInputProps()} />
+                                <DropzonePlaceholder
+                                    mediaTypes={fieldMetadata.mediaTypes}
+                                    mediaMaxSizeKb={fieldMetadata.mediaMaxSizeKb}
+                                />
+                            </div>
+                            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                                <div className="absolute mt-1">
+                                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                                </div>
+                            )}
+                            {
+                                fileSizeError &&
+                                <Message severity="error" text={fileSizeError?.toString()} />
+                            }
+                            {fileDetails && (
+                                <div className="solid-file-upload-wrapper mt-4">
+                                    <div className="flex align-items-center gap-2">
+                                        <FileReaderExt fileDetails={fileDetails} />
+                                        <div className="w-full flex flex-column gap-1">
+                                            <div className="flex align-items-start justify-content-between">
+                                                <Link className="font-normal w-9 text-primary" href={fileDetails.fileUrl} target="_blank">{fileDetails.name}</Link>
+                                                <div className="flex align-items-center gap-2">
+                                                    <div>
+                                                        <Button
+                                                            type="button"
+                                                            text
+                                                            icon={"pi pi-download"}
+                                                            size="small"
+                                                            severity="secondary"
+                                                            // className="p-2"
+                                                            style={{
+                                                                height: 16,
+                                                                width: 16
+                                                            }}
+                                                            onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
+                                                        />
+                                                    </div>
+                                                    <div>
+                                                        <Button
+                                                            type="button"
+                                                            text
+                                                            icon={"pi pi-times"}
+                                                            size="small"
+                                                            severity="secondary"
+                                                            // className="p-2"
+                                                            style={{
+                                                                height: 16,
+                                                                width: 16
+                                                            }}
+                                                            onClick={() => setDeleteImageDialogVisible(true)}
+                                                        />
+                                                    </div>
+                                                </div>
                                             </div>
-                                            <div>
-                                                <Button
-                                                    type="button"
-                                                    text
-                                                    icon={"pi pi-times"}
-                                                    size="small"
-                                                    severity="secondary"
-                                                    // className="p-2"
-                                                    style={{
-                                                        height: 16,
-                                                        width: 16
-                                                    }}
-                                                    onClick={() => setDeleteImageDialogVisible(true)}
-                                                />
+                                            <div className="flex align-items-center gap-2 text-sm">
+                                                {fileDetails && formatFileSize(fileDetails.fileSize)}
                                             </div>
                                         </div>
                                     </div>
-                                    <div className="flex align-items-center gap-2 text-sm">
-                                        {fileDetails && formatFileSize(fileDetails.fileSize)}
-                                    </div>
                                 </div>
-                            </div>
+                            )}
                         </div>
-                    )}
-                </div>
-                <Dialog
-                    visible={isDeleteImageDialogVisible}
-                    header="Confirm Delete"
-                    modal
-                    footer={() => (
-                        <div className="flex justify-content-center">
-                            <Button type="button" label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={handleCancelUpload} />
-                            <Button type="button" label="No" icon="pi pi-times" className='small-button' onClick={() => setDeleteImageDialogVisible(false)} />
-                        </div>
-                    )}
-                    onHide={() => setDeleteImageDialogVisible(false)}
-                >
-                    <p>Are you sure you want to delete media?</p>
-                </Dialog>
-                <Dialog
-                    visible={isReplaceImageDialogVisible}
-                    header="Replace Image"
-                    modal
-                    footer={() => (
-                        <div className="flex justify-content-center">
-                            <Button type="button" label="Yes, Replace" icon="pi pi-check" className='small-button' severity="danger" onClick={handleReplaceFile} />
-                            <Button type="button" label="Cancel" icon="pi pi-times" className='small-button' onClick={() => setReplaceImageDialogVisible(false)} />
-                        </div>
-                    )}
-                    onHide={() => setReplaceImageDialogVisible(false)}
-                >
-                    <p>An media is already uploaded. Do you want to delete it and upload a new one?</p>
-                </Dialog>
-            </div>
+                        <Dialog
+                            visible={isDeleteImageDialogVisible}
+                            header="Confirm Delete"
+                            modal
+                            footer={() => (
+                                <div className="flex justify-content-center">
+                                    <Button type="button" label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={handleCancelUpload} />
+                                    <Button type="button" label="No" icon="pi pi-times" className='small-button' onClick={() => setDeleteImageDialogVisible(false)} />
+                                </div>
+                            )}
+                            onHide={() => setDeleteImageDialogVisible(false)}
+                        >
+                            <p>Are you sure you want to delete media?</p>
+                        </Dialog>
+                        <Dialog
+                            visible={isReplaceImageDialogVisible}
+                            header="Replace Image"
+                            modal
+                            footer={() => (
+                                <div className="flex justify-content-center">
+                                    <Button type="button" label="Yes, Replace" icon="pi pi-check" className='small-button' severity="danger" onClick={handleReplaceFile} />
+                                    <Button type="button" label="Cancel" icon="pi pi-times" className='small-button' onClick={() => setReplaceImageDialogVisible(false)} />
+                                </div>
+                            )}
+                            onHide={() => setReplaceImageDialogVisible(false)}
+                        >
+                            <p>An media is already uploaded. Do you want to delete it and upload a new one?</p>
+                        </Dialog>
+                    </div>
+                }
+            </>
         );
     }
 }

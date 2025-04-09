@@ -15,6 +15,7 @@ import { ProgressBar } from "primereact/progressbar";
 import getAcceptedFileTypes from "@/helpers/getAcceptedFileTypes";
 import Link from "next/link";
 import { downloadMediaFile } from "@/helpers/downloadMediaFile";
+import { getExtensionComponent } from "@/helpers/registry";
 export class SolidMediaMultipleField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
@@ -94,6 +95,7 @@ export class SolidMediaMultipleField implements ISolidField {
         const fieldLayoutInfo = this.fieldContext.field;
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+        const viewMode: string = this.fieldContext.viewMode;
         const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
         const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
         const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
@@ -103,6 +105,7 @@ export class SolidMediaMultipleField implements ISolidField {
         const [imageToBeDeletedData, setImageToBeDeletedData] = useState<any>();
         const [fileDetails, setFileDetails] = useState<{ name: string; type: string; size: number, id: number, fileUrl: string }[]>([]);
         const [selectedFileId, setSelectedFileId] = useState<string | null>(null);
+        const [fileSizeError, setFileSizeError] = useState<string | null>(null);
 
         const formatFileSize = (size: number) => {
             return size >= 1024 * 1024
@@ -151,6 +154,7 @@ export class SolidMediaMultipleField implements ISolidField {
 
         const handleDropImages = (acceptedFiles: any[]) => {
             if (!acceptedFiles.length) return;
+            setFileSizeError(null);
             const newFileDetails = [...fileDetails];
             acceptedFiles.forEach((file) => {
                 newFileDetails.push({ name: file.name, type: file.type, size: file.size, id: file.id, fileUrl: file._full_url });
@@ -199,6 +203,15 @@ export class SolidMediaMultipleField implements ISolidField {
             isDragActive,
         } = useDropzone({
             onDrop: handleDropImages,
+            onDropRejected: (fileRejections) => {
+                const rejection = fileRejections[0];
+                const sizeError = rejection.errors.find(err => err.code === 'file-too-large');
+                if (sizeError) {
+                    setFileSizeError(`File is too large. Max size is ${fieldMetadata.mediaMaxSizeKb} KB.`);
+                } else {
+                    setFileSizeError(rejection.errors[0]?.message || "File not accepted.");
+                }
+            },
             accept: getAcceptedFileTypes(fieldMetadata.mediaTypes),
             maxSize: fieldMetadata.mediaMaxSizeKb * 1024,
         });
@@ -206,161 +219,179 @@ export class SolidMediaMultipleField implements ISolidField {
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
         const [isShowAllFiles, setShowAllFiles] = useState(false);
+        let DynamicWidget = getExtensionComponent("SolidFormFieldViewMediaMultipleWidget");
+        const widgetProps = {
+            formik: formik,
+            fieldContext: this.fieldContext,
+        }
         return (
-            <div className={className} style={readOnlyPermission === true ? { filter: 'opacity(50%)', pointerEvents: 'none' } : {}}>
-                <div className="flex flex-column gap-2 mt-4 relative">
-                    {showFieldLabel != false &&
-                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                            {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                        </label>
-                    }
-                    <div
-                        {...getRootProps()}
-                        className="solid-dropzone-wrapper"
-                    >
-                        <input {...getInputProps()} />
-                        <DropzonePlaceholder
-                            mediaTypes={fieldMetadata.mediaTypes}
-                            mediaMaxSizeKb={fieldMetadata.mediaMaxSizeKb}
-                        />
+            <>
+                {viewMode === "view" &&
+                    <div className={className}>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
                     </div>
-                    {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                        <div className="absolute mt-1">
-                            <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                }
+                {viewMode === "edit" &&
+                    <div className={className} style={readOnlyPermission === true ? { filter: 'opacity(50%)', pointerEvents: 'none' } : {}}>
+                        <div className="flex flex-column gap-2 mt-4 relative">
+                            {showFieldLabel != false &&
+                                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                                    {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
+                                </label>
+                            }
+                            <div
+                                {...getRootProps()}
+                                className="solid-dropzone-wrapper"
+                            >
+                                <input {...getInputProps()} />
+                                <DropzonePlaceholder
+                                    mediaTypes={fieldMetadata.mediaTypes}
+                                    mediaMaxSizeKb={fieldMetadata.mediaMaxSizeKb}
+                                />
+                            </div>
+                            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                                <div className="absolute mt-1">
+                                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                                </div>
+                            )}
+                            {
+                                fileSizeError &&
+                                <Message severity="error" text={fileSizeError?.toString()} />
+                            }
                         </div>
-                    )}
-                </div>
-                {fileDetails.length > 0 &&
-                    <div className="solid-file-upload-wrapper">
-                        <div className="flex align-items-center gap-2">
-                            <FileReaderExt fileDetails={fileDetails[0]} />
-                            <div className="w-full flex flex-column gap-1">
-                                <div className="flex align-items-center justify-content-between">
-                                    <Link className="font-normal w-11" href={`${fileDetails[0]?.fileUrl}`} target="_blank">{fileDetails[0].name}</Link>
-                                    <div className="flex align-items-center gap-2">
-                                        <div>
-                                            <Button
-                                                type="button"
-                                                text
-                                                icon={"pi pi-download"}
-                                                size="small"
-                                                style={{
-                                                    height: 16,
-                                                    width: 16
-                                                }}
-                                                onClick={() => downloadMediaFile(fileDetails[0]?.fileUrl, fileDetails[0]?.name)}
-                                            />
+                        {fileDetails.length > 0 &&
+                            <div className="solid-file-upload-wrapper">
+                                <div className="flex align-items-center gap-2">
+                                    <FileReaderExt fileDetails={fileDetails[0]} />
+                                    <div className="w-full flex flex-column gap-1">
+                                        <div className="flex align-items-center justify-content-between">
+                                            <Link className="font-normal w-11" href={`${fileDetails[0]?.fileUrl}`} target="_blank">{fileDetails[0].name}</Link>
+                                            <div className="flex align-items-center gap-2">
+                                                <div>
+                                                    <Button
+                                                        type="button"
+                                                        text
+                                                        icon={"pi pi-download"}
+                                                        size="small"
+                                                        style={{
+                                                            height: 16,
+                                                            width: 16
+                                                        }}
+                                                        onClick={() => downloadMediaFile(fileDetails[0]?.fileUrl, fileDetails[0]?.name)}
+                                                    />
+                                                </div>
+                                                <div>
+                                                    <Button
+                                                        type="button"
+                                                        text
+                                                        icon={"pi pi-times"}
+                                                        size="small"
+                                                        severity="secondary"
+                                                        // className="p-2"
+                                                        style={{
+                                                            height: 16,
+                                                            width: 16
+                                                        }}
+                                                        onClick={() => confirmDeleteFile(`${fileDetails[0].name}-${fileDetails[0].size}`, fileDetails[0].id)}
+                                                    />
+                                                </div>
+                                            </div>
                                         </div>
-                                        <div>
-                                            <Button
-                                                type="button"
-                                                text
-                                                icon={"pi pi-times"}
-                                                size="small"
-                                                severity="secondary"
-                                                // className="p-2"
-                                                style={{
-                                                    height: 16,
-                                                    width: 16
-                                                }}
-                                                onClick={() => confirmDeleteFile(`${fileDetails[0].name}-${fileDetails[0].size}`, fileDetails[0].id)}
-                                            />
+                                        <div className="flex align-items-center gap-2 text-sm">
+                                            {formatFileSize(fileDetails[0].size)}
                                         </div>
                                     </div>
                                 </div>
-                                <div className="flex align-items-center gap-2 text-sm">
-                                    {formatFileSize(fileDetails[0].size)}
+                            </div>
+                        }
+
+                        {fileDetails.length > 1 &&
+                            <div className="flex align-items-center mt-1">
+                                <p className="m-0">
+                                    {fileDetails.length - 1} items
+                                </p>
+                                <div>
+                                    <Button type="button" size="small" text label="View" onClick={() => setShowAllFiles(true)} />
                                 </div>
                             </div>
-                        </div>
-                    </div>
-                }
+                        }
 
-                {fileDetails.length > 1 &&
-                    <div className="flex align-items-center mt-1">
-                        <p className="m-0">
-                            {fileDetails.length - 1} items
-                        </p>
-                        <div>
-                            <Button type="button" size="small" text label="View" onClick={() => setShowAllFiles(true)} />
-                        </div>
-                    </div>
-                }
-
-                <Dialog
-                    visible={isShowAllFiles}
-                    header="Items Uploaded"
-                    modal
-                    onHide={() => setShowAllFiles(false)}
-                    style={{ minWidth: 450 }}
-                >
-                    {fileDetails.length > 1 &&
-                        fileDetails.map((file, index) => {
-                            const fileId = `${file.name}-${file.size}`;
-                            return (
-                                <div key={fileId} className="solid-file-upload-wrapper">
-                                    <div className="flex align-items-center gap-2">
-                                        <FileReaderExt fileDetails={file} />
-                                        <div className="w-full flex flex-column gap-1">
-                                            <div className="flex align-items-center justify-content-between">
-                                                <Link className="font-normal w-11" href={file?.fileUrl} target="_blank">{file.name}</Link>
-                                                <div className="flex align-items-center gap-2">
-                                                    <div>
-                                                        <Button
-                                                            type="button"
-                                                            text
-                                                            icon={"pi pi-download"}
-                                                            size="small"
-                                                            style={{
-                                                                height: 16,
-                                                                width: 16
-                                                            }}
-                                                            onClick={() => downloadMediaFile(file?.fileUrl, file?.name)}
-                                                        />
+                        <Dialog
+                            visible={isShowAllFiles}
+                            header="Items Uploaded"
+                            modal
+                            onHide={() => setShowAllFiles(false)}
+                            style={{ minWidth: 450 }}
+                        >
+                            {fileDetails.length > 1 &&
+                                fileDetails.map((file, index) => {
+                                    const fileId = `${file.name}-${file.size}`;
+                                    return (
+                                        <div key={fileId} className="solid-file-upload-wrapper">
+                                            <div className="flex align-items-center gap-2">
+                                                <FileReaderExt fileDetails={file} />
+                                                <div className="w-full flex flex-column gap-1">
+                                                    <div className="flex align-items-center justify-content-between">
+                                                        <Link className="font-normal w-11" href={file?.fileUrl} target="_blank">{file.name}</Link>
+                                                        <div className="flex align-items-center gap-2">
+                                                            <div>
+                                                                <Button
+                                                                    type="button"
+                                                                    text
+                                                                    icon={"pi pi-download"}
+                                                                    size="small"
+                                                                    style={{
+                                                                        height: 16,
+                                                                        width: 16
+                                                                    }}
+                                                                    onClick={() => downloadMediaFile(file?.fileUrl, file?.name)}
+                                                                />
+                                                            </div>
+                                                            <div>
+                                                                <Button
+                                                                    type="button"
+                                                                    text
+                                                                    icon={"pi pi-times"}
+                                                                    size="small"
+                                                                    severity="secondary"
+                                                                    // className="p-2"
+                                                                    style={{
+                                                                        height: 16,
+                                                                        width: 16
+                                                                    }}
+                                                                    onClick={() => confirmDeleteFile(fileId, file?.id)}
+                                                                />
+                                                            </div>
+                                                        </div>
                                                     </div>
-                                                    <div>
-                                                        <Button
-                                                            type="button"
-                                                            text
-                                                            icon={"pi pi-times"}
-                                                            size="small"
-                                                            severity="secondary"
-                                                            // className="p-2"
-                                                            style={{
-                                                                height: 16,
-                                                                width: 16
-                                                            }}
-                                                            onClick={() => confirmDeleteFile(fileId, file?.id)}
-                                                        />
+                                                    <div className="flex align-items-center gap-2 text-sm">
+                                                        {formatFileSize(file.size)}
                                                     </div>
                                                 </div>
                                             </div>
-                                            <div className="flex align-items-center gap-2 text-sm">
-                                                {formatFileSize(file.size)}
-                                            </div>
                                         </div>
-                                    </div>
+                                    );
+                                })
+                            }
+                        </Dialog>
+                        <Dialog
+                            visible={isDeleteImageDialogVisible}
+                            header="Confirm Delete"
+                            modal
+                            footer={() => (
+                                <div className="flex justify-content-center">
+                                    <Button type="button" label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteFile} />
+                                    <Button type="button" label="No" icon="pi pi-times" className='small-button' onClick={() => setDeleteImageDialogVisible(false)} />
                                 </div>
-                            );
-                        })
-                    }
-                </Dialog>
-                <Dialog
-                    visible={isDeleteImageDialogVisible}
-                    header="Confirm Delete"
-                    modal
-                    footer={() => (
-                        <div className="flex justify-content-center">
-                            <Button type="button" label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteFile} />
-                            <Button type="button" label="No" icon="pi pi-times" className='small-button' onClick={() => setDeleteImageDialogVisible(false)} />
-                        </div>
-                    )}
-                    onHide={() => setDeleteImageDialogVisible(false)}
-                >
-                    <p>Are you sure you want to delete image?</p>
-                </Dialog>
-            </div >
+                            )}
+                            onHide={() => setDeleteImageDialogVisible(false)}
+                        >
+                            <p>Are you sure you want to delete image?</p>
+                        </Dialog>
+                    </div>
+                }
+            </>
         );
     }
 }

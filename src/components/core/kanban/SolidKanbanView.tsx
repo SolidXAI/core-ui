@@ -26,6 +26,8 @@ import Counter from "yet-another-react-lightbox/plugins/counter";
 import Download from "yet-another-react-lightbox/plugins/download";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
+import { useRouter, useSearchParams } from "next/navigation";
+import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
 
 
 
@@ -38,7 +40,8 @@ type SolidKanbanViewParams = {
 
 export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const solidGlobalSearchElementRef = useRef();
-
+  const searchParams = useSearchParams().toString(); // Converts the query params to a string
+  const router = useRouter();
   // TODO: The initial filter state will be created based on the fields which are present on this kanban view. 
   const [filters, setFilters] = useState<any>();
   const [toPopulate, setToPopulate] = useState<string[]>([]);
@@ -58,6 +61,19 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
   const [openLightbox, setOpenLightbox] = useState(false);
   const [lightboxUrls, setLightboxUrls] = useState({});
+  const [filterQueryString, setFilterQueryString] = useState<any>();
+
+
+
+  const pushFiltersToRouter = (filterQueryString: any) => {
+    router.push(`?${filterQueryString}`, undefined, { shallow: true });
+  };
+
+  useEffect(() => {
+    if (filterQueryString) {
+      pushFiltersToRouter(filterQueryString);
+    }
+  }, [filterQueryString]);
 
 
 
@@ -286,10 +302,15 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           // sort: [`id:desc`],
         };
         // fields=status&groupBy=status&fields=count(status)&populateGroup=true
-        const queryString = qs.stringify(queryData, {
+        let queryString = qs.stringify(queryData, {
           encodeValuesOnly: true
         });
-
+        if (searchParams) {
+          queryString = searchParams;
+          setFilterQueryString(searchParams)
+        } else {
+          setFilterQueryString(queryString)
+        }
         triggerGetSolidEntities(queryString);
         setSelectedRecords([]);
       }
@@ -408,7 +429,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       const queryString = qs.stringify(queryData, {
         encodeValuesOnly: true
       });
-
+      setFilterQueryString(queryString);
       const data: any = await triggerGetSolidEntities(queryString);
       const newRecords = data.data.records;
       const currentData = kanbanViewData;
@@ -561,7 +582,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       const queryString = qs.stringify(queryData, {
         encodeValuesOnly: true
       });
-
+      setFilterQueryString(queryString);
       const data: any = await triggerGetSolidEntities(queryString);
       if (data && data?.data?.groupRecords.length > 0) {
         const updatedData = [...kanbanViewData, ...data.data.groupRecords];
@@ -600,6 +621,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       });
 
       // triggerGetSolidEntities(queryString);
+      setFilterQueryString(queryString);
       const data: any = await triggerGetSolidEntities(queryString);
       if (data && data?.data?.groupRecords.length > 0) {
         const updatedData = [...data.data.groupRecords];
@@ -628,6 +650,22 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     // }
   }
 
+
+  useEffect(() => {
+    if (solidKanbanViewMetaData) {
+      const createActionUrl = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.type === "custom" ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.customComponent : "form/new";
+      const editActionUrl = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.type === "custom" ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.customComponent : "form";
+      const viewModes = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.length > 0 && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view } });
+      setViewModes(viewModes);
+      if (createActionUrl) {
+        setCreateButtonUrl(createActionUrl)
+      }
+      if (editActionUrl) {
+        setEditButtonUrl(editActionUrl)
+      }
+    }
+  }, [solidKanbanViewMetaData])
+
   const kanbanViewTitle = solidKanbanViewMetaData?.data?.solidView?.displayName
 
   return (
@@ -654,25 +692,28 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             className="small-button"
             severity="danger"
           />}
-          {/* <SolidListViewConfigure
-        setShowArchived={setShowArchived}
-        showArchived={showArchived}
-        viewData={solidKanbanViewMetaData}
-        sizeOptions={sizeOptions}
-        setSize={setSize}
-        size={size}
-        viewModes={viewModes}
-        params={params}
-        actionsAllowed={actionsAllowed}
-        selectedRecords={selectedRecords}
-        setDialogVisible={setDialogVisible}
-      ></SolidListViewConfigure> */}
+          <Button
+            type="button"
+            size="small"
+            icon="pi pi-refresh"
+            severity="secondary"
+            outlined
+            onClick={() => {
+              window.location.reload()
+            }}
+          />
+          <SolidKanbanViewConfigure
+            solidKanbanViewMetaData={solidKanbanViewMetaData}
+            actionsAllowed={actionsAllowed}
+            viewModes={viewModes}
+          // setLayoutDialogVisible={setLayoutDialogVisible}
+          />
           {/* <SolidConfigureLayoutElement></SolidConfigureLayoutElement> */}
         </div>
       </div>
       <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
       {solidKanbanViewMetaData && kanbanViewData &&
-        <KanbanBoard groupedView={groupedView} kanbanViewData={kanbanViewData} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLinPagination={handleSwimLinPagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} ></KanbanBoard>
+        <KanbanBoard groupedView={groupedView} kanbanViewData={kanbanViewData} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLinPagination={handleSwimLinPagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox}  editButtonUrl={editButtonUrl}></KanbanBoard>
       }
 
       <Dialog

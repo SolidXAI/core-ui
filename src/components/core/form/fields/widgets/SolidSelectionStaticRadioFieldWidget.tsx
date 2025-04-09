@@ -36,7 +36,7 @@ export const SolidSelectionStaticRadioWidget = ({ formik, fieldContext }: SolidS
             <div className="relative">
                 <div className="flex flex-column gap-2 mt-4">
                     {showFieldLabel !== false && (
-                        <label htmlFor={fieldName} className="form-field-label">
+                        <label htmlFor={fieldName} className="form-field-label font-medium">
                             {fieldLabel}
                             {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         </label>

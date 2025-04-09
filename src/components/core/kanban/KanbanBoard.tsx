@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import axios from "axios";
 import KanbanColumn from "./KanbanColumn";
+import { Button } from "primereact/button";
 
 // Define types for groupData and Grouped Data
 interface Post {
@@ -24,7 +25,7 @@ interface ApiResponse {
     };
 }
 
-export const KanbanBoard = ({ groupedView, kanbanViewData, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLinPagination, setLightboxUrls, setOpenLightbox }: any) => {
+export const KanbanBoard = ({ groupedView, kanbanViewData, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLanePagination, setLightboxUrls, setOpenLightbox, editButtonUrl }: any) => {
     const [loading, setLoading] = useState<boolean>(true);
     // State to manage the folded status of each column
     const [foldedStates, setFoldedStates] = useState<Record<string, boolean>>({});
@@ -112,12 +113,13 @@ export const KanbanBoard = ({ groupedView, kanbanViewData, solidKanbanViewMetaDa
                                 handleLoadMore={handleLoadMore}
                                 setLightboxUrls={setLightboxUrls}
                                 setOpenLightbox={setOpenLightbox}
+                                editButtonUrl={editButtonUrl}
                             />
                         );
                     })}
                     {groupedView !== false &&
                         <div className="kanban-load-more-folded">
-                            <a className="kaban-load-more" onClick={handleSwimLinPagination}>load More</a></div>
+                            <Button className="kaban-load-more" size="small" text onClick={handleSwimLanePagination}>load More</Button></div>
                     }
                 </div>
             </DragDropContext>

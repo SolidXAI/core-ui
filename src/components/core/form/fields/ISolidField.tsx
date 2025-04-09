@@ -9,6 +9,7 @@ export type SolidFieldProps = {
     data: any,
     modelName?: any,
     readOnly?: any,
+    viewMode? :any
     onChange?: any,
     onBlur?: any
 };
