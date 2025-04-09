@@ -2484,7 +2484,7 @@ li.header-li-px {
 
 .custom-filter-chip-type {
   display: flex;
-  align-items: center;  
+  align-items: center;
   padding: 0.25rem 0.5rem !important;
   color: var(--primary-color) !important;
   font-size: 0.875rem !important;
@@ -2967,6 +2967,32 @@ li.header-li-px {
   padding: 9px;
 }
 
+
+.solid-media-card {
+  box-shadow: none;
+  border-radius: 0.5rem;
+  border: 1px solid #E0E0E0;
+  background: #FAFAFA;
+  padding: 9px;
+  height: 100%;
+  transition: 0.2s linear;
+}
+
+.solid-media-card:hover {
+  border: 1px solid #722ED1;
+  background: #F9F0FF;
+}
+
+.solid-mimetype-chip {
+  border-radius: 0.25rem;
+  background: #F0F0F0;
+  padding: 0.25rem 0.5rem;
+  color: var(--secondary-dark-color);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 16px;
+}
+
 .kanban-group-heading {
   font-weight: 600;
   display: flex;
@@ -2999,6 +3025,30 @@ flex-shrink: 0; */
   max-height: 120px;
   object-fit: contain;
   box-shadow: rgba(0, 0, 0, 0.05) 0px 1px 2px 0px;
+}
+
+
+.kanban-media-image-preview {
+  /* width: 100px; */
+  /* width: 240px;
+height: 120px;
+flex-shrink: 0; */
+  width: 100%;
+  border-radius: 8px;
+  height: 145px;
+  object-fit: contain;
+  background-color: #fff;
+}
+
+.kanban-media-view-card {
+  width: 100%;
+  border-radius: 8px;
+  height: 145px;
+  object-fit: contain;
+  background-color: #fff;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .kanban-image-preview:hover {

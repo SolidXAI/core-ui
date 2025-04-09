@@ -25,7 +25,8 @@ export type SolidKanbanViewFieldsParams = {
     fieldLayout: any,
     data: any,
     setLightboxUrls?: any,
-        setOpenLightbox?:any
+    setOpenLightbox?: any,
+    groupedView?: boolean
 };
 
 export const getNumberOfInputs = (matchMode: any): number | null => {
@@ -73,69 +74,69 @@ export const getNumberOfInputs = (matchMode: any): number | null => {
 //     }
 // };
 
-export const SolidKanbanViewFields = ({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data, setLightboxUrls, setOpenLightbox }: SolidKanbanViewFieldsParams) => {
+export const SolidKanbanViewFields = ({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data, setLightboxUrls, setOpenLightbox, groupedView }: SolidKanbanViewFieldsParams) => {
 
     // And finally we can implement additional switching logic based on certain special fields. 
     if (fieldMetadata.name === 'id') {
-        return SolidIntKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidIntKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data });
     }
 
     if (fieldMetadata.type === 'int') {
-        return SolidIntKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidIntKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data });
     }
     if (fieldMetadata.type === 'bigint') {
-        return SolidBigintKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidBigintKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data });
     }
     if (fieldMetadata.type === 'float') {
-        return SolidFloatKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidFloatKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data });
     }
     if (fieldMetadata.type === 'decimal') {
-        return SolidDecimalKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidDecimalKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data });
     }
     if (fieldMetadata.type === 'shortText') {
-        return SolidShortTextKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data,setLightboxUrls, setOpenLightbox });
+        return SolidShortTextKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data, setLightboxUrls, setOpenLightbox, groupedView });
     }
     if (fieldMetadata.type === 'longText') {
-        return SolidLongTextKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidLongTextKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data, groupedView });
     }
     if (fieldMetadata.type === 'richText') {
-        return SolidRichTextKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidRichTextKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data });
     }
     if (fieldMetadata.type === 'boolean') {
-        return SolidBooleanKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidBooleanKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data });
     }
     if (fieldMetadata.type === 'date') {
-        return SolidDateKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidDateKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data });
     }
     if (fieldMetadata.type === 'datetime') {
-        return SolidDatetimeKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidDatetimeKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data });
     }
     if (fieldMetadata.type === 'time') {
-        return SolidTimeKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidTimeKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data });
     }
     if (fieldMetadata.type === 'relation') {
-        return SolidRelationKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidRelationKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data });
     }
     if (fieldMetadata.type === 'mediaSingle') {
-        return SolidMediaSingleKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data ,setLightboxUrls, setOpenLightbox});
+        return SolidMediaSingleKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data, setLightboxUrls, setOpenLightbox });
     }
     if (fieldMetadata.type === 'mediaMultiple') {
-        return SolidMediaMultipleKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data,setLightboxUrls, setOpenLightbox });
+        return SolidMediaMultipleKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data, setLightboxUrls, setOpenLightbox });
     }
     if (fieldMetadata.type === 'selectionStatic') {
-        return SolidSelectionStaticKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidSelectionStaticKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data });
     }
     if (fieldMetadata.type === 'selectionDynamic') {
-        return SolidSelectionDynamicKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidSelectionDynamicKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data });
     }
     if (fieldMetadata.type === 'computed') {
-        return SolidComputedKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidComputedKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data });
     }
     if (fieldMetadata.type === 'externalId') {
-        return SolidExternalIdKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidExternalIdKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data });
     }
     if (fieldMetadata.type === 'uuid') {
-        return SolidUuidKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout,data });
+        return SolidUuidKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data });
     }
     // // Load everything else based on type and dynamically.
     // else {
