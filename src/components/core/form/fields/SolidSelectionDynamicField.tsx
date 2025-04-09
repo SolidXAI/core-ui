@@ -106,7 +106,7 @@ export class SolidSelectionDynamicField implements ISolidField {
         let DynamicWidget = getExtensionComponent("SolidFormFieldViewModeWidget");
         const widgetProps = {
             label: fieldLabel,
-            value: formik.values[fieldLayoutInfo.attrs.name],
+            value: formik.values[fieldLayoutInfo.attrs.name] && formik.values[fieldLayoutInfo.attrs.name].value,
         }
         return (
             <>
