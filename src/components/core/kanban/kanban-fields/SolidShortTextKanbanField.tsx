@@ -13,8 +13,24 @@ const SolidShortTextKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fie
     const renderMode = fieldLayout?.attrs?.renderMode ? fieldLayout?.attrs?.renderMode : "text";
     const mimeType = data && data?.mimeType
     const fileName = data?.originalFileName;
-    console.log("response", fieldMetadata?.name);
-
+    const PDFHeader = () => {
+        return (
+            <div className='flex justify-content-between align-items-center'>
+                <p className='m-0'>
+                    {fileName}
+                </p>
+                <a
+                    href={data[fieldMetadata.name]}
+                    download={fileName}
+                    target="_blank"
+                    rel="noopener noreferrer"
+                    className='mr-4'
+                >
+                    <i className='pi pi-download' />
+                </a>
+            </div>
+        )
+    }
     return (
         <div>
             {renderMode === "text" && groupedView &&
@@ -44,7 +60,7 @@ const SolidShortTextKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fie
                     <div className='kanban-media-view-card' onClick={() => setVisible(true)} style={{ cursor: 'pointer' }}>
                         <PDFSvg />
                     </div>
-                    <Dialog header={fileName} visible={visible} style={{ width: "" }} onHide={() => setVisible(false)} modal>
+                    <Dialog header={<PDFHeader />} visible={visible} style={{ width: "" }} onHide={() => setVisible(false)} modal>
                         <Document file={data[fieldMetadata.name]}>
                             <Page pageNumber={1} />
                         </Document>
