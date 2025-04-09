@@ -922,7 +922,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         // const fieldMetadata = solidFieldsMetadata[attrs.name];
                         const fieldMetadata = solidFormViewMetaData.data.solidFieldsMetadata[attrs.name];
                         // Read only permission if there is no update permission on model and router doesnt contains new
-                        const readOnlyPermission = !actionsAllowed.includes(`${updatePermission(params.modelName)}`) && params.id !== "new"
+                        const readOnlyPermission = !actionsAllowed.includes(`${updatePermission(params.modelName)}`) && params.id !== "new";
                         return <SolidField
                             key={key}
                             field={element}

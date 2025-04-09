@@ -93,6 +93,7 @@ export class SolidRelationOneToManyField implements ISolidField {
                 inlineCreate: readOnlyPermission === false ? true : false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
                 embeded: true,
+                id: this.fieldContext.data ? this?.fieldContext?.data?.id : 'new',
                 customFilter: {
                     [customFilter]: {
                         id: {
@@ -113,6 +114,7 @@ export class SolidRelationOneToManyField implements ISolidField {
                 inlineCreate: readOnlyPermission === false ? true : false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
                 embeded: true,
+                id: this.fieldContext.data ? this?.fieldContext?.data?.id : 'new',
                 customFilter: {
                     [customFilter]: {
                         id: {
@@ -128,11 +130,11 @@ export class SolidRelationOneToManyField implements ISolidField {
                 embeded: true,
                 isCustomCreate: false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
-                modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName)
+                modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName),
             }
             setformViewParams(formviewparams)
 
-        }, [])
+        }, [readOnlyPermission])
 
         const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
         const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
