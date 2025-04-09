@@ -7,7 +7,7 @@ import { OverlayPanel } from 'primereact/overlaypanel';
 import { RadioButton } from 'primereact/radiobutton';
 import React, { useEffect, useRef, useState } from 'react'
 
-export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllowed, viewModes }: any) => {
+export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllowed, setLayoutDialogVisible, viewModes }: any) => {
     const op = useRef(null);
     const customizeLayout = useRef<OverlayPanel | null>(null);
     const pathname = usePathname();
@@ -68,7 +68,7 @@ export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllow
                     <div className="flex flex-column">
                         <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2 text-base" />
                         <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base" />
-                        {/* <Button
+                        <Button
                             text
                             type="button"
                             className="w-8rem text-left gap-2 purple-200"
@@ -78,7 +78,7 @@ export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllow
                             severity="contrast"
                             icon={'pi pi-objects-column'}
                             onClick={() => setLayoutDialogVisible(true)}
-                        /> */}
+                        />
                     </div>
                 </div>
                 <Divider className="m-0" />

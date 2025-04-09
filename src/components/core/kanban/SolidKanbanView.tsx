@@ -28,6 +28,8 @@ import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
+import { KanbanUserViewLayout } from "./KanbanUserViewLayout";
+import { useSelector } from "react-redux";
 
 
 
@@ -39,6 +41,7 @@ type SolidKanbanViewParams = {
 
 
 export const SolidKanbanView = (params: SolidKanbanViewParams) => {
+  const { user } = useSelector((state: any) => state.auth);
   const solidGlobalSearchElementRef = useRef();
   const searchParams = useSearchParams().toString(); // Converts the query params to a string
   const router = useRouter();
@@ -62,6 +65,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [openLightbox, setOpenLightbox] = useState(false);
   const [lightboxUrls, setLightboxUrls] = useState({});
   const [filterQueryString, setFilterQueryString] = useState<any>();
+  const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
 
 
 
@@ -117,7 +121,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   } = entityApi;
 
   // Get the kanban view layout & metadata first. 
-  const kanbanViewMetaDataQs = qs.stringify({ ...params, viewType: 'kanban' }, {
+  const kanbanViewMetaDataQs = qs.stringify({ ...params, viewType: 'kanban', userId: user?.user?.id }, {
     encodeValuesOnly: true,
   });
   const [kanbanViewMetaData, setKanbanViewMetaData] = useState<any>({});
@@ -706,14 +710,14 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             solidKanbanViewMetaData={solidKanbanViewMetaData}
             actionsAllowed={actionsAllowed}
             viewModes={viewModes}
-          // setLayoutDialogVisible={setLayoutDialogVisible}
+            setLayoutDialogVisible={setLayoutDialogVisible}
           />
           {/* <SolidConfigureLayoutElement></SolidConfigureLayoutElement> */}
         </div>
       </div>
       <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
       {solidKanbanViewMetaData && kanbanViewData &&
-        <KanbanBoard groupedView={groupedView} kanbanViewData={kanbanViewData} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLinPagination={handleSwimLinPagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox}  editButtonUrl={editButtonUrl}></KanbanBoard>
+        <KanbanBoard groupedView={groupedView} kanbanViewData={kanbanViewData} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLinPagination={handleSwimLinPagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl}></KanbanBoard>
       }
 
       <Dialog
@@ -738,6 +742,17 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           slides={lightboxUrls}
         />
       }
+      <Dialog
+        visible={isLayoutDialogVisible}
+        header="Change Kanban Layout"
+        modal
+        onHide={() => setLayoutDialogVisible(false)}
+        contentStyle={{
+          width: 800
+        }}
+      >
+        <KanbanUserViewLayout solidKanbanViewMetaData={solidKanbanViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
+      </Dialog>
     </div>
   );
 };

@@ -43,6 +43,8 @@ import { SolidEmailField } from "./fields/SolidEmailField";
 import { Panel } from "primereact/panel";
 import { SolidFormStepper } from "@/components/common/SolidFormStepper";
 import { SolidFormHeader } from "@/components/common/SolidFormHeader";
+import { SolidFormUserViewLayout } from "./SolidFormUserViewLayout";
+import { useSelector } from "react-redux";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -342,7 +344,7 @@ const SolidPage = ({ attrs, children, key }: any) => (
 // };
 
 const SolidFormView = (params: SolidFormViewProps) => {
-
+    const { user } = useSelector((state: any) => state.auth);
     const pathname = usePathname();
     const router = useRouter();
     const toast = useRef<Toast>(null);
@@ -352,6 +354,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [redirectToList, setRedirectToList] = useState(false);
 
     const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
+    const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
 
     const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<"view" | "edit">("view");
@@ -437,7 +440,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     // - - - - - - - - - - - -- - - - - - - - - - - - METADATA here
     // Get the form view layout & metadata first. 
-    const formViewMetaDataQs = qs.stringify({ ...params, viewType: 'form' }, {
+    const formViewMetaDataQs = qs.stringify({ ...params, viewType: 'form', userId: user?.user?.id }, {
         encodeValuesOnly: true,
     });
     const [formViewMetaData, setFormViewMetaData] = useState({});
@@ -1042,6 +1045,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 </svg>}
                             /> */}
                             {params.embeded !== true &&
+                                params.id !== "new" &&
                                 actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
                                 !formViewLayout.attrs.readonly &&
                                 <Button
@@ -1056,6 +1060,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     onClick={() => setDeleteDialogVisible(true)}
                                 />
                             }
+                            <Button
+                                text
+                                type="button"
+                                className="w-8rem text-left gap-2 purple-200"
+                                label="Layout"
+                                size="small"
+                                iconPos="left"
+                                severity="contrast"
+                                icon={'pi pi-objects-column'}
+                                onClick={() => setLayoutDialogVisible(true)}
+                            />
                         </div>
                     </OverlayPanel>
                 </div>
@@ -1137,7 +1152,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     {params.embeded !== true &&
                                         <SolidCancelButton />
                                     }
-
+                                    {formActionDropdown()}
                                 </div>
                             </>
                         ) : (
@@ -1266,9 +1281,19 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 >
                     <p>Are you sure you want to delete?</p>
                 </Dialog>
+                <Dialog
+                    visible={isLayoutDialogVisible}
+                    header="Change Form Layout"
+                    modal
+                    onHide={() => setLayoutDialogVisible(false)}
+                    contentStyle={{
+                        width: 800
+                    }}
+                >
+                    <SolidFormUserViewLayout solidFormViewMetaData={solidFormViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
+                </Dialog>
             </div>
         );
-
     }
 };
 
