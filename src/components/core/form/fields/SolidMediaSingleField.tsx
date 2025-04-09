@@ -235,21 +235,23 @@ export class SolidMediaSingleField implements ISolidField {
                                     {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                                 </label>
                             }
-                            <div
-                                {...getRootProps()}
-                                className="solid-dropzone-wrapper"
-                            >
-                                <input {...getInputProps()} />
-                                <DropzonePlaceholder
-                                    mediaTypes={fieldMetadata.mediaTypes}
-                                    mediaMaxSizeKb={fieldMetadata.mediaMaxSizeKb}
-                                />
-                            </div>
-                            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                                <div className="absolute mt-1">
-                                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                            <div className="relative">
+                                <div
+                                    {...getRootProps()}
+                                    className="solid-dropzone-wrapper"
+                                >
+                                    <input {...getInputProps()} />
+                                    <DropzonePlaceholder
+                                        mediaTypes={fieldMetadata.mediaTypes}
+                                        mediaMaxSizeKb={fieldMetadata.mediaMaxSizeKb}
+                                    />
                                 </div>
-                            )}
+                                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                                    <div className="absolute mt-1">
+                                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                                    </div>
+                                )}
+                            </div>
                             {
                                 fileSizeError &&
                                 <Message severity="error" text={fileSizeError?.toString()} />
