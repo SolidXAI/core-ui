@@ -729,16 +729,18 @@ export const SolidListView = (params: SolidListViewParams) => {
             ></Button>
           }
           {/* Button For Manual Refresh */}
-          <Button
-            type="button"
-            size="small"
-            icon="pi pi-refresh"
-            severity="secondary"
-            outlined
-            onClick={() => {
-              setQueryString(first, rows, sortField, sortOrder, filters, showArchived);
-            }}
-          />
+          {params.embeded !== true &&
+            <Button
+              type="button"
+              size="small"
+              icon="pi pi-refresh"
+              severity="secondary"
+              outlined
+              onClick={() => {
+                setQueryString(first, rows, sortField, sortOrder, filters, showArchived);
+              }}
+            />
+          }
           {showArchived && <Button type="button" icon="pi pi-refresh" label="Recover" size='small' severity="secondary"
             onClick={() => setRecoverDialogVisible(true)}
           ></Button>}
