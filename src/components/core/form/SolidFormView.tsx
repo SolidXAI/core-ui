@@ -344,7 +344,6 @@ const SolidPage = ({ attrs, children, key }: any) => (
 // };
 
 const SolidFormView = (params: SolidFormViewProps) => {
-    const { user } = useSelector((state: any) => state.auth);
     const pathname = usePathname();
     const router = useRouter();
     const toast = useRef<Toast>(null);
@@ -440,7 +439,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     // - - - - - - - - - - - -- - - - - - - - - - - - METADATA here
     // Get the form view layout & metadata first. 
-    const formViewMetaDataQs = qs.stringify({ ...params, viewType: 'form', userId: user?.user?.id }, {
+    const formViewMetaDataQs = qs.stringify({ ...params, viewType: 'form'}, {
         encodeValuesOnly: true,
     });
     const [formViewMetaData, setFormViewMetaData] = useState({});
