@@ -43,7 +43,6 @@ import Download from "yet-another-react-lightbox/plugins/download";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 import { SolidListViewConfigure } from "./SolidListViewConfigure";
-import { useSelector } from "react-redux";
 
 
 const getRandomInt = (min: number, max: number) => {
@@ -92,8 +91,6 @@ type SolidListViewParams = {
 export const SolidListView = (params: SolidListViewParams) => {
 
   const solidGlobalSearchElementRef = useRef();
-  const { user } = useSelector((state: any) => state.auth);
-
 
   const router = useRouter()
   const searchParams = useSearchParams().toString(); // Converts the query params to a string
@@ -150,7 +147,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   } = entityApi;
 
   // Get the list view layout & metadata first. 
-  const listViewMetaDataQs = qs.stringify({ modelName: params.modelName, moduleName: params.moduleName, viewType: 'list', userId: user?.user?.id }, {
+  const listViewMetaDataQs = qs.stringify({ modelName: params.modelName, moduleName: params.moduleName, viewType: 'list'}, {
     encodeValuesOnly: true,
   });
   const [listViewMetaData, setListViewMetaData] = useState({});
@@ -160,7 +157,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     isLoading: solidListViewMetaDataIsLoading,
     isError: solidListViewMetaDataIsError,
     refetch
-  } = useGetSolidViewLayoutQuery(listViewMetaDataQs, { skip: !user?.user?.id });
+  } = useGetSolidViewLayoutQuery(listViewMetaDataQs);
 
   const initialFilterMethod = () => {
 

@@ -4,7 +4,6 @@ import { Button } from 'primereact/button';
 import { Checkbox, CheckboxChangeEvent } from 'primereact/checkbox';
 import React, { useEffect, useRef, useState } from 'react'
 import qs from "qs";
-import { useSelector } from 'react-redux';
 import { createSolidEntityApi } from '@/redux/api/solidEntityApi';
 import { Toast } from "primereact/toast";
 
@@ -20,7 +19,6 @@ interface FilterColumns {
 export const SolidListColumnSelector = ({ listViewMetaData }: any) => {
     const toast = useRef<Toast>(null);
 
-    const { user } = useSelector((state: any) => state.auth);
     const entityApi = createSolidEntityApi('userViewMetadata');
     const {
         useUpsertSolidEntityMutation
@@ -104,7 +102,6 @@ export const SolidListColumnSelector = ({ listViewMetaData }: any) => {
                 if (listViewMetaData?.data?.solidView?.id) {
                     // Update existing user view
                     const response = await upsertUserView({
-                        userId: user?.user?.id,
                         viewMetadataId: listViewMetaData?.data?.solidView?.id,
                         layout: JSON.stringify(updatedView.layout),
                     }).unwrap();

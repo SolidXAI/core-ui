@@ -29,7 +29,6 @@ import "yet-another-react-lightbox/plugins/counter.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
 import { KanbanUserViewLayout } from "./KanbanUserViewLayout";
-import { useSelector } from "react-redux";
 
 
 
@@ -41,7 +40,6 @@ type SolidKanbanViewParams = {
 
 
 export const SolidKanbanView = (params: SolidKanbanViewParams) => {
-  const { user } = useSelector((state: any) => state.auth);
   const solidGlobalSearchElementRef = useRef();
   const searchParams = useSearchParams().toString(); // Converts the query params to a string
   const router = useRouter();
@@ -121,7 +119,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   } = entityApi;
 
   // Get the kanban view layout & metadata first. 
-  const kanbanViewMetaDataQs = qs.stringify({ ...params, viewType: 'kanban', userId: user?.user?.id }, {
+  const kanbanViewMetaDataQs = qs.stringify({ ...params, viewType: 'kanban' }, {
     encodeValuesOnly: true,
   });
   const [kanbanViewMetaData, setKanbanViewMetaData] = useState<any>({});
@@ -131,7 +129,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     error: solidKanbanViewMetaDataError,
     isLoading: solidKanbanViewMetaDataIsLoading,
     isError: solidKanbanViewMetaDataIsError
-  } = useGetSolidViewLayoutQuery(kanbanViewMetaDataQs, { skip: !user?.user?.id });
+  } = useGetSolidViewLayoutQuery(kanbanViewMetaDataQs);
 
 
 

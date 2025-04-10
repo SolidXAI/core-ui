@@ -11,7 +11,6 @@ import { Toast } from "primereact/toast";
 
 export const SolidFormUserViewLayout = ({ solidFormViewMetaData, setLayoutDialogVisible }: any) => {
     const toast = useRef<Toast>(null);
-    const { user } = useSelector((state: any) => state.auth);
     const entityApi = createSolidEntityApi("userViewMetadata");
     const { useUpsertSolidEntityMutation } = entityApi;
     const [upsertUserView] = useUpsertSolidEntityMutation();
@@ -40,7 +39,6 @@ export const SolidFormUserViewLayout = ({ solidFormViewMetaData, setLayoutDialog
             try {
                 if (solidView.id) {
                     const response = await upsertUserView({
-                        userId: user?.user?.id,
                         viewMetadataId: solidView.id,
                         layout: JSON.stringify(parsedLayout)
                     }).unwrap();
