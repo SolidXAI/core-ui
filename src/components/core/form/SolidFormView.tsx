@@ -658,7 +658,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             const event: SolidLoadForm = {
                 fieldsMetadata: solidFormViewMetaData,
                 formData: solidFormViewData?.data,
-                type: dynamicHeader,
+                type: 'onFormLayoutLoad',
                 viewMetadata: solidFormViewMetaData?.data?.solidView
             }
             if (dynamicHeader) {
