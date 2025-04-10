@@ -160,7 +160,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     isLoading: solidListViewMetaDataIsLoading,
     isError: solidListViewMetaDataIsError,
     refetch
-  } = useGetSolidViewLayoutQuery(listViewMetaDataQs);
+  } = useGetSolidViewLayoutQuery(listViewMetaDataQs, { skip: !user?.user?.id });
 
   const initialFilterMethod = () => {
 

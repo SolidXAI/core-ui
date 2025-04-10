@@ -448,7 +448,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const {
         data: solidFormViewMetaData,
         isLoading: solidFormViewMetaDataIsLoading
-    } = useGetSolidViewLayoutQuery(formViewMetaDataQs);
+    } = useGetSolidViewLayoutQuery(formViewMetaDataQs, { skip: !user?.user?.id });
 
     useEffect(() => {
         if (

@@ -131,7 +131,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     error: solidKanbanViewMetaDataError,
     isLoading: solidKanbanViewMetaDataIsLoading,
     isError: solidKanbanViewMetaDataIsError
-  } = useGetSolidViewLayoutQuery(kanbanViewMetaDataQs);
+  } = useGetSolidViewLayoutQuery(kanbanViewMetaDataQs, { skip: !user?.user?.id });
 
 
 
