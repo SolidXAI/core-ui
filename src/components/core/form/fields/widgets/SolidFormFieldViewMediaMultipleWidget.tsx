@@ -7,7 +7,7 @@ import { downloadMediaFile } from "@/helpers/downloadMediaFile";
 import { SolidMediaSingleFieldWidgetProps } from "@/types/solid-core";
 import { Dialog } from "primereact/dialog";
 
-export const SolidFormFieldViewMediaMultipleWidget = ({ formik, fieldContext }: SolidMediaSingleFieldWidgetProps) => {
+export const SolidFormFieldViewMediaMultipleWidget = ({ formik, fieldContext, setLightboxUrls, setOpenLightbox }: SolidMediaSingleFieldWidgetProps) => {
     const [fileDetails, setFileDetails] = useState<{ name: string; type: string; size: number, id: number, fileUrl: string }[]>([]);
     const [isShowAllFiles, setShowAllFiles] = useState(false);
     const fieldMetadata = fieldContext.fieldMetadata;
@@ -60,6 +60,23 @@ export const SolidFormFieldViewMediaMultipleWidget = ({ formik, fieldContext }: 
         }
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 
+    const handleFileView = (url: any) => {
+        if (url?.type.includes('image/')) {
+            setLightboxUrls?.([
+                { src: url.fileUrl, downloadUrl: url.fileUrl },
+            ]);
+            setOpenLightbox?.(true);
+        } else {
+            const link = document.createElement('a');
+            link.href = url.fileUrl;
+            link.download = ''; // or specify a file name like 'file.pdf'
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
+
     return (
         <div className={className}>
             {showFieldLabel != false &&
@@ -72,7 +89,7 @@ export const SolidFormFieldViewMediaMultipleWidget = ({ formik, fieldContext }: 
                         <FileReaderExt fileDetails={fileDetails[0]} />
                         <div className="w-full flex flex-column gap-1">
                             <div className="flex align-items-center justify-content-between">
-                                <Link className="font-normal w-11" href={`${fileDetails[0]?.fileUrl}`} target="_blank">{fileDetails[0].name}</Link>
+                                <p className="font-normal w-11 text-primary m-0" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails[0])}>{fileDetails[0].name}</p>
                                 <div className="flex align-items-center gap-2">
                                     <div>
                                         <Button
@@ -124,7 +141,7 @@ export const SolidFormFieldViewMediaMultipleWidget = ({ formik, fieldContext }: 
                                     <FileReaderExt fileDetails={file} />
                                     <div className="w-full flex flex-column gap-1">
                                         <div className="flex align-items-center justify-content-between">
-                                            <Link className="font-normal w-11" href={file?.fileUrl} target="_blank">{file.name}</Link>
+                                            <p className="font-normal w-11" style={{ cursor: 'pointer' }} onClick={() => handleFileView(file)}>{file.name}</p>
                                             <div className="flex align-items-center gap-2">
                                                 <div>
                                                     <Button

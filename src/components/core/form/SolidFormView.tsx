@@ -44,7 +44,11 @@ import { Panel } from "primereact/panel";
 import { SolidFormStepper } from "@/components/common/SolidFormStepper";
 import { SolidFormHeader } from "@/components/common/SolidFormHeader";
 import { SolidFormUserViewLayout } from "./SolidFormUserViewLayout";
-import { useSelector } from "react-redux";
+import Lightbox from "yet-another-react-lightbox";
+import Counter from "yet-another-react-lightbox/plugins/counter";
+import Download from "yet-another-react-lightbox/plugins/download";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/counter.css";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -90,7 +94,7 @@ const getLayoutFieldsAsObject = (layout: any[]): any => {
     }, {});
 }
 
-const fieldFactory = (type: string, fieldContext: SolidFieldProps): ISolidField | null => {
+const fieldFactory = (type: string, fieldContext: SolidFieldProps, setLightboxUrls?: any, setOpenLightbox?: any): ISolidField | null => {
     if (type === 'shortText') {
         return new SolidShortTextField(fieldContext);
     }
@@ -131,10 +135,10 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps): ISolidField 
         return new SolidRelationField(fieldContext);
     }
     if (type === 'mediaSingle') {
-        return new SolidMediaSingleField(fieldContext);
+        return new SolidMediaSingleField(fieldContext, setLightboxUrls, setOpenLightbox);
     }
     if (type === 'mediaMultiple') {
-        return new SolidMediaMultipleField(fieldContext);
+        return new SolidMediaMultipleField(fieldContext, setLightboxUrls, setOpenLightbox);
     }
     if (type === 'password') {
         return new SolidPasswordField(fieldContext);
@@ -146,7 +150,7 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps): ISolidField 
 }
 
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
-const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur }: any) => {
+const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, setLightboxUrls, setOpenLightbox }: any) => {
     const fieldContext: SolidFieldProps = {
         // field metadata - coming from the field-metadata table.
         fieldMetadata: fieldMetadata,
@@ -162,7 +166,7 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
         onChange: onChange,
         onBlur: onBlur
     }
-    const solidField = fieldFactory(fieldMetadata?.type, fieldContext);
+    const solidField = fieldFactory(fieldMetadata?.type, fieldContext, setLightboxUrls, setOpenLightbox);
 
     return solidField?.render(formik);
 };
@@ -357,7 +361,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<"view" | "edit">("view");
-
+    const [openLightbox, setOpenLightbox] = useState(false);
+    const [lightboxUrls, setLightboxUrls] = useState([]);
     const errorFields: string[] = [];
 
     const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
@@ -439,7 +444,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     // - - - - - - - - - - - -- - - - - - - - - - - - METADATA here
     // Get the form view layout & metadata first. 
-    const formViewMetaDataQs = qs.stringify({ ...params, viewType: 'form'}, {
+    const formViewMetaDataQs = qs.stringify({ ...params, viewType: 'form' }, {
         encodeValuesOnly: true,
     });
     const [formViewMetaData, setFormViewMetaData] = useState({});
@@ -934,6 +939,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             viewMode={viewMode}
                             onChange={formFieldOnXXX}
                             onBlur={formFieldOnXXX}
+                            setLightboxUrls={setLightboxUrls}
+                            setOpenLightbox={setOpenLightbox}
                         />;
                     }
                 }
@@ -1291,6 +1298,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 >
                     <SolidFormUserViewLayout solidFormViewMetaData={solidFormViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
                 </Dialog>
+                {openLightbox &&
+                    <Lightbox
+                        open={openLightbox}
+                        plugins={[Counter, Download]}
+                        close={() => setOpenLightbox(false)}
+                        slides={lightboxUrls}
+                    />
+                }
             </div>
         );
     }
