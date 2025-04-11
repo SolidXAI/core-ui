@@ -60,7 +60,7 @@ const KanbanColumn = ({ groupedView, groupByField, solidKanbanViewMetaData, grou
             </div>
           }
           {!group.folded &&
-              <Button
+            <Button
               onClick={(e: any) => op?.current?.toggle(e)}
               icon='pi pi-cog'
               text
@@ -119,7 +119,7 @@ const KanbanColumn = ({ groupedView, groupByField, solidKanbanViewMetaData, grou
               className={groupedView === false && "kanban-ungrouped-column-content"}
             >
               {groupData.map((data, index) => (
-                <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox}  editButtonUrl={editButtonUrl}/>
+                <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl}/>
               ))}
               {provided.placeholder}
               {group.count > 0 && (group.count > (group.limit * group.currentPage)) &&

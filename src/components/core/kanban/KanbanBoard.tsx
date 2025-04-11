@@ -118,7 +118,7 @@ export const KanbanBoard = ({ groupedView, kanbanViewData, solidKanbanViewMetaDa
                     })}
                     {groupedView !== false &&
                         <div className="kanban-load-more-folded">
-                            <a className="kaban-load-more" onClick={handleSwimLinPagination}>load More</a></div>
+                            <a className="kaban-load-more" onClick={handleSwimLanePagination}>load More</a></div>
                     }
                 </div>
             </DragDropContext>
