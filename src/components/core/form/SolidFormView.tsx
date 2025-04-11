@@ -49,6 +49,7 @@ import Counter from "yet-another-react-lightbox/plugins/counter";
 import Download from "yet-another-react-lightbox/plugins/download";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
+import { SolidChatter } from "../chatter/SolidChatter";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -1096,7 +1097,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             <div className="solid-form-wrapper">
                 <Toast ref={toast} />
 
-                <form style={{ width: params.embeded !== true ? '77.5%' : '100%', borderRight: params.embeded !== true ? '1px solid var(--primary-light-color' : '' }} onSubmit={formik.handleSubmit}>
+                <form style={{ width: params.embeded !== true ? '77%' : '100%', borderRight: params.embeded !== true ? '1px solid var(--primary-light-color' : '' }} onSubmit={formik.handleSubmit}>
                     <div className="solid-form-header">
                         {params.id === "new" ? (
                             <>
@@ -1270,7 +1271,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     </div>
                 </form>
                 {params.embeded !== true &&
-                    <div style={{ width: '22.5%' }}>
+                    <div style={{ width: '23%' }}>
+                        <SolidChatter />
                     </div>
                 }
                 <Dialog
