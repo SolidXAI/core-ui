@@ -21,11 +21,11 @@ const MediaWithFallback = ({ src, alt, onClick }: { src: string; alt: string; on
                     width={40}
                     height={40}
                     style={{ objectFit: "cover" }}
-                    onError={() => setIsBroken(true)} // Handle broken image
+                    onError={() => setIsBroken(true)}
                     onClick={onClick}
                 />
             ) : (
-                <i className={classNames(isImageFile(src) ? "pi pi-image" : "pi pi-file", "text-3xl text-gray-400")}></i> // Image or file icon
+                <i className={classNames(isImageFile(src) ? "pi pi-image" : "pi pi-file", "text-3xl text-gray-400")}></i>
             )}
         </div>
     );
@@ -50,7 +50,10 @@ const SolidMediaSingleColumn = ({ solidListViewMetaData, fieldMetadata, column, 
                     }}
                 />
             ) : (
-                <i className="pi pi-image text-3xl text-gray-400"></i> // Default fallback icon
+                <div
+                    style={{ height: 40, width: 40 }}
+                >
+                </div>
             )
         );
     };

@@ -92,7 +92,6 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   const solidGlobalSearchElementRef = useRef();
 
-
   const router = useRouter()
   const searchParams = useSearchParams().toString(); // Converts the query params to a string
 
@@ -148,7 +147,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   } = entityApi;
 
   // Get the list view layout & metadata first. 
-  const listViewMetaDataQs = qs.stringify({ modelName: params.modelName, moduleName: params.moduleName, viewType: 'list' }, {
+  const listViewMetaDataQs = qs.stringify({ modelName: params.modelName, moduleName: params.moduleName, viewType: 'list'}, {
     encodeValuesOnly: true,
   });
   const [listViewMetaData, setListViewMetaData] = useState({});
@@ -722,23 +721,25 @@ export const SolidListView = (params: SolidListViewParams) => {
           {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded !== true &&
             <SolidCreateButton url={createButtonUrl} />
           }
-          {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true &&
+          {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true && params.id !== 'new' &&
             // < SolidCreateButton url={createButtonUrl} />
             <Button type="button" icon="pi pi-plus" label="Add" size='small'
               onClick={() => params.handlePopUpOpen("new")}
             ></Button>
           }
           {/* Button For Manual Refresh */}
-          <Button
-            type="button"
-            size="small"
-            icon="pi pi-refresh"
-            severity="secondary"
-            outlined
-            onClick={() => {
-              setQueryString(first, rows, sortField, sortOrder, filters, showArchived);
-            }}
-          />
+          {params.embeded !== true &&
+            <Button
+              type="button"
+              size="small"
+              icon="pi pi-refresh"
+              severity="secondary"
+              outlined
+              onClick={() => {
+                setQueryString(first, rows, sortField, sortOrder, filters, showArchived);
+              }}
+            />
+          }
           {showArchived && <Button type="button" icon="pi pi-refresh" label="Recover" size='small' severity="secondary"
             onClick={() => setRecoverDialogVisible(true)}
           ></Button>}

@@ -120,10 +120,12 @@ export type SolidSelectionStaticFieldWidgetProps = {
 };
 
 export type SolidShortTextImageRenderModeWidgetProps = {
-data: string;
+    data: string;
 }
 
 export type SolidMediaSingleFieldWidgetProps = {
     formik: any;
     fieldContext?: SolidFieldProps;
+    setLightboxUrls?: any,
+    setOpenLightbox?: any
 };

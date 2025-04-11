@@ -43,6 +43,12 @@ import { SolidEmailField } from "./fields/SolidEmailField";
 import { Panel } from "primereact/panel";
 import { SolidFormStepper } from "@/components/common/SolidFormStepper";
 import { SolidFormHeader } from "@/components/common/SolidFormHeader";
+import { SolidFormUserViewLayout } from "./SolidFormUserViewLayout";
+import Lightbox from "yet-another-react-lightbox";
+import Counter from "yet-another-react-lightbox/plugins/counter";
+import Download from "yet-another-react-lightbox/plugins/download";
+import "yet-another-react-lightbox/styles.css";
+import "yet-another-react-lightbox/plugins/counter.css";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -88,7 +94,7 @@ const getLayoutFieldsAsObject = (layout: any[]): any => {
     }, {});
 }
 
-const fieldFactory = (type: string, fieldContext: SolidFieldProps): ISolidField | null => {
+const fieldFactory = (type: string, fieldContext: SolidFieldProps, setLightboxUrls?: any, setOpenLightbox?: any): ISolidField | null => {
     if (type === 'shortText') {
         return new SolidShortTextField(fieldContext);
     }
@@ -129,10 +135,10 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps): ISolidField 
         return new SolidRelationField(fieldContext);
     }
     if (type === 'mediaSingle') {
-        return new SolidMediaSingleField(fieldContext);
+        return new SolidMediaSingleField(fieldContext, setLightboxUrls, setOpenLightbox);
     }
     if (type === 'mediaMultiple') {
-        return new SolidMediaMultipleField(fieldContext);
+        return new SolidMediaMultipleField(fieldContext, setLightboxUrls, setOpenLightbox);
     }
     if (type === 'password') {
         return new SolidPasswordField(fieldContext);
@@ -144,7 +150,7 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps): ISolidField 
 }
 
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
-const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur }: any) => {
+const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, setLightboxUrls, setOpenLightbox }: any) => {
     const fieldContext: SolidFieldProps = {
         // field metadata - coming from the field-metadata table.
         fieldMetadata: fieldMetadata,
@@ -160,7 +166,7 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
         onChange: onChange,
         onBlur: onBlur
     }
-    const solidField = fieldFactory(fieldMetadata?.type, fieldContext);
+    const solidField = fieldFactory(fieldMetadata?.type, fieldContext, setLightboxUrls, setOpenLightbox);
 
     return solidField?.render(formik);
 };
@@ -342,7 +348,6 @@ const SolidPage = ({ attrs, children, key }: any) => (
 // };
 
 const SolidFormView = (params: SolidFormViewProps) => {
-
     const pathname = usePathname();
     const router = useRouter();
     const toast = useRef<Toast>(null);
@@ -352,10 +357,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [redirectToList, setRedirectToList] = useState(false);
 
     const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
+    const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
 
     const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<"view" | "edit">("view");
-
+    const [openLightbox, setOpenLightbox] = useState(false);
+    const [lightboxUrls, setLightboxUrls] = useState([]);
     const errorFields: string[] = [];
 
     const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
@@ -656,7 +663,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             const event: SolidLoadForm = {
                 fieldsMetadata: solidFormViewMetaData,
                 formData: solidFormViewData?.data,
-                type: dynamicHeader,
+                type: 'onFormLayoutLoad',
                 viewMetadata: solidFormViewMetaData?.data?.solidView
             }
             if (dynamicHeader) {
@@ -919,7 +926,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         // const fieldMetadata = solidFieldsMetadata[attrs.name];
                         const fieldMetadata = solidFormViewMetaData.data.solidFieldsMetadata[attrs.name];
                         // Read only permission if there is no update permission on model and router doesnt contains new
-                        const readOnlyPermission = !actionsAllowed.includes(`${updatePermission(params.modelName)}`) && params.id !== "new"
+                        const readOnlyPermission = !actionsAllowed.includes(`${updatePermission(params.modelName)}`) && params.id !== "new";
                         return <SolidField
                             key={key}
                             field={element}
@@ -932,6 +939,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             viewMode={viewMode}
                             onChange={formFieldOnXXX}
                             onBlur={formFieldOnXXX}
+                            setLightboxUrls={setLightboxUrls}
+                            setOpenLightbox={setOpenLightbox}
                         />;
                     }
                 }
@@ -1042,6 +1051,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 </svg>}
                             /> */}
                             {params.embeded !== true &&
+                                params.id !== "new" &&
                                 actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
                                 !formViewLayout.attrs.readonly &&
                                 <Button
@@ -1056,6 +1066,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     onClick={() => setDeleteDialogVisible(true)}
                                 />
                             }
+                            <Button
+                                text
+                                type="button"
+                                className="w-8rem text-left gap-2 purple-200"
+                                label="Layout"
+                                size="small"
+                                iconPos="left"
+                                severity="contrast"
+                                icon={'pi pi-objects-column'}
+                                onClick={() => setLayoutDialogVisible(true)}
+                            />
                         </div>
                     </OverlayPanel>
                 </div>
@@ -1137,7 +1158,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     {params.embeded !== true &&
                                         <SolidCancelButton />
                                     }
-
+                                    {formActionDropdown()}
                                 </div>
                             </>
                         ) : (
@@ -1266,9 +1287,27 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 >
                     <p>Are you sure you want to delete?</p>
                 </Dialog>
+                <Dialog
+                    visible={isLayoutDialogVisible}
+                    header="Change Form Layout"
+                    modal
+                    onHide={() => setLayoutDialogVisible(false)}
+                    contentStyle={{
+                        width: 800
+                    }}
+                >
+                    <SolidFormUserViewLayout solidFormViewMetaData={solidFormViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
+                </Dialog>
+                {openLightbox &&
+                    <Lightbox
+                        open={openLightbox}
+                        plugins={[Counter, Download]}
+                        close={() => setOpenLightbox(false)}
+                        slides={lightboxUrls}
+                    />
+                }
             </div>
         );
-
     }
 };
 

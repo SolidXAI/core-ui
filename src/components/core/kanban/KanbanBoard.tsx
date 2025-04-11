@@ -5,6 +5,7 @@ import React, { useState, useEffect } from "react";
 import { DragDropContext, DropResult } from "@hello-pangea/dnd";
 import axios from "axios";
 import KanbanColumn from "./KanbanColumn";
+import { Button } from "primereact/button";
 
 // Define types for groupData and Grouped Data
 interface Post {
@@ -118,7 +119,7 @@ export const KanbanBoard = ({ groupedView, kanbanViewData, solidKanbanViewMetaDa
                     })}
                     {groupedView !== false &&
                         <div className="kanban-load-more-folded">
-                            <a className="kaban-load-more" onClick={handleSwimLanePagination}>load More</a></div>
+                            <Button className="kaban-load-more" size="small" text onClick={handleSwimLanePagination}>load More</Button></div>
                     }
                 </div>
             </DragDropContext>

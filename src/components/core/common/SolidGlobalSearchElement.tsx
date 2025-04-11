@@ -679,8 +679,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                         <i className="pi pi-times ml-1"
                             style={{ cursor: "pointer" }}
                             onClick={() => handleRemoveChipGroup(column)}
-                        >
-                        </i>
+                        >                        </i>
                     </div>
                 </li>
             ))}

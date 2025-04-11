@@ -110,7 +110,7 @@ const KanbanColumn = ({ groupedView, groupByField, solidKanbanViewMetaData, grou
         </div>
       }
       {!group.folded && (
-        <Droppable droppableId={groupByField}>
+        <Droppable droppableId={groupByField} isDropDisable={!groupedView}>
           {(provided: DroppableProvided) => (
             <div
               ref={provided.innerRef}
@@ -119,16 +119,14 @@ const KanbanColumn = ({ groupedView, groupByField, solidKanbanViewMetaData, grou
               className={groupedView === false && "kanban-ungrouped-column-content"}
             >
               {groupData.map((data, index) => (
-                <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl}/>
+                <KanbanCard groupedView={groupedView} key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl} />
               ))}
               {provided.placeholder}
               {group.count > 0 && (group.count > (group.limit * group.currentPage)) &&
-                <a
-                  className="load-more-button"
+                <Button text className="kaban-load-more" size="small"
                   onClick={() => handleLoadMore(groupByField)}
-                >
-                  Load more data... ({group.count - (group.limit * group.currentPage)} remaining)
-                </a>
+                  label={`Load more data... ( ${group.count - (group.limit * group.currentPage)} remaining)`}
+                />
               }
             </div>
           )}

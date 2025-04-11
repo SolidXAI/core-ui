@@ -21,7 +21,7 @@ interface KanbanCardProps {
 }
 
 // Render columns dynamically based on metadata
-const renderFieldsDynamically = (field: any, data: any, solidKanbanViewMetaData: any, setLightboxUrls?: any, setOpenLightbox?: any) => {
+const renderFieldsDynamically = (field: any, data: any, solidKanbanViewMetaData: any, setLightboxUrls?: any, setOpenLightbox?: any, groupedView: boolean) => {
   if (!solidKanbanViewMetaData) {
     return;
   }
@@ -33,7 +33,7 @@ const renderFieldsDynamically = (field: any, data: any, solidKanbanViewMetaData:
   }
   const fieldMetadata = solidFieldsMetadata[field.attrs.name];
   const fieldLayout = field;
-  return SolidKanbanViewFields({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data, setLightboxUrls, setOpenLightbox });
+  return SolidKanbanViewFields({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data, setLightboxUrls, setOpenLightbox, groupedView });
   // return solidView.layout.children?.map((column: any) => {
   //   const fieldMetadata = solidFieldsMetadata[column.attrs.name];
   //   if (!fieldMetadata) {
@@ -45,7 +45,7 @@ const renderFieldsDynamically = (field: any, data: any, solidKanbanViewMetaData:
   // });
 };
 
-const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, setLightboxUrls, setOpenLightbox, editButtonUrl }) => {
+const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, setLightboxUrls, setOpenLightbox, editButtonUrl, groupedView }) => {
   const router = useRouter()
 
   const SolidRow = ({ children, attrs }: any) => {
@@ -104,7 +104,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
 
   const SolidField = ({ field, data, solidKanbanViewMetaData }: any) => {
 
-    return renderFieldsDynamically(field, data, solidKanbanViewMetaData, setLightboxUrls, setOpenLightbox)
+    return renderFieldsDynamically(field, data, solidKanbanViewMetaData, setLightboxUrls, setOpenLightbox, groupedView)
     // switch (solidKanbanViewMetaData[field.attrs.name].type) {
     //   case "mediaSingle":
     //     return <img src=""></img>
@@ -164,7 +164,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
 
 
   return (
-    <Draggable draggableId={String(data.id)} index={index}>
+    <Draggable draggableId={String(data.id)} index={index} isDragDisabled={!groupedView}>
       {(provided: DraggableProvided, snapshot) => (
         <div
           className=""
@@ -180,9 +180,10 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
             style={{
               opacity: snapshot.isDragging ? 0.9 : 1,
               transform: snapshot.isDragging ? "rotate(-2deg)" : "",
+              cursor:'pointer'
             }}
             elevation={snapshot.isDragging ? 3 : 1}
-            className="solid-kanban-card"
+            className={`${!groupedView ? 'solid-media-card' : 'solid-kanban-card'}`}
             onClick={() =>
               router.push(`${editButtonUrl}/${data?.id}`)
             }

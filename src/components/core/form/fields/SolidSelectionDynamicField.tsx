@@ -64,6 +64,7 @@ export class SolidSelectionDynamicField implements ISolidField {
 
         const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
         const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+        const whereClause = fieldLayoutInfo.attrs.whereClause;
 
         // selection dynamic specific code. 
         const [triggerGetSelectionDynamicValues] = useLazyGetSelectionDynamicValuesQuery();
@@ -77,11 +78,18 @@ export class SolidSelectionDynamicField implements ISolidField {
                 query: event.query,
                 fieldId: fieldMetadata.id
             };
-
-            const sdQs = qs.stringify(queryData, {
+            if (whereClause) {
+                queryData.query = whereClause;
+            }
+            let sdQs = qs.stringify(queryData, {
                 encodeValuesOnly: true,
+                encoder: (str, defaultEncoder, charset, type) => {
+                    if (type === 'key' || type === 'value') {
+                      if (str === queryData.query) return str;
+                    }
+                    return defaultEncoder(str);
+                }
             });
-
             // TODO: do error handling here, possible errors like modelname is incorrect etc...
             const sdResponse = await triggerGetSelectionDynamicValues(sdQs);
 
@@ -98,7 +106,7 @@ export class SolidSelectionDynamicField implements ISolidField {
         let DynamicWidget = getExtensionComponent("SolidFormFieldViewModeWidget");
         const widgetProps = {
             label: fieldLabel,
-            value: formik.values[fieldLayoutInfo.attrs.name],
+            value: formik.values[fieldLayoutInfo.attrs.name] && formik.values[fieldLayoutInfo.attrs.name].value,
         }
         return (
             <>
@@ -130,7 +138,8 @@ export class SolidSelectionDynamicField implements ISolidField {
                                         suggestions={selectionDynamicItems}
                                         completeMethod={selectionDynamicSearch}
                                         // onChange={(e) => updateInputs(index, e.value)} />
-                                        onChange={formik.handleChange}
+                                        // onChange={formik.handleChange}
+                                        onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
                                         className="solid-standard-autocomplete"
                                     />
                                 </div>
