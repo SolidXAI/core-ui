@@ -6,7 +6,7 @@ import Link from "next/link";
 import { downloadMediaFile } from "@/helpers/downloadMediaFile";
 import { SolidMediaSingleFieldWidgetProps } from "@/types/solid-core";
 
-export const SolidFormFieldViewMediaSingleWidget = ({ formik, fieldContext }: SolidMediaSingleFieldWidgetProps) => {
+export const SolidFormFieldViewMediaSingleWidget = ({ formik, fieldContext, setLightboxUrls, setOpenLightbox }: SolidMediaSingleFieldWidgetProps) => {
     const [fileDetails, setFileDetails] = useState<{ name: string; type: string, fileUrl: string, fileSize: number } | null>(null);
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
@@ -52,6 +52,23 @@ export const SolidFormFieldViewMediaSingleWidget = ({ formik, fieldContext }: So
         }
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 
+    const handleFileView = (url: any) => {
+        if (url?.type.includes('image/')) {
+            setLightboxUrls?.([
+                { src: url.fileUrl, downloadUrl: url.fileUrl },
+            ]);
+            setOpenLightbox?.(true);
+        } else {
+            const link = document.createElement('a');
+            link.href = url.fileUrl;
+            link.download = ''; // or specify a file name like 'file.pdf'
+            link.target = '_blank';
+            document.body.appendChild(link);
+            link.click();
+            document.body.removeChild(link);
+        }
+    }
+
     return (
         <div className={className}>
             <div className="flex flex-column gap-2 mt-4 relative">
@@ -66,7 +83,7 @@ export const SolidFormFieldViewMediaSingleWidget = ({ formik, fieldContext }: So
                             <FileReaderExt fileDetails={fileDetails} />
                             <div className="w-full flex flex-column gap-1">
                                 <div className="flex align-items-start justify-content-between">
-                                    <Link className="font-normal w-9 text-primary" href={fileDetails.fileUrl} target="_blank">{fileDetails.name}</Link>
+                                    <p className="font-normal w-9 text-primary m-0" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails)}>{fileDetails.name}</p>
                                     <div className="flex align-items-center gap-2">
                                         <div>
                                             <Button

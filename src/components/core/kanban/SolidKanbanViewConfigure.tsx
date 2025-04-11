@@ -71,7 +71,7 @@ export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllow
                         <Button
                             text
                             type="button"
-                            className="w-8rem text-left gap-2 purple-200"
+                            className="w-8rem text-left text-base gap-2 purple-200"
                             label="Layout"
                             size="small"
                             iconPos="left"
