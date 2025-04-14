@@ -250,7 +250,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     },
   ] = useDeleteMultipleSolidEntitiesMutation();
   const [
-    updateKanbanView,
+    patchKanbanView,
     { isSuccess: isKanbanUpdateSuccessfull, isError: isKanbanUpdateError, error: kanbanUpdateError },
   ] = usePatchUpdateSolidEntityMutation();
 
@@ -557,7 +557,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     try {
       const formData = new FormData();
       formData.append(groupByFieldName, destinationGroupName);
-      const kanbanUpdateResponse = await updateKanbanView({ id: +movedItem.id, data: formData }).unwrap();
+      const kanbanUpdateResponse = await patchKanbanView({ id: +movedItem.id, data: formData }).unwrap();
 
       if (kanbanUpdateResponse?.statusCode === 200) {
         showToast("success", "Success", "Kanban View Updated!");
