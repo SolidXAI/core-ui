@@ -1653,6 +1653,12 @@ li.header-li-px {
   display: flex;
 }
 
+.solid-form-section {
+  position: relative;
+  flex-grow: 1;
+  transition: width 0.3s ease;
+}
+
 .solid-form-wrapper .solid-form-content {
   height: calc(100vh - 116px);
   /* height: calc(100vh - 111px); */
@@ -1661,6 +1667,44 @@ li.header-li-px {
   /* if Stepper */
   /* height: calc(100vh - 127px); */
   overflow-y: auto;
+}
+
+
+.chatter-collapse-btn {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  right: -18px;
+  z-index: 10;
+  box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
+  background-color: #fff;
+}
+
+.chatter-section {
+  width: 380px;
+  flex-shrink: 0;
+  transition: width 0.3s ease, padding 0.3s ease;
+  overflow: hidden;
+  min-height: 100%;
+  transition: width 0.3s ease, padding 0.3s ease;
+}
+
+.chatter-section.collapsed {
+  width: 45px !important;
+}
+
+.chatter-collapsed-content {
+  font-size: 0.875rem;
+  background-color: #eff1f4;
+  color: var(--secondary-dark-color);
+  white-space: nowrap;
+  padding: 0.75rem 0.5rem;
+  border-radius: 4px;
+  border: 1px solid var(--primary-light-color);
+  display: inline-block;
+  writing-mode: vertical-rl;
+  transform: rotate(180deg);
+  width: 30px;
 }
 
 .solid-form-header {
@@ -2834,6 +2878,10 @@ li.header-li-px {
     left: 71% !important;
     top: 17% !important;
   }
+
+  .chatter-section {
+    width: 360px;
+  }
 }
 
 /* 1500px - 1599px */
@@ -2855,6 +2903,10 @@ li.header-li-px {
     position: absolute;
     left: 69% !important;
     top: 17.3% !important;
+  }
+
+  .chatter-section {
+    width: 345px;
   }
 }
 
@@ -2878,6 +2930,11 @@ li.header-li-px {
     left: 67% !important;
     top: 17.5% !important;
   }
+
+
+  .chatter-section {
+    width: 330px;
+  }
 }
 
 /* 1300px - 1399px */
@@ -2900,6 +2957,10 @@ li.header-li-px {
     left: 63.5% !important;
     top: 15% !important;
   }
+
+  .chatter-section {
+    width: 310px;
+  }
 }
 
 /* 1200px - 1299px */
@@ -2921,6 +2982,10 @@ li.header-li-px {
     position: absolute;
     left: 61% !important;
     top: 15% !important;
+  }
+
+  .chatter-section {
+    width: 300px;
   }
 }
 
