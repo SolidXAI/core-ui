@@ -1,8 +1,11 @@
 import React from 'react'
-
-export const PDFSvg = () => {
+interface MediaProps {
+    size?: any
+}
+export const PDFSvg = (props: MediaProps) => {
+    const { size } = props;
     return (
-        <svg width="80" height="80" viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg width={size ? size : 80} height={size ? size : 80} viewBox="0 0 80 80" fill="none" xmlns="http://www.w3.org/2000/svg">
             <path d="M15 10.4147V10.4146C14.9999 5.29959 19.6888 1 25.3892 1H53.5858L77 24.4142V69.5852C77 74.7288 72.5287 78.9999 66.8806 78.9999H25.1406C19.47 78.9999 15 74.7276 15 69.5852V10.4147Z" fill="white" stroke="#DBDBDB" stroke-width="2" />
             <path d="M54.0513 16.32V0L78 24H62.0342C54.8496 24 53.7187 18.88 54.0513 16.32Z" fill="#D4D4D8" />
             <rect x="2" y="38" width="52" height="30" rx="6" fill="#E62E05" />
