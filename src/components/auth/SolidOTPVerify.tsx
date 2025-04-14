@@ -90,7 +90,7 @@ const SolidOTPVerify = () => {
                                 showToast("error", "Login Error", response.error);
                             } else {
                                 showToast("success", "Login Success", "Redirecting to dashboard...");
-                                router.push("/admin/core/solid-core/user/list");
+                                router.push(`${process.env.NEXT_PUBLIC_LOGIN_REDIRECT_URL}`);
                             }
 
                         }}

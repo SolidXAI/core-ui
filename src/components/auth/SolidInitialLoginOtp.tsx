@@ -14,6 +14,7 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SS-Logo.png'
+import { signIn } from "next-auth/react";
 
 const SolidInitialLoginOtp = () => {
     const searchParams = useSearchParams();
@@ -84,8 +85,18 @@ const SolidInitialLoginOtp = () => {
                                 const response = await initiateOtpLogin(payload).unwrap(); // Call mutation trigger
 
                                 if (response?.statusCode === 200) {
-                                    showToast("success", "Login Successfully", "Login");
-                                    router.push(`/admin/core/solid-core/user/list`);
+                                    const otpResponse = await signIn("credentials", {
+                                        redirect: false,
+                                        accessToken: response?.data?.accessToken,
+                                        email: response?.data?.user?.email,
+                                    });
+
+                                    if (otpResponse?.error) {
+                                        showToast("error", "Login Error", otpResponse.error);
+                                    } else {
+                                        showToast("success", "Login Success", "Redirecting to dashboard...");
+                                        router.push(`${process.env.NEXT_PUBLIC_LOGIN_REDIRECT_URL}`);
+                                    }
                                 } else {
                                     showToast("error", "Invalid OTP", response.error);
                                     setErrors({
