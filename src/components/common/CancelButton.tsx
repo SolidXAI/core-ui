@@ -18,7 +18,7 @@ export const CancelButton = () => {
     };
     return (
         <div>
-            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse'/>
+            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse' />
         </div>
     )
 }
@@ -28,15 +28,21 @@ export const SolidCancelButton = () => {
     const pathname = usePathname(); // Get the current path
 
     const handleGoBack = () => {
-        const segments = pathname.split('/').filter(Boolean); // Split and filter empty segments
-        if (segments.length > 1) {
-            const newPath = '/' + segments.slice(0, -2).join('/') + '/list'; // Remove last segment and add "/all"
-            router.push(newPath); // Navigate to the parent route with "/all"
+        let fromView: string | null = null;
+        if (typeof window !== "undefined") {
+            fromView = sessionStorage.getItem("fromView");
         }
+
+        // Default to 'list' if not available
+        const view = fromView === "kanban" ? "kanban" : "list";
+
+        // Navigate back to the previous path with the appropriate view type
+        const newPath = pathname.replace(/\/form\/[^/]+$/, `/${view}`);
+        router.push(newPath);
     };
     return (
         <div>
-            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack}  className='bg-primary-reverse'/>
+            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse' />
         </div>
     )
 }
