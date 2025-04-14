@@ -124,7 +124,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   } = entityApi;
 
   // Get the kanban view layout & metadata first. 
-  const kanbanViewMetaDataQs = qs.stringify({ ...params, viewType: 'kanban', userId: user?.user?.id }, {
+  const kanbanViewMetaDataQs = qs.stringify({ ...params, viewType: 'kanban' }, {
     encodeValuesOnly: true,
   });
   const [kanbanViewMetaData, setKanbanViewMetaData] = useState<any>({});
@@ -756,7 +756,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       </div>
       <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
       {solidKanbanViewMetaData && kanbanViewData &&
-        <KanbanBoard groupedView={groupedView} kanbanViewData={kanbanViewData} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLinPagination={handleSwimLinPagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl}></KanbanBoard>
+        <KanbanBoard groupedView={groupedView} kanbanViewData={kanbanViewData} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl}></KanbanBoard>
       }
 
       <Dialog

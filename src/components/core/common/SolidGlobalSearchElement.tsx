@@ -308,12 +308,24 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     useEffect(() => {
 
         const filters = {
-            $and: [
-                { model: { $in: [viewData?.data?.solidView?.model?.id] } },
-                { view: { $in: [viewData?.solidView?.id] } },
-                { user: { $in: [user?.user?.id] } },
+            $or:[
+                {
+                    $and: [
+                        { model: { $in: [viewData?.data?.solidView?.model?.id] } },
+                        { view: { $in: [viewData?.solidView?.id] } },
+                        { user: { $in: [user?.user?.id] } }
+                    ]
+                },
+                {
+                    $and: [
+                        { model: { $in: [viewData?.data?.solidView?.model?.id] } },
+                        { view: { $in: [viewData?.solidView?.id] } },
+                        { isPrivate: { $eqi: true } }
+                    ]
+                }
 
             ]
+            
         }
 
         const queryData: any = {
