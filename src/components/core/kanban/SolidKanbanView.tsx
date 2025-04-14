@@ -113,7 +113,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     useLazyGetSolidKanbanEntitiesQuery,
     useLazyGetSolidEntityByIdQuery,
     usePrefetch,
-    useUpdateSolidEntityMutation
+    useUpdateSolidEntityMutation,
+    usePatchUpdateSolidEntityMutation
   } = entityApi;
 
   // Get the kanban view layout & metadata first. 
@@ -248,7 +249,10 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       data: DeletedSolidEntities,
     },
   ] = useDeleteMultipleSolidEntitiesMutation();
-
+  const [
+    updateKanbanView,
+    { isSuccess: isKanbanUpdateSuccessfull, isError: isKanbanUpdateError, error: kanbanUpdateError },
+  ] = usePatchUpdateSolidEntityMutation();
 
   // After data is fetched populate the kanban view state so as to be able to render the data. 
   useEffect(() => {
