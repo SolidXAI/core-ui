@@ -1272,7 +1272,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             {renderFormDynamically(formViewMetaData)}
                         </div>
                     </form>
-                    {isShowChatter === true &&
+                    {params.embeded !== true && isShowChatter === true &&
                         <Button
                             icon="pi pi-chevron-right"
                             size="small"
