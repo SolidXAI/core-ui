@@ -34,7 +34,7 @@ export const GoogleAuthChecking = () => {
                     setError("Authentication failed.")
                 } else {
                     showToast("success", "Login Success", "Redirecting to dashboard...");
-                    router.push("/admin/core/solid-core/user/list");
+                    router.push(`${process.env.NEXT_PUBLIC_LOGIN_REDIRECT_URL}`);
                 }
             } catch (err: any) {
                 showToast("error", "Login Error", err?.data?.message || "Authentication failed.");
