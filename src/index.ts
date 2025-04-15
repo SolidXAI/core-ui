@@ -225,6 +225,7 @@ export { SolidViewLayoutManager } from '@/components/core/common/SolidViewLayout
 export { SolidListViewConfigure } from '@/components/core/list/SolidListViewConfigure';
 export { SolidCreateButton } from '@/components/core/common/SolidCreateButton';
 export { SolidGlobalSearchElement } from '@/components/core/common/SolidGlobalSearchElement';
+export { SolidSaveCustomFilterForm } from '@/components/core/common/SolidSaveCustomFilterForm';
 export { SolidSearchBox } from '@/components/core/common/SolidSearchBox';
 
 // export type {ModelMetaData} from '@/components/core/field/FieldListViewData'; //Commenting this line for now, since it does not seem to be used anywhere

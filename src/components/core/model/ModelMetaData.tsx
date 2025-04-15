@@ -2,6 +2,7 @@
 import { SingleSelectAutoCompleteField } from "@/components/common/SingleSelectAutoCompleteField";
 import { getSingularAndPlural } from "@/helpers/helpers";
 import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
+import { useLazyGetModelsQuery } from "@/redux/api/modelApi";
 import { useLazyGetmodulesQuery } from "@/redux/api/moduleApi";
 import { useFormik } from "formik";
 import { snakeCase } from "lodash";
@@ -27,6 +28,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
   const pathname = usePathname();
 
   const [triggerGetModules, { data: moduleData, isFetching: isModuleFetching, error: moduleError }] = useLazyGetmodulesQuery();
+  const [triggerGetModels, { data: modelData, isFetching: isModelFetching, error: modelError }] = useLazyGetModelsQuery();
   const { data: fieldDefaultMetaData, isLoading, error, refetch } = useGetFieldDefaultMetaDataQuery(null);
 
 
@@ -54,13 +56,21 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     enableSoftDelete: modelMetaData ? modelMetaData?.enableSoftDelete : "",
     enableAuditTracking: modelMetaData ? modelMetaData?.enableAuditTracking : "",
     internationalisation: modelMetaData ? modelMetaData?.internationalisation : "",
+    isChild: modelMetaData ? modelMetaData?.isChild : false,
+    parentModelId: modelMetaData ? modelMetaData?.parentModel?.id : "",
+    parentModel: modelMetaData ? modelMetaData?.parentModel : "",
+
   };
 
   const [showTableName, setShowTableName] = useState<any>(false);
+  const [showParentModel, setShowParentModel] = useState<any>(false);
 
   useEffect(() => {
     if (modelMetaData && modelMetaData.tableName) {
       setShowTableName(true)
+    }
+    if (modelMetaData && modelMetaData.isChild) {
+      setShowParentModel(true)
     }
   }, [modelMetaData])
 
@@ -93,6 +103,10 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     enableSoftDelete: Yup.boolean(),
     enableAuditTracking: Yup.boolean(),
     internationalisation: Yup.boolean(),
+    isChild: Yup.boolean(),
+    parentModelId: Yup.number(),
+    parentModel: Yup.object()
+
   });
 
 
@@ -124,6 +138,11 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
           enableSoftDelete: values.enableSoftDelete === true ? true : '',
           enableAuditTracking: values.enableAuditTracking === true ? true : '',
           internationalisation: values.internationalisation === true ? true : '',
+          isChild: values.isChild ? values.isChild === true : '',
+          ...(values.isChild == true && {
+            parentModelId: values.parentModelId,
+            parentModel: values.parentModel,
+          }),
         };
         setModelMetaData(modelData);
         nextTab()
@@ -185,6 +204,37 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
       });
 
       const result = await triggerGetModules(queryString).unwrap();
+
+      if (result && result.records) {
+        const updatedSuggestion = [...result.records];
+        return updatedSuggestion
+      } else {
+        return []
+      }
+    } catch (error) {
+      return []
+    }
+  };
+
+
+  const searchModel = async (event: any) => {
+    try {
+      const query = event.query;
+      const queryData = {
+        limit: 10,
+        offset: 0,
+        filters: {
+          singularName: {
+            $containsi: query,
+          },
+        },
+      };
+
+      const queryString = qs.stringify(queryData, {
+        encodeValuesOnly: true,
+      });
+
+      const result = await triggerGetModels(queryString).unwrap();
 
       if (result && result.records) {
         const updatedSuggestion = [...result.records];
@@ -404,6 +454,39 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     className="mt-2"
                   />
                 )}
+
+                <div className="mt-4">
+                  <div className="flex align-items-center gap-2">
+                    <Checkbox onChange={e => { setShowParentModel(e.checked) }} checked={showParentModel} disabled={params.id !== 'new'}></Checkbox>
+                    <label htmlFor="ingredient1" className="form-field-label">
+                      isChild
+                    </label>
+                  </div>
+                </div>
+                {showParentModel &&
+                  <div className="flex flex-column gap-2 mt-3">
+                    <label htmlFor="type" className="form-field-label">
+                      Parent Model
+                    </label>
+                    <SingleSelectAutoCompleteField
+                      disabled={params.id !== 'new'}
+                      key="parentModel"
+                      formik={formik}
+                      isFormFieldValid={isFormFieldValid}
+                      relationField={true}
+                      fieldName="parentModel"
+                      fieldNameId="parentModelId"
+                      labelKey="displayName"
+                      valueKey="id"
+                      searchData={searchModel}
+                      existingData={formik.values.parentModel}
+                      formErrors={formErrors}
+                    />
+                    {(isFormFieldValid(formik, "parentModel") || (formErrors["parentModel"])) && (
+                      <Message severity="error" text={formik?.errors?.parentModelId?.toString()} />
+                    )}
+                  </div>
+                }
                 {/* <div className="field col-6">
                   <div className="flex align-items-center gap-2 mt-3">
                     <Checkbox
@@ -510,132 +593,132 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
 
               {/* <p className="form-wrapper-heading text-base">Basic Settings</p> */}
               <Panel header={"Basic Settings"} className="solid-column-panel">
-                  <div className="flex flex-column gap-2 mt-3">
-                    <label htmlFor="displayName" className="form-field-label">
-                      Display Name
-                    </label>
-                    <InputText
-                      type="text"
-                      id="displayName"
-                      name="displayName"
-                      onChange={(e) => {
+                <div className="flex flex-column gap-2 mt-3">
+                  <label htmlFor="displayName" className="form-field-label">
+                    Display Name
+                  </label>
+                  <InputText
+                    type="text"
+                    id="displayName"
+                    name="displayName"
+                    onChange={(e) => {
 
-                        formik.handleChange(e);
-                        const { toCamelCase, toSnakeCase, toPluralCamelCase } = getSingularAndPlural(e.target.value);
+                      formik.handleChange(e);
+                      const { toCamelCase, toSnakeCase, toPluralCamelCase } = getSingularAndPlural(e.target.value);
+                      if (params.id === 'new') {
+                        formik.setFieldValue("singularName", toCamelCase);
+                        formik.setFieldValue("pluralName", toPluralCamelCase);
+                      }
+                      if (showTableName == true) {
                         if (params.id === 'new') {
-                          formik.setFieldValue("singularName", toCamelCase);
-                          formik.setFieldValue("pluralName", toPluralCamelCase);
+                          formik.setFieldValue("tableName", toSnakeCase);
                         }
-                        if (showTableName == true) {
-                          if (params.id === 'new') {
-                            formik.setFieldValue("tableName", toSnakeCase);
-                          }
-                        }
+                      }
 
 
-                      }}
-                      value={formik.values.displayName}
-                      className={classNames("", {
-                        "p-invalid": isFormFieldValid(formik, "displayName") || formErrors["displayName"],
-                      })}
+                    }}
+                    value={formik.values.displayName}
+                    className={classNames("", {
+                      "p-invalid": isFormFieldValid(formik, "displayName") || formErrors["displayName"],
+                    })}
 
+                  />
+
+                  {(isFormFieldValid(formik, "displayName") || (formErrors["displayName"])) && (
+                    <Message
+                      severity="error"
+                      text={formik?.errors?.displayName?.toString()}
                     />
+                  )}
+                </div>
+                <div className="flex flex-column gap-1 mt-4">
+                  <label htmlFor="singularName" className="form-field-label">
+                    Singular Name
+                  </label>
+                  <InputText
+                    disabled={true}
+                    type="text"
+                    id="singularName"
+                    name="singularName"
+                    onChange={formik.handleChange}
+                    value={formik.values.singularName}
+                    className={classNames("", {
+                      "p-invalid": isFormFieldValid(formik, "singularName") || formErrors["singularName"],
+                    })}
+                  />
+                  {(isFormFieldValid(formik, "singularName") || (formErrors["singularName"])) && (
+                    <Message
+                      severity="error"
+                      text={formik?.errors?.singularName?.toString()}
+                    />
+                  )}
+                </div>
+                <div className="flex flex-column gap-1 mt-4">
+                  <label htmlFor="pluralName" className="form-field-label">
+                    Plural Name
+                  </label>
+                  <InputText
+                    disabled={true}
+                    type="text"
+                    id="pluralName"
+                    name="pluralName"
+                    onChange={formik.handleChange}
+                    value={formik.values.pluralName}
+                    className={classNames("", {
+                      "p-invalid": isFormFieldValid(formik, "pluralName") || formErrors["pluralName"],
+                    })}
+                  />
+                  {(isFormFieldValid(formik, "pluralName") || (formErrors["pluralName"])) && (
+                    <Message severity="error" text={formik?.errors?.pluralName?.toString()} />
+                  )}
+                </div>
 
-                    {(isFormFieldValid(formik, "displayName") || (formErrors["displayName"])) && (
-                      <Message
-                        severity="error"
-                        text={formik?.errors?.displayName?.toString()}
-                      />
-                    )}
+                <div className="mt-4">
+                  <div className="flex align-items-center gap-2">
+                    <Checkbox onChange={e => {
+                      setShowTableName(e.checked);
+                      if (e.checked === true) {
+                        const { toCamelCase, toSnakeCase, toPluralCamelCase } = getSingularAndPlural(formik.values.displayName);
+                        if (params.id === 'new') {
+                          formik.setFieldValue("tableName", toSnakeCase);
+                        }
+                      }
+
+                    }} checked={showTableName} disabled={params.id !== 'new'}></Checkbox>
+                    <label htmlFor="ingredient1" className="form-field-label">
+                      Set table name
+                    </label>
                   </div>
+                </div>
+                {showTableName &&
                   <div className="flex flex-column gap-1 mt-4">
-                    <label htmlFor="singularName" className="form-field-label">
-                      Singular Name
+                    <label htmlFor="tableName" className="form-field-label">
+                      Table Name
                     </label>
                     <InputText
-                      disabled={true}
+                      disabled={params.id !== 'new'}
                       type="text"
-                      id="singularName"
-                      name="singularName"
+                      id="tableName"
+                      name="tableName"
                       onChange={formik.handleChange}
-                      value={formik.values.singularName}
+                      value={formik.values.tableName}
                       className={classNames("", {
-                        "p-invalid": isFormFieldValid(formik, "singularName") || formErrors["singularName"],
+                        "p-invalid": isFormFieldValid(formik, "tableName") || formErrors["tableName"],
                       })}
                     />
-                    {(isFormFieldValid(formik, "singularName") || (formErrors["singularName"])) && (
+                    {(isFormFieldValid(formik, "tableName") || (formErrors["tableName"])) && (
                       <Message
                         severity="error"
-                        text={formik?.errors?.singularName?.toString()}
+                        text={formik?.errors?.tableName?.toString()}
                       />
                     )}
                   </div>
-                  <div className="flex flex-column gap-1 mt-4">
-                    <label htmlFor="pluralName" className="form-field-label">
-                      Plural Name
-                    </label>
-                    <InputText
-                      disabled={true}
-                      type="text"
-                      id="pluralName"
-                      name="pluralName"
-                      onChange={formik.handleChange}
-                      value={formik.values.pluralName}
-                      className={classNames("", {
-                        "p-invalid": isFormFieldValid(formik, "pluralName") || formErrors["pluralName"],
-                      })}
-                    />
-                    {(isFormFieldValid(formik, "pluralName") || (formErrors["pluralName"])) && (
-                      <Message severity="error" text={formik?.errors?.pluralName?.toString()} />
-                    )}
-                  </div>
-
-                  <div className="mt-4">
-                    <div className="flex align-items-center gap-2">
-                      <Checkbox onChange={e => {
-                        setShowTableName(e.checked);
-                        if (e.checked === true) {
-                          const { toCamelCase, toSnakeCase, toPluralCamelCase } = getSingularAndPlural(formik.values.displayName);
-                          if (params.id === 'new') {
-                            formik.setFieldValue("tableName", toSnakeCase);
-                          }
-                        }
-
-                      }} checked={showTableName} disabled={params.id !== 'new'}></Checkbox>
-                      <label htmlFor="ingredient1" className="form-field-label">
-                        Set table name
-                      </label>
-                    </div>
-                  </div>
-                  {showTableName &&
-                    <div className="flex flex-column gap-1 mt-4">
-                      <label htmlFor="tableName" className="form-field-label">
-                        Table Name
-                      </label>
-                      <InputText
-                        disabled={params.id !== 'new'}
-                        type="text"
-                        id="tableName"
-                        name="tableName"
-                        onChange={formik.handleChange}
-                        value={formik.values.tableName}
-                        className={classNames("", {
-                          "p-invalid": isFormFieldValid(formik, "tableName") || formErrors["tableName"],
-                        })}
-                      />
-                      {(isFormFieldValid(formik, "tableName") || (formErrors["tableName"])) && (
-                        <Message
-                          severity="error"
-                          text={formik?.errors?.tableName?.toString()}
-                        />
-                      )}
-                    </div>
-                  }
-                  <div className="flex flex-column gap-1 mt-4">
-                    <label htmlFor="description" className="form-field-label">
-                      Description
-                    </label>
-                    {/* <InputText
+                }
+                <div className="flex flex-column gap-1 mt-4">
+                  <label htmlFor="description" className="form-field-label">
+                    Description
+                  </label>
+                  {/* <InputText
                       type="text"
                       id="description"
                       name="description"
@@ -645,24 +728,24 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                         "p-invalid": isFormFieldValid(formik, "description"),
                       })}
                     /> */}
-                    <InputTextarea
-                      id="description"
-                      name="description"
-                      onChange={formik.handleChange}
-                      value={formik.values.description}
-                      className={classNames("", {
-                        "p-invalid": isFormFieldValid(formik, "description") || formErrors["description"],
-                      })}
-                      rows={5}
-                      cols={30}
+                  <InputTextarea
+                    id="description"
+                    name="description"
+                    onChange={formik.handleChange}
+                    value={formik.values.description}
+                    className={classNames("", {
+                      "p-invalid": isFormFieldValid(formik, "description") || formErrors["description"],
+                    })}
+                    rows={5}
+                    cols={30}
+                  />
+                  {(isFormFieldValid(formik, "description") || (formErrors["description"])) && (
+                    <Message
+                      severity="error"
+                      text={formik?.errors?.description?.toString()}
                     />
-                    {(isFormFieldValid(formik, "description") || (formErrors["description"])) && (
-                      <Message
-                        severity="error"
-                        text={formik?.errors?.description?.toString()}
-                      />
-                    )}
-                  </div>
+                  )}
+                </div>
               </Panel>
             </div>
 

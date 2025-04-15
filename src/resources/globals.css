@@ -3096,3 +3096,11 @@ flex-shrink: 0; */
   margin-top: 0 !important;
   margin-bottom: 0 !important;
 }
+
+
+
+.solid-global-search-element input {
+
+  min-width: 300px;
+
+}
