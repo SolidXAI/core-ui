@@ -29,6 +29,10 @@ import "yet-another-react-lightbox/plugins/counter.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
 import { KanbanUserViewLayout } from "./KanbanUserViewLayout";
+import { useSelector } from "react-redux";
+import { queryObjectToQueryString, queryStringToQueryObject } from "../list/SolidListView";
+
+
 import { Toast } from "primereact/toast";
 import { useSelector } from "react-redux";
 import { queryObjectToQueryString, queryStringToQueryObject } from "../list/SolidListView";
