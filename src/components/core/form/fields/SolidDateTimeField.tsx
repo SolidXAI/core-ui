@@ -32,7 +32,7 @@ export class SolidDateTimeField implements ISolidField {
     }
 
     validationSchema(): Schema {
-        let schema: Yup.DateSchema = Yup.date();
+        let schema: Yup.DateSchema<Date | null | undefined> = Yup.date();
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
@@ -40,6 +40,8 @@ export class SolidDateTimeField implements ISolidField {
         // 1. required 
         if (fieldMetadata.required) {
             schema = schema.required(`${fieldLabel} is required.`);
+        } else {
+            schema = schema.nullable();
         }
         return schema;
     }
