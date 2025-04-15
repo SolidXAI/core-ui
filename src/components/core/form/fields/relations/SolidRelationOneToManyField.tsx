@@ -153,7 +153,7 @@ export class SolidRelationOneToManyField implements ISolidField {
         let DynamicWidget = getExtensionComponent("SolidFormFieldRelationViewModeWidget");
         const widgetProps = {
             label: fieldLabel,
-            value: (this.fieldContext.data[fieldLayoutInfo.attrs.name] || []).map(
+            value: (this.fieldContext.data?.[fieldLayoutInfo.attrs.name] || []).map(
                 (item: any) => ({ label: item[userKeyFieldName] ?? '' })
             )
         }

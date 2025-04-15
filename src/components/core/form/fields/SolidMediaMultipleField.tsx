@@ -19,9 +19,13 @@ import { getExtensionComponent } from "@/helpers/registry";
 export class SolidMediaMultipleField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
-
-    constructor(fieldContext: SolidFieldProps) {
+    private setLightboxUrls?: (urls: { src: string; downloadUrl: string }[]) => void;
+    private setOpenLightbox?: (open: boolean) => void;
+    constructor(fieldContext: SolidFieldProps, setLightboxUrls?: (urls: { src: string; downloadUrl: string }[]) => void,
+        setOpenLightbox?: (open: boolean) => void) {
         this.fieldContext = fieldContext;
+        this.setLightboxUrls = setLightboxUrls;
+        this.setOpenLightbox = setOpenLightbox;
     }
 
     updateFormData(value: any, formData: FormData): any {
@@ -223,7 +227,27 @@ export class SolidMediaMultipleField implements ISolidField {
         const widgetProps = {
             formik: formik,
             fieldContext: this.fieldContext,
+            setLightboxUrls: this.setLightboxUrls,
+            setOpenLightbox: this.setOpenLightbox
         }
+
+        const handleFileView = (url: any) => {
+            if (url?.type.includes('image/')) {
+                this.setLightboxUrls?.([
+                    { src: url.fileUrl, downloadUrl: url.fileUrl },
+                ]);
+                this.setOpenLightbox?.(true);
+            } else {
+                const link = document.createElement('a');
+                link.href = url.fileUrl;
+                link.download = ''; // or specify a file name like 'file.pdf'
+                link.target = '_blank';
+                document.body.appendChild(link);
+                link.click();
+                document.body.removeChild(link);
+            }
+        }
+
         return (
             <>
                 {viewMode === "view" &&
@@ -268,7 +292,7 @@ export class SolidMediaMultipleField implements ISolidField {
                                     <FileReaderExt fileDetails={fileDetails[0]} />
                                     <div className="w-full flex flex-column gap-1">
                                         <div className="flex align-items-center justify-content-between">
-                                            <Link className="font-normal w-11" href={`${fileDetails[0]?.fileUrl}`} target="_blank">{fileDetails[0].name}</Link>
+                                            <p className="font-normal w-9 text-primary m-0" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails[0])}>{fileDetails[0].name}</p>
                                             <div className="flex align-items-center gap-2">
                                                 <div>
                                                     <Button
@@ -335,7 +359,7 @@ export class SolidMediaMultipleField implements ISolidField {
                                                 <FileReaderExt fileDetails={file} />
                                                 <div className="w-full flex flex-column gap-1">
                                                     <div className="flex align-items-center justify-content-between">
-                                                        <Link className="font-normal w-11" href={file?.fileUrl} target="_blank">{file.name}</Link>
+                                                        <p className="font-normal w-11 text-primary m-0" style={{ cursor: 'pointer' }} onClick={() => handleFileView(file)}>{file.name}</p>
                                                         <div className="flex align-items-center gap-2">
                                                             <div>
                                                                 <Button
