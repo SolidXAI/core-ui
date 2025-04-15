@@ -11,7 +11,8 @@ export type SolidFieldProps = {
     readOnly?: any,
     viewMode? :any
     onChange?: any,
-    onBlur?: any
+    onBlur?: any,
+    populateData?: any
 };
 
 export type FormikObject = {
@@ -64,6 +65,6 @@ export type FormikObject = {
 export interface ISolidField {
     initialValue(): any;
     validationSchema(): Schema;
-    render(formik: FormikObject): React.JSX.Element;
+    render(formik: FormikObject): React.JSX.Element | null;
     updateFormData(value: any, formData: FormData): any;
 }
