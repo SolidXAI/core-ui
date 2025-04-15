@@ -33,6 +33,7 @@ import { useSelector } from "react-redux";
 import { queryObjectToQueryString, queryStringToQueryObject } from "../list/SolidListView";
 
 
+import { Toast } from "primereact/toast";
 
 type SolidKanbanViewParams = {
   moduleName: string;
@@ -68,8 +69,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [lightboxUrls, setLightboxUrls] = useState({});
   const [filterQueryString, setFilterQueryString] = useState<any>();
   const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
-
-
+  const toast = useRef<Toast>(null);
 
   const pushFiltersToRouter = (filterQueryString: any) => {
     router.push(`?${filterQueryString}`, undefined, { shallow: true });
@@ -119,7 +119,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     useLazyGetSolidKanbanEntitiesQuery,
     useLazyGetSolidEntityByIdQuery,
     usePrefetch,
-    useUpdateSolidEntityMutation
+    useUpdateSolidEntityMutation,
+    usePatchUpdateSolidEntityMutation
   } = entityApi;
 
   // Get the kanban view layout & metadata first. 
@@ -234,6 +235,14 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
 
 
+  const showToast = (severity: "success" | "error", summary: string, detail: string) => {
+    toast.current?.show({
+      severity,
+      summary,
+      detail,
+      life: 3000,
+    });
+  };
   // Get the kanban view data.
   // const [triggerGetSolidEntitiesForKanban, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidKanbanEntitiesQuery();
   const [triggerGetSolidEntities, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidEntitiesQuery();
@@ -249,7 +258,10 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       data: DeletedSolidEntities,
     },
   ] = useDeleteMultipleSolidEntitiesMutation();
-
+  const [
+    patchKanbanView,
+    { isSuccess: isKanbanUpdateSuccessfull, isError: isKanbanUpdateError, error: kanbanUpdateError },
+  ] = usePatchUpdateSolidEntityMutation();
 
   // After data is fetched populate the kanban view state so as to be able to render the data. 
   useEffect(() => {
@@ -541,17 +553,33 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     destinationGroup.groupData.records = destinationRecords;
 
     // Update the kanbanViewData state
-    setKanbanViewData((prevData: typeof kanbanViewData) =>
-      prevData.map((group: any) => {
-        if (group.groupName === sourceGroupName) {
-          return sourceGroup;
-        }
-        if (group.groupName === destinationGroupName) {
-          return destinationGroup;
-        }
-        return group;
-      })
-    );
+    try {
+      const formData = new FormData();
+      formData.append(groupByFieldName, destinationGroupName);
+      const kanbanUpdateResponse = await patchKanbanView({ id: +movedItem.id, data: formData }).unwrap();
+
+      if (kanbanUpdateResponse?.statusCode === 200) {
+        showToast("success", "Success", "Kanban View Updated!");
+        // Update the kanbanViewData state
+        setKanbanViewData((prevData: typeof kanbanViewData) =>
+          prevData.map((group: any) => {
+            if (group.groupName === sourceGroupName) {
+              return sourceGroup;
+            }
+            if (group.groupName === destinationGroupName) {
+              return destinationGroup;
+            }
+            return group;
+          })
+        );
+      } else {
+        showToast("error", "Duplicate Key", kanbanUpdateResponse?.error);
+      }
+    } catch (error: any) {
+      // 6. Handle 500 or network errors
+      console.error("API error:", error);
+      showToast("error", "Something went wrong", error?.data?.message || "Something went wrong");
+    }
   };
 
 
@@ -684,6 +712,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
   return (
     <div className="page-parent-wrapper">
+      <Toast ref={toast} />
       <div className="page-header">
         <div className="flex gap-3 align-items-center">
           <p className="m-0 view-title">{kanbanViewTitle}</p>
