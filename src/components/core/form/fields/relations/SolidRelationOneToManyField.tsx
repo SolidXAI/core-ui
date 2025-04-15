@@ -68,6 +68,7 @@ export class SolidRelationOneToManyField implements ISolidField {
         const readOnlyPermission = this.fieldContext.readOnly;
         const pathname = usePathname();
         const lastPathSegment = pathname.split('/').pop();
+        const userKeyField: any = Object.entries(this.fieldContext.solidFormViewMetaData.data.solidFieldsMetadata).find(([_, value]: any) => value.isUserKey)?.[0];
 
         const handlePopupOpen = (id: any) => {
             const formviewparams = {
@@ -76,6 +77,7 @@ export class SolidRelationOneToManyField implements ISolidField {
                 embeded: true,
                 isCustomCreate: false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
+                populateData: userKeyField ? {[userKeyField] : {label: this.fieldContext.data[userKeyField], value: this.fieldContext.data['id']}} : {},
                 modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName)
             }
             setformViewParams(formviewparams);
@@ -130,6 +132,7 @@ export class SolidRelationOneToManyField implements ISolidField {
                 embeded: true,
                 isCustomCreate: false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
+                populateData: userKeyField ? {[userKeyField] : {label: this.fieldContext.data[userKeyField], value: this.fieldContext.data['id']}} : {},
                 modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName),
             }
             setformViewParams(formviewparams)

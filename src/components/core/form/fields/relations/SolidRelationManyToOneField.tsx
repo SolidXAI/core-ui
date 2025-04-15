@@ -3,7 +3,7 @@ import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { Message } from "primereact/message";
 import qs from "qs";
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
@@ -25,15 +25,22 @@ export class SolidRelationManyToOneField implements ISolidField {
     }
 
     initialValue(): any {
-
-        const manyToOneFieldData = this.fieldContext.data[this.fieldContext.field.attrs.name];
-        const fieldMetadata = this.fieldContext.fieldMetadata;
+        const manyToOneFieldData = this.fieldContext?.data[this.fieldContext?.field?.attrs?.name];
+        const fieldMetadata = this.fieldContext?.fieldMetadata;
         const userKeyField = fieldMetadata?.relationModel?.userKeyField?.name;
         const manyToOneColVal = manyToOneFieldData ? manyToOneFieldData[userKeyField] : '';
         if (manyToOneColVal) {
             return { label: manyToOneColVal || '', value: manyToOneFieldData?.id || '' };
         }
-        return {}
+        
+        if (this.fieldContext.populateData) {
+            const [key, value]: any = Object.entries(this.fieldContext.populateData)[0] || [];
+            if (key && value !== undefined) {
+                return { label: value.label, value: value.value };
+            }
+        }
+        
+        return {};
     }
 
     updateFormData(value: any, formData: FormData): any {
@@ -68,7 +75,19 @@ export class SolidRelationManyToOneField implements ISolidField {
         const readOnlyPermission = this.fieldContext.readOnly;
         const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
 
-        // auto complete specific code. 
+        useEffect(() => {
+            const newValue = this.initialValue();
+            if (this.fieldContext.populateData) {
+                formik.setFieldValue(fieldLayoutInfo.attrs.name, newValue);
+            }
+        }, [this.fieldContext.populateData]);
+
+        const isVisible = fieldLayoutInfo.attrs?.visible !== false && !this.fieldContext.populateData;
+
+        if (!isVisible) {
+            return null;
+        }
+
         const entityApi = createSolidEntityApi(fieldMetadata.relationCoModelSingularName);
         const { useLazyGetSolidEntitiesQuery } = entityApi;
         const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();

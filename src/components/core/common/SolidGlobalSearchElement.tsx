@@ -440,8 +440,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         </>
     );
 
-    console.log("custom chip", customFilter);
-
     const [showOverlay, setShowOverlay] = useState(false);
 
 
