@@ -499,7 +499,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
 
   // Handle drag-and-drop functionality
-  const onDragEnd = (result: DropResult): void => {
+  const onDragEnd = async (result: DropResult): void => {
     const { source, destination } = result;
     if (!destination) return;
 

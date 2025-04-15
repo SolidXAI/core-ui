@@ -11,7 +11,8 @@ import { PDFSvg } from '@/components/Svg/PDFSvg';
 import Image from 'next/image';
 import FileImage from '../../../../resources/images/fileTypes/File.png'
 import { ExcelSvg } from '@/components/Svg/ExcelSvg';
-
+import MP3Image from '../../../../resources/images/fileTypes/Mp3.png'
+import MP4Image from '../../../../resources/images/fileTypes/Mp4.png'
 
 pdfjs.GlobalWorkerOptions.workerSrc = `//unpkg.com/pdfjs-dist@${pdfjs.version}/build/pdf.worker.min.mjs`;
 
@@ -83,11 +84,53 @@ const SolidMediaSingleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, f
                     </a>
                 </div>
             )}
+
+            {mimeType && mimeType.includes("audio") && (
+                <div className='flex align-items-end gap-2 my-2' onClick={(e) => e.stopPropagation()}>
+                    <a href={url} download target="_blank" rel="noopener noreferrer">
+                        <Image
+                            src={MP3Image}
+                            alt={fileName}
+                            className="relative"
+                            height={50}
+                            width={50}
+                        />
+                    </a>
+                    <a href={url} download target="_blank" rel="noopener noreferrer" className='text-color flex align-items-start gap-2' style={{ textDecoration: 'none' }}>
+                        <p className="text-sm mb-1" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                            {fileName}
+                        </p>
+                        <span className='pi pi-cloud-download'></span>
+                    </a>
+                </div>
+            )}
+            {mimeType && mimeType.includes("video") && (
+                <div className='flex align-items-end gap-2 my-2' onClick={(e) => e.stopPropagation()}>
+                    <a href={url} download target="_blank" rel="noopener noreferrer">
+                        <Image
+                            src={MP4Image}
+                            alt={fileName}
+                            className="relative"
+                            height={50}
+                            width={50}
+                        />
+                    </a>
+                    <a href={url} download target="_blank" rel="noopener noreferrer" className='text-color flex align-items-start gap-2' style={{ textDecoration: 'none' }}>
+                        <p className="text-sm mb-1" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}>
+                            {fileName}
+                        </p>
+                        <span className='pi pi-cloud-download'></span>
+                    </a>
+                </div>
+            )}
+
             {mimeType &&
                 !mimeType.includes("image/") &&
                 !mimeType.includes("pdf") &&
                 !mimeType.includes("excel") &&
-                !mimeType.includes("spreadsheet") && (
+                !mimeType.includes("spreadsheet") &&
+                !mimeType.includes("audio") &&
+                !mimeType.includes("video") && (
                     <div className='flex align-items-end gap-2 my-2' onClick={(e) => e.stopPropagation()}>
                         <a href={url} download target="_blank" rel="noopener noreferrer">
                             <Image
