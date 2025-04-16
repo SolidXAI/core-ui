@@ -59,7 +59,6 @@ export type SolidFormViewProps = {
     customCreateHandler?: any
     inlineCreateAutoSave?: boolean,
     customLayout?: any,
-    populateData?: any,
 };
 
 
@@ -151,7 +150,7 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps, setLightboxUr
 }
 
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
-const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, populateData, setLightboxUrls, setOpenLightbox }: any) => {
+const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, setLightboxUrls, setOpenLightbox }: any) => {
     const fieldContext: SolidFieldProps = {
         // field metadata - coming from the field-metadata table.
         fieldMetadata: fieldMetadata,
@@ -166,9 +165,6 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
         viewMode: viewMode,
         onChange: onChange,
         onBlur: onBlur
-    }
-    if (populateData) {
-        fieldContext.populateData = populateData;
     }
     const solidField = fieldFactory(fieldMetadata?.type, fieldContext, setLightboxUrls, setOpenLightbox);
 
@@ -944,14 +940,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             field={element}
                             formik={formik}
                             fieldMetadata={fieldMetadata}
-                            initialEntityData={solidFormViewData ? solidFormViewData.data : {}}
+                            initialEntityData={solidFormViewData ? solidFormViewData.data : null}
                             solidFormViewMetaData={solidFormViewMetaData}
                             modelName={params.modelName}
                             readOnly={readOnlyPermission}
                             viewMode={viewMode}
                             onChange={formFieldOnXXX}
                             onBlur={formFieldOnXXX}
-                            populateData={params.populateData}
                             setLightboxUrls={setLightboxUrls}
                             setOpenLightbox={setOpenLightbox}
                         />;

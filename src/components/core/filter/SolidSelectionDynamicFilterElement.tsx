@@ -17,7 +17,7 @@ export const SolidSelectionDynamicFilterElement = ({ value, updateInputs, index,
             offset: 0,
             limit: 10,
             query: event.query,
-            fieldId: fieldMetadata.id
+            id: fieldMetadata.id
         };
 
         const sdQs = qs.stringify(queryData, {
