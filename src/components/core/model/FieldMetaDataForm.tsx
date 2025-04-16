@@ -425,6 +425,13 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
         "Relation Model Module Name Value is required"
       ),
     }),
+
+    ...(currentFields.includes("relationFieldFixedFilter") && {
+      relationFieldFixedFilter: Yup.string().required(
+        "Relation Model Module Name Value is required"
+      ),
+    }),
+
     ...(currentFields.includes("selectionDynamicProvider") && {
       selectionDynamicProvider: Yup.string().required(
         "Selection Dynamic Provider Value is required"
@@ -898,6 +905,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     relationCreateInverse: fieldMetaData ? fieldMetaData?.relationCreateInverse : false,
     relationCascade: fieldMetaData ? fieldMetaData?.relationCascade : 'cascade',
     relationModelModuleName: fieldMetaData ? fieldMetaData?.relationModelModuleName : modelMetaData?.module.name,
+    relationFieldFixedFilter: fieldMetaData ? fieldMetaData?.relationFieldFixedFilter : "",
     selectionDynamicProvider: fieldMetaData ? fieldMetaData?.selectionDynamicProvider : null,
     selectionDynamicProviderCtxt: fieldMetaData ? fieldMetaData?.selectionDynamicProviderCtxt : "",
     selectionStaticValues: fieldMetaData ? fieldMetaData?.selectionStaticValues : [""],
@@ -1705,8 +1713,12 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               <SelectButton
                                 value={formik.values.relationType}
                                 options={fieldDefaultMetaData.data.relationTypes}
-                                onChange={(e) =>
-                                  formik.setFieldValue("relationType", e.value)
+                                onChange={(e) => {
+                                  formik.setFieldValue("relationType", e.value);
+                                  if (e.value === "one-to-many") {
+                                    formik.setFieldValue("relationCreateInverse", true);
+                                  }
+                                }
                                 }
                                 className={classNames("", {
                                   "p-invalid": isFormFieldValid(formik, "relationType"),
@@ -1869,6 +1881,39 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               </div>
                             )}
 
+                          {currentFields.includes(
+                            "relationFieldFixedFilter"
+                          ) && (
+                              <div className="field col-6 flex-flex-column gap-2 mt-3">
+                                <label
+                                  htmlFor="relationFieldFixedFilter"
+                                  className="form-field-label"
+                                >
+                                  Relation Co-Model Field Name
+                                </label>
+                                <InputText
+                                  type="text"
+                                  id="relationFieldFixedFilter"
+                                  name="relationFieldFixedFilter"
+                                  onChange={formik.handleChange}
+                                  disabled={fieldMetaData?.id}
+                                  value={formik.values.relationFieldFixedFilter}
+                                  className={classNames("", {
+                                    "p-invalid": isFormFieldValid(
+                                      formik,
+                                      "relationFieldFixedFilter"
+                                    ),
+                                  })}
+                                />
+                                {isFormFieldValid(formik, "relationFieldFixedFilter") && (
+                                  <Message
+                                    severity="error"
+                                    text={formik?.errors?.relationFieldFixedFilter?.toString()}
+                                  />
+                                )}
+
+                              </div>
+                            )}
                           {isUserKeyFields && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
@@ -1902,7 +1947,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
 
-                          {currentFields.includes("relationCreateInverse") && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
+                          {currentFields.includes("relationCreateInverse") && (
                             <div className="field col-6 flex flex-column gap-2 mt-3">
                               <label htmlFor="relationCreateInverse" className="form-field-label">
                                 Relation Create Inverse
@@ -1912,6 +1957,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   inputId="relationCreateInverse"
                                   name="relationCreateInverse"
                                   checked={formik.values.relationCreateInverse}
+                                  disabled={formik.values.relationType === "one-to-many" ? true : false}
                                   onChange={(e) => formik.setFieldValue("relationCreateInverse", e.checked)}
                                 />
                                 <label htmlFor="relationCreateInverse" className="ml-2">Create Inverse</label>
@@ -1935,6 +1981,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 id="relationCoModelFieldName"
                                 name="relationCoModelFieldName"
                                 onChange={formik.handleChange}
+                                disabled={fieldMetaData?.id}
                                 value={formik.values.relationCoModelFieldName}
                                 className={classNames("", {
                                   "p-invalid": isFormFieldValid(
@@ -1997,6 +2044,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 id="relationCoModelColumnName"
                                 name="relationCoModelColumnName"
                                 onChange={formik.handleChange}
+                                disabled={fieldMetaData?.id}
                                 value={formik.values.relationCoModelColumnName}
                                 className={classNames("", {
                                   "p-invalid": isFormFieldValid(
@@ -2028,6 +2076,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 id="relationJoinTableName"
                                 name="relationJoinTableName"
                                 onChange={formik.handleChange}
+                                disabled={fieldMetaData?.id}
                                 value={formik.values.relationJoinTableName}
                                 className={classNames("", {
                                   "p-invalid": isFormFieldValid(
@@ -2927,10 +2976,10 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                   </TabView>
                   <div className="flex gap-3">
                     <div>
-                      <Button label="Finish" size="small" onClick={() => showError()} type="submit"  />
+                      <Button label="Finish" size="small" onClick={() => showError()} type="submit" />
                     </div>
                     <div>
-                      <Button label="Cancel" size="small" severity="secondary" type="reset" onClick={() => setVisiblePopup(false)} outlined  />
+                      <Button label="Cancel" size="small" severity="secondary" type="reset" onClick={() => setVisiblePopup(false)} outlined />
                     </div>
                   </div>
                 </div>
