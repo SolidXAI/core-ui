@@ -436,11 +436,9 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
       ),
     }),
 
-    // ...(currentFields.includes("relationFieldFixedFilter") && {
-    //   relationFieldFixedFilter: Yup.string().required(
-    //     "Relation Model Module Name Value is required"
-    //   ),
-    // }),
+    ...(currentFields.includes("relationFieldFixedFilter") && {
+      relationFieldFixedFilter: Yup.string().nullable(),
+    }),
 
     ...(currentFields.includes("selectionDynamicProvider") && {
       selectionDynamicProvider: Yup.string().required(
@@ -915,7 +913,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     relationCreateInverse: fieldMetaData ? fieldMetaData?.relationCreateInverse : false,
     relationCascade: fieldMetaData ? fieldMetaData?.relationCascade : 'cascade',
     relationModelModuleName: fieldMetaData ? fieldMetaData?.relationModelModuleName : modelMetaData?.module.name,
-    // relationFieldFixedFilter: fieldMetaData ? fieldMetaData?.relationFieldFixedFilter : "",
+    relationFieldFixedFilter: fieldMetaData ? fieldMetaData?.relationFieldFixedFilter : "",
     selectionDynamicProvider: fieldMetaData ? fieldMetaData?.selectionDynamicProvider : null,
     selectionDynamicProviderCtxt: fieldMetaData ? fieldMetaData?.selectionDynamicProviderCtxt : "",
     selectionStaticValues: fieldMetaData ? fieldMetaData?.selectionStaticValues : [""],
@@ -1891,7 +1889,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               </div>
                             )}
 
-                          {/* {currentFields.includes(
+                          {currentFields.includes(
                             "relationFieldFixedFilter"
                           ) && (
                               <div className="field col-6 flex-flex-column gap-2 mt-3">
@@ -1899,8 +1897,25 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   htmlFor="relationFieldFixedFilter"
                                   className="form-field-label"
                                 >
-                                  Relation Fixed Field Name
+                                  Relation Field Fixed Filter
                                 </label>
+
+                                <InputTextarea
+                                  aria-describedby="Fixed Filter"
+                                  id="relationFieldFixedFilter"
+                                  name="relationFieldFixedFilter"
+                                  onChange={formik.handleChange}
+                                  value={formik.values.relationFieldFixedFilter}
+                                  rows={5}
+                                  cols={30}
+                                  className={classNames("", {
+                                    "p-invalid": isFormFieldValid(
+                                      formik,
+                                      "relationFieldFixedFilter"
+                                    ),
+                                  })}
+                                />
+                                {/* 
                                 <InputText
                                   type="text"
                                   id="relationFieldFixedFilter"
@@ -1914,7 +1929,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                       "relationFieldFixedFilter"
                                     ),
                                   })}
-                                />
+                                /> */}
                                 {isFormFieldValid(formik, "relationFieldFixedFilter") && (
                                   <Message
                                     severity="error"
@@ -1923,7 +1938,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 )}
 
                               </div>
-                            )} */}
+                            )}
                           {isUserKeyFields && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
