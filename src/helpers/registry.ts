@@ -20,6 +20,8 @@ import { SolidFormFieldRelationViewModeWidget } from "@/components/core/form/fie
 import { SolidFormFieldViewMediaSingleWidget } from "@/components/core/form/fields/widgets/SolidFormFieldViewMediaSingleWidget";
 import { SolidFormFieldViewMediaMultipleWidget } from "@/components/core/form/fields/widgets/SolidFormFieldViewMediaMultipleWidget";
 import { SolidUserNameAvatarWidget } from "@/components/core/list/widgets/SolidUserNameAvatarWidget";
+import GenerateModelCodeRowAction from "@/components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction";
+import GenerateModuleCodeRowAction from "@/components/core/extension/solid-core/moduleMetadata/list/GenerateModuleCodeRowAction";
 
 type ExtensionRegistry = {
     components: Record<string, React.ComponentType<any>>;
@@ -80,6 +82,11 @@ export const getExtensionFunction = (name: string) => {
 // Register all the dynamic widget & functions from inside solid-core-ui
 // Common
 registerExtensionComponent("CustomHtml", CustomHtml, []);
+
+
+
+registerExtensionComponent("GenerateModelCodeRowAction", GenerateModelCodeRowAction, []);
+registerExtensionComponent("GenerateModuleCodeRowAction", GenerateModuleCodeRowAction, []);
 registerExtensionComponent("SolidRelationManyToManyCheckboxWidget", SolidRelationManyToManyCheckboxWidget, ["checkbox"]);
 registerExtensionComponent("SolidRelationManyToManyAutocompleteWidget", SolidRelationManyToManyAutocompleteWidget, ["autocomplete"]);
 registerExtensionComponent("SolidBooleanFieldCheckboxWidget", SolidBooleanFieldCheckboxWidget, ["field-checkbox"]);
