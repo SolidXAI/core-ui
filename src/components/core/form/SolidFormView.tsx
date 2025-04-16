@@ -660,42 +660,50 @@ const SolidFormView = (params: SolidFormViewProps) => {
     }, [formViewDataQs])
 
     useEffect(() => {
-        if (solidFormViewMetaData) {
-            let formLayout = solidFormViewMetaData;
-            const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormLayoutLoad;
-            let DynamicFunctionComponent = null;
-            const event: SolidLoadForm = {
-                fieldsMetadata: solidFormViewMetaData,
-                formData: solidFormViewData?.data,
-                type: 'onFormLayoutLoad',
-                viewMetadata: solidFormViewMetaData?.data?.solidView
-            }
-            if (dynamicHeader) {
-                DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
-                if (DynamicFunctionComponent) {
-                    const updatedFormLayout = DynamicFunctionComponent(event);
-                    if (updatedFormLayout && updatedFormLayout?.layoutChanged && updatedFormLayout?.newLayout) {
-                        const newFormLayout = {
-                            ...formLayout,
-                            data: {
-                                ...formLayout.data,
-                                solidView: {
-                                    ...formLayout.data.solidView,
-                                    layout: updatedFormLayout.newLayout
-                                }
+        const handleDynamicLayout = async () => {
+            if (solidFormViewMetaData) {
+                let formLayout = solidFormViewMetaData;
+                const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormLayoutLoad;
+                let DynamicFunctionComponent = null;
+                const event: SolidLoadForm = {
+                    fieldsMetadata: solidFormViewMetaData,
+                    formData: solidFormViewData?.data,
+                    type: 'onFormLayoutLoad',
+                    viewMetadata: solidFormViewMetaData?.data?.solidView
+                }
+                if (dynamicHeader) {
+                    DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
+                    if (DynamicFunctionComponent) {
+                        try {
+                            const updatedFormLayout = await DynamicFunctionComponent(event);
+                            if (updatedFormLayout && updatedFormLayout?.layoutChanged && updatedFormLayout?.newLayout) {
+                                const newFormLayout = {
+                                    ...formLayout,
+                                    data: {
+                                        ...formLayout.data,
+                                        solidView: {
+                                            ...formLayout.data.solidView,
+                                            layout: updatedFormLayout.newLayout
+                                        }
+                                    }
+                                };
+                                formLayout = newFormLayout;
                             }
-                        };
-                        formLayout = newFormLayout;
+                        } catch (error) {
+                            console.error('Error in DynamicFunctionComponent:', error);
+                        }
                     }
                 }
+                setFormViewMetaData(formLayout);
+                if (params.customLayout) {
+                    setFormViewLayout(params.customLayout);
+                } else {
+                    setFormViewLayout(formLayout.data.solidView.layout);
+                }
             }
-            setFormViewMetaData(formLayout);
-            if (params.customLayout) {
-                setFormViewLayout(params.customLayout);
-            } else {
-                setFormViewLayout(formLayout.data.solidView.layout);
-            }
-        }
+        };
+
+        handleDynamicLayout();
     }, [solidFormViewMetaData, solidFormViewData]);
 
     useEffect(() => {
