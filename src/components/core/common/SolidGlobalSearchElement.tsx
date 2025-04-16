@@ -699,6 +699,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         </>
     );
 
+
     const [showOverlay, setShowOverlay] = useState(false);
 
     return (
