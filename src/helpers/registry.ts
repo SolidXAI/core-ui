@@ -9,7 +9,7 @@ import { SolidBooleanFieldCheckboxWidget } from "@/components/core/form/fields/w
 import { SolidBooleanFieldSelectWidget } from "@/components/core/form/fields/widgets/SolidBooleanSelectFieldWidget";
 import { SolidSelectionStaticAutocompleteWidget } from "@/components/core/form/fields/widgets/SolidSelectionStaticAutocompleteFieldWidget";
 import { SolidSelectionStaticRadioWidget } from "@/components/core/form/fields/widgets/SolidSelectionStaticRadioFieldWidget";
-import { SolidShortTextFieldTextRenderModeWidget } from "@/components/core/list/widgets/SolidShortTextFieldTextRenderModeWidget copy";
+import { SolidShortTextFieldTextRenderModeWidget } from "@/components/core/list/widgets/SolidShortTextFieldTextRenderModeWidget";
 import { SolidShortTextFieldImageRenderModeWidget } from "@/components/core/list/widgets/SolidShortTextFieldImageRenderModeWidget";
 import { SolidFormFieldViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldViewModeWidget";
 import { SolidFormFieldJsonViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldJsonViewModeWidget";
@@ -19,6 +19,7 @@ import { SolidFormFieldMediaViewModeWidget } from "@/components/core/form/fields
 import { SolidFormFieldRelationViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldRelationViewModeWidget";
 import { SolidFormFieldViewMediaSingleWidget } from "@/components/core/form/fields/widgets/SolidFormFieldViewMediaSingleWidget";
 import { SolidFormFieldViewMediaMultipleWidget } from "@/components/core/form/fields/widgets/SolidFormFieldViewMediaMultipleWidget";
+import { SolidUserNameAvatarWidget } from "@/components/core/list/widgets/SolidUserNameAvatarWidget";
 
 type ExtensionRegistry = {
     components: Record<string, React.ComponentType<any>>;
@@ -95,6 +96,8 @@ registerExtensionComponent("SolidFormFieldMediaViewModeWidget", SolidFormFieldMe
 registerExtensionComponent("SolidFormFieldRelationViewModeWidget", SolidFormFieldRelationViewModeWidget, []);
 registerExtensionComponent("SolidFormFieldViewMediaSingleWidget", SolidFormFieldViewMediaSingleWidget, []);
 registerExtensionComponent("SolidFormFieldViewMediaMultipleWidget", SolidFormFieldViewMediaMultipleWidget, []);
+registerExtensionComponent("SolidFormFieldViewMediaMultipleWidget", SolidFormFieldViewMediaMultipleWidget, []);
+registerExtensionComponent("SolidUserNameAvatarWidget", SolidUserNameAvatarWidget, []);
 
 
 // ModuleMetadata
