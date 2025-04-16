@@ -394,16 +394,26 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
         "Relation Model Singular Name is required"
       ),
     }),
-    // ...(currentFields.includes("relationCoModelFieldName") && {
-    //   relationCoModelFieldName: Yup.string()
-    //   // .required(
-    //   //   "Relation Model Field Name is required"
-    //   // ),
-    // }),
-
+    ...(currentFields.includes("relationCoModelFieldName") && {
+      relationCoModelFieldName: Yup.string()
+      // .required(
+      //   "Relation Model Field Name is required"
+      // ),
+    }),
     ...(currentFields.includes("relationCreateInverse") && {
       relationCreateInverse: Yup.boolean(),
     }),
+    ...(currentFields.includes("relationCoModelFieldName") && {
+      relationCoModelFieldName: Yup.string().when("relationCreateInverse", (relationCreateInverse: any, schema) => {
+        console.log("relationCreateInverse", relationCreateInverse);
+        if (relationCreateInverse.length > 0 && relationCreateInverse[0] == true) {
+          return schema.required("Relation Co Model Field Name is required")
+        } else {
+          return schema.notRequired();
+        }
+      }),
+    }),
+
     // ...(currentFields.includes("relationCascade") && {
     //   relationCascade: Yup.string().required(
     //     "Relation Cascade Value is required"
