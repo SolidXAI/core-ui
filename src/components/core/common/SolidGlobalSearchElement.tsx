@@ -157,22 +157,30 @@ const transformRulesToFilters = (input: any) => {
 }
 
 const tranformSearchToFilters = (input: any) => {
+    if (!input || !input.$and) return input;
 
-    if (!input || !input.$and) return input; // Return as-is if invalid
+    const grouped: Record<string, string[]> = {};
+
+    input.$and.forEach(({ fieldName, value }: any) => {
+        const val = Array.isArray(value) && value.length === 1 ? value[0] : value;
+
+        if (!grouped[fieldName]) {
+            grouped[fieldName] = [];
+        }
+
+        if (Array.isArray(val)) {
+            grouped[fieldName].push(...val);
+        } else {
+            grouped[fieldName].push(val);
+        }
+    });
 
     return {
-        $and: input.$and.map((condition: any) => {
-            const { fieldName, matchMode, value } = condition;
-
-            // Ensure value is a single string (if it's an array with one element, extract it)
-            const formattedValue = Array.isArray(value) && value.length === 1 ? value[0] : value;
-
-            return {
-                [fieldName]: {
-                    [matchMode]: formattedValue
-                }
-            };
-        })
+        $and: Object.entries(grouped).map(([fieldName, values]) => ({
+            [fieldName]: {
+                $containsi: values.length === 1 ? values[0] : values
+            }
+        }))
     };
 }
 
@@ -683,7 +691,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                                 <span key={index} className="custom-chip-value">{value}
                                 </span>
                                 {values.length > 1 &&
-                                    <span className="custom-chip-or">and</span>
+                                    <span className="custom-chip-or">or</span>
                                 }
                             </React.Fragment>
                         ))}
