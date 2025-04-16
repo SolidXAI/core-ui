@@ -60,6 +60,7 @@ export type SolidFormViewProps = {
     customCreateHandler?: any
     inlineCreateAutoSave?: boolean,
     customLayout?: any,
+    populateData?: any,
 };
 
 
@@ -151,7 +152,7 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps, setLightboxUr
 }
 
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
-const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, setLightboxUrls, setOpenLightbox }: any) => {
+const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, populateData, setLightboxUrls, setOpenLightbox }: any) => {
     const fieldContext: SolidFieldProps = {
         // field metadata - coming from the field-metadata table.
         fieldMetadata: fieldMetadata,
@@ -166,6 +167,9 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
         viewMode: viewMode,
         onChange: onChange,
         onBlur: onBlur
+    }
+    if (populateData) {
+        fieldContext.populateData = populateData;
     }
     const solidField = fieldFactory(fieldMetadata?.type, fieldContext, setLightboxUrls, setOpenLightbox);
 
@@ -659,42 +663,50 @@ const SolidFormView = (params: SolidFormViewProps) => {
     }, [formViewDataQs])
 
     useEffect(() => {
-        if (solidFormViewMetaData) {
-            let formLayout = solidFormViewMetaData;
-            const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormLayoutLoad;
-            let DynamicFunctionComponent = null;
-            const event: SolidLoadForm = {
-                fieldsMetadata: solidFormViewMetaData,
-                formData: solidFormViewData?.data,
-                type: 'onFormLayoutLoad',
-                viewMetadata: solidFormViewMetaData?.data?.solidView
-            }
-            if (dynamicHeader) {
-                DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
-                if (DynamicFunctionComponent) {
-                    const updatedFormLayout = DynamicFunctionComponent(event);
-                    if (updatedFormLayout && updatedFormLayout?.layoutChanged && updatedFormLayout?.newLayout) {
-                        const newFormLayout = {
-                            ...formLayout,
-                            data: {
-                                ...formLayout.data,
-                                solidView: {
-                                    ...formLayout.data.solidView,
-                                    layout: updatedFormLayout.newLayout
-                                }
+        const handleDynamicLayout = async () => {
+            if (solidFormViewMetaData) {
+                let formLayout = solidFormViewMetaData;
+                const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormLayoutLoad;
+                let DynamicFunctionComponent = null;
+                const event: SolidLoadForm = {
+                    fieldsMetadata: solidFormViewMetaData,
+                    formData: solidFormViewData?.data,
+                    type: 'onFormLayoutLoad',
+                    viewMetadata: solidFormViewMetaData?.data?.solidView
+                }
+                if (dynamicHeader) {
+                    DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
+                    if (DynamicFunctionComponent) {
+                        try {
+                            const updatedFormLayout = await DynamicFunctionComponent(event);
+                            if (updatedFormLayout && updatedFormLayout?.layoutChanged && updatedFormLayout?.newLayout) {
+                                const newFormLayout = {
+                                    ...formLayout,
+                                    data: {
+                                        ...formLayout.data,
+                                        solidView: {
+                                            ...formLayout.data.solidView,
+                                            layout: updatedFormLayout.newLayout
+                                        }
+                                    }
+                                };
+                                formLayout = newFormLayout;
                             }
-                        };
-                        formLayout = newFormLayout;
+                        } catch (error) {
+                            console.error('Error in DynamicFunctionComponent:', error);
+                        }
                     }
                 }
+                setFormViewMetaData(formLayout);
+                if (params.customLayout) {
+                    setFormViewLayout(params.customLayout);
+                } else {
+                    setFormViewLayout(formLayout.data.solidView.layout);
+                }
             }
-            setFormViewMetaData(formLayout);
-            if (params.customLayout) {
-                setFormViewLayout(params.customLayout);
-            } else {
-                setFormViewLayout(formLayout.data.solidView.layout);
-            }
-        }
+        };
+
+        handleDynamicLayout();
     }, [solidFormViewMetaData, solidFormViewData]);
 
     useEffect(() => {
@@ -935,13 +947,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             field={element}
                             formik={formik}
                             fieldMetadata={fieldMetadata}
-                            initialEntityData={solidFormViewData ? solidFormViewData.data : null}
+                            initialEntityData={solidFormViewData ? solidFormViewData.data : {}}
                             solidFormViewMetaData={solidFormViewMetaData}
                             modelName={params.modelName}
                             readOnly={readOnlyPermission}
                             viewMode={viewMode}
                             onChange={formFieldOnXXX}
                             onBlur={formFieldOnXXX}
+                            populateData={params.populateData}
                             setLightboxUrls={setLightboxUrls}
                             setOpenLightbox={setOpenLightbox}
                         />;

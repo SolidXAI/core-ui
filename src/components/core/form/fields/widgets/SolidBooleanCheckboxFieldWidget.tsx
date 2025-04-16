@@ -17,7 +17,6 @@ export const SolidBooleanFieldCheckboxWidget = ({ formik, fieldContext }: SolidB
     // Set default value to false on mount
     useEffect(() => {
         if (formik.values[fieldLayoutInfo.attrs.name] === undefined) {
-            console.log("Setting default value:", false);
             formik.setFieldValue(fieldLayoutInfo.attrs.name, false);
         }
     }, []);

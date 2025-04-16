@@ -173,8 +173,6 @@ const fieldBasedPayloadFormating = (values: any, currentFields: string[], fieldM
   if (transformedPayload.relationType == "many-to-many") {
     transformedPayload.isRelationManyToManyOwner = true;
   }
-  
-
   return transformedPayload
 
 }

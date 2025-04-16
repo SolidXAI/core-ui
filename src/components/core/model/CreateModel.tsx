@@ -178,7 +178,7 @@ const CreateModel = ({ data, params }: any) => {
         }
         return rest
       });
-      const { module, createdAt, updatedAt, id, deletedAt, ...modelData } = modelMetaData;
+      const { module, parentModel,createdAt, updatedAt, id, deletedAt, ...modelData } = modelMetaData;
       const updateData = { ...modelData, displayName: modelData.displayName.trim(), fields: fieldData };
       updateModel({ id: data.id, data: updateData });
     }
@@ -190,7 +190,7 @@ const CreateModel = ({ data, params }: any) => {
           }
           return rest
         });
-        const { module, ...modelData } = modelMetaData;
+        const { module, parentModel,...modelData } = modelMetaData;
         const data = { ...modelData, displayName: modelData.displayName.trim(), fields: fieldData };
         createModel(data);
         if (isCreateModelSuccess) {

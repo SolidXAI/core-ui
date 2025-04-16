@@ -12,7 +12,7 @@ const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilter
         { label: 'false', value: false },
     ];
     const filterMatchModeOptions = [
-        { label: 'Equals', value: "$eqi" },
+        { label: 'Equals', value: "$eq" },
     ];
 
 
