@@ -6147,4 +6147,40 @@
   .active-menu-image {
     background-color: var(--solid-login-bg-color);
   }
+
+
+  .solid-kanban-board-wrapper {
+    border-top: 1px solid var(--primary-light-color);
+  }
+
+  .kanban-group-heading {
+    color: #fff;
+  }
+
+  .solid-kanban-card,
+  .solid-media-card {
+    border: 1px solid var(--primary-light-color);
+    background: #171717;
+  }
+
+  .solid-kanban-card:hover,
+  .solid-media-card:hover {
+    border: 1px solid var(--purple-900);
+    background: var(--surface-hover);
+  }
+
+  .solid-mimetype-chip {
+    background: var(--gray-700);
+  }
+
+  .kanban-image-preview,
+  .kanban-media-image-preview,
+  .kanban-media-view-card {
+    background-color: var(--surface-hover);
+  }
+
+  .kanban-count-badge {
+    background: var(--primary-light-color);
+    color: var(--primary-color);
+  }
 }

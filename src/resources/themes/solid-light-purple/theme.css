@@ -66,6 +66,7 @@
   --solid-chatter-date-border: rgba(0, 0, 0, 0.15);
   --solid-chatter-input-bg: #FEFCFF;
   --solid-chatter-input-placeholder: rgba(51, 51, 51, 0.20);
+  --solid-kanban-wrapper: #E0E0E0;
   color-scheme: light;
 }
 
@@ -6202,5 +6203,33 @@
 
   .active-menu-image {
     background-color: #EFF1F4;
+  }
+
+  .solid-kanban-card,
+  .solid-media-card {
+    border: 1px solid var(--solid-kanban-wrapper);
+    background: var(--hightlight-bg-secondary);
+  }
+
+  .solid-kanban-card:hover,
+  .solid-media-card:hover {
+    border: 1px solid #722ED1;
+    background: #F9F0FF;
+  }
+
+
+  .solid-mimetype-chip {
+    background: #F0F0F0;
+  }
+
+  .kanban-image-preview,
+  .kanban-media-image-preview,
+  .kanban-media-view-card {
+    background-color: #fff;
+  }
+
+  .kanban-count-badge {
+    background: #F6FAFF;
+    color: var(--primary-color);
   }
 }
