@@ -1,15 +1,15 @@
 .chatterTitle {
     padding: 15px;
-    border-bottom: 1px solid #D8E2EA;
+    border-bottom: 1px solid var(--primary-light-color);
 }
 
 .chatterMessageComposer .chatterMessageInput {
-    background-color: #FEFCFF;
-    border: 1px solid #D8E2EA;
+    background-color: var(--solid-chatter-input-bg);
+    border: 1px solid var(--primary-light-color);
 }
 
 .chatterMessageComposer .chatterMessageInput::placeholder {
-    color: rgba(51, 51, 51, 0.20);
+    color: var(--solid-chatter-input-placeholder);
 }
 
 .chatterEmails {
@@ -28,8 +28,8 @@
     position: absolute;
     right: 0px !important;
     top: 1;
-    background-color: #fff;
-    border: 1px solid #D8E2EA;
+    background-color: var(--surface-a);
+    border: 1px solid var(--primary-light-color);
     padding: 8px;
     border-radius: 8px !important;
     min-width: 200;
@@ -43,7 +43,7 @@
 }
 
 .chatterDatetimeDivider {
-    border-top: 1px dashed #00000026;
+    border-top: 1px dashed var(--solid-chatter-dash);
     position: relative;
     margin: 30px 0;
 }
@@ -53,8 +53,8 @@
     left: 50%;
     transform: translate(-50%, -50%);
     border-radius: 6.25rem;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    background: #FAFAFA;
+    border: 1px solid var(--solid-chatter-date-border);
+    background: var(--highlight-bg-secondary);
     padding: 0.25rem 0.5rem;
     text-wrap: nowrap;
     font-size: 0.625rem;
@@ -63,7 +63,7 @@
 }
 
 .solidMessageWrapper {
-    border: 1px solid #D8E2EA;
+    border: 1px solid var(--primary-light-color);
     padding: 10px;
     border-radius: 0.25rem;
     width: 100%;
