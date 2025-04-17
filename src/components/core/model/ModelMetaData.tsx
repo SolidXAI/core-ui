@@ -104,8 +104,22 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     enableAuditTracking: Yup.boolean(),
     internationalisation: Yup.boolean(),
     isChild: Yup.boolean(),
-    parentModelId: Yup.number(),
-    parentModel: Yup.object()
+    parentModelId: Yup.number().when("isChild", (isChild: any, schema) => {
+      console.log("relationCreateInverse", isChild);
+      if (isChild.length > 0 && isChild[0] == true) {
+        return schema.required("Parent Model Id is required")
+      } else {
+        return schema.notRequired().nullable();
+      }
+    }),
+    parentModel: Yup.object().when("isChild", (isChild: any, schema) => {
+      console.log("relationCreateInverse", isChild);
+      if (isChild.length > 0 && isChild[0] == true) {
+        return schema.required("Parent Model is required")
+      } else {
+        return schema.notRequired().nullable();
+      }
+    }),
 
   });
 
