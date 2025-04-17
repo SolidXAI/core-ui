@@ -43,6 +43,7 @@
   --maskbg: rgba(0, 0, 0, 0.4);
   --primary-light-color: #D8E2EA;
   --highlight-bg: #F5F5F5;
+  --hightlight-bg-secondary: #FAFAFA;
   --highlight-text-color: #4C1D95;
   --icon-color: #000000E0;
   --auth-title-color: #000000;
@@ -59,6 +60,13 @@
   --solid-stepper-border: #CFD6DC;
   --solid-setting-title: rgba(0, 0, 0, 0.88);
   --solid-dark-title: rgba(0, 0, 0, 0.88);
+  --solid-dropzone-bg: rgba(255, 255, 255, 0.60);
+  --solid-file-wrapper: #E0E0E0;
+  --solid-chatter-dash: #00000026;
+  --solid-chatter-date-border: rgba(0, 0, 0, 0.15);
+  --solid-chatter-input-bg: #FEFCFF;
+  --solid-chatter-input-placeholder: rgba(51, 51, 51, 0.20);
+  --solid-kanban-wrapper: #E0E0E0;
   color-scheme: light;
 }
 
@@ -337,6 +345,7 @@
     /* box-shadow: 0 0 0 0.2rem #d3b5f5; */
     border-color: #722ED1;
   }
+
   .p-autocomplete .p-autocomplete-multiple-container .p-autocomplete-input-token input {
     font-family: var(--font-family);
     font-feature-settings: var(--font-feature-settings, normal);
@@ -1686,7 +1695,7 @@
     box-shadow: 0 0 0 0.2rem #d3b5f5;
   }
 
-  
+
   .p-treeselect-panel .p-treeselect-items-wrapper .p-treeselect-empty-message {
     padding: 0.75rem 1.25rem;
     color: #4b5563;
@@ -3443,7 +3452,7 @@
     border-bottom: 0 none;
   }
 
-  
+
   .p-picklist .p-picklist-filter-container .p-picklist-filter-icon {
     right: 0.75rem;
     color: #6b7280;
@@ -4546,7 +4555,7 @@
     border-top-left-radius: 6px;
   }
 
-  
+
   .p-megamenu .p-submenu-list .p-menuitem-separator {
     border-top: 1px solid #CED0D6;
     margin: 0.25rem 0;
@@ -6125,5 +6134,102 @@
 
   .solid-custom-title {
     color: var(--solid-form-title);
+  }
+
+
+  .solid-global-search-element {
+    border: 1px solid #d1d5db;
+  }
+
+  .custom-filter-button {
+    border-left: 1px solid #d1d5db;
+  }
+
+  .solid-layout-accordion label {
+    color: #000;
+  }
+
+  .primary-filter-fieldset {
+    background-color: #F8F7FC;
+  }
+
+  .nested-custom-filter .primary-filter-fieldset {
+    background-color: #FFF;
+  }
+
+  .solid-column-panel.p-panel .p-panel-header {
+    background: #F9F9F9;
+  }
+
+  .solid-column-panel.p-panel .p-panel-header,
+  .solid-column-panel.p-panel .p-panel-content {
+    border: 1px solid rgba(216, 226, 234, 0.40);
+  }
+
+  .form-field-label {
+    color: rgba(0, 0, 0, 0.88) !important;
+  }
+
+  .solid-standard-autocomplete .p-autocomplete-dropdown.p-button {
+    background-color: #fff;
+    border-color: #d1d5db;
+    color: rgba(0, 0, 0, 0.60);
+  }
+
+
+  .solid-standard-autocomplete .p-inputtext:focus+.p-button {
+    border-color: #d1d5db !important;
+  }
+
+  .solid-custom-editor .ql-toolbar.ql-snow {
+    border: 1px solid #d1d5db;
+  }
+
+  .solid-custom-editor .ql-container.ql-snow {
+    border: 1px solid #d1d5db;
+  }
+
+  .view-widget-chip.p-chip {
+    background-color: #f9f9f9 !important;
+  }
+
+  .solid-step-button.p-button.p-button-text,
+  .solid-step-button.p-button.p-button-text:not(:disabled):active,
+  .solid-step-button.p-button.p-button-text:not(:disabled):hover,
+  .solid-step-button.btn-step-first,
+  .solid-step-button.btn-step-last {
+    color: #0D0B26 !important;
+  }
+
+  .active-menu-image {
+    background-color: #EFF1F4;
+  }
+
+  .solid-kanban-card,
+  .solid-media-card {
+    border: 1px solid var(--solid-kanban-wrapper);
+    background: var(--hightlight-bg-secondary);
+  }
+
+  .solid-kanban-card:hover,
+  .solid-media-card:hover {
+    border: 1px solid #722ED1;
+    background: #F9F0FF;
+  }
+
+
+  .solid-mimetype-chip {
+    background: #F0F0F0;
+  }
+
+  .kanban-image-preview,
+  .kanban-media-image-preview,
+  .kanban-media-view-card {
+    background-color: #fff;
+  }
+
+  .kanban-count-badge {
+    background: #F6FAFF;
+    color: var(--primary-color);
   }
 }
