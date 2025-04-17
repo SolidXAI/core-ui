@@ -39,7 +39,7 @@ const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column, se
         )
     };
 
-    const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter
+    const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter;
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
     return (
@@ -63,7 +63,16 @@ const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column, se
             body={(rowData) => {
                 const renderMode = column.attrs.renderMode || "text";
                 const data = rowData;
-                const widgetName = renderMode == "text" ? "SolidShortTextFieldTextRenderModeWidget" : "SolidShortTextFieldImageRenderModeWidget";
+                let widgetName = column?.attrs?.widget;
+                if (renderMode === "image") {
+                    widgetName = "SolidShortTextFieldImageRenderModeWidget"
+                }
+                if (renderMode === "text") {
+                    widgetName = "SolidShortTextFieldTextRenderModeWidget"
+                };
+                if (column?.attrs?.widget) {
+                    widgetName = column?.attrs?.widget;
+                }
                 let DynamicWidget = getExtensionComponent(widgetName);
                 const widgetProps = {
                     value: data[fieldMetadata.name],

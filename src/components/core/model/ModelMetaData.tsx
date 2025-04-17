@@ -56,7 +56,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     enableSoftDelete: modelMetaData ? modelMetaData?.enableSoftDelete : "",
     enableAuditTracking: modelMetaData ? modelMetaData?.enableAuditTracking : "",
     internationalisation: modelMetaData ? modelMetaData?.internationalisation : "",
-    isChild: modelMetaData ? modelMetaData?.isChild : false,
+    isChild: modelMetaData ? modelMetaData?.isChild : "",
     parentModelId: modelMetaData ? modelMetaData?.parentModel?.id : "",
     parentModel: modelMetaData ? modelMetaData?.parentModel : "",
 
@@ -138,7 +138,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
           enableSoftDelete: values.enableSoftDelete === true ? true : '',
           enableAuditTracking: values.enableAuditTracking === true ? true : '',
           internationalisation: values.internationalisation === true ? true : '',
-          isChild: values.isChild ? values.isChild === true : '',
+          isChild: values.isChild === true ? true : '',
           ...(values.isChild == true && {
             parentModelId: values.parentModelId,
             parentModel: values.parentModel,
@@ -455,14 +455,27 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   />
                 )}
 
-                <div className="mt-4">
-                  <div className="flex align-items-center gap-2">
-                    <Checkbox onChange={e => { setShowParentModel(e.checked) }} checked={showParentModel} disabled={params.id !== 'new'}></Checkbox>
-                    <label htmlFor="ingredient1" className="form-field-label">
-                      isChild
-                    </label>
-                  </div>
+                <div className="flex align-items-center gap-2 mt-3">
+                  <Checkbox
+                    name="isChild"
+                    onChange={(e) => {
+                      formik.setFieldValue("isChild", e.checked);
+                    }}
+                    disabled={params.id !== 'new'}
+                    checked={formik.values.isChild}
+                  ></Checkbox>
+                  <label htmlFor="isChild" className="form-field-label">
+                    Is Child
+                  </label>
                 </div>
+                {params.id !== 'new' && <p className="form-field-label mt-1 text-sm">Is Current Model child of another Model</p>}
+                {(isFormFieldValid(formik, "isChild") || (formErrors["isChild"])) && (
+                  <Message
+                    severity="error"
+                    text={formik?.errors?.isChild?.toString()}
+                    className="mt-2"
+                  />
+                )}
                 {showParentModel &&
                   <div className="flex flex-column gap-2 mt-3">
                     <label htmlFor="type" className="form-field-label">
