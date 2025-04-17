@@ -72,7 +72,7 @@ const CreateModel = ({ data, params }: any) => {
   useEffect(() => {
     if (data) {
       const modelData = {
-        ...data, moduleId: data?.module?.id
+        ...data, moduleId: data?.module?.id,parentModelId: data?.parentModel
       }
 
       setIsLoadingData(false);

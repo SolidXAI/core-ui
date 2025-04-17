@@ -20,7 +20,7 @@ export const modelsApi = createApi({
             }
         }),
         getmodelById: builder.query({
-            query: (id) => `/model-metadata/${id}?populate[0]=fields&populate[1]=module&populate[2]=fields.mediaStorageProvider`,
+            query: (id) => `/model-metadata/${id}?populate[0]=fields&populate[1]=module&&populate[2]=fields.mediaStorageProvider&populate[3]=parentModel`,
         }),
         createmodel: builder.mutation({
             query: (model) => ({
