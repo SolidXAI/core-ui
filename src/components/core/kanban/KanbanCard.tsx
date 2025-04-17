@@ -180,13 +180,16 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
             style={{
               opacity: snapshot.isDragging ? 0.9 : 1,
               transform: snapshot.isDragging ? "rotate(-2deg)" : "",
-              cursor:'pointer'
+              cursor: 'pointer'
             }}
             elevation={snapshot.isDragging ? 3 : 1}
             className={`${!groupedView ? 'solid-media-card' : 'solid-kanban-card'}`}
-            onClick={() =>
+            onClick={() => {
+              if (typeof window !== "undefined") {
+                sessionStorage.setItem("fromView", "kanban");
+              }
               router.push(`${editButtonUrl}/${data?.id}`)
-            }
+            }}
           >
             {renderFormDynamically(solidKanbanViewMetaData)}
 

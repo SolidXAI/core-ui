@@ -147,7 +147,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   } = entityApi;
 
   // Get the list view layout & metadata first. 
-  const listViewMetaDataQs = qs.stringify({ modelName: params.modelName, moduleName: params.moduleName, viewType: 'list'}, {
+  const listViewMetaDataQs = qs.stringify({ modelName: params.modelName, moduleName: params.moduleName, viewType: 'list' }, {
     encodeValuesOnly: true,
   });
   const [listViewMetaData, setListViewMetaData] = useState({});
@@ -812,6 +812,9 @@ export const SolidListView = (params: SolidListViewParams) => {
             if (params.embeded == true) {
               params.handlePopUpOpen(rowData?.id);
             } else {
+              if (typeof window !== "undefined") {
+                sessionStorage.setItem("fromView", "list");
+              }
               router.push(`${editButtonUrl}/${rowData?.id}`);
             }
           }}
