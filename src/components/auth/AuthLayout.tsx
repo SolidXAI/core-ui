@@ -44,16 +44,16 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         // Fetch settings if not already available
         trigger("");
 
-        const iamAllowPublicRegistration = solidSettingsData?.data?.iamAllowPublicRegistration;
+        const allowPublicRegistration = solidSettingsData?.data?.allowPublicRegistration;
 
-        if (iamAllowPublicRegistration === false) {
+        if (allowPublicRegistration === false) {
             setAllowRegistration(false);
             if (pathname === "/auth/register") {
                 setIsRestricted(true);
             } else {
                 setIsRestricted(false);
             }
-        } else if (iamAllowPublicRegistration === true) {
+        } else if (allowPublicRegistration === true) {
             setAllowRegistration(true);
             setIsRestricted(false);
         }

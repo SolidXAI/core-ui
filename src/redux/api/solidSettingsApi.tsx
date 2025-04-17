@@ -32,6 +32,13 @@ export const solidSettingsApi = createApi({
                 body: data,
             }),
         }),
+        bulkUpdateSolidSettings: builder.mutation({
+            query: ({ data }) => ({
+                url: `/setting/bulk-update`,
+                method: 'POST',
+                body: data,
+            }),
+        }),
     })
 });
 
@@ -44,4 +51,5 @@ export const {
     useLazyGetSolidSettingsQuery,
     useLazyGetSolidSettingsByIdQuery,
     useUpdateSolidSettingsMutation,
+    useBulkUpdateSolidSettingsMutation
 } = solidSettingsApi;
