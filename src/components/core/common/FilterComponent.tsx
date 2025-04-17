@@ -144,11 +144,7 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
             <Button text severity='secondary' icon="pi pi-plus" size='small' onClick={() => onAddRule(rule.parentRule)} className='solid-filter-action-btn' />
           </div>
           <div className='col-4 px-0 flex align-items-center'>
-            <Button text severity='secondary' icon={
-              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                <path d="M11.6665 13.334H13.3332V11.6673H14.9998V10.0007H13.3332V8.33398H11.6665V10.0007H9.99984V11.6673H11.6665V13.334ZM3.33317 16.6673C2.87484 16.6673 2.48248 16.5041 2.15609 16.1777C1.8297 15.8513 1.6665 15.459 1.6665 15.0007V5.00065C1.6665 4.54232 1.8297 4.14996 2.15609 3.82357C2.48248 3.49718 2.87484 3.33398 3.33317 3.33398H8.33317L9.99984 5.00065H16.6665C17.1248 5.00065 17.5172 5.16385 17.8436 5.49023C18.17 5.81662 18.3332 6.20898 18.3332 6.66732V15.0007C18.3332 15.459 18.17 15.8513 17.8436 16.1777C17.5172 16.5041 17.1248 16.6673 16.6665 16.6673H3.33317ZM3.33317 15.0007H16.6665V6.66732H9.31234L7.64567 5.00065H3.33317V15.0007Z" fill="#4B4D52" />
-              </svg>
-            } size='small' onClick={() => onAddGroup(rule.id)} className='solid-filter-action-btn p-0' />
+            <Button text severity='secondary' icon={"pi pi-folder-plus"} size='small' onClick={() => onAddGroup(rule.id)} className='solid-filter-action-btn' />
           </div>
           <div className='col-4 px-0 flex align-items-center'>
             <Button text severity='secondary' icon="pi pi-trash" size='small' onClick={() => onDelete(rule.id)} className='solid-filter-action-btn' />
@@ -352,7 +348,7 @@ const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, transf
   // };
 
 
-  const removeEmptyGroups = (rule) => { 
+  const removeEmptyGroups = (rule) => {
     if (rule.type === "rule_group" && rule.children.length === 0) {
       return null;
     }
@@ -366,7 +362,7 @@ const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, transf
 
 
   const handleDeleteRule = (id) => {
-    if(filterRules[0].children.length === 1 && filterRules[0].children[0].id === id ){
+    if (filterRules[0].children.length === 1 && filterRules[0].children[0].id === id) {
       return
     }
     const deleteRecursively = (rules, id, isRoot = false) => {

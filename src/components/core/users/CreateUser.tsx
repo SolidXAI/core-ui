@@ -70,11 +70,15 @@ const CreateUser = ({ data, params }: any) => {
   }, [data]);
 
   const handleCheckboxChange = (roleName: string) => {
+    let updatedRoles;
     if (selectedRoles.includes(roleName)) {
-      setSelectedRoles(selectedRoles.filter((name) => name !== roleName));
+      updatedRoles = selectedRoles.filter((name) => name !== roleName);
     } else {
-      setSelectedRoles([...selectedRoles, roleName]);
+      updatedRoles = [...selectedRoles, roleName];
     }
+    setSelectedRoles(updatedRoles);
+    formik.setFieldTouched('roles', true); // fake "touched"
+    formik.setFieldValue('roles', updatedRoles);
   };
 
   const initialValues = {
@@ -244,9 +248,9 @@ const CreateUser = ({ data, params }: any) => {
                 <div className="form-wrapper-title">Create User</div>
               </div>
               <div className="gap-3 flex">
-                {/* {formik.dirty && */}
+                {formik.dirty &&
                   <Button label="Save" size="small" type="submit" />
-                {/* } */}
+                }
                 <CancelButton />
               </div>
             </>
@@ -258,9 +262,9 @@ const CreateUser = ({ data, params }: any) => {
               </div>
               <div>
                 <div className="gap-3 flex">
-                  {/* {formik.dirty && */}
+                  {formik.dirty &&
                     <Button label="Save" size="small" type="submit" />
-                  {/* } */}
+                  }
                   {data &&
                     <Button outlined label="Delete" size="small" severity="danger" type="button" onClick={() => deleteUser(data.id)} />
                   }
