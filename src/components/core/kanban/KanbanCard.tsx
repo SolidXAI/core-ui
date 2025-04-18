@@ -1,11 +1,10 @@
 // @ts-nocheck
 'use client';
-
-import { Draggable, DraggableProvided } from "@hello-pangea/dnd";
-import { Card } from "primereact/card";
-import React from "react";
+import React, { useRef } from "react";
 import { SolidKanbanViewFields } from "./SolidKanbanViewFields";
 import { useRouter } from "next/navigation";
+import { Button } from "primereact/button";
+import { OverlayPanel } from "primereact/overlaypanel";
 
 // Define the types for the data and props
 interface Data {
@@ -162,6 +161,53 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
     return dynamicForm;
   };
 
+  const kanbanActionRef = useRef(null);
+
+  const renderKanbanAction = (data, groupedView) => {
+    return (
+      <div className="solid-kanban-action" onClick={(e) => e.stopPropagation()}>
+        <Button
+          size="small"
+          text
+          className="text-sm p-0"
+          icon="pi pi-ellipsis-v"
+          onClick={(e) => kanbanActionRef.current.toggle(e)}
+          style={{ width: 25, height: 25 }}
+        />
+        <OverlayPanel ref={kanbanActionRef} className="solid-custom-overlay">
+          <div className="flex flex-column">
+            <Button
+              type="button"
+              className="w-8rem text-left gap-1"
+              label="Edit"
+              size="small"
+              iconPos="left"
+              text
+              icon={"pi pi-pencil"}
+              onClick={() => router.push(`${editButtonUrl}/${data?.id}`)}
+            />
+            {!groupedView &&
+              <a
+                href={data?.relativeUri}
+                download={data?.originalFileName}
+                target="_blank"
+                rel="noopener noreferrer"
+              >
+                <Button
+                  type="button"
+                  className="w-8rem text-left gap-1"
+                  label="Download"
+                  size="small"
+                  iconPos="left"
+                  icon={"pi pi-download"}
+                />
+              </a>
+            }
+          </div>
+        </OverlayPanel>
+      </div>
+    )
+  }
 
   return (
     <Draggable draggableId={String(data.id)} index={index} isDragDisabled={!groupedView}>
@@ -191,8 +237,8 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
               router.push(`${editButtonUrl}/${data?.id}`)
             }}
           >
+            {renderKanbanAction(data, groupedView)}
             {renderFormDynamically(solidKanbanViewMetaData)}
-
             {/* {solidKanbanViewMetaData?.solidView?.layout?.layoutData &&
               Object.entries(solidKanbanViewMetaData?.solidView?.layout?.layoutData).map(([key, value]) => (
                 <p className="kanban-card-heading" key={key}>{data[value]}</p>
