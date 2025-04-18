@@ -10,6 +10,7 @@ import { Panel } from "primereact/panel";
 import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidBooleanFieldWidgetProps } from "@/types/solid-core";
+import { Layout } from "@/components/layout/Layout";
 
 export class SolidBooleanField implements ISolidField {
 
@@ -101,6 +102,7 @@ export class SolidBooleanField implements ISolidField {
         const widgetProps = {
             label: fieldLabel,
             value: formik.values[fieldLayoutInfo.attrs.name],
+            layout:fieldLayoutInfo
         }
         return (
             <>

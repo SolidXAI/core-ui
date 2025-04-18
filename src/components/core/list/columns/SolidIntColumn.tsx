@@ -5,6 +5,7 @@ import { FormEvent } from "primereact/ts-helpers";
 import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 import SolidTableRowCell from '../SolidTableRowCell';
+import { getExtensionComponent } from '@/helpers/registry';
 
 const SolidIntColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
@@ -56,14 +57,31 @@ const SolidIntColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidL
             // style={{ minWidth: "12rem" }}
             // headerClassName="table-header-fs"
             header={() => {
-                return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace:'nowrap', textOverflow:'ellipsis', overflow:'hidden'}}>{header}</div>)
+                return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{header}</div>)
             }}
-            body={(rowData) => (
-                <SolidTableRowCell
-                    value={rowData[fieldMetadata.name]}
-                    truncateAfter={truncateAfter}
-                />
-            )}
+            body={(rowData) => {
+                const data = rowData;
+                let widgetName = column?.attrs?.widget;
+                if (widgetName) {
+                    let DynamicWidget = getExtensionComponent(widgetName);
+                    const widgetProps = {
+                        value: data[fieldMetadata.name],
+                    }
+                    return (
+                        <>
+                            {DynamicWidget && <DynamicWidget {...widgetProps} />}
+                        </>
+                    )
+                } else {
+                    return (
+
+                        <SolidTableRowCell
+                            value={rowData[fieldMetadata.name]}
+                            truncateAfter={truncateAfter}
+                        />
+                    )
+                }
+            }}
         ></Column>
     );
 

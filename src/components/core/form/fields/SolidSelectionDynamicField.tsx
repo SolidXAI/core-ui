@@ -107,6 +107,7 @@ export class SolidSelectionDynamicField implements ISolidField {
         const widgetProps = {
             label: fieldLabel,
             value: formik.values[fieldLayoutInfo.attrs.name] && formik.values[fieldLayoutInfo.attrs.name].value,
+            layout:fieldLayoutInfo
         }
         return (
             <>
