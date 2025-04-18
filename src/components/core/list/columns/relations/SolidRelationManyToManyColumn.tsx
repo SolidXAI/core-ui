@@ -4,9 +4,30 @@ import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { FormEvent } from "primereact/ts-helpers";
 import { SolidListViewColumnParams } from '../../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../../SolidVarInputsFilterElement";
+import { Button } from 'primereact/button';
 import { getExtensionComponent } from '@/helpers/registry';
+import { Chip } from 'primereact/chip';
 
-const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
+
+const RenderLabel = ({ value, widget }: any) => {
+    let DynamicWidget = getExtensionComponent(widget);
+
+    const widgetProps = {
+        value: value
+    }
+
+
+    return (
+        widget ?
+            <>
+                {DynamicWidget && <DynamicWidget {...widgetProps} />}
+            </> :
+            <p>{value}</p>
+
+    )
+}
+
+const SolidRelationManyToManyColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
     const showFilterOperator = false;
     const filterMatchModeOptions = [
@@ -14,9 +35,6 @@ const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, co
         { label: 'Not In', value: FilterMatchMode.NOT_IN },
     ];
     const columnDataType = undefined;
-
-
-
     const filterTemplate = (options: ColumnFilterElementTemplateOptions) => {
 
         return (
@@ -33,26 +51,33 @@ const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, co
     };
 
     const bodyTemplate = (rowData: any) => {
-        const manyToOneFieldData = rowData[column.attrs.name];
+        const manyToManyFieldData = rowData[column.attrs.name];
 
         // This is the userkey that will be present within the rowData.
-        if (manyToOneFieldData) {
+        if (manyToManyFieldData) {
             // Since this is a many-to-one field, we fetch the user key field of the associated model.
             const userKeyField = fieldMetadata?.relationModel?.userKeyField?.name;
 
-            const manyToOneColVal = manyToOneFieldData[userKeyField];
-            let DynamicWidget = getExtensionComponent(column.attrs.widget);
-
-            const widgetProps = {
-                value: manyToOneColVal
-            }
+            const manyToManyColVal = manyToManyFieldData.map((f: any) => f[userKeyField]);
 
             // TODO: change this to use an anchor tag so that on click we open that entity form view. 
-            if (column.attrs.widget) {
-                return <>{DynamicWidget && <DynamicWidget {...widgetProps} />}</>
-            } else {
-                return <span>{manyToOneColVal}</span>;
-            }
+            return (
+
+                <>
+
+                    {manyToManyColVal.length > 0 &&
+                        <p>
+                            <RenderLabel value={manyToManyColVal[0]} widget={column.attrs.widget}> </RenderLabel>
+                            <Button text className="kaban-load-more" style={{ padding: 0, paddingBottom: "3px" }} size="small"
+                                onClick={() => { }}
+                                label={manyToManyColVal.length - 1 > 0 ? `...${manyToManyColVal.length - 1} more` : ""}
+                            />
+
+                        </p >
+                    }
+                </>
+
+            )
         }
         else {
             return <span></span>
@@ -81,4 +106,4 @@ const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, co
 
 };
 
-export default SolidRelationManyToOneColumn;
+export default SolidRelationManyToManyColumn;

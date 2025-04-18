@@ -197,7 +197,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       }
 
       // Form the "toPopulate" array. 
-      if (fieldMetadata.type === 'relation' && fieldMetadata.relationType === 'many-to-one') {
+      if (fieldMetadata.type === 'relation') {
         toPopulate.push(fieldMetadata.name);
       }
       if (fieldMetadata.type === 'mediaSingle' || fieldMetadata.type === 'mediaMultiple') {

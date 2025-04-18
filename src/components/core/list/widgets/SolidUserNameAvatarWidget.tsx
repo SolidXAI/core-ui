@@ -29,8 +29,8 @@ export const SolidUserNameAvatarWidget = ({ value }: any) => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <div
                     style={{
-                        width: 25,
-                        height: 25,
+                        width: 20,
+                        height: 20,
                         borderRadius: '50%',
                         backgroundColor: bgColor,
                         color: 'white',
@@ -38,7 +38,7 @@ export const SolidUserNameAvatarWidget = ({ value }: any) => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontWeight: 600,
-                        fontSize: 25 * 0.4,
+                        fontSize: 12,
                         boxShadow: '0 0 0 2px rgba(0,0,0,0.1)',
                     }}
                 >

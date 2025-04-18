@@ -152,7 +152,9 @@ export class SolidRelationOneToManyField implements ISolidField {
             label: fieldLabel,
             value: (this.fieldContext.data?.[fieldLayoutInfo.attrs.name] || []).map(
                 (item: any) => ({ label: item[userKeyFieldName] ?? '' })
-            )
+            ),
+            layout: fieldLayoutInfo
+
         }
 
 

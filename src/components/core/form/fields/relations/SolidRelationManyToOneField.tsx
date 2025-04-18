@@ -145,6 +145,7 @@ export class SolidRelationManyToOneField implements ISolidField {
         const widgetProps = {
             label: fieldLabel,
             value: formik.values[fieldLayoutInfo.attrs.name],
+            layout: fieldLayoutInfo
         }
         return (
             <>
