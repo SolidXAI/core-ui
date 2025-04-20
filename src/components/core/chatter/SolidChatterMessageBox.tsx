@@ -22,7 +22,7 @@ export const SolidChatterMessageBox = (props: Props) => {
         <div className={styles.solidChatterMessageBox}>
             <div className='flex align-items-center'>
                 <div style={{ width: 32 }}>
-                    <Avatar label={user[0].toUpperCase()} style={avatarStyle} shape="circle" />
+                    <Avatar label={user.toUpperCase()} style={avatarStyle} shape="circle" />
                 </div>
                 <div className='flex align-items-center justify-content-between' style={{ width: '100%' }}>
                     <div className='text-sm'>
@@ -42,7 +42,7 @@ export const SolidChatterMessageBox = (props: Props) => {
                         {time}
                     </p>
                     <div className={styles.solidMessageWrapper}>
-                        {auditRecord?.length > 0 ? (
+                        {auditType === "audit" ? (
                             <div className='flex flex-column gap-2'>
                                 {auditRecord.map((item: any, index: number) => (
                                     <div key={index} className='flex gap-2'>

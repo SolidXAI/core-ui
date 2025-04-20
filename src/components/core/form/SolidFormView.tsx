@@ -1306,7 +1306,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     onClick={() => setShowChatter(true)}
                                 />
                             </div>
-                            : <SolidChatter />
+                            : <SolidChatter solidFormViewMetaData={solidFormViewMetaData} />
                         }
                     </div>
                 }

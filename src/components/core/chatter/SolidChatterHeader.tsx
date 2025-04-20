@@ -5,10 +5,12 @@ import styles from './chatter.module.css'
 interface Props {
     activeTab: any,
     handleTabClick: any,
-    visibleBox: any
+    visibleBox: any,
+    solidFormViewMetaData: any,
+    refetch: any
 }
 export const SolidChatterHeader = (props: Props) => {
-    const { activeTab, visibleBox, handleTabClick } = props;
+    const { activeTab, visibleBox, handleTabClick, solidFormViewMetaData, refetch } = props;
     return (
         <div className={styles.chatterTitle}>
             <div className='flex justify-content-between align-items-center'>
@@ -57,7 +59,7 @@ export const SolidChatterHeader = (props: Props) => {
                     }
 
                     {visibleBox === "log" &&
-                        <SolidMessageComposer />
+                        <SolidMessageComposer refetch={refetch} solidFormViewMetaData={solidFormViewMetaData} />
                     }
                 </div>
             }
