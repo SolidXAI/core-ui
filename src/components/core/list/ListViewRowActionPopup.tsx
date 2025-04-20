@@ -1,6 +1,6 @@
 'use client';
 import { Button } from "primereact/button"
-import { LoadDynamicJsxComponent } from "../common/LoadDynamicJsxComponent";
+import { getExtensionComponent } from "@/helpers/registry";
 
 
 export const ListViewRowActionPopup = ({ context }: any) => {
@@ -13,11 +13,18 @@ export const ListViewRowActionPopup = ({ context }: any) => {
 
     }
 
+    let DynamicWidget = getExtensionComponent(context?.rowAction?.action?.customComponent);
+    const widgetProps = {
+        context: context
+    }
+
     return (
         <div>
             {
                 context?.rowAction?.action?.customComponent ?
-                    <LoadDynamicJsxComponent context={context}></LoadDynamicJsxComponent>
+                    DynamicWidget && <DynamicWidget {...widgetProps} />
+
+                    // <LoadDynamicJsxComponent context={context}></LoadDynamicJsxComponent>
                     :
                     <>
                         <h1>{context?.modelName}</h1>
