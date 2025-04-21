@@ -7,7 +7,7 @@ import { OverlayPanel } from 'primereact/overlaypanel';
 import { RadioButton } from 'primereact/radiobutton';
 import React, { useEffect, useRef, useState } from 'react'
 
-export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllowed, setLayoutDialogVisible, viewModes }: any) => {
+export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllowed, setLayoutDialogVisible, viewModes, setShowSaveFilterPopup }: any) => {
     const op = useRef(null);
     const customizeLayout = useRef<OverlayPanel | null>(null);
     const pathname = usePathname();
@@ -98,6 +98,7 @@ export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllow
                     >
                         <i className="pi pi-chevron-right text-sm"></i>
                     </Button>
+                    <Button text icon='pi pi-save' label="Save Custom Filter" size="small" severity="secondary" className="text-left gap-2 text-base" onClick={() => setShowSaveFilterPopup(true)} />
                     <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}
                         onShow={() => setIsOverlayOpen(true)}
                         onHide={() => {
