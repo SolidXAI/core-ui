@@ -2938,6 +2938,11 @@ li.header-li-px {
   max-width: calc(20% - 20px);
 }
 
+.solid-kanban-action {
+  position: absolute;
+  right: 5px;
+}
+
 .solid-kanban-card {
   box-shadow: none;
   border-radius: 0.5rem;
