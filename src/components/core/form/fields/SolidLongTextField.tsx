@@ -66,12 +66,12 @@ export class SolidLongTextField implements ISolidField {
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         return (
             <>
-                {(!fieldLayoutInfo.attrs.renderMode || fieldLayoutInfo.attrs.renderMode === 'longText') &&
+                {(!fieldLayoutInfo.attrs.widget || fieldLayoutInfo.attrs.widget === 'longText') &&
                     <div className={className}>
                         {this.renderLongText(formik)}
                     </div>
                 }
-                {fieldLayoutInfo.attrs.renderMode === 'richText' &&
+                {fieldLayoutInfo.attrs.widget === 'richText' &&
                     <div className={className}>
                         {this.renderRichText(formik)}
                     </div>

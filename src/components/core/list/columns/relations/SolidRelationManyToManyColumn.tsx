@@ -62,9 +62,7 @@ const SolidRelationManyToManyColumn = ({ solidListViewMetaData, fieldMetadata, c
 
             // TODO: change this to use an anchor tag so that on click we open that entity form view. 
             return (
-
                 <>
-
                     {manyToManyColVal.length > 0 &&
                         <p>
                             <RenderLabel value={manyToManyColVal[0]} widget={column.attrs.widget}> </RenderLabel>
@@ -76,7 +74,6 @@ const SolidRelationManyToManyColumn = ({ solidListViewMetaData, fieldMetadata, c
                         </p >
                     }
                 </>
-
             )
         }
         else {

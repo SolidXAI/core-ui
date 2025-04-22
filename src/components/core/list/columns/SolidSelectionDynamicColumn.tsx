@@ -5,6 +5,7 @@ import { FormEvent } from "primereact/ts-helpers";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 import SolidTableRowCell from '../SolidTableRowCell';
+import { getExtensionComponent } from '@/helpers/registry';
 
 const SolidSelectionDynamicColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
@@ -49,14 +50,28 @@ const SolidSelectionDynamicColumn = ({ solidListViewMetaData, fieldMetadata, col
             // style={{ minWidth: "12rem" }}
             // headerClassName="table-header-fs"
             header={() => {
-                return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace:'nowrap', textOverflow:'ellipsis', overflow:'hidden'}}>{header}</div>)
+                return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{header}</div>)
             }}
-            body={(rowData) => (
-                <SolidTableRowCell
-                    value={rowData[fieldMetadata.name]}
-                    truncateAfter={truncateAfter}
-                />
-            )}
+            body={(rowData) => {
+                const data = rowData;
+                let widgetName = "SolidTextRenderModeWidget";
+
+                if (column?.attrs?.widget) {
+                    widgetName = column?.attrs?.widget;
+                }
+                let DynamicWidget = getExtensionComponent(widgetName);
+                const widgetProps = {
+                    value: data[fieldMetadata.name],
+                    truncateAfter: truncateAfter
+                }
+                return (
+                    <>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
+                    </>
+                )
+            }
+
+            }
         ></Column>
     );
 

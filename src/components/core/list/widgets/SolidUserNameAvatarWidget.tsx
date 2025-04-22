@@ -3,13 +3,19 @@ export const SolidUserNameAvatarWidget = ({ value }: any) => {
 
     // use "widget": "SolidUserNameAvatarWidget" in the list view field 
 
-    const getInitials = (fullName: string) => {
-        const names = fullName.trim().split(' ');
+    
+
+    const getInitials = (value: string) => {
+      if(value){
+        const names = value?.trim().split(' ');
         const initials =
             names.length === 1
                 ? names[0][0]
                 : names[0][0] + names[names.length - 1][0];
         return initials.toUpperCase();
+      } else{
+        return ""
+      }
     };
 
     const getColorFromInitials = (initials: string) => {

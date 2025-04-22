@@ -142,9 +142,10 @@ export class SolidRelationManyToOneField implements ISolidField {
 
         const viewMode: string = this.fieldContext.viewMode;
         let DynamicWidget = getExtensionComponent("SolidFormFieldRelationViewModeWidget");
+
         const widgetProps = {
             label: fieldLabel,
-            value: formik.values[fieldLayoutInfo.attrs.name],
+            value: formik.values[fieldLayoutInfo.attrs.name] ?? formik.values[fieldLayoutInfo.attrs.name],
             layout: fieldLayoutInfo
         }
         return (

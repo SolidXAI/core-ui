@@ -93,9 +93,9 @@ export class SolidBooleanField implements ISolidField {
         const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
         const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
-        let renderMode = fieldLayoutInfo.attrs.renderMode;
-        if (!renderMode) {
-            renderMode = 'field-selectbox';
+        let widget = fieldLayoutInfo.attrs.widget;
+        if (!widget) {
+            widget = 'field-selectbox';
         }
         const viewMode: string = this.fieldContext.viewMode;
         let DynamicWidget = getExtensionComponent("SolidFormFieldViewModeWidget");
@@ -111,8 +111,8 @@ export class SolidBooleanField implements ISolidField {
                 }
                 {viewMode === "edit" && (
                     <>
-                        {renderMode &&
-                            this.renderExtensionRenderMode(renderMode, formik)
+                        {widget &&
+                            this.renderExtensionRenderMode(widget, formik)
                         }
                         {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                             <div className="absolute mt-1">
@@ -129,8 +129,8 @@ export class SolidBooleanField implements ISolidField {
     }
 
 
-    renderExtensionRenderMode(widgetName: string, formik: FormikObject) {
-        let DynamicWidget = getExtensionComponent(widgetName);
+    renderExtensionRenderMode(widget: string, formik: FormikObject) {
+        let DynamicWidget = getExtensionComponent(widget);
         if (!DynamicWidget) {
             DynamicWidget = getExtensionComponent('field-selectbox');
         }

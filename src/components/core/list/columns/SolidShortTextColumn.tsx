@@ -61,14 +61,14 @@ const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column, se
                 return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{header}</div>)
             }}
             body={(rowData) => {
-                const renderMode = column.attrs.renderMode || "text";
+                const widget = column.attrs.widget || "text";
                 const data = rowData;
                 let widgetName = column?.attrs?.widget;
-                if (renderMode === "image") {
+                if (widget === "image") {
                     widgetName = "SolidShortTextFieldImageRenderModeWidget"
                 }
-                if (renderMode === "text") {
-                    widgetName = "SolidShortTextFieldTextRenderModeWidget"
+                if (widget === "text") {
+                    widgetName = "SolidTextRenderModeWidget"
                 };
                 if (column?.attrs?.widget) {
                     widgetName = column?.attrs?.widget;
@@ -77,7 +77,8 @@ const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column, se
                 const widgetProps = {
                     value: data[fieldMetadata.name],
                     setLightboxUrls: setLightboxUrls,
-                    setOpenLightbox: setOpenLightbox
+                    setOpenLightbox: setOpenLightbox,
+                    truncateAfter: truncateAfter
                 }
                 return (
                     <>

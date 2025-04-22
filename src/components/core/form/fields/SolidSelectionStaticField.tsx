@@ -87,9 +87,9 @@ export class SolidSelectionStaticField implements ISolidField {
         const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
         const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-        let renderMode = fieldLayoutInfo.attrs.renderMode;
-        if (!renderMode) {
-            renderMode = 'field-autocomplete';
+        let widget = fieldLayoutInfo.attrs.widget;
+        if (!widget) {
+            widget = 'field-autocomplete';
         }
         const viewMode: string = this.fieldContext.viewMode;
         let DynamicWidget = getExtensionComponent("SolidFormFieldViewModeWidget");
@@ -108,8 +108,8 @@ export class SolidSelectionStaticField implements ISolidField {
                 {viewMode === "edit" &&
                     (
                         <>
-                            {renderMode &&
-                                this.renderExtensionRenderMode(renderMode, formik)
+                            {widget &&
+                                this.renderExtensionRenderMode(widget, formik)
                             }
                             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                                 <div className="absolute mt-1">

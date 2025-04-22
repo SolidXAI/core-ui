@@ -91,9 +91,9 @@ export class SolidRelationManyToManyField implements ISolidField {
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
 
-        let renderMode = fieldLayoutInfo.attrs.renderMode;
-        if (!renderMode) {
-            renderMode = 'autocomplete';
+        let widget = fieldLayoutInfo.attrs.widget;
+        if (!widget) {
+            widget = 'autocomplete';
         }
 
         const viewMode: string = this.fieldContext.viewMode;
@@ -115,8 +115,8 @@ export class SolidRelationManyToManyField implements ISolidField {
                 {viewMode === "edit" &&
                     (
                         <>
-                            {renderMode &&
-                                this.renderExtensionRenderMode(renderMode, formik, visibleCreateRelationEntity, setVisibleCreateRelationEntity)
+                            {widget &&
+                                this.renderExtensionRenderMode(widget, formik, visibleCreateRelationEntity, setVisibleCreateRelationEntity)
                             }
                             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                                 <div className="absolute mt-1">

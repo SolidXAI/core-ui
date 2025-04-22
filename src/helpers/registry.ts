@@ -9,7 +9,6 @@ import { SolidBooleanFieldCheckboxWidget } from "@/components/core/form/fields/w
 import { SolidBooleanFieldSelectWidget } from "@/components/core/form/fields/widgets/SolidBooleanSelectFieldWidget";
 import { SolidSelectionStaticAutocompleteWidget } from "@/components/core/form/fields/widgets/SolidSelectionStaticAutocompleteFieldWidget";
 import { SolidSelectionStaticRadioWidget } from "@/components/core/form/fields/widgets/SolidSelectionStaticRadioFieldWidget";
-import { SolidShortTextFieldTextRenderModeWidget } from "@/components/core/list/widgets/SolidShortTextFieldTextRenderModeWidget";
 import { SolidShortTextFieldImageRenderModeWidget } from "@/components/core/list/widgets/SolidShortTextFieldImageRenderModeWidget";
 import { SolidFormFieldViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldViewModeWidget";
 import { SolidFormFieldJsonViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldJsonViewModeWidget";
@@ -22,6 +21,7 @@ import { SolidFormFieldViewMediaMultipleWidget } from "@/components/core/form/fi
 import { SolidUserNameAvatarWidget } from "@/components/core/list/widgets/SolidUserNameAvatarWidget";
 import GenerateModelCodeRowAction from "@/components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction";
 import GenerateModuleCodeRowAction from "@/components/core/extension/solid-core/moduleMetadata/list/GenerateModuleCodeRowAction";
+import { SolidTextRenderModeWidget } from "@/components/core/list/widgets/SolidTextRenderModeWidget";
 
 type ExtensionRegistry = {
     components: Record<string, React.ComponentType<any>>;
@@ -93,7 +93,7 @@ registerExtensionComponent("SolidBooleanFieldCheckboxWidget", SolidBooleanFieldC
 registerExtensionComponent("SolidBooleanFieldSelectWidget", SolidBooleanFieldSelectWidget, ["field-selectbox"]);
 registerExtensionComponent("SolidSelectionStaticAutocompleteWidget", SolidSelectionStaticAutocompleteWidget, ["field-autocomplete"]);
 registerExtensionComponent("SolidSelectionStaticRadioWidget", SolidSelectionStaticRadioWidget, ["field-radio"]);
-registerExtensionComponent("SolidShortTextFieldTextRenderModeWidget", SolidShortTextFieldTextRenderModeWidget, []);
+registerExtensionComponent("SolidTextRenderModeWidget", SolidTextRenderModeWidget, []);
 registerExtensionComponent("SolidShortTextFieldImageRenderModeWidget", SolidShortTextFieldImageRenderModeWidget, []);
 registerExtensionComponent("SolidFormFieldViewModeWidget", SolidFormFieldViewModeWidget, []);
 registerExtensionComponent("SolidFormFieldJsonViewModeWidget", SolidFormFieldJsonViewModeWidget, []);

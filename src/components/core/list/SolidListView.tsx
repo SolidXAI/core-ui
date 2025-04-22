@@ -863,17 +863,17 @@ export const SolidListView = (params: SolidListViewParams) => {
                         />
                       }
                       {solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons &&
-                        solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons.map((rowAction: any) => {
+                        solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons.map((rowButton: any) => {
                           return (
                             <Button
                               text
                               size="small"
-                              icon={rowAction?.attrs?.className ? rowAction?.attrs?.className : "pi pi-pencil"}
+                              icon={rowButton?.attrs?.className ? rowButton?.attrs?.className : "pi pi-pencil"}
                               onClick={() => {
                                 setListRowActionData({
                                   modelName: params.modelName,
                                   moduleName: params.moduleName,
-                                  rowAction: rowAction,
+                                  rowAction: rowButton,
                                   rowData: selectedSolidViewData,
                                   closeListViewRowActionPopup: closeListViewRowActionPopup
 
@@ -882,7 +882,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                               }
                               }
                               className="w-full text-left gap-2"
-                              label="Generate Code"
+                              label={rowButton?.attrs?.label}
                             />
                           );
                         })}

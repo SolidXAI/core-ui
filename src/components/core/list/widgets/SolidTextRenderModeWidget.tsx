@@ -1,6 +1,6 @@
 import SolidTableRowCell from "../SolidTableRowCell";
 
-export const SolidShortTextFieldTextRenderModeWidget = ({ value, truncateAfter }: any) => {
+export const SolidTextRenderModeWidget = ({ value, truncateAfter }: any) => {
     return (
         <SolidTableRowCell
             value={value}
