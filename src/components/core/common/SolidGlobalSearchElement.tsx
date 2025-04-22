@@ -203,7 +203,7 @@ export const mergeSearchAndCustomFilters = (transformedFilter: any, newFilter: a
 const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, openSavedCustomFilter, setSavedFilterTobeDeleted, setIsDeleteSQDialogVisible }: any) => {
     return (
         <div className="flex align-items-center justify-content-between gap-2">
-            <Button text size="small" className="text-base py-1 w-full" severity={Number(activeSavedFilter) == savedfilter.id ? "secondary" : "contrast" } onClick={() => applySavedFilter(savedfilter)}>{savedfilter.name}</Button>
+            <Button text size="small" className="text-base py-1 w-full" severity={Number(activeSavedFilter) == savedfilter.id ? "secondary" : "contrast"} onClick={() => applySavedFilter(savedfilter)}>{savedfilter.name}</Button>
             <div className="flex align-items-center gap-2">
                 <Button
                     icon="pi pi-pencil"
@@ -228,7 +228,7 @@ const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, ope
     )
 }
 
-export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCustomFilter, filters, clearFilter }: any, ref) => {
+export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCustomFilter, filters, clearFilter, showSaveFilterPopup, setShowSaveFilterPopup }: any, ref) => {
     const defaultState: FilterRule[] = [
         {
             id: 1,
@@ -276,7 +276,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     const [searchFilter, setSearchFilter] = useState<any | null>(null);
     const [customFilter, setCustomFilter] = useState<any | null>(null);
     const [hasSearched, setHasSearched] = useState<boolean>(false);
-    const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
     const [currentSavedFilterData, setCurrentSavedFilterData] = useState<any>();
     const [savedFilterTobeDeleted, setSavedFilterTobeDeleted] = useState<any>();
     const [isDeleteSQDialogVisible, setIsDeleteSQDialogVisible] = useState<boolean>(false);
@@ -316,7 +315,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     useEffect(() => {
 
         const filters = {
-            $or:[
+            $or: [
                 {
                     $and: [
                         { model: { $in: [viewData?.data?.solidView?.model?.id] } },
@@ -333,7 +332,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 }
 
             ]
-            
+
         }
 
         const queryData: any = {
@@ -690,7 +689,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                             <React.Fragment>
                                 <span key={index} className="custom-chip-value">{value}
                                 </span>
-                                {values.length > 1 &&
+                                {index < values.length - 1 &&
                                     <span className="custom-chip-or">or</span>
                                 }
                             </React.Fragment>
@@ -809,7 +808,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                         }
                     </div>
                 </Dialog>
-                <Dialog header="Add Custom Filter" visible={showSaveFilterPopup} style={{ width: 500 }} onHide={() => { if (!showSaveFilterPopup) return; setShowSaveFilterPopup(false); }}>
+                <Dialog header="Save Custom Filter" visible={showSaveFilterPopup} style={{ width: 500 }} onHide={() => { if (!showSaveFilterPopup) return; setShowSaveFilterPopup(false); }}>
                     <SolidSaveCustomFilterForm currentSavedFilterData={currentSavedFilterData} handleSaveFilter={handleSaveFilter} closeDialog={setShowSaveFilterPopup}></SolidSaveCustomFilterForm>
                 </Dialog>
 
@@ -828,7 +827,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     <p>Are you sure you want to delete the {currentSavedFilterData?.name} saved query?</p>
                 </Dialog>
             </div>
-            <div>
+            {/* <div>
                 <Button
                     icon="pi pi-save"
                     style={{ fontSize: 10 }}
@@ -838,7 +837,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                         setShowSaveFilterPopup(true)
                     }}
                 />
-            </div>
+            </div> */}
         </>
     )
 });

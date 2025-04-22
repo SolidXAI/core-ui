@@ -11,7 +11,7 @@ import { RadioButton } from "primereact/radiobutton";
 import { useEffect, useRef, useState } from "react";
 import { SolidListColumnSelector } from "./SolidListColumnSelector";
 
-export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, params, actionsAllowed, selectedRecords, setDialogVisible }: any) => {
+export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, params, actionsAllowed, selectedRecords, setDialogVisible, setShowSaveFilterPopup }: any) => {
     // const [visible, setVisible] = useState<boolean>(false);
     const op = useRef(null);
     const customizeLayout = useRef<OverlayPanel | null>(null);
@@ -120,6 +120,7 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
                     >
                         <i className="pi pi-chevron-right text-sm"></i>
                     </Button>
+                    <Button text icon='pi pi-save' label="Save Custom Filter" size="small" severity="secondary" className="text-left gap-2 text-base" onClick={() => setShowSaveFilterPopup(true)} />
                     {/* <p className="mt-3 mb-1 font-medium" style={{ color: 'var(--gray-400)' }}>Saved Layouts</p> */}
                     {/* <Button text severity="secondary" label="Diet Tracking" icon="pi pi-plus" size="small" /> */}
                     <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}

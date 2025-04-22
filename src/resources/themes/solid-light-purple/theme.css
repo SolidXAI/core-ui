@@ -6205,6 +6205,10 @@
     background-color: #EFF1F4;
   }
 
+  .solid-kanban-board-wrapper {
+    border-top: 1px solid var(--primary-light-color);
+  }
+
   .solid-kanban-card,
   .solid-media-card {
     border: 1px solid var(--solid-kanban-wrapper);

@@ -236,7 +236,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [columnsCount, setColumnsCount] = useState(5);
   const [swimLaneCurrentPageNumber, setSwimLaneCurrentPageNumber] = useState(1);
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
-
+  const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
 
 
   const showToast = (severity: "success" | "error", summary: string, detail: string) => {
@@ -722,7 +722,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           <p className="m-0 view-title">{kanbanViewTitle}</p>
           {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
             // <SolidGlobalSearchElement viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} ></SolidGlobalSearchElement>
-            <SolidGlobalSearchElement ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
+            <SolidGlobalSearchElement showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
 
           }
         </div>
@@ -754,6 +754,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             actionsAllowed={actionsAllowed}
             viewModes={viewModes}
             setLayoutDialogVisible={setLayoutDialogVisible}
+            setShowSaveFilterPopup={setShowSaveFilterPopup}
           />
           {/* <SolidConfigureLayoutElement></SolidConfigureLayoutElement> */}
         </div>

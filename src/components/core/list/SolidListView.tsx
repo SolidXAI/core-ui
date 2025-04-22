@@ -267,6 +267,8 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [showArchived, setShowArchived] = useState(false);
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
   const [customFilter, setCustomFilter] = useState(null);
+  const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
+
   const sizeOptions = [
     { label: 'Compact', value: 'small', image: CompactImage },
     { label: 'Cozy', value: 'normal', image: CozyImage },
@@ -713,7 +715,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         <div className="flex gap-3 align-items-center">
           <p className="m-0 view-title">{solidListViewMetaData?.data?.solidView?.displayName}</p>
           {solidListViewMetaData?.data?.solidView?.layout?.attrs?.enableGlobalSearch === true && params.embeded === false &&
-            <SolidGlobalSearchElement filters={filters} clearFilter={clearFilter} ref={solidGlobalSearchElementRef} viewData={solidListViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}></SolidGlobalSearchElement>
+            <SolidGlobalSearchElement showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} filters={filters} clearFilter={clearFilter} ref={solidGlobalSearchElementRef} viewData={solidListViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}></SolidGlobalSearchElement>
           }
         </div>
         <div className="flex align-items-center gap-3">
@@ -758,6 +760,7 @@ export const SolidListView = (params: SolidListViewParams) => {
               actionsAllowed={actionsAllowed}
               selectedRecords={selectedRecords}
               setDialogVisible={setDialogVisible}
+              setShowSaveFilterPopup={setShowSaveFilterPopup}
             />
           }
 
