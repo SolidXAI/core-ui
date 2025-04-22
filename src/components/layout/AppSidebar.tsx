@@ -188,7 +188,7 @@ const AppSidebar = () => {
                 <div className={`sidebar-right ${visibleNavbar ? "open" : ""}`}>
 
                     <div className="flex relative justify-content-between align-items-center py-4 px-3">
-                        <div className="text-base font-semibold">{currentMainMenu && currentMainMenu}</div>
+                        <div className="text-base sidebar-title font-semibold">{currentMainMenu && currentMainMenu}</div>
                         {/* <button
                             className="sidebar-toggle-button"
                             onClick={handleToggle}
@@ -213,7 +213,7 @@ const AppSidebar = () => {
                             />
                         </div>
                     </div> */}
-                    <div className="px-3">
+                    <div className="px-3 solid-sidebar-menuitems-wrapper">
                         <NavbarTwoMenu menuItems={currentMenu}></NavbarTwoMenu>
                     </div>
                 </div>
