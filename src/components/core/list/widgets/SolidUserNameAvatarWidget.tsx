@@ -39,7 +39,6 @@ export const SolidUserNameAvatarWidget = ({ value }: any) => {
                         justifyContent: 'center',
                         fontWeight: 600,
                         fontSize: 25 * 0.4,
-                        boxShadow: '0 0 0 2px rgba(0,0,0,0.1)',
                     }}
                 >
                     {initials}

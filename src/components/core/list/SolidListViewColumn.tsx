@@ -100,6 +100,9 @@ export const SolidListViewColumn = ({ solidListViewMetaData, fieldMetadata, colu
     if (fieldMetadata.type === 'richText') {
         return SolidRichTextColumn({ solidListViewMetaData, fieldMetadata, column });
     }
+    if (fieldMetadata.type === 'email') {
+        return SolidShortTextColumn({ solidListViewMetaData, fieldMetadata, column });
+    }
     if (fieldMetadata.type === 'boolean') {
         return SolidBooleanColumn({ solidListViewMetaData, fieldMetadata, column });
     }
