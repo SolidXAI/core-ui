@@ -36,8 +36,10 @@ export const SolidBreadcrumb = (props: Props) => {
 
   useEffect(() => {
     if (segments.length === 6 && segments[4] === "form" && userKeyFieldValue && !queryUserKeyField) {
-      const newUrl = `${pathname}?userKeyField=${encodeURIComponent(userKeyFieldValue)}`;
-      router.replace(newUrl, { scroll: false });
+      const params = new URLSearchParams(searchParams.toString());
+      params.set("userKeyField", userKeyFieldValue);
+      const newUrl = `${pathname}?${params.toString()}`;
+      router.push(newUrl, { scroll: false });
     }
   }, [pathname, userKeyFieldValue, queryUserKeyField, router]);
 
@@ -81,7 +83,7 @@ export const SolidBreadcrumb = (props: Props) => {
 
     if (segments.length === 6 && segments[4] === "form") {
       breadcrumbItems.push({
-        label: queryUserKeyField || segments[5],
+        label: queryUserKeyField ? decodeURIComponent(queryUserKeyField) : segments[5],
       });
     }
   }

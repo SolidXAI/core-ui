@@ -838,7 +838,7 @@ export const SolidListView = (params: SolidListViewParams) => {
               if (typeof window !== "undefined") {
                 sessionStorage.setItem("fromView", "list");
               }
-              router.push(`${editButtonUrl}/${rowData?.id}`);
+              router.push(`${editButtonUrl}/${rowData?.id}?viewMode=view`);
             }
           }}
         >
@@ -868,7 +868,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                           if (params.embeded == true) {
                             params.handlePopUpOpen(selectedSolidViewData?.id);
                           } else {
-                            router.push(`${editButtonUrl}/${selectedSolidViewData?.id}`)
+                            router.push(`${editButtonUrl}/${selectedSolidViewData?.id}?viewMode=edit`)
                           }
                         }}
                       />
