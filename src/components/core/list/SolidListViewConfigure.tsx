@@ -18,7 +18,6 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
     const pathname = usePathname();
     const router = useRouter();
     const [view, setView] = useState<string>("");
-
     const handleViewChange = (newView: string) => {
         if (view === newView) return; // Prevent unnecessary updates
         const pathSegments = pathname.split('/').filter(Boolean);
@@ -84,11 +83,11 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
                                 onClick={() => setDialogVisible(true)}
                             />}
                         <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2 text-base" />
-                        <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base" />
+                        <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base"/>
                         {/* <Button text icon='pi pi-share-alt' label="Share" size="small" severity="secondary" className="text-left gap-2" /> */}
                         {/* {viewData?.data?.solidView?.model?.enableSoftDelete &&
                         <Button text severity="secondary" size="small" className="text-left w-13rem" label={showArchived ? "Hide Archived Records" : "Show Archived Records"} iconPos="left" onClick={() => { setShowArchived(!showArchived); }} />
-                    } */}
+                        } */}
                         {viewData?.data?.solidView?.model?.enableSoftDelete && (
                             <div className="flex align-items-center px-3 gap-2 mt-2 mb-1">
                                 <Checkbox
@@ -126,7 +125,6 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
                     <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}
                         onShow={() => setIsOverlayOpen(true)}
                         onHide={() => {
-                            console.log("Overlay closed");
                             setTimeout(() => setIsOverlayOpen(false), 50); // ✅ Ensure state updates
                         }}
                     >

@@ -5,8 +5,6 @@ import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { Button } from 'primereact/button';
 
 const SolidMediaMultipleColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidListViewColumnParams) => {
-    console.log("rendered");
-
     // const filterable = column.attrs.filterable;
     const filterable = false;
     const showFilterOperator = false;

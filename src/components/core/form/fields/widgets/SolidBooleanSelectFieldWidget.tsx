@@ -48,7 +48,7 @@ export const SolidBooleanFieldSelectWidget = ({ formik, fieldContext }: SolidBoo
                         disabled={formDisabled || fieldDisabled}
                         id={fieldLayoutInfo.attrs.name}
                         aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                        onChange={(e) => {formik.setFieldValue(fieldLayoutInfo.attrs.name, e.value); console.log("value is",e.value)}} // Custom handling for boolean input
+                        onChange={(e) => {formik.setFieldValue(fieldLayoutInfo.attrs.name, e.value)}} // Custom handling for boolean input
                         value={formik.values[fieldLayoutInfo.attrs.name] ? formik.values[fieldLayoutInfo.attrs.name].toString() : "false"}
                         options={booleanOptions}
                         className={classNames("", {

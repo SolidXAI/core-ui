@@ -17,21 +17,14 @@ export const SolidBooleanFieldCheckboxWidget = ({ formik, fieldContext }: SolidB
     // Set default value to false on mount
     useEffect(() => {
         if (formik.values[fieldLayoutInfo.attrs.name] === undefined) {
-            console.log("Setting default value:", false);
             formik.setFieldValue(fieldLayoutInfo.attrs.name, false);
         }
     }, []);
 
     const handleChange = (e: CheckboxChangeEvent) => {
-        const newValue = e.checked; // This returns `true` or `false`
-        console.log(`${fieldLayoutInfo.attrs.name}, new value:`, newValue);
-        
+        const newValue = e.checked; // This returns `true` or `false`       
         formik.setFieldValue(fieldLayoutInfo.attrs.name, newValue === true ? 'true' : 'false');
         formik.setTouched({ ...formik.touched, [fieldLayoutInfo.attrs.name]: true }); // Ensure Formik registers the change
-        // ✅ Check if Formik updated the value correctly
-    setTimeout(() => {
-        console.log("Formik values after update:", formik.values);
-    }, 0);
     };
 
     const isFormFieldValid = (formik:any, fieldName:any) => 

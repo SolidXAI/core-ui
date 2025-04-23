@@ -22,7 +22,7 @@ import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { pascalCase } from "change-case";
 import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
-import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
+import { createPermission, deleteManyPermission, deletePermission, updatePermission } from "@/helpers/permissions";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@/components/core/common/FilterComponent";
@@ -57,7 +57,6 @@ export const queryStringToQueryObject = () => {
     try {
       const decodedQueryString = atob(encodedQueryString); // Base64 decode the string
       const parsedParams = qs.parse(decodedQueryString); // Parse the decoded string into an object
-      console.log("Parsed Params from Local Storage:", parsedParams);
       return parsedParams;
     } catch (error) {
       console.error("Error decoding or parsing query string from local storage:", error);
@@ -71,8 +70,6 @@ export const queryObjectToQueryString = (queryObject: string) => {
     const encodedQueryString = btoa(stringifiedObject); // Base64 encode the stringified object
     const currentPageUrl = window.location.href; // Get the current page URL
     localStorage.setItem(currentPageUrl, encodedQueryString); // Store in local storage with the URL as the key
-    console.log("Encoded and stored queryObject in localStorage:", encodedQueryString);
-
     return encodedQueryString;
   }
   return null;
@@ -112,7 +109,8 @@ export const SolidListView = (params: SolidListViewParams) => {
         const permissionNames = [
           createPermission(params.modelName),
           deletePermission(params.modelName),
-          updatePermission(params.modelName)
+          updatePermission(params.modelName),
+          deleteManyPermission(params.modelName)
         ]
         const queryData = {
           permissionNames: permissionNames
@@ -160,7 +158,6 @@ export const SolidListView = (params: SolidListViewParams) => {
   } = useGetSolidViewLayoutQuery(listViewMetaDataQs);
 
   const initialFilterMethod = () => {
-
     const solidView = solidListViewMetaData?.data?.solidView;
     const solidFieldsMetadata = solidListViewMetaData?.data?.solidFieldsMetadata;
 
