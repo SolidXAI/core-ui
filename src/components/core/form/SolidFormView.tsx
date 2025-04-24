@@ -456,13 +456,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
         data: solidFormViewMetaData,
         isLoading: solidFormViewMetaDataIsLoading
     } = useGetSolidViewLayoutQuery(formViewMetaDataQs);
-
+    const [refreshChatterMessage, setRefreshChatterMessage] = useState<boolean>(true);
     useEffect(() => {
         if (
             isEntityCreateSuccess == true ||
             isEntityUpdateSuceess == true ||
             isEntityDeleteSuceess == true
         ) {
+            setRefreshChatterMessage(true);
             // Close The pop in case the form is used in embeded form
             if (params.embeded == true) {
                 params.handlePopupClose()
@@ -1303,10 +1304,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     size="small"
                                     className="px-0"
                                     style={{ width: 30 }}
-                                    onClick={() => setShowChatter(true)}
+                                    onClick={() => {setShowChatter(true); setRefreshChatterMessage(true);}}
                                 />
                             </div>
-                            : <SolidChatter solidFormViewMetaData={solidFormViewMetaData} />
+                            : <SolidChatter solidFormViewMetaData={solidFormViewMetaData} id={params.id} refreshChatterMessage={refreshChatterMessage} setRefreshChatterMessage={setRefreshChatterMessage} />
                         }
                     </div>
                 }

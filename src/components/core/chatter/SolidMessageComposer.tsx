@@ -3,13 +3,16 @@ import { InputText } from 'primereact/inputtext'
 import styles from './chatter.module.css'
 import { Button } from 'primereact/button'
 import { useCreateChatterMessageMutation } from '@/redux/api/solidChatterMessageApi'
-import { useEffect, useState } from 'react'
+import { useEffect, useState, useRef } from 'react'
 import { useGetSolidViewLayoutQuery } from '@/redux/api/solidViewApi'
 import { useSelector } from 'react-redux'
+import { FileUpload } from 'primereact/fileupload';
 
-export const SolidMessageComposer = ({ type, solidFormViewMetaData, refetch }: { type?: string, solidFormViewMetaData?: any, refetch?: any }) => {
+export const SolidMessageComposer = ({ type, solidFormViewMetaData, refetch, id }: { type?: string, solidFormViewMetaData?: any, refetch?: any, id?: any }) => {
     const [message, setMessage] = useState('');
+    const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const { user } = useSelector((state: any) => state.auth);
+    const fileInputRef = useRef<HTMLInputElement>(null);
 
     // const { data: viewLayoutData } = useGetSolidViewLayoutQuery(null);
     const [createChatterMessage, { isLoading, isSuccess, isError }] = useCreateChatterMessageMutation();
@@ -20,22 +23,33 @@ export const SolidMessageComposer = ({ type, solidFormViewMetaData, refetch }: {
         "example@mail.com"
     ]
 
+    const handleFileSelect = (event: React.ChangeEvent<HTMLInputElement>) => {
+        if (event.target.files) {
+            const files = Array.from(event.target.files);
+            setSelectedFiles(prev => [...prev, ...files]);
+        }
+    };
+
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
-        if (!message.trim()) return;
+        if (!message.trim() && selectedFiles.length === 0) return;
 
         try {
-            const payload = {
-                messageType: "custom",
-                messageSubType: "audit_insert",
-                messageBody: message,
-                coModelEntityId: solidFormViewMetaData?.data?.solidView?.model?.id,
-                coModelName: solidFormViewMetaData?.data?.solidView?.model?.singularName,
-                userId: user?.user?.id
-            };
-            console.log(payload, user.user.id);
-            await createChatterMessage(payload).unwrap();
+            const formData = new FormData();
+            formData.append('messageType', "custom");
+            formData.append('messageSubType', "audit_insert");
+            formData.append('messageBody', message);
+            formData.append('coModelEntityId', id);
+            formData.append('coModelName', solidFormViewMetaData?.data?.solidView?.model?.singularName);
+            formData.append('userId', user?.user?.id);
+
+            selectedFiles.forEach((file, index) => {
+                formData.append(`messageAttachments`, file);
+            });
+
+            await createChatterMessage(formData).unwrap();
             setMessage('');
+            setSelectedFiles([]);
         } catch (error) {
             console.error('Error creating message:', error);
         }
@@ -49,7 +63,7 @@ export const SolidMessageComposer = ({ type, solidFormViewMetaData, refetch }: {
 
     return (
         <form className={styles.chatterMessageComposer} onSubmit={handleSubmit}>
-            {type === 'email' &&
+            {/* {type === 'email' &&
                 <div className='flex align-items-center gap-1 text-sm mb-2'>
                     <span className='font-bold'>To:</span>
                     <div className={styles.chatterEmails}>
@@ -69,14 +83,44 @@ export const SolidMessageComposer = ({ type, solidFormViewMetaData, refetch }: {
                         </div>
                     </div>
                 </div>
-            }
-            <InputText
-                type="text"
-                value={message}
-                onChange={(e) => setMessage(e.target.value)}
-                placeholder={type === 'email' ? 'Send a message to followers' : 'Log an internal note...'}
-                className={`p-inputtext-sm w-full p-2 ${styles.chatterMessageInput}`}
-            />
+            } */}
+            <div className='flex align-items-center gap-2'>
+                <InputText
+                    type="text"
+                    value={message}
+                    onChange={(e) => setMessage(e.target.value)}
+                    placeholder={type === 'email' ? 'Send a message to followers' : 'Log an internal note...'}
+                    className={`p-inputtext-sm w-full p-2 ${styles.chatterMessageInput}`}
+                />
+                <input
+                    type="file"
+                    ref={fileInputRef}
+                    onChange={handleFileSelect}
+                    multiple
+                    style={{ display: 'none' }}
+                />
+                <Button
+                    icon="pi pi-plus"
+                    className="p-button-rounded p-button-text"
+                    onClick={() => fileInputRef.current?.click()}
+                    tooltip="Attach files"
+                    tooltipOptions={{ position: 'top' }}
+                />
+            </div>
+            {selectedFiles.length > 0 && (
+                <div className='flex flex-wrap gap-2 mt-2'>
+                    {selectedFiles.map((file, index) => (
+                        <div key={index} className='flex align-items-center gap-2 bg-gray-100 p-2 rounded'>
+                            <span className='text-sm'>{file.name}</span>
+                            <Button
+                                icon="pi pi-times"
+                                className="p-button-rounded p-button-text p-button-sm"
+                                onClick={() => setSelectedFiles(prev => prev.filter((_, i) => i !== index))}
+                            />
+                        </div>
+                    ))}
+                </div>
+            )}
             <div className='mt-3 flex align-items-center gap-2'>
                 <Button
                     label={type === 'email' ? 'Send' : 'Log'}
@@ -90,7 +134,10 @@ export const SolidMessageComposer = ({ type, solidFormViewMetaData, refetch }: {
                     type='button'
                     text
                     severity='contrast'
-                    onClick={() => setMessage('')}
+                    onClick={() => {
+                        setMessage('');
+                        setSelectedFiles([]);
+                    }}
                 />
             </div>
         </form>

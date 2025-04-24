@@ -3,101 +3,197 @@ import React, { useState, useEffect } from 'react'
 import { SolidChatterHeader } from './SolidChatterHeader'
 import { SolidChatterDateDivider } from './SolidChatterDateDivider'
 import { SolidChatterMessageBox } from './SolidChatterMessageBox'
-import { useLazyGetchatterMessageQuery } from '@/redux/api/solidChatterMessageApi'
+import { useLazyGetchatterMessageQuery, useLazyGetchatterMessageDetailQuery } from '@/redux/api/solidChatterMessageApi'
 import qs from "qs";
 
-export const SolidChatter = ({ solidFormViewMetaData }: { solidFormViewMetaData: any }) => {
+interface FilterState {
+    name: string;
+    startDate: Date | null;
+    endDate: Date | null;
+}
+
+export const SolidChatter = ({ solidFormViewMetaData, id, refreshChatterMessage, setRefreshChatterMessage }: { solidFormViewMetaData: any, id: string, refreshChatterMessage: boolean, setRefreshChatterMessage: (value: boolean) => void }) => {
     const [activeTab, setActiveTab] = useState<'email-message' | 'log' | null>('email-message');
     const [visibleBox, setVisibleBox] = useState<'email-message' | 'log' | null>(null);
     const [messages, setMessages] = useState<any[]>([]);
+    const [filters, setFilters] = useState<FilterState>({
+        name: '',
+        startDate: null,
+        endDate: null
+    });
 
-    const queryData = {
+    const queryDataChatterMessage = {
         filters: {
             messageType: {
                 $eqi: 'custom'
             },
+            coModelName: {
+                $eq: solidFormViewMetaData?.data?.solidView?.model?.singularName
+            },
             coModelEntityId: {
-                $eq: solidFormViewMetaData?.data?.solidView?.model?.id
+                $eq: id
             }
         }
     };
 
-    const queryString = qs.stringify(queryData, {
+    const queryStringChatterMessage = qs.stringify(queryDataChatterMessage, {
         encodeValuesOnly: true,
     });
 
-    const [getchatterMessage, { data: chatterMessageData, isLoading, isError, isSuccess }] = useLazyGetchatterMessageQuery();
-    useEffect(() => {   
+
+    const [getchatterMessage, { data: chatterMessageData, isLoading: isCustomLoading, isError: isCustomError }] = useLazyGetchatterMessageQuery();
+    const [getchatterMessageDetail, { data: auditMessageData, isLoading: isAuditLoading, isError: isAuditError }] = useLazyGetchatterMessageDetailQuery();
+
+    useEffect(() => {
+        if (refreshChatterMessage) {
+            fetchData();
+            setRefreshChatterMessage(false);
+        }
+    }, [refreshChatterMessage]);
+
+    useEffect(() => {
         fetchData();
-    }, []);
+    }, [filters]);
 
     const handleTabClick = (tab: 'email-message' | 'log') => {
         setActiveTab(tab);
         setVisibleBox(prev => (prev === tab ? null : tab));
     }
+
+    const formatDate = (dateString: string) => {
+        const date = new Date(dateString);
+        const today = new Date();
+        const yesterday = new Date(today);
+        yesterday.setDate(yesterday.getDate() - 1);
+
+        if (date.toDateString() === today.toDateString()) {
+            return 'Today';
+        } else if (date.toDateString() === yesterday.toDateString()) {
+            return 'Yesterday';
+        } else {
+            return date.toLocaleDateString('en-US', { 
+                year: 'numeric', 
+                month: 'long', 
+                day: 'numeric' 
+            });
+        }
+    };
+
+    const groupAuditMessages = (messages: any[]) => {
+        const groupedMessages: any[] = [];
+        const timeMap = new Map();
+
+        messages.forEach((msg) => {
+            if (msg.auditType === 'audit') {
+                const timeKey = msg.time;
+                if (timeMap.has(timeKey)) {
+                    const existingMsg = timeMap.get(timeKey);
+                    existingMsg.auditRecord.push(...msg.auditRecord);
+                } else {
+                    timeMap.set(timeKey, { ...msg });
+                    groupedMessages.push(timeMap.get(timeKey));
+                }
+            } else {
+                groupedMessages.push(msg);
+            }
+        });
+
+        return groupedMessages;
+    };
+
+    const filterMessages = (messages: any[]) => {
+        console.log("Current filters:", filters);
+        return messages.filter(msg => {
+            if (filters.name && !msg.user.toLowerCase().includes(filters.name.toLowerCase())) {
+                return false;
+            }
+
+            const messageDate = new Date(msg.createdAt);
+            if (filters.startDate) {
+                const startDate = new Date(filters.startDate);
+                startDate.setHours(0, 0, 0, 0);
+                if (messageDate < startDate) {
+                    return false;
+                }
+            }
+            if (filters.endDate) {
+                const endDate = new Date(filters.endDate);
+                endDate.setHours(23, 59, 59, 999);
+                if (messageDate > endDate) {
+                    return false;
+                }
+            }
+
+            return true;
+        });
+    };
+
     const fetchData = async () => {
-        const response = await getchatterMessage(queryString).unwrap();
-        console.log('response', response);
-        setMessages(response.data.records);
+        try {
+            const customResponse = await getchatterMessage(queryStringChatterMessage).unwrap();
+            const customMessages = customResponse.data.records.map((msg: any) => ({
+                id: msg.id,
+                user: msg.user?.fullName || "System",
+                auditType: "custom",
+                message: msg.messageBody,
+                time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                createdAt: msg.createdAt,
+                date: formatDate(msg.createdAt),
+                media: msg._media
+            }));
+
+            const auditResponse = await getchatterMessageDetail(`${solidFormViewMetaData?.data?.solidView?.model?.singularName}/${id}`).unwrap();
+            const auditMessages = auditResponse.data.map((msg: any) => ({
+                id: msg.id,
+                user: msg.chatterMessage.user?.fullName || "System",
+                auditType: "audit",
+                time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                auditRecord: [{
+                    field: msg.fieldName,
+                    previous: msg.oldValueDisplay || msg.oldValue || 'None',
+                    current: msg.newValueDisplay || msg.newValue
+                }],
+                createdAt: msg.createdAt,
+                date: formatDate(msg.createdAt)
+            }));
+
+            const allMessages = [...customMessages, ...auditMessages].sort((a, b) => 
+                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+            );
+
+            const groupedMessages = groupAuditMessages(allMessages);
+            const filteredMessages = filterMessages(groupedMessages);
+            setMessages(filteredMessages);
+        } catch (error) {
+            console.error('Error fetching messages:', error);
+        }
     }
-    const messageData = [
-        {
-            user: "Mary Smith",
-            auditType: "audit",
-            time: "01:35 PM",
-            auditRecord: [
-                {
-                    field: "Title",
-                    previous: "Book Title",
-                    current: "New Title"
-                },
-                {
-                    field: "ISBN",
-                    previous: "ISBN798789",
-                    current: "ISBN54665"
-                },
-            ]
-        },
-        {
-            user: "Mary Smith",
-            auditType: "custom",
-            time: "01:35 PM",
-            message: 'Lorem ipsum dolor sit amet consectetur. Neque dui tempor aliquet eu quam amet id. In tortor leo interdum eget facilisis dictumst sed.'
-        },
-        {
-            user: "Jane Doe",
-            auditType: "audit",
-            time: "01:35 PM",
-            auditRecord: [
-                {
-                    field: "Status",
-                    previous: "Draft",
-                    current: "Available"
-                },
-                {
-                    field: "Enable SEO",
-                    previous: "Yes",
-                    current: "No"
-                },
-            ]
-        },
-        {
-            user: "Mary Smith",
-            auditType: "custom",
-            time: "01:35 PM",
-            message: 'Lorem ipsum dolor sit amet consectetur. Neque dui tempor aliquet eu quam amet id. In tortor leo interdum eget facilisis dictumst sed.'
-        },
-        {
-            user: "John Doe",
-            auditType: "custom",
-            time: "01:35 PM",
-            message: 'Lorem ipsum dolor sit amet consectetur. Neque dui tempor aliquet eu quam amet id. In tortor leo interdum eget facilisis dictumst sed.'
-        },
-    ]
+
+    const handleFilterChange = (newFilters: FilterState) => {
+        console.log("New filters received:", newFilters);
+        setFilters(prev => {
+            console.log("Previous filters:", prev);
+            const updatedFilters = {
+                name: newFilters.name,
+                startDate: newFilters.startDate,
+                endDate: newFilters.endDate
+            };
+            console.log("Updated filters:", updatedFilters);
+            return updatedFilters;
+        });
+    };
 
     return (
         <div className='h-full'>
-            <SolidChatterHeader refetch={fetchData} solidFormViewMetaData={solidFormViewMetaData} activeTab={activeTab} handleTabClick={handleTabClick} visibleBox={visibleBox} />
+            <SolidChatterHeader 
+                id={id} 
+                refetch={fetchData} 
+                solidFormViewMetaData={solidFormViewMetaData} 
+                activeTab={activeTab} 
+                handleTabClick={handleTabClick} 
+                visibleBox={visibleBox}
+                onFilterChange={handleFilterChange}
+            />
             <div className='p-3' style={{
                 overflowY: 'scroll',
                 height:
@@ -107,31 +203,30 @@ export const SolidChatter = ({ solidFormViewMetaData }: { solidFormViewMetaData:
                             ? 'calc(100vh - 172px)'
                             : 'calc(100vh - 65px)',
             }}>
-                {isLoading ? (
+                {(isCustomLoading || isAuditLoading) ? (
                     <div className='flex align-items-center justify-content-center h-full font-medium'>
                         Loading...
                     </div>
-                ) : isError ? (
-                    <div className='flex align-items-center justify-content-center h-full font-medium text-red-500'>
-                        Error loading messages
-                    </div>
-                ) : messages.length === 0 ? (
+                )  : messages.length === 0 ? (
                     <div className='flex align-items-center justify-content-center h-full font-medium'>
                         No Data Available
                     </div>
                 ) : (
-                    [...messages].reverse().map((message) => {
+                    messages.map((message, index) => {
+                        const showDateDivider = index === 0 || message.date !== messages[index - 1].date;
                         return (
                             <div key={message.id}>
-                                <SolidChatterDateDivider />
+                                {showDateDivider && <SolidChatterDateDivider date={message.date} />}
                                 <SolidChatterMessageBox
-                                    user={message.user.fullName}
-                                    auditType={message.messageType}
-                                    message={message.messageBody}
-                                    time={new Date(message.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' })}
+                                    user={message.user}
+                                    auditType={message.auditType}
+                                    message={message.message}
+                                    time={message.time}
+                                    auditRecord={message.auditRecord}
+                                    media={message.media}
                                 />
                             </div>
-                        )
+                        );
                     })
                 )}
             </div>

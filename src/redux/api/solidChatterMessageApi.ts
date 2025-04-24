@@ -7,7 +7,12 @@ export const solidChatterMessageApi = createApi({
     endpoints: (builder) => ({
         getchatterMessage: builder.query({
             query: (qs) => {
-                return `/chatter-message?populate[0]=user&${qs}`
+                return `/chatter-message?populate[0]=user&populateMedia[1]=messageAttachments&${qs}`
+            },
+        }),
+        getchatterMessageDetail: builder.query({
+            query: (qs) => {
+                return `/chatter-message-details/getAudits/${qs}`
             },
         }),
         createChatterMessage: builder.mutation({
@@ -22,4 +27,4 @@ export const solidChatterMessageApi = createApi({
     })
 });
 
-export const { useGetchatterMessageQuery, useLazyGetchatterMessageQuery, useCreateChatterMessageMutation } = solidChatterMessageApi;
+export const { useGetchatterMessageQuery, useLazyGetchatterMessageQuery, useCreateChatterMessageMutation, useGetchatterMessageDetailQuery, useLazyGetchatterMessageDetailQuery } = solidChatterMessageApi;
