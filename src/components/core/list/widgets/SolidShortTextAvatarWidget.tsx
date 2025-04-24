@@ -46,7 +46,6 @@ export const SolidShortTextAvatarWidget = ({ rowData, solidListViewMetaData, fie
                         justifyContent: 'center',
                         fontWeight: 600,
                         fontSize: 12,
-                        boxShadow: '0 0 0 2px rgba(0,0,0,0.1)',
                     }}
                 >
                     {initials}

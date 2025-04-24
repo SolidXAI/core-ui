@@ -43,6 +43,8 @@ import Download from "yet-another-react-lightbox/plugins/download";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 import { SolidListViewConfigure } from "./SolidListViewConfigure";
+import { SolidListViewShimmerLoading } from "./SolidListViewShimmerLoading";
+import { SolidEmptyListViewPlaceholder } from "./SolidEmptyListViewPlaceholder";
 
 
 const getRandomInt = (min: number, max: number) => {
@@ -708,6 +710,23 @@ export const SolidListView = (params: SolidListViewParams) => {
     setListViewRowActionPopupState(false)
   }
 
+  if (loading || isLoading) {
+    return <SolidListViewShimmerLoading />;
+  }
+
+  const isListViewEmptyWithoutFilters = !loading && (!filters || Object.keys(filters).length === 0) && listViewData.length === 0;
+
+  if (isListViewEmptyWithoutFilters) {
+    return (
+      <SolidEmptyListViewPlaceholder
+        createButtonUrl={createButtonUrl}
+        actionsAllowed={actionsAllowed}
+        params={params}
+        solidListViewMetaData={solidListViewMetaData}
+      />
+    );
+  }
+
   return (
     <div className="page-parent-wrapper">
       <div className="page-header">
@@ -791,8 +810,9 @@ export const SolidListView = (params: SolidListViewParams) => {
           onSort={(e: DataTableStateEvent) => onSort(e)}
           sortField={sortField}
           sortOrder={sortOrder === 1 || sortOrder === -1 ? sortOrder : 0}
-          loading={loading || isLoading}
-          loadingIcon="pi pi-spinner"
+          loading={false}
+          // loading={loading || isLoading}
+          // loadingIcon="pi pi-spinner"
           selection={[...selectedRecords, ...selectedRecoverRecords]}
           onSelectionChange={onSelectionChange}
           selectionMode="checkbox"
@@ -818,7 +838,7 @@ export const SolidListView = (params: SolidListViewParams) => {
               if (typeof window !== "undefined") {
                 sessionStorage.setItem("fromView", "list");
               }
-              router.push(`${editButtonUrl}/${rowData?.id}`);
+              router.push(`${editButtonUrl}/${rowData?.id}?viewMode=view`);
             }
           }}
         >
@@ -848,7 +868,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                           if (params.embeded == true) {
                             params.handlePopUpOpen(selectedSolidViewData?.id);
                           } else {
-                            router.push(`${editButtonUrl}/${selectedSolidViewData?.id}`)
+                            router.push(`${editButtonUrl}/${selectedSolidViewData?.id}?viewMode=edit`)
                           }
                         }}
                       />

@@ -353,7 +353,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const router = useRouter();
     const toast = useRef<Toast>(null);
     const searchParams = useSearchParams();
-    const viewModeFromURL = searchParams.get("viewMode");
 
     const [redirectToList, setRedirectToList] = useState(false);
 
@@ -372,15 +371,20 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const op = useRef(null);
 
     useEffect(() => {
-        if (viewModeFromURL === "edit" || viewModeFromURL === "view") {
-            setViewMode(viewModeFromURL);
-        } else {
-            setViewMode("view"); // Default to 'view' if not present
-        }
+        const mode = searchParams.get('viewMode');
+
         if (params.id === 'new') {
-            setViewMode("edit");
+            setViewMode('edit');
+            return;
         }
-    }, [viewModeFromURL]);
+
+        // Set the viewMode based on the URL
+        if (mode === 'view' || mode === 'edit') {
+            setViewMode(mode);
+        } else {
+            setViewMode('view'); // Default to 'view' if no valid mode is provided
+        }
+    }, [searchParams, params.id]);
 
 
     // function that updates view mode 
