@@ -1,11 +1,19 @@
 'use client';
 import { Message } from "primereact/message";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
 import { getExtensionComponent } from "@/helpers/registry";
-import { SolidRelationManyToManyFieldWidgetProps } from "@/types/solid-core";
+import { AutoComplete } from "primereact/autocomplete";
+import { Button } from "primereact/button";
+import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { useRelationEntityHandler } from "./widgets/helpers/useRelationEntityHandler";
+import { InlineRelationEntityDialog } from "./widgets/helpers/InlineRelationEntityDialog";
+import { capitalize } from "lodash";
+import { Checkbox } from "primereact/checkbox";
+import { Panel } from "primereact/panel";
+
 
 
 
@@ -85,38 +93,30 @@ export class SolidRelationManyToManyField implements ISolidField {
     render(formik: FormikObject) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const [visibleCreateRelationEntity, setVisibleCreateRelationEntity] = useState(false);
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
 
-        let widget = fieldLayoutInfo.attrs.widget;
-        if (!widget) {
-            widget = 'autocomplete';
+        let viewWidget = fieldLayoutInfo.attrs.viewWidget;
+        let editWidget = fieldLayoutInfo.attrs.editWidget;
+        if (!editWidget) {
+            editWidget = 'DefaultRelationManyToManyAutoCompleteFormEditWidget';
         }
-
+        if (!viewWidget) {
+            viewWidget = 'DefaultRelationOneToManyFormViewWidget';
+        }
         const viewMode: string = this.fieldContext.viewMode;
-        let DynamicWidget = getExtensionComponent("SolidFormFieldRelationViewModeWidget");
-        const widgetProps = {
-            label: fieldLabel,
-            value: formik.values[fieldLayoutInfo.attrs.name],
-            layout: fieldLayoutInfo
-        }
-
         return (
-
             <>
-                {viewMode === "view" &&
-                    <div className={className}>
-                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
-                    </div>
-                }
-                {viewMode === "edit" &&
-                    (
+                <div className={className}>
+                    {viewMode === "view" &&
+                        this.renderExtensionRenderMode(viewWidget, formik)
+                    }
+                    {viewMode === "edit" && (
                         <>
-                            {widget &&
-                                this.renderExtensionRenderMode(widget, formik, visibleCreateRelationEntity, setVisibleCreateRelationEntity)
+                            {editWidget &&
+                                this.renderExtensionRenderMode(editWidget, formik)
                             }
                             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                                 <div className="absolute mt-1">
@@ -124,17 +124,16 @@ export class SolidRelationManyToManyField implements ISolidField {
                                 </div>
                             )}
                         </>
-                    )}
+                    )
+                    }
+                </div>
             </>
         );
     }
 
-    renderExtensionRenderMode(widgetName: string, formik: FormikObject, visibleCreateRelationEntity: any, setvisibleCreateRelationEntity: any) {
-        let DynamicWidget = getExtensionComponent(widgetName);
-        if (!DynamicWidget) {
-            DynamicWidget = getExtensionComponent('autocomplete');
-        }
-        const widgetProps: SolidRelationManyToManyFieldWidgetProps = {
+    renderExtensionRenderMode(widget: string, formik: FormikObject) {
+        let DynamicWidget = getExtensionComponent(widget);
+        const widgetProps: SolidFormFieldWidgetProps = {
             formik: formik,
             fieldContext: this.fieldContext,
         }
@@ -144,4 +143,167 @@ export class SolidRelationManyToManyField implements ISolidField {
             </>
         )
     }
+}
+
+
+
+export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+    const readOnlyPermission = fieldContext.readOnly;
+    const disabled = fieldLayoutInfo.attrs?.disabled;
+    const readOnly = fieldLayoutInfo.attrs?.readOnly;
+
+    const [visibleCreateDialog, setVisibleCreateDialog] = useState(false);
+    const { autoCompleteItems, fetchRelationEntities, addNewRelation } = useRelationEntityHandler({ fieldContext, formik });
+
+    const onChange = (e: any) => {
+        formik.setFieldValue(fieldContext.field.attrs.name, e.value);
+    };
+
+    return (
+
+        <div className="mt-4">
+            {showFieldLabel != false &&
+                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
+                    {fieldLabel}
+                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                </label>
+            }
+            <div className="flex align-items-center gap-3 mt-2">
+                <AutoComplete
+                    readOnly={readOnly || readOnlyPermission}
+                    disabled={disabled || readOnlyPermission}
+                    multiple
+                    {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
+                    id={fieldLayoutInfo.attrs.name}
+                    field="label"
+                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                    dropdown={!readOnlyPermission}
+                    suggestions={autoCompleteItems}
+                    completeMethod={(e) => fetchRelationEntities(e.query)}
+                    onChange={onChange}
+                    className="solid-standard-autocomplete w-full"
+                />
+                {fieldContext.field.attrs.inlineCreate && (
+                    <>
+                        <Button
+                            icon="pi pi-plus"
+                            rounded
+                            outlined
+                            aria-label="Filter"
+                            type="button"
+                            size="small"
+                            onClick={() => setVisibleCreateDialog(true)}
+                            className="custom-add-button"
+                        />
+                        <InlineRelationEntityDialog
+                            visible={visibleCreateDialog}
+                            setVisible={setVisibleCreateDialog}
+                            fieldContext={fieldContext}
+                            onCreate={addNewRelation}
+                        />
+                    </>
+                )}
+            </div>
+        </div>
+    );
+}
+
+
+
+export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+
+    const readOnlyPermission = fieldContext.readOnly;
+    const [visibleCreateDialog, setVisibleCreateDialog] = useState(false);
+    const { autoCompleteItems, fetchRelationEntities, addNewRelation } = useRelationEntityHandler({ fieldContext, formik });
+
+    useEffect(() => {
+        fetchRelationEntities();
+    }, []);
+
+    const handleCheckboxChange = (e: any) => {
+        if (formik.values[fieldLayoutInfo.attrs.name].some((item: any) => item.value === e.value)) {
+            formik.setFieldValue(fieldLayoutInfo.attrs.name, formik.values[fieldLayoutInfo.attrs.name].filter((s: any) => s.value !== e.value));
+        } else {
+            formik.setFieldValue(fieldLayoutInfo.attrs.name, [...formik.values[fieldLayoutInfo.attrs.name], e]);
+        }
+    };
+
+    const headerTemplate = (options: any) => {
+        const className = `${options.className} justify-content-space-between`;
+
+        return (
+            <div className={className}>
+                <div className="flex align-items-center gap-3">
+                    {showFieldLabel != false &&
+                        <label className="form-field-label">
+                            {capitalize(fieldLayoutInfo.attrs.name)}
+                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        </label>
+                    }
+                    {fieldContext.field.attrs.inlineCreate && (
+                        <>
+                            <Button
+                                icon="pi pi-plus"
+                                rounded
+                                outlined
+                                aria-label="Filter"
+                                type="button"
+                                size="small"
+                                onClick={() => setVisibleCreateDialog(true)}
+                                className="custom-add-button"
+                            />
+                            <InlineRelationEntityDialog
+                                visible={visibleCreateDialog}
+                                setVisible={setVisibleCreateDialog}
+                                fieldContext={fieldContext}
+                                onCreate={addNewRelation}
+                            />
+                        </>
+                    )}
+                    {/* <div className="many-to-many-add" >
+                        <Button icon="pi pi-plus"
+                            rounded
+                            outlined
+                            aria-label="Filter"
+                            type="button"
+                            onClick={() => autoCompleteSearch()}
+                        />
+                    </div> */}
+                </div>
+                <div>
+                    {options.togglerElement}
+                </div>
+            </div>
+        );
+    };
+    return (
+        <div>
+            <Panel toggleable headerTemplate={headerTemplate}>
+                <div className="formgrid grid">
+                    {autoCompleteItems && autoCompleteItems.map((a: any, i: number) => {
+                        return (
+                            <div key={a.label} className={`field col-6 flex gap-2 ${i >= 2 ? 'mt-3' : ''}`}>
+                                <Checkbox
+                                    readOnly={readOnlyPermission}
+                                    inputId={a.label}
+                                    checked={formik.values[fieldLayoutInfo.attrs.name].some((item: any) => item.label === a.label)}
+                                    onChange={() => handleCheckboxChange(a)}
+                                />
+                                <label htmlFor={a.label} className="form-field-label m-0"> {a.label}</label>
+                            </div>
+                        )
+                    })}
+                </div>
+            </Panel>
+        </div>
+    )
+
 }

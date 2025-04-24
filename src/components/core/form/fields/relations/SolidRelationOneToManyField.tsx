@@ -9,6 +9,10 @@ import SolidFormView from "../../SolidFormView";
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
 import { usePathname } from "next/navigation";
 import { getExtensionComponent } from "@/helpers/registry";
+import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { Message } from "primereact/message";
+import FieldMetaData from "@/components/core/model/FieldMetaData";
+import { Chip } from "primereact/chip";
 
 
 export class SolidRelationOneToManyField implements ISolidField {
@@ -56,94 +60,10 @@ export class SolidRelationOneToManyField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
 
         const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-        const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
-        const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
-        const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
-        const [listViewParams, setListViewParams] = useState<any>()
-        const [formViewParams, setformViewParams] = useState<any>()
-        const [refreshList, setRefreshList] = useState(false); // Added state for rerender
-        const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
-        const readOnlyPermission = this.fieldContext.readOnly;
-        const pathname = usePathname();
-        const lastPathSegment = pathname.split('/').pop();
-
-        const handlePopupOpen = (id: any) => {
-            const formviewparams = {
-                moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
-                id: id,
-                embeded: true,
-                isCustomCreate: false,
-                customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
-                modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName)
-            }
-            setformViewParams(formviewparams);
-            setvisibleCreateRelationEntity(true);
-
-        }
-
-        const handlePopupClose = () => {
-            setvisibleCreateRelationEntity(false);
-            setRefreshList((prev) => !prev);
-            const customFilter = this.fieldContext.fieldMetadata.relationCoModelFieldName ? this.fieldContext.fieldMetadata.relationCoModelFieldName : `${this.fieldContext.modelName}`
-            const lisviewparams = {
-                moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
-                modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName),
-                inlineCreate: readOnlyPermission === false ? true : false,
-                customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
-                embeded: true,
-                id: this.fieldContext.data ? this?.fieldContext?.data?.id : 'new',
-                customFilter: {
-                    [customFilter]: {
-                        id: {
-                            $eq: this.fieldContext.data ? this?.fieldContext?.data?.id : -1
-                        }
-                    }
-                }
-            }
-            setListViewParams(lisviewparams)
-        }
-        //Intial Params 
-        useEffect(() => {
-
-            const customFilter = this.fieldContext.fieldMetadata.relationCoModelFieldName ? this.fieldContext.fieldMetadata.relationCoModelFieldName : `${this.fieldContext.modelName}`
-            const listviewparams = {
-                moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
-                modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName),
-                inlineCreate: readOnlyPermission === false ? true : false,
-                customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
-                embeded: true,
-                id: this.fieldContext.data ? this?.fieldContext?.data?.id : 'new',
-                customFilter: {
-                    [customFilter]: {
-                        id: {
-                            $eq: this.fieldContext.data ? this?.fieldContext?.data?.id : -1
-                        }
-                    }
-                }
-            }
-            setListViewParams(listviewparams);
-            const formviewparams = {
-                moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
-                id: "new",
-                embeded: true,
-                isCustomCreate: false,
-                customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
-                modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName),
-            }
-            setformViewParams(formviewparams)
-
-        }, [readOnlyPermission])
-
-        const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
-        const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
-
-        const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
-        const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-        const viewMode: string = this.fieldContext.viewMode;
 
         const userKeyFieldName = fieldMetadata.relationModel?.userKeyField?.name;
 
@@ -154,79 +74,238 @@ export class SolidRelationOneToManyField implements ISolidField {
                 (item: any) => ({ label: item[userKeyFieldName] ?? '' })
             ),
             layout: fieldLayoutInfo
-
         }
 
+        DefaultRelationOneToManyFormEditWidget
 
+
+        let viewWidget = fieldLayoutInfo.attrs.viewWidget;
+        let editWidget = fieldLayoutInfo.attrs.editWidget;
+        if (!editWidget) {
+            editWidget = 'DefaultRelationManyToOneFormEditWidget';
+        }
+        if (!viewWidget) {
+            viewWidget = 'DefaultRelationOneToManyFormViewWidget';
+        }
+        const viewMode: string = this.fieldContext.viewMode;
         return (
             <>
-                {viewMode === "view" &&
-                    <div className={className}>
-                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
-                    </div>
-                }
-                {viewMode === "edit" &&
-                    (
-                        <div className={className}>
-                            {/* <div className="justify-content-center align-items-center"> */}
-                            {showFieldLabel != false &&
-                                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                                    {/* &nbsp;{fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                                </label>
+                <div className={className}>
+                    {viewMode === "view" &&
+                        this.renderExtensionRenderMode(viewWidget, formik)
+                    }
+                    {viewMode === "edit" && (
+                        <>
+                            {editWidget &&
+                                this.renderExtensionRenderMode(editWidget, formik)
                             }
-
-                            {/* </div>
-                <br></br> */}
-                            {lastPathSegment === 'new' && <p>Please save the {solidFormViewMetaData.data.solidView.model.displayName} to be able to save {fieldMetadata.displayName}</p>}
-                            {listViewParams && lastPathSegment !== 'new' &&
-                                <SolidListView key={refreshList.toString()}  {...listViewParams} handlePopUpOpen={handlePopupOpen} />
-                            }
-                            {readOnlyPermission !== true &&
-                                this.renderSolidFormEmbededView(visibleCreateRelationEntity, setvisibleCreateRelationEntity, formViewParams, handlePopupClose)}
-
-                        </div>
-                    )}
+                            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                                <div className="absolute mt-1">
+                                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                                </div>
+                            )}
+                        </>
+                    )
+                    }
+                </div>
             </>
         );
 
     }
 
-
-    renderSolidFormEmbededView(visibleCreateRelationEntity: any, setvisibleCreateRelationEntity: any, formViewParams: any, handlePopupClose: any) {
-
-        const fieldMetadata = this.fieldContext.fieldMetadata;
-        const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'col-12';
-        const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-
-
+    renderExtensionRenderMode(widget: string, formik: FormikObject) {
+        let DynamicWidget = getExtensionComponent(widget);
+        const widgetProps: SolidFormFieldWidgetProps = {
+            formik: formik,
+            fieldContext: this.fieldContext,
+        }
         return (
-            <div className="many-to-many-add" >
-                {/* <Button icon="pi pi-plus"
-                    rounded
-                    outlined
-                    aria-label="Filter"
-                    type="button"
-                    onClick={() => setvisibleCreateRelationEntity(true)}
-                /> */}
-                <Dialog
-                    header=""
-                    showHeader={false}
-                    visible={visibleCreateRelationEntity}
-                    className="solid-dialog"
-                    style={{ width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "40vw" }}
-                    onHide={() => {
-                        if (!visibleCreateRelationEntity) return;
-                        setvisibleCreateRelationEntity(false);
-                    }}
-                >
-                    {formViewParams &&
-                        < SolidFormView {...formViewParams} handlePopupClose={handlePopupClose} />
-                    }
-                </Dialog>
-            </div>
+            <>
+                {DynamicWidget && <DynamicWidget {...widgetProps} />}
+            </>
         )
     }
+
+
 }
 
+
+export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+    const fieldMetadata = fieldContext.fieldMetadata;
+
+    const fieldLayoutInfo = fieldContext.field;
+    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
+    const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
+    const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
+    const [listViewParams, setListViewParams] = useState<any>()
+    const [formViewParams, setformViewParams] = useState<any>()
+    const [refreshList, setRefreshList] = useState(false); // Added state for rerender
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+    const readOnlyPermission = fieldContext.readOnly;
+    const pathname = usePathname();
+    const lastPathSegment = pathname.split('/').pop();
+
+    const handlePopupOpen = (id: any) => {
+        const formviewparams = {
+            moduleName: fieldContext.fieldMetadata.relationModelModuleName,
+            id: id,
+            embeded: true,
+            isCustomCreate: false,
+            customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
+            modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName)
+        }
+        setformViewParams(formviewparams);
+        setvisibleCreateRelationEntity(true);
+
+    }
+
+    const handlePopupClose = () => {
+        setvisibleCreateRelationEntity(false);
+        setRefreshList((prev) => !prev);
+        const customFilter = fieldContext.fieldMetadata.relationCoModelFieldName ? fieldContext.fieldMetadata.relationCoModelFieldName : `${fieldContext.modelName}`
+        const lisviewparams = {
+            moduleName: fieldContext.fieldMetadata.relationModelModuleName,
+            modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+            inlineCreate: readOnlyPermission === false ? true : false,
+            customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
+            embeded: true,
+            id: fieldContext.data ? fieldContext?.data?.id : 'new',
+            customFilter: {
+                [customFilter]: {
+                    id: {
+                        $eq: fieldContext.data ? fieldContext?.data?.id : -1
+                    }
+                }
+            }
+        }
+        setListViewParams(lisviewparams)
+    }
+    //Intial Params 
+    useEffect(() => {
+
+        const customFilter = fieldContext.fieldMetadata.relationCoModelFieldName ? fieldContext.fieldMetadata.relationCoModelFieldName : `${fieldContext.modelName}`
+        const listviewparams = {
+            moduleName: fieldContext.fieldMetadata.relationModelModuleName,
+            modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+            inlineCreate: readOnlyPermission === false ? true : false,
+            customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
+            embeded: true,
+            id: fieldContext.data ? fieldContext?.data?.id : 'new',
+            customFilter: {
+                [customFilter]: {
+                    id: {
+                        $eq: fieldContext.data ? fieldContext?.data?.id : -1
+                    }
+                }
+            }
+        }
+        setListViewParams(listviewparams);
+        const formviewparams = {
+            moduleName: fieldContext.fieldMetadata.relationModelModuleName,
+            id: "new",
+            embeded: true,
+            isCustomCreate: false,
+            customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
+            modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+        }
+        setformViewParams(formviewparams)
+
+    }, [readOnlyPermission])
+
+    const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
+    const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
+
+    const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
+    const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+
+    return (
+        <div>
+            {/* <div className="justify-content-center align-items-center"> */}
+            {showFieldLabel != false &&
+                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                </label>
+            }
+
+            {lastPathSegment === 'new' && <p>Please save the {solidFormViewMetaData.data.solidView.model.displayName} to be able to save {fieldMetadata.displayName}</p>}
+            {listViewParams && lastPathSegment !== 'new' &&
+                <SolidListView key={refreshList.toString()}  {...listViewParams} handlePopUpOpen={handlePopupOpen} />
+            }
+            {readOnlyPermission !== true &&
+                <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
+            }
+
+        </div>
+    );
+}
+
+export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity, formViewParams, handlePopupClose }: any) => {
+
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const className = fieldLayoutInfo.attrs?.className || 'col-12';
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+
+
+    return (
+        <div className="many-to-many-add" >
+            {/* <Button icon="pi pi-plus"
+                rounded
+                outlined
+                aria-label="Filter"
+                type="button"
+                onClick={() => setvisibleCreateRelationEntity(true)}
+            /> */}
+            <Dialog
+                header=""
+                showHeader={false}
+                visible={visibleCreateRelationEntity}
+                className="solid-dialog"
+                style={{ width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "40vw" }}
+                onHide={() => {
+                    if (!visibleCreateRelationEntity) return;
+                    setvisibleCreateRelationEntity(false);
+                }}
+            >
+                {formViewParams &&
+                    < SolidFormView {...formViewParams} handlePopupClose={handlePopupClose} />
+                }
+            </Dialog>
+        </div>
+    )
+}
+
+export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const userKeyFieldName = fieldMetadata.relationModel?.userKeyField?.name;
+    const [fieldValue, setFieldValue] = useState<any>([]);
+    useEffect(() => {
+        const value = (fieldContext.data?.[fieldLayoutInfo.attrs.name] || []).map((item: any) => ({ label: item[userKeyFieldName] ?? '' }));
+        if (Array.isArray(value)) {
+
+            if (value.length > 0) {
+                const data = value.map((v: any) => v.label);
+                setFieldValue(data);
+            }
+        }
+        if (value && !Array.isArray(value) && typeof value === "object") {
+            setFieldValue([value.label]);
+        }
+    }, [fieldContext]);
+
+    return (
+        <div className="mt-2 flex-column">
+            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            <div className="flex flex-wrap gap-2 mt-2">
+                {fieldValue.map((v: any) => (
+                    <Chip key={v} label={v} className="view-widget-chip" />
+                ))}
+            </div>
+        </div>
+    );
+}

@@ -1,27 +1,39 @@
 import hanldeEmailFormTypeChange from "@/components/core/extension/solid-core/emailTemplate/emailFormTypeChangeHandler";
 import hanldeEmailFormTypeLoad from "@/components/core/extension/solid-core/emailTemplate/emailFormTypeLoad";
 import { RolePermissionsManyToManyFieldWidget } from "@/components/core/extension/solid-core/roleMetadata/RolePermissionsManyToManyFieldWidget";
-import { SolidRelationManyToManyAutocompleteWidget } from "@/components/core/form/fields/relations/widgets/SolidRelationManyToManyAutocompleteWidget";
-import { SolidRelationManyToManyCheckboxWidget } from "@/components/core/form/fields/relations/widgets/SolidRelationManyToManyCheckboxWidget";
 import { CustomHtml } from "@/components/core/form/widgets/CustomHtml";
 import React from "react";
-import { SolidBooleanFieldCheckboxWidget } from "@/components/core/form/fields/widgets/SolidBooleanCheckboxFieldWidget";
-import { SolidBooleanFieldSelectWidget } from "@/components/core/form/fields/widgets/SolidBooleanSelectFieldWidget";
-import { SolidSelectionStaticAutocompleteWidget } from "@/components/core/form/fields/widgets/SolidSelectionStaticAutocompleteFieldWidget";
-import { SolidSelectionStaticRadioWidget } from "@/components/core/form/fields/widgets/SolidSelectionStaticRadioFieldWidget";
-import { SolidShortTextFieldImageRenderModeWidget } from "@/components/core/list/widgets/SolidShortTextFieldImageRenderModeWidget";
-import { SolidFormFieldViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldViewModeWidget";
-import { SolidFormFieldJsonViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldJsonViewModeWidget";
-import { SolidFormFieldPasswordViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldPasswordViewModeWidget";
-import { SolidFormFieldRichTextViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldRichTextViewModeWidget";
-import { SolidFormFieldMediaViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldMediaViewModeWidget";
-import { SolidFormFieldRelationViewModeWidget } from "@/components/core/form/fields/widgets/SolidFormFieldRelationViewModeWidget";
-import { SolidFormFieldViewMediaSingleWidget } from "@/components/core/form/fields/widgets/SolidFormFieldViewMediaSingleWidget";
-import { SolidFormFieldViewMediaMultipleWidget } from "@/components/core/form/fields/widgets/SolidFormFieldViewMediaMultipleWidget";
-import { SolidUserNameAvatarWidget } from "@/components/core/list/widgets/SolidUserNameAvatarWidget";
+import { SolidShortTextFieldImageListWidget } from "@/components/core/list/widgets/SolidShortTextFieldImageRenderModeWidget";
+import { SolidShortTextAvatarWidget } from "@/components/core/list/widgets/SolidShortTextAvatarWidget";
 import GenerateModelCodeRowAction from "@/components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction";
 import GenerateModuleCodeRowAction from "@/components/core/extension/solid-core/moduleMetadata/list/GenerateModuleCodeRowAction";
-import { SolidTextRenderModeWidget } from "@/components/core/list/widgets/SolidTextRenderModeWidget";
+import { DefaultBooleanFormEditWidget, SolidBooleanCheckboxStyleFormEditWidget } from "@/components/core/form/fields/SolidBooleanField";
+import { DefaultDateFormEditWidget } from "@/components/core/form/fields/SolidDateField";
+import { DefaultDateTimeFormEditWidget } from "@/components/core/form/fields/SolidDateTimeField";
+import { DefaultDecimalFormEditWidget } from "@/components/core/form/fields/SolidDecimalField";
+import { DefaultEmailFormEditWidget } from "@/components/core/form/fields/SolidEmailField";
+import { DefaultIntegerFormEditWidget } from "@/components/core/form/fields/SolidIntegerField";
+import { DefaultJsonFormEditWidget, DefaultJsonFormViewWidget } from "@/components/core/form/fields/SolidJsonField";
+import { DefaultLongTextFormEditWidget } from "@/components/core/form/fields/SolidLongTextField";
+import { DefaultMediaMultipleFormEditWidget, DefaultMediaMultipleFormViewWidget } from "@/components/core/form/fields/SolidMediaMultipleField";
+import { DefaultMediaSingleFormEditWidget, DefaultMediaSingleFormViewWidget } from "@/components/core/form/fields/SolidMediaSingleField";
+import { DefaultPasswordFormEditWidget, DefaultPasswordFormViewWidget } from "@/components/core/form/fields/SolidPasswordField";
+import { DefaultRichTextFormEditWidget, DefaultRichTextFormViewWidget } from "@/components/core/form/fields/SolidRichTextField";
+import { DefaultSelectionStaticAutocompleteFormEditWidget, DefaultSelectionStaticFormViewWidget, SolidSelectionStaticRadioFormEditWidget } from "@/components/core/form/fields/SolidSelectionStaticField";
+import { DefaultShortTextFormEditWidget, DefaultShortTextFormViewWidget } from "@/components/core/form/fields/SolidShortTextField";
+import { DefaultRelationManyToOneFormEditWidget, DefaultRelationManyToOneFormViewWidget } from "@/components/core/form/fields/relations/SolidRelationManyToOneField";
+import { DefaultRelationOneToManyFormViewWidget } from "@/components/core/form/fields/relations/SolidRelationOneToManyField";
+import { DefaultRelationManyToManyAutoCompleteFormEditWidget, DefaultRelationManyToManyCheckBoxFormEditWidget } from "@/components/core/form/fields/relations/SolidRelationManyToManyField";
+import { DefaultBooleanListWidget } from "@/components/core/list/columns/SolidBooleanColumn";
+import { DefaultTextListWidget } from "@/components/core/list/columns/SolidShortTextColumn";
+import { DefaultMediaSingleListWidget } from "@/components/core/list/columns/SolidMediaSingleColumn";
+import { DefaultMediaMultipleListWidget } from "@/components/core/list/columns/SolidMediaMultipleColumn";
+import { DefaultRelationManyToManyListWidget } from "@/components/core/list/columns/relations/SolidRelationManyToManyColumn";
+import { DefaultRelationManyToOneListWidget } from "@/components/core/list/columns/relations/SolidRelationManyToOneColumn";
+import { DefaultRelationOneToManyListWidget } from "@/components/core/list/columns/relations/SolidRelationOneToManyColumn";
+import { SolidRelationAvatarWidget } from "@/components/core/list/widgets/SolidRelationAvatarWidget";
+import { SolidRelationFieldAvatarFormWidget } from "@/components/core/form/fields/widgets/SolidRelationFieldAvatarFormWidget";
+import { DefaultSelectionDynamicFormViewWidget } from "@/components/core/form/fields/SolidSelectionDynamicField";
 
 type ExtensionRegistry = {
     components: Record<string, React.ComponentType<any>>;
@@ -82,29 +94,68 @@ export const getExtensionFunction = (name: string) => {
 // Register all the dynamic widget & functions from inside solid-core-ui
 // Common
 registerExtensionComponent("CustomHtml", CustomHtml, []);
-
-
-
 registerExtensionComponent("GenerateModelCodeRowAction", GenerateModelCodeRowAction, []);
 registerExtensionComponent("GenerateModuleCodeRowAction", GenerateModuleCodeRowAction, []);
-registerExtensionComponent("SolidRelationManyToManyCheckboxWidget", SolidRelationManyToManyCheckboxWidget, ["checkbox"]);
-registerExtensionComponent("SolidRelationManyToManyAutocompleteWidget", SolidRelationManyToManyAutocompleteWidget, ["autocomplete"]);
-registerExtensionComponent("SolidBooleanFieldCheckboxWidget", SolidBooleanFieldCheckboxWidget, ["field-checkbox"]);
-registerExtensionComponent("SolidBooleanFieldSelectWidget", SolidBooleanFieldSelectWidget, ["field-selectbox"]);
-registerExtensionComponent("SolidSelectionStaticAutocompleteWidget", SolidSelectionStaticAutocompleteWidget, ["field-autocomplete"]);
-registerExtensionComponent("SolidSelectionStaticRadioWidget", SolidSelectionStaticRadioWidget, ["field-radio"]);
-registerExtensionComponent("SolidTextRenderModeWidget", SolidTextRenderModeWidget, []);
-registerExtensionComponent("SolidShortTextFieldImageRenderModeWidget", SolidShortTextFieldImageRenderModeWidget, []);
-registerExtensionComponent("SolidFormFieldViewModeWidget", SolidFormFieldViewModeWidget, []);
-registerExtensionComponent("SolidFormFieldJsonViewModeWidget", SolidFormFieldJsonViewModeWidget, []);
-registerExtensionComponent("SolidFormFieldPasswordViewModeWidget", SolidFormFieldPasswordViewModeWidget, []);
-registerExtensionComponent("SolidFormFieldRichTextViewModeWidget", SolidFormFieldRichTextViewModeWidget, []);
-registerExtensionComponent("SolidFormFieldMediaViewModeWidget", SolidFormFieldMediaViewModeWidget, []);
-registerExtensionComponent("SolidFormFieldRelationViewModeWidget", SolidFormFieldRelationViewModeWidget, []);
-registerExtensionComponent("SolidFormFieldViewMediaSingleWidget", SolidFormFieldViewMediaSingleWidget, []);
-registerExtensionComponent("SolidFormFieldViewMediaMultipleWidget", SolidFormFieldViewMediaMultipleWidget, []);
-registerExtensionComponent("SolidFormFieldViewMediaMultipleWidget", SolidFormFieldViewMediaMultipleWidget, []);
-registerExtensionComponent("SolidUserNameAvatarWidget", SolidUserNameAvatarWidget, []);
+
+
+// Formview Default Edit widgets
+registerExtensionComponent("DefaultDateFormEditWidget", DefaultDateFormEditWidget, []);
+registerExtensionComponent("DefaultBooleanFormEditWidget", DefaultBooleanFormEditWidget, ["booleanSelectbox"]);
+registerExtensionComponent("SolidBooleanCheckboxStyleFormEditWidget", SolidBooleanCheckboxStyleFormEditWidget, ["booleanCheckbox"]);
+registerExtensionComponent("DefaultDateTimeFormEditWidget", DefaultDateTimeFormEditWidget, []);
+registerExtensionComponent("DefaultDecimalFormEditWidget", DefaultDecimalFormEditWidget, []);
+registerExtensionComponent("DefaultEmailFormEditWidget", DefaultEmailFormEditWidget, []);
+registerExtensionComponent("DefaultIntegerFormEditWidget", DefaultIntegerFormEditWidget, []);
+registerExtensionComponent("DefaultJsonFormEditWidget", DefaultJsonFormEditWidget, []);
+registerExtensionComponent("DefaultLongTextFormEditWidget", DefaultLongTextFormEditWidget, []);
+registerExtensionComponent("DefaultMediaMultipleFormEditWidget", DefaultMediaMultipleFormEditWidget, []);
+registerExtensionComponent("DefaultMediaSingleFormEditWidget", DefaultMediaSingleFormEditWidget, []);
+registerExtensionComponent("DefaultPasswordFormEditWidget", DefaultPasswordFormEditWidget, []);
+registerExtensionComponent("DefaultRichTextFormEditWidget", DefaultRichTextFormEditWidget, []);
+registerExtensionComponent("DefaultSelectionStaticAutocompleteFormEditWidget", DefaultSelectionStaticAutocompleteFormEditWidget, []);
+registerExtensionComponent("DefaultShortTextFormEditWidget", DefaultShortTextFormEditWidget, []);
+registerExtensionComponent("DefaultRelationManyToOneFormEditWidget", DefaultRelationManyToOneFormEditWidget, []);
+registerExtensionComponent("DefaultRelationManyToOneFormEditWidget", DefaultRelationManyToOneFormEditWidget, []);
+registerExtensionComponent("DefaultRelationManyToManyAutoCompleteFormEditWidget", DefaultRelationManyToManyAutoCompleteFormEditWidget, []);
+registerExtensionComponent("DefaultRelationManyToManyCheckBoxFormEditWidget", DefaultRelationManyToManyCheckBoxFormEditWidget, []);
+registerExtensionComponent("SolidSelectionStaticRadioFormEditWidget", SolidSelectionStaticRadioFormEditWidget, []);
+
+// Formview Edit Custom  widgets
+
+
+// Formview Default View widgets
+registerExtensionComponent("DefaultMediaMultipleFormViewWidget", DefaultMediaMultipleFormViewWidget, []);
+registerExtensionComponent("DefaultMediaSingleFormViewWidget", DefaultMediaSingleFormViewWidget, []);
+registerExtensionComponent("DefaultPasswordFormViewWidget", DefaultPasswordFormViewWidget, []);
+registerExtensionComponent("DefaultRichTextFormViewWidget", DefaultRichTextFormViewWidget, []);
+registerExtensionComponent("DefaultShortTextFormViewWidget", DefaultShortTextFormViewWidget, []);
+registerExtensionComponent("DefaultRelationOneToManyFormViewWidget", DefaultRelationOneToManyFormViewWidget, []);
+registerExtensionComponent("DefaultJsonFormViewWidget", DefaultJsonFormViewWidget, []);
+registerExtensionComponent("DefaultRelationManyToOneFormViewWidget", DefaultRelationManyToOneFormViewWidget, []);
+registerExtensionComponent("DefaultSelectionStaticFormViewWidget", DefaultSelectionStaticFormViewWidget, []);
+registerExtensionComponent("DefaultSelectionDynamicFormViewWidget", DefaultSelectionDynamicFormViewWidget, []);
+
+// Form View Custom Widgets
+registerExtensionComponent("SolidRelationFieldAvatarFormWidget", SolidRelationFieldAvatarFormWidget, []);
+
+
+
+// list view render modes   
+registerExtensionComponent("DefaultTextListWidget", DefaultTextListWidget, []);
+registerExtensionComponent("DefaultBooleanListWidget", DefaultBooleanListWidget, []);
+registerExtensionComponent("DefaultMediaSingleListWidget", DefaultMediaSingleListWidget, []);
+registerExtensionComponent("DefaultMediaMultipleListWidget", DefaultMediaMultipleListWidget, []);
+registerExtensionComponent("DefaultRelationManyToOneListWidget", DefaultRelationManyToOneListWidget, []);
+registerExtensionComponent("DefaultRelationManyToManyListWidget", DefaultRelationManyToManyListWidget, []);
+registerExtensionComponent("DefaultRelationOneToManyListWidget", DefaultRelationOneToManyListWidget, []);
+registerExtensionComponent("SolidShortTextFieldImageListWidget", SolidShortTextFieldImageListWidget, []);
+
+
+// List View Custom Widgets
+
+
+registerExtensionComponent("SolidShortTextAvatarWidget", SolidShortTextAvatarWidget, []);
+registerExtensionComponent("SolidRelationAvatarWidget", SolidRelationAvatarWidget, []);
 
 
 // ModuleMetadata

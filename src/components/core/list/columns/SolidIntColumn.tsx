@@ -6,6 +6,7 @@ import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewCo
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 import SolidTableRowCell from '../SolidTableRowCell';
 import { getExtensionComponent } from '@/helpers/registry';
+import { SolidListFieldWidgetProps } from '@/types/solid-core';
 
 const SolidIntColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
@@ -60,28 +61,24 @@ const SolidIntColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidL
                 return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{header}</div>)
             }}
             body={(rowData) => {
-                const data = rowData;
-                let widgetName = column?.attrs?.widget;
-                if (widgetName) {
-                    let DynamicWidget = getExtensionComponent(widgetName);
-                    const widgetProps = {
-                        value: data[fieldMetadata.name],
-                    }
-                    return (
-                        <>
-                            {DynamicWidget && <DynamicWidget {...widgetProps} />}
-                        </>
-                    )
-                } else {
-                    return (
-
-                        <SolidTableRowCell
-                            value={rowData[fieldMetadata.name]}
-                            truncateAfter={truncateAfter}
-                        />
-                    )
+                let viewWidget = column.attrs.viewWidget;
+                if (!viewWidget) {
+                    viewWidget = 'DefaultTextRenderModeWidget';
                 }
-            }}
+                let DynamicWidget = getExtensionComponent(viewWidget);
+                const widgetProps: SolidListFieldWidgetProps = {
+                    rowData,
+                    solidListViewMetaData,
+                    fieldMetadata,
+                    column
+                }
+                return (
+                    <>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
+                    </>
+                )
+            }
+            }
         ></Column>
     );
 

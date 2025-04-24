@@ -6,6 +6,7 @@ import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 import SolidTableRowCell from '../SolidTableRowCell';
 import { getExtensionComponent } from '@/helpers/registry';
+import { SolidListFieldWidgetProps } from '@/types/solid-core';
 
 const SolidSelectionDynamicColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
@@ -53,16 +54,16 @@ const SolidSelectionDynamicColumn = ({ solidListViewMetaData, fieldMetadata, col
                 return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{header}</div>)
             }}
             body={(rowData) => {
-                const data = rowData;
-                let widgetName = "SolidTextRenderModeWidget";
-
-                if (column?.attrs?.widget) {
-                    widgetName = column?.attrs?.widget;
+                let viewWidget = column.attrs.viewWidget;
+                if (!viewWidget) {
+                    viewWidget = 'DefaultTextRenderModeWidget';
                 }
-                let DynamicWidget = getExtensionComponent(widgetName);
-                const widgetProps = {
-                    value: data[fieldMetadata.name],
-                    truncateAfter: truncateAfter
+                let DynamicWidget = getExtensionComponent(viewWidget);
+                const widgetProps: SolidListFieldWidgetProps = {
+                    rowData,
+                    solidListViewMetaData,
+                    fieldMetadata,
+                    column
                 }
                 return (
                     <>
@@ -70,7 +71,6 @@ const SolidSelectionDynamicColumn = ({ solidListViewMetaData, fieldMetadata, col
                     </>
                 )
             }
-
             }
         ></Column>
     );

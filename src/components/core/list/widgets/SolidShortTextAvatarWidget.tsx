@@ -1,21 +1,22 @@
+import { SolidListFieldWidgetProps } from "@/types/solid-core";
 
-export const SolidUserNameAvatarWidget = ({ value }: any) => {
 
+export const SolidShortTextAvatarWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
     // use "widget": "SolidUserNameAvatarWidget" in the list view field 
 
-    
+    const value = rowData[fieldMetadata.name];
 
     const getInitials = (value: string) => {
-      if(value){
-        const names = value?.trim().split(' ');
-        const initials =
-            names.length === 1
-                ? names[0][0]
-                : names[0][0] + names[names.length - 1][0];
-        return initials.toUpperCase();
-      } else{
-        return ""
-      }
+        if (value) {
+            const names = value?.trim().split(' ');
+            const initials =
+                names.length === 1
+                    ? names[0][0]
+                    : names[0][0] + names[names.length - 1][0];
+            return initials.toUpperCase();
+        } else {
+            return ""
+        }
     };
 
     const getColorFromInitials = (initials: string) => {
