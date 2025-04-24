@@ -12,7 +12,7 @@ export const solidChatterMessageApi = createApi({
         }),
         getchatterMessageDetail: builder.query({
             query: (qs) => {
-                return `/chatter-message-details/getAudits/${qs}`
+                return `/chatter-message-details?${qs}`
             },
         }),
         createChatterMessage: builder.mutation({

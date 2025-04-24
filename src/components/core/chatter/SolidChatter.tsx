@@ -40,6 +40,23 @@ export const SolidChatter = ({ solidFormViewMetaData, id, refreshChatterMessage,
         encodeValuesOnly: true,
     });
 
+    const queryDataChatterMessageDetail = {
+        populate: ['chatterMessage', 'chatterMessage.user'],
+        filters: {
+            chatterMessage: {
+                coModelName: {
+                    $eq: solidFormViewMetaData?.data?.solidView?.model?.singularName
+                },
+                coModelEntityId: {
+                    $eq: id
+                }
+            }
+        }
+    };
+
+    const queryStringChatterMessageDetail = qs.stringify(queryDataChatterMessageDetail, {
+        encodeValuesOnly: true,
+    });
 
     const [getchatterMessage, { data: chatterMessageData, isLoading: isCustomLoading, isError: isCustomError }] = useLazyGetchatterMessageQuery();
     const [getchatterMessageDetail, { data: auditMessageData, isLoading: isAuditLoading, isError: isAuditError }] = useLazyGetchatterMessageDetailQuery();
@@ -142,8 +159,8 @@ export const SolidChatter = ({ solidFormViewMetaData, id, refreshChatterMessage,
                 media: msg._media
             }));
 
-            const auditResponse = await getchatterMessageDetail(`${solidFormViewMetaData?.data?.solidView?.model?.singularName}/${id}`).unwrap();
-            const auditMessages = auditResponse.data.map((msg: any) => ({
+            const auditResponse = await getchatterMessageDetail(queryStringChatterMessageDetail).unwrap();
+            const auditMessages = auditResponse.data.records.map((msg: any) => ({
                 id: msg.id,
                 user: msg.chatterMessage.user?.fullName || "System",
                 auditType: "audit",
@@ -207,7 +224,7 @@ export const SolidChatter = ({ solidFormViewMetaData, id, refreshChatterMessage,
                     <div className='flex align-items-center justify-content-center h-full font-medium'>
                         Loading...
                     </div>
-                )  : messages.length === 0 ? (
+                ) : messages.length === 0 ? (
                     <div className='flex align-items-center justify-content-center h-full font-medium'>
                         No Data Available
                     </div>
