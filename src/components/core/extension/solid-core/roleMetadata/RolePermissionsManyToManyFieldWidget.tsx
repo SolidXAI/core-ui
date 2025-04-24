@@ -1,5 +1,4 @@
 "use client";
-import { SolidRelationManyToManyFieldWidgetProps } from "@/types/solid-core";
 import { capitalize } from "lodash";
 import { Panel } from "primereact/panel";
 import { useEffect, useState } from "react";
@@ -8,6 +7,7 @@ import { InputSwitch } from "primereact/inputswitch";
 import { useRelationEntityHandler } from "@/components/core/form/fields/relations/widgets/helpers/useRelationEntityHandler";
 import { InlineRelationEntityDialog } from "@/components/core/form/fields/relations/widgets/helpers/InlineRelationEntityDialog";
 import { Checkbox } from "primereact/checkbox";
+import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 
 const groupByController = (items: any[]) => {
     const grouped: { [key: string]: any[] } = {};
@@ -21,7 +21,7 @@ const groupByController = (items: any[]) => {
     return grouped;
 };
 
-export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: SolidRelationManyToManyFieldWidgetProps) => {
+export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldLayoutInfo = fieldContext.field;
 
     const readOnlyPermission = fieldContext.readOnly;

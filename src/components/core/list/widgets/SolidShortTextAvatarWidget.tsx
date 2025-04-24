@@ -1,15 +1,22 @@
+import { SolidListFieldWidgetProps } from "@/types/solid-core";
 
-export const SolidUserNameAvatarWidget = ({ value }: any) => {
 
+export const SolidShortTextAvatarWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
     // use "widget": "SolidUserNameAvatarWidget" in the list view field 
 
-    const getInitials = (fullName: string) => {
-        const names = fullName.trim().split(' ');
-        const initials =
-            names.length === 1
-                ? names[0][0]
-                : names[0][0] + names[names.length - 1][0];
-        return initials.toUpperCase();
+    const value = rowData[fieldMetadata.name];
+
+    const getInitials = (value: string) => {
+        if (value) {
+            const names = value?.trim().split(' ');
+            const initials =
+                names.length === 1
+                    ? names[0][0]
+                    : names[0][0] + names[names.length - 1][0];
+            return initials.toUpperCase();
+        } else {
+            return ""
+        }
     };
 
     const getColorFromInitials = (initials: string) => {
@@ -29,8 +36,8 @@ export const SolidUserNameAvatarWidget = ({ value }: any) => {
             <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                 <div
                     style={{
-                        width: 25,
-                        height: 25,
+                        width: 20,
+                        height: 20,
                         borderRadius: '50%',
                         backgroundColor: bgColor,
                         color: 'white',
@@ -38,7 +45,7 @@ export const SolidUserNameAvatarWidget = ({ value }: any) => {
                         alignItems: 'center',
                         justifyContent: 'center',
                         fontWeight: 600,
-                        fontSize: 25 * 0.4,
+                        fontSize: 12,
                         boxShadow: '0 0 0 2px rgba(0,0,0,0.1)',
                     }}
                 >

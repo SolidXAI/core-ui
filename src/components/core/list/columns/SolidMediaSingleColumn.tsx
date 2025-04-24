@@ -3,6 +3,8 @@ import React, { useState } from 'react';
 import { Column } from "primereact/column";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { classNames } from 'primereact/utils';
+import { SolidListFieldWidgetProps, SolidMediaListFieldWidgetProps } from '@/types/solid-core';
+import { getExtensionComponent } from '@/helpers/registry';
 
 const isImageFile = (url: string) => {
     return /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
@@ -33,37 +35,32 @@ const MediaWithFallback = ({ src, alt, onClick }: { src: string; alt: string; on
 
 const SolidMediaSingleColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidListViewColumnParams) => {
     const header = column.attrs.label ?? fieldMetadata.displayName;
-
-    const mediaBodyTemplate = (product: any) => {
-        if (!product?._media?.[fieldMetadata.name]) return null;
-        const mediaUrls = product._media[fieldMetadata.name].map((i: any) => i._full_url);
-
-        return (
-            mediaUrls.length > 0 ? (
-                <MediaWithFallback
-                    src={mediaUrls[0]}
-                    alt="product-media"
-                    onClick={(event) => {
-                        event.stopPropagation();
-                        setLightboxUrls([{ src: mediaUrls[0], downloadUrl: mediaUrls[0] }]);
-                        setOpenLightbox(true);
-                    }}
-                />
-            ) : (
-                <div
-                    style={{ height: 40, width: 40 }}
-                >
-                </div>
-            )
-        );
-    };
-
     return (
         <Column
             key={fieldMetadata.name}
             field={fieldMetadata.name}
             header={header}
-            body={mediaBodyTemplate}
+            body={(rowData) => {
+                let viewWidget = column.attrs.viewWidget;
+                if (!viewWidget) {
+                    viewWidget = 'DefaultMediaSingleListWidget';
+                }
+                let DynamicWidget = getExtensionComponent(viewWidget);
+                const widgetProps: SolidMediaListFieldWidgetProps = {
+                    rowData,
+                    solidListViewMetaData,
+                    fieldMetadata,
+                    column,
+                    setLightboxUrls,
+                    setOpenLightbox
+                }
+                return (
+                    <>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
+                    </>
+                )
+            }
+            }
             sortable={column.attrs.sortable}
             showFilterOperator={false}
             filterPlaceholder={`Search by ${fieldMetadata.displayName}`}
@@ -74,3 +71,28 @@ const SolidMediaSingleColumn = ({ solidListViewMetaData, fieldMetadata, column, 
 };
 
 export default SolidMediaSingleColumn;
+
+
+export const DefaultMediaSingleListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidMediaListFieldWidgetProps) => {
+    if (!rowData?._media?.[fieldMetadata.name]) return null;
+    const mediaUrls = rowData._media[fieldMetadata.name].map((i: any) => i._full_url);
+
+    return (
+        mediaUrls.length > 0 ? (
+            <MediaWithFallback
+                src={mediaUrls[0]}
+                alt="media"
+                onClick={(event) => {
+                    event.stopPropagation();
+                    setLightboxUrls([{ src: mediaUrls[0], downloadUrl: mediaUrls[0] }]);
+                    setOpenLightbox(true);
+                }}
+            />
+        ) : (
+            <div
+                style={{ height: 40, width: 40 }}
+            >
+            </div>
+        )
+    );
+};

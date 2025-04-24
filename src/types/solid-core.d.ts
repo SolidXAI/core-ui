@@ -68,6 +68,7 @@ export type LayoutAttribute = {
     className?: string;
     inlineCreate?: string;
     renderMode?: string;
+    widget?: string;
 };
 
 // Generic representation of any node in our layout 
@@ -105,27 +106,34 @@ export type SolidFormWidgetProps = {
     fieldsMetadata: FieldsMetadata;
 };
 
-export type SolidRelationManyToManyFieldWidgetProps = {
+export type SolidFormFieldWidgetProps = {
     formik: any;
     fieldContext?: SolidFieldProps;
-};
+}
+export type SolidListFieldWidgetProps = {
+    rowData: any;
+    solidListViewMetaData: any
+    fieldMetadata: FieldMetadata;
+    column: any;
+}
 
-export type SolidBooleanFieldWidgetProps = {
-    formik: any;
-    fieldContext?: SolidFieldProps;
-};
-export type SolidSelectionStaticFieldWidgetProps = {
-    formik: any;
-    fieldContext?: SolidFieldProps;
-};
+
+
+export type SolidMediaListFieldWidgetProps = SolidListFieldWidgetProps & {
+    setLightboxUrls?: any,
+    setOpenLightbox?: any
+}
+
+
+
+
+export type SolidMediaFormFieldWidgetProps = SolidFormFieldWidgetProps & {
+    setLightboxUrls?: any,
+    setOpenLightbox?: any
+}
+
+
 
 export type SolidShortTextImageRenderModeWidgetProps = {
     data: string;
 }
-
-export type SolidMediaSingleFieldWidgetProps = {
-    formik: any;
-    fieldContext?: SolidFieldProps;
-    setLightboxUrls?: any,
-    setOpenLightbox?: any
-};
