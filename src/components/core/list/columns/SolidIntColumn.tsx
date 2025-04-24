@@ -5,6 +5,8 @@ import { FormEvent } from "primereact/ts-helpers";
 import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 import SolidTableRowCell from '../SolidTableRowCell';
+import { getExtensionComponent } from '@/helpers/registry';
+import { SolidListFieldWidgetProps } from '@/types/solid-core';
 
 const SolidIntColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
@@ -56,14 +58,27 @@ const SolidIntColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidL
             // style={{ minWidth: "12rem" }}
             // headerClassName="table-header-fs"
             header={() => {
-                return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace:'nowrap', textOverflow:'ellipsis', overflow:'hidden'}}>{header}</div>)
+                return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{header}</div>)
             }}
-            body={(rowData) => (
-                <SolidTableRowCell
-                    value={rowData[fieldMetadata.name]}
-                    truncateAfter={truncateAfter}
-                />
-            )}
+            body={(rowData) => {
+                let viewWidget = column.attrs.viewWidget;
+                if (!viewWidget) {
+                    viewWidget = 'DefaultTextRenderModeWidget';
+                }
+                let DynamicWidget = getExtensionComponent(viewWidget);
+                const widgetProps: SolidListFieldWidgetProps = {
+                    rowData,
+                    solidListViewMetaData,
+                    fieldMetadata,
+                    column
+                }
+                return (
+                    <>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
+                    </>
+                )
+            }
+            }
         ></Column>
     );
 

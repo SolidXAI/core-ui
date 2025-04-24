@@ -6,7 +6,7 @@ import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewCo
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 import SolidTableRowCell from '../SolidTableRowCell';
 import { getExtensionComponent } from '@/helpers/registry';
-import { SolidShortTextImageRenderModeWidgetProps } from '@/types/solid-core';
+import { SolidListFieldWidgetProps, SolidMediaListFieldWidgetProps, SolidShortTextImageRenderModeWidgetProps } from '@/types/solid-core';
 
 const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
@@ -60,22 +60,19 @@ const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column, se
             header={() => {
                 return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{header}</div>)
             }}
+
             body={(rowData) => {
-                const renderMode = column.attrs.renderMode || "text";
-                const data = rowData;
-                let widgetName = column?.attrs?.widget;
-                if (renderMode === "image") {
-                    widgetName = "SolidShortTextFieldImageRenderModeWidget"
+                //add this widget to render media image in image format  - SolidShortTextFieldImageRenderModeWidget 
+                let viewWidget = column.attrs.viewWidget;
+                if (!viewWidget) {
+                    viewWidget = 'DefaultTextListWidget';
                 }
-                if (renderMode === "text") {
-                    widgetName = "SolidShortTextFieldTextRenderModeWidget"
-                };
-                if (column?.attrs?.widget) {
-                    widgetName = column?.attrs?.widget;
-                }
-                let DynamicWidget = getExtensionComponent(widgetName);
-                const widgetProps = {
-                    value: data[fieldMetadata.name],
+                let DynamicWidget = getExtensionComponent(viewWidget);
+                const widgetProps: SolidMediaListFieldWidgetProps = {
+                    rowData,
+                    solidListViewMetaData,
+                    fieldMetadata,
+                    column,
                     setLightboxUrls: setLightboxUrls,
                     setOpenLightbox: setOpenLightbox
                 }
@@ -84,33 +81,23 @@ const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column, se
                         {DynamicWidget && <DynamicWidget {...widgetProps} />}
                     </>
                 )
+            }
+            }
 
-                // if (renderMode === "text") {
-                //     return <SolidTableRowCell
-                //         value={rowData[fieldMetadata.name]}
-                //         truncateAfter={truncateAfter}
-                //     />
-                // } else {
-                //     return (
-                //         <img
-                //             src={data[fieldMetadata.name]}
-                //             alt="product-image-single"
-                //             className="shadow-2 border-round"
-                //             width={40}
-                //             height={40}
-                //             style={{ objectFit: "cover" }}
-                //             onClick={(event) => {
-                //                 event.stopPropagation();
-                //                 setLightboxUrls([{ src: data[fieldMetadata.name], downloadUrl: data[fieldMetadata.name] }]);
-                //                 setOpenLightbox(true);
-                //             }}
-                //         />
-                //     );
-                // }
-            }}
         ></Column >
     );
 
 };
 
 export default SolidShortTextColumn;
+
+
+export const DefaultTextListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
+    const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter
+    return (
+        <SolidTableRowCell
+            value={rowData[fieldMetadata.name]}
+            truncateAfter={truncateAfter}
+        />
+    )
+};

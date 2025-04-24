@@ -1993,7 +1993,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
 
-                          {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
+                          {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse  && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="relationCoModelFieldName"

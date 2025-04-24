@@ -2,46 +2,42 @@
 import { FilterMatchMode } from 'primereact/api';
 import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { FormEvent } from "primereact/ts-helpers";
-import { SolidListViewColumnParams } from '../SolidListViewColumn';
-import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
-import SolidTableRowCell from '../SolidTableRowCell';
-import { getExtensionComponent } from '@/helpers/registry';
+import { SolidListViewColumnParams } from '../../SolidListViewColumn';
+import { InputTypes, SolidVarInputsFilterElement } from "../../SolidVarInputsFilterElement";
+import { Button } from 'primereact/button';
 import { SolidListFieldWidgetProps } from '@/types/solid-core';
+import { getExtensionComponent } from '@/helpers/registry';
 
-
-const SolidSelectionStaticColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
-
+const SolidRelationOneToManyColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
     const showFilterOperator = false;
-    const columnDataType = fieldMetadata.selectionValueType === 'int' ? 'numeric' : 'text';
     const filterMatchModeOptions = [
         { label: 'In', value: FilterMatchMode.IN },
         { label: 'Not In', value: FilterMatchMode.NOT_IN },
     ];
-
+    const columnDataType = undefined;
     const filterTemplate = (options: ColumnFilterElementTemplateOptions) => {
 
         return (
             <SolidVarInputsFilterElement
                 values={options.value}
                 onChange={(e: FormEvent<HTMLInputElement>) => options.filterCallback(e, options.index)}
-                inputType={InputTypes.SelectionStatic}
+                inputType={InputTypes.RelationManyToOne}
                 solidListViewMetaData={solidListViewMetaData}
                 fieldMetadata={fieldMetadata}
                 column={column}
             >
             </SolidVarInputsFilterElement>
         )
-    }
+    };
 
-    const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
     return (
         <Column
             key={fieldMetadata.name}
             field={fieldMetadata.name}
-            // header={header}
+            header={header}
             // className="text-sm"
             sortable={column.attrs.sortable}
             // filter={filterable}
@@ -49,16 +45,10 @@ const SolidSelectionStaticColumn = ({ solidListViewMetaData, fieldMetadata, colu
             showFilterOperator={showFilterOperator}
             filterMatchModeOptions={filterMatchModeOptions}
             filterElement={filterTemplate}
-            filterPlaceholder={`Search by ${fieldMetadata.displayName}`}
-            // style={{ minWidth: "12rem" }}
-            // headerClassName="table-header-fs"
-            header={() => {
-                return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{header}</div>)
-            }}
             body={(rowData) => {
                 let viewWidget = column.attrs.viewWidget;
                 if (!viewWidget) {
-                    viewWidget = 'DefaultTextRenderModeWidget';
+                    viewWidget = 'DefaultRelationOneToManyListWidget';
                 }
                 let DynamicWidget = getExtensionComponent(viewWidget);
                 const widgetProps: SolidListFieldWidgetProps = {
@@ -74,8 +64,48 @@ const SolidSelectionStaticColumn = ({ solidListViewMetaData, fieldMetadata, colu
                 )
             }
             }
-        ></Column >
+            filterPlaceholder={`Search by ${fieldMetadata.displayName}`}
+            style={{ minWidth: "12rem" }}
+            headerClassName="table-header-fs"
+        ></Column>
     );
+
 };
 
-export default SolidSelectionStaticColumn;
+export default SolidRelationOneToManyColumn;
+
+
+
+
+export const DefaultRelationOneToManyListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
+    const manyToManyFieldData = rowData[column.attrs.name];
+
+    // This is the userkey that will be present within the rowData.
+    if (manyToManyFieldData) {
+        // Since this is a many-to-one field, we fetch the user key field of the associated model.
+        const userKeyField = fieldMetadata?.relationModel?.userKeyField?.name;
+
+        const manyToManyColVal = manyToManyFieldData.map((f: any) => f[userKeyField]);
+
+        // TODO: change this to use an anchor tag so that on click we open that entity form view. 
+        return (
+
+            <>
+                {manyToManyColVal.length > 0 &&
+                    <p>
+                        {manyToManyColVal[0]}
+                        <Button text className="kaban-load-more" style={{ padding: 0, paddingBottom: "3px" }} size="small"
+                            onClick={() => { }}
+                            label={manyToManyColVal.length - 1 > 0 ? `...${manyToManyColVal.length - 1} more` : ""}
+                        />
+
+                    </p >
+                }
+            </>
+
+        )
+    }
+    else {
+        return <span></span>
+    }
+};

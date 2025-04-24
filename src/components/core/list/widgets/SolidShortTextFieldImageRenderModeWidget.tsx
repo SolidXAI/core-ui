@@ -1,8 +1,10 @@
+import { SolidMediaListFieldWidgetProps } from "@/types/solid-core";
 
-export const SolidShortTextFieldImageRenderModeWidget = ({ value, setLightboxUrls, setOpenLightbox }: any) => {
+export const SolidShortTextFieldImageListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidMediaListFieldWidgetProps) => {
+
     return (
         <img
-            src={value}
+            src={rowData[fieldMetadata.name]}
             alt="product-image-single"
             className="shadow-2 border-round"
             width={40}
@@ -10,7 +12,7 @@ export const SolidShortTextFieldImageRenderModeWidget = ({ value, setLightboxUrl
             style={{ objectFit: "cover" }}
             onClick={(event) => {
                 event.stopPropagation();
-                setLightboxUrls([{ src: value, downloadUrl: value }]);
+                setLightboxUrls([{ src: rowData[fieldMetadata.name], downloadUrl: rowData[fieldMetadata.name] }]);
                 setOpenLightbox(true);
             }}
         />
