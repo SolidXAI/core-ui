@@ -146,6 +146,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
     const readOnlyPermission = fieldContext.readOnly;
     const pathname = usePathname();
     const lastPathSegment = pathname.split('/').pop();
+    const userKeyField: any = Object.entries(fieldContext.solidFormViewMetaData.data.solidFieldsMetadata).find(([_, value]: any) => value.isUserKey)?.[0];
 
     const handlePopupOpen = (id: any) => {
         const formviewparams = {
@@ -154,7 +155,8 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
             embeded: true,
             isCustomCreate: false,
             customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
-            modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName)
+            modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+            parentData: userKeyField ? {[userKeyField] : {label: fieldContext.data[userKeyField], value: fieldContext.data['id']}} : {},
         }
         setformViewParams(formviewparams);
         setvisibleCreateRelationEntity(true);
@@ -209,6 +211,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
             isCustomCreate: false,
             customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
             modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+            parentData: userKeyField ? {[userKeyField] : {label: fieldContext.data[userKeyField], value: fieldContext.data['id']}} : {}
         }
         setformViewParams(formviewparams)
 

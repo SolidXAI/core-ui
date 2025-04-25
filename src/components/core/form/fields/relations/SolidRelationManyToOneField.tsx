@@ -3,7 +3,7 @@ import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { Message } from "primereact/message";
 import qs from "qs";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
@@ -27,12 +27,18 @@ export class SolidRelationManyToOneField implements ISolidField {
 
     initialValue(): any {
 
-        const manyToOneFieldData = this.fieldContext.data[this.fieldContext.field.attrs.name];
-        const fieldMetadata = this.fieldContext.fieldMetadata;
+        const manyToOneFieldData = this.fieldContext?.data[this.fieldContext?.field?.attrs?.name];
+        const fieldMetadata = this.fieldContext?.fieldMetadata;
         const userKeyField = fieldMetadata?.relationModel?.userKeyField?.name;
         const manyToOneColVal = manyToOneFieldData ? manyToOneFieldData[userKeyField] : '';
         if (manyToOneColVal) {
             return { label: manyToOneColVal || '', value: manyToOneFieldData?.id || '' };
+        }
+        if (this.fieldContext.parentData) {
+            const [key, value]: any = Object.entries(this.fieldContext.parentData)[0] || [];
+            if (key && value !== undefined) {
+                return { label: value.label, value: value.value };
+            }
         }
         return {}
     }
@@ -64,6 +70,19 @@ export class SolidRelationManyToOneField implements ISolidField {
         const fieldLayoutInfo = this.fieldContext.field;
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+
+        useEffect(() => {
+            const newValue = this.initialValue();
+            if (this.fieldContext.parentData) {
+                formik.setFieldValue(fieldLayoutInfo.attrs.name, newValue);
+            }
+        }, [this.fieldContext.parentData]);
+
+        const isVisible = fieldLayoutInfo.attrs?.visible !== false && !this.fieldContext.parentData;
+
+        if (!isVisible) {
+            return null;
+        }
 
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
         let editWidget = fieldLayoutInfo.attrs.editWidget;
