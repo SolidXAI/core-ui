@@ -193,7 +193,7 @@ export const SolidIntegerSliderStyleFormEditWidget = ({ formik, fieldContext }: 
     };
 
     return (
-        <div className="w-full">
+        <div className="w-full" style={{height: '60px'}}>
             {showFieldLabel != false && (
                 <div className="font-medium mb-2">{fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
