@@ -8,7 +8,7 @@ import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "@/helpers/registry";
-
+import { useRef } from 'react';
 
 export class SolidSelectionDynamicField implements ISolidField {
 
@@ -69,36 +69,76 @@ export class SolidSelectionDynamicField implements ISolidField {
         // selection dynamic specific code. 
         const [triggerGetSelectionDynamicValues] = useLazyGetSelectionDynamicValuesQuery();
         const [selectionDynamicItems, setSelectionDynamicItems] = useState([]);
+        const autoCompleteRef = useRef<any>(null); // Ref to control AutoComplete
+        let autoCompleteKey = '';
         const selectionDynamicSearch = async (event: AutoCompleteCompleteEvent) => {
-
+            await fetchSuggestions(event.query);
             // Get the list view layout & metadata first. 
-            const queryData = {
-                offset: 0,
-                limit: 10,
-                query: event.query,
-                fieldId: fieldMetadata.id
-            };
-            if (whereClause) {
-                queryData.query = whereClause;
-            }
-            let sdQs = qs.stringify(queryData, {
-                encodeValuesOnly: true,
-                encoder: (str, defaultEncoder, charset, type) => {
-                    if (type === 'key' || type === 'value') {
-                      if (str === queryData.query) return str;
-                    }
-                    return defaultEncoder(str);
-                }
-            });
-            // TODO: do error handling here, possible errors like modelname is incorrect etc...
-            const sdResponse = await triggerGetSelectionDynamicValues(sdQs);
+            // const queryData = {
+            //     offset: 0,
+            //     limit: 10,
+            //     query: event.query,
+            //     fieldId: fieldMetadata.id
+            // };
+            // if (whereClause) {
+            //     queryData.query = whereClause;
+            // }
+            // console.log("queryData is", queryData)
+            // let sdQs = qs.stringify(queryData, {
+            //     encodeValuesOnly: true,
+            //     encoder: (str, defaultEncoder, charset, type) => {
+            //         if (type === 'key' || type === 'value') {
+            //           if (str === queryData.query) return str;
+            //         }
+            //         return defaultEncoder(str);
+            //     }
+            // });
+            // console.log("sdQs is", sdQs);
+            // // TODO: do error handling here, possible errors like modelname is incorrect etc...
+            // const sdResponse = await triggerGetSelectionDynamicValues(sdQs);
+            // console.log("sdResponse is", sdResponse);
 
-            // TODO: if no data found then can we show no matching "entities", where entities can be replaced with the model plural name,
-            const sdData = sdResponse.data.data;
+            // // TODO: if no data found then can we show no matching "entities", where entities can be replaced with the model plural name,
+            // const sdData = sdResponse.data.data;
+            // console.log("sdData is", sdData);
 
-            // @ts-ignore
-            setSelectionDynamicItems(sdData);
+            // // @ts-ignore
+            // setSelectionDynamicItems(sdData);
         }
+
+        const fetchSuggestions = async (query = '') => {
+            const queryData = {
+              offset: 0,
+              limit: 10,
+              query: whereClause || query,
+              fieldId: fieldMetadata.id
+            };
+          
+            const sdQs = qs.stringify(queryData, {
+              encodeValuesOnly: true,
+            //   encoder: (str, defaultEncoder, charset, type) => {
+            //     if (type === 'key' || type === 'value') {
+            //       if (str === queryData.query) return str;
+            //     }
+            //     return defaultEncoder(str);
+            //   }
+            });
+          
+            const sdResponse = await triggerGetSelectionDynamicValues(sdQs).unwrap();
+            const sdData = sdResponse?.data ?? [];
+          
+            setSelectionDynamicItems(sdData);
+          };
+          
+          const handleDropdownClick = async () => {
+            await fetchSuggestions(''); // Empty string triggers full list
+            autoCompleteRef.current?.show(); // Force dropdown open
+            const currentValue = formik.values[fieldLayoutInfo.attrs.name] || '';
+           autoCompleteKey = currentValue?.value || currentValue?.label || '';
+          };
+        //   const currentValue = formik.values[fieldLayoutInfo.attrs.name] || '';
+        //   const autoCompleteKey = currentValue?.value || currentValue?.label || '';
+          
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
@@ -128,19 +168,24 @@ export class SolidSelectionDynamicField implements ISolidField {
                                         </label>
                                     }
                                     <AutoComplete
+                                        key={autoCompleteKey}
+                                        ref={autoCompleteRef}
                                         readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                                         disabled={formDisabled || fieldDisabled}
                                         {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                                         id={fieldLayoutInfo.attrs.name}
                                         field="label"
                                         value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                                        
                                         dropdown
                                         suggestions={selectionDynamicItems}
                                         completeMethod={selectionDynamicSearch}
                                         // onChange={(e) => updateInputs(index, e.value)} />
                                         // onChange={formik.handleChange}
+                                        onDropdownClick={handleDropdownClick}
                                         onChange={(e) => this.fieldContext.onChange(e, 'onFieldChange')}
                                         className="solid-standard-autocomplete"
+                                      
                                     />
                                 </div>
                                 {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (

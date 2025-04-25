@@ -1176,6 +1176,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     <div className="form-wrapper-title"> {editHeaderTitle}</div>
                                 </div>
                                 <div className="gap-3 flex">
+                                    {  params.embeded !== true && viewMode === "view" &&
+                                         <Button type="button" icon="pi pi-plus" label="Add" size='small'
+                                            onClick={() => router.replace('new')}
+                                        ></Button>
+                                    }
                                     {params.embeded !== true && viewMode === "view" &&
                                         <div>
                                             <Button
@@ -1186,6 +1191,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                             />
                                         </div>
                                     }
+                                   
 
                                     {params.embeded !== true &&
                                         actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
