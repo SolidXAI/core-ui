@@ -903,7 +903,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 case "span":
                     return <span key={key} {...attrs}>{body}</span>
                 case "p":
-                    return <p key={key} {...attrs}>{body}</p>
+                    return <p key={key} className={attrs?.className} {...attrs}>{body}</p>
                 case "h1":
                     return <h1 key={key} {...attrs}>{body}</h1>
                 case "h2":

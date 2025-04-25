@@ -63,13 +63,17 @@ export const SolidChatter = ({ solidFormViewMetaData, id, refreshChatterMessage,
 
     useEffect(() => {
         if (refreshChatterMessage) {
-            fetchData();
-            setRefreshChatterMessage(false);
+            if (id !== 'new') {
+                fetchData();
+                setRefreshChatterMessage(false);
+            }
         }
     }, [refreshChatterMessage]);
 
     useEffect(() => {
-        fetchData();
+        if (id !== 'new') {
+            fetchData();
+        }
     }, [filters]);
 
     const handleTabClick = (tab: 'email-message' | 'log') => {

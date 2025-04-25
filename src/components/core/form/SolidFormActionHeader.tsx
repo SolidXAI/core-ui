@@ -12,9 +12,9 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const op = useRef(null);
-
-    const createHeaderTitle = `Create ${solidView.model.displayName}`;
-    const editHeaderTitle = `Edit ${solidView.model.displayName}`;
+    const customLabel = formViewLayout?.attrs?.customLabel;
+    const createHeaderTitle = customLabel || `Create ${solidView.model.displayName}`;
+    const editHeaderTitle = customLabel || `Edit ${solidView.model.displayName}`;
 
     const updateViewMode = (newMode: "view" | "edit") => {
         setViewMode(newMode);
