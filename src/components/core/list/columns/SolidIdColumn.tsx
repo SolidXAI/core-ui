@@ -55,7 +55,7 @@ const SolidIdColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidLi
             body={(rowData) => {
                 let viewWidget = column.attrs.viewWidget;
                 if (!viewWidget) {
-                    viewWidget = 'DefaultTextRenderModeWidget';
+                    viewWidget = 'DefaultTextListWidget';
                 }
                 let DynamicWidget = getExtensionComponent(viewWidget);
                 const widgetProps: SolidListFieldWidgetProps = {

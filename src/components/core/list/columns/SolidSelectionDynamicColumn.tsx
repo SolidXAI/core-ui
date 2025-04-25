@@ -56,7 +56,7 @@ const SolidSelectionDynamicColumn = ({ solidListViewMetaData, fieldMetadata, col
             body={(rowData) => {
                 let viewWidget = column.attrs.viewWidget;
                 if (!viewWidget) {
-                    viewWidget = 'DefaultTextRenderModeWidget';
+                    viewWidget = 'DefaultTextListWidget';
                 }
                 let DynamicWidget = getExtensionComponent(viewWidget);
                 const widgetProps: SolidListFieldWidgetProps = {
