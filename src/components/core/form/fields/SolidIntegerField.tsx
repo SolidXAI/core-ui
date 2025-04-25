@@ -6,6 +6,7 @@ import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { useEffect } from "react";
 
 export class SolidIntegerField implements ISolidField {
 
@@ -171,15 +172,22 @@ export const SolidIntegerSliderStyleFormEditWidget = ({ formik, fieldContext }: 
 
     const min = fieldMetadata.min || 1;
     const max = fieldMetadata.max || 5;
-    const value = formik.values[fieldLayoutInfo.attrs.name] || min;
+    const value = formik.values[fieldLayoutInfo.attrs.name] ?? min;
 
     const getPercentage = () => {
         return ((value - min) / (max - min)) * 100;
     };
 
     const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, parseInt(e.target.value, 10));
+        const newValue = parseInt(e.target.value, 10);
+        formik.setFieldValue(fieldLayoutInfo.attrs.name, newValue);
     };
+
+    useEffect(() => {
+        if (formik.values[fieldLayoutInfo.attrs.name] === undefined || formik.values[fieldLayoutInfo.attrs.name] === null) {
+            formik.setFieldValue(fieldLayoutInfo.attrs.name, min);
+        }
+    }, []);
 
     const getLabelPosition = (num: number) => {
         const positions: { [key: number]: string } = {
