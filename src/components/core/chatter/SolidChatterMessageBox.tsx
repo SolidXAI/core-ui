@@ -147,7 +147,7 @@ export const SolidChatterMessageBox = (props: Props) => {
             <Dialog
                 visible={isImageDialogVisible}
                 onHide={() => setIsImageDialogVisible(false)}
-                className='w-9'
+                className='w-9 '
                 modal
             >
                 {selectedImage && (
