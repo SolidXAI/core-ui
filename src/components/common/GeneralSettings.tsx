@@ -74,7 +74,7 @@ export const GeneralSettings = () => {
                     data: { settings: updatedSettings },
                 }).unwrap();
                 if (response.statusCode === 200) {
-                    showToast("success", "Ypdated", "Settings updated")
+                    showToast("success", "Updated", "Settings updated")
                 }
 
             } catch (error) {
