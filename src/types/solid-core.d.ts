@@ -69,6 +69,7 @@ export type LayoutAttribute = {
     inlineCreate?: string;
     renderMode?: string;
     widget?: string;
+    visible?: boolean;
 };
 
 // Generic representation of any node in our layout 
