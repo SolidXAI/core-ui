@@ -61,6 +61,7 @@ export type SolidFormViewProps = {
     customCreateHandler?: any
     inlineCreateAutoSave?: boolean,
     customLayout?: any,
+    parentData?: any
 };
 
 
@@ -152,7 +153,7 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps, setLightboxUr
 }
 
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
-const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, setLightboxUrls, setOpenLightbox }: any) => {
+const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, parentData, setLightboxUrls, setOpenLightbox }: any) => {
     const fieldContext: SolidFieldProps = {
         // field metadata - coming from the field-metadata table.
         fieldMetadata: fieldMetadata,
@@ -167,6 +168,9 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
         viewMode: viewMode,
         onChange: onChange,
         onBlur: onBlur
+    }
+    if (parentData) {
+        fieldContext.parentData = parentData;
     }
     const solidField = fieldFactory(fieldMetadata?.type, fieldContext, setLightboxUrls, setOpenLightbox);
 
@@ -941,7 +945,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             field={element}
                             formik={formik}
                             fieldMetadata={fieldMetadata}
-                            initialEntityData={solidFormViewData ? solidFormViewData.data : null}
+                            initialEntityData={solidFormViewData ? solidFormViewData.data : {}}
                             solidFormViewMetaData={solidFormViewMetaData}
                             modelName={params.modelName}
                             readOnly={readOnlyPermission}
@@ -950,6 +954,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             onBlur={formFieldOnXXX}
                             setLightboxUrls={setLightboxUrls}
                             setOpenLightbox={setOpenLightbox}
+                            parentData={params.parentData}
                         />;
                     }
                 }
