@@ -99,9 +99,6 @@ const CreateModule = ({ data }: any) => {
     menuSequenceNumber: data ? data.menuSequenceNumber : ""
   };
 
-  const visibleModulePopup = useSelector(
-    (state: any) => state.popup.visibleModulePopup
-  );
 
   const validationSchema = Yup.object({
     name: Yup.string()

@@ -175,7 +175,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       const fieldMetadata = solidFieldsMetadata?.[column.attrs.name];
       if (!fieldMetadata?.type) {
         showFieldError(`${column.attrs.label} is not present in metadata`)
-        return;
+        // return;
       }
       // Form the initial filters after iterating over the columns and field metadata. 
       if (['int', 'bigint', 'float', 'decimal'].includes(fieldMetadata?.type)) {
@@ -742,7 +742,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded !== true &&
             <SolidCreateButton url={createButtonUrl} />
           }
-          {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true && params.id !== 'new' &&
+          {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true && params.id !== 'new' && params.viewMode == "edit" &&
             // < SolidCreateButton url={createButtonUrl} />
             <Button type="button" icon="pi pi-plus" label="Add" size='small'
               onClick={() => params.handlePopUpOpen("new")}

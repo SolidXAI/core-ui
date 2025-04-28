@@ -1,3 +1,4 @@
+"use client"
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import { useState } from "react";
