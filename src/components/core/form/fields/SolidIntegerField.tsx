@@ -6,6 +6,9 @@ import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { Slider } from "primereact/slider";
+import styles from './solidFields.module.css'
+import { useState } from "react";
 
 export class SolidIntegerField implements ISolidField {
 
@@ -156,3 +159,58 @@ export const DefaultIntegerFormEditWidget = ({ formik, fieldContext }: SolidForm
         </div>
     );
 }
+
+export const SolidIntegerSliderStyleFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+    const readOnlyPermission = fieldContext.readOnly;
+    const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
+    const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
+    const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
+    const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
+    const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+    const min = fieldMetadata.min || 0;
+    const max = fieldMetadata.max || 5;
+    const [sliderValue, setsliderValue] = useState((formik.values[fieldLayoutInfo.attrs.name] || min) * 20);
+
+    const handleChange = (e: any) => {
+        const newValue = Math.round(e.value / 20);
+        formik.setFieldValue(fieldLayoutInfo.attrs.name, newValue);
+        setsliderValue(e.value);
+    };
+
+    return (
+        <div className="w-full" style={{height: '60px'}}>
+            {showFieldLabel != false && (
+                <div className="font-medium mb-2">{fieldLabel}
+                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                </div>
+            )}
+            <div className="relative h-12">
+                <Slider 
+                    value={sliderValue} 
+                    onChange={(e) => handleChange(e)} 
+                    className={`w-full ${styles.solidCustomSlider}`} 
+                    step={20} 
+                    min={0}
+                    max={100}
+                />
+                <div className="flex align-item-center justify-content-between mt-2">
+                    {Array.from({ length: max - min + 1 }, (_, i) => {
+                        const num = i + min;
+                        return (
+                            <span 
+                                key={num}
+                                className="text-sm"
+                            >
+                                {num === 0 ? '' : num}
+                            </span>
+                        );
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+};

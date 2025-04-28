@@ -12,7 +12,7 @@ import { DefaultDateFormEditWidget } from "@/components/core/form/fields/SolidDa
 import { DefaultDateTimeFormEditWidget } from "@/components/core/form/fields/SolidDateTimeField";
 import { DefaultDecimalFormEditWidget } from "@/components/core/form/fields/SolidDecimalField";
 import { DefaultEmailFormEditWidget } from "@/components/core/form/fields/SolidEmailField";
-import { DefaultIntegerFormEditWidget } from "@/components/core/form/fields/SolidIntegerField";
+import { DefaultIntegerFormEditWidget, SolidIntegerSliderStyleFormEditWidget } from "@/components/core/form/fields/SolidIntegerField";
 import { DefaultJsonFormEditWidget, DefaultJsonFormViewWidget } from "@/components/core/form/fields/SolidJsonField";
 import { DefaultLongTextFormEditWidget } from "@/components/core/form/fields/SolidLongTextField";
 import { DefaultMediaMultipleFormEditWidget, DefaultMediaMultipleFormViewWidget } from "@/components/core/form/fields/SolidMediaMultipleField";
@@ -106,6 +106,7 @@ registerExtensionComponent("DefaultDateTimeFormEditWidget", DefaultDateTimeFormE
 registerExtensionComponent("DefaultDecimalFormEditWidget", DefaultDecimalFormEditWidget, []);
 registerExtensionComponent("DefaultEmailFormEditWidget", DefaultEmailFormEditWidget, []);
 registerExtensionComponent("DefaultIntegerFormEditWidget", DefaultIntegerFormEditWidget, []);
+registerExtensionComponent("SolidIntegerSliderStyleFormEditWidget", SolidIntegerSliderStyleFormEditWidget, ["integerSlider"]);
 registerExtensionComponent("DefaultJsonFormEditWidget", DefaultJsonFormEditWidget, []);
 registerExtensionComponent("DefaultLongTextFormEditWidget", DefaultLongTextFormEditWidget, []);
 registerExtensionComponent("DefaultMediaMultipleFormEditWidget", DefaultMediaMultipleFormEditWidget, []);
