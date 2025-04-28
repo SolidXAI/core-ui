@@ -75,6 +75,7 @@ export type LayoutAttribute = {
 // Generic representation of any node in our layout 
 export type LayoutNodeType = "form" | "sheet" | "notebook" | "page" | "row" | "column" | "field" | "div" | "p" | "span" | "h1" | "h2" | "h3";
 export type LayoutNode = {
+    body?: string;
     type: LayoutNodeType;
     attrs: LayoutAttribute;
     children?: LayoutNode[];
