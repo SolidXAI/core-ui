@@ -1,3 +1,4 @@
+"use client"
 import { BackButton } from "@/components/common/BackButton";
 import { SolidCancelButton } from "@/components/common/CancelButton";
 import { SolidFormHeader } from "@/components/common/SolidFormHeader";
