@@ -68,7 +68,7 @@ export const SolidChatterHeader = (props: Props) => {
                     Activity
                 </div>
                 <div className='flex align-items-center gap-2'>
-                    <Button
+                    {/* <Button
                         label="Send Message"
                         size="small"
                         type="button"
@@ -77,7 +77,7 @@ export const SolidChatterHeader = (props: Props) => {
                             severity: 'secondary',
                             outlined: true,
                         })}
-                    />
+                    /> */}
                     <Button
                         label="Log Note"
                         size="small"
