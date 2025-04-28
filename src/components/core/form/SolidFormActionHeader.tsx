@@ -3,19 +3,38 @@ import { BackButton } from "@/components/common/BackButton";
 import { SolidCancelButton } from "@/components/common/CancelButton";
 import { SolidFormHeader } from "@/components/common/SolidFormHeader";
 import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
+import { getExtensionFunction } from "@/helpers/registry";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 
 export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode }: any) => {
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
     const op = useRef(null);
-
+    const [contextMenuHeaderButtons, setContextMenuHeaderButtons] = useState<any>([]);
+    const [normalHeaderButtons, setNormalHeaderButtons] = useState<any>([]);
     const createHeaderTitle = `Create ${solidView.model.displayName}`;
     const editHeaderTitle = `Edit ${solidView.model.displayName}`;
+    useEffect(() => {
+        if (solidView) {
+            let contextMenuHeaderButtonsData: any = [];
+            let normalHeaderButtonsData: any = [];
+            const formHeaderButtons = solidView.layout.formButtons;
+            if (formHeaderButtons && formHeaderButtons.length > 0) {
+                contextMenuHeaderButtonsData = formHeaderButtons.filter((button: any) => {
+                    return button.attrs && button.attrs.actionInContextMenu && button.attrs.actionInContextMenu === true;
+                });
+                setContextMenuHeaderButtons(contextMenuHeaderButtonsData)
+                normalHeaderButtonsData = formHeaderButtons.filter((button: any) => {
+                    return !button.attrs || !button.attrs.actionInContextMenu || button.attrs.actionInContextMenu === false;
+                });
+                setNormalHeaderButtons(normalHeaderButtonsData);
+            }
+        }
+    }, []);
 
     const updateViewMode = (newMode: "view" | "edit") => {
         setViewMode(newMode);
@@ -44,17 +63,6 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                 />
                 <OverlayPanel ref={op} className="solid-custom-overlay">
                     <div className="flex flex-column gap-1 p-1">
-                        {/* <Button
-                            text
-                            type="button"
-                            className="w-8rem text-left gap-2 text-color"
-                            label="Duplicate"
-                            size="small"
-                            iconPos="left"
-                            icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <path d="M6 11.9997C5.63333 11.9997 5.31944 11.8691 5.05833 11.608C4.79722 11.3469 4.66667 11.033 4.66667 10.6663V2.66634C4.66667 2.29967 4.79722 1.98579 5.05833 1.72467C5.31944 1.46356 5.63333 1.33301 6 1.33301H12C12.3667 1.33301 12.6806 1.46356 12.9417 1.72467C13.2028 1.98579 13.3333 2.29967 13.3333 2.66634V10.6663C13.3333 11.033 13.2028 11.3469 12.9417 11.608C12.6806 11.8691 12.3667 11.9997 12 11.9997H6ZM6 10.6663H12V2.66634H6V10.6663ZM3.33333 14.6663C2.96667 14.6663 2.65278 14.5358 2.39167 14.2747C2.13056 14.0136 2 13.6997 2 13.333V3.99967H3.33333V13.333H10.6667V14.6663H3.33333Z" fill="black" fill-opacity="0.88" />
-                            </svg>}
-                        /> */}
                         {params.embeded !== true &&
                             params.id !== "new" &&
                             actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
@@ -82,6 +90,32 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             icon={'pi pi-objects-column'}
                             onClick={() => setLayoutDialogVisible(true)}
                         />
+                        {contextMenuHeaderButtons.map((button: any, index: number) => {
+                            return (
+                                <Button
+                                    text
+                                    type="button"
+                                    className="w-full text-left gap-2"
+                                    label={button.attrs.label}
+                                    size="small"
+                                    iconPos="left"
+                                    severity="contrast"
+                                    icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                                    onClick={() => {
+                                        const DynamicFunctionComponent = getExtensionFunction(button.attrs.action);
+                                        if (DynamicFunctionComponent) {
+                                            const event = {
+                                                formik,
+                                                solidFormViewMetaData: solidFormViewMetaData.data
+                                            }
+                                            DynamicFunctionComponent(event)
+                                        }
+                                    }}
+                                />
+                            )
+                        })
+                        }
+
                     </div>
                 </OverlayPanel>
             </div>
@@ -98,6 +132,31 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             <div className="form-wrapper-title"> {createHeaderTitle}</div>
                         </div>
                         <div className="gap-3 flex">
+                            {normalHeaderButtons.map((button: any, index: number) => {
+                                return (
+                                    <Button
+                                        text
+                                        type="button"
+                                        className="w-full text-left gap-2"
+                                        label={button.attrs.label}
+                                        size="small"
+                                        iconPos="left"
+                                        severity="contrast"
+                                        icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                                        onClick={() => {
+                                            const DynamicFunctionComponent = getExtensionFunction(button.attrs.action);
+                                            if (DynamicFunctionComponent) {
+                                                const event = {
+                                                    formik,
+                                                    solidFormViewMetaData: solidFormViewMetaData.data
+                                                }
+                                                DynamicFunctionComponent(event)
+                                            }
+                                        }}
+                                    />
+                                )
+                            })
+                            }
                             {params.embeded !== true &&
                                 actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
                                 !formViewLayout.attrs.readonly &&
