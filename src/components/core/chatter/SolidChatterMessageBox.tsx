@@ -1,10 +1,11 @@
-import React, { useMemo, useState } from 'react'
-import styles from './chatter.module.css'
-import { Avatar } from 'primereact/avatar'
-import { stringToColor, getTextColor } from '@/helpers/getRandomColors'
+"use client"
 import { RightArrowSvg } from '@/components/Svg/RightArrowSvg'
-import { Dialog } from 'primereact/dialog';
-import Image from 'next/image';
+import { getTextColor, stringToColor } from '@/helpers/getRandomColors'
+import Image from 'next/image'
+import { Avatar } from 'primereact/avatar'
+import { Dialog } from 'primereact/dialog'
+import { useMemo, useState } from 'react'
+import styles from './chatter.module.css'
 
 interface Props {
     user: string,

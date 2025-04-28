@@ -17,3 +17,6 @@ declare module '*.svg' {
     const content: any;
     export default content;
 }
+
+// src/declarations.d.ts or types/declarations.d.ts
+declare module '@solidstarters/solid-core-ui';

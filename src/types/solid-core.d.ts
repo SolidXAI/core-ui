@@ -69,6 +69,7 @@ export type LayoutAttribute = {
     inlineCreate?: string;
     renderMode?: string;
     widget?: string;
+    visible?: boolean;
 };
 
 // Generic representation of any node in our layout 
@@ -118,23 +119,24 @@ export type SolidListFieldWidgetProps = {
     column: any;
 }
 
-
-
 export type SolidMediaListFieldWidgetProps = SolidListFieldWidgetProps & {
     setLightboxUrls?: any,
     setOpenLightbox?: any
 }
-
-
-
 
 export type SolidMediaFormFieldWidgetProps = SolidFormFieldWidgetProps & {
     setLightboxUrls?: any,
     setOpenLightbox?: any
 }
 
-
-
 export type SolidShortTextImageRenderModeWidgetProps = {
     data: string;
 }
+
+
+export type SolidFormDynamicFunctionProps = {
+    formik: any;
+    solidFormViewMetaData: SolidView;
+}
+
+export type RootState = ReturnType<ReturnType<typeof initializeStore>['getState']>;

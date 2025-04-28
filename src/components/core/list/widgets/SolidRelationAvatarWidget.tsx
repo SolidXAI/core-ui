@@ -32,26 +32,28 @@ export const AvatarWidget = ({ value }: any) => {
 
     return (
         <div className="solid-table-row">
-            <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
-                <div
-                    style={{
-                        width: 20,
-                        height: 20,
-                        borderRadius: '50%',
-                        backgroundColor: bgColor,
-                        color: 'white',
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'center',
-                        fontWeight: 600,
-                        fontSize: 12,
-                        boxShadow: '0 0 0 2px rgba(0,0,0,0.1)',
-                    }}
-                >
-                    {initials}
+            {value &&
+                <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                    <div
+                        style={{
+                            width: 20,
+                            height: 20,
+                            borderRadius: '50%',
+                            backgroundColor: bgColor,
+                            color: 'white',
+                            display: 'flex',
+                            alignItems: 'center',
+                            justifyContent: 'center',
+                            fontWeight: 600,
+                            fontSize: 12,
+                            boxShadow: '0 0 0 2px rgba(0,0,0,0.1)',
+                        }}
+                    >
+                        {initials}
+                    </div>
+                    <span>{value}</span>
                 </div>
-                <span>{value}</span>
-            </div>
+            }
         </div>
     );
 };

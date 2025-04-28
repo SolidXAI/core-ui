@@ -1,5 +1,5 @@
-import React from 'react'
-import styles from './chatter.module.css'
+"use client"
+import styles from './chatter.module.css';
 
 interface Props {
     date: string;

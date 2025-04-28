@@ -1,9 +1,10 @@
-import React, { useState, useEffect } from 'react'
-import { SolidMessageComposer } from './SolidMessageComposer'
+"use client"
 import { Button } from 'primereact/button'
-import { Dialog } from 'primereact/dialog'
 import { Calendar } from 'primereact/calendar'
+import { Dialog } from 'primereact/dialog'
+import { useEffect, useState } from 'react'
 import styles from './chatter.module.css'
+import { SolidMessageComposer } from './SolidMessageComposer'
 
 interface FilterState {
     name: string;
