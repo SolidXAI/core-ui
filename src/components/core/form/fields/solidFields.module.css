@@ -1,0 +1,7 @@
+.solidCustomSlider {
+    height: 0.625rem;
+}
+.solidCustomSlider .p-slider .p-slider-handle {
+    background: #0895CD;
+    border: 2px solid #fff;
+}

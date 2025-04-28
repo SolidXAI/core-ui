@@ -6,7 +6,9 @@ import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
-import { useEffect } from "react";
+import { Slider } from "primereact/slider";
+import styles from './solidFields.module.css'
+import { useState } from "react";
 
 export class SolidIntegerField implements ISolidField {
 
@@ -169,35 +171,14 @@ export const SolidIntegerSliderStyleFormEditWidget = ({ formik, fieldContext }: 
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
-
-    const min = fieldMetadata.min || 1;
+    const min = fieldMetadata.min || 0;
     const max = fieldMetadata.max || 5;
-    const value = formik.values[fieldLayoutInfo.attrs.name] ?? min;
+    const [sliderValue, setsliderValue] = useState((formik.values[fieldLayoutInfo.attrs.name] || min) * 20);
 
-    const getPercentage = () => {
-        return ((value - min) / (max - min)) * 100;
-    };
-
-    const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
-        const newValue = parseInt(e.target.value, 10);
+    const handleChange = (e: any) => {
+        const newValue = Math.round(e.value / 20);
         formik.setFieldValue(fieldLayoutInfo.attrs.name, newValue);
-    };
-
-    useEffect(() => {
-        if (formik.values[fieldLayoutInfo.attrs.name] === undefined || formik.values[fieldLayoutInfo.attrs.name] === null) {
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, min);
-        }
-    }, []);
-
-    const getLabelPosition = (num: number) => {
-        const positions: { [key: number]: string } = {
-            1: '1%',
-            2: '25%',
-            3: '50%',
-            4: '74%',
-            5: '99%'
-        };
-        return positions[num] || '0%';
+        setsliderValue(e.value);
     };
 
     return (
@@ -208,49 +189,23 @@ export const SolidIntegerSliderStyleFormEditWidget = ({ formik, fieldContext }: 
                 </div>
             )}
             <div className="relative h-12">
-                <div className="absolute top-1/2 left-0 right-0 h-2 bg-gray-200 rounded-full -translate-y-1/2">
-                    <div 
-                        className="absolute top-0 left-0 h-full rounded-full"
-                        style={{ 
-                            width: `${getPercentage()}%`,
-                            backgroundColor: '#20a4d9 !important'
-                        }}
-                    />
-                </div>
-                
-                <input
-                    type="range"
-                    min={min}
-                    max={max}
-                    value={value}
-                    onChange={handleChange}
-                    step={1}
-                    disabled={formDisabled || fieldDisabled || formReadonly || fieldReadonly || readOnlyPermission}
-                    className="absolute top-1/2 left-0 right-0 w-full h-2 -translate-y-1/2 cursor-pointer"
+                <Slider 
+                    value={sliderValue} 
+                    onChange={(e) => handleChange(e)} 
+                    className={`w-full ${styles.solidCustomSlider}`} 
+                    step={20} 
+                    min={0}
+                    max={100}
                 />
-                
-                <div 
-                    className="absolute w-5 h-5 rounded-full ring-2 ring-white transform -translate-y-1/2 -translate-x-1/2"
-                    style={{ 
-                        left: `${getPercentage()}%`,
-                        top: '50%',
-                        backgroundColor: '#20a4d9'
-                    }}
-                />
-
-                <div className="absolute top-full left-0 right-0 mt-2">
+                <div className="flex align-item-center justify-content-between mt-2">
                     {Array.from({ length: max - min + 1 }, (_, i) => {
                         const num = i + min;
                         return (
                             <span 
                                 key={num}
-                                className="absolute text-sm text-gray-600 transform -translate-x-1/2"
-                                style={{ 
-                                    left: getLabelPosition(num),
-                                    marginTop: '12px'
-                                }}
+                                className="text-sm"
                             >
-                                {num}
+                                {num === 0 ? '' : num}
                             </span>
                         );
                     })}

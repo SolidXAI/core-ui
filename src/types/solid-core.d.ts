@@ -92,6 +92,7 @@ export type SolidUiEvent = {
 };
 
 export type SolidLoadForm = {
+    parentData?: any,
     type: SolidUiEvents;
     formData: Record<string, any>;
     viewMetadata: SolidView;
