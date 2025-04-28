@@ -76,7 +76,7 @@ export class SolidSelectionStaticField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
-        const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
+        const isFormFieldValid = (formik: any, fieldName: string) => formik.errors[fieldName];
 
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
         let editWidget = fieldLayoutInfo.attrs.editWidget;
@@ -170,7 +170,7 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
                     id={fieldLayoutInfo.attrs.name}
                     name={fieldLayoutInfo.attrs.name}
                     field="label"
-                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                    value={formik.values[fieldLayoutInfo.attrs.name] || null}
                     dropdown
                     suggestions={selectionStaticItems}
                     completeMethod={selectionStaticSearch}
@@ -211,7 +211,7 @@ export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }
     });
 
     const isFormFieldValid = (formik: any, fieldName: string) =>
-        formik.touched[fieldName] && formik.errors[fieldName];
+         formik.errors[fieldName];
 
     return (
         <div className={className}>
