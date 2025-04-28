@@ -468,7 +468,6 @@ export { solidSettingsApi, useCreateSolidSettingsMutation, useGetSolidSettingsBy
 export { logout, setToken } from '@/redux/features/authSlice';
 export { gridView, listView } from '@/redux/features/dataViewSlice';
 export { hideNavbar, showNavbar, toggleNavbar } from '@/redux/features/navbarSlice';
-export { hideFieldsPopup, hideModulePopup, showFieldsPopup, showModulePopup } from '@/redux/features/popupSlice';
 export { toggleTheme } from '@/redux/features/themeSlice';
 export { setIsAuthenticated, setUser } from '@/redux/features/userSlice';
 
@@ -616,6 +615,8 @@ export { default as navbarReducer } from '@/redux/features/navbarSlice';
 export { default as popupReducer } from '@/redux/features/popupSlice';
 export { default as themeReducer } from '@/redux/features/themeSlice';
 export { default as userReducer } from '@/redux/features/userSlice';
+export { default as useSolidPopup } from '@/redux/hooks/useSolidPopup';
+
 
 export { default as GenerateModelCodeRowAction } from '@/components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction'
 
