@@ -61,7 +61,7 @@ export type SolidFormViewProps = {
     customCreateHandler?: any
     inlineCreateAutoSave?: boolean,
     customLayout?: any,
-    parentData?: any,
+    parentData?: any
 };
 
 
