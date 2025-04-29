@@ -45,7 +45,7 @@ import "yet-another-react-lightbox/plugins/counter.css";
 import { SolidListViewConfigure } from "./SolidListViewConfigure";
 import { SolidListViewShimmerLoading } from "./SolidListViewShimmerLoading";
 import { SolidEmptyListViewPlaceholder } from "./SolidEmptyListViewPlaceholder";
-
+import { useHandleListCustomButtonClick } from "@/components/common/useHandleListCustomButtonClick";
 
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -95,7 +95,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const solidGlobalSearchElementRef = useRef();
 
   const router = useRouter()
-  const searchParams = useSearchParams().toString(); // Converts the query params to a string
+  const searchParams = useSearchParams(); // Converts the query params to a string
 
   // TODO: The initial filter state will be created based on the fields which are present on this list view. 
   const [filters, setFilters] = useState<any>(params.customFilter || null);
@@ -107,6 +107,8 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
 
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
+
+  const handleCustomButtonClick = useHandleListCustomButtonClick()
 
   useEffect(() => {
     const fetchPermissions = async () => {
@@ -177,34 +179,37 @@ export const SolidListView = (params: SolidListViewParams) => {
         showFieldError(`${column.attrs.label} is not present in metadata`)
         // return;
       }
-      // Form the initial filters after iterating over the columns and field metadata. 
-      if (['int', 'bigint', 'float', 'decimal'].includes(fieldMetadata?.type)) {
-        // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] }
-        initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.EQUALS }
-      }
-      else if (['date', 'datetime', 'time', 'boolean'].includes(fieldMetadata?.type)) {
-        // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }] }
-        initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.EQUALS }
-      }
-      else if (['relation', 'selectionStatic', 'selectionDynamic'].includes(fieldMetadata?.type)) {
-        initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.IN }
-      }
-      else {
-        // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
-        initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.STARTS_WITH }
+      if (fieldMetadata) {
+        // Form the initial filters after iterating over the columns and field metadata. 
+        if (['int', 'bigint', 'float', 'decimal'].includes(fieldMetadata?.type)) {
+          // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] }
+          initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.EQUALS }
+        }
+        else if (['date', 'datetime', 'time', 'boolean'].includes(fieldMetadata?.type)) {
+          // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }] }
+          initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.EQUALS }
+        }
+        else if (['relation', 'selectionStatic', 'selectionDynamic'].includes(fieldMetadata?.type)) {
+          initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.IN }
+        }
+        else {
+          // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
+          initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.STARTS_WITH }
+        }
+
+        if (column.attrs.name === 'id') {
+          initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.IN }
+        }
+
+        // Form the "toPopulate" array. 
+        if (fieldMetadata.type === 'relation') {
+          toPopulate.push(fieldMetadata.name);
+        }
+        if (fieldMetadata.type === 'mediaSingle' || fieldMetadata.type === 'mediaMultiple') {
+          toPopulateMedia.push(fieldMetadata.name);
+        }
       }
 
-      if (column.attrs.name === 'id') {
-        initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.IN }
-      }
-
-      // Form the "toPopulate" array. 
-      if (fieldMetadata.type === 'relation') {
-        toPopulate.push(fieldMetadata.name);
-      }
-      if (fieldMetadata.type === 'mediaSingle' || fieldMetadata.type === 'mediaMultiple') {
-        toPopulateMedia.push(fieldMetadata.name);
-      }
     }
     // setFilters(initialFilters);
     const rows = solidListViewMetaData?.data?.solidView?.layout?.attrs?.defaultPageSize ?? 25;
@@ -738,11 +743,35 @@ export const SolidListView = (params: SolidListViewParams) => {
           }
         </div>
         <div className="flex align-items-center gap-3">
+          {/* {solidListViewMetaData?.data?.solidView?.layout?.attrs?.headerButtons &&
+            solidListViewMetaData?.data?.solidView?.layout?.attrs?.headerButtons.map((button: any) => {
+              return (
+                <Button
+                  text
+                  type="button"
+                  className="w-full text-left gap-2"
+                  label={button.attrs.label}
+                  size="small"
+                  iconPos="left"
+                  severity="contrast"
+                  icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                  onClick={() => {
+                    const event = {
+                      params,
+                      solidListViewMetaData: solidListViewMetaData.data
+                    }
+                    handleCustomButtonClick(button.attrs, event)
+                  }}
+                />
+              );
+            })
+          } */}
+
 
           {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded !== true &&
             <SolidCreateButton url={createButtonUrl} />
           }
-          {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true && params.id !== 'new' && params.viewMode == "edit" &&
+          {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true && params.id !== 'new' && s.viewMode == "edit" &&
             // < SolidCreateButton url={createButtonUrl} />
             <Button type="button" icon="pi pi-plus" label="Add" size='small'
               onClick={() => params.handlePopUpOpen("new")}
@@ -846,6 +875,48 @@ export const SolidListView = (params: SolidListViewParams) => {
           <Column selectionMode="multiple" headerStyle={{ width: "3em" }} />
 
           {renderColumnsDynamically(listViewMetaData)}
+          {solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons &&
+            solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons.filter(rb => rb.attrs.actionInContextMenu != true).map((button: any) => {
+              return (
+                <Button
+                  text
+                  type="button"
+                  className="w-full text-left gap-2"
+                  label={button.attrs.label}
+                  size="small"
+                  iconPos="left"
+                  severity="contrast"
+                  icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                  onClick={() => {
+                    const event = {
+                      params,
+                      rowData: selectedSolidViewData,
+                      solidListViewMetaData: solidListViewMetaData.data
+                    }
+                    handleCustomButtonClick(button.attrs, event)
+                  }}
+                />
+                // <Button
+                //   text
+                //   size="small"
+                //   icon={rowButton?.attrs?.className ? rowButton?.attrs?.className : "pi pi-pencil"}
+                //   onClick={() => {
+                //     setListRowActionData({
+                //       modelName: params.modelName,
+                //       moduleName: params.moduleName,
+                //       rowAction: rowButton,
+                //       rowData: selectedSolidViewData,
+                //       closeListViewRowActionPopup: closeListViewRowActionPopup
+
+                //     });
+                //     setListViewRowActionPopupState(true)
+                //   }
+                //   }
+                //   className="w-full text-left gap-2"
+                //   label={rowButton?.attrs?.label}
+                // />
+              );
+            })}
           {actionsAllowed.includes(`${updatePermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.edit !== false &&
             <Column frozen alignFrozen="right" body={(rowData) => (
               rowData?.deletedAt ? (
@@ -886,27 +957,45 @@ export const SolidListView = (params: SolidListViewParams) => {
                         />
                       }
                       {solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons &&
-                        solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons.map((rowButton: any) => {
+                        solidListViewMetaData?.data?.solidView?.layout?.attrs?.rowButtons.filter(rb => rb.attrs.actionInContextMenu == true).map((button: any) => {
                           return (
                             <Button
                               text
-                              size="small"
-                              icon={rowButton?.attrs?.className ? rowButton?.attrs?.className : "pi pi-pencil"}
-                              onClick={() => {
-                                setListRowActionData({
-                                  modelName: params.modelName,
-                                  moduleName: params.moduleName,
-                                  rowAction: rowButton,
-                                  rowData: selectedSolidViewData,
-                                  closeListViewRowActionPopup: closeListViewRowActionPopup
-
-                                });
-                                setListViewRowActionPopupState(true)
-                              }
-                              }
+                              type="button"
                               className="w-full text-left gap-2"
-                              label={rowButton?.attrs?.label}
+                              label={button.attrs.label}
+                              size="small"
+                              iconPos="left"
+                              severity="contrast"
+                              icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                              onClick={() => {
+                                const event = {
+                                  params,
+                                  rowData: selectedSolidViewData,
+                                  solidListViewMetaData: solidListViewMetaData.data
+                                }
+                                handleCustomButtonClick(button.attrs, event)
+                              }}
                             />
+                            // <Button
+                            //   text
+                            //   size="small"
+                            //   icon={rowButton?.attrs?.className ? rowButton?.attrs?.className : "pi pi-pencil"}
+                            //   onClick={() => {
+                            //     setListRowActionData({
+                            //       modelName: params.modelName,
+                            //       moduleName: params.moduleName,
+                            //       rowAction: rowButton,
+                            //       rowData: selectedSolidViewData,
+                            //       closeListViewRowActionPopup: closeListViewRowActionPopup
+
+                            //     });
+                            //     setListViewRowActionPopupState(true)
+                            //   }
+                            //   }
+                            //   className="w-full text-left gap-2"
+                            //   label={rowButton?.attrs?.label}
+                            // />
                           );
                         })}
                     </div>

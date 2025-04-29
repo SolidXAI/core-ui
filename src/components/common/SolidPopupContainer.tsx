@@ -3,25 +3,28 @@
 import { useSelector, useDispatch } from 'react-redux';
 import { RootState } from '@/types/solid-core';
 import { closePopup } from '@/redux/features/popupSlice';
+import { Dialog } from 'primereact/dialog';
+import { get } from 'lodash';
+import { getExtensionComponent } from '@/helpers/registry';
+
 
 const SolidPopupContainer = () => {
-    const { isOpen, content } = useSelector((state: RootState) => state.popup);
+    const { isOpen, event } = useSelector((state: RootState) => state.popup);
     const dispatch = useDispatch();
 
     if (!isOpen) return null;
 
+    const DynamicComponent = getExtensionComponent(event?.action);
+
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-50 flex justify-center items-center z-50">
-            <div className="bg-white rounded-xl shadow-lg p-4 min-w-[300px] relative max-w-full max-h-full overflow-auto">
-                <button
-                    onClick={() => dispatch(closePopup())}
-                    className="absolute top-2 right-2 text-gray-500 hover:text-black text-2xl"
-                >
-                    &times;
-                </button>
-                {content}
-            </div>
-        </div>
+        <Dialog
+            visible={isOpen}
+            onHide={() => dispatch(closePopup())}
+            style={{ width: '50vw' }}
+            modal
+        >
+            {DynamicComponent && <DynamicComponent {...event} />}
+        </Dialog>
     );
 };
 

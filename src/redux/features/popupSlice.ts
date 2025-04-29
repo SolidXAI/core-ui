@@ -4,25 +4,26 @@ import { ReactNode } from 'react';
 
 interface PopupState {
   isOpen: boolean;
-  content: ReactNode | null;
+  event: Event | null;
+
 }
 
 const initialState: PopupState = {
   isOpen: false,
-  content: null,
+  event: null,
 };
 
 const popupSlice = createSlice({
   name: 'popup',
   initialState,
   reducers: {
-    openPopup: (state, action: PayloadAction<ReactNode>) => {
+    openPopup: (state, action: PayloadAction<any>) => {
       state.isOpen = true;
-      state.content = action.payload;
+      state.event = action.payload;
     },
     closePopup: (state) => {
       state.isOpen = false;
-      state.content = null;
+      state.event = null;
     },
   },
 });

@@ -594,6 +594,9 @@ export { default as UserProfile } from '@/components/layout/user-profile';
 export { default as UserSidebar } from '@/components/layout/UserSidebar';
 //menu.tsx
 export { default as menu } from '@/helpers/menu';
+//SolidPopupContainer.tsx
+export { default as SolidPopupContainer } from '@/components/common/SolidPopupContainer';
+
 
 // Auth 
 export { AuthLayout } from '@/components/auth/AuthLayout';

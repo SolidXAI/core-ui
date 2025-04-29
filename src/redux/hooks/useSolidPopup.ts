@@ -7,11 +7,11 @@ const useSolidPopup = () => {
     const dispatch = useDispatch();
 
     const showSolidPopup = (content: ReactNode) => {
-        dispatch(openPopup(content));
+        // dispatch(openPopup(content));
     };
 
     const hideSolidPopup = () => {
-        dispatch(closePopup());
+        // dispatch(closePopup());
     };
 
     return { showSolidPopup, hideSolidPopup };
