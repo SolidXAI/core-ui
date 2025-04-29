@@ -136,8 +136,24 @@ export type SolidShortTextImageRenderModeWidgetProps = {
 
 
 export type SolidFormDynamicFunctionProps = {
+    action: string,
     formik: any;
     solidFormViewMetaData: SolidView;
+}
+
+
+export type SolidListHeaderDynamicFunctionProps = {
+    action: string,
+    params: any,
+    solidListViewMetaData: any
+}
+
+
+export type SolidListRowdataDynamicFunctionProps = {
+    action: string,
+    params: any
+    rowData: any
+    solidListViewMetaData: any
 }
 
 export type RootState = ReturnType<ReturnType<typeof initializeStore>['getState']>;
