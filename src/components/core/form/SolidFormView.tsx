@@ -776,6 +776,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 solidFormViewMetaData: solidFormViewMetaData,
                 modelName: params.modelName
             }
+            if (params.parentData) {
+                fieldContext.parentData = params.parentData;
+            }
             let solidField = fieldFactory(fieldMetadata?.type, fieldContext);
             if (!fieldMetadata?.type) {
                 const errorMessage = formLayoutField.attrs.label;

@@ -55,7 +55,8 @@ export class SolidSelectionDynamicField implements ISolidField {
         const fieldLayoutInfo = this.fieldContext.field;
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
 
-        const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
+        // const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
+        const isFormFieldValid = (formik: any, fieldName: string) => formik.errors[fieldName];
 
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
         let editWidget = fieldLayoutInfo.attrs.editWidget;
@@ -172,7 +173,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                     {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                     id={fieldLayoutInfo.attrs.name}
                     field="label"
-                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                    value={formik.values[fieldLayoutInfo.attrs.name] || null}
                     dropdown
                     suggestions={selectionDynamicItems}
                     completeMethod={selectionDynamicSearch}
