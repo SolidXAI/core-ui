@@ -6,7 +6,7 @@ export const SolidFieldTooltip = ({ fieldContext }: any) => {
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const fieldLayoutInfo = fieldContext.field;
     const fieldMetadata = fieldContext.fieldMetadata;
-    const showTooltip = solidFormViewMetaData.data.solidView?.layout?.attrs?.showTooltip;
+    const showTooltip = solidFormViewMetaData.data.solidView?.layout?.attrs?.showTooltip ?? true;
     const tooltipPosition = solidFormViewMetaData.data.solidView?.layout?.attrs?.tooltipPosition;
     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
 
