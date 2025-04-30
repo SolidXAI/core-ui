@@ -10,7 +10,7 @@ import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { useEffect, useRef, useState } from "react";
 
-export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode }: any) => {
+export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue }: any) => {
     const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
     const router = useRouter();
     const pathname = usePathname();
@@ -48,7 +48,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
         router.push(`${pathname}?${params.toString()}`, { scroll: false });
     };
     const FormActionDropdown = () => {
-        
+
         return (
             <div>
                 <Button
@@ -270,6 +270,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                     initialEntityData={initialEntityData}
                     modelName={params.modelName}
                     id={params.id}
+                    solidWorkflowFieldValue={solidWorkflowFieldValue}
+                    setSolidWorkflowFieldValue={setSolidWorkflowFieldValue}
                 />
             }
         </>

@@ -6,7 +6,9 @@ interface Props {
     solidFormViewMetaData?: any;
     initialEntityData?: any;
     modelName?: any;
-    id?:any
+    id?:any,
+    solidWorkflowFieldValue?: any
+    setSolidWorkflowFieldValue?: any
 }
 
 export const SolidFormHeader = (props: Props) => {

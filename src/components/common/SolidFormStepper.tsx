@@ -10,11 +10,13 @@ interface Props {
     solidFormViewMetaData?: any;
     modelName?: any,
     initialEntityData?: any;
-    id?: any
+    id?: any,
+    solidWorkflowFieldValue?: any
+    setSolidWorkflowFieldValue?: any
 }
 
 export const SolidFormStepper = (props: Props) => {
-    const { solidFormViewMetaData, modelName, initialEntityData, id } = props;
+    const { solidFormViewMetaData, modelName, initialEntityData, id, solidWorkflowFieldValue, setSolidWorkflowFieldValue } = props;
     const toast = useRef<Toast>(null);
     const formStepperOverlay = useRef(null);
 
@@ -25,7 +27,6 @@ export const SolidFormStepper = (props: Props) => {
     const defaultWorkflowFieldDisplayName = solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.displayName
     const activeStep = solidFormViewMetaData?.data?.solidFormViewWorkflowData[0].value
     const [solidWorkflowFieldKey, setSolidWorkflowFieldKey] = useState<string>("");
-    const [solidWorkflowFieldValue, setSolidWorkflowFieldValue] = useState<string>("");
 
     useEffect(() => {
         if (!solidWorkflowField) return;
