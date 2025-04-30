@@ -9,6 +9,7 @@ import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct import
+import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 export class SolidJsonField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
@@ -122,6 +123,7 @@ export const DefaultJsonFormEditWidget = ({ formik, fieldContext }: SolidFormFie
                     {showFieldLabel != false &&
                         <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                             {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                            <SolidFieldTooltip fieldContext={fieldContext}/>
                             {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                         </label>
                     }
