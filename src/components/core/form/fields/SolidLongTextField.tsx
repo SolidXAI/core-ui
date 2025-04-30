@@ -8,6 +8,7 @@ import { Editor } from "primereact/editor";
 import { useState } from "react";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 
 export class SolidLongTextField implements ISolidField {
 
@@ -138,6 +139,7 @@ export const DefaultLongTextFormEditWidget = ({ formik, fieldContext }: SolidFor
             {showFieldLabel != false &&
                 <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                    <SolidFieldTooltip fieldContext={fieldContext}/>
                     {/* &nbsp;   {fieldDescription && <span>({fieldDescription}) </span>} */}
                 </label>
             }

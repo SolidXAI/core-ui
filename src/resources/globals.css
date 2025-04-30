@@ -441,6 +441,19 @@ a {
 
 .form-field-label {
   font-weight: 400;
+  display: flex;
+  align-items: center;
+}
+
+.solid-field-tooltip-icon{
+  margin-left: 8px;
+  color: var(--text-color);
+  font-size: 14px;
+}
+
+.solid-field-tooltip.p-tooltip{
+  font-size: 12px;
+  color: #fff;
 }
 
 .form-wrapper-subtitle {

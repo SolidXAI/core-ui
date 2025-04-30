@@ -17,6 +17,7 @@ import Link from "next/link";
 import { downloadMediaFile } from "@/helpers/downloadMediaFile";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps, SolidMediaFormFieldWidgetProps } from "@/types/solid-core";
+import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 export class SolidMediaMultipleField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
@@ -314,6 +315,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        <SolidFieldTooltip fieldContext={fieldContext}/>
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
@@ -546,6 +548,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
         <div>
             {showFieldLabel != false &&
                 <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label mt-4 font-medium">{fieldLabel}
+                <SolidFieldTooltip fieldContext={fieldContext}/>
                 </label>
             }
             {fileDetails.length > 0 &&

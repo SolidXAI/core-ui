@@ -8,6 +8,7 @@ import { Password } from "primereact/password";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { useState } from "react";
+import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 
 export class SolidPasswordField implements ISolidField {
 
@@ -142,6 +143,7 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
                         {fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        <SolidFieldTooltip fieldContext={fieldContext}/>
                     </label>
                 }
                 <Password

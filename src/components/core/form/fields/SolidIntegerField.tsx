@@ -9,6 +9,7 @@ import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { Slider } from "primereact/slider";
 import styles from './solidFields.module.css'
 import { useState } from "react";
+import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 
 export class SolidIntegerField implements ISolidField {
 
@@ -137,6 +138,7 @@ export const DefaultIntegerFormEditWidget = ({ formik, fieldContext }: SolidForm
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        <SolidFieldTooltip fieldContext={fieldContext}/>
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
