@@ -2,6 +2,7 @@
 import { BackButton } from "@/components/common/BackButton";
 import { SolidCancelButton } from "@/components/common/CancelButton";
 import { SolidFormHeader } from "@/components/common/SolidFormHeader";
+import { useHandleFormCustomButtonClickaction } from "@/components/common/useHandleFormCustomButtonClick";
 import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
 import { getExtensionFunction } from "@/helpers/registry";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -10,6 +11,7 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { useEffect, useRef, useState } from "react";
 
 export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode }: any) => {
+    const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
@@ -18,6 +20,9 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     const [normalHeaderButtons, setNormalHeaderButtons] = useState<any>([]);
     const createHeaderTitle = `Create ${solidView.model.displayName}`;
     const editHeaderTitle = `Edit ${solidView.model.displayName}`;
+
+
+
     useEffect(() => {
         if (solidView) {
             let contextMenuHeaderButtonsData: any = [];
@@ -43,6 +48,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
         router.push(`${pathname}?${params.toString()}`, { scroll: false });
     };
     const FormActionDropdown = () => {
+        
         return (
             <div>
                 <Button
@@ -102,14 +108,11 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     severity="contrast"
                                     icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
                                     onClick={() => {
-                                        const DynamicFunctionComponent = getExtensionFunction(button.attrs.action);
-                                        if (DynamicFunctionComponent) {
-                                            const event = {
-                                                formik,
-                                                solidFormViewMetaData: solidFormViewMetaData.data
-                                            }
-                                            DynamicFunctionComponent(event)
+                                        const event = {
+                                            formik,
+                                            solidFormViewMetaData: solidFormViewMetaData.data
                                         }
+                                        handleCustomButtonClick(button.attrs, event)
                                     }}
                                 />
                             )
@@ -144,14 +147,12 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                         severity="contrast"
                                         icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
                                         onClick={() => {
-                                            const DynamicFunctionComponent = getExtensionFunction(button.attrs.action);
-                                            if (DynamicFunctionComponent) {
-                                                const event = {
-                                                    formik,
-                                                    solidFormViewMetaData: solidFormViewMetaData.data
-                                                }
-                                                DynamicFunctionComponent(event)
+                                            const event = {
+                                                action: button.attrs.action,
+                                                formik,
+                                                solidFormViewMetaData: solidFormViewMetaData.data
                                             }
+                                            handleCustomButtonClick(button.attrs, event)
                                         }}
                                     />
                                 )

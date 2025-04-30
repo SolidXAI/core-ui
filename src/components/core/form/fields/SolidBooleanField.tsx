@@ -9,6 +9,7 @@ import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
+import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 
 
 
@@ -161,6 +162,7 @@ export const DefaultBooleanFormEditWidget = ({ formik, fieldContext }: SolidForm
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label font-medium">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        <SolidFieldTooltip fieldContext={fieldContext}/>
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
@@ -240,6 +242,7 @@ export const SolidBooleanCheckboxStyleFormEditWidget = ({ formik, fieldContext }
                         <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label font-medium">
                             {fieldLabel}
                             {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                            <SolidFieldTooltip fieldContext={fieldContext}/>
                         </label>
                     )}
 

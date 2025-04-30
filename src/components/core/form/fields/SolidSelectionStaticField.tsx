@@ -8,6 +8,7 @@ import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { RadioButton } from "primereact/radiobutton";
+import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 
 export class SolidSelectionStaticField implements ISolidField {
 
@@ -76,7 +77,7 @@ export class SolidSelectionStaticField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
-        const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
+        const isFormFieldValid = (formik: any, fieldName: string) => formik.errors[fieldName];
 
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
         let editWidget = fieldLayoutInfo.attrs.editWidget;
@@ -160,6 +161,7 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label font-medium">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        <SolidFieldTooltip fieldContext={fieldContext}/>
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
@@ -170,7 +172,7 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
                     id={fieldLayoutInfo.attrs.name}
                     name={fieldLayoutInfo.attrs.name}
                     field="label"
-                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                    value={formik.values[fieldLayoutInfo.attrs.name] || null}
                     dropdown
                     suggestions={selectionStaticItems}
                     completeMethod={selectionStaticSearch}
@@ -211,7 +213,7 @@ export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }
     });
 
     const isFormFieldValid = (formik: any, fieldName: string) =>
-        formik.touched[fieldName] && formik.errors[fieldName];
+         formik.errors[fieldName];
 
     return (
         <div className={className}>
@@ -221,6 +223,7 @@ export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }
                         <label htmlFor={fieldName} className="form-field-label font-medium">
                             {fieldLabel}
                             {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                            <SolidFieldTooltip fieldContext={fieldContext}/>
                         </label>
                     )}
                     <div className="flex flex-wrap gap-3">

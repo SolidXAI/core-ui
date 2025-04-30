@@ -61,6 +61,7 @@ export type SolidFormViewProps = {
     customCreateHandler?: any
     inlineCreateAutoSave?: boolean,
     customLayout?: any,
+    parentData?: any
 };
 
 
@@ -152,7 +153,7 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps, setLightboxUr
 }
 
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
-const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, setLightboxUrls, setOpenLightbox }: any) => {
+const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, parentData, setLightboxUrls, setOpenLightbox }: any) => {
     const fieldContext: SolidFieldProps = {
         // field metadata - coming from the field-metadata table.
         fieldMetadata: fieldMetadata,
@@ -167,6 +168,9 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
         viewMode: viewMode,
         onChange: onChange,
         onBlur: onBlur
+    }
+    if (parentData) {
+        fieldContext.parentData = parentData;
     }
     const solidField = fieldFactory(fieldMetadata?.type, fieldContext, setLightboxUrls, setOpenLightbox);
 
@@ -665,7 +669,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormLayoutLoad;
                 let DynamicFunctionComponent = null;
                 const event: SolidLoadForm = {
-                    parentData: params?.parentData,  
+                    parentData: params?.parentData,
                     fieldsMetadata: solidFormViewMetaData,
                     formData: solidFormViewData?.data,
                     type: 'onFormLayoutLoad',
@@ -771,6 +775,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 data: initialEntityData,
                 solidFormViewMetaData: solidFormViewMetaData,
                 modelName: params.modelName
+            }
+            if (params.parentData) {
+                fieldContext.parentData = params.parentData;
             }
             let solidField = fieldFactory(fieldMetadata?.type, fieldContext);
             if (!fieldMetadata?.type) {
@@ -941,7 +948,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             field={element}
                             formik={formik}
                             fieldMetadata={fieldMetadata}
-                            initialEntityData={solidFormViewData ? solidFormViewData.data : null}
+                            initialEntityData={solidFormViewData ? solidFormViewData.data : {}}
                             solidFormViewMetaData={solidFormViewMetaData}
                             modelName={params.modelName}
                             readOnly={readOnlyPermission}
@@ -950,6 +957,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             onBlur={formFieldOnXXX}
                             setLightboxUrls={setLightboxUrls}
                             setOpenLightbox={setOpenLightbox}
+                            parentData={params.parentData}
                         />;
                     }
                 }

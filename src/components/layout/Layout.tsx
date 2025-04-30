@@ -13,6 +13,7 @@ import { CustomHeader } from '../CustomHeader/CustomHeader';
 import AppConfig from './AppConfig';
 import { LayoutContext } from './context/layoutcontext';
 import AppSidebar from './AppSidebar';
+import SolidPopupContainer from '../common/SolidPopupContainer';
 
 export const Layout = ({ children }: ChildContainerProps) => {
     const { layoutConfig, layoutState, setLayoutState } = useContext(LayoutContext);
@@ -124,6 +125,7 @@ export const Layout = ({ children }: ChildContainerProps) => {
             <div className={containerClass}>
                 {process.env.NEXT_PUBLIC_ENABLE_CUSTOM_HEADER_FOOTER == "true" && <CustomHeader />}
                 <AppSidebar />
+                <SolidPopupContainer></SolidPopupContainer>
                 <div className={`main-content ${visibleNavbar ? "shifted" : ""}`}>
                     {children}
                     {process.env.NEXT_PUBLIC_ENABLE_CUSTOM_HEADER_FOOTER == "true" && <CustomFooter />}

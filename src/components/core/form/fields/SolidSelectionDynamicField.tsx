@@ -9,6 +9,7 @@ import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 
 
 export class SolidSelectionDynamicField implements ISolidField {
@@ -55,7 +56,8 @@ export class SolidSelectionDynamicField implements ISolidField {
         const fieldLayoutInfo = this.fieldContext.field;
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
 
-        const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
+        // const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
+        const isFormFieldValid = (formik: any, fieldName: string) => formik.errors[fieldName];
 
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
         let editWidget = fieldLayoutInfo.attrs.editWidget;
@@ -163,6 +165,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        <SolidFieldTooltip fieldContext={fieldContext}/>
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
@@ -172,7 +175,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                     {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                     id={fieldLayoutInfo.attrs.name}
                     field="label"
-                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                    value={formik.values[fieldLayoutInfo.attrs.name] || null}
                     dropdown
                     suggestions={selectionDynamicItems}
                     completeMethod={selectionDynamicSearch}

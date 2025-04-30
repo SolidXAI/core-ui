@@ -13,7 +13,7 @@ export const ListViewRowActionPopup = ({ context }: any) => {
 
     }
 
-    let DynamicWidget = getExtensionComponent(context?.rowAction?.action?.customComponent);
+    let DynamicWidget = getExtensionComponent(context?.rowAction?.action);
     const widgetProps = {
         context: context
     }
@@ -21,17 +21,16 @@ export const ListViewRowActionPopup = ({ context }: any) => {
     return (
         <div>
             {
-                context?.rowAction?.action?.customComponent ?
+                context?.rowAction?.action ?
                     DynamicWidget && <DynamicWidget {...widgetProps} />
-
                     // <LoadDynamicJsxComponent context={context}></LoadDynamicJsxComponent>
                     :
                     <>
                         <h1>{context?.modelName}</h1>
                         <h1>{context?.moduleName}</h1>
                         <div className="flex justify-content-center">
-                            <Button label={context?.rowAction?.action?.confirmBtnLabel} icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={triggerServerAction} />
-                            <Button label={context?.rowAction?.action?.cancelBtnLabel} icon="pi pi-times" className='small-button' onClick={() => context.closeCustomRowActionPopup()} />
+                            <Button label="Confirm" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={triggerServerAction} />
+                            <Button label="Cancel" icon="pi pi-times" className='small-button' onClick={() => context.closeCustomRowActionPopup()} />
                         </div>
                     </>
             }

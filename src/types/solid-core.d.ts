@@ -75,6 +75,7 @@ export type LayoutAttribute = {
 // Generic representation of any node in our layout 
 export type LayoutNodeType = "form" | "sheet" | "notebook" | "page" | "row" | "column" | "field" | "div" | "p" | "span" | "h1" | "h2" | "h3";
 export type LayoutNode = {
+    body?: string;
     type: LayoutNodeType;
     attrs: LayoutAttribute;
     children?: LayoutNode[];
@@ -135,8 +136,24 @@ export type SolidShortTextImageRenderModeWidgetProps = {
 
 
 export type SolidFormDynamicFunctionProps = {
+    action: string,
     formik: any;
     solidFormViewMetaData: SolidView;
+}
+
+
+export type SolidListHeaderDynamicFunctionProps = {
+    action: string,
+    params: any,
+    solidListViewMetaData: any
+}
+
+
+export type SolidListRowdataDynamicFunctionProps = {
+    action: string,
+    params: any
+    rowData: any
+    solidListViewMetaData: any
 }
 
 export type RootState = ReturnType<ReturnType<typeof initializeStore>['getState']>;

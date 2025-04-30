@@ -41,7 +41,7 @@ export const SolidMessageComposer = ({ type, solidFormViewMetaData, refetch, id 
             formData.append('messageBody', message);
             formData.append('coModelEntityId', id);
             formData.append('coModelName', solidFormViewMetaData?.data?.solidView?.model?.singularName);
-            formData.append('userId', user?.user?.id);
+            formData.append('userId', user?.user?.id || 1);
 
             selectedFiles.forEach((file, index) => {
                 formData.append(`messageAttachments`, file);

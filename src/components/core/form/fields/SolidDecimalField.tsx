@@ -6,6 +6,7 @@ import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 
 export class SolidDecimalField implements ISolidField {
 
@@ -134,6 +135,7 @@ export const DefaultDecimalFormEditWidget = ({ formik, fieldContext }: SolidForm
                     {showFieldLabel != false &&
                         <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                             {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                            <SolidFieldTooltip fieldContext={fieldContext}/>
                             {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                         </label>
                     }
