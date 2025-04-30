@@ -123,7 +123,7 @@ registerExtensionComponent("SolidSelectionStaticRadioFormEditWidget", SolidSelec
 registerExtensionComponent("DefaultSelectionDynamicFormEditWidget", DefaultSelectionDynamicFormEditWidget, []);
 registerExtensionComponent("DefaultRelationOneToManyFormEditWidget", DefaultRelationOneToManyFormEditWidget, []);
 
-// Formview Edit Custom  widgets
+// Formview Custom Edit widgets
 
 
 // Formview Default View widgets
@@ -138,12 +138,12 @@ registerExtensionComponent("DefaultRelationManyToOneFormViewWidget", DefaultRela
 registerExtensionComponent("DefaultSelectionStaticFormViewWidget", DefaultSelectionStaticFormViewWidget, []);
 registerExtensionComponent("DefaultSelectionDynamicFormViewWidget", DefaultSelectionDynamicFormViewWidget, []);
 
-// Form View Custom Widgets
+// Formview Custom view widgets
 registerExtensionComponent("SolidRelationFieldAvatarFormWidget", SolidRelationFieldAvatarFormWidget, []);
 
 
 
-// list view render modes   
+// Listview default widgets
 registerExtensionComponent("DefaultTextListWidget", DefaultTextListWidget, []);
 registerExtensionComponent("DefaultBooleanListWidget", DefaultBooleanListWidget, []);
 registerExtensionComponent("DefaultMediaSingleListWidget", DefaultMediaSingleListWidget, []);
@@ -154,9 +154,7 @@ registerExtensionComponent("DefaultRelationOneToManyListWidget", DefaultRelation
 registerExtensionComponent("SolidShortTextFieldImageListWidget", SolidShortTextFieldImageListWidget, []);
 
 
-// List View Custom Widgets
-
-
+// Listview custom widgets
 registerExtensionComponent("SolidShortTextAvatarWidget", SolidShortTextAvatarWidget, []);
 registerExtensionComponent("SolidRelationAvatarWidget", SolidRelationAvatarWidget, []);
 
