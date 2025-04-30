@@ -24,14 +24,34 @@ export class SolidSelectionDynamicField implements ISolidField {
         // {label: '', value: ''}
         const optionValue = this.fieldContext.data[this.fieldContext.field.attrs.name];
         const fieldMetadata = this.fieldContext.fieldMetadata;
+        const isMultiple = this.fieldContext.field.attrs.multiple;
 
-        return { label: optionValue || '', value: optionValue || '' };
+        // return { label: optionValue || '', value: optionValue || '' };
+        if (isMultiple) {
+            // Multiple selected options - initialize as array
+            if (Array.isArray(optionValue)) {
+                return optionValue.map(val => ({ label: val, value: val }));
+            }
+            return [];
+        } else {
+            // Single selection
+            return { label: optionValue || '', value: optionValue || '' };
+        }
     }
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
+        const isMultiple = fieldLayoutInfo.attrs.multiple;
+        // if (value) {
+        //     formData.append(fieldLayoutInfo.attrs.name, value.value);
+        // }
         if (value) {
-            formData.append(fieldLayoutInfo.attrs.name, value.value);
+            if (isMultiple) {
+                const selectedValues = value.map((v: any) => v.value);
+                formData.append(fieldLayoutInfo.attrs.name, JSON.stringify(selectedValues)); // You can change format if needed
+            } else {
+                formData.append(fieldLayoutInfo.attrs.name, value.value);
+            }
         }
     }
 
@@ -41,10 +61,20 @@ export class SolidSelectionDynamicField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+        const isMultiple = fieldLayoutInfo.attrs.multiple;
 
         // 1. required 
         if (fieldMetadata.required) {
-            schema = schema.required(`${fieldLabel} is required.`);
+            // schema = schema.required(`${fieldLabel} is required.`);
+            if (isMultiple) {
+                schema = schema.test('required', `${fieldLabel} is required.`, (value: any) => {
+                    return Array.isArray(value) && value.length > 0;
+                });
+            } else {
+                schema = schema.test('required', `${fieldLabel} is required.`, (value: any) => {
+                    return value && value.value;
+                });
+            }
         }
 
         return schema;
@@ -115,6 +145,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const readOnlyPermission = fieldContext.readOnly;
+    const isMultiple = fieldLayoutInfo.attrs.multiple;
 
     const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
     const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
