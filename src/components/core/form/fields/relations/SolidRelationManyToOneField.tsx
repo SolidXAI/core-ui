@@ -15,7 +15,7 @@ import { Panel } from "primereact/panel";
 import SolidFormView from "../../SolidFormView";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
-import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
+import Handlebars from "handlebars";
 
 
 export class SolidRelationManyToOneField implements ISolidField {
@@ -33,12 +33,12 @@ export class SolidRelationManyToOneField implements ISolidField {
         const userKeyField = fieldMetadata?.relationModel?.userKeyField?.name;
         const manyToOneColVal = manyToOneFieldData ? manyToOneFieldData[userKeyField] : '';
         if (manyToOneColVal) {
-            return { label: manyToOneColVal || '', value: manyToOneFieldData?.id || '' };
+            return { solidManyToOneLabel: manyToOneColVal || '', solidManyToOneValue: manyToOneFieldData?.id || '', ...manyToOneFieldData };
         }
         if (this.fieldContext.parentData) {
             const [key, value]: any = Object.entries(this.fieldContext.parentData)[0] || [];
             if (key && value !== undefined) {
-                return { label: value.label, value: value.value };
+                return { solidManyToOneLabel: value.solidManyToOneLabel, solidManyToOneValue: value.solidManyToOneValue };
             }
         }
         return {}
@@ -46,8 +46,8 @@ export class SolidRelationManyToOneField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        if (value?.value) {
-            formData.append(`${fieldLayoutInfo.attrs.name}Id`, value.value);
+        if (value?.solidManyToOneValue) {
+            formData.append(`${fieldLayoutInfo.attrs.name}Id`, value.solidManyToOneValue);
         }
     }
 
@@ -158,11 +158,50 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
             offset: 0,
             limit: 10,
             filters: {
-                [fieldMetadata?.relationModel?.userKeyField?.name]: {
-                    '$containsi': event.query
-                }
+                $and: [
+                    {
+                        [fieldMetadata?.relationModel?.userKeyField?.name]: {
+                            '$containsi': event.query
+                        }
+                    }
+                ]
             }
         };
+        if (fieldMetadata?.relationFieldFixedFilter) {
+            const convertedFixedFilter = fieldMetadata?.relationFieldFixedFilter;
+            const fixedFilterTemplate = Handlebars.compile(convertedFixedFilter);
+            const renderedFilter = fixedFilterTemplate(formik.values);
+
+            // Parse the result into a JS object
+            let parsedFilter;
+            try {
+                parsedFilter = JSON.parse(renderedFilter);
+                const isValid = (obj: any): boolean => {
+                    if (!obj || typeof obj !== 'object') return false;
+
+                    // Recursively check all nested values
+                    const hasValidValue = (val: any): boolean => {
+                        if (val === null || val === undefined || val === '') return false;
+                        if (typeof val === 'object') {
+                            return Object.values(val).some(hasValidValue);
+                        }
+                        return true;
+                    };
+
+                    return hasValidValue(obj);
+                };
+
+                if (isValid(parsedFilter)) {
+                    queryData.filters.$and.push(parsedFilter);
+                } else {
+                    console.warn("Skipping invalid/empty fixed filter:", parsedFilter);
+                }
+            } catch (e) {
+                console.error("Invalid fixedFilter JSON:", renderedFilter);
+                parsedFilter = {}; // fallback or throw error as needed
+            }
+
+        }
 
         let autocompleteQs = qs.stringify(queryData, {
             encodeValuesOnly: true,
@@ -179,8 +218,9 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
         if (autocompleteData) {
             const autoCompleteItems = autocompleteData.records.map((item: any) => {
                 return {
-                    label: item[fieldMetadata?.relationModel?.userKeyField?.name],
-                    value: item['id']
+                    solidManyToOneLabel: item[fieldMetadata?.relationModel?.userKeyField?.name],
+                    solidManyToOneValue: item['id'],
+                    ...item,
                 }
             });
             setAutoCompleteItems(autoCompleteItems);
@@ -195,8 +235,8 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
         const updatedRelationData = [
             ...currentRelationData,
             {
-                label: jsonValues[fieldMetadata?.relationModel?.userKeyField?.name],
-                value: "new",
+                solidManyToOneLabel: jsonValues[fieldMetadata?.relationModel?.userKeyField?.name],
+                solidManyToOneValue: "new",
                 original: jsonValues,
             },
         ];
@@ -210,7 +250,6 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                 <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                    <SolidFieldTooltip fieldContext={fieldContext}/>
                 </label>
             }
             <div className="flex align-items-center gap-3 mt-2">
@@ -219,7 +258,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                     disabled={formDisabled || fieldDisabled || readOnlyPermission}
                     {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                     id={fieldLayoutInfo.attrs.name}
-                    field="label"
+                    field="solidManyToOneLabel"
                     value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                     dropdown={!readOnlyPermission}
                     suggestions={autoCompleteItems}
@@ -298,7 +337,7 @@ export const DefaultRelationManyToOneFormViewWidget = ({ formik, fieldContext }:
     return (
         <div className="mt-2 flex-column gap-2">
             <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
-            <p className="m-0">{value && value.label}</p>
+            <p className="m-0">{value && value.solidManyToOneLabel}</p>
         </div>
     );
 }
