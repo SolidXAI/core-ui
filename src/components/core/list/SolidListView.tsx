@@ -743,7 +743,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           }
         </div>
         <div className="flex align-items-center gap-3">
-          {/* {solidListViewMetaData?.data?.solidView?.layout?.attrs?.headerButtons &&
+          {solidListViewMetaData?.data?.solidView?.layout?.attrs?.headerButtons &&
             solidListViewMetaData?.data?.solidView?.layout?.attrs?.headerButtons.map((button: any) => {
               return (
                 <Button
@@ -765,7 +765,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                 />
               );
             })
-          } */}
+          }
 
 
           {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded !== true &&
