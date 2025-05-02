@@ -167,8 +167,8 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                 ]
             }
         };
-        if (fieldMetadata?.relationFieldFixedFilter) {
-            const convertedFixedFilter = fieldMetadata?.relationFieldFixedFilter;
+        if (fieldMetadata?.relationFieldFixedFilter || fieldLayoutInfo?.attrs?.fixedFilter) {
+            const convertedFixedFilter = fieldMetadata?.relationFieldFixedFilter ? fieldMetadata?.relationFieldFixedFilter : fieldLayoutInfo?.attrs?.fixedFilter;
             const fixedFilterTemplate = Handlebars.compile(convertedFixedFilter);
             const renderedFilter = fixedFilterTemplate(formik.values);
 
