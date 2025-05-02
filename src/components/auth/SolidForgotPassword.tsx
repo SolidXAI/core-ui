@@ -77,14 +77,13 @@ const SolidForgotPassword = () => {
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className="solid-logo flex align-items-center gap-3">
+                        <div className={`solid-logo flex align-items-center ${process.env.NEXT_PUBLIC_AUTH_LOGO_POSITION}`}>
                             <Image
                                 alt="solid logo"
-                                src={SolidLogo}
+                                src={process.env.NEXT_PUBLIC_AUTH_LOGO ?? SolidLogo}
                                 className="relative"
                                 fill
                             />
-                            <AppTitle title={solidSettingsData} />
                         </div>
                     </div>
                 }

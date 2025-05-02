@@ -73,6 +73,18 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 {solidSettingsData?.data?.authPagesLayout === 'left' &&
                     <div className='col-6 flex align-items-center justify-content-center solid-login-dark-bg'>
                         <div className="w-full">
+                            {process.env.NEXT_PUBLIC_AUTH_LOGO && process.env.NEXT_PUBLIC_AUTH_LOGO_POSITION === "in_form_view" &&
+                                <div className="flex justify-content-center">
+                                    <div className={`solid-logo flex align-items-center ${process.env.NEXT_PUBLIC_AUTH_LOGO_POSITION}`}>
+                                        <Image
+                                            alt="solid logo"
+                                            src={process.env.NEXT_PUBLIC_AUTH_LOGO ?? SolidLogo}
+                                            className="relative"
+                                            fill
+                                        />
+                                    </div>
+                                </div>
+                            }
                             {authChildren}
                         </div>
                     </div>
@@ -83,25 +95,46 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                                 ${solidSettingsData?.data?.authPagesLayout === 'left' ? 'solid-left-layout' : ''} 
                                 ${solidSettingsData?.data?.authPagesLayout === 'right' ? 'solid-right-layout' : ''}`.trim()}
                 >
-                    {solidSettingsData?.data?.authPagesLayout !== 'center' &&
-                        <div className="solid-logo flex align-items-center gap-3">
+                    {process.env.NEXT_PUBLIC_AUTH_LOGO && process.env.NEXT_PUBLIC_AUTH_LOGO_POSITION === "in_image_view" &&
+                        <div className={`solid-logo flex align-items-center gap-3 ${process.env.NEXT_PUBLIC_AUTH_LOGO_POSITION}`}>
                             <Image
                                 alt="solid logo"
-                                src={SolidLogo}
+                                src={process.env.NEXT_PUBLIC_AUTH_LOGO ?? SolidLogo}
                                 className="relative"
                                 fill
                             />
-                            <AppTitle title={solidSettingsData} />
+                        </div>
+                    }
+                    {process.env.NEXT_PUBLIC_SHOW_AUTH_TEXT_CONTENT === 'true' &&
+                        <div className="w-full" style={{ zIndex: 1 }}>
+                            <div className="grid">
+                                <div className="col-8 mx-auto">
+                                    <h1 className="solid-auth-image-subtitle m-0">{process.env.NEXT_PUBLIC_AUTH_SUBTITLE}</h1>
+                                    <h1 className="solid-auth-image-title mt-0">{process.env.NEXT_PUBLIC_AUTH_TITLE}</h1>
+                                    <p className="solid-auth-image-helper-text">{process.env.NEXT_PUBLIC_AUTH_HELPER_TEXT}</p>
+                                </div>
+                            </div>
                         </div>
                     }
                 </div>
-
                 {solidSettingsData?.data?.authPagesLayout === 'center' && <div className="solid-center-layout">
                     {authChildren}
                 </div>}
                 {solidSettingsData?.data?.authPagesLayout === 'right' &&
                     <div className='col-6 flex align-items-center justify-content-center solid-login-dark-bg'>
                         <div className="w-full">
+                            {process.env.NEXT_PUBLIC_AUTH_LOGO && process.env.NEXT_PUBLIC_AUTH_LOGO_POSITION === "in_form_view" &&
+                                <div className="flex justify-content-center">
+                                    <div className={`solid-logo flex align-items-center gap-3 ${process.env.NEXT_PUBLIC_AUTH_LOGO_POSITION}`}>
+                                        <Image
+                                            alt="solid logo"
+                                            src={process.env.NEXT_PUBLIC_AUTH_LOGO ?? SolidLogo}
+                                            className="relative"
+                                            fill
+                                        />
+                                    </div>
+                                </div>
+                            }
                             {authChildren}
                         </div>
                     </div>
