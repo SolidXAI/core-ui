@@ -200,7 +200,7 @@ export const DefaultSelectionDynamicFormViewWidget = ({ formik, fieldContext }: 
     return (
         <div className="mt-2 flex-column gap-2">
             <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
-            <p className="m-0">{value && value.label && value.label}</p>
+            <p className="m-0 solid-custom-selection-dynamic-pill">{value && value.label && value.label}</p>
         </div>
     );
 }
