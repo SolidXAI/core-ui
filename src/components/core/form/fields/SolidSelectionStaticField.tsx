@@ -8,6 +8,7 @@ import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { RadioButton } from "primereact/radiobutton";
+import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 
 export class SolidSelectionStaticField implements ISolidField {
 
@@ -160,6 +161,7 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label font-medium">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        <SolidFieldTooltip fieldContext={fieldContext}/>
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
@@ -221,6 +223,7 @@ export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }
                         <label htmlFor={fieldName} className="form-field-label font-medium">
                             {fieldLabel}
                             {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                            <SolidFieldTooltip fieldContext={fieldContext}/>
                         </label>
                     )}
                     <div className="flex flex-wrap gap-3">

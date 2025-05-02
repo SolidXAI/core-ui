@@ -16,6 +16,7 @@ import getAcceptedFileTypes from "@/helpers/getAcceptedFileTypes";
 import { downloadMediaFile } from "@/helpers/downloadMediaFile";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidMediaFormFieldWidgetProps } from "@/types/solid-core";
+import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 
 export class SolidMediaSingleField implements ISolidField {
 
@@ -311,6 +312,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        <SolidFieldTooltip fieldContext={fieldContext}/>
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
@@ -482,6 +484,7 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
         <div className="flex flex-column gap-2 mt-4 relative">
             {showFieldLabel != false &&
                 <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label font-medium">{fieldLabel}
+                <SolidFieldTooltip fieldContext={fieldContext}/>
                 </label>
             }
 

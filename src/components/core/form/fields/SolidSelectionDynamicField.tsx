@@ -9,6 +9,7 @@ import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 
 
 export class SolidSelectionDynamicField implements ISolidField {
@@ -140,12 +141,12 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
         }
         let sdQs = qs.stringify(queryData, {
             encodeValuesOnly: true,
-            encoder: (str, defaultEncoder, charset, type) => {
-                if (type === 'key' || type === 'value') {
-                    if (str === queryData.query) return str;
-                }
-                return defaultEncoder(str);
-            }
+            // encoder: (str, defaultEncoder, charset, type) => {
+            //     if (type === 'key' || type === 'value') {
+            //         if (str === queryData.query) return str;
+            //     }
+            //     return defaultEncoder(str);
+            // }
         });
         // TODO: do error handling here, possible errors like modelname is incorrect etc...
         const sdResponse = await triggerGetSelectionDynamicValues(sdQs);
@@ -164,6 +165,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        <SolidFieldTooltip fieldContext={fieldContext}/>
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }

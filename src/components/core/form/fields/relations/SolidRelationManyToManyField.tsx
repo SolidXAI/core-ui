@@ -13,6 +13,7 @@ import { InlineRelationEntityDialog } from "./widgets/helpers/InlineRelationEnti
 import { capitalize } from "lodash";
 import { Checkbox } from "primereact/checkbox";
 import { Panel } from "primereact/panel";
+import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 
 
 
@@ -171,6 +172,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                 <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                    <SolidFieldTooltip fieldContext={fieldContext}/>
                 </label>
             }
             <div className="flex align-items-center gap-3 mt-2">
@@ -246,6 +248,7 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
                         <label className="form-field-label">
                             {capitalize(fieldLayoutInfo.attrs.name)}
                             {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                            <SolidFieldTooltip fieldContext={fieldContext}/>
                         </label>
                     }
                     {fieldContext.field.attrs.inlineCreate && (

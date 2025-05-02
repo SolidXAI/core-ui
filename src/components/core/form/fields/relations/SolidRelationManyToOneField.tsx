@@ -15,6 +15,7 @@ import { Panel } from "primereact/panel";
 import SolidFormView from "../../SolidFormView";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 
 
 export class SolidRelationManyToOneField implements ISolidField {
@@ -209,6 +210,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                 <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                    <SolidFieldTooltip fieldContext={fieldContext}/>
                 </label>
             }
             <div className="flex align-items-center gap-3 mt-2">

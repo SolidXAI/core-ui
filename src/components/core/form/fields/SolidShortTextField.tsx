@@ -6,6 +6,7 @@ import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 
 export class SolidShortTextField implements ISolidField {
 
@@ -143,6 +144,7 @@ export const DefaultShortTextFormEditWidget = ({ formik, fieldContext }: SolidFo
                         {showFieldLabel != false &&
                             <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                                 {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                                <SolidFieldTooltip fieldContext={fieldContext}/>
                                 {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                             </label>
                         }
@@ -170,6 +172,7 @@ export const DefaultShortTextFormEditWidget = ({ formik, fieldContext }: SolidFo
                     {showFieldLabel != false &&
                         <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                             {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                            <SolidFieldTooltip fieldContext={fieldContext}/>
                             {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                         </label>
                     }
