@@ -1674,6 +1674,8 @@ li.header-li-px {
   position: relative;
   flex-grow: 1;
   transition: width 0.3s ease;
+  min-width: 0;
+  overflow-x: auto;
 }
 
 .solid-form-wrapper .solid-form-content {
