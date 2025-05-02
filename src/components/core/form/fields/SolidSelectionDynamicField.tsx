@@ -141,12 +141,12 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
         }
         let sdQs = qs.stringify(queryData, {
             encodeValuesOnly: true,
-            encoder: (str, defaultEncoder, charset, type) => {
-                if (type === 'key' || type === 'value') {
-                    if (str === queryData.query) return str;
-                }
-                return defaultEncoder(str);
-            }
+            // encoder: (str, defaultEncoder, charset, type) => {
+            //     if (type === 'key' || type === 'value') {
+            //         if (str === queryData.query) return str;
+            //     }
+            //     return defaultEncoder(str);
+            // }
         });
         // TODO: do error handling here, possible errors like modelname is incorrect etc...
         const sdResponse = await triggerGetSelectionDynamicValues(sdQs);
