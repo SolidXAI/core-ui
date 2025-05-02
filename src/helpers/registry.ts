@@ -7,7 +7,7 @@ import { SolidShortTextFieldImageListWidget } from "@/components/core/list/widge
 import { SolidShortTextAvatarWidget } from "@/components/core/list/widgets/SolidShortTextAvatarWidget";
 import GenerateModelCodeRowAction from "@/components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction";
 import GenerateModuleCodeRowAction from "@/components/core/extension/solid-core/moduleMetadata/list/GenerateModuleCodeRowAction";
-import { DefaultBooleanFormEditWidget, SolidBooleanCheckboxStyleFormEditWidget } from "@/components/core/form/fields/SolidBooleanField";
+import { DefaultBooleanFormEditWidget, SolidBooleanCheckboxStyleFormEditWidget, SolidBooleanSwitchStyleFormEditWidget } from "@/components/core/form/fields/SolidBooleanField";
 import { DefaultDateFormEditWidget } from "@/components/core/form/fields/SolidDateField";
 import { DefaultDateTimeFormEditWidget } from "@/components/core/form/fields/SolidDateTimeField";
 import { DefaultDecimalFormEditWidget } from "@/components/core/form/fields/SolidDecimalField";
@@ -102,6 +102,9 @@ registerExtensionComponent("GenerateModuleCodeRowAction", GenerateModuleCodeRowA
 registerExtensionComponent("DefaultDateFormEditWidget", DefaultDateFormEditWidget, []);
 registerExtensionComponent("DefaultBooleanFormEditWidget", DefaultBooleanFormEditWidget, ["booleanSelectbox"]);
 registerExtensionComponent("SolidBooleanCheckboxStyleFormEditWidget", SolidBooleanCheckboxStyleFormEditWidget, ["booleanCheckbox"]);
+registerExtensionComponent("SolidBooleanSwitchStyleFormEditWidget", SolidBooleanSwitchStyleFormEditWidget,[]);
+
+
 registerExtensionComponent("DefaultDateTimeFormEditWidget", DefaultDateTimeFormEditWidget, []);
 registerExtensionComponent("DefaultDecimalFormEditWidget", DefaultDecimalFormEditWidget, []);
 registerExtensionComponent("DefaultEmailFormEditWidget", DefaultEmailFormEditWidget, []);

@@ -6,6 +6,7 @@ import { closePopup } from '@/redux/features/popupSlice';
 import { Dialog } from 'primereact/dialog';
 import { get } from 'lodash';
 import { getExtensionComponent } from '@/helpers/registry';
+import { Button } from 'primereact/button';
 
 
 const SolidPopupContainer = () => {
@@ -22,6 +23,9 @@ const SolidPopupContainer = () => {
             onHide={() => dispatch(closePopup())}
             style={{ width: '50vw' }}
             modal
+            headerClassName='p-0'
+            contentClassName='p-0'
+            footer={<Button size='small' label='Close' outlined onClick={() => dispatch(closePopup())} />}
         >
             {DynamicComponent && <DynamicComponent {...event} />}
         </Dialog>

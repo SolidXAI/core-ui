@@ -27,7 +27,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
         if (solidView) {
             let contextMenuHeaderButtonsData: any = [];
             let normalHeaderButtonsData: any = [];
-            const formHeaderButtons = solidView.layout.formButtons;
+            const formHeaderButtons = solidView.layout.attrs.formButtons;
             if (formHeaderButtons && formHeaderButtons.length > 0) {
                 contextMenuHeaderButtonsData = formHeaderButtons.filter((button: any) => {
                     return button.attrs && button.attrs.actionInContextMenu && button.attrs.actionInContextMenu === true;
@@ -48,7 +48,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
         router.push(`${pathname}?${params.toString()}`, { scroll: false });
     };
     const FormActionDropdown = () => {
-        
+
         return (
             <div>
                 <Button
@@ -109,6 +109,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
                                     onClick={() => {
                                         const event = {
+                                            action: button.attrs.action,
+                                            params,
                                             formik,
                                             solidFormViewMetaData: solidFormViewMetaData.data
                                         }
@@ -149,6 +151,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                         onClick={() => {
                                             const event = {
                                                 action: button.attrs.action,
+                                                params,
                                                 formik,
                                                 solidFormViewMetaData: solidFormViewMetaData.data
                                             }
@@ -201,7 +204,32 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             {params.embeded !== true && <BackButton />}
                             <div className="form-wrapper-title"> {editHeaderTitle}</div>
                         </div>
+                        
                         <div className="gap-3 flex">
+                        {normalHeaderButtons.map((button: any, index: number) => {
+                                return (
+                                    <Button
+                                        text
+                                        type="button"
+                                        className="w-full text-left gap-2"
+                                        label={button.attrs.label}
+                                        size="small"
+                                        iconPos="left"
+                                        severity="contrast"
+                                        icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                                        onClick={() => {
+                                            const event = {
+                                                action: button.attrs.action,
+                                                params,
+                                                formik,
+                                                solidFormViewMetaData: solidFormViewMetaData.data
+                                            }
+                                            handleCustomButtonClick(button.attrs, event)
+                                        }}
+                                    />
+                                )
+                            })
+                        }
                             {params.embeded !== true && viewMode === "view" &&
                                 <div>
                                     <Button
