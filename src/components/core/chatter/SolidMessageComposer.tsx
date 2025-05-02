@@ -105,6 +105,7 @@ export const SolidMessageComposer = ({ type, solidFormViewMetaData, refetch, id 
                     onClick={() => fileInputRef.current?.click()}
                     tooltip="Attach files"
                     tooltipOptions={{ position: 'top' }}
+                    type='button'
                 />
             </div>
             {selectedFiles.length > 0 && (

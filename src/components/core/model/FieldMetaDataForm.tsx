@@ -928,7 +928,8 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     isUserKey: fieldMetaData ? fieldMetaData?.isUserKey : false,
     relationCoModelColumnName: fieldMetaData ? fieldMetaData?.relationCoModelColumnName : null,
     relationJoinTableName: fieldMetaData ? fieldMetaData?.relationJoinTableName : null,
-    userKey: fieldMetaData ? fieldMetaData?.userKey : null
+    userKey: fieldMetaData ? fieldMetaData?.userKey : null,
+    enableAuditTracking: fieldMetaData ? fieldMetaData?.enableAuditTracking : false,
   };
 
 
@@ -2882,6 +2883,30 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           </div>
                         )} */}
+                        {currentFields.includes("enableAuditTracking") && formik.values.relationType !== "one-to-many" && (
+                          <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="flex align-items-center gap-2">
+                              <Checkbox
+                                name="enableAuditTracking"
+                                onChange={(e) => {
+                                  formik.setFieldValue("enableAuditTracking", e.checked);
+                                }}
+                                checked={formik.values.enableAuditTracking}
+                              ></Checkbox>
+                              <label htmlFor="ingredient1" className="form-field-label">
+                                Enable Audit Tracking
+                              </label>
+                            </div>
+                            <p className="fieldSubTitle">By selecting this option, you are setting audit trail for this field.</p>
+
+                            {isFormFieldValid(formik, "enableAuditTracking") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.enableAuditTracking?.toString()}
+                              />
+                            )}
+                          </div>
+                        )}
                         {currentFields.includes("isUserKey") && formik.values.unique && (
                           <div className="field col-6 flex-flex-column gap-2 mt-3">
                             <div className="flex align-items-center gap-2">

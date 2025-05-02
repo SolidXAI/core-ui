@@ -514,6 +514,25 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     )}
                   </div>
                 }
+                <div className="flex align-items-center gap-2 mt-3">
+                  <Checkbox
+                    name="enableAuditTracking"
+                    onChange={(e) => {
+                      formik.setFieldValue("enableAuditTracking", e.checked);
+                    }}
+                    checked={formik.values.enableAuditTracking}
+                  ></Checkbox>
+                  <label htmlFor="enableAuditTracking" className="form-field-label">
+                    Enable Audit Tracking
+                  </label>
+                </div>
+                {(isFormFieldValid(formik, "enableAuditTracking") || (formErrors["enableAuditTracking"])) && (
+                  <Message
+                    severity="error"
+                    text={formik?.errors?.enableAuditTracking?.toString()}
+                    className="mt-2"
+                  />
+                )}
                 {/* <div className="field col-6">
                   <div className="flex align-items-center gap-2 mt-3">
                     <Checkbox
