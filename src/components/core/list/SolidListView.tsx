@@ -306,7 +306,29 @@ export const SolidListView = (params: SolidListViewParams) => {
   // After data is fetched populate the list view state so as to be able to render the data. 
   useEffect(() => {
     if (solidEntityListViewData) {
-      setListViewData(solidEntityListViewData?.records);
+      const cleanedRecords = solidEntityListViewData.records.map((record) => {
+        const newRecord = { ...record };
+  
+        Object.entries(newRecord).forEach(([key, value]) => {
+          if (typeof value === 'string') {
+            try {
+              const parsed = JSON.parse(value);
+              if (Array.isArray(parsed)) {
+                newRecord[key] = parsed.join(', ');
+              }
+            } catch {
+              // If not valid JSON array, optionally strip brackets/quotes
+              if (/^\[.*\]$/.test(value)) {
+                newRecord[key] = value.replace(/[\[\]"]+/g, '');
+              }
+            }
+          }
+        });
+  
+        return newRecord;
+      });
+      setListViewData(cleanedRecords);
+      // setListViewData(solidEntityListViewData?.records);
       setTotalRecords(solidEntityListViewData?.meta.totalRecords);
       setLoading(false);
     }

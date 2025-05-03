@@ -25,15 +25,68 @@ export class SolidSelectionDynamicField implements ISolidField {
         // {label: '', value: ''}
         const optionValue = this.fieldContext.data[this.fieldContext.field.attrs.name];
         const fieldMetadata = this.fieldContext.fieldMetadata;
+        const isMultiple = this.fieldContext.field.attrs.multiple;
 
-        return { label: optionValue || '', value: optionValue || '' };
+        // return { label: optionValue || '', value: optionValue || '' };
+        const stripBracketsAndQuotes = (str: string) =>
+            str.replace(/^\[?"?/, '').replace(/"?\]?$/, '').trim();
+    
+        const cleanValue = (val: any) => {
+            if (typeof val === 'string') {
+                const cleaned = stripBracketsAndQuotes(val);
+                return { label: cleaned, value: cleaned };
+            } else if (val && typeof val === 'object') {
+                const label = stripBracketsAndQuotes(String(val.label ?? val));
+                const value = stripBracketsAndQuotes(String(val.value ?? val));
+                return { label, value };
+            } else {
+                const strVal = stripBracketsAndQuotes(String(val));
+                return { label: strVal, value: strVal };
+            }
+        };
+    
+        if (isMultiple) {
+            if (Array.isArray(optionValue)) {
+                return optionValue.map(cleanValue);
+            } else if (typeof optionValue === 'string') {
+                try {
+                    const parsed = JSON.parse(optionValue); // try to parse as JSON array
+                    if (Array.isArray(parsed)) {
+                        return parsed.map(cleanValue);
+                    }
+                } catch {
+                    // fallback to comma-split only if not valid JSON
+                    const splitValues = optionValue.split(',').map(v => v.trim()).filter(Boolean);
+                    return splitValues.map(cleanValue);
+                }
+            }
+            return [];
+        } else {
+            return cleanValue(optionValue || '');
+        }
     }
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
+        const isMultiple = fieldLayoutInfo.attrs.multiple;
+        const stripQuotes = (str: string) => str.replace(/^"+|"+$/g, '').replace(/^'+|'+$/g, '');
+
         if (value) {
-            formData.append(fieldLayoutInfo.attrs.name, value.value);
+            if (isMultiple) {
+                const selectedValues = value.map((v: any) => {
+                    const cleanedValue = stripQuotes(v.value);  // still fine
+                    return cleanedValue;
+                });
+                const jsonString = JSON.stringify(selectedValues);  // ✅ Proper JSON array
+                formData.append(fieldLayoutInfo.attrs.name, jsonString);
+            } else {
+                const cleanedValue = stripQuotes(value.value);
+                formData.append(fieldLayoutInfo.attrs.name, cleanedValue);
+            }
         }
+        // if (value) {
+        //     formData.append(fieldLayoutInfo.attrs.name, value.value);
+        // }
     }
 
     validationSchema(): Schema {
@@ -44,11 +97,27 @@ export class SolidSelectionDynamicField implements ISolidField {
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
 
         // 1. required 
-        if (fieldMetadata.required) {
-            schema = schema.required(`${fieldLabel} is required.`);
-        }
+        // if (fieldMetadata.required) {
+        //     schema = schema.required(`${fieldLabel} is required.`);
+        // }
 
-        return schema;
+        // return schema;
+        const isMultiple = fieldLayoutInfo.attrs?.multiple;
+    
+        if (!fieldMetadata.required) {
+          return Yup.mixed();
+        }
+    
+        if (isMultiple) {
+          return Yup.array()
+            .min(1, `${fieldLabel} is required.`)
+            .of(Yup.object().shape({ label: Yup.string(), value: Yup.string() }));
+        }
+    
+        return Yup.object().shape({
+          label: Yup.string(),
+          value: Yup.string().required(`${fieldLabel} is required.`),
+        });
     }
 
     render(formik: FormikObject) {
@@ -123,6 +192,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
     const whereClause = fieldLayoutInfo.attrs.whereClause;
+    const isMultiple = fieldLayoutInfo?.attrs?.multiple;
 
     // selection dynamic specific code. 
     const [triggerGetSelectionDynamicValues] = useLazyGetSelectionDynamicValuesQuery();
@@ -170,12 +240,14 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                     </label>
                 }
                 <AutoComplete
+                    multiple={isMultiple}
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                     disabled={formDisabled || fieldDisabled}
                     {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                     id={fieldLayoutInfo.attrs.name}
                     field="label"
-                    value={formik.values[fieldLayoutInfo.attrs.name] || null}
+                    // value={formik.values[fieldLayoutInfo.attrs.name] || null}
+                    value={formik.values[fieldLayoutInfo.attrs.name] || (isMultiple ? [] : null)}
                     dropdown
                     suggestions={selectionDynamicItems}
                     completeMethod={selectionDynamicSearch}
@@ -196,11 +268,43 @@ export const DefaultSelectionDynamicFormViewWidget = ({ formik, fieldContext }: 
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const value  =formik.values[fieldLayoutInfo.attrs.name];
+    const isMultiple = fieldLayoutInfo.attrs.multiple;
+
+    let values: string[] = [];
+    if (isMultiple) {
+        if (typeof value === 'string') {
+            try {
+                const parsed = JSON.parse(value);
+                if (Array.isArray(parsed)) {
+                    values = parsed;
+                }
+            } catch {
+                // Fallback if not a JSON string (or invalid JSON)
+                values = value.split(',').map(v => v.trim());
+            }
+        } else if (Array.isArray(value)) {
+            values = value.map(v => (typeof v === 'object' && v.label ? v.label : String(v)));
+        }
+    }
     
     return (
+        // <div className="mt-2 flex-column gap-2">
+        //     <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+        //     <p className="m-0 solid-custom-selection-dynamic-pill">{value && value.label && value.label}</p>
+        // </div>
         <div className="mt-2 flex-column gap-2">
             <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
-            <p className="m-0 solid-custom-selection-dynamic-pill">{value && value.label && value.label}</p>
+            <p className="m-0">
+                {isMultiple ? (
+                    values.length > 0 ? (
+                    <span>{values.join(', ')}</span> // ✅ Join with commas
+                    ) : (
+                    <span className="text-gray-500">No selection</span>
+                    )
+                ) : (
+                    value && value?.label ? value.label : <span className="text-gray-500">No selection</span>
+                )}
+                </p>
         </div>
     );
 }
