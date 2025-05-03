@@ -219,6 +219,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
     }
     return (
         <div className="mt-4 relative">
+                            <Toast ref={toast} />
             {showFieldLabel != false &&
                 <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
                     {fieldLabel}
