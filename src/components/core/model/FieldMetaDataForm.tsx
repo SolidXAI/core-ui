@@ -928,7 +928,8 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     isUserKey: fieldMetaData ? fieldMetaData?.isUserKey : false,
     relationCoModelColumnName: fieldMetaData ? fieldMetaData?.relationCoModelColumnName : null,
     relationJoinTableName: fieldMetaData ? fieldMetaData?.relationJoinTableName : null,
-    userKey: fieldMetaData ? fieldMetaData?.userKey : null
+    userKey: fieldMetaData ? fieldMetaData?.userKey : null,
+    isMultiselect: fieldMetaData ? fieldMetaData?.isMultiselect : false,
   };
 
 
@@ -2763,6 +2764,32 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             )}
                           </div>
                         )}
+                        
+                        {currentFields.includes("isMultiselect") && (
+                          <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="flex align-items-center">
+                              <Checkbox
+                                name="isMultiselect"
+                                onChange={(e) => {
+                                  formik.setFieldValue("isMultiselect", e.checked);
+                                }}
+                                checked={formik.values.isMultiselect}
+                              ></Checkbox>
+                              <label htmlFor="ingredient1" className="form-field-label ml-2">
+                              Is Multiselect
+                              </label>
+                            </div>
+                            {isFormFieldValid(formik, "isMultiselect") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.isMultiselect?.toString()}
+                              />
+                            )}
+                          </div>
+                        )}
+
+
+
                         {currentFields.includes("unique") && selectedType.value !== 'relation' && (
                           <div className="field col-6 flex-flex-column gap-2">
                             <div className="flex align-items-center">

@@ -19,7 +19,13 @@ export class SolidSelectionStaticField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        if (value) {
+        const isMultiple = this.fieldContext.field?.attrs?.multiple;
+        // if (value) {
+        //     formData.append(fieldLayoutInfo.attrs.name, value.value);
+        // }
+        if (isMultiple && Array.isArray(value)) {
+            formData.append(fieldLayoutInfo.attrs.name, JSON.stringify(value.map(v => v.value)));
+        } else if (value) {
             formData.append(fieldLayoutInfo.attrs.name, value.value);
         }
     }
@@ -30,28 +36,54 @@ export class SolidSelectionStaticField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldDefaultValue = fieldMetadata?.defaultValue;
 
+        const isMultiple = this.fieldContext.field?.attrs?.multiple;
+
         // Get existing value from form data
         const existingValue = this.fieldContext.data[fieldName];
 
         // Function to get display value based on selectionStaticValues
-        const getDisplayValue = (value: string | null): string | null => {
-            if (!value) return null;
-            for (const item of fieldMetadata.selectionStaticValues) {
-                const [lhs, rhs] = item.split(':');
-                if (lhs === value) {
-                    return rhs;
-                }
-            }
-            return null;
+        // const getDisplayValue = (value: string | null): string | null => {
+        //     if (!value) return null;
+        //     for (const item of fieldMetadata.selectionStaticValues) {
+        //         const [lhs, rhs] = item.split(':');
+        //         if (lhs === value) {
+        //             return rhs;
+        //         }
+        //     }
+        //     return null;
+        // };
+        const getDisplayValue = (value: string): string => {
+            const match = fieldMetadata.selectionStaticValues.find((item: string) => item.startsWith(value + ':'));
+            return match ? match.split(':')[1] : value;
         };
 
         // Determine the final value to use (existing value or default value)
         const finalValue = existingValue ?? fieldDefaultValue ?? '';
 
-        // Get display value for the final value
-        const displayValue = getDisplayValue(finalValue);
+        if (isMultiple) {
+            let values: string[] = [];
+    
+            if (Array.isArray(finalValue)) {
+                values = finalValue;
+            } else {
+                try {
+                    const parsed = JSON.parse(finalValue);
+                    if (Array.isArray(parsed)) values = parsed;
+                } catch {}
+            }
+    
+            return values.map(val => ({
+                label: getDisplayValue(val),
+                value: val
+            }));
+        }
 
-        return { label: displayValue ?? '', value: finalValue };
+        // Get display value for the final value
+        // const displayValue = getDisplayValue(finalValue);
+
+        // return { label: displayValue ?? '', value: finalValue };
+        return { label: getDisplayValue(finalValue), value: finalValue };
+
     }
 
 
@@ -60,14 +92,35 @@ export class SolidSelectionStaticField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-        let schema = Yup.object({
-            value: Yup.string().required(`${fieldLabel} is required.`)
-        });
+
+        const isMultiple = fieldLayoutInfo.attrs?.multiple;
+        // let schema = Yup.object({
+        //     value: Yup.string().required(`${fieldLabel} is required.`)
+        // });
 
         // 1. required 
-        if (fieldMetadata.required) {
-            schema = schema.required(`${fieldLabel} is required.`);
-        }
+        // if (fieldMetadata.required) {
+        //     schema = schema.required(`${fieldLabel} is required.`);
+        // }
+
+        let schema: Schema;
+
+    if (isMultiple) {
+        // Expecting an array of objects with shape { value: string }
+        schema = Yup.array()
+            .of(Yup.object({
+                value: Yup.string().required(`${fieldLabel} is required.`)
+            }))
+            .min(1, `${fieldLabel} is required.`);
+    } else {
+        schema = Yup.object({
+            value: Yup.string().required(`${fieldLabel} is required.`)
+        });
+    }
+
+    if (fieldMetadata.required) {
+        schema = schema.required(`${fieldLabel} is required.`);
+    }
 
         return schema;
     }
@@ -141,6 +194,9 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
+    const isMultiple = fieldLayoutInfo?.attrs?.multiple;
+
+
     const [selectionStaticItems, setSelectionStaticItems] = useState([]);
     const selectionStaticSearch = (event: AutoCompleteCompleteEvent) => {
         const selectionStaticData = fieldMetadata.selectionStaticValues.map((i: string) => {
@@ -164,13 +220,15 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
                     </label>
                 }
                 <AutoComplete
+                    multiple={isMultiple}
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                     disabled={formDisabled || fieldDisabled}
                     {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                     id={fieldLayoutInfo.attrs.name}
                     name={fieldLayoutInfo.attrs.name}
                     field="label"
-                    value={formik.values[fieldLayoutInfo.attrs.name] || null}
+                    // value={formik.values[fieldLayoutInfo.attrs.name] || null}
+                    value={formik.values[fieldLayoutInfo.attrs.name] || (isMultiple ? [] : null)}
                     dropdown
                     suggestions={selectionStaticItems}
                     completeMethod={selectionStaticSearch}
@@ -260,12 +318,24 @@ export const DefaultSelectionStaticFormViewWidget = ({ formik, fieldContext }: S
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const value  =formik.values[fieldLayoutInfo.attrs.name];
+    const isMultiple = fieldLayoutInfo?.attrs?.multiple;
 
     return (
+        // <div className="mt-2 flex-column gap-2">
+        //     <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+        //     <p className="m-0">{value && value.label && value.label}</p>
+        // </div>
         <div className="mt-2 flex-column gap-2">
             <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
-            <p className="m-0">{value && value.label && value.label}</p>
+            <p className="m-0">
+                {isMultiple
+                    ? Array.isArray(value)
+                        ? value.map(v => v?.label).filter(Boolean).join(', ')
+                        : ''
+                    : value?.label || ''}
+            </p>
         </div>
+        
     );
 }
 
