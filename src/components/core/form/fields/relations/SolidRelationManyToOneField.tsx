@@ -3,7 +3,7 @@ import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { Message } from "primereact/message";
 import qs from "qs";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
@@ -16,6 +16,8 @@ import SolidFormView from "../../SolidFormView";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import Handlebars from "handlebars";
+import { Toast } from "primereact/toast";
+import { SolidFormFieldRender } from "../../SolidFormFieldRender";
 
 
 export class SolidRelationManyToOneField implements ISolidField {
@@ -67,68 +69,15 @@ export class SolidRelationManyToOneField implements ISolidField {
     }
 
     render(formik: FormikObject) {
-        const fieldMetadata = this.fieldContext.fieldMetadata;
-        const fieldLayoutInfo = this.fieldContext.field;
-        const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
-
-        const isVisible = fieldLayoutInfo.attrs?.visible !== false && !this.fieldContext.parentData;
-
-        if (!isVisible) {
-            return null;
-        }
-
-        let viewWidget = fieldLayoutInfo.attrs.viewWidget;
-        let editWidget = fieldLayoutInfo.attrs.editWidget;
-        if (!editWidget) {
-            editWidget = 'DefaultRelationManyToOneFormEditWidget';
-        }
-        if (!viewWidget) {
-            viewWidget = 'DefaultRelationManyToOneFormViewWidget';
-        }
-        const viewMode: string = this.fieldContext.viewMode;
         return (
-            <>
-                <div className={className}>
-
-                    {viewMode === "view" &&
-                        this.renderExtensionRenderMode(viewWidget, formik)
-                    }
-                    {viewMode === "edit" && (
-                        <>
-                            {editWidget &&
-                                this.renderExtensionRenderMode(editWidget, formik)
-                            }
-                            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                                <div className="absolute mt-1">
-                                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                                </div>
-                            )}
-
-                        </>
-                    )
-                    }
-                </div>
-            </>
+           <SolidFormFieldRender formik={formik} fieldContext={this.fieldContext}></SolidFormFieldRender>
         );
     }
-
-    renderExtensionRenderMode(widget: string, formik: FormikObject) {
-        let DynamicWidget = getExtensionComponent(widget);
-        const widgetProps: SolidFormFieldWidgetProps = {
-            formik: formik,
-            fieldContext: this.fieldContext,
-        }
-        return (
-            <>
-                {DynamicWidget && <DynamicWidget {...widgetProps} />}
-            </>
-        )
-    }
-
 }
 
 export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+    const toast = useRef<Toast>(null);
+
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const className = fieldLayoutInfo.attrs?.className || 'field col-12';
@@ -138,6 +87,14 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
     const readOnlyPermission = fieldContext.readOnly;
     const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
 
+    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
+        toast.current?.show({
+            severity,
+            summary,
+            detail,
+            life: 3000,
+        });
+    };
     // auto complete specific code. 
     const entityApi = createSolidEntityApi(fieldMetadata.relationCoModelSingularName);
     const { useLazyGetSolidEntitiesQuery } = entityApi;
@@ -167,8 +124,14 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                 ]
             }
         };
+        let fixedFilterToBeApplied = false;
+        let fixedFilterParsed = false;
+        if (solidFormViewMetaData?.data?.solidView?.model?.singularName === "listOfValues") {
+            fixedFilterToBeApplied = true;
+        }
         if (fieldMetadata?.relationFieldFixedFilter || fieldLayoutInfo?.attrs?.fixedFilter) {
-            const convertedFixedFilter = fieldLayoutInfo?.attrs?.fixedFilter ? fieldLayoutInfo?.attrs?.fixedFilter :fieldMetadata?.relationFieldFixedFilter;
+            const convertedFixedFilter = fieldLayoutInfo?.attrs?.fixedFilter ? fieldLayoutInfo?.attrs?.fixedFilter : fieldMetadata?.relationFieldFixedFilter;
+            fixedFilterToBeApplied = true;
             const fixedFilterTemplate = Handlebars.compile(convertedFixedFilter);
             const renderedFilter = fixedFilterTemplate(formik.values);
 
@@ -193,6 +156,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 
                 if (isValid(parsedFilter)) {
                     queryData.filters.$and.push(parsedFilter);
+                    fixedFilterParsed = true;
                 } else {
                     console.warn("Skipping invalid/empty fixed filter:", parsedFilter);
                 }
@@ -209,22 +173,31 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
         if (whereClause) {
             autocompleteQs = `${autocompleteQs}&${whereClause}`;
         }
-        // TODO: do error handling here, possible errors like modelname is incorrect etc...
-        const autocompleteResponse = await triggerGetSolidEntities(autocompleteQs);
 
-        // TODO: if no data found then can we show no matching "entities", where entities can be replaced with the model plural name,
-        const autocompleteData = autocompleteResponse.data;
 
-        if (autocompleteData) {
-            const autoCompleteItems = autocompleteData.records.map((item: any) => {
-                return {
-                    solidManyToOneLabel: item[fieldMetadata?.relationModel?.userKeyField?.name],
-                    solidManyToOneValue: item['id'],
-                    ...item,
-                }
-            });
-            setAutoCompleteItems(autoCompleteItems);
+        if (fixedFilterToBeApplied && !fixedFilterParsed) {
+            showToast("error", "Please select relevant fields used in fixed filter", "Fields Not selected!");
+
+        } else {
+            // TODO: do error handling here, possible errors like modelname is incorrect etc...
+            const autocompleteResponse = await triggerGetSolidEntities(autocompleteQs);
+
+            // TODO: if no data found then can we show no matching "entities", where entities can be replaced with the model plural name,
+            const autocompleteData = autocompleteResponse.data;
+
+            if (autocompleteData) {
+                const autoCompleteItems = autocompleteData.records.map((item: any) => {
+                    return {
+                        solidManyToOneLabel: item[fieldMetadata?.relationModel?.userKeyField?.name],
+                        solidManyToOneValue: item['id'],
+                        ...item,
+                    }
+                });
+                setAutoCompleteItems(autoCompleteItems);
+            }
         }
+
+
     }
 
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
