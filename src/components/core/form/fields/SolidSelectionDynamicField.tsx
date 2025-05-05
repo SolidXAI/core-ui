@@ -79,11 +79,6 @@ export class SolidSelectionDynamicField implements ISolidField {
                             {editWidget &&
                                 this.renderExtensionRenderMode(editWidget, formik)
                             }
-                            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                                <div className="absolute mt-1">
-                                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                                </div>
-                            )}
                         </>
                     }
                 </div>
@@ -127,6 +122,8 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
     // selection dynamic specific code. 
     const [triggerGetSelectionDynamicValues] = useLazyGetSelectionDynamicValuesQuery();
     const [selectionDynamicItems, setSelectionDynamicItems] = useState([]);
+    const isFormFieldValid = (formik: any, fieldName: string) => formik.errors[fieldName];
+
     const selectionDynamicSearch = async (event: AutoCompleteCompleteEvent) => {
 
         // Get the list view layout & metadata first. 
@@ -165,7 +162,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                        <SolidFieldTooltip fieldContext={fieldContext}/>
+                        <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
@@ -185,6 +182,11 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                     className="solid-standard-autocomplete"
                 />
             </div>
+            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                <div className="absolute mt-1">
+                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                </div>
+            )}
         </div>
     );
 }
@@ -195,8 +197,8 @@ export const DefaultSelectionDynamicFormViewWidget = ({ formik, fieldContext }: 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-    const value  =formik.values[fieldLayoutInfo.attrs.name];
-    
+    const value = formik.values[fieldLayoutInfo.attrs.name];
+
     return (
         <div className="mt-2 flex-column gap-2">
             <p className="m-0 form-field-label font-medium">{fieldLabel}</p>

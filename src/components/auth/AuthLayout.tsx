@@ -105,7 +105,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                             />
                         </div>
                     }
-                    {process.env.NEXT_PUBLIC_SHOW_AUTH_TEXT_CONTENT === 'true' &&
+                    {process.env.NEXT_PUBLIC_SHOW_AUTH_TEXT_CONTENT === 'true' && solidSettingsData?.data?.authPagesLayout !== 'center' &&
                         <div className="w-full" style={{ zIndex: 1 }}>
                             <div className="grid">
                                 <div className="col-8 mx-auto">

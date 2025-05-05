@@ -99,12 +99,6 @@ export class SolidRelationManyToOneField implements ISolidField {
                             {editWidget &&
                                 this.renderExtensionRenderMode(editWidget, formik)
                             }
-                            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                                <div className="absolute mt-1">
-                                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                                </div>
-                            )}
-
                         </>
                     )
                     }
@@ -205,34 +199,40 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 
     }
     return (
-        <div className="mt-4 relative">
-            {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
-                    {fieldLabel}
-                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                    <SolidFieldTooltip fieldContext={fieldContext}/>
-                </label>
-            }
-            <div className="flex align-items-center gap-3 mt-2">
-                <AutoComplete
-                    readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                    disabled={formDisabled || fieldDisabled || readOnlyPermission}
-                    {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
-                    id={fieldLayoutInfo.attrs.name}
-                    field="label"
-                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                    dropdown={!readOnlyPermission}
-                    suggestions={autoCompleteItems}
-                    completeMethod={autoCompleteSearch}
-                    onChange={formik.handleChange}
-                    onFocus={(e) => e.target.select()}
-                    className="w-full solid-standard-autocomplete"
-                />
-                {fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false &&
-                    <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} customCreateHandler={customCreateHandler} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity}></RenderSolidFormEmbededView>
+        <div className="relative">
+            <div className="flex flex-column gap-2 mt-4">
+                {showFieldLabel != false &&
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
+                        {fieldLabel}
+                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        <SolidFieldTooltip fieldContext={fieldContext} />
+                    </label>
                 }
+                <div className="flex align-items-center gap-3">
+                    <AutoComplete
+                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                        disabled={formDisabled || fieldDisabled || readOnlyPermission}
+                        {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
+                        id={fieldLayoutInfo.attrs.name}
+                        field="label"
+                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                        dropdown={!readOnlyPermission}
+                        suggestions={autoCompleteItems}
+                        completeMethod={autoCompleteSearch}
+                        onChange={formik.handleChange}
+                        onFocus={(e) => e.target.select()}
+                        className="w-full solid-standard-autocomplete"
+                    />
+                    {fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false &&
+                        <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} customCreateHandler={customCreateHandler} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity}></RenderSolidFormEmbededView>
+                    }
+                </div>
             </div>
-
+            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                <div className="absolute mt-1">
+                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                </div>
+            )}
         </div>
     );
 }
@@ -259,17 +259,19 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
         modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName)
     }
     return (
-        <div >
-            <Button
-                icon="pi pi-plus"
-                rounded
-                outlined
-                aria-label="Filter"
-                type="button"
-                size="small"
-                onClick={() => setvisibleCreateRelationEntity(true)}
-                className="custom-add-button"
-            />
+        <div>
+            <div>
+                <Button
+                    icon="pi pi-plus"
+                    rounded
+                    outlined
+                    aria-label="Filter"
+                    type="button"
+                    size="small"
+                    onClick={() => setvisibleCreateRelationEntity(true)}
+                    className="custom-add-button"
+                />
+            </div>
             <Dialog
                 header=""
                 showHeader={false}

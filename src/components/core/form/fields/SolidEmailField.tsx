@@ -89,11 +89,6 @@ export class SolidEmailField implements ISolidField {
                         {editWidget &&
                             this.renderExtensionRenderMode(editWidget, formik)
                         }
-                        {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                            <div className="absolute mt-1">
-                                <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                            </div>
-                        )}
                     </>
                 )
                 }
