@@ -445,13 +445,13 @@ a {
   align-items: center;
 }
 
-.solid-field-tooltip-icon{
+.solid-field-tooltip-icon {
   margin-left: 8px;
   color: var(--text-color);
   font-size: 14px;
 }
 
-.solid-field-tooltip.p-tooltip{
+.solid-field-tooltip.p-tooltip {
   font-size: 12px;
   color: #fff;
 }
@@ -2300,6 +2300,10 @@ li.header-li-px {
   margin: 0 auto;
 }
 
+.solid-logo.in_form_view {
+  margin-bottom: 30px;
+}
+
 .solid-logo img {
   width: 2.375rem !important;
   height: 2.375rem !important;
@@ -2400,6 +2404,32 @@ li.header-li-px {
 .solid-left-layout .solid-logo .solid-logo-title,
 .solid-right-layout .solid-logo .solid-logo-title {
   color: #fff !important;
+}
+
+.solid-left-layout,
+.solid-right-layout {
+  display: flex;
+  align-items: center;
+}
+
+.solid-auth-image-title {
+  font-size: 5rem;
+  font-weight: 600;
+}
+
+.solid-auth-image-subtitle {
+  font-size: 3.5rem;
+  font-weight: 400;
+}
+
+.solid-auth-image-helper-text {
+  font-size: 0.875rem;
+}
+
+.solid-auth-image-title,
+.solid-auth-image-subtitle,
+.solid-auth-image-helper-text {
+  color: #FFF !important;
 }
 
 .listview-cogwheel-panel .p-overlaypanel-content {

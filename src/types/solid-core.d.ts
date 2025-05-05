@@ -140,8 +140,8 @@ export type SolidFormDynamicFunctionProps = {
     params: any,
     formik: any;
     solidFormViewMetaData: SolidView;
+    rowData: any
 }
-
 
 export type SolidListHeaderDynamicFunctionProps = {
     action: string,
