@@ -43,14 +43,14 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
 
     const updateViewMode = (newMode: "view" | "edit") => {
         setViewMode(newMode);
-        // const params = new URLSearchParams(searchParams.toString());
-        // params.set("viewMode", newMode);
-        // router.push(`${pathname}?${params.toString()}`, { scroll: false });
-        const router = useRouter();
-        const pathname = usePathname();
-        const params = new URLSearchParams(searchParams?.toString() || "");
+        const params = new URLSearchParams(searchParams.toString());
         params.set("viewMode", newMode);
         router.push(`${pathname}?${params.toString()}`, { scroll: false });
+        // const router = useRouter();
+        // const pathname = usePathname();
+        // const params = new URLSearchParams(searchParams?.toString() || "");
+        // params.set("viewMode", newMode);
+        // router.push(`${pathname}?${params.toString()}`, { scroll: false });
 
     };
     const FormActionDropdown = () => {
