@@ -68,10 +68,65 @@ export class SolidRelationManyToOneField implements ISolidField {
         return schema;
     }
 
+    
     render(formik: FormikObject) {
+        const fieldMetadata = this.fieldContext.fieldMetadata;
+        const fieldLayoutInfo = this.fieldContext.field;
+        const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
+        const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+
+        const isVisible = fieldLayoutInfo.attrs?.visible !== false && !this.fieldContext.parentData;
+
+        if (!isVisible) {
+            return null;
+        }
+
+        let viewWidget = fieldLayoutInfo.attrs.viewWidget;
+        let editWidget = fieldLayoutInfo.attrs.editWidget;
+        if (!editWidget) {
+            editWidget = 'DefaultRelationManyToOneFormEditWidget';
+        }
+        if (!viewWidget) {
+            viewWidget = 'DefaultRelationManyToOneFormViewWidget';
+        }
+        const viewMode: string = this.fieldContext.viewMode;
         return (
-           <SolidFormFieldRender formik={formik} fieldContext={this.fieldContext}></SolidFormFieldRender>
+            <>
+                <div className={className}>
+
+                    {viewMode === "view" &&
+                        this.renderExtensionRenderMode(viewWidget, formik)
+                    }
+                    {viewMode === "edit" && (
+                        <>
+                            {editWidget &&
+                                this.renderExtensionRenderMode(editWidget, formik)
+                            }
+                            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                                <div className="absolute mt-1">
+                                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                                </div>
+                            )}
+
+                        </>
+                    )
+                    }
+                </div>
+            </>
         );
+    }
+
+    renderExtensionRenderMode(widget: string, formik: FormikObject) {
+        let DynamicWidget = getExtensionComponent(widget);
+        const widgetProps: SolidFormFieldWidgetProps = {
+            formik: formik,
+            fieldContext: this.fieldContext,
+        }
+        return (
+            <>
+                {DynamicWidget && <DynamicWidget {...widgetProps} />}
+            </>
+        )
     }
 }
 

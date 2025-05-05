@@ -589,11 +589,16 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
                 else {
                     // updateEntity({ id: +params.id, data: formData });
-                    await updateEntity({ id: +params.id, data: formData }).unwrap();
+                    const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
                     // const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
                     if (!params.embeded) {
                         showToast("success", "Form Updated", "Form updated successfully!");
+                        if (result?.statusCode === 200) {
+                            updateViewMode("view")
+                        }
                     }
+
+
                 }
             }
 
