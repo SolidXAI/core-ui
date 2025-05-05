@@ -27,7 +27,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
         if (solidView) {
             let contextMenuHeaderButtonsData: any = [];
             let normalHeaderButtonsData: any = [];
-            const formHeaderButtons = solidView.layout.attrs.formButtons;
+            const formHeaderButtons = solidView?.layout?.attrs?.formButtons;
             if (formHeaderButtons && formHeaderButtons.length > 0) {
                 contextMenuHeaderButtonsData = formHeaderButtons.filter((button: any) => {
                     return button.attrs && button.attrs.actionInContextMenu && button.attrs.actionInContextMenu === true;
