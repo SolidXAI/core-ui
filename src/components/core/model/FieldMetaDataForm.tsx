@@ -930,7 +930,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     relationJoinTableName: fieldMetaData ? fieldMetaData?.relationJoinTableName : null,
     userKey: fieldMetaData ? fieldMetaData?.userKey : null,
     enableAuditTracking: fieldMetaData ? fieldMetaData?.enableAuditTracking : false,
-    isMultiselect: fieldMetaData ? fieldMetaData?.isMultiselect : false,
+    isMultiSelect: fieldMetaData ? fieldMetaData?.isMultiSelect : false,
   };
 
 
@@ -2860,24 +2860,24 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             )}
                           </div>
                         )}
-                        {currentFields.includes("isMultiselect") && (
+                        {currentFields.includes("isMultiSelect") && (
                           <div className="field col-6 flex-flex-column gap-2 mt-3">
                             <div className="flex align-items-center">
                               <Checkbox
-                                name="isMultiselect"
+                                name="isMultiSelect"
                                 onChange={(e) => {
-                                  formik.setFieldValue("isMultiselect", e.checked);
+                                  formik.setFieldValue("isMultiSelect", e.checked);
                                 }}
-                                checked={formik.values.isMultiselect}
+                                checked={formik.values.isMultiSelect}
                               ></Checkbox>
                               <label htmlFor="ingredient1" className="form-field-label ml-2">
-                              Is Multiselect
+                              Is MultiSelect
                               </label>
                             </div>
-                            {isFormFieldValid(formik, "isMultiselect") && (
+                            {isFormFieldValid(formik, "isMultiSelect") && (
                               <Message
                                 severity="error"
-                                text={formik?.errors?.isMultiselect?.toString()}
+                                text={formik?.errors?.isMultiSelect?.toString()}
                               />
                             )}
                           </div>

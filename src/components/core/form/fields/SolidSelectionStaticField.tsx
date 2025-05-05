@@ -20,8 +20,9 @@ export class SolidSelectionStaticField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        const isMultiple = this.fieldContext.field?.attrs?.multiple;
-        if (isMultiple && Array.isArray(value)) {
+        const fieldMetadata = this.fieldContext.fieldMetadata;
+        const isMultiSelect = fieldMetadata?.isMultiSelect;
+        if (isMultiSelect && Array.isArray(value)) {
             formData.append(fieldLayoutInfo.attrs.name, JSON.stringify(value.map(v => v.value)));
         } else if (value) {
             formData.append(fieldLayoutInfo.attrs.name, value.value);
@@ -36,7 +37,7 @@ export class SolidSelectionStaticField implements ISolidField {
         const fieldName = this.fieldContext.field.attrs.name;
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldDefaultValue = fieldMetadata?.defaultValue;
-        const isMultiple = this.fieldContext.field?.attrs?.multiple;
+        const isMultiSelect = fieldMetadata?.isMultiSelect;
         // Get existing value from form data
         const existingValue = this.fieldContext.data[fieldName];
 
@@ -61,7 +62,7 @@ export class SolidSelectionStaticField implements ISolidField {
         // Determine the final value to use (existing value or default value)
         const finalValue = existingValue ?? fieldDefaultValue ?? '';
 
-        if (isMultiple) {
+        if (isMultiSelect) {
             let values: string[] = [];
     
             if (Array.isArray(finalValue)) {
@@ -92,14 +93,14 @@ export class SolidSelectionStaticField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-        const isMultiple = fieldLayoutInfo.attrs?.multiple;
+        const isMultiSelect = fieldMetadata?.isMultiSelect;
 
         // let schema = Yup.object({
         //     value: Yup.string().required(`${fieldLabel} is required.`)
         // });
         let schema: Schema;
 
-        if (isMultiple) {
+        if (isMultiSelect) {
             // Expecting an array of objects with shape { value: string }
             schema = Yup.array()
                 .of(Yup.object({
@@ -188,7 +189,7 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
 
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
-    const isMultiple = fieldLayoutInfo?.attrs?.multiple;
+    const isMultiSelect = fieldMetadata?.isMultiSelect;
 
     const [selectionStaticItems, setSelectionStaticItems] = useState([]);
     const selectionStaticSearch = (event: AutoCompleteCompleteEvent) => {
@@ -214,7 +215,7 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
                     </label>
                 }
                 <AutoComplete
-                    multiple={isMultiple}
+                    multiple={isMultiSelect}
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                     disabled={formDisabled || fieldDisabled}
                     {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
@@ -222,7 +223,7 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
                     name={fieldLayoutInfo.attrs.name}
                     field="label"
                     // value={formik.values[fieldLayoutInfo.attrs.name] || null}
-                    value={formik.values[fieldLayoutInfo.attrs.name] || (isMultiple ? [] : null)}
+                    value={formik.values[fieldLayoutInfo.attrs.name] || (isMultiSelect ? [] : null)}
                     dropdown
                     suggestions={selectionStaticItems}
                     completeMethod={selectionStaticSearch}
@@ -255,7 +256,7 @@ export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }
     const formReadonly = fieldContext.solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
     const fieldName = fieldLayoutInfo.attrs.name;
-
+    const isMultiSelect = fieldMetadata?.isMultiSelect;
     // Convert selectionStaticValues to usable radio options
     const radioOptions = fieldMetadata.selectionStaticValues.map((i: string) => {
         const [value, label] = i.split(":");
@@ -264,6 +265,17 @@ export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }
 
     const isFormFieldValid = (formik: any, fieldName: string) =>
          formik.errors[fieldName];
+
+    if (isMultiSelect) {
+        return (
+            <div className={className}>
+                <Message
+                    severity="error"
+                    text={`This render mode is not supported for multi select.`}
+                />
+            </div>
+        );
+    }
 
     return (
         <div className={className}>
@@ -313,7 +325,7 @@ export const DefaultSelectionStaticFormViewWidget = ({ formik, fieldContext }: S
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const value  =formik.values[fieldLayoutInfo.attrs.name];
-    const isMultiple = fieldLayoutInfo?.attrs?.multiple;
+    const isMultiSelect = fieldMetadata?.isMultiSelect;
 
     return (
         // <div className="mt-2 flex-column gap-2">
@@ -323,7 +335,7 @@ export const DefaultSelectionStaticFormViewWidget = ({ formik, fieldContext }: S
         <div className="mt-2 flex-column gap-2">
             <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
             <p className="m-0">
-                {isMultiple
+                {isMultiSelect
                     ? Array.isArray(value)
                         ? value.map(v => v?.label).filter(Boolean).join(', ')
                         : ''

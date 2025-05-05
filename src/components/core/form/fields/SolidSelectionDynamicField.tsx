@@ -25,7 +25,8 @@ export class SolidSelectionDynamicField implements ISolidField {
         // {label: '', value: ''}
         const optionValue = this.fieldContext.data[this.fieldContext.field.attrs.name];
         const fieldMetadata = this.fieldContext.fieldMetadata;
-        const isMultiple = this.fieldContext.field.attrs.multiple;
+        const isMultiSelect = fieldMetadata?.isMultiSelect;
+        // isMultiSelect: fieldMetaData ? fieldMetaData?.isMultiSelect : false,
 
         // return { label: optionValue || '', value: optionValue || '' };
         const stripBracketsAndQuotes = (str: string) =>
@@ -45,7 +46,7 @@ export class SolidSelectionDynamicField implements ISolidField {
             }
         };
     
-        if (isMultiple) {
+        if (isMultiSelect) {
             if (Array.isArray(optionValue)) {
                 return optionValue.map(cleanValue);
             } else if (typeof optionValue === 'string') {
@@ -68,11 +69,12 @@ export class SolidSelectionDynamicField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        const isMultiple = fieldLayoutInfo.attrs.multiple;
+        const fieldMetadata = this.fieldContext.fieldMetadata;
+        const isMultiSelect = fieldMetadata?.isMultiSelect;
         const stripQuotes = (str: string) => str.replace(/^"+|"+$/g, '').replace(/^'+|'+$/g, '');
 
         if (value) {
-            if (isMultiple) {
+            if (isMultiSelect) {
                 const selectedValues = value.map((v: any) => {
                     const cleanedValue = stripQuotes(v.value);  // still fine
                     return cleanedValue;
@@ -102,13 +104,13 @@ export class SolidSelectionDynamicField implements ISolidField {
         // }
 
         // return schema;
-        const isMultiple = fieldLayoutInfo.attrs?.multiple;
+        const isMultiSelect = fieldMetadata?.isMultiSelect;
     
         if (!fieldMetadata.required) {
           return Yup.mixed();
         }
     
-        if (isMultiple) {
+        if (isMultiSelect) {
           return Yup.array()
             .min(1, `${fieldLabel} is required.`)
             .of(Yup.object().shape({ label: Yup.string(), value: Yup.string() }));
@@ -192,7 +194,8 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
     const whereClause = fieldLayoutInfo.attrs.whereClause;
-    const isMultiple = fieldLayoutInfo?.attrs?.multiple;
+    
+    const isMultiSelect = fieldMetadata?.isMultiSelect;
 
     // selection dynamic specific code. 
     const [triggerGetSelectionDynamicValues] = useLazyGetSelectionDynamicValuesQuery();
@@ -240,14 +243,14 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                     </label>
                 }
                 <AutoComplete
-                    multiple={isMultiple}
+                    multiple={isMultiSelect}
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                     disabled={formDisabled || fieldDisabled}
                     {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                     id={fieldLayoutInfo.attrs.name}
                     field="label"
                     // value={formik.values[fieldLayoutInfo.attrs.name] || null}
-                    value={formik.values[fieldLayoutInfo.attrs.name] || (isMultiple ? [] : null)}
+                    value={formik.values[fieldLayoutInfo.attrs.name] || (isMultiSelect ? [] : null)}
                     dropdown
                     suggestions={selectionDynamicItems}
                     completeMethod={selectionDynamicSearch}
@@ -268,10 +271,10 @@ export const DefaultSelectionDynamicFormViewWidget = ({ formik, fieldContext }: 
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const value  =formik.values[fieldLayoutInfo.attrs.name];
-    const isMultiple = fieldLayoutInfo.attrs.multiple;
+    const isMultiSelect = fieldMetadata?.isMultiSelect;
 
     let values: string[] = [];
-    if (isMultiple) {
+    if (isMultiSelect) {
         if (typeof value === 'string') {
             try {
                 const parsed = JSON.parse(value);
@@ -295,7 +298,7 @@ export const DefaultSelectionDynamicFormViewWidget = ({ formik, fieldContext }: 
         <div className="mt-2 flex-column gap-2">
             <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
             <p className="m-0">
-                {isMultiple ? (
+                {isMultiSelect ? (
                     values.length > 0 ? (
                     <span>{values.join(', ')}</span> // ✅ Join with commas
                     ) : (
