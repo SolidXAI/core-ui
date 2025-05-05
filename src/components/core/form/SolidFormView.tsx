@@ -1042,7 +1042,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
         if (dynamicHeader) {
             DynamicHeaderComponent = getExtensionComponent(dynamicHeader);
         }
-
+        const customComponent = solidView.layout.attrs.customFormComponent;
+        const isCustom = solidView?.layout?.attrs?.custom;
+        let DynamicFormComponent = null;
+        if (isCustom) {
+            DynamicFormComponent = getExtensionComponent(customComponent);
+        }
         return (
             <div className="solid-form-wrapper">
                 <Toast ref={toast} />
@@ -1064,7 +1069,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         />
                         <div className="p-4 solid-form-content">
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
-                            {renderFormDynamically(formViewMetaData)}
+                            {isCustom && DynamicFormComponent ? <DynamicFormComponent params={params}/> : renderFormDynamically(formViewMetaData)}
                         </div>
                     </form>
                     {params.embeded !== true && isShowChatter === true &&
