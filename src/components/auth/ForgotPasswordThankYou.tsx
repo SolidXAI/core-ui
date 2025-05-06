@@ -19,18 +19,13 @@ export const ForgotPasswordThankYou = () => {
             <div className={`auth-container ${authLayout === 'Center' ? 'center' : 'side'}`}>
                 {authLayout === 'Center' &&
                     <div className="flex justify-content-center">
-                        <div className="solid-logo flex align-items-center gap-3">
+                        <div className={`solid-logo flex align-items-center ${process.env.NEXT_PUBLIC_AUTH_LOGO_POSITION}`}>
                             <Image
                                 alt="solid logo"
-                                src={SolidLogo}
+                                src={process.env.NEXT_PUBLIC_AUTH_LOGO ?? SolidLogo}
                                 className="relative"
                                 fill
                             />
-                            <div>
-                                <p className="solid-logo-title">
-                                    Solid<br />Starters
-                                </p>
-                            </div>
                         </div>
                     </div>
                 }
