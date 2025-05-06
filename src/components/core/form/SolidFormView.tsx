@@ -1047,11 +1047,15 @@ const SolidFormView = (params: SolidFormViewProps) => {
         if (dynamicHeader) {
             DynamicHeaderComponent = getExtensionComponent(dynamicHeader);
         }
-        const customComponent = solidView.layout.attrs.customFormComponent;
-        const isCustom = solidView?.layout?.attrs?.custom;
-        let DynamicFormComponent = null;
-        if (isCustom) {
-            DynamicFormComponent = getExtensionComponent(customComponent);
+        const customFormComponentEdit = solidView.layout.attrs.customFormComponentEdit;
+        const customFormComponentNew = solidView.layout.attrs.customFormComponentNew;
+        let DynamicFormComponentEdit = null;
+        let DynamicFormComponentNew = null;
+        if (customFormComponentEdit) {
+            DynamicFormComponentEdit = getExtensionComponent(customFormComponentEdit);
+        }
+        if (customFormComponentNew) {
+            DynamicFormComponentNew = getExtensionComponent(customFormComponentNew);
         }
         return (
             <div className="solid-form-wrapper">
@@ -1074,7 +1078,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         />
                         <div className="p-4 solid-form-content">
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
-                            {isCustom && DynamicFormComponent ? <DynamicFormComponent params={params}/> : renderFormDynamically(formViewMetaData)}
+                            {params.id === 'new' && DynamicFormComponentNew ? (
+                                <DynamicFormComponentNew params={params} />
+                            ) : params.id !== 'new' && DynamicFormComponentEdit ? (
+                                <DynamicFormComponentEdit params={params} />
+                            ) : (
+                                renderFormDynamically(formViewMetaData)
+                            )}
                         </div>
                     </form>
                     {params.embeded !== true && isShowChatter === true &&
