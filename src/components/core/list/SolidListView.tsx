@@ -306,7 +306,29 @@ export const SolidListView = (params: SolidListViewParams) => {
   // After data is fetched populate the list view state so as to be able to render the data. 
   useEffect(() => {
     if (solidEntityListViewData) {
-      setListViewData(solidEntityListViewData?.records);
+      const cleanedRecords = solidEntityListViewData.records.map((record) => {
+        const newRecord = { ...record };
+  
+        Object.entries(newRecord).forEach(([key, value]) => {
+          if (typeof value === 'string') {
+            try {
+              const parsed = JSON.parse(value);
+              if (Array.isArray(parsed)) {
+                newRecord[key] = parsed.join(', ');
+              }
+            } catch {
+              // If not valid JSON array, optionally strip brackets/quotes
+              if (/^\[.*\]$/.test(value)) {
+                newRecord[key] = value.replace(/[\[\]"]+/g, '');
+              }
+            }
+          }
+        });
+  
+        return newRecord;
+      });
+      setListViewData(cleanedRecords);
+      // setListViewData(solidEntityListViewData?.records);
       setTotalRecords(solidEntityListViewData?.meta.totalRecords);
       setLoading(false);
     }
@@ -768,7 +790,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           }
 
 
-          {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded !== true &&
+          {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded !== true && solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultAddButton !== false &&
             <SolidCreateButton url={createButtonUrl} />
           }
           {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true && params.id !== 'new' &&
@@ -928,21 +950,24 @@ export const SolidListView = (params: SolidListViewParams) => {
                   {detailsBodyTemplate(rowData)}
                   <OverlayPanel ref={op} className="solid-custom-overlay" style={{ top: 10, minWidth: 120 }}>
                     <div className="flex flex-column gap-1 p-1">
-                      <Button
-                        type="button"
-                        className="w-full text-left gap-1"
-                        label="Edit"
-                        size="small"
-                        iconPos="left"
-                        icon={"pi pi-pencil"}
-                        onClick={() => {
-                          if (params.embeded == true) {
-                            params.handlePopUpOpen(selectedSolidViewData?.id);
-                          } else {
-                            router.push(`${editButtonUrl}/${selectedSolidViewData?.id}?viewMode=edit`)
-                          }
-                        }}
-                      />
+                      {solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultEditButton !== false &&
+                        <Button
+                          type="button"
+                          className="w-full text-left gap-1"
+                          label="Edit"
+                          size="small"
+                          iconPos="left"
+                          icon={"pi pi-pencil"}
+                          onClick={() => {
+                            if (params.embeded == true) {
+                              params.handlePopUpOpen(selectedSolidViewData?.id);
+                            } else {
+                              router.push(`${editButtonUrl}/${selectedSolidViewData?.id}?viewMode=edit`)
+                            }
+                          }}
+                        />
+                      }
+
                       {actionsAllowed.includes(`${deletePermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.delete !== false &&
                         <Button
                           text

@@ -137,6 +137,7 @@ export type SolidShortTextImageRenderModeWidgetProps = {
 
 export type SolidFormDynamicFunctionProps = {
     action: string,
+    params: any,
     formik: any;
     solidFormViewMetaData: SolidView;
     rowData: any
