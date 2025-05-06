@@ -2,10 +2,15 @@
 import { createSlice, PayloadAction } from '@reduxjs/toolkit';
 import { ReactNode } from 'react';
 
+interface PopupEvent {
+  action: string;
+  closable?: boolean;
+  [key: string]: any;
+}
+
 interface PopupState {
   isOpen: boolean;
-  event: Event | null;
-
+  event: PopupEvent | null;
 }
 
 const initialState: PopupState = {
@@ -17,7 +22,7 @@ const popupSlice = createSlice({
   name: 'popup',
   initialState,
   reducers: {
-    openPopup: (state, action: PayloadAction<any>) => {
+    openPopup: (state, action: PayloadAction<PopupEvent>) => {
       state.isOpen = true;
       state.event = action.payload;
     },

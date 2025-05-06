@@ -25,7 +25,8 @@ const SolidPopupContainer = () => {
             modal
             headerClassName='p-0'
             contentClassName='p-0'
-            footer={<Button size='small' label='Close' outlined onClick={() => dispatch(closePopup())} />}
+            closable={event?.closable ?? true}
+            footer={event?.closable !== false && <Button size='small' label='Close' outlined onClick={() => dispatch(closePopup())} />}
         >
             {DynamicComponent && <DynamicComponent {...event} />}
         </Dialog>
