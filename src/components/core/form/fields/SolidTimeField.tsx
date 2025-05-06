@@ -72,11 +72,6 @@ export class SolidTimeField implements ISolidField {
                             {editWidget &&
                                 this.renderExtensionRenderMode(editWidget, formik)
                             }
-                            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                                <div className="absolute mt-1">
-                                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                                </div>
-                            )}
                         </>
                     }
                 </div>
@@ -123,7 +118,7 @@ export const DefaultTimeFormEditWidget = ({ formik, fieldContext }: SolidFormFie
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                        <SolidFieldTooltip fieldContext={fieldContext}/>
+                        <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
@@ -144,6 +139,11 @@ export const DefaultTimeFormEditWidget = ({ formik, fieldContext }: SolidFormFie
 
                 />
             </div>
+            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                <div className="absolute mt-1">
+                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                </div>
+            )}
         </div>
     );
 }

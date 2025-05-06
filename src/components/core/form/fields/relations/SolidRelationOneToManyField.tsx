@@ -64,8 +64,6 @@ export class SolidRelationOneToManyField implements ISolidField {
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
 
-        const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-
         const userKeyFieldName = fieldMetadata.relationModel?.userKeyField?.name;
 
         let DynamicWidget = getExtensionComponent("SolidFormFieldRelationViewModeWidget");
@@ -100,11 +98,6 @@ export class SolidRelationOneToManyField implements ISolidField {
                             {editWidget &&
                                 this.renderExtensionRenderMode(editWidget, formik)
                             }
-                            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                                <div className="absolute mt-1">
-                                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                                </div>
-                            )}
                         </>
                     )
                     }
@@ -223,25 +216,32 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
 
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+    const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
     return (
-        <div>
-            {/* <div className="justify-content-center align-items-center"> */}
-            {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                    <SolidFieldTooltip fieldContext={fieldContext}/>
-                </label>
-            }
+        <div className="relative">
+            <div className="flex flex-column gap-2 mt-4">
+                {/* <div className="justify-content-center align-items-center"> */}
+                {showFieldLabel != false &&
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        <SolidFieldTooltip fieldContext={fieldContext} />
+                    </label>
+                }
 
-            {lastPathSegment === 'new' && <p>Please save the {solidFormViewMetaData.data.solidView.model.displayName} to be able to save {fieldMetadata.displayName}</p>}
-            {listViewParams && lastPathSegment !== 'new' &&
-                <SolidListView key={refreshList.toString()}  {...listViewParams} handlePopUpOpen={handlePopupOpen} />
-            }
-            {readOnlyPermission !== true &&
-                <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
-            }
-
+                {lastPathSegment === 'new' && <p>Please save the {solidFormViewMetaData.data.solidView.model.displayName} to be able to save {fieldMetadata.displayName}</p>}
+                {listViewParams && lastPathSegment !== 'new' &&
+                    <SolidListView key={refreshList.toString()}  {...listViewParams} handlePopUpOpen={handlePopupOpen} />
+                }
+                {readOnlyPermission !== true &&
+                    <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
+                }
+            </div>
+            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                <div className="absolute mt-1">
+                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                </div>
+            )}
         </div>
     );
 }
@@ -343,7 +343,7 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
             {showFieldLabel != false &&
                 <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                    <SolidFieldTooltip fieldContext={fieldContext}/>
+                    <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
             }
 
