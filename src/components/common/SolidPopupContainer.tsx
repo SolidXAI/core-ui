@@ -21,11 +21,12 @@ const SolidPopupContainer = () => {
         <Dialog
             visible={isOpen}
             onHide={() => dispatch(closePopup())}
+            closable={false}
             style={{ width: '50vw' }}
             modal
             headerClassName='p-0'
             contentClassName='p-0'
-            footer={<Button size='small' label='Close' outlined onClick={() => dispatch(closePopup())} />}
+            contentStyle={{borderRadius: 6}}
         >
             {DynamicComponent && <DynamicComponent {...event} />}
         </Dialog>
