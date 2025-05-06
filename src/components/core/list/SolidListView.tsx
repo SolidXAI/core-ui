@@ -276,6 +276,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [customFilter, setCustomFilter] = useState(null);
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
 
+
   const sizeOptions = [
     { label: 'Compact', value: 'small', image: CompactImage },
     { label: 'Cozy', value: 'normal', image: CozyImage },
@@ -793,7 +794,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded !== true && solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultAddButton !== false &&
             <SolidCreateButton url={createButtonUrl} />
           }
-          {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true && params.id !== 'new' &&
+          {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true && params.id !== 'new' && searchParams.get('viewMode') === "edit" &&
             // < SolidCreateButton url={createButtonUrl} />
             <Button type="button" icon="pi pi-plus" label="Add" size='small'
               onClick={() => params.handlePopUpOpen("new")}
