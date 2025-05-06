@@ -90,11 +90,6 @@ export class SolidLongTextField implements ISolidField {
                             {editWidget &&
                                 this.renderExtensionRenderMode(editWidget, formik)
                             }
-                            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                                <div className="absolute mt-1">
-                                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                                </div>
-                            )}
                         </>
                     )
                     }
@@ -133,26 +128,34 @@ export const DefaultLongTextFormEditWidget = ({ formik, fieldContext }: SolidFor
 
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+    const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
     return (
-        <div className="flex flex-column gap-2 mt-4">
-            {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                    <SolidFieldTooltip fieldContext={fieldContext}/>
-                    {/* &nbsp;   {fieldDescription && <span>({fieldDescription}) </span>} */}
-                </label>
-            }
-            <InputTextarea
-                readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                disabled={formDisabled || fieldDisabled}
-                id={fieldLayoutInfo.attrs.name}
-                aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                onChange={formik.handleChange}
-                value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                rows={5}
-                cols={30}
-            />
+        <div className="relative">
+            <div className="flex flex-column gap-2 mt-4">
+                {showFieldLabel != false &&
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        <SolidFieldTooltip fieldContext={fieldContext} />
+                        {/* &nbsp;   {fieldDescription && <span>({fieldDescription}) </span>} */}
+                    </label>
+                }
+                <InputTextarea
+                    readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                    disabled={formDisabled || fieldDisabled}
+                    id={fieldLayoutInfo.attrs.name}
+                    aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
+                    onChange={formik.handleChange}
+                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                    rows={5}
+                    cols={30}
+                />
+            </div>
+            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                <div className="absolute mt-1">
+                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                </div>
+            )}
         </div>
     );
 }

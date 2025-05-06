@@ -91,11 +91,6 @@ export class SolidPasswordField implements ISolidField {
                             {editWidget &&
                                 this.renderExtensionRenderMode(editWidget, formik)
                             }
-                            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                                <div className="absolute mt-1">
-                                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                                </div>
-                            )}
                         </>
                     }
                 </div>
@@ -143,7 +138,7 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
                         {fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                        <SolidFieldTooltip fieldContext={fieldContext}/>
+                        <SolidFieldTooltip fieldContext={fieldContext} />
                     </label>
                 }
                 <Password
@@ -158,6 +153,11 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
                 />
 
             </div>
+            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                <div className="absolute mt-1">
+                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                </div>
+            )}
         </div>
     );
 }

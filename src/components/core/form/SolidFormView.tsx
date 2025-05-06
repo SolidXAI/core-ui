@@ -365,7 +365,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
 
     const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
-    const [viewMode, setViewMode] = useState<"view" | "edit">("view");
+    const [viewMode, setViewMode] = useState<"view" | "edit">(params.embeded === true ? "edit" : "view");
     const [openLightbox, setOpenLightbox] = useState(false);
     const [lightboxUrls, setLightboxUrls] = useState([]);
     const [isShowChatter, setShowChatter] = useState(true);
