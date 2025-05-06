@@ -150,7 +150,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
             isCustomCreate: false,
             customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
             modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
-            parentData: userKeyField ? { [userKeyField]: { label: fieldContext.data[userKeyField], value: fieldContext.data['id'] } } : {},
+            parentData: userKeyField ? {[userKeyField] : {solidManyToOneLabel: fieldContext.data[userKeyField], solidManyToOneValue: fieldContext.data['id']}} : {},
         }
         setformViewParams(formviewparams);
         setvisibleCreateRelationEntity(true);
@@ -205,7 +205,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
             isCustomCreate: false,
             customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
             modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
-            parentData: userKeyField ? { [userKeyField]: { label: fieldContext.data[userKeyField], value: fieldContext.data['id'] } } : {}
+            parentData: userKeyField ? {[userKeyField] : {solidManyToOneLabel: fieldContext.data[userKeyField], solidManyToOneValue: fieldContext.data['id']}} : {}
         }
         setformViewParams(formviewparams)
 
