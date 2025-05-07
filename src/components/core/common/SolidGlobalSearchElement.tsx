@@ -76,7 +76,7 @@ const transformRulesToFilters = (input: any) => {
         if (rule.value && rule.value.length > 0) {
 
             // Ensure rule.value is always an array
-            let values = typeof rule.value[0] === "object" ? rule.value.map((i: any) => i.value) : rule.value;
+            let values = typeof rule.value[0] === "object" ? rule.value.map((i: any) => i?.value ? i?.value : i) : rule?.value;
             if (rule.matchMode !== '$in' && rule.matchMode !== '$notIn' && rule.matchMode !== '$between') {
                 values = values[0];
             }
