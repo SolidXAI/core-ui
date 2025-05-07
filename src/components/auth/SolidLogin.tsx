@@ -261,7 +261,7 @@ const SolidLogin = () => {
                     </>
                 }
             </div>
-            {solidSettingsData?.data?.iamAllowPublicRegistration && <div className=" mt-5">
+            {solidSettingsData?.data?.allowPublicRegistration && <div className=" mt-5">
                 <div className="text-sm text-center text-400 secondary-dark-color">
                     Don’t have an account ? <Link className="font-bold" href="/auth/register">Sign Up</Link>
                 </div>

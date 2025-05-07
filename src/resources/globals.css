@@ -1696,6 +1696,7 @@ li.header-li-px {
   padding: 0.8rem 1.5rem;
 }
 
+
 .solid-breadcrumb.p-breadcrumb {
   /* border-bottom: 1px solid #CED0D6; */
   border-bottom: none;
@@ -3062,39 +3063,12 @@ flex-shrink: 0; */
 .solid-export-controls{
   display: flex;
   justify-content: flex-end;
-  margin: 0px;
+  margin: 0px 10px !important;
 }
 .export-tabview .p-tabview-nav-container{
   padding: 5px;
   width: 100% !important;
   background-color: #D8E2EA !important;
-}
-/* p-unselectable-text p-tabview-selected p-highlight */
-.export-tabview .p-unselectable-text {
-  width: 50% !important;
-  background-color: transparent !important;
-  color:#000 !important;
-  border-radius: 0 !important;
-  padding: 10px;
-  border: none;
-  background-color: #D8E2EA !important;
-  border-radius: 6px !important;
-}
-.export-tabview .p-unselectable-text.p-highlight {
-  width: 50% !important;
-  /* background-color: blueviolet !important; */
-  color: #fff !important;
-  border-radius: 0 !important;
-  padding: 10px;
-  border: none !important;
-  /* background-image: url('../resources/images/Background.svg') !important;
-  background-repeat: no-repeat;
-  background-size: cover !important;
-  background-position: center; */
-  border-radius: 6px !important;
-}
-.export-tabview .p-tabview-nav-link{
-  text-decoration: none;
 }
 
 .export-tabview .p-unselectable-text.p-highlight .p-tabview-title{
@@ -3159,4 +3133,51 @@ flex-shrink: 0; */
 
 .solid-picklist-move-button.p-button-outlined{
     background-color: #f5f5f5;
+}
+
+.solid-dynamic-stepper.export-stepper{
+  width: 100% !important;
+  background-color: #F6F6F6 !important;
+  padding: 0.7rem 1.2rem !important;
+  border-radius: 0 !important;
+  height:60px !important;
+  margin: 0 !important;
+  border-bottom: 1px solid var(--primary-light-color);
+  border-top: 1px solid var(--primary-light-color);
+}
+.solid-dynamic-stepper.export-stepper .solid-step-button.export{
+  padding: 10px !important;
+  flex:1 !important ;
+}
+.solid-dynamic-stepper.export-stepper .solid-step-button.export:first-child {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+.solid-dynamic-stepper.export-stepper .solid-step-button.export:last-child {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.custom-progress{
+  height: 2px !important;
+}
+
+.p-export-text{
+  color: #666666 !important;
+  font-size: 14px !important;
+}
+.export-dialog {
+  width: 1000px !important;
+  height: 700px !important;
+  padding:0 !important;
+  margin:0 !important;
+}
+.export-dialog  .p-dialog-header {
+  padding-bottom: 0 !important;
+}
+.export-dialog  .p-dialog-content  {
+  padding: 0 !important;
+}
+.export-dialog .p-progressbar-label{
+  display: none;
 }

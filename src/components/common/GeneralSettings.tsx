@@ -33,7 +33,7 @@ export const GeneralSettings = () => {
         });
     };
     const initialValues = {
-        iamAllowPublicRegistration: solidSettingsData?.data?.records?.[0]?.iamAllowPublicRegistration || false,
+        allowPublicRegistration: solidSettingsData?.data?.records?.[0]?.allowPublicRegistration || false,
         iamPasswordRegistrationEnabled: solidSettingsData?.data?.records?.[0]?.iamPasswordRegistrationEnabled || false,
         iamPasswordLessRegistrationEnabled: solidSettingsData?.data?.records?.[0]?.iamPasswordLessRegistrationEnabled || false,
         iamActivateUserOnRegistration: solidSettingsData?.data?.records?.[0]?.iamActivateUserOnRegistration || false,
@@ -224,9 +224,9 @@ export const GeneralSettings = () => {
                                                     </div>
                                                     <div className="col-7">
                                                         <InputSwitch
-                                                            name="iamAllowPublicRegistration"
-                                                            checked={formik.values.iamAllowPublicRegistration}
-                                                            onChange={(e) => formik.setFieldValue("iamAllowPublicRegistration", e.value)}
+                                                            name="allowPublicRegistration"
+                                                            checked={formik.values.allowPublicRegistration}
+                                                            onChange={(e) => formik.setFieldValue("allowPublicRegistration", e.value)}
                                                         />
                                                     </div>
                                                 </div>

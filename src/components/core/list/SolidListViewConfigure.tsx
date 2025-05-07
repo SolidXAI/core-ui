@@ -72,8 +72,8 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
                 // @ts-ignore
                 onClick={(e) => op.current.toggle(e)}
             />
-            <Dialog header="Export" visible={exportView} style={{ width: 1000 ,height: 700 }} onHide={() => { if (!exportView) return; setExportView(false); }}>
-            <SolidExport listViewMetaData={listViewMetaData} setExportView={setExportView}/>
+            <Dialog header="Export" visible={exportView} className="export-dialog" onHide={() => { if (!exportView) return; setExportView(false); }}>
+            <SolidExport listViewMetaData={listViewMetaData}/>
             </Dialog>
             <OverlayPanel ref={exportRef} className="listview-export-panel">
              
