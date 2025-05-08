@@ -927,7 +927,9 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     isUserKey: fieldMetaData ? fieldMetaData?.isUserKey : false,
     relationCoModelColumnName: fieldMetaData ? fieldMetaData?.relationCoModelColumnName : null,
     relationJoinTableName: fieldMetaData ? fieldMetaData?.relationJoinTableName : null,
-    userKey: fieldMetaData ? fieldMetaData?.userKey : null
+    userKey: fieldMetaData ? fieldMetaData?.userKey : null,
+    enableAuditTracking: fieldMetaData ? fieldMetaData?.enableAuditTracking : false,
+    isMultiSelect: fieldMetaData ? fieldMetaData?.isMultiSelect : false,
   };
 
 
@@ -1992,7 +1994,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
 
-                          {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
+                          {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse  && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="relationCoModelFieldName"
@@ -2857,6 +2859,28 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             )}
                           </div>
                         )}
+                        {currentFields.includes("isMultiSelect") && (
+                          <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="flex align-items-center">
+                              <Checkbox
+                                name="isMultiSelect"
+                                onChange={(e) => {
+                                  formik.setFieldValue("isMultiSelect", e.checked);
+                                }}
+                                checked={formik.values.isMultiSelect}
+                              ></Checkbox>
+                              <label htmlFor="ingredient1" className="form-field-label ml-2">
+                              Is MultiSelect
+                              </label>
+                            </div>
+                            {isFormFieldValid(formik, "isMultiSelect") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.isMultiSelect?.toString()}
+                              />
+                            )}
+                          </div>
+                        )}
                         {/* {currentFields.includes("isSystem") && (
                           <div className="md:col-6 sm:col-12">
                             <div className="field">
@@ -2881,6 +2905,30 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           </div>
                         )} */}
+                        {currentFields.includes("enableAuditTracking") && formik.values.relationType !== "one-to-many" && (
+                          <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="flex align-items-center gap-2">
+                              <Checkbox
+                                name="enableAuditTracking"
+                                onChange={(e) => {
+                                  formik.setFieldValue("enableAuditTracking", e.checked);
+                                }}
+                                checked={formik.values.enableAuditTracking}
+                              ></Checkbox>
+                              <label htmlFor="ingredient1" className="form-field-label">
+                                Enable Audit Tracking
+                              </label>
+                            </div>
+                            <p className="fieldSubTitle">By selecting this option, you are setting audit trail for this field.</p>
+
+                            {isFormFieldValid(formik, "enableAuditTracking") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.enableAuditTracking?.toString()}
+                              />
+                            )}
+                          </div>
+                        )}
                         {currentFields.includes("isUserKey") && formik.values.unique && (
                           <div className="field col-6 flex-flex-column gap-2 mt-3">
                             <div className="flex align-items-center gap-2">

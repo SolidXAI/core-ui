@@ -68,11 +68,14 @@ export type LayoutAttribute = {
     className?: string;
     inlineCreate?: string;
     renderMode?: string;
+    widget?: string;
+    visible?: boolean;
 };
 
 // Generic representation of any node in our layout 
 export type LayoutNodeType = "form" | "sheet" | "notebook" | "page" | "row" | "column" | "field" | "div" | "p" | "span" | "h1" | "h2" | "h3";
 export type LayoutNode = {
+    body?: string;
     type: LayoutNodeType;
     attrs: LayoutAttribute;
     children?: LayoutNode[];
@@ -91,6 +94,7 @@ export type SolidUiEvent = {
 };
 
 export type SolidLoadForm = {
+    parentData?: any,
     type: SolidUiEvents;
     formData: Record<string, any>;
     viewMetadata: SolidView;
@@ -105,27 +109,52 @@ export type SolidFormWidgetProps = {
     fieldsMetadata: FieldsMetadata;
 };
 
-export type SolidRelationManyToManyFieldWidgetProps = {
+export type SolidFormFieldWidgetProps = {
     formik: any;
     fieldContext?: SolidFieldProps;
-};
+}
+export type SolidListFieldWidgetProps = {
+    rowData: any;
+    solidListViewMetaData: any
+    fieldMetadata: FieldMetadata;
+    column: any;
+}
 
-export type SolidBooleanFieldWidgetProps = {
-    formik: any;
-    fieldContext?: SolidFieldProps;
-};
-export type SolidSelectionStaticFieldWidgetProps = {
-    formik: any;
-    fieldContext?: SolidFieldProps;
-};
+export type SolidMediaListFieldWidgetProps = SolidListFieldWidgetProps & {
+    setLightboxUrls?: any,
+    setOpenLightbox?: any
+}
+
+export type SolidMediaFormFieldWidgetProps = SolidFormFieldWidgetProps & {
+    setLightboxUrls?: any,
+    setOpenLightbox?: any
+}
 
 export type SolidShortTextImageRenderModeWidgetProps = {
     data: string;
 }
 
-export type SolidMediaSingleFieldWidgetProps = {
+
+export type SolidFormDynamicFunctionProps = {
+    action: string,
+    params: any,
     formik: any;
-    fieldContext?: SolidFieldProps;
-    setLightboxUrls?: any,
-    setOpenLightbox?: any
-};
+    solidFormViewMetaData: SolidView;
+    rowData: any
+}
+
+export type SolidListHeaderDynamicFunctionProps = {
+    action: string,
+    params: any,
+    solidListViewMetaData: any
+}
+
+
+export type SolidListRowdataDynamicFunctionProps = {
+    action: string,
+    params: any
+    rowData: any
+    solidListViewMetaData: any
+}
+
+export type RootState = ReturnType<ReturnType<typeof initializeStore>['getState']>;

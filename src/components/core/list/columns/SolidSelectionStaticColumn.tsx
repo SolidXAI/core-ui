@@ -5,6 +5,8 @@ import { FormEvent } from "primereact/ts-helpers";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 import SolidTableRowCell from '../SolidTableRowCell';
+import { getExtensionComponent } from '@/helpers/registry';
+import { SolidListFieldWidgetProps } from '@/types/solid-core';
 
 
 const SolidSelectionStaticColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
@@ -31,7 +33,7 @@ const SolidSelectionStaticColumn = ({ solidListViewMetaData, fieldMetadata, colu
             </SolidVarInputsFilterElement>
         )
     }
-    
+
     const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
@@ -51,15 +53,28 @@ const SolidSelectionStaticColumn = ({ solidListViewMetaData, fieldMetadata, colu
             // style={{ minWidth: "12rem" }}
             // headerClassName="table-header-fs"
             header={() => {
-                return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace:'nowrap', textOverflow:'ellipsis', overflow:'hidden'}}>{header}</div>)
+                return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{header}</div>)
             }}
-            body={(rowData) => (
-                <SolidTableRowCell
-                    value={rowData[fieldMetadata.name]} 
-                    truncateAfter={truncateAfter} 
-                />
-            )}
-        ></Column>
+            body={(rowData) => {
+                let viewWidget = column.attrs.viewWidget;
+                if (!viewWidget) {
+                    viewWidget = 'DefaultTextListWidget';
+                }
+                let DynamicWidget = getExtensionComponent(viewWidget);
+                const widgetProps: SolidListFieldWidgetProps = {
+                    rowData,
+                    solidListViewMetaData,
+                    fieldMetadata,
+                    column
+                }
+                return (
+                    <>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
+                    </>
+                )
+            }
+            }
+        ></Column >
     );
 };
 

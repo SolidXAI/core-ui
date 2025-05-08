@@ -1,0 +1,318 @@
+"use client"
+import { BackButton } from "@/components/common/BackButton";
+import { SolidCancelButton } from "@/components/common/CancelButton";
+import { SolidFormHeader } from "@/components/common/SolidFormHeader";
+import { useHandleFormCustomButtonClickaction } from "@/components/common/useHandleFormCustomButtonClick";
+import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
+import { getExtensionFunction } from "@/helpers/registry";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { Button } from "primereact/button";
+import { OverlayPanel } from "primereact/overlaypanel";
+import { useEffect, useRef, useState } from "react";
+
+export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode }: any) => {
+    const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
+    const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
+    const op = useRef(null);
+    const [contextMenuHeaderButtons, setContextMenuHeaderButtons] = useState<any>([]);
+    const [normalHeaderButtons, setNormalHeaderButtons] = useState<any>([]);
+    const createHeaderTitle = `Create ${solidView.model.displayName}`;
+    const editHeaderTitle = `Edit ${solidView.model.displayName}`;
+
+
+
+    useEffect(() => {
+        if (solidView) {
+            let contextMenuHeaderButtonsData: any = [];
+            let normalHeaderButtonsData: any = [];
+            const formHeaderButtons = solidView?.layout?.attrs?.formButtons;
+            if (formHeaderButtons && formHeaderButtons.length > 0) {
+                contextMenuHeaderButtonsData = formHeaderButtons.filter((button: any) => {
+                    return button.attrs && button.attrs.actionInContextMenu && button.attrs.actionInContextMenu === true;
+                });
+                setContextMenuHeaderButtons(contextMenuHeaderButtonsData)
+                normalHeaderButtonsData = formHeaderButtons.filter((button: any) => {
+                    return !button.attrs || !button.attrs.actionInContextMenu || button.attrs.actionInContextMenu === false;
+                });
+                setNormalHeaderButtons(normalHeaderButtonsData);
+            }
+        }
+    }, []);
+
+    const updateViewMode = (newMode: "view" | "edit") => {
+        setViewMode(newMode);
+        const params = new URLSearchParams(searchParams.toString());
+        params.set("viewMode", newMode);
+        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+        // const router = useRouter();
+        // const pathname = usePathname();
+        // const params = new URLSearchParams(searchParams?.toString() || "");
+        // params.set("viewMode", newMode);
+        // router.push(`${pathname}?${params.toString()}`, { scroll: false });
+
+    };
+    const FormActionDropdown = () => {
+
+        return (
+            <div>
+                <Button
+                    outlined
+                    severity="secondary"
+                    type="button"
+                    icon={'pi pi-cog'}
+                    size="small"
+                    className="surface-card p-0"
+                    style={{
+                        height: 33.06,
+                        width: 33.06
+                    }}
+                    onClick={(e) =>
+                        // @ts-ignore 
+                        op.current.toggle(e)
+                    }
+                />
+                <OverlayPanel ref={op} className="solid-custom-overlay">
+                    <div className="flex flex-column gap-1 p-1">
+                        {params.embeded !== true &&
+                            params.id !== "new" &&
+                            actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
+                            !formViewLayout.attrs.readonly &&
+                            <Button
+                                text
+                                type="button"
+                                className="w-8rem text-left gap-2"
+                                label="Delete"
+                                size="small"
+                                iconPos="left"
+                                severity="danger"
+                                icon={'pi pi-trash'}
+                                onClick={() => setDeleteDialogVisible(true)}
+                            />
+                        }
+                        <Button
+                            text
+                            type="button"
+                            className="w-8rem text-left gap-2 purple-200"
+                            label="Layout"
+                            size="small"
+                            iconPos="left"
+                            severity="contrast"
+                            icon={'pi pi-objects-column'}
+                            onClick={() => setLayoutDialogVisible(true)}
+                        />
+                        {contextMenuHeaderButtons.map((button: any, index: number) => {
+                            return (
+                                <Button
+                                    text
+                                    type="button"
+                                    className="w-full text-left gap-2"
+                                    label={button.attrs.label}
+                                    size="small"
+                                    iconPos="left"
+                                    severity="contrast"
+                                    icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                                    onClick={() => {
+                                        const event = {
+                                            action: button.attrs.action,
+                                            params,
+                                            formik,
+                                            solidFormViewMetaData: solidFormViewMetaData.data
+                                        }
+                                        handleCustomButtonClick(button.attrs, event)
+                                    }}
+                                />
+                            )
+                        })
+                        }
+
+                    </div>
+                </OverlayPanel>
+            </div>
+        )
+    }
+
+    return (
+        <>
+            <div className="solid-form-header">
+                {params.id === "new" ? (
+                    <>
+                        <div className="flex align-items-center gap-3">
+                            {params.embeded !== true && <BackButton />}
+                            <div className="form-wrapper-title"> {createHeaderTitle}</div>
+                        </div>
+                        <div className="gap-3 flex">
+                            {normalHeaderButtons.map((button: any, index: number) => {
+                                return (
+                                    <Button
+                                        text
+                                        type="button"
+                                        className="w-full text-left gap-2"
+                                        label={button.attrs.label}
+                                        size="small"
+                                        iconPos="left"
+                                        severity="contrast"
+                                        icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                                        onClick={() => {
+                                            const event = {
+                                                action: button.attrs.action,
+                                                params,
+                                                formik,
+                                                solidFormViewMetaData: solidFormViewMetaData.data
+                                            }
+                                            handleCustomButtonClick(button.attrs, event)
+                                        }}
+                                    />
+                                )
+                            })
+                            }
+                            {params.embeded !== true &&
+                                actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
+                                !formViewLayout.attrs.readonly &&
+                                formik.dirty &&
+                                <div>
+                                    <Button
+                                        label="Save"
+                                        size="small"
+                                        type="submit"
+                                    />
+                                </div>
+                            }
+                            {params.embeded == true &&
+                                actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
+                                !formViewLayout.attrs.readonly &&
+                                formik.dirty &&
+                                <div>
+                                    <Button
+                                        label="Save"
+                                        size="small"
+                                        onClick={() => {
+                                            setRedirectToList(false);
+                                        }}
+                                        type="submit"
+                                    />
+                                </div>
+                            }
+                            {params.embeded == true &&
+                                <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' />
+
+                            }
+                            {params.embeded !== true &&
+                                <SolidCancelButton />
+                            }
+                            <FormActionDropdown />
+                        </div>
+                    </>
+                ) : (
+                    <>
+                        <div className="flex align-items-center gap-3">
+                            {params.embeded !== true && <BackButton />}
+                            <div className="form-wrapper-title"> {editHeaderTitle}</div>
+                        </div>
+
+                        <div className="gap-3 flex">
+                            {normalHeaderButtons.map((button: any, index: number) => {
+                                return (
+                                    <Button
+                                        text
+                                        type="button"
+                                        className="w-full text-left gap-2"
+                                        label={button.attrs.label}
+                                        size="small"
+                                        iconPos="left"
+                                        severity="contrast"
+                                        icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                                        onClick={() => {
+                                            const event = {
+                                                action: button.attrs.action,
+                                                params,
+                                                formik,
+                                                solidFormViewMetaData: solidFormViewMetaData.data
+                                            }
+                                            handleCustomButtonClick(button.attrs, event)
+                                        }}
+                                    />
+                                )
+                            })
+                            }
+                            {   
+                                params.embeded !== true && viewMode === "view" &&
+                                <Button type="button" icon="pi pi-plus" label="Add" size='small'
+                                    onClick={() => router.replace('new')}
+                                >
+                                </Button>
+                            }
+                            {params.embeded !== true && viewMode === "view" &&
+                                <div>
+                                    <Button
+                                        label="Edit"
+                                        size="small"
+                                        onClick={() => updateViewMode("edit")}
+                                        type="button"
+                                    />
+                                </div>
+                            }
+
+                            {params.embeded !== true &&
+                                actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
+                                !formViewLayout.attrs.readonly &&
+                                formik.dirty &&
+                                <div>
+                                    <Button
+                                        label="Save"
+                                        size="small"
+                                        type="submit"
+                                    />
+                                </div>
+                            }
+
+                            {/* Inline */}
+                            {params.embeded == true &&
+                                actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
+                                !formViewLayout.attrs.readonly &&
+                                formik.dirty &&
+                                <div>
+                                    <Button
+                                        label="Save"
+                                        size="small"
+                                        type="submit"
+                                    />
+                                </div>
+                            }
+                            {params.embeded == true &&
+                                actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
+                                !formViewLayout.attrs.readonly &&
+                                <div>
+                                    <Button
+                                        size="small"
+                                        type="button"
+                                        label="Delete"
+                                        severity="danger"
+                                        onClick={() => setDeleteDialogVisible(true)}
+                                    />
+                                </div>
+                            }
+                            {params.embeded == true &&
+                                <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' />
+
+                            }
+                            {params.embeded !== true &&
+                                <SolidCancelButton />
+                            }
+                            <FormActionDropdown />
+                        </div>
+                    </>
+                )}
+            </div>
+            {params.embeded !== true &&
+                <SolidFormHeader
+                    solidFormViewMetaData={solidFormViewMetaData}
+                    initialEntityData={initialEntityData}
+                    modelName={params.modelName}
+                    id={params.id}
+                />
+            }
+        </>
+    )
+}

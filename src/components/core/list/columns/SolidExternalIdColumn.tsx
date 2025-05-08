@@ -6,6 +6,8 @@ import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { FormEvent } from "primereact/ts-helpers";
 import { FilterMatchMode } from 'primereact/api';
 import SolidTableRowCell from '../SolidTableRowCell';
+import { SolidListFieldWidgetProps } from '@/types/solid-core';
+import { getExtensionComponent } from '@/helpers/registry';
 
 const SolidExternalIdColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
@@ -49,14 +51,27 @@ const SolidExternalIdColumn = ({ solidListViewMetaData, fieldMetadata, column }:
             // style={{ minWidth: "12rem" }}
             // headerClassName="table-header-fs"
             header={() => {
-                return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace:'nowrap', textOverflow:'ellipsis', overflow:'hidden'}}>{header}</div>)
+                return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{header}</div>)
             }}
-            body={(rowData) => (
-                <SolidTableRowCell
-                    value={rowData[fieldMetadata.name]}
-                    truncateAfter={truncateAfter}
-                />
-            )}
+            body={(rowData) => {
+                let viewWidget = column.attrs.viewWidget;
+                if (!viewWidget) {
+                    viewWidget = 'DefaultTextListWidget';
+                }
+                let DynamicWidget = getExtensionComponent(viewWidget);
+                const widgetProps: SolidListFieldWidgetProps = {
+                    rowData,
+                    solidListViewMetaData,
+                    fieldMetadata,
+                    column
+                }
+                return (
+                    <>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
+                    </>
+                )
+            }
+            }
         ></Column>
     );
 

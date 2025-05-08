@@ -175,13 +175,35 @@ const tranformSearchToFilters = (input: any) => {
         }
     });
 
-    return {
-        $and: Object.entries(grouped).map(([fieldName, values]) => ({
-            [fieldName]: {
-                $containsi: values.length === 1 ? values[0] : values
-            }
+    // return {
+    //     $and: Object.entries(grouped).map(([fieldName, values]) => ({
+    //         [fieldName]: {
+    //             $containsi: values.length === 1 ? values[0] : values
+    //         }
+    //     }))
+    // };
+
+    const andFilters: any[] = [];
+
+  Object.entries(grouped).forEach(([fieldName, values]) => {
+    if (values.length === 1) {
+      andFilters.push({
+        [fieldName]: {
+          $containsi: values[0]
+        }
+      });
+    } else {
+      andFilters.push({
+        $or: values.map((v) => ({
+          [fieldName]: { $containsi: v }
         }))
-    };
+      });
+    }
+  });
+
+  return {
+    $and: andFilters
+  };
 }
 
 export const mergeSearchAndCustomFilters = (transformedFilter: any, newFilter: any, transformedFilterName: string, newFilterName: string) => {

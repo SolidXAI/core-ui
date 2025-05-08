@@ -11,7 +11,7 @@ import Image from 'next/image';
 import { ExcelSvg } from '@/components/Svg/ExcelSvg';
 const SolidShortTextKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data, setLightboxUrls, setOpenLightbox, groupedView }: SolidKanbanViewFieldsParams) => {
     const [visible, setVisible] = useState(false);
-    const renderMode = fieldLayout?.attrs?.renderMode ? fieldLayout?.attrs?.renderMode : "text";
+    const widget = fieldLayout?.attrs?.widget ? fieldLayout?.attrs?.widget : "text";
     const mimeType = data && data?.mimeType
     const fileName = data?.originalFileName;
     const PDFHeader = () => {
@@ -34,16 +34,16 @@ const SolidShortTextKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fie
     }
     return (
         <div>
-            {renderMode === "text" && groupedView &&
+            {widget === "text" && groupedView &&
                 <p className='font-medium'>{data && data[fieldMetadata.name] ? `${data[fieldMetadata.name]}` : ""}</p>
             }
-            {renderMode === "text" && !groupedView && fieldMetadata?.name === 'originalFileName' &&
+            {widget === "text" && !groupedView && fieldMetadata?.name === 'originalFileName' &&
                 <p className='font-medium'>{data && data[fieldMetadata.name] ? `${data[fieldMetadata.name]}` : ""}</p>
             }
-            {renderMode === "text" && !groupedView && fieldMetadata?.name === 'mimeType' &&
+            {widget === "text" && !groupedView && fieldMetadata?.name === 'mimeType' &&
                 <span className='solid-mimetype-chip'>{data && data[fieldMetadata.name] ? `${data[fieldMetadata.name]}` : ""}</span>
             }
-            {renderMode === "image" && !groupedView && mimeType && mimeType.includes("image/") &&
+            {widget === "image" && !groupedView && mimeType && mimeType.includes("image/") &&
                 < div className='mt-3'>
                     <img
                         src={data[fieldMetadata.name]}
@@ -56,7 +56,7 @@ const SolidShortTextKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fie
                     ></img>
                 </div>
             }
-            {renderMode === "image" && !groupedView && mimeType && mimeType.includes("pdf") && (
+            {widget === "image" && !groupedView && mimeType && mimeType.includes("pdf") && (
                 <div className='mt-3' onClick={(e) => e.stopPropagation()}>
                     <div className='kanban-media-view-card' onClick={() => setVisible(true)} style={{ cursor: 'pointer' }}>
                         <PDFSvg />
@@ -69,12 +69,12 @@ const SolidShortTextKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fie
                 </div>
             )}
 
-            {renderMode === "image" && !groupedView && mimeType && (mimeType.includes("excel") || mimeType.includes("spreadsheet")) && (
+            {widget === "image" && !groupedView && mimeType && (mimeType.includes("excel") || mimeType.includes("spreadsheet")) && (
                 <a href={data[fieldMetadata.name]} className='kanban-media-view-card mt-3' onClick={(e) => e.stopPropagation()} style={{ cursor: 'pointer' }} download target="_blank" rel="noopener noreferrer">
                     <ExcelSvg />
                 </a>
             )}
-            {renderMode === "image" && !groupedView && mimeType && mimeType.includes("audio") && (
+            {widget === "image" && !groupedView && mimeType && mimeType.includes("audio") && (
                 <a href={data[fieldMetadata.name]} className='kanban-media-view-card my-2' onClick={(e) => e.stopPropagation()} style={{ cursor: 'pointer' }} download target="_blank" rel="noopener noreferrer">
                     <Image
                         src={MP3Image}
@@ -85,7 +85,7 @@ const SolidShortTextKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fie
                     />
                 </a>
             )}
-            {renderMode === "image" && !groupedView && mimeType && mimeType.includes("video") && (
+            {widget === "image" && !groupedView && mimeType && mimeType.includes("video") && (
                 <a href={data[fieldMetadata.name]} className='kanban-media-view-card mt-3' onClick={(e) => e.stopPropagation()} style={{ cursor: 'pointer' }} download target="_blank" rel="noopener noreferrer">
                     <Image
                         src={MP4Image}
@@ -97,7 +97,7 @@ const SolidShortTextKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fie
                 </a>
             )}
 
-            {renderMode === "image" && !groupedView && mimeType && !mimeType.includes("image/") &&
+            {widget === "image" && !groupedView && mimeType && !mimeType.includes("image/") &&
                 !mimeType.includes("pdf") &&
                 !mimeType.includes("excel") &&
                 !mimeType.includes("spreadsheet") &&

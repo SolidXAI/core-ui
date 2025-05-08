@@ -441,6 +441,7 @@ export { mediaStorageProviderApi, useCreateMediaStorageProivderMutation, useDele
 export { modelsApi, useCreatemodelMutation, useDeleteMultipleModelsMutation, useDeletemodelMutation, useGenerateCodeForModelMutation, useGetModelsQuery, useGetmodelByIdQuery, useLazyGetModelsQuery, useLazyGetmodelByIdQuery, useUpdatemodelMutation } from '@/redux/api/modelApi';
 export { modulesApi, useCreatemoduleMutation, useDeleteMultiplemodulesMutation, useDeletemoduleMutation, useGenerateCodeFormoduleMutation, useGetDefaultDataSourceQuery, useGetmoduleByIdQuery, useGetmodulesQuery, useLazyGetDefaultDataSourceQuery, useLazyGetmoduleByIdQuery, useLazyGetmodulesQuery, useRefreshPermissionsMutation, useUpdatemoduleMutation } from '@/redux/api/moduleApi';
 export { testApi, useSeederMutation } from '@/redux/api/testApi';
+export { solidChatterMessageApi, useGetchatterMessageQuery, useLazyGetchatterMessageQuery } from '@/redux/api/solidChatterMessageApi';
 // export * from '@/redux/api/orderAttributeApi';
 // export * from '@/redux/api/permissionApi';
 // export * from '@/redux/api/pincodeApi';
@@ -468,7 +469,6 @@ export { solidSettingsApi, useCreateSolidSettingsMutation, useGetSolidSettingsBy
 export { logout, setToken } from '@/redux/features/authSlice';
 export { gridView, listView } from '@/redux/features/dataViewSlice';
 export { hideNavbar, showNavbar, toggleNavbar } from '@/redux/features/navbarSlice';
-export { hideFieldsPopup, hideModulePopup, showFieldsPopup, showModulePopup } from '@/redux/features/popupSlice';
 export { toggleTheme } from '@/redux/features/themeSlice';
 export { setIsAuthenticated, setUser } from '@/redux/features/userSlice';
 
@@ -595,6 +595,9 @@ export { default as UserProfile } from '@/components/layout/user-profile';
 export { default as UserSidebar } from '@/components/layout/UserSidebar';
 //menu.tsx
 export { default as menu } from '@/helpers/menu';
+//SolidPopupContainer.tsx
+export { default as SolidPopupContainer } from '@/components/common/SolidPopupContainer';
+
 
 // Auth 
 export { AuthLayout } from '@/components/auth/AuthLayout';
@@ -616,6 +619,8 @@ export { default as navbarReducer } from '@/redux/features/navbarSlice';
 export { default as popupReducer } from '@/redux/features/popupSlice';
 export { default as themeReducer } from '@/redux/features/themeSlice';
 export { default as userReducer } from '@/redux/features/userSlice';
+export { default as useSolidPopup } from '@/redux/hooks/useSolidPopup';
+
 
 export { default as GenerateModelCodeRowAction } from '@/components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction'
 

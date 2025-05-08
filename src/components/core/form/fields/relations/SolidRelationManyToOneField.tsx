@@ -3,7 +3,7 @@ import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { Message } from "primereact/message";
 import qs from "qs";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
@@ -14,6 +14,11 @@ import { Dialog } from "primereact/dialog";
 import { Panel } from "primereact/panel";
 import SolidFormView from "../../SolidFormView";
 import { getExtensionComponent } from "@/helpers/registry";
+import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import Handlebars from "handlebars";
+import { Toast } from "primereact/toast";
+import { SolidFormFieldRender } from "../../SolidFormFieldRender";
+import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 
 
 export class SolidRelationManyToOneField implements ISolidField {
@@ -26,20 +31,26 @@ export class SolidRelationManyToOneField implements ISolidField {
 
     initialValue(): any {
 
-        const manyToOneFieldData = this.fieldContext.data[this.fieldContext.field.attrs.name];
-        const fieldMetadata = this.fieldContext.fieldMetadata;
+        const manyToOneFieldData = this.fieldContext?.data[this.fieldContext?.field?.attrs?.name];
+        const fieldMetadata = this.fieldContext?.fieldMetadata;
         const userKeyField = fieldMetadata?.relationModel?.userKeyField?.name;
         const manyToOneColVal = manyToOneFieldData ? manyToOneFieldData[userKeyField] : '';
         if (manyToOneColVal) {
-            return { label: manyToOneColVal || '', value: manyToOneFieldData?.id || '' };
+            return { solidManyToOneLabel: manyToOneColVal || '', solidManyToOneValue: manyToOneFieldData?.id || '', ...manyToOneFieldData };
+        }
+        if (this.fieldContext.parentData) {
+            const [key, value]: any = Object.entries(this.fieldContext.parentData)[0] || [];
+            if (key && value !== undefined) {
+                return { solidManyToOneLabel: value.solidManyToOneLabel, solidManyToOneValue: value.solidManyToOneValue };
+            }
         }
         return {}
     }
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        if (value?.value) {
-            formData.append(`${fieldLayoutInfo.attrs.name}Id`, value.value);
+        if (value?.solidManyToOneValue) {
+            formData.append(`${fieldLayoutInfo.attrs.name}Id`, value.solidManyToOneValue);
         }
     }
 
@@ -58,48 +69,166 @@ export class SolidRelationManyToOneField implements ISolidField {
         return schema;
     }
 
+    
     render(formik: FormikObject) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
+        const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
-        const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-        const solidFormViewMetaData = this.fieldContext.solidFormViewMetaData;
-        const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
-        const readOnlyPermission = this.fieldContext.readOnly;
-        const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
 
-        // auto complete specific code. 
-        const entityApi = createSolidEntityApi(fieldMetadata.relationCoModelSingularName);
-        const { useLazyGetSolidEntitiesQuery } = entityApi;
-        const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
+        const isVisible = fieldLayoutInfo.attrs?.visible !== false && !this.fieldContext.parentData;
 
-        const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
-        const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
+        if (!isVisible) {
+            return null;
+        }
 
-        const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
-        const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
-        const whereClause = fieldLayoutInfo.attrs.whereClause;
+        let viewWidget = fieldLayoutInfo.attrs.viewWidget;
+        let editWidget = fieldLayoutInfo.attrs.editWidget;
+        if (!editWidget) {
+            editWidget = 'DefaultRelationManyToOneFormEditWidget';
+        }
+        if (!viewWidget) {
+            viewWidget = 'DefaultRelationManyToOneFormViewWidget';
+        }
+        const viewMode: string = this.fieldContext.viewMode;
+        return (
+            <>
+                <div className={className}>
 
-        const [autoCompleteItems, setAutoCompleteItems] = useState([]);
-        const autoCompleteSearch = async (event: AutoCompleteCompleteEvent) => {
-
-            // Get the list view layout & metadata first. 
-            const queryData = {
-                offset: 0,
-                limit: 10,
-                filters: {
-                    [fieldMetadata?.relationModel?.userKeyField?.name]: {
-                        '$containsi': event.query
+                    {viewMode === "view" &&
+                        this.renderExtensionRenderMode(viewWidget, formik)
                     }
-                }
-            };
+                    {viewMode === "edit" && (
+                        <>
+                            {editWidget &&
+                                this.renderExtensionRenderMode(editWidget, formik)
+                            }
+                        </>
+                    )
+                    }
+                </div>
+            </>
+        );
+    }
 
-            let autocompleteQs = qs.stringify(queryData, {
-                encodeValuesOnly: true,
-            });
-            if (whereClause) {
-                autocompleteQs = `${autocompleteQs}&${whereClause}`;
+    renderExtensionRenderMode(widget: string, formik: FormikObject) {
+        let DynamicWidget = getExtensionComponent(widget);
+        const widgetProps: SolidFormFieldWidgetProps = {
+            formik: formik,
+            fieldContext: this.fieldContext,
+        }
+        return (
+            <>
+                {DynamicWidget && <DynamicWidget {...widgetProps} />}
+            </>
+        )
+    }
+}
+
+export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+    const toast = useRef<Toast>(null);
+
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+    const readOnlyPermission = fieldContext.readOnly;
+    const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
+
+    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
+        toast.current?.show({
+            severity,
+            summary,
+            detail,
+            life: 3000,
+        });
+    };
+    // auto complete specific code. 
+    const entityApi = createSolidEntityApi(fieldMetadata.relationCoModelSingularName);
+    const { useLazyGetSolidEntitiesQuery } = entityApi;
+    const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
+
+    const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
+    const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
+
+    const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
+    const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+    const whereClause = fieldLayoutInfo.attrs.whereClause;
+
+    const [autoCompleteItems, setAutoCompleteItems] = useState([]);
+    const autoCompleteSearch = async (event: AutoCompleteCompleteEvent) => {
+
+        // Get the list view layout & metadata first. 
+        const queryData = {
+            offset: 0,
+            limit: 10,
+            filters: {
+                $and: [
+                    {
+                        [fieldMetadata?.relationModel?.userKeyField?.name]: {
+                            '$containsi': event.query
+                        }
+                    }
+                ]
             }
+        };
+        let fixedFilterToBeApplied = false;
+        let fixedFilterParsed = false;
+        if (solidFormViewMetaData?.data?.solidView?.model?.singularName === "listOfValues") {
+            fixedFilterToBeApplied = true;
+        }
+        if (fieldMetadata?.relationFieldFixedFilter || fieldLayoutInfo?.attrs?.fixedFilter) {
+            const convertedFixedFilter = fieldLayoutInfo?.attrs?.fixedFilter ? fieldLayoutInfo?.attrs?.fixedFilter : fieldMetadata?.relationFieldFixedFilter;
+            fixedFilterToBeApplied = true;
+            const fixedFilterTemplate = Handlebars.compile(convertedFixedFilter);
+            const renderedFilter = fixedFilterTemplate(formik.values);
+
+            // Parse the result into a JS object
+            let parsedFilter;
+            try {
+                parsedFilter = JSON.parse(renderedFilter);
+                const isValid = (obj: any): boolean => {
+                    if (!obj || typeof obj !== 'object') return false;
+
+                    // Recursively check all nested values
+                    const hasValidValue = (val: any): boolean => {
+                        if (val === null || val === undefined || val === '') return false;
+                        if (typeof val === 'object') {
+                            return Object.values(val).some(hasValidValue);
+                        }
+                        return true;
+                    };
+
+                    return hasValidValue(obj);
+                };
+
+                if (isValid(parsedFilter)) {
+                    queryData.filters.$and.push(parsedFilter);
+                    fixedFilterParsed = true;
+                } else {
+                    console.warn("Skipping invalid/empty fixed filter:", parsedFilter);
+                }
+            } catch (e) {
+                console.error("Invalid fixedFilter JSON:", renderedFilter);
+                parsedFilter = {}; // fallback or throw error as needed
+            }
+
+        }
+
+        let autocompleteQs = qs.stringify(queryData, {
+            encodeValuesOnly: true,
+        });
+        if (whereClause) {
+            autocompleteQs = `${autocompleteQs}&${whereClause}`;
+        }
+
+
+        if (fixedFilterToBeApplied && !fixedFilterParsed) {
+            showToast("error", "Please select relevant fields used in fixed filter", "Fields Not selected!");
+
+        } else {
             // TODO: do error handling here, possible errors like modelname is incorrect etc...
             const autocompleteResponse = await triggerGetSolidEntities(autocompleteQs);
 
@@ -109,117 +238,99 @@ export class SolidRelationManyToOneField implements ISolidField {
             if (autocompleteData) {
                 const autoCompleteItems = autocompleteData.records.map((item: any) => {
                     return {
-                        label: item[fieldMetadata?.relationModel?.userKeyField?.name],
-                        value: item['id']
+                        solidManyToOneLabel: item[fieldMetadata?.relationModel?.userKeyField?.name],
+                        solidManyToOneValue: item['id'],
+                        ...item,
                     }
                 });
                 setAutoCompleteItems(autoCompleteItems);
             }
         }
 
-        const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
-
-
-
-
-
-        const customCreateHandler = (values: any) => {
-            const currentRelationData = formik.values[fieldLayoutInfo.attrs.name] || [];
-            const jsonValues = Object.fromEntries(values.entries());
-            const updatedRelationData = [
-                ...currentRelationData,
-                {
-                    label: jsonValues[fieldMetadata?.relationModel?.userKeyField?.name],
-                    value: "new",
-                    original: jsonValues,
-                },
-            ];
-
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, updatedRelationData);
-
-        }
-
-        const viewMode: string = this.fieldContext.viewMode;
-        let DynamicWidget = getExtensionComponent("SolidFormFieldRelationViewModeWidget");
-        const widgetProps = {
-            label: fieldLabel,
-            value: formik.values[fieldLayoutInfo.attrs.name],
-        }
-        return (
-            <>
-                {viewMode === "view" &&
-                    <div className={className}>
-                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
-                    </div>
-                }
-                {viewMode === "edit" &&
-                    (
-                        <div className={className}>
-                            <div className="mt-4 relative">
-                                {showFieldLabel != false &&
-                                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
-                                        {fieldLabel}
-                                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                                    </label>
-                                }
-                                <div className="flex align-items-center gap-3 mt-2">
-                                    <AutoComplete
-                                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                                        disabled={formDisabled || fieldDisabled || readOnlyPermission}
-                                        {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
-                                        id={fieldLayoutInfo.attrs.name}
-                                        field="label"
-                                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                                        dropdown={!readOnlyPermission}
-                                        suggestions={autoCompleteItems}
-                                        completeMethod={autoCompleteSearch}
-                                        onChange={formik.handleChange}
-                                        onFocus={(e) => e.target.select()}
-                                        className="w-full solid-standard-autocomplete"
-                                    />
-                                    {fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false &&
-                                        this.renderSolidFormEmbededView(formik, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity)
-                                    }
-                                </div>
-                                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                                    <div className="absolute mt-1">
-                                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                                    </div>
-                                )}
-                            </div>
-                        </div>
-                    )}
-            </>
-        );
     }
 
+    const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
-    renderSolidFormEmbededView(formik: FormikObject, customCreateHandler: any, visibleCreateRelationEntity: any, setvisibleCreateRelationEntity: any) {
+    const customCreateHandler = (values: any) => {
+        const currentRelationData = formik.values[fieldLayoutInfo.attrs.name] || [];
+        const jsonValues = Object.fromEntries(values.entries());
+        const updatedRelationData = [
+            ...currentRelationData,
+            {
+                solidManyToOneLabel: jsonValues[fieldMetadata?.relationModel?.userKeyField?.name],
+                solidManyToOneValue: "new",
+                original: jsonValues,
+            },
+        ];
 
-        const fieldMetadata = this.fieldContext.fieldMetadata;
-        const fieldLayoutInfo = this.fieldContext.field;
-        const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
-        const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+        formik.setFieldValue(fieldLayoutInfo.attrs.name, updatedRelationData);
 
-        const params = {
-            moduleName: this.fieldContext.fieldMetadata.relationModelModuleName,
-            id: "new",
-            embeded: true,
-            layout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
-            customCreateHandler: ((values: any) => {
-                setvisibleCreateRelationEntity(false);
-                customCreateHandler(values)
-            }),
-            inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
-            handlePopupClose: (() => {
-                setvisibleCreateRelationEntity(false);
-            }),
-            modelName: camelCase(this.fieldContext.fieldMetadata.relationCoModelSingularName)
-        }
+    }
+    return (
+        <div className="relative">
+            <Toast ref={toast} />
+            <div className="flex flex-column gap-2 mt-4">
+                {showFieldLabel != false &&
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
+                        {fieldLabel}
+                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        <SolidFieldTooltip fieldContext={fieldContext} />
+                    </label>
+                }
+                <div className="flex align-items-center gap-3">
+                    <AutoComplete
+                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                        disabled={formDisabled || fieldDisabled || readOnlyPermission}
+                        {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
+                        id={fieldLayoutInfo.attrs.name}
+                        field="label"
+                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                        dropdown={!readOnlyPermission}
+                        suggestions={autoCompleteItems}
+                        completeMethod={autoCompleteSearch}
+                        onChange={formik.handleChange}
+                        onFocus={(e) => e.target.select()}
+                        className="w-full solid-standard-autocomplete"
+                    />
+                    {fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false &&
+                        <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} customCreateHandler={customCreateHandler} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity}></RenderSolidFormEmbededView>
+                    }
+                </div>
+            </div>
+            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                <div className="absolute mt-1">
+                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                </div>
+            )}
+        </div>
+    );
+}
 
-        return (
-            <div >
+export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity }: any) => {
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+
+    const params = {
+        moduleName: fieldContext.fieldMetadata.relationModelModuleName,
+        id: "new",
+        embeded: true,
+        layout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
+        customCreateHandler: ((values: any) => {
+            setvisibleCreateRelationEntity(false);
+            customCreateHandler(values)
+        }),
+        inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
+        handlePopupClose: (() => {
+            setvisibleCreateRelationEntity(false);
+        }),
+        modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName)
+    }
+    return (
+        <div>
+            <div>
                 <Button
                     icon="pi pi-plus"
                     rounded
@@ -230,21 +341,37 @@ export class SolidRelationManyToOneField implements ISolidField {
                     onClick={() => setvisibleCreateRelationEntity(true)}
                     className="custom-add-button"
                 />
-                <Dialog
-                    header=""
-                    showHeader={false}
-                    visible={visibleCreateRelationEntity}
-                    style={{ width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw" }}
-                    onHide={() => {
-                        if (!visibleCreateRelationEntity) return;
-                        setvisibleCreateRelationEntity(false);
-                    }}
-                    className="solid-dialog"
-                >
-                    <SolidFormView {...params} />
-
-                </Dialog>
             </div>
-        )
-    }
+            <Dialog
+                header=""
+                showHeader={false}
+                visible={visibleCreateRelationEntity}
+                style={{ width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw" }}
+                onHide={() => {
+                    if (!visibleCreateRelationEntity) return;
+                    setvisibleCreateRelationEntity(false);
+                }}
+                className="solid-dialog"
+            >
+                <SolidFormView {...params} />
+
+            </Dialog>
+        </div>
+    )
 }
+
+
+export const DefaultRelationManyToOneFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const value = formik.values[fieldLayoutInfo.attrs.name];
+    return (
+        <div className="mt-2 flex-column gap-2">
+            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            <p className="m-0">{value && value.solidManyToOneLabel}</p>
+        </div>
+    );
+}
+

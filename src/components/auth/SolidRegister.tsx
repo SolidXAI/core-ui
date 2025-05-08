@@ -23,7 +23,7 @@ import SolidLogo from '../../resources/images/SS-Logo.png'
 
 interface AuthTabsProps {
     iamPasswordRegistrationEnabled: boolean;
-    iamPasswordLessRegistrationEnabled: boolean;
+    passwordlessRegistration: boolean;
 }
 
 const SolidRegister = () => {
@@ -285,8 +285,8 @@ const SolidRegister = () => {
         )
     }
 
-    const AuthTabs: React.FC<AuthTabsProps> = ({ iamPasswordRegistrationEnabled, iamPasswordLessRegistrationEnabled }) => {
-        if (iamPasswordRegistrationEnabled && iamPasswordLessRegistrationEnabled) {
+    const AuthTabs: React.FC<AuthTabsProps> = ({ iamPasswordRegistrationEnabled, passwordlessRegistration }) => {
+        if (iamPasswordRegistrationEnabled && passwordlessRegistration) {
             return (
                 <TabView className="solid-auth-tabview">
                     <TabPanel header="With Password">
@@ -299,7 +299,7 @@ const SolidRegister = () => {
             );
         } else if (iamPasswordRegistrationEnabled) {
             return <PasswordSignup />;
-        } else if (iamPasswordLessRegistrationEnabled) {
+        } else if (passwordlessRegistration) {
             return <PasswordLessSignup />;
         } else {
             return <p>No authentication method available</p>;
@@ -311,20 +311,19 @@ const SolidRegister = () => {
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className="solid-logo flex align-items-center gap-3">
+                        <div className={`solid-logo flex align-items-center ${process.env.NEXT_PUBLIC_AUTH_LOGO_POSITION}`}>
                             <Image
                                 alt="solid logo"
-                                src={SolidLogo}
+                                src={process.env.NEXT_PUBLIC_AUTH_LOGO ?? SolidLogo}
                                 className="relative"
                                 fill
                             />
-                            <AppTitle title={solidSettingsData} />
                         </div>
                     </div>
                 }
                 <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-4' : 'text-left'}`}>Sign Up</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
-                <AuthTabs iamPasswordRegistrationEnabled={solidSettingsData?.data?.iamPasswordRegistrationEnabled} iamPasswordLessRegistrationEnabled={solidSettingsData?.data?.iamPasswordLessRegistrationEnabled} />
+                <AuthTabs iamPasswordRegistrationEnabled={solidSettingsData?.data?.iamPasswordRegistrationEnabled} passwordlessRegistration={solidSettingsData?.data?.passwordlessRegistration} />
                 {solidSettingsData?.data?.iamGoogleOAuthEnabled &&
                     <>
                         <Divider align="center">

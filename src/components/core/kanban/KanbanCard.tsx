@@ -5,6 +5,7 @@ import { SolidKanbanViewFields } from "./SolidKanbanViewFields";
 import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
+import { Draggable, DraggableProvided } from "@hello-pangea/dnd";
 
 // Define the types for the data and props
 interface Data {

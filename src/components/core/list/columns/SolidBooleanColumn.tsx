@@ -2,6 +2,8 @@
 import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { Dropdown } from 'primereact/dropdown';
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
+import { SolidListFieldWidgetProps } from "@/types/solid-core";
+import { getExtensionComponent } from "@/helpers/registry";
 
 const SolidBooleanColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
@@ -50,7 +52,25 @@ const SolidBooleanColumn = ({ solidListViewMetaData, fieldMetadata, column }: So
             showFilterOperator={showFilterOperator}
             // filterMatchModeOptions={filterMatchModeOptions}
             filterElement={filterTemplate}
-            body={bodyTemplate}
+            body={(rowData) => {
+                let viewWidget = column.attrs.viewWidget;
+                if (!viewWidget) {
+                    viewWidget = 'DefaultBooleanListWidget';
+                }
+                let DynamicWidget = getExtensionComponent(viewWidget);
+                const widgetProps: SolidListFieldWidgetProps = {
+                    rowData,
+                    solidListViewMetaData,
+                    fieldMetadata,
+                    column
+                }
+                return (
+                    <>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
+                    </>
+                )
+            }
+            }
             filterPlaceholder={`Search by ${fieldMetadata.displayName}`}
             style={{ minWidth: "12rem" }}
             headerClassName="table-header-fs"
@@ -59,3 +79,11 @@ const SolidBooleanColumn = ({ solidListViewMetaData, fieldMetadata, column }: So
 };
 
 export default SolidBooleanColumn;
+
+
+
+
+export const DefaultBooleanListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
+    const fieldKey = column.attrs.label ?? fieldMetadata.name;
+    return rowData[fieldKey] ? 'Yes' : 'No';
+}

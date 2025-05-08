@@ -18,6 +18,7 @@
     "declaration": true,              // Generate TypeScript declaration files (.d.ts)
     "declarationMap": true,           // Generate declaration maps for debugging
     "emitDeclarationOnly": false,
+    "declarationDir": "dist",
     "sourceMap": true,                // Generate source maps for debugging
     "plugins": [
       {

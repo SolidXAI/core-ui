@@ -4,6 +4,8 @@ import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { FormEvent } from "primereact/ts-helpers";
 import { SolidListViewColumnParams } from '../../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../../SolidVarInputsFilterElement";
+import { getExtensionComponent } from '@/helpers/registry';
+import { SolidListFieldWidgetProps } from '@/types/solid-core';
 
 const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
@@ -13,6 +15,9 @@ const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, co
         { label: 'Not In', value: FilterMatchMode.NOT_IN },
     ];
     const columnDataType = undefined;
+
+
+
     const filterTemplate = (options: ColumnFilterElementTemplateOptions) => {
 
         return (
@@ -28,23 +33,6 @@ const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, co
         )
     };
 
-    const bodyTemplate = (rowData: any) => {
-        const manyToOneFieldData = rowData[column.attrs.name];
-
-        // This is the userkey that will be present within the rowData.
-        if (manyToOneFieldData) {
-            // Since this is a many-to-one field, we fetch the user key field of the associated model.
-            const userKeyField = fieldMetadata?.relationModel?.userKeyField?.name;
-
-            const manyToOneColVal = manyToOneFieldData[userKeyField];
-
-            // TODO: change this to use an anchor tag so that on click we open that entity form view. 
-            return <span>{manyToOneColVal}</span>;
-        }
-        else {
-            return <span></span>
-        }
-    };
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
     return (
@@ -59,7 +47,25 @@ const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, co
             showFilterOperator={showFilterOperator}
             filterMatchModeOptions={filterMatchModeOptions}
             filterElement={filterTemplate}
-            body={bodyTemplate}
+            body={(rowData) => {
+                let viewWidget = column.attrs.viewWidget;
+                if (!viewWidget) {
+                    viewWidget = 'DefaultRelationManyToOneListWidget';
+                }
+                let DynamicWidget = getExtensionComponent(viewWidget);
+                const widgetProps: SolidListFieldWidgetProps = {
+                    rowData,
+                    solidListViewMetaData,
+                    fieldMetadata,
+                    column
+                }
+                return (
+                    <>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
+                    </>
+                )
+            }
+            }
             filterPlaceholder={`Search by ${fieldMetadata.displayName}`}
             style={{ minWidth: "12rem" }}
             headerClassName="table-header-fs"
@@ -69,3 +75,21 @@ const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, co
 };
 
 export default SolidRelationManyToOneColumn;
+
+
+export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
+    const manyToOneFieldData = rowData[column.attrs.name];
+
+    // This is the userkey that will be present within the rowData.
+    if (manyToOneFieldData) {
+        // Since this is a many-to-one field, we fetch the user key field of the associated model.
+        const userKeyField = fieldMetadata?.relationModel?.userKeyField?.name;
+
+        const manyToOneColVal = manyToOneFieldData[userKeyField];
+
+        return <span>{manyToOneColVal}</span>;
+    }
+    else {
+        return <span></span>
+    }
+};
