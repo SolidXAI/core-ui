@@ -551,7 +551,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const solidView = solidFormViewMetaData.data.solidView;
         const solidFieldsMetadata = solidFormViewMetaData.data.solidFieldsMetadata;
         const layoutFieldsObj = getLayoutFieldsAsObject([formViewLayout]);
-
         try {
             let formData = new FormData();
 
@@ -621,11 +620,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         // errorFields.length = 0;
     };
-    // useEffect(() => {
-    //     if (errorFields?.length > 0) {
-    //         showFieldError();
-    //     }
-    // }, [errorFields])
+    useEffect(() => {
+        if (errorFields?.length > 0) {
+            showFieldError();
+        }
+    }, [errorFields])
 
     // - - - - - - - - - - - -- - - - - - - - - - - - DATA here
     // Fetch the actual data here. 
@@ -816,11 +815,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
             // get details from the form event
             const { name: fieldName, value, type, checked } = event.target;
-            // console.log(`${eventType}: formFieldOnXXX ${fieldName} invoked for change with value:`, value);
 
             // TODO: check if there is a change handler registered with this form view, load it and fire it.
             const changeHandler = solidView.layout[eventType];
-            // console.log(`changeHandler for this form is ${changeHandler}`);
 
             if (changeHandler) {
                 // Get hold of the dynamic module...
@@ -843,7 +840,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     // Invoke the dynamic change handler: 
                     // TODO: encapsulate in try/catch, catch the exception render in the UI as an error & stop form rendering.
                     const updatedFormInfo = await dynamicChangeHandler(event);
-                    // console.log(`${eventType}: formFieldOnXXX response received: `, updatedFormInfo);
 
                     // If dataChanged is true, update Formik values
                     if (updatedFormInfo?.dataChanged && updatedFormInfo.newFormData) {
@@ -863,7 +859,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     // if layout has changed then we need to re-render.
                     if (updatedFormInfo?.layoutChanged && updatedFormInfo.newLayout) {
                         // setFormViewMetaData({ ...formViewMetaData, layout: updatedFormInfo.newLayout });
-                        // console.log(`Existing form view metadata is: `, formViewMetaData);
 
                         // TODO: this will trigger a useEffect dependent on formViewMetadata that invokes setFormViewLayout, 
                         // TODO: which means that this will not work if custom layout has been injected as a prop.
@@ -879,14 +874,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     },
                                 },
                             };
-                            // console.log(`Updated form view metadata is: `, updatedFormViewMetadata);
                             return updatedFormViewMetadata;
                         });
                     }
-                }
-                else {
-                    // TODO: Show an error popup and stop form rendering ideallly...
-                    console.log(`Unable to load dynamic module:`, changeHandler);
                 }
             }
         }
@@ -901,8 +891,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
             if (visible === undefined || visible === null) {
                 visible = true;
             }
-            // console.log(`Resolved visibility of form element ${key} to ${visible}`);
-            // console.log(`Form element ${key}: `, attrs);
 
             switch (type) {
                 case "form":
@@ -971,7 +959,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         return <SolidNotebook key={key}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData))}</SolidNotebook>;
                     }
                 case "page":
-                    // console.log(`Resolved visibility of form element ${key} to ${visible}`);
                     if (visible === true) {
                         const pageChildren = children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData));
                         return SolidPage({ children: pageChildren, attrs: attrs, key: key });
@@ -1000,7 +987,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
         };
 
         const renderFormDynamically = (solidFormViewMetaData: any) => {
-            // console.log(`renderFormDynamically invoked....`);
             if (!solidFormViewMetaData) {
                 return;
             }

@@ -29,18 +29,13 @@ const authProviders: NextAuthOptions = {
             // @ts-ignore
             async authorize(credentials: Credentials) {
                 const { username, email, password, accessToken, accessCode } = credentials;
-
                 try {
                     if (accessCode) {
                         let config = {
                             method: 'get',
                             url: `${process.env.API_URL}/api/iam/google/authenticate?accessCode=${accessCode}`,
                         };
-
-
                         const loginResponse = await axios.request(config);
-                        console.log("loginResponse", loginResponse.data);
-
                         if (loginResponse.status == 400) {
                             throw new Error(loginResponse.data.message);
                         }

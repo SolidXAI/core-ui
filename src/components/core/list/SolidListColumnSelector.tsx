@@ -109,17 +109,10 @@ export const SolidListColumnSelector = ({ listViewMetaData }: any) => {
                         showToast("success", "Layout", "Form Layout Updated successfully!");
                         window.location.reload();
                     }
-                    console.log("Successfully updated:", response);
-                } else {
-                    // Create new user view
-                    console.log("Error:");
                 }
             } catch (error) {
                 console.error("Error updating user view:", error);
             }
-
-            console.log("Updated solidView", updatedView);
-
         },
     });
 

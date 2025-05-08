@@ -34,19 +34,16 @@ export class SolidShortTextField implements ISolidField {
 
     validationSchema(): Schema {
         let schema: Yup.StringSchema<string | null | undefined> = Yup.string();
-
-        const fieldMetadata = this.fieldContext.fieldMetadata;
+        const fieldMetadata = this.fieldContext.fieldMetadata;  
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-
-        // 1. required 
+        // 1. required  
         // 1. required
         if (fieldMetadata.required) {
             schema = schema.required(`${fieldLabel} is required.`);
         } else {
             schema = schema.nullable(); // Allow null when not required
         }
-
         // 2. length (min/max)
         if (fieldMetadata.min && fieldMetadata.min > 0) {
             schema = schema.min(fieldMetadata.min, `${fieldLabel} should be at-least ${fieldMetadata.min} characters long.`);

@@ -34,15 +34,12 @@ export const KanbanUserViewLayout = ({ solidKanbanViewMetaData, setLayoutDialogV
         },
         onSubmit: async (values) => {
             const parsedLayout = JSON.parse(values.layoutString);
-            console.log("updatedLayout", parsedLayout);
-
             try {
                 if (solidView.id) {
                     const response = await upsertUserView({
                         viewMetadataId: solidView.id,
                         layout: JSON.stringify(parsedLayout),
                     }).unwrap();
-                    console.log("Response", response);
                     if (response.statusCode === 200) {
                         showToast("success", "Layout", "Form Layout Updated successfully!");
                         setLayoutDialogVisible(false);

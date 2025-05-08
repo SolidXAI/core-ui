@@ -405,7 +405,6 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
     }),
     ...(currentFields.includes("relationCoModelFieldName") && {
       relationCoModelFieldName: Yup.string().when("relationCreateInverse", (relationCreateInverse: any, schema) => {
-        console.log("relationCreateInverse", relationCreateInverse);
         if (relationCreateInverse.length > 0 && relationCreateInverse[0] == true) {
           return schema.required("Relation Co Model Field Name is required")
         } else {

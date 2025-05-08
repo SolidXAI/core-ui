@@ -572,7 +572,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     const transformFilterRules = (filterRules: any) => {
         const transformedFilter = transformRulesToFilters(filterRules[0]);
-        console.log("transformedFilter from custom filter", transformedFilter);
         setCustomFilter(transformedFilter);
         if (transformedFilter) {
             const finalFilter = mergeSearchAndCustomFilters(transformedFilter, searchFilter, "c_filter", "s_filter");
