@@ -597,7 +597,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             handleApplyCustomFilter(finalFilter);
             // }
         }
-    }, [searchChips]);
+    }, [searchChips,hasSearched]);
 
 
     // Saved Filter related 

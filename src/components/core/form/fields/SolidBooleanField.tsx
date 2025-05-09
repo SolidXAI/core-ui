@@ -39,8 +39,8 @@ export class SolidBooleanField implements ISolidField {
 
         // Ensure the value is always a string "true" or "false"
         const result = existingValue
-            ? (existingValue === true || existingValue === "true" ? true : false)
-            : (fieldDefaultValue === true || fieldDefaultValue === "true" ? true : false);
+            ? (existingValue === true || existingValue === "true" ? "true" : "false")
+            : (fieldDefaultValue === true || fieldDefaultValue === "true" ? "true" : "false");
         return result;
     }
 
