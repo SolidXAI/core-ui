@@ -9,10 +9,10 @@ export type SolidFieldProps = {
     data: any,
     modelName?: any,
     readOnly?: any,
-    viewMode? :any
+    viewMode?: any
     onChange?: any,
     onBlur?: any,
-    parentData?: any
+    parentData?: any,
 };
 
 export type FormikObject = {

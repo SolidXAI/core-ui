@@ -525,7 +525,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
     if (sortField) {
       const sortFieldMetadata = solidFieldsMetadata[sortField];
-      if (sortFieldMetadata.type === 'relation' && sortFieldMetadata.relationType === 'many-to-one') {
+      if (sortFieldMetadata?.type === 'relation' && sortFieldMetadata?.relationType === 'many-to-one') {
         sortField = `${sortField}.${sortFieldMetadata?.relationModel?.userKeyField?.name}`;
       }
       queryData.sort = [
@@ -794,7 +794,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded !== true && solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultAddButton !== false &&
             <SolidCreateButton url={createButtonUrl} />
           }
-          {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true && params.id !== 'new' && searchParams.get('viewMode') === "edit" &&
+          {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true  && searchParams.get('viewMode') !== "view" &&
             // < SolidCreateButton url={createButtonUrl} />
             <Button type="button" icon="pi pi-plus" label="Add" size='small'
               onClick={() => params.handlePopUpOpen("new")}
