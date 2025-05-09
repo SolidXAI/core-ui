@@ -188,7 +188,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
             customFilter: {
                 [customFilter]: {
                     id: {
-                        $eq: fieldContext.data ? fieldContext?.data?.id : -1
+                        $eq: fieldContext.data && fieldContext.data.id !== undefined ? fieldContext.data.id : -1
                     }
                 }
             }
@@ -211,7 +211,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
             customFilter: {
                 [customFilter]: {
                     id: {
-                        $eq: fieldContext.data ? fieldContext?.data?.id : -1
+                        $eq: fieldContext.data && fieldContext.data.id !== undefined ? fieldContext.data.id : -1
                     }
                 }
             }
@@ -273,14 +273,14 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
                 <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
             }
 
-            <Dialog header="" headerClassName="py-2" contentClassName="px-0 pb-0" visible={showSaveParentEntityConfirmationPopup} style={{ width: '20vw' }} onHide={() => { if (!showSaveParentEntityConfirmationPopup) return; setShowSaveParentEntityConfirmationPopup(false); }}>
+            <Dialog showHeader={false} headerClassName="py-2" contentClassName="px-0 pb-0" visible={showSaveParentEntityConfirmationPopup} style={{ width: '20vw' }} onHide={() => { if (!showSaveParentEntityConfirmationPopup) return; setShowSaveParentEntityConfirmationPopup(false); }}>
                 <Divider className="m-0" />
                 <div className="p-4">
                     <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
                         Before Creating {fieldLabel} you need to save {capitalize(fieldContext.modelName)}.
                         Please click save if you wish to proceed ?
                     </p>
-                    <div className="flex align-items-center gap-2 mt-3">
+                    <div className="flex align-items-center justify-content-center gap-2 mt-3">
                         <Button label="Save" size="small" onClick={saveParentEntity} />
                         <Button label="Cancel" size="small" onClick={() => setShowSaveParentEntityConfirmationPopup(false)} outlined className='bg-primary-reverse' />
                     </div>
