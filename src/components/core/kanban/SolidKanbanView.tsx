@@ -412,7 +412,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     selectedRecords.forEach((element: any) => {
       deleteList.push(element.id);
     });
-    console.log(deleteList);
     deleteManySolidEntities(deleteList);
     setDialogVisible(false);
   };

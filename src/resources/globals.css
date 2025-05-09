@@ -888,7 +888,7 @@ footer {
 
 .form-demo .p-inline-message.p-inline-message-error {
   background-color: transparent;
-  justify-content: start;
+  justify-content: flex-start;
 }
 
 .form-demo .p-inline-message .p-inline-message-text {
@@ -1748,6 +1748,7 @@ li.header-li-px {
   border-bottom: 1px solid var(--primary-light-color);
   padding: 0.8rem 1.5rem;
 }
+
 
 .solid-breadcrumb.p-breadcrumb {
   /* border-bottom: 1px solid #CED0D6; */
@@ -3237,4 +3238,125 @@ flex-shrink: 0; */
 .solid-sidebar-menuitems-wrapper {
   height: calc(100vh - 64px);
   overflow-y: auto;
+}
+.solid-export-controls{
+  display: flex;
+  justify-content: flex-end;
+  margin: 0px 10px !important;
+}
+.export-tabview .p-tabview-nav-container{
+  padding: 5px;
+  width: 100% !important;
+  background-color: #D8E2EA !important;
+}
+
+.export-tabview .p-unselectable-text.p-highlight .p-tabview-title{
+  color: #fff;
+  text-decoration: none;
+}
+
+.export-tabview .p-tabview-nav-link{
+  border: none !important;
+}
+.e-cancel{
+  background-color: #722ED1 !important;
+  border: 1px solid #722ED1 !important;
+}
+
+.solid-custom-picklist {
+    border-radius: 0.5rem;
+    border: 1px solid var(--primary-light-color);
+    background: #FFF;
+    overflow: hidden;
+    position: relative;
+}
+
+.solid-picklist-header {
+    padding: 12px 16px;
+    font-size: 0.875rem;
+    font-weight: 600;
+    background: #F3FAFF;
+}
+
+.solid-source-picklist-header {
+    border-right: 1px solid var(--primary-light-color);
+}
+
+.solid-picklist-item-wrapper {
+    height: 2.5rem;
+    display: flex;
+    justify-content: flex-start;
+    align-items: center;
+    border-top: 1px solid var(--primary-light-color);
+    padding: 0 16px;
+}
+
+.solid-picklist-source-item {
+    border-right: 1px solid var(--primary-light-color);
+}
+
+.solid-picklist-item-content {
+    font-size: 0.875rem;
+    font-weight: 600;
+}
+
+.solid-picklist-move-button {
+    position: absolute;
+    right: 47.5%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    height: 28px;
+    width: 28px !important;
+    padding: 0;
+}
+
+.solid-picklist-move-button.p-button-outlined{
+    background-color: #f5f5f5;
+}
+
+.solid-dynamic-stepper.export-stepper{
+  width: 100% !important;
+  background-color: #F6F6F6 !important;
+  padding: 0.7rem 1.2rem !important;
+  border-radius: 0 !important;
+  height:60px !important;
+  margin: 0 !important;
+  border-bottom: 1px solid var(--primary-light-color);
+  border-top: 1px solid var(--primary-light-color);
+}
+.solid-dynamic-stepper.export-stepper .solid-step-button.export{
+  padding: 10px !important;
+  flex:1 !important ;
+}
+.solid-dynamic-stepper.export-stepper .solid-step-button.export:first-child {
+  border-top-left-radius: 6px;
+  border-bottom-left-radius: 6px;
+}
+.solid-dynamic-stepper.export-stepper .solid-step-button.export:last-child {
+  border-top-right-radius: 6px;
+  border-bottom-right-radius: 6px;
+}
+
+.custom-progress{
+  height: 2px !important;
+}
+
+.p-export-text{
+  color: #666666 !important;
+  font-size: 14px !important;
+}
+.export-dialog {
+  width: 1000px !important;
+  height: 700px !important;
+  padding:0 !important;
+  margin:0 !important;
+}
+.export-dialog  .p-dialog-header {
+  padding-bottom: 0 !important;
+}
+.export-dialog  .p-dialog-content  {
+  padding: 0 !important;
+}
+.export-dialog .p-progressbar-label{
+  display: none;
 }

@@ -47,7 +47,6 @@ const SolidChangeForcePassword = () => {
                     currentPassword: values.currentPassword,
                     newPassword: values.newPassword,
                 };
-                console.log("Payload:", payload);
 
                 // Call the mutation and handle the response
                 const response = await changePassword(payload).unwrap(); // Await the API call and unwrap to handle errors.

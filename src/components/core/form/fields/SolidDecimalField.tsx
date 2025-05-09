@@ -80,11 +80,6 @@ export class SolidDecimalField implements ISolidField {
                             {editWidget &&
                                 this.renderExtensionRenderMode(editWidget, formik)
                             }
-                            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                                <div className="absolute mt-1">
-                                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                                </div>
-                            )}
                         </>
                     )
                     }
@@ -130,28 +125,32 @@ export const DefaultDecimalFormEditWidget = ({ formik, fieldContext }: SolidForm
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
     return (
-            <div className="relative">
-                <div className="flex flex-column gap-2 mt-4">
-                    {showFieldLabel != false &&
-                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                            <SolidFieldTooltip fieldContext={fieldContext}/>
-                            {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                        </label>
-                    }
-                    <InputNumber
-                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                        disabled={formDisabled || fieldDisabled}
-                        id={fieldLayoutInfo.attrs.name}
-                        minFractionDigits={2}
-                        aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                        onChange={(e: any) => {
-                            formik.setFieldValue(fieldLayoutInfo.attrs.name, e.value)
-                        }}
-                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                    />
+        <div className="relative">
+            <div className="flex flex-column gap-2 mt-4">
+                {showFieldLabel != false &&
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        <SolidFieldTooltip fieldContext={fieldContext} />
+                        {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
+                    </label>
+                }
+                <InputNumber
+                    readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                    disabled={formDisabled || fieldDisabled}
+                    id={fieldLayoutInfo.attrs.name}
+                    minFractionDigits={2}
+                    aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
+                    onChange={(e: any) => {
+                        formik.setFieldValue(fieldLayoutInfo.attrs.name, e.value)
+                    }}
+                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                />
+            </div>
+            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                <div className="absolute mt-1">
+                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 </div>
-
+            )}
         </div>
     );
 }

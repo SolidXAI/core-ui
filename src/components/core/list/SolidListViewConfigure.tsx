@@ -10,14 +10,18 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { RadioButton } from "primereact/radiobutton";
 import { useEffect, useRef, useState } from "react";
 import { SolidListColumnSelector } from "./SolidListColumnSelector";
+import { SolidExport } from "@/components/common/SolidExport";
+import { Dialog } from "primereact/dialog";
 
 export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, params, actionsAllowed, selectedRecords, setDialogVisible, setShowSaveFilterPopup }: any) => {
     // const [visible, setVisible] = useState<boolean>(false);
     const op = useRef(null);
+    const exportRef = useRef(null);
     const customizeLayout = useRef<OverlayPanel | null>(null);
     const pathname = usePathname();
     const router = useRouter();
     const [view, setView] = useState<string>("");
+    const [exportView, setExportView] = useState<boolean>(false);
 
     const handleViewChange = (newView: string) => {
         if (view === newView) return; // Prevent unnecessary updates
@@ -68,6 +72,12 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
                 // @ts-ignore
                 onClick={(e) => op.current.toggle(e)}
             />
+            <Dialog header="Export" visible={exportView} className="export-dialog" onHide={() => { if (!exportView) return; setExportView(false); }}>
+            <SolidExport listViewMetaData={listViewMetaData}/>
+            </Dialog>
+            <OverlayPanel ref={exportRef} className="listview-export-panel">
+             
+            </OverlayPanel>
             <OverlayPanel ref={op} className="listview-cogwheel-panel">
                 <div className="p-2">
                     <div className="flex flex-column">
@@ -84,11 +94,13 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
                                 onClick={() => setDialogVisible(true)}
                             />}
                         <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2 text-base" />
-                        <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base" />
+                        <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base"  
+                         // @ts-ignore
+                        onClick={() => { setExportView((exportView) => !exportView); }}/>
                         {/* <Button text icon='pi pi-share-alt' label="Share" size="small" severity="secondary" className="text-left gap-2" /> */}
                         {/* {viewData?.data?.solidView?.model?.enableSoftDelete &&
                         <Button text severity="secondary" size="small" className="text-left w-13rem" label={showArchived ? "Hide Archived Records" : "Show Archived Records"} iconPos="left" onClick={() => { setShowArchived(!showArchived); }} />
-                    } */}
+                        } */}
                         {viewData?.data?.solidView?.model?.enableSoftDelete && (
                             <div className="flex align-items-center px-3 gap-2 mt-2 mb-1">
                                 <Checkbox
@@ -126,7 +138,6 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
                     <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}
                         onShow={() => setIsOverlayOpen(true)}
                         onHide={() => {
-                            console.log("Overlay closed");
                             setTimeout(() => setIsOverlayOpen(false), 50); // ✅ Ensure state updates
                         }}
                     >

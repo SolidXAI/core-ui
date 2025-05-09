@@ -65,8 +65,6 @@ export class SolidRelationOneToManyField implements ISolidField {
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
 
-        const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-
         const userKeyFieldName = fieldMetadata.relationModel?.userKeyField?.name;
 
         let DynamicWidget = getExtensionComponent("SolidFormFieldRelationViewModeWidget");
@@ -101,11 +99,6 @@ export class SolidRelationOneToManyField implements ISolidField {
                             {editWidget &&
                                 this.renderExtensionRenderMode(editWidget, formik)
                             }
-                            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                                <div className="absolute mt-1">
-                                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                                </div>
-                            )}
                         </>
                     )
                     }
@@ -161,7 +154,6 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
     }, [])
 
     const handlePopupOpen = (id: any) => {
-
         if (lastPathSegment === "new") {
             setShowSaveParentEntityConfirmationPopup(true);
         } else {
@@ -177,8 +169,6 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
             setformViewParams(formviewparams);
             setvisibleCreateRelationEntity(true);
         }
-
-
     }
 
     const handlePopupClose = () => {
@@ -245,6 +235,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
 
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+    const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
     const saveParentEntity = async () => {
         const currentPath = window.location.pathname;

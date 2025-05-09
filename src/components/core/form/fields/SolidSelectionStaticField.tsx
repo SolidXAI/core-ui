@@ -148,11 +148,6 @@ export class SolidSelectionStaticField implements ISolidField {
                             {editWidget &&
                                 this.renderExtensionRenderMode(editWidget, formik)
                             }
-                            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                                <div className="absolute mt-1">
-                                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                                </div>
-                            )}
                         </>
                     }
                 </div>
@@ -235,7 +230,14 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <div className="absolute mt-1">
-                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    <Message severity="error" 
+                        text={
+                            // formik?.errors[fieldLayoutInfo.attrs.name]?.toString()
+                            typeof formik.errors[fieldLayoutInfo?.attrs?.name] === 'object'
+                            ? formik.errors[fieldLayoutInfo?.attrs?.name]?.value?.toString()
+                            : formik.errors[fieldLayoutInfo?.attrs?.name]?.toString()
+                        } 
+                    />
                 </div>
             )}
         </div>
