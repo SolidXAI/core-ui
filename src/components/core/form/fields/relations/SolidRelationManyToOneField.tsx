@@ -284,7 +284,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                         disabled={formDisabled || fieldDisabled || readOnlyPermission}
                         {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                         id={fieldLayoutInfo.attrs.name}
-                        field="label"
+                        field="solidManyToOneLabel"
                         value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                         dropdown={!readOnlyPermission}
                         suggestions={autoCompleteItems}
