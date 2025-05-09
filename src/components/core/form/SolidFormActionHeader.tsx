@@ -237,13 +237,13 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             })
                             }
                             {   
-                                params.embeded !== true && viewMode === "view" &&
+                                solidView?.layout?.attrs?.showAddFormButton !== false && params.embeded !== true && viewMode === "view" &&
                                 <Button type="button" icon="pi pi-plus" label="Add" size='small'
                                     onClick={() => router.replace('new')}
                                 >
                                 </Button>
                             }
-                            {params.embeded !== true && viewMode === "view" &&
+                            { solidView?.layout?.attrs?.showEditFormButton !== false && params.embeded !== true && viewMode === "view" &&
                                 <div>
                                     <Button
                                         label="Edit"
@@ -300,7 +300,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             {params.embeded !== true &&
                                 <SolidCancelButton />
                             }
-                            <FormActionDropdown />
+                            {solidView?.layout?.attrs?.showCogWheelFormButton !== false && <FormActionDropdown />}
                         </div>
                     </>
                 )}
