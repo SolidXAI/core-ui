@@ -164,7 +164,8 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
                 embeded: true,
                 isCustomCreate: false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
-                modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName)
+                modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+                parentData: userKeyField ? { [userKeyField]: { label: fieldContext.data[userKeyField], value: fieldContext.data['id'] } } : {}
             }
             setformViewParams(formviewparams);
             setvisibleCreateRelationEntity(true);
@@ -308,6 +309,7 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
     const readOnlyPermission = fieldContext.readOnly;
     const pathname = usePathname();
     const lastPathSegment = pathname.split('/').pop();
+    const userKeyField: any = Object.entries(fieldContext.solidFormViewMetaData.data.solidFieldsMetadata).find(([_, value]: any) => value.isUserKey)?.[0];
 
     const handlePopupOpen = (id: any) => {
 
@@ -317,7 +319,8 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
             embeded: true,
             isCustomCreate: false,
             customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
-            modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName)
+            modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+            parentData: userKeyField ? { [userKeyField]: { label: fieldContext.data[userKeyField], value: fieldContext.data['id'] } } : {}
         }
         setformViewParams(formviewparams);
         setvisibleCreateRelationEntity(true);
@@ -373,6 +376,7 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
             inlineCreateAutoSave: false,
             customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
             modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+            parentData: userKeyField ? { [userKeyField]: { label: fieldContext.data[userKeyField], value: fieldContext.data['id'] } } : {}
         }
         setformViewParams(formviewparams)
 
@@ -415,6 +419,7 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
     const fieldLayoutInfo = fieldContext.field;
     const className = fieldLayoutInfo.attrs?.className || 'col-12';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const userKeyField: any = Object.entries(fieldContext.solidFormViewMetaData.data.solidFieldsMetadata).find(([_, value]: any) => value.isUserKey)?.[0];
 
     const params = {
         moduleName: fieldContext.fieldMetadata.relationModelModuleName,
@@ -427,7 +432,8 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
         }),
         inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
         handlePopupClose: handlePopupClose,
-        modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName)
+        modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+        parentData: userKeyField ? { [userKeyField]: { label: fieldContext.data[userKeyField], value: fieldContext.data['id'] } } : {}
     }
 
     return (
