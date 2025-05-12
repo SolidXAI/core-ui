@@ -22,7 +22,7 @@ import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { pascalCase } from "change-case";
 import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
-import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
+import { createPermission, deleteManyPermission, deletePermission, updatePermission } from "@/helpers/permissions";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@/components/core/common/FilterComponent";
@@ -59,7 +59,6 @@ export const queryStringToQueryObject = () => {
     try {
       const decodedQueryString = atob(encodedQueryString); // Base64 decode the string
       const parsedParams = qs.parse(decodedQueryString); // Parse the decoded string into an object
-      console.log("Parsed Params from Local Storage:", parsedParams);
       return parsedParams;
     } catch (error) {
       console.error("Error decoding or parsing query string from local storage:", error);
@@ -67,14 +66,13 @@ export const queryStringToQueryObject = () => {
   };
 
 };
+
 export const queryObjectToQueryString = (queryObject: string) => {
   if (queryObject) {
     const stringifiedObject = qs.stringify(queryObject);
     const encodedQueryString = btoa(stringifiedObject); // Base64 encode the stringified object
     const currentPageUrl = window.location.href; // Get the current page URL
     localStorage.setItem(currentPageUrl, encodedQueryString); // Store in local storage with the URL as the key
-    console.log("Encoded and stored queryObject in localStorage:", encodedQueryString);
-
     return encodedQueryString;
   }
   return null;
@@ -111,12 +109,14 @@ export const SolidListView = (params: SolidListViewParams) => {
   const handleCustomButtonClick = useHandleListCustomButtonClick()
 
   useEffect(() => {
+    console.log('useEffect: [params.modelName]');
     const fetchPermissions = async () => {
       if (params.modelName) {
         const permissionNames = [
           createPermission(params.modelName),
           deletePermission(params.modelName),
-          updatePermission(params.modelName)
+          updatePermission(params.modelName),
+          deleteManyPermission(params.modelName)
         ]
         const queryData = {
           permissionNames: permissionNames
@@ -164,7 +164,6 @@ export const SolidListView = (params: SolidListViewParams) => {
   } = useGetSolidViewLayoutQuery(listViewMetaDataQs);
 
   const initialFilterMethod = () => {
-
     const solidView = solidListViewMetaData?.data?.solidView;
     const solidFieldsMetadata = solidListViewMetaData?.data?.solidFieldsMetadata;
 
@@ -225,6 +224,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   // Set the initial filter state based on the metadata.
   useEffect(() => {
+    console.log('useEffect: [solidListViewMetaData] line no 227');
     // refetch();
     if (solidListViewMetaData) {
       if (params.customLayout) {
@@ -242,6 +242,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   // set layout and actions for create and edit buttons and view modes
   useEffect(() => {
+    console.log('useEffect: [solidListViewMetaData] line no 245');
     if (solidListViewMetaData) {
       const createActionUrl = solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction && solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.type === "custom" ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.customComponent : "form/new";
       const editActionUrl = solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction && solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.type === "custom" ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.customComponent : "form";
@@ -306,6 +307,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   // After data is fetched populate the list view state so as to be able to render the data. 
   useEffect(() => {
+    console.log('useEffect: [solidListViewMetaData] line no 310');
     if (solidEntityListViewData) {
       const cleanedRecords = solidEntityListViewData.records.map((record) => {
         const newRecord = { ...record };
@@ -352,6 +354,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   // Fetch data after toPopulate has been populated...
   useEffect(() => {
+    console.log('useEffect: [isDeleteSolidEntitiesSucess, isDeleteSolidSingleEntitySuccess, recoverByIdIsSuccess, recoverByIsSuccess, solidListViewMetaData]');
     if (solidListViewMetaData) {
       const queryObject = queryStringToQueryObject();
 
@@ -395,6 +398,8 @@ export const SolidListView = (params: SolidListViewParams) => {
   }, [isDeleteSolidEntitiesSucess, isDeleteSolidSingleEntitySuccess, recoverByIdIsSuccess, recoverByIsSuccess, solidListViewMetaData]);
 
   useEffect(() => {
+    console.log('useEffect: [first, rows, sortField, sortOrder, showArchived, toPopulate, toPopulateMedia, customFilter, queryDataLoaded]');
+    
     if (queryDataLoaded) {
       setQueryString(
         first,
@@ -525,7 +530,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
     if (sortField) {
       const sortFieldMetadata = solidFieldsMetadata[sortField];
-      if (sortFieldMetadata.type === 'relation' && sortFieldMetadata.relationType === 'many-to-one') {
+      if (sortFieldMetadata?.type === 'relation' && sortFieldMetadata?.relationType === 'many-to-one') {
         sortField = `${sortField}.${sortFieldMetadata?.relationModel?.userKeyField?.name}`;
       }
       queryData.sort = [
@@ -637,6 +642,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   }
 
   useEffect(() => {
+    console.log('useEffect: [recoverIsError, recoverByIdIsError]');
     if (recoverIsError || recoverByIdIsError) {
       showError(recoverByIdIsError ? recoverByIdError : recoverError);
     }
@@ -755,6 +761,8 @@ export const SolidListView = (params: SolidListViewParams) => {
     );
   }
 
+  console.log('About to render the list view');
+
   return (
     <div className="page-parent-wrapper">
       <div className="page-header">
@@ -794,7 +802,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded !== true && solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultAddButton !== false &&
             <SolidCreateButton url={createButtonUrl} />
           }
-          {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true && params.id !== 'new' && searchParams.get('viewMode') === "edit" &&
+          {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true  && searchParams.get('viewMode') !== "view" &&
             // < SolidCreateButton url={createButtonUrl} />
             <Button type="button" icon="pi pi-plus" label="Add" size='small'
               onClick={() => params.handlePopUpOpen("new")}

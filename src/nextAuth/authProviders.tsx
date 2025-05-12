@@ -28,19 +28,16 @@ const authProviders: NextAuthOptions = {
         CredentialsProvider({
             // @ts-ignore
             async authorize(credentials: Credentials) {
-                const { username, email, password, accessToken, accessCode } = credentials;
+                console.log('Credentials provider called');
 
+                const { username, email, password, accessToken, accessCode } = credentials;
                 try {
                     if (accessCode) {
                         let config = {
                             method: 'get',
                             url: `${process.env.API_URL}/api/iam/google/authenticate?accessCode=${accessCode}`,
                         };
-
-
                         const loginResponse = await axios.request(config);
-                        console.log("loginResponse", loginResponse.data);
-
                         if (loginResponse.status == 400) {
                             throw new Error(loginResponse.data.message);
                         }
@@ -49,7 +46,8 @@ const authProviders: NextAuthOptions = {
                         }
 
                         let base64decoded = jwtDecode(loginResponse.data.data.accessToken);
-                        let accessTokenExpires = base64decoded.exp;
+                        // let accessTokenExpires = base64decoded.exp;
+                        let accessTokenExpires = base64decoded.exp && base64decoded.exp * 1000;
 
                         return {
                             accessToken: loginResponse.data.data.accessToken,
@@ -87,7 +85,8 @@ const authProviders: NextAuthOptions = {
                             }
 
                             let base64decoded = jwtDecode(loginResponse.data.data.accessToken);
-                            let accessTokenExpires = base64decoded.exp;
+                            // let accessTokenExpires = base64decoded.exp;
+                            let accessTokenExpires = base64decoded.exp && base64decoded.exp * 1000;
 
                             return {
                                 accessToken: loginResponse.data.data.accessToken,
@@ -156,7 +155,8 @@ const authProviders: NextAuthOptions = {
                                 throw new Error(loginResponse.data.data.message);
                             }
                             let base64decoded = jwtDecode(loginResponse.data.data.accessToken);
-                            let accessTokenExpires = base64decoded.exp;
+                            // let accessTokenExpires = base64decoded.exp;
+                            let accessTokenExpires = base64decoded.exp && base64decoded.exp * 1000;
                             const returnResponse = {
                                 accessToken: loginResponse.data.data.accessToken,
                                 refreshToken: loginResponse.data.data.refreshToken,
@@ -215,13 +215,15 @@ const authProviders: NextAuthOptions = {
 
             // If there is no user (first time login or session), we return the user data
             if (user) {
-                const base64decoded = jwtDecode(user.accessToken);
-                const accessTokenExpires = base64decoded.exp && base64decoded.exp * 1000; // Convert from seconds to milliseconds
+                // const base64decoded = jwtDecode(user.accessToken);
+                // Convert from seconds to milliseconds
+                // const accessTokenExpires = base64decoded.exp && base64decoded.exp * 1000; 
+                // const accessTokenExpires = user.accessTokenExpires * 1000; 
                 return {
                     ...token,
                     accessToken: user.accessToken,
                     refreshToken: user.refreshToken,
-                    accessTokenExpires: accessTokenExpires,
+                    accessTokenExpires: user.accessTokenExpires,
                     user: user,  // Include the user data here
                 };
             }
@@ -230,6 +232,8 @@ const authProviders: NextAuthOptions = {
         },
         // @ts-ignore
         session: async ({ session, token }) => {
+            console.log("Session callback called");
+            
             const user = token.user || {};  // Default to an empty object if user is undefined or null
             session.error = token.error ? token.error : null;
             // if (token.error) {

@@ -6,7 +6,7 @@ import Handlebars from "handlebars";
 
 export const CustomHtml = ({ field, formData, viewMetadata, fieldsMetadata }: SolidFormWidgetProps) => {
     let { type, attrs, body, children } = field;
-
+    
     // TODO: null check on this field required, show a proper error message on the UI suggesting that you are using a CustomHtml widget, however the html is not specified in the layout.
     const html = attrs.html;
 

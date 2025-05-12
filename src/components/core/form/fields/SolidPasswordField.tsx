@@ -150,6 +150,7 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                     disabled={formDisabled || fieldDisabled}
                     toggleMask
+                    autoComplete="new-password"
                 />
 
             </div>

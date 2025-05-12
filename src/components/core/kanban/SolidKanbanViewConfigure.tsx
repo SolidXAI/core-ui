@@ -102,7 +102,6 @@ export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllow
                     <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}
                         onShow={() => setIsOverlayOpen(true)}
                         onHide={() => {
-                            console.log("Overlay closed");
                             setTimeout(() => setIsOverlayOpen(false), 50); // ✅ Ensure state updates
                         }}
                     >

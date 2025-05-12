@@ -49,8 +49,6 @@ const SolidLogin = () => {
     const isFormFieldValid = (formik: any, fieldName: string) =>
         formik.touched[fieldName] && formik.errors[fieldName];
 
-    console.log("process.env.LOGIN_REDIRECT_URL", process.env.LOGIN_REDIRECT_URL);
-
     const PasswordLogin = () => {
         return (
             <Formik

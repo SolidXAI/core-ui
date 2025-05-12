@@ -1,0 +1,80 @@
+import { getSession } from "next-auth/react";
+
+export async function downloadFileWithProgress(
+  url: string,
+  handlers: {
+    onProgress?: (progress: number) => void;
+    onStatusChange?: (status: "In Progress" | "success" | "error", message: string, submessage: string) => void;
+  }
+): Promise<{ fileName: string; blob: Blob }> {
+  const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api`;
+
+  try {
+    handlers.onStatusChange?.("In Progress", "Downloading File", "Please wait...");
+    const session = await getSession();
+    const headers = new Headers();
+    if (session?.user?.accessToken) {
+      headers.set("Authorization", `Bearer ${session.user.accessToken}`);
+    }
+    const response = await fetch(`${baseUrl}${url}`, {
+      method: "POST",
+      headers,
+    }); 
+    if (!response.ok || !response.body) {
+      throw new Error("Failed to fetch file");
+    }
+    const contentDisposition = response.headers.get("Content-Disposition");
+    const fileNameMatch = contentDisposition?.match(/filename="?([^"]+)"?/);
+    const fileName = fileNameMatch?.[1] || "exported-file";
+
+    const contentType = response.headers.get("content-type") || "application/octet-stream";
+    const extension = contentType.includes("excel")
+      ? ".xlsx"
+      : contentType.includes("csv")
+      ? ".csv"
+      : "";
+
+    const contentLength = response.headers.get("content-length");
+    const total = contentLength ? parseInt(contentLength) : 2130;
+    const reader = response.body.getReader();
+    const chunks: Uint8Array[] = [];
+    let received = 0;
+    let progress = 0;
+    const totalDuration = 2000; // 2 seconds
+    const totalSteps = 100; // Progress steps from 0 to 100
+    const progressInterval = totalDuration / totalSteps;
+    while (true) {
+      const { done, value } = await reader.read();
+      if (done) break;
+  
+      if (value) {
+        chunks.push(value);
+        const interval = setInterval(() => {
+          progress += 1;
+          handlers.onProgress?.(progress);
+    
+          if (progress >= 100) {
+            clearInterval(interval);
+          }
+        }, progressInterval);
+      }
+    }
+
+    const blob = new Blob(chunks, { type: contentType });
+    const downloadUrl = URL.createObjectURL(blob);
+
+    const link = document.createElement("a");
+    link.href = downloadUrl;
+    link.download = fileName.endsWith(".csv") || fileName.endsWith(".xlsx")
+      ? fileName
+      : `${fileName}${extension}`;
+    link.click();
+    URL.revokeObjectURL(link.href);
+    handlers.onStatusChange?.("success", `${fileName}`, `File Exported Successfully.`);
+    return { fileName, blob };
+
+  } catch (error) {
+    handlers.onStatusChange?.("error", "Download Failed", 'Please try again later');
+    throw error;
+  }
+}
