@@ -51,6 +51,7 @@ import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 import { SolidChatter } from "../chatter/SolidChatter";
 import { SolidFormActionHeader } from "./SolidFormActionHeader";
+import { SolidFormViewShimmerLoading } from "./SolidFormViewShimmerLoading";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -794,7 +795,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             onSubmit: onFormikSubmit,
         });
 
-        return <div>Rendering form...</div>;
+        return <SolidFormViewShimmerLoading />;
     }
     // At this point everything required to render the form is loaded, so we go ahead and start rendering things dynamically...
     else {

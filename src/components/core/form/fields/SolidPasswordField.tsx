@@ -84,7 +84,8 @@ export class SolidPasswordField implements ISolidField {
             <>
                 <div className={className}>
                     {viewMode === "view" &&
-                        this.renderExtensionRenderMode(viewWidget, formik)
+                    <></>
+                        // this.renderExtensionRenderMode(viewWidget, formik)
                     }
                     {viewMode === "edit" &&
                         <>
