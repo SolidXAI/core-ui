@@ -790,7 +790,6 @@ export const SolidListView = (params: SolidListViewParams) => {
                   label={button.attrs.label}
                   size="small"
                   iconPos="left"
-                  severity="contrast"
                   icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
                   onClick={() => {
                     const event = {
@@ -922,7 +921,6 @@ export const SolidListView = (params: SolidListViewParams) => {
                   label={button.attrs.label}
                   size="small"
                   iconPos="left"
-                  severity="contrast"
                   icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
                   onClick={() => {
                     const event = {
