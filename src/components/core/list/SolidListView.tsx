@@ -311,7 +311,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (solidEntityListViewData) {
       const cleanedRecords = solidEntityListViewData.records.map((record) => {
         const newRecord = { ...record };
-  
+
         Object.entries(newRecord).forEach(([key, value]) => {
           if (typeof value === 'string') {
             try {
@@ -327,7 +327,7 @@ export const SolidListView = (params: SolidListViewParams) => {
             }
           }
         });
-  
+
         return newRecord;
       });
       setListViewData(cleanedRecords);
@@ -399,7 +399,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   useEffect(() => {
     console.log('useEffect: [first, rows, sortField, sortOrder, showArchived, toPopulate, toPopulateMedia, customFilter, queryDataLoaded]');
-    
+
     if (queryDataLoaded) {
       setQueryString(
         first,
@@ -744,7 +744,13 @@ export const SolidListView = (params: SolidListViewParams) => {
     setListViewRowActionPopupState(false)
   }
 
-  if (loading || isLoading) {
+  // if (loading || isLoading) {
+  //   return <SolidListViewShimmerLoading />;
+  // }
+
+  const viewMode = searchParams.get('viewMode');
+
+  if ((loading || isLoading) && params.embeded == false && viewMode !== 'view') {
     return <SolidListViewShimmerLoading />;
   }
 
@@ -802,7 +808,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded !== true && solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultAddButton !== false &&
             <SolidCreateButton url={createButtonUrl} />
           }
-          {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true  && searchParams.get('viewMode') !== "view" &&
+          {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true && searchParams.get('viewMode') !== "view" &&
             // < SolidCreateButton url={createButtonUrl} />
             <Button type="button" icon="pi pi-plus" label="Add" size='small'
               onClick={() => params.handlePopUpOpen("new")}
