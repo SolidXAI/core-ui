@@ -326,7 +326,7 @@ const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData }
 
 const SolidPage = ({ attrs, children, key, formik, fields }: any) => {
     const fieldsName = fields.map((f: any) => f.attrs.name);
-    const errorCount = fieldsName.filter((name: any) => !!formik.errors[name]).length;
+    const errorCount = formik.submitCount > 0 ? fieldsName.filter((name: any) => !!formik.errors[name]).length : 0;
     const label = (
         <span style={{ color: errorCount > 0 ? 'red' : 'inherit' }}>
             {attrs.label}{errorCount > 0 && ` (${errorCount})`}
@@ -661,6 +661,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             showFieldError();
         }
     }, [errorFields])
+    
 
     // - - - - - - - - - - - -- - - - - - - - - - - - DATA here
     // Fetch the actual data here. 
@@ -821,9 +822,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
             let solidField = fieldFactory(fieldMetadata?.type, fieldContext);
             if (!fieldMetadata?.type) {
-                const errorMessage = formLayoutField.attrs.label;
+                const errorMessage = formLayoutField?.attrs?.label ? formLayoutField?.attrs?.label :formLayoutField.attrs.name;
                 if (!errorFields.includes(errorMessage)) {
-                    errorFields.push(errorMessage);
+                    // errorFields.push(errorMessage);
                 }
             }
             if (solidField) {
