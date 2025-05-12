@@ -20,7 +20,7 @@ export async function refreshAccessToken(token: any) {
     } catch (error: any) {
       console.error("Failed to refresh access token:", error.message || error.response?.data);
       return {
-        // ...token,
+        ...token,
         error: "RefreshAccessTokenError",
       };
     }

@@ -175,10 +175,43 @@ const authProviders: NextAuthOptions = {
     callbacks: {
         // @ts-ignore
         jwt: async ({ token, user }) => {
-            const bufferTime = 60000;
-            if (Date.now() >= (token.accessTokenExpires as number - bufferTime)) {
-                return await refreshAccessToken(token); // Call the refresh token function
+            const bufferTime = 10 * 60 * 1000; // 10 minutes in milliseconds i.e refresh token get called before 10 minutes of expire of access token
+            if (Date.now() >= token.accessTokenExpires - bufferTime) {
+                // return await refreshAccessToken(token); // Call the refresh token function
+                const refreshedToken = await refreshAccessToken(token);
+                let config = {    // call iam/me api again to set user
+                    method: 'get',
+                    url: `${process.env.API_URL}/api/iam/me`,
+                    headers: {
+                        'accept': '*/*',
+                        'Content-Type': 'application/json',
+                        'Authorization': `Bearer ${refreshedToken?.accessToken}`
+                    }
+                };
+
+                const loginResponse = await axios.request(config);
+
+                if (loginResponse.status == 400) {
+                    throw new Error(loginResponse.data.message);
+                }
+                if (loginResponse.status == 401) {
+                    throw new Error(loginResponse.data.message);
+                }
+
+                let base64decoded = jwtDecode(loginResponse.data.data.accessToken);
+                let accessTokenExpires = base64decoded.exp;
+
+                return {
+                    accessToken: loginResponse.data.data.accessToken,
+                    refreshToken: loginResponse.data.data.refreshToken,
+                    accessTokenExpires: accessTokenExpires,
+                    ...loginResponse.data.data,
+                };
+                // return {
+                //     user: token.user, // ⬅️ keep the user info!
+                // };
             }
+            
 
             // If there is no user (first time login or session), we return the user data
             if (user) {
