@@ -420,7 +420,7 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
         moduleName: fieldContext.fieldMetadata.relationModelModuleName,
         id: "new",
         embeded: true,
-        layout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
+        customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
         customCreateHandler: ((values: any) => {
             setvisibleCreateRelationEntity(false);
             customCreateHandler(values)
