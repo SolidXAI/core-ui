@@ -8,6 +8,7 @@ import { DevDocs } from '../Svg/DevDocs';
 import { FieldSvg } from '../Svg/FieldSvg';
 import { ModelSvg } from '../Svg/ModelSvg';
 import { ModuleSvg } from '../Svg/ModuleSvg';
+import { HomePageModuleSvg } from '../Svg/HomePageModuleSvg';
 export const SolidModuleHome = () => {
     const { data: session, status } = useSession();
     //@ts-ignore
@@ -15,7 +16,7 @@ export const SolidModuleHome = () => {
 
     return (
         <div className="h-screen surface-0">
-            <div className="page-header" style={{borderBottom: '1px solid var(--primary-light-color)'}}>
+            <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
                 <p className="m-0 view-title">
                     Dashboard
                 </p>
@@ -33,6 +34,9 @@ export const SolidModuleHome = () => {
                         <div className='mt-2'>
                             <Button size='small' label='View Profile' />
                         </div>
+                    </div>
+                    <div className={styles.homeSvg}>
+                        <HomePageModuleSvg />
                     </div>
                 </div>
                 <div className='grid'>
