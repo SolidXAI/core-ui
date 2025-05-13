@@ -376,7 +376,7 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
             inlineCreateAutoSave: false,
             customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
             modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
-            parentData: userKeyField ? { [userKeyField]: { solidManyToOneLabel: fieldContext.data[userKeyField], value: fieldContext.data['id'] } } : {}
+            parentData: userKeyField ? { [userKeyField]: { solidManyToOneLabel: fieldContext.data[userKeyField], solidManyToOneValue: fieldContext.data['id'] } } : {}
         }
         setformViewParams(formviewparams)
 
