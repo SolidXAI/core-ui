@@ -41,7 +41,7 @@ export class SolidRelationManyToOneField implements ISolidField {
         if (this.fieldContext.parentData) {
             const [key, value]: any = Object.entries(this.fieldContext.parentData)[0] || [];
             if (key && value !== undefined) {
-                return { solidManyToOneLabel: value.label, solidManyToOneValue: value.value };
+                return { solidManyToOneLabel: value.solidManyToOneLabel, solidManyToOneValue: value.solidManyToOneValue };
             }
         }
         return {}
