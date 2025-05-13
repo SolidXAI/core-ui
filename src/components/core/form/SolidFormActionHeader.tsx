@@ -27,7 +27,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
         if (solidView) {
             let contextMenuHeaderButtonsData: any = [];
             let normalHeaderButtonsData: any = [];
-            const formHeaderButtons = solidView?.layout?.attrs?.formButtons;
+            const formHeaderButtons = formViewLayout?.attrs?.formButtons;
             if (formHeaderButtons && formHeaderButtons.length > 0) {
                 contextMenuHeaderButtonsData = formHeaderButtons.filter((button: any) => {
                     return button.attrs && button.attrs.actionInContextMenu && button.attrs.actionInContextMenu === true;
@@ -195,7 +195,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 </div>
                             }
                             {params.embeded == true &&
-                                <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' />
+                                <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' style={{ minWidth: 66 }} />
 
                             }
                             {params.embeded !== true &&
@@ -236,14 +236,15 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 )
                             })
                             }
-                            {   
-                                solidView?.layout?.attrs?.showAddFormButton !== false && params.embeded !== true && viewMode === "view" &&
+                            {
+                                formViewLayout?.attrs?.showAddFormButton !== false && params.embeded !== true && viewMode === "view" &&
                                 <Button type="button" icon="pi pi-plus" label="Add" size='small'
                                     onClick={() => router.replace('new')}
+                                    style={{minWidth: 78}}
                                 >
                                 </Button>
                             }
-                            { solidView?.layout?.attrs?.showEditFormButton !== false && params.embeded !== true && viewMode === "view" &&
+                            {formViewLayout?.attrs?.showEditFormButton !== false && params.embeded !== true && viewMode === "view" &&
                                 <div>
                                     <Button
                                         label="Edit"
@@ -294,13 +295,13 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 </div>
                             }
                             {params.embeded == true &&
-                                <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' />
+                                <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' style={{ minWidth: 66 }} />
 
                             }
                             {params.embeded !== true &&
                                 <SolidCancelButton />
                             }
-                            {solidView?.layout?.attrs?.showCogWheelFormButton !== false && <FormActionDropdown />}
+                            {formViewLayout?.attrs?.showCogWheelFormButton !== false && <FormActionDropdown />}
                         </div>
                     </>
                 )}
