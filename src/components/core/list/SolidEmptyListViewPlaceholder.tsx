@@ -41,7 +41,7 @@ export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, actionsAllowed,
                     </div>
                 }
                 <div>
-                    {solidListViewMetaData?.data?.solidView?.layout?.attrs?.headerButtons &&
+                    {solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultAddButton === false && solidListViewMetaData?.data?.solidView?.layout?.attrs?.headerButtons &&
                         solidListViewMetaData?.data?.solidView?.layout?.attrs?.headerButtons.map((button: any) => {
                             return (
                                 <Button
