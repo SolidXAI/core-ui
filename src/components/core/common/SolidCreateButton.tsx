@@ -5,7 +5,7 @@ import { Button } from 'primereact/button';
 
 export const SolidCreateButton = ({ url, title }: any) => {
     const pathName = usePathname();
-    const createPath = url ? url : pathName.split('/').slice(0, -1).join('/') + '/form/new';
+    const createPath = url ? url : pathName.split('/').slice(0, -1).join('/') + '/form/new?viewMode=edit';
 
     return (
         <div>

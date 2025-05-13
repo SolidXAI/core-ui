@@ -1,12 +1,17 @@
 import { createPermission } from '@/helpers/permissions'
 import { SolidCreateButton } from '../common/SolidCreateButton'
 import Image from 'next/image'
+import { Button } from 'primereact/button'
+import { useHandleListCustomButtonClick } from '@/components/common/useHandleListCustomButtonClick'
 
 export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, actionsAllowed, params, solidListViewMetaData }: any) => {
     const noDataText = solidListViewMetaData?.data?.solidView?.layout?.attrs?.listViewNoDataHelperText
         ?? (process.env.NEXT_PUBLIC_DEFAULT_LIST_VIEW_NODATA_HELPER_TEXT && solidListViewMetaData?.data?.solidView?.displayName
             ? `${process.env.NEXT_PUBLIC_DEFAULT_LIST_VIEW_NODATA_HELPER_TEXT} ${solidListViewMetaData.data.solidView.displayName}`
             : null)
+
+    const handleCustomButtonClick = useHandleListCustomButtonClick()
+
     return (
         <div className="page-parent-wrapper">
             <div className="page-header">
@@ -30,11 +35,35 @@ export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, actionsAllowed,
                         {noDataText}
                     </div>
                 }
-                {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded !== true &&
+                {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded !== true && solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultAddButton !== false &&
                     <div className='mt-2'>
                         <SolidCreateButton url={createButtonUrl} title={solidListViewMetaData?.data?.solidView?.displayName} />
                     </div>
                 }
+                <div>
+                    {solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultAddButton === false && solidListViewMetaData?.data?.solidView?.layout?.attrs?.headerButtons &&
+                        solidListViewMetaData?.data?.solidView?.layout?.attrs?.headerButtons.map((button: any) => {
+                            return (
+                                <Button
+                                    text
+                                    type="button"
+                                    className="w-full text-left gap-2"
+                                    label={button.attrs.label}
+                                    size="small"
+                                    iconPos="left"
+                                    icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                                    onClick={() => {
+                                        const event = {
+                                            params,
+                                            solidListViewMetaData: solidListViewMetaData.data
+                                        }
+                                        handleCustomButtonClick(button.attrs, event)
+                                    }}
+                                />
+                            );
+                        })
+                    }
+                </div>
             </div>
         </div>
     )
