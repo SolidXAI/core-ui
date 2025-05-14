@@ -662,7 +662,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             showFieldError();
         }
     }, [errorFields])
-    
+
 
     // - - - - - - - - - - - -- - - - - - - - - - - - DATA here
     // Fetch the actual data here. 
@@ -823,7 +823,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
             let solidField = fieldFactory(fieldMetadata?.type, fieldContext);
             if (!fieldMetadata?.type) {
-                const errorMessage = formLayoutField?.attrs?.label ? formLayoutField?.attrs?.label :formLayoutField.attrs.name;
+                const errorMessage = formLayoutField?.attrs?.label ? formLayoutField?.attrs?.label : formLayoutField.attrs.name;
                 if (!errorFields.includes(errorMessage)) {
                     // errorFields.push(errorMessage);
                 }
@@ -1118,19 +1118,19 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             )}
                         </div>
                     </form>
-                    {params.embeded !== true && isShowChatter === true &&
-                        <Button
-                            icon="pi pi-chevron-right"
-                            size="small"
-                            text
-                            className="chatter-collapse-btn"
-                            style={{ width: 30 }}
-                            onClick={() => setShowChatter(false)}
-                        />
-                    }
                 </div>
                 {params.embeded !== true &&
                     <div className={`chatter-section ${isShowChatter === false ? 'collapsed' : ''}`}>
+                        {isShowChatter === true &&
+                            <Button
+                                icon="pi pi-angle-double-right"
+                                size="small"
+                                text
+                                className="chatter-collapse-btn"
+                                style={{ width: 30, height: 30, aspectRatio: '1/1' }}
+                                onClick={() => setShowChatter(false)}
+                            />
+                        }
                         {isShowChatter === false ?
                             <div className="flex flex-column gap-2 justify-content-center p-2">
                                 <div className="chatter-collapsed-content">
