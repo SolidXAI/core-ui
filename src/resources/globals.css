@@ -1438,6 +1438,19 @@ li.header-li-px {
 .tab-error-heading .p-tabview-nav-link:focus {
   border-color: #ff5757 !important;
 }
+.tab-error-heading{
+  animation: shake 0.8s ease-in-out;
+  border-bottom: 3px solid red;
+  font-weight: bold;
+}
+@keyframes shake {
+  0% { transform: translateX(0); }
+  20% { transform: translateX(-5px); }
+  40% { transform: translateX(5px); }
+  60% { transform: translateX(-5px); }
+  80% { transform: translateX(5px); }
+  100% { transform: translateX(0); }
+}
 
 .field-selection-form {
   padding: 15px;
