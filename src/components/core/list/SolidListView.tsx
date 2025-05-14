@@ -1081,13 +1081,13 @@ export const SolidListView = (params: SolidListViewParams) => {
           <ListViewRowActionPopup context={listViewRowActionData}></ListViewRowActionPopup>
         </Dialog>
       }
-      <Dialog header="Delete Field" headerClassName="py-2" contentClassName="px-0 pb-0" visible={deleteEntity} style={{ width: '20vw' }} onHide={() => { if (!deleteEntity) return; setDeleteEntity(false); }}>
+      <Dialog header={`Delete ${params?.modelName}`} headerClassName="py-2" contentClassName="px-0 pb-0" visible={deleteEntity} style={{ width: '20vw' }} onHide={() => { if (!deleteEntity) return; setDeleteEntity(false); }}>
         <Divider className="m-0" />
         <div className="p-4">
           <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
-            Are you sure you want to delete this Field ?
+           {`Are you sure you want to delete this ${params?.modelName}?`}
           </p>
-          <p className="" style={{ color: 'var{--solid-grey-500}' }}>{selectedSolidViewData?.singularName}</p>
+          {/* <p className="" style={{ color: 'var{--solid-grey-500}' }}>{selectedSolidViewData?.singularName}</p> */}
           <div className="flex align-items-center gap-2 mt-3">
             <Button label="Delete" size="small" onClick={() => { deleteSolidSingleEntiry(selectedSolidViewData?.id); setDeleteEntity(false); }} />
             <Button label="Cancel" size="small" onClick={() => setDeleteEntity(false)} outlined className='bg-primary-reverse' />
