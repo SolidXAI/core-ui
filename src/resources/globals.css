@@ -1706,13 +1706,14 @@ li.header-li-px {
   position: absolute;
   top: 50%;
   transform: translateY(-50%);
-  right: -18px;
+  left: -18px;
   z-index: 10;
   box-shadow: 0 0 4px rgba(0, 0, 0, 0.1);
   background-color: #fff;
 }
 
 .chatter-section {
+  position: relative;
   width: 380px;
   flex-shrink: 0;
   transition: width 0.3s ease, padding 0.3s ease;
