@@ -62,7 +62,8 @@ export type SolidFormViewProps = {
     customCreateHandler?: any
     inlineCreateAutoSave?: boolean,
     customLayout?: any,
-    parentData?: any
+    parentData?: any,
+    redirectToPath?: string, 
 };
 
 
@@ -514,10 +515,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 params.handlePopupClose()
             }
             if (redirectToList === true) {
-
-                const segments = pathname.split('/').filter(Boolean); // Split and filter empty segments
-                const newPath = '/' + segments.slice(0, -2).join('/') + '/list'; // Remove last segment and add "/all"
-                router.push(newPath);
+                if (params.redirectToPath) {
+                    router.push(params.redirectToPath);
+                    window.location.reload();
+                } else {
+                    const segments = pathname.split('/').filter(Boolean); // Split and filter empty segments
+                    const newPath = '/' + segments.slice(0, -2).join('/') + '/list'; // Remove last segment and add "/all"
+                    router.push(newPath);
+                }
             }
         }
     }, [isEntityCreateSuccess, isEntityUpdateSuceess, isEntityDeleteSuceess]);

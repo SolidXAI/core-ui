@@ -188,7 +188,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                         label="Save"
                                         size="small"
                                         onClick={() => {
-                                            setRedirectToList(false);
+                                            setRedirectToList(params.redirectToPath ? true : false);
                                         }}
                                         type="submit"
                                     />
