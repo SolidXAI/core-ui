@@ -943,7 +943,7 @@ export const SolidListView = (params: SolidListViewParams) => {
               );
             })}
 
-          {actionsAllowed.includes(`${deletePermission(params.modelName)}`) && solidListViewLayout?.attrs?.delete !== false && solidListViewLayout?.attrs.showRowDeleteInContextMenu === false &&
+          {actionsAllowed.includes(`${deletePermission(params.modelName)}`) && solidListViewLayout?.attrs?.delete !== false && solidListViewLayout?.attrs?.showRowDeleteInContextMenu === false &&
 
             <Column
               header="Delete"
