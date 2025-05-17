@@ -932,7 +932,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                         onClick={() => {
                           const event = {
                             params,
-                            rowData: selectedSolidViewData,
+                            rowData: rowData,
                             solidListViewMetaData: solidListViewMetaData.data
                           }
                           handleCustomButtonClick(button.attrs, event)
