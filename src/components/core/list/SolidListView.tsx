@@ -932,7 +932,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                         onClick={() => {
                           const event = {
                             params,
-                            rowData: selectedSolidViewData,
+                            rowData: rowData,
                             solidListViewMetaData: solidListViewMetaData.data
                           }
                           handleCustomButtonClick(button.attrs, event)
@@ -947,7 +947,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
             <Column
               header="Delete"
-                            body={(rowData) => {
+              body={(rowData) => {
                 return (
                   <Button
                     text
@@ -957,7 +957,9 @@ export const SolidListView = (params: SolidListViewParams) => {
                     iconPos="left"
                     severity="danger"
                     icon={'pi pi-trash'}
-                    onClick={() => setDeleteEntity(true)}
+                    onClick={() => {
+                      setSelectedSolidViewData(rowData); setDeleteEntity(true)
+                    }}
                   />
                 )
               }} />
@@ -1103,7 +1105,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         <Divider className="m-0" />
         <div className="p-4">
           <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
-           {`Are you sure you want to delete this ${params?.modelName}?`}
+            {`Are you sure you want to delete this ${params?.modelName}?`}
           </p>
           {/* <p className="" style={{ color: 'var{--solid-grey-500}' }}>{selectedSolidViewData?.singularName}</p> */}
           <div className="flex align-items-center gap-2 mt-3">
