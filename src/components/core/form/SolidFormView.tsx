@@ -63,7 +63,7 @@ export type SolidFormViewProps = {
     inlineCreateAutoSave?: boolean,
     customLayout?: any,
     parentData?: any,
-    redirectToPath?: string, 
+    redirectToPath?: string,
 };
 
 
@@ -623,8 +623,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     const result = await createEntity(formData).unwrap();
                     showToast("success", "Form saved", "Form saved successfully!");
                     if (!params.embeded) {
-                        const updatedUrl = `${pathname.replace("new", result?.data?.id)}?${searchParams.toString()} `;
+                        // const updatedUrl = `${pathname.replace("new", result?.data?.id)}?${searchParams.toString()} `;
+                        // router.push(updatedUrl);
+
+                        const currentUrl = new URL(window.location.href);
+                        // Replace "new" with the new entity id in the pathname
+                        currentUrl.pathname = currentUrl.pathname.replace(/new$/, result?.data?.id);
+                        // The search params remain unchanged, so nothing else is needed here.
+                        const updatedUrl = currentUrl.toString();
                         router.push(updatedUrl);
+
+                        const updatedPath = currentUrl.toString();
                     }
                     return result;
                 }
