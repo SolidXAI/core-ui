@@ -406,6 +406,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [openLightbox, setOpenLightbox] = useState(false);
     const [lightboxUrls, setLightboxUrls] = useState([]);
     const [isShowChatter, setShowChatter] = useState(true);
+    const [solidWorkflowFieldValue, setSolidWorkflowFieldValue] = useState<string>("");
 
     const errorFields: string[] = [];
 
@@ -615,6 +616,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
 
             });
+
+            let solidWorkflowField = solidFormViewMetaData?.data?.solidView?.layout?.attrs?.workflowField;
+            if (solidFormViewMetaData?.data?.solidFormViewWorkflowData) {
+                if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "selectionStatic") {
+                    formData.append(solidWorkflowField, solidWorkflowFieldValue);
+                }
+                if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "many-to-one") {
+                    formData.append(`${solidWorkflowField}Id`, solidWorkflowFieldValue);
+                }
+            }
+            
             if (params.inlineCreateAutoSave === true) {
                 params.customCreateHandler(formData);
             } else {
@@ -1120,6 +1132,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             setRedirectToList={setRedirectToList}
                             viewMode={viewMode}
                             setViewMode={setViewMode}
+                            solidWorkflowFieldValue={solidWorkflowFieldValue}
+                            setSolidWorkflowFieldValue={setSolidWorkflowFieldValue}
                         />
                         <div className="p-4 solid-form-content">
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
