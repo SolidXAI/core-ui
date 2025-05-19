@@ -63,7 +63,7 @@ export type SolidFormViewProps = {
     inlineCreateAutoSave?: boolean,
     customLayout?: any,
     parentData?: any,
-    redirectToPath?: string, 
+    redirectToPath?: string,
 };
 
 
@@ -406,6 +406,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [openLightbox, setOpenLightbox] = useState(false);
     const [lightboxUrls, setLightboxUrls] = useState([]);
     const [isShowChatter, setShowChatter] = useState(true);
+    const [solidWorkflowFieldValue, setSolidWorkflowFieldValue] = useState<string>("");
 
     const errorFields: string[] = [];
 
@@ -615,6 +616,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
 
             });
+
+            let solidWorkflowField = solidFormViewMetaData?.data?.solidView?.layout?.attrs?.workflowField;
+            if (solidFormViewMetaData?.data?.solidFormViewWorkflowData) {
+                if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "selectionStatic") {
+                    formData.append(solidWorkflowField, solidWorkflowFieldValue);
+                }
+                if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "many-to-one") {
+                    formData.append(`${solidWorkflowField}Id`, solidWorkflowFieldValue);
+                }
+            }
+            
             if (params.inlineCreateAutoSave === true) {
                 params.customCreateHandler(formData);
             } else {
@@ -623,8 +635,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     const result = await createEntity(formData).unwrap();
                     showToast("success", "Form saved", "Form saved successfully!");
                     if (!params.embeded) {
-                        const updatedUrl = `${pathname.replace("new", result?.data?.id)}?${searchParams.toString()} `;
+                        // const updatedUrl = `${pathname.replace("new", result?.data?.id)}?${searchParams.toString()} `;
+                        // router.push(updatedUrl);
+
+                        const currentUrl = new URL(window.location.href);
+                        // Replace "new" with the new entity id in the pathname
+                        currentUrl.pathname = currentUrl.pathname.replace(/new$/, result?.data?.id);
+                        // The search params remain unchanged, so nothing else is needed here.
+                        const updatedUrl = currentUrl.toString();
                         router.push(updatedUrl);
+
+                        const updatedPath = currentUrl.toString();
                     }
                     return result;
                 }
@@ -667,7 +688,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             showFieldError();
         }
     }, [errorFields])
-    
+
 
     // - - - - - - - - - - - -- - - - - - - - - - - - DATA here
     // Fetch the actual data here. 
@@ -828,7 +849,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
             let solidField = fieldFactory(fieldMetadata?.type, fieldContext);
             if (!fieldMetadata?.type) {
-                const errorMessage = formLayoutField?.attrs?.label ? formLayoutField?.attrs?.label :formLayoutField.attrs.name;
+                const errorMessage = formLayoutField?.attrs?.label ? formLayoutField?.attrs?.label : formLayoutField.attrs.name;
                 if (!errorFields.includes(errorMessage)) {
                     // errorFields.push(errorMessage);
                 }
@@ -1111,6 +1132,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             setRedirectToList={setRedirectToList}
                             viewMode={viewMode}
                             setViewMode={setViewMode}
+                            solidWorkflowFieldValue={solidWorkflowFieldValue}
+                            setSolidWorkflowFieldValue={setSolidWorkflowFieldValue}
                         />
                         <div className="p-4 solid-form-content">
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
@@ -1123,19 +1146,19 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             )}
                         </div>
                     </form>
-                    {params.embeded !== true && isShowChatter === true &&
-                        <Button
-                            icon="pi pi-chevron-right"
-                            size="small"
-                            text
-                            className="chatter-collapse-btn"
-                            style={{ width: 30 }}
-                            onClick={() => setShowChatter(false)}
-                        />
-                    }
                 </div>
                 {params.embeded !== true &&
                     <div className={`chatter-section ${isShowChatter === false ? 'collapsed' : ''}`}>
+                        {isShowChatter === true &&
+                            <Button
+                                icon="pi pi-angle-double-right"
+                                size="small"
+                                text
+                                className="chatter-collapse-btn"
+                                style={{ width: 30, height: 30, aspectRatio: '1/1' }}
+                                onClick={() => setShowChatter(false)}
+                            />
+                        }
                         {isShowChatter === false ?
                             <div className="flex flex-column gap-2 justify-content-center p-2">
                                 <div className="chatter-collapsed-content">

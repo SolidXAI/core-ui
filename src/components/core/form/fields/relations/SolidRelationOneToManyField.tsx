@@ -245,7 +245,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
         currentUrl.searchParams.set('viewMode', 'edit');
         const updatedPath = currentUrl.toString();
         try {
-
+            console.log("updatedPath", updatedPath);
             router.push(updatedPath);
             await formik.handleSubmit();
         } catch {
@@ -274,8 +274,8 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
                 <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
             }
 
-            <Dialog showHeader={false} headerClassName="py-2" contentClassName="px-0 pb-0" contentStyle={{borderRadius: 6}} visible={showSaveParentEntityConfirmationPopup} style={{ width: '20vw' }} onHide={() => { if (!showSaveParentEntityConfirmationPopup) return; setShowSaveParentEntityConfirmationPopup(false); }}>          
-                  <div className="p-4">
+            <Dialog showHeader={false} headerClassName="py-2" contentClassName="px-0 pb-0" contentStyle={{ borderRadius: 6 }} visible={showSaveParentEntityConfirmationPopup} style={{ width: '20vw' }} onHide={() => { if (!showSaveParentEntityConfirmationPopup) return; setShowSaveParentEntityConfirmationPopup(false); }}>
+                <div className="p-4">
                     <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
                         Before Creating {fieldLabel} you need to save {capitalize(fieldContext.modelName)}.
                         Please click save if you wish to proceed ?
