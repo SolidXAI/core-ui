@@ -24,9 +24,7 @@ export class SolidBooleanField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        if (value) {
-            formData.append(fieldLayoutInfo.attrs.name, value === "true" ? "true" : "");
-        }
+        formData.append(fieldLayoutInfo.attrs.name, value === "true" || value === true ? "true" : "");
     }
 
     initialValue(): any {
@@ -39,8 +37,8 @@ export class SolidBooleanField implements ISolidField {
 
         // Ensure the value is always a string "true" or "false"
         const result = existingValue
-            ? (existingValue === true || existingValue === "true" ? true : false)
-            : (fieldDefaultValue === true || fieldDefaultValue === "true" ? true : false);
+            ? (existingValue === true || existingValue === "true" ? "true" : "false")
+            : (fieldDefaultValue === true || fieldDefaultValue === "true" ? "true" : "false");
         return result;
     }
 
@@ -89,7 +87,7 @@ export class SolidBooleanField implements ISolidField {
             editWidget = 'booleanSelectbox';
         }
         if (!viewWidget) {
-            viewWidget = 'DefaultShortTextFormViewWidget';
+            viewWidget = 'DefaultBooleanFormViewWidget';
         }
         const viewMode: string = this.fieldContext.viewMode;
 
@@ -105,11 +103,6 @@ export class SolidBooleanField implements ISolidField {
                                 {
                                     this.renderExtensionRenderMode(editWidget, formik)
                                 }
-                                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                                    <div className="absolute mt-1">
-                                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                                    </div>
-                                )}
                             </>
                         )
                     }
@@ -324,7 +317,7 @@ export const SolidBooleanSwitchStyleFormEditWidget = ({ formik, fieldContext }: 
                     <div className="flex align-items-center">
                         <InputSwitch
                             id={fieldLayoutInfo.attrs.name}
-                            checked={formik.values[fieldLayoutInfo.attrs.name] === true}
+                            checked={formik.values[fieldLayoutInfo.attrs.name] === true || formik.values[fieldLayoutInfo.attrs.name] === "true"}
                             onChange={handleChange}
                             disabled={formDisabled || fieldDisabled}
                             readOnly={formReadonly || fieldReadonly || readOnlyPermission}
@@ -347,3 +340,18 @@ export const SolidBooleanSwitchStyleFormEditWidget = ({ formik, fieldContext }: 
 }
 
 
+
+
+export const DefaultBooleanFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+
+    return (
+        <div className="mt-2 flex-column gap-2">
+            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name] === true || formik.values[fieldLayoutInfo.attrs.name] === "true" ? "true" : "false"}</p>
+        </div>
+    );
+}

@@ -25,7 +25,7 @@ interface AuthTabsProps {
     iamPasswordRegistrationEnabled: boolean;
     passwordlessRegistration: boolean;
 }
-const SolidLogin = () => {
+const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
     const [initiateLogin] = useInitateLoginMutation();
 
@@ -48,8 +48,6 @@ const SolidLogin = () => {
 
     const isFormFieldValid = (formik: any, fieldName: string) =>
         formik.touched[fieldName] && formik.errors[fieldName];
-
-    console.log("process.env.LOGIN_REDIRECT_URL", process.env.LOGIN_REDIRECT_URL);
 
     const PasswordLogin = () => {
         return (
@@ -93,11 +91,11 @@ const SolidLogin = () => {
                 {(formik) => (
                     <Form>
                         <div className="flex flex-column gap-2 mt-3">
-                            <label htmlFor="email" className="solid-auth-input-label">Username or Email</label>
+                            <label htmlFor="email" className="solid-auth-input-label">{signInValidatorLabel ? signInValidatorLabel : "Username or Email"}</label>
                             <InputText
                                 id="email"
                                 name="email"
-                                placeholder="Email ID"
+                                placeholder={signInValidatorPlaceholder ? signInValidatorPlaceholder : "Email ID"}
                                 onChange={formik.handleChange}
                                 value={formik.values.email}
                                 invalid={!!formik.errors.email}
@@ -115,7 +113,7 @@ const SolidLogin = () => {
                                 id="password"
                                 name="password"
                                 value={formik.values.password}
-                                onChange={formik.handleChange} 
+                                onChange={formik.handleChange}
                                 toggleMask
                                 invalid={!!formik.errors.password}
                                 inputClassName="w-full"
@@ -183,11 +181,11 @@ const SolidLogin = () => {
                 {(formik) => (
                     <Form>
                         <div className="flex flex-column gap-2 mt-3">
-                            <label htmlFor="email" className="solid-auth-input-label">Email</label>
+                            <label htmlFor="email" className="solid-auth-input-label">{signInValidatorLabel ? signInValidatorLabel : "Username or Email"}</label>
                             <InputText
                                 id="email"
                                 name="email"
-                                placeholder="Email ID"
+                                placeholder={signInValidatorPlaceholder ? signInValidatorPlaceholder : "Email ID"}
                                 onChange={formik.handleChange}
                                 value={formik.values.email}
                                 invalid={!!formik.errors.email}

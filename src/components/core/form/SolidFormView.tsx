@@ -14,7 +14,7 @@ import { Dialog } from "primereact/dialog";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import qs from "qs";
-import { ChangeEvent, useEffect, useRef, useState } from "react";
+import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as Yup from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./fields/ISolidField";
 import { SolidBooleanField } from "./fields/SolidBooleanField";
@@ -51,6 +51,7 @@ import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 import { SolidChatter } from "../chatter/SolidChatter";
 import { SolidFormActionHeader } from "./SolidFormActionHeader";
+import { SolidFormViewShimmerLoading } from "./SolidFormViewShimmerLoading";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -61,7 +62,8 @@ export type SolidFormViewProps = {
     customCreateHandler?: any
     inlineCreateAutoSave?: boolean,
     customLayout?: any,
-    parentData?: any
+    parentData?: any,
+    redirectToPath?: string,
 };
 
 
@@ -87,7 +89,7 @@ const getLayoutFields = (node: any): any => {
     return fields;
 }
 
-const getLayoutFieldsAsObject = (layout: any[]): any => {
+export const getLayoutFieldsAsObject = (layout: any[]): any => {
     const allFields = layout.flatMap(getLayoutFields);
     return allFields.reduce((result, field) => {
         if (field.attrs.name) {
@@ -270,11 +272,33 @@ const SolidSheet = ({ children }: any) => (
     </div>
 );
 
-const SolidNotebook = ({ children }: any) => {
+const SolidNotebook = ({ children, activeTab }: any) => {
+    const childrenArray = children;
+    const router = useRouter();
+
+    const activeIndex = useMemo(() => {
+        return childrenArray.findIndex((child: any) => {
+            return child.key === activeTab;
+        });
+    }, [childrenArray, activeTab]);
+
+
+    const handleTabChange = (e: any) => {
+        const selectedChild = childrenArray[e.index] as any;
+        const newTabLabel = selectedChild?.key;
+
+        if (newTabLabel) {
+            const currentUrl = new URL(window.location.href);
+            currentUrl.searchParams.set('activeTab', newTabLabel);
+            const updatedPath = currentUrl.toString();
+            router.push(updatedPath);
+        }
+    };
+
 
     return (
         <div className="solid-tab-view w-full">
-            <TabView>
+            <TabView activeIndex={activeIndex >= 0 ? activeIndex : 0} onTabChange={handleTabChange}>
                 {children}
             </TabView>
         </div>
@@ -302,11 +326,24 @@ const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData }
 };
 
 
-const SolidPage = ({ attrs, children, key }: any) => (
-    <TabPanel key={key} header={attrs.label} >
-        <div className="p-fluid">{children}</div>
-    </TabPanel>
-);
+const SolidPage = ({ attrs, children, key, formik, fields }: any) => {
+    const fieldsName = fields.map((f: any) => f.attrs.name);
+    const errorCount = formik.submitCount > 0 ? fieldsName.filter((name: any) => !!formik.errors[name]).length : 0;
+    const label = (
+        <span style={{ color: errorCount > 0 ? 'red' : 'inherit' }}>
+            {attrs.label}{errorCount > 0 && ` (${errorCount})`}
+        </span>
+    );
+
+
+    return (
+
+        <TabPanel key={key} header={label} >
+            <div className="p-fluid">{children}</div>
+        </TabPanel>
+    )
+
+};
 
 // Original code...
 // const addLevelToGroups = (layout: any, level = 1) => {
@@ -365,7 +402,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
 
     const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
-    const [viewMode, setViewMode] = useState<"view" | "edit">("view");
+    const [viewMode, setViewMode] = useState<"view" | "edit">(params.embeded === true ? "edit" : "view");
     const [openLightbox, setOpenLightbox] = useState(false);
     const [lightboxUrls, setLightboxUrls] = useState([]);
     const [isShowChatter, setShowChatter] = useState(true);
@@ -398,7 +435,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         setViewMode(newMode);
         const params = new URLSearchParams(searchParams.toString());
         params.set("viewMode", newMode);
-        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+        router.push(`${pathname}?${params.toString()} `, { scroll: false });
     };
 
 
@@ -429,7 +466,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     // Create the RTK slices for this entitor (const id of fieldValue) {
     //     if (!isInt(id)) {
-    //         errors.push({ field: this.fieldMetadata.name, error: `Invalid ids in ${commandFieldName}` });
+    //         errors.push({ field: this.fieldMetadata.name, error: `Invalid ids in ${ commandFieldName } ` });
     //     }
     // }y
     const entityApi = createSolidEntityApi(params.modelName);
@@ -479,10 +516,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 params.handlePopupClose()
             }
             if (redirectToList === true) {
-
-                const segments = pathname.split('/').filter(Boolean); // Split and filter empty segments
-                const newPath = '/' + segments.slice(0, -2).join('/') + '/list'; // Remove last segment and add "/all"
-                router.push(newPath);
+                if (params.redirectToPath) {
+                    router.push(params.redirectToPath);
+                    window.location.reload();
+                } else {
+                    const segments = pathname.split('/').filter(Boolean); // Split and filter empty segments
+                    const newPath = '/' + segments.slice(0, -2).join('/') + '/list'; // Remove last segment and add "/all"
+                    router.push(newPath);
+                }
             }
         }
     }, [isEntityCreateSuccess, isEntityUpdateSuceess, isEntityDeleteSuceess]);
@@ -552,7 +593,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const solidView = solidFormViewMetaData.data.solidView;
         const solidFieldsMetadata = solidFormViewMetaData.data.solidFieldsMetadata;
         const layoutFieldsObj = getLayoutFieldsAsObject([formViewLayout]);
-
         try {
             let formData = new FormData();
 
@@ -595,9 +635,19 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     const result = await createEntity(formData).unwrap();
                     showToast("success", "Form saved", "Form saved successfully!");
                     if (!params.embeded) {
-                        const updatedUrl = pathname.replace("new", result?.data?.id);
+                        // const updatedUrl = `${pathname.replace("new", result?.data?.id)}?${searchParams.toString()} `;
+                        // router.push(updatedUrl);
+
+                        const currentUrl = new URL(window.location.href);
+                        // Replace "new" with the new entity id in the pathname
+                        currentUrl.pathname = currentUrl.pathname.replace(/new$/, result?.data?.id);
+                        // The search params remain unchanged, so nothing else is needed here.
+                        const updatedUrl = currentUrl.toString();
                         router.push(updatedUrl);
+
+                        const updatedPath = currentUrl.toString();
                     }
+                    return result;
                 }
                 else {
                     // updateEntity({ id: +params.id, data: formData });
@@ -609,7 +659,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             updateViewMode("view")
                         }
                     }
-
+                    return result;
 
                 }
             }
@@ -633,11 +683,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         // errorFields.length = 0;
     };
-    // useEffect(() => {
-    //     if (errorFields?.length > 0) {
-    //         showFieldError();
-    //     }
-    // }, [errorFields])
+    useEffect(() => {
+        if (errorFields?.length > 0) {
+            showFieldError();
+        }
+    }, [errorFields])
+
 
     // - - - - - - - - - - - -- - - - - - - - - - - - DATA here
     // Fetch the actual data here. 
@@ -771,7 +822,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             onSubmit: onFormikSubmit,
         });
 
-        return <div>Rendering form...</div>;
+        return <SolidFormViewShimmerLoading />;
     }
     // At this point everything required to render the form is loaded, so we go ahead and start rendering things dynamically...
     else {
@@ -798,9 +849,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
             let solidField = fieldFactory(fieldMetadata?.type, fieldContext);
             if (!fieldMetadata?.type) {
-                const errorMessage = formLayoutField.attrs.label;
+                const errorMessage = formLayoutField?.attrs?.label ? formLayoutField?.attrs?.label : formLayoutField.attrs.name;
                 if (!errorFields.includes(errorMessage)) {
-                    errorFields.push(errorMessage);
+                    // errorFields.push(errorMessage);
                 }
             }
             if (solidField) {
@@ -828,11 +879,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
             // get details from the form event
             const { name: fieldName, value, type, checked } = event.target;
-            // console.log(`${eventType}: formFieldOnXXX ${fieldName} invoked for change with value:`, value);
 
             // TODO: check if there is a change handler registered with this form view, load it and fire it.
             const changeHandler = solidView.layout[eventType];
-            // console.log(`changeHandler for this form is ${changeHandler}`);
 
             if (changeHandler) {
                 // Get hold of the dynamic module...
@@ -855,7 +904,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     // Invoke the dynamic change handler: 
                     // TODO: encapsulate in try/catch, catch the exception render in the UI as an error & stop form rendering.
                     const updatedFormInfo = await dynamicChangeHandler(event);
-                    // console.log(`${eventType}: formFieldOnXXX response received: `, updatedFormInfo);
 
                     // If dataChanged is true, update Formik values
                     if (updatedFormInfo?.dataChanged && updatedFormInfo.newFormData) {
@@ -875,7 +923,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     // if layout has changed then we need to re-render.
                     if (updatedFormInfo?.layoutChanged && updatedFormInfo.newLayout) {
                         // setFormViewMetaData({ ...formViewMetaData, layout: updatedFormInfo.newLayout });
-                        // console.log(`Existing form view metadata is: `, formViewMetaData);
 
                         // TODO: this will trigger a useEffect dependent on formViewMetadata that invokes setFormViewLayout, 
                         // TODO: which means that this will not work if custom layout has been injected as a prop.
@@ -891,14 +938,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     },
                                 },
                             };
-                            // console.log(`Updated form view metadata is: `, updatedFormViewMetadata);
                             return updatedFormViewMetadata;
                         });
                     }
                 }
                 else {
                     // TODO: Show an error popup and stop form rendering ideallly...
-                    console.log(`Unable to load dynamic module:`, changeHandler);
+                    console.log(`Unable to load dynamic module: `, changeHandler);
                 }
             }
         }
@@ -908,23 +954,23 @@ const SolidFormView = (params: SolidFormViewProps) => {
             let { type, attrs, body, children } = element;
 
             // const key = attrs?.name ?? generateRandomKey();
-            const key = attrs?.name;
+            const key = attrs?.label;
             let visible = attrs?.visible;
             if (visible === undefined || visible === null) {
                 visible = true;
             }
-            // console.log(`Resolved visibility of form element ${key} to ${visible}`);
-            // console.log(`Form element ${key}: `, attrs);
+            // console.log(`Resolved visibility of form element ${ key } to ${ visible } `);
+            // console.log(`Form element ${ key }: `, attrs);
 
             switch (type) {
                 case "form":
                     if (!children)
                         children = [];
-                    return <div key={key}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData))}</div>;
+                    return <div key={key}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</div>;
                 case "div":
                     if (!children)
                         children = [];
-                    return <div key={key} {...attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData))}</div>
+                    return <div key={key} {...attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</div>
                 case "span":
                     return <span key={key} {...attrs}>{body}</span>
                 case "p":
@@ -936,22 +982,22 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 case "ul":
                     if (!children)
                         children = [];
-                    return <ul key={key} {...attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData))}</ul>
+                    return <ul key={key} {...attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</ul>
                 case "li":
                     return <li key={key} {...attrs}>{body}</li>
                 case "sheet":
-                    return <SolidSheet key={key}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData))}</SolidSheet>;
+                    return <SolidSheet key={key}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</SolidSheet>;
                 case "group":
                     if (visible === true) {
-                        return <SolidGroup key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData))}</SolidGroup>;
+                        return <SolidGroup key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</SolidGroup>;
                     }
                 case "row":
                     if (visible === true) {
-                        return <SolidRow key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData))}</SolidRow>;
+                        return <SolidRow key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</SolidRow>;
                     }
                 case "column":
                     if (visible === true) {
-                        return <SolidColumn key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData))}</SolidColumn>;
+                        return <SolidColumn key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</SolidColumn>;
                     }
                 case "field": {
                     if (visible === true) {
@@ -961,7 +1007,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         // Read only permission if there is no update permission on model and router doesnt contains new
                         const readOnlyPermission = !actionsAllowed.includes(`${updatePermission(params.modelName)}`) && params.id !== "new";
                         return <SolidField
-                            key={key}
+                            key={attrs.name}
                             field={element}
                             formik={formik}
                             fieldMetadata={fieldMetadata}
@@ -980,13 +1026,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
                 case "notebook":
                     if (visible === true) {
-                        return <SolidNotebook key={key}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData))}</SolidNotebook>;
+                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</SolidNotebook>;
                     }
                 case "page":
-                    // console.log(`Resolved visibility of form element ${key} to ${visible}`);
                     if (visible === true) {
+                        const fields = children.flatMap((child: any) => getLayoutFields(child));
                         const pageChildren = children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData));
-                        return SolidPage({ children: pageChildren, attrs: attrs, key: key });
+                        return SolidPage({ children: pageChildren, attrs: attrs, key: key, formik: formik, fields });
                     }
                 case "custom":
                     if (visible === true) {
@@ -1012,7 +1058,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
         };
 
         const renderFormDynamically = (solidFormViewMetaData: any) => {
-            // console.log(`renderFormDynamically invoked....`);
             if (!solidFormViewMetaData) {
                 return;
             }
@@ -1059,7 +1104,16 @@ const SolidFormView = (params: SolidFormViewProps) => {
         if (dynamicHeader) {
             DynamicHeaderComponent = getExtensionComponent(dynamicHeader);
         }
-
+        const customFormComponentEdit = solidView.layout.attrs.customFormComponentEdit;
+        const customFormComponentNew = solidView.layout.attrs.customFormComponentNew;
+        let DynamicFormComponentEdit = null;
+        let DynamicFormComponentNew = null;
+        if (customFormComponentEdit) {
+            DynamicFormComponentEdit = getExtensionComponent(customFormComponentEdit);
+        }
+        if (customFormComponentNew) {
+            DynamicFormComponentNew = getExtensionComponent(customFormComponentNew);
+        }
         return (
             <div className="solid-form-wrapper">
                 <Toast ref={toast} />
@@ -1083,22 +1137,28 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         />
                         <div className="p-4 solid-form-content">
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
-                            {renderFormDynamically(formViewMetaData)}
+                            {params.id === 'new' && DynamicFormComponentNew ? (
+                                <DynamicFormComponentNew params={params} />
+                            ) : params.id !== 'new' && DynamicFormComponentEdit ? (
+                                <DynamicFormComponentEdit params={params} />
+                            ) : (
+                                renderFormDynamically(formViewMetaData)
+                            )}
                         </div>
                     </form>
-                    {params.embeded !== true && isShowChatter === true &&
-                        <Button
-                            icon="pi pi-chevron-right"
-                            size="small"
-                            text
-                            className="chatter-collapse-btn"
-                            style={{ width: 30 }}
-                            onClick={() => setShowChatter(false)}
-                        />
-                    }
                 </div>
                 {params.embeded !== true &&
                     <div className={`chatter-section ${isShowChatter === false ? 'collapsed' : ''}`}>
+                        {isShowChatter === true &&
+                            <Button
+                                icon="pi pi-angle-double-right"
+                                size="small"
+                                text
+                                className="chatter-collapse-btn"
+                                style={{ width: 30, height: 30, aspectRatio: '1/1' }}
+                                onClick={() => setShowChatter(false)}
+                            />
+                        }
                         {isShowChatter === false ?
                             <div className="flex flex-column gap-2 justify-content-center p-2">
                                 <div className="chatter-collapsed-content">

@@ -68,7 +68,7 @@ const Register = () => {
 
       await register(userData);
       } catch (err) {
-        console.log('inside', err);
+        console.log(err);
       } 
     }
   });

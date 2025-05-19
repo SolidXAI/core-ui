@@ -425,7 +425,7 @@ const CreateModel = ({ data, params }: any) => {
             className="relative"
           >
             <TabPanel header="Model"
-              headerClassName={tabErrors[0] ? "tab-error" : ""}>
+              headerClassName={tabErrors[0] ? "tab-error-heading " : ""}>
               <ModelMetaData
                 modelMetaData={modelMetaData}
                 setModelMetaData={setModelMetaData}
@@ -439,7 +439,7 @@ const CreateModel = ({ data, params }: any) => {
               ></ModelMetaData>
             </TabPanel>
             <TabPanel header="Fields"
-              headerClassName={tabErrors[1] ? "tab-error" : ""}>
+              headerClassName={tabErrors[1] ? "tab-error-heading " : ""}>
               <FieldMetaData
                 modelMetaData={modelMetaData}
                 fieldMetaData={fieldMetaData}

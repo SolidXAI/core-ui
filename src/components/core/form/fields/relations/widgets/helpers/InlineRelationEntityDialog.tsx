@@ -9,7 +9,7 @@ export const InlineRelationEntityDialog = ({ visible, setVisible, fieldContext, 
     moduleName: fieldContext.fieldMetadata.relationModelModuleName,
     id: "new",
     embeded: true,
-    layout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
+    customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
     customCreateHandler: (values: any) => {
       setVisible(false);
       onCreate(values);

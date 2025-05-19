@@ -7,8 +7,6 @@ import { SolidMediaListFieldWidgetProps } from '@/types/solid-core';
 import { getExtensionComponent } from '@/helpers/registry';
 
 const SolidMediaMultipleColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidListViewColumnParams) => {
-    console.log("rendered");
-
     // const filterable = column.attrs.filterable;
     const filterable = false;
     const showFilterOperator = false;

@@ -76,7 +76,7 @@ const transformRulesToFilters = (input: any) => {
         if (rule.value && rule.value.length > 0) {
 
             // Ensure rule.value is always an array
-            let values = typeof rule.value[0] === "object" ? rule.value.map((i: any) => i.value) : rule.value;
+            let values = typeof rule.value[0] === "object" ? rule.value.map((i: any) => i?.value ? i?.value : i) : rule?.value;
             if (rule.matchMode !== '$in' && rule.matchMode !== '$notIn' && rule.matchMode !== '$between') {
                 values = values[0];
             }
@@ -572,7 +572,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     const transformFilterRules = (filterRules: any) => {
         const transformedFilter = transformRulesToFilters(filterRules[0]);
-        console.log("transformedFilter from custom filter", transformedFilter);
         setCustomFilter(transformedFilter);
         if (transformedFilter) {
             const finalFilter = mergeSearchAndCustomFilters(transformedFilter, searchFilter, "c_filter", "s_filter");
@@ -598,7 +597,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             handleApplyCustomFilter(finalFilter);
             // }
         }
-    }, [searchChips]);
+    }, [searchChips,hasSearched]);
 
 
     // Saved Filter related 

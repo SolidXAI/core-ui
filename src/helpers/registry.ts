@@ -7,7 +7,7 @@ import { SolidShortTextFieldImageListWidget } from "@/components/core/list/widge
 import { SolidShortTextAvatarWidget } from "@/components/core/list/widgets/SolidShortTextAvatarWidget";
 import GenerateModelCodeRowAction from "@/components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction";
 import GenerateModuleCodeRowAction from "@/components/core/extension/solid-core/moduleMetadata/list/GenerateModuleCodeRowAction";
-import { DefaultBooleanFormEditWidget, SolidBooleanCheckboxStyleFormEditWidget, SolidBooleanSwitchStyleFormEditWidget } from "@/components/core/form/fields/SolidBooleanField";
+import { DefaultBooleanFormEditWidget, DefaultBooleanFormViewWidget, SolidBooleanCheckboxStyleFormEditWidget, SolidBooleanSwitchStyleFormEditWidget } from "@/components/core/form/fields/SolidBooleanField";
 import { DefaultDateFormEditWidget } from "@/components/core/form/fields/SolidDateField";
 import { DefaultDateTimeFormEditWidget } from "@/components/core/form/fields/SolidDateTimeField";
 import { DefaultDecimalFormEditWidget } from "@/components/core/form/fields/SolidDecimalField";
@@ -46,7 +46,6 @@ const extensionRegistry: ExtensionRegistry = {
 };
 
 export const registerExtensionComponent = (name: string, component: React.ComponentType<any>, aliases: string[] = []) => {
-    // console.log(`registerExtensionComponent invoked... ${name}`);
     extensionRegistry.components[name] = component;
     for (let i = 0; i < aliases.length; i++) {
         const alias = aliases[i];
@@ -55,7 +54,6 @@ export const registerExtensionComponent = (name: string, component: React.Compon
 };
 
 export const registerExtensionFunction = (name: string, fn: (...args: any[]) => any) => {
-    // console.log(`registerExtensionFunction invoked... ${name}`);
     extensionRegistry.functions[name] = fn;
 };
 
@@ -86,7 +84,6 @@ export const getExtensionComponent = (name: string): React.ComponentType<any> | 
 };
 
 export const getExtensionFunction = (name: string) => {
-    // console.log(`Registry state: `, extensionRegistry);
     return extensionRegistry.functions[name];
 };
 
@@ -140,6 +137,7 @@ registerExtensionComponent("DefaultJsonFormViewWidget", DefaultJsonFormViewWidge
 registerExtensionComponent("DefaultRelationManyToOneFormViewWidget", DefaultRelationManyToOneFormViewWidget, []);
 registerExtensionComponent("DefaultSelectionStaticFormViewWidget", DefaultSelectionStaticFormViewWidget, []);
 registerExtensionComponent("DefaultSelectionDynamicFormViewWidget", DefaultSelectionDynamicFormViewWidget, []);
+registerExtensionComponent("DefaultBooleanFormViewWidget", DefaultBooleanFormViewWidget, []);
 
 // Formview Custom view widgets
 registerExtensionComponent("SolidRelationFieldAvatarFormWidget", SolidRelationFieldAvatarFormWidget, []);

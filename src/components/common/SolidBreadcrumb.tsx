@@ -48,7 +48,6 @@ export const SolidBreadcrumb = (props: Props) => {
   useEffect(() => {
     if (typeof window !== "undefined") {
       const storedView = sessionStorage.getItem("fromView");
-      console.log("📌 fromView loaded from sessionStorage:", storedView);
       if (storedView === "list" || storedView === "kanban") {
         setFromView(storedView);
       }

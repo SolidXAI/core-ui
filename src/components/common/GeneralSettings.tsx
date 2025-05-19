@@ -10,6 +10,7 @@ import { InputSwitch } from 'primereact/inputswitch';
 import { RadioButton } from 'primereact/radiobutton';
 import { handleError } from '@/helpers/ToastContainer';
 import { usePathname } from 'next/navigation';
+import { InputTextarea } from 'primereact/inputtextarea';
 
 export const GeneralSettings = () => {
     const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery()
@@ -38,11 +39,15 @@ export const GeneralSettings = () => {
         shouldQueueSms: solidSettingsData?.data?.shouldQueueSms || false,
         authPagesTheme: solidSettingsData?.data?.authPagesTheme || "light",
         authPagesLayout: solidSettingsData?.data?.authPagesLayout || "center",
+        defaultRole: solidSettingsData?.data?.defaultRole || "Admin",
+        appLogoPosition: solidSettingsData?.data?.appLogoPosition || "in_form_view",
+        showAuthContent: solidSettingsData?.data?.showAuthContent || false,
+        appTitle: solidSettingsData?.data?.appTitle || "SolidX",
+        appSubtitle: solidSettingsData?.data?.appSubtitle || "Welcome To",
+        appDescription: solidSettingsData?.data?.appDescription || "appDescription",
+        showLegalLinks: solidSettingsData?.data?.showLegalLinks || false,
         appTnc: solidSettingsData?.data?.appTnc || "",
         appPrivacyPolicy: solidSettingsData?.data?.appPrivacyPolicy || "",
-        defaultRole: solidSettingsData?.data?.defaultRole || "Admin",
-        appTitle: solidSettingsData?.data?.appTitle || "SolidX",
-        appDescription: solidSettingsData?.data?.appDescription || "appDescription",
     };
     const formik = useFormik({
         initialValues: initialValues,
@@ -65,7 +70,7 @@ export const GeneralSettings = () => {
                         updatedSettings[key] = value;
                     }
                 });
-                
+
                 if (Object.keys(updatedSettings).length === 0) {
                     showToast("success", "No Changes", "No settings were updated");
                     return;
@@ -95,6 +100,12 @@ export const GeneralSettings = () => {
 
     }, [pathname])
 
+    const positionMap: Record<'left' | 'center' | 'right', string> = {
+        left: 'The form will appear on the left side of the screen, while the banner will be positioned on the right side.',
+        center: 'The form will be centered in the middle of the screen for balanced alignment.',
+        right: 'The form will appear on the right side of the screen, and the banner will be positioned on the left side.'
+    };
+
     return (
         <div className="page-parent-wrapper">
             <Toast ref={toast} />
@@ -120,26 +131,57 @@ export const GeneralSettings = () => {
                                                         <div className="col-5">
                                                             <label className="form-field-label">App Logo</label>
                                                         </div>
-                                                        {/* <div className="col-7">
-                                                <InputText
-                                                    type="text"
-                                                    id="appTitle"
-                                                    name="appTitle"
-                                                    onChange={formik.handleChange}
-                                                    value={formik.values.appTitle}
-                                                />
-                                            </div> */}
                                                     </div>
                                                 </div>
                                             </div>
                                         </div>
                                     </div>
+                                    <p className='font-bold mt-4' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>App Logo Position</p>
+                                    <div className='formgrid grid'>
+                                        <div className='col-8'>
+                                            <div className="flex align-items-center gap-3">
+                                                <div className="flex align-items-center">
+                                                    <RadioButton
+                                                        inputId="appLogoPosition-in_form_view"
+                                                        name="appLogoPosition"
+                                                        value="in_form_view"
+                                                        checked={formik.values.appLogoPosition === "in_form_view"}
+                                                        onChange={(e) => formik.setFieldValue("appLogoPosition", e.value)}
+                                                    />
+                                                    <label htmlFor="appLogoPosition-in_form_view" className="ml-2">In Form View</label>
+                                                </div>
+                                                <div className="flex align-items-center">
+                                                    <RadioButton
+                                                        inputId="appLogoPosition-in_image_view"
+                                                        name="appLogoPosition"
+                                                        value="in_image_view"
+                                                        checked={formik.values.appLogoPosition === "in_image_view"}
+                                                        onChange={(e) => formik.setFieldValue("appLogoPosition", e.value)}
+                                                    />
+                                                    <label htmlFor="appLogoPosition-in_image_view" className="ml-2">In Image View</label>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div className='mt-4' style={{ borderBottom: '1px dashed #D8E2EA' }}></div>
-
                                     <p className='font-bold mt-4' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Title & Description Details </p>
                                     <div className='formgrid grid'>
                                         <div className='col-8'>
                                             <div className="formgrid grid">
+                                                <div className="col-6">
+                                                    <div className="formgrid grid align-items-center">
+                                                        <div className="col-5">
+                                                            <label className="form-field-label">Show Details on Authentication Screen</label>
+                                                        </div>
+                                                        <div className="col-7">
+                                                            <InputSwitch
+                                                                name="showAuthContent"
+                                                                checked={formik.values.showAuthContent}
+                                                                onChange={(e) => formik.setFieldValue("showAuthContent", e.value)}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
                                                 <div className="col-6">
                                                     <div className="formgrid grid align-items-center">
                                                         <div className="col-5">
@@ -152,22 +194,41 @@ export const GeneralSettings = () => {
                                                                 name="appTitle"
                                                                 onChange={formik.handleChange}
                                                                 value={formik.values.appTitle}
+                                                                className='w-full'
                                                             />
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-6">
+                                                <div className="col-6 mt-4">
                                                     <div className="formgrid grid align-items-center">
                                                         <div className="col-5">
-                                                            <label className="form-field-label">Description</label>
+                                                            <label className="form-field-label">App Subtitle</label>
                                                         </div>
                                                         <div className="col-7">
                                                             <InputText
                                                                 type="text"
+                                                                id="appSubtitle"
+                                                                name="appSubtitle"
+                                                                onChange={formik.handleChange}
+                                                                value={formik.values.appSubtitle}
+                                                                className='w-full'
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-6 mt-4">
+                                                    <div className="formgrid grid align-items-start">
+                                                        <div className="col-5">
+                                                            <label className="form-field-label">Description</label>
+                                                        </div>
+                                                        <div className="col-7">
+                                                            <InputTextarea
+                                                                rows={3}
                                                                 id="appDescription"
                                                                 name="appDescription"
                                                                 onChange={formik.handleChange}
                                                                 value={formik.values.appDescription}
+                                                                className='w-full'
                                                             />
                                                         </div>
                                                     </div>
@@ -177,11 +238,25 @@ export const GeneralSettings = () => {
                                     </div>
                                     <div className='mt-4' style={{ borderBottom: '1px dashed #D8E2EA' }}></div>
 
-                                    <p className='font-bold mt-4' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Policies Links </p>
+                                    <p className='font-bold mt-4' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Legal Links</p>
                                     <div className='formgrid grid'>
                                         <div className='col-8'>
                                             <div className="formgrid grid">
-                                                <div className="col-6 mt-3">
+                                                <div className="col-6">
+                                                    <div className="formgrid grid align-items-center">
+                                                        <div className="col-5">
+                                                            <label className="form-field-label">Show Legal Links</label>
+                                                        </div>
+                                                        <div className="col-7">
+                                                            <InputSwitch
+                                                                name="showLegalLinks"
+                                                                checked={formik.values.showLegalLinks}
+                                                                onChange={(e) => formik.setFieldValue("showLegalLinks", e.value)}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-6">
                                                     <div className="formgrid grid align-items-center">
                                                         <div className="col-5">
                                                             <label className="form-field-label">Terms and Conditions Link</label>
@@ -193,6 +268,7 @@ export const GeneralSettings = () => {
                                                                 name="appTnc"
                                                                 onChange={formik.handleChange}
                                                                 value={formik.values.appTnc}
+                                                                className='w-full'
                                                             />
                                                         </div>
                                                     </div>
@@ -209,6 +285,7 @@ export const GeneralSettings = () => {
                                                                 name="appPrivacyPolicy"
                                                                 onChange={formik.handleChange}
                                                                 value={formik.values.appPrivacyPolicy}
+                                                                className='w-full'
                                                             />
                                                         </div>
                                                     </div>
@@ -333,6 +410,7 @@ export const GeneralSettings = () => {
                                                     <label htmlFor="authPagesLayout-right" className="ml-2">Right</label>
                                                 </div>
                                             </div>
+                                            <p className="mt-3 text-sm font-bold">Note : {positionMap[formik.values.authPagesLayout as 'left' | 'center' | 'right']}</p>
                                         </div>
                                     </div>
                                     <div className='mt-4' style={{ borderBottom: '1px dashed #D8E2EA' }}></div>
