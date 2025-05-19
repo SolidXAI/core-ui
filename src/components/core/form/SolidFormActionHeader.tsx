@@ -9,6 +9,8 @@ import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { useEffect, useRef, useState } from "react";
+import { SolidFormViewNormalHeaderButton } from "./SolidFormViewNormalHeaderButton";
+import { SolidFormViewContextMenuHeaderButton } from "./SolidFormViewContextMenuHeaderButton";
 
 export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode }: any) => {
     const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
@@ -104,25 +106,15 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                         />
                         {contextMenuHeaderButtons.map((button: any, index: number) => {
                             return (
-                                <Button
-                                    text
-                                    type="button"
-                                    className="w-full text-left gap-2"
-                                    label={button.attrs.label}
-                                    size="small"
-                                    iconPos="left"
-                                    severity="contrast"
-                                    icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
-                                    onClick={() => {
-                                        const event = {
-                                            action: button.attrs.action,
-                                            params,
-                                            formik,
-                                            solidFormViewMetaData: solidFormViewMetaData.data
-                                        }
-                                        handleCustomButtonClick(button.attrs, event)
-                                    }}
+                                <SolidFormViewContextMenuHeaderButton
+                                    key={index}
+                                    button={button}
+                                    params={params}
+                                    formik={formik}
+                                    solidFormViewMetaData={solidFormViewMetaData}
+                                    handleCustomButtonClick={handleCustomButtonClick}
                                 />
+
                             )
                         })
                         }
@@ -145,25 +137,34 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                         <div className="gap-3 flex">
                             {normalHeaderButtons.map((button: any, index: number) => {
                                 return (
-                                    <Button
-                                        text
-                                        type="button"
-                                        className="w-full text-left gap-2"
-                                        label={button.attrs.label}
-                                        size="small"
-                                        iconPos="left"
-                                        severity="contrast"
-                                        icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
-                                        onClick={() => {
-                                            const event = {
-                                                action: button.attrs.action,
-                                                params,
-                                                formik,
-                                                solidFormViewMetaData: solidFormViewMetaData.data
-                                            }
-                                            handleCustomButtonClick(button.attrs, event)
-                                        }}
+                                    // <Button
+                                    //     text
+                                    //     type="button"
+                                    //     className="w-full text-left gap-2"
+                                    //     label={button.attrs.label}
+                                    //     size="small"
+                                    //     iconPos="left"
+                                    //     severity="contrast"
+                                    //     icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                                    //     onClick={() => {
+                                    //         const event = {
+                                    //             action: button.attrs.action,
+                                    //             params,
+                                    //             formik,
+                                    //             solidFormViewMetaData: solidFormViewMetaData.data
+                                    //         }
+                                    //         handleCustomButtonClick(button.attrs, event)
+                                    //     }}
+                                    // />
+                                    <SolidFormViewNormalHeaderButton
+                                        key={index}
+                                        button={button}
+                                        params={params}
+                                        formik={formik}
+                                        solidFormViewMetaData={solidFormViewMetaData}
+                                        handleCustomButtonClick={handleCustomButtonClick}
                                     />
+
                                 )
                             })
                             }
@@ -214,24 +215,32 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                         <div className="gap-3 flex">
                             {normalHeaderButtons.map((button: any, index: number) => {
                                 return (
-                                    <Button
-                                        text
-                                        type="button"
-                                        className="w-full text-left gap-2"
-                                        label={button.attrs.label}
-                                        size="small"
-                                        iconPos="left"
-                                        severity="contrast"
-                                        icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
-                                        onClick={() => {
-                                            const event = {
-                                                action: button.attrs.action,
-                                                params,
-                                                formik,
-                                                solidFormViewMetaData: solidFormViewMetaData.data
-                                            }
-                                            handleCustomButtonClick(button.attrs, event)
-                                        }}
+                                    // <Button
+                                    //     text
+                                    //     type="button"
+                                    //     className="w-full text-left gap-2"
+                                    //     label={button.attrs.label}
+                                    //     size="small"
+                                    //     iconPos="left"
+                                    //     severity="contrast"
+                                    //     icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                                    //     onClick={() => {
+                                    //         const event = {
+                                    //             action: button.attrs.action,
+                                    //             params,
+                                    //             formik,
+                                    //             solidFormViewMetaData: solidFormViewMetaData.data
+                                    //         }
+                                    //         handleCustomButtonClick(button.attrs, event)
+                                    //     }}
+                                    // />
+                                    <SolidFormViewNormalHeaderButton
+                                        key={index}
+                                        button={button}
+                                        params={params}
+                                        formik={formik}
+                                        solidFormViewMetaData={solidFormViewMetaData}
+                                        handleCustomButtonClick={handleCustomButtonClick}
                                     />
                                 )
                             })
