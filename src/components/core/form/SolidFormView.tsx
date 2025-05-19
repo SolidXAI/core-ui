@@ -52,6 +52,8 @@ import "yet-another-react-lightbox/plugins/counter.css";
 import { SolidChatter } from "../chatter/SolidChatter";
 import { SolidFormActionHeader } from "./SolidFormActionHeader";
 import { SolidFormViewShimmerLoading } from "./SolidFormViewShimmerLoading";
+import { useSelector } from "react-redux";
+import { hasAnyRole } from "@/helpers/rolesHelper";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -391,6 +393,7 @@ const SolidPage = ({ attrs, children, key, formik, fields }: any) => {
 // };
 
 const SolidFormView = (params: SolidFormViewProps) => {
+    const { user } = useSelector((state: any) => state.auth);
     const pathname = usePathname();
     const router = useRouter();
     const toast = useRef<Toast>(null);
@@ -961,6 +964,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
             // console.log(`Resolved visibility of form element ${ key } to ${ visible } `);
             // console.log(`Form element ${ key }: `, attrs);
+            const visibleToRole = attrs.roles || [];
+
+            if (visibleToRole.length > 0) {
+                if (!hasAnyRole(user?.user?.roles, visibleToRole)) {
+                return <></>
+                }
+            }
 
             switch (type) {
                 case "form":
@@ -1074,7 +1084,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
 
             const updatedLayout = [formViewLayout];
-
             const dynamicForm = updatedLayout.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData));
 
             return dynamicForm;
