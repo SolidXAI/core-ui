@@ -1,0 +1,42 @@
+.exportCustomProgressbar{
+    height: 2px !important;
+    margin-top: 5px !important;
+}
+.pExportText{
+    color:  var(--auth-subtitle-color) !important;
+    font-size: 14px !important;
+}
+.exportDialog {
+    width: 1000px !important;
+    height: 700px !important;
+    padding:0 !important;
+    margin:0 !important;
+}
+.solidExportControls{
+    display: flex;
+    justify-content: flex-end;
+    margin: 0px 10px !important;
+}
+.exportCancelButton{
+    background-color: var(--primary-color) !important;
+    border: 1px solid  var(--primary-color)  !important;
+    border-radius: 12px;
+}
+.ExportItemWrapper {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 4px 0;
+  }
+  
+.ExportDropdownText {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 8px;
+ }
+.ExportDropdownIcon {
+    flex-shrink: 0;
+    cursor: pointer;
+}

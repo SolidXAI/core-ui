@@ -1,16 +1,17 @@
 "use client";
 import { useFormik } from "formik";
+import styles from './SolidExport.module.css'
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
-import { useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { Dropdown } from "primereact/dropdown";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
-import { useCreateExportTemplateMutation, useGetExportTemplatesQuery } from "@/redux/api/exportTemplateApi";
+import { useCreateExportTemplateMutation, useDeleteExportTemplateMutation, useGetExportTemplatesQuery } from "@/redux/api/exportTemplateApi";
 import { downloadFileWithProgress } from "../../helpers/downloadFileWithProgress";
 import { DownloadProgressToast } from "./DownloadProgressToast";
-import { SolidExportStepper } from "./SolidExportStepper";
+
 interface FieldMetadata {
   displayName: string;
 }
@@ -62,6 +63,7 @@ export const SolidExport = ({ listViewMetaData }: any) => {
   );
 
   const [createExportTemplate] = useCreateExportTemplateMutation();
+  const [deleteExportTemplate] = useDeleteExportTemplateMutation();
   const { data: templatesData } = useGetExportTemplatesQuery({});
   const formik = useFormik({
     initialValues: {
@@ -124,9 +126,25 @@ export const SolidExport = ({ listViewMetaData }: any) => {
       name: "Excel",
       code: "excel",
       icon: (
-        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" xmlns="http://www.w3.org/2000/svg">
-        <path fill-rule="evenodd" clip-rule="evenodd" d="M9.29289 1.29289C9.48043 1.10536 9.73478 1 10 1H18C19.6569 1 21 2.34315 21 4V9C21 9.55228 20.5523 10 20 10C19.4477 10 19 9.55228 19 9V4C19 3.44772 18.5523 3 18 3H11V8C11 8.55228 10.5523 9 10 9H5V20C5 20.5523 5.44772 21 6 21H7C7.55228 21 8 21.4477 8 22C8 22.5523 7.55228 23 7 23H6C4.34315 23 3 21.6569 3 20V8C3 7.73478 3.10536 7.48043 3.29289 7.29289L9.29289 1.29289ZM6.41421 7H9V4.41421L6.41421 7ZM19 12C19.5523 12 20 12.4477 20 13V19H23C23.5523 19 24 19.4477 24 20C24 20.5523 23.5523 21 23 21H19C18.4477 21 18 20.5523 18 20V13C18 12.4477 18.4477 12 19 12ZM11.8137 12.4188C11.4927 11.9693 10.8682 11.8653 10.4188 12.1863C9.96935 12.5073 9.86526 13.1318 10.1863 13.5812L12.2711 16.5L10.1863 19.4188C9.86526 19.8682 9.96935 20.4927 10.4188 20.8137C10.8682 21.1347 11.4927 21.0307 11.8137 20.5812L13.5 18.2205L15.1863 20.5812C15.5073 21.0307 16.1318 21.1347 16.5812 20.8137C17.0307 20.4927 17.1347 19.8682 16.8137 19.4188L14.7289 16.5L16.8137 13.5812C17.1347 13.1318 17.0307 12.5073 16.5812 12.1863C16.1318 11.8653 15.5073 11.9693 15.1863 12.4188L13.5 14.7795L11.8137 12.4188Z" fill="#000000"/>
-        </svg>
+      <svg version="1.1" id="Layer_1" x="0px" y="0px"
+      fill="#000000"	 viewBox="0 0 512 512"  width="16" height="16">
+      <g>
+        <g>
+          <g>
+            <path d="M447.168,134.56c-0.535-1.288-1.318-2.459-2.304-3.445l-128-128c-2.003-1.988-4.709-3.107-7.531-3.115H74.667
+              C68.776,0,64,4.776,64,10.667v490.667C64,507.224,68.776,512,74.667,512h362.667c5.891,0,10.667-4.776,10.667-10.667V138.667
+              C447.997,137.256,447.714,135.86,447.168,134.56z M320,36.416L411.584,128H320V36.416z M426.667,490.667H85.333V21.333h213.333
+              v117.333c0,5.891,4.776,10.667,10.667,10.667h117.333V490.667z"/>
+            <path d="M128,181.333v256c0,5.891,4.776,10.667,10.667,10.667h234.667c5.891,0,10.667-4.776,10.667-10.667v-256
+              c0-5.891-4.776-10.667-10.667-10.667H138.667C132.776,170.667,128,175.442,128,181.333z M320,192h42.667v42.667H320V192z
+              M320,256h42.667v42.667H320V256z M320,320h42.667v42.667H320V320z M320,384h42.667v42.667H320V384z M213.333,192h85.333v42.667
+              h-85.333V192z M213.333,256h85.333v42.667h-85.333V256z M213.333,320h85.333v42.667h-85.333V320z M213.333,384h85.333v42.667
+              h-85.333V384z M149.333,192H192v42.667h-42.667V192z M149.333,256H192v42.667h-42.667V256z M149.333,320H192v42.667h-42.667V320z
+              M149.333,384H192v42.667h-42.667V384z"/>
+          </g>
+        </g>
+      </g>
+      </svg>
       ),
     },
   ]);
@@ -295,7 +313,7 @@ export const SolidExport = ({ listViewMetaData }: any) => {
         />
         <Button
           label="Cancel"
-          className="e-cancel rounded"
+          className={styles.exportCancelButton}
           onClick={() => {
             setNewTemplateName("");
             setIsDialogVisible(false);
@@ -303,48 +321,78 @@ export const SolidExport = ({ listViewMetaData }: any) => {
         />
       </div>
     );
+    const handleDeleteTemplate = async(id: string) => {
+      console.log("Delete template with ID:", id);
+      // Optional: Confirm deletion
+      // Delete from state or trigger backend deletion
+      const response = await deleteExportTemplate(id).unwrap();
+      setTemplateOptions((prev) => prev.filter((template) => template.code !== id));
+      console.log(response)
+      toast?.current?.show({
+        severity: "success",
+        summary: "Template Deleted",
+        detail: "Template Deleted",
+      });
+    };
+    const itemTemplate = (option: TemplateOption) => {
+      return (
+        <div className={styles.ExportItemWrapper}>
+          <span className={styles.ExportDropdownText}>{option.name}</span>
+          <svg width="16px" height="16px" viewBox="0 0 24 24" fill="none" className={styles.ExportDropdownIcon} onClick={(e) => {
+              e.stopPropagation(); // Prevent triggering selection
+              handleDeleteTemplate(option.code);
+            }}
+           xmlns="http://www.w3.org/2000/svg">
+            <path d="M7 4a2 2 0 0 1 2-2h6a2 2 0 0 1 2 2v2h4a1 1 0 1 1 0 2h-1.069l-.867 12.142A2 2 0 0 1 17.069 22H6.93a2 2 0 0 1-1.995-1.858L4.07 8H3a1 1 0 0 1 0-2h4V4zm2 2h6V4H9v2zM6.074 8l.857 12H17.07l.857-12H6.074zM10 10a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1zm4 0a1 1 0 0 1 1 1v6a1 1 0 1 1-2 0v-6a1 1 0 0 1 1-1z" 
+            fill="#ff3d32"/></svg>
+        </div>
+      );
+    };
+    
   return (
     <>
       <Toast ref={toast} />
-      <div className="flex align-items-center justify-content-between m-0 p-0">
-      <SolidExportStepper
+      {/*<div className="flex align-items-center justify-content-between m-0 p-0">
+       <SolidExportStepper
        solidFormViewWorkflowData={steps}
        activeValue={currentStepValue}
        setActiveValue={setCurrentStepValue} />
-      </div>
-
-      <div className="p-3">
-      {/*if click on export button then export view visible and if clicked on summary then summary view custom tab  */}
+      </div> */}
+      <div className="p-1">
       { currentStepValue === 'export' && 
             <>
-            <div className="solid-export-controls gap-2">
-              <Dropdown
-                value={selectedFormat}
-                onChange={(e) => setSelectedFormat(e.value)}
-                options={formatOptions}
-                optionLabel="name"
-                placeholder="Format .."
-                className="p-dropdown p-outlined"
-                
-                // 👇 Render icon + text for dropdown list options
-                itemTemplate={(option) => (
+            <div className={`${styles.solidExportControls} gap-2`}>
+            <Dropdown
+              value={selectedFormat}
+              onChange={(e) => setSelectedFormat(e.value)}
+              options={formatOptions}
+              optionLabel="name"
+              placeholder="Format ..."
+              className="p-dropdown p-outlined"
+
+              // 👇 Render icon + text for dropdown list options
+              itemTemplate={(option) => {
+                const isSelected = selectedFormat?.code === option.code;
+                const iconColor = isSelected ? "#722ED1" : "#000000"; // Blue for selected
+                return (
                   <div className="flex items-center gap-2">
-                    {option.icon}
+                    {React.cloneElement(option.icon, { fill: iconColor })}
                     <span>{option.name}</span>
                   </div>
-                )}
+                );
+              }}
 
-                // 👇 Render icon + text for selected value display
-                valueTemplate={(option) => {
-                  if (!option) return "Format ..";
-                  return (
-                    <div className="flex items-center gap-2">
-                      {option.icon}
-                      <span>{option.name}</span>
-                    </div>
-                  );
-                }}
-              />
+              // 👇 Render icon + text for selected value display
+              valueTemplate={(option) => {
+                if (!option) return "Format ...";
+                return (
+                  <div className="flex items-center gap-2">
+                    {React.cloneElement(option.icon, { fill: "#722ED1" })}
+                    <span>{option.name}</span>
+                  </div>
+                );
+              }}
+            />
               <Dropdown
                 value={selectedTemplate}
                 onChange={(e) => handleTemplateChange(e)}
@@ -352,6 +400,7 @@ export const SolidExport = ({ listViewMetaData }: any) => {
                 optionLabel="name"
                 placeholder="Template"
                 className="p-dropdown"
+                itemTemplate={itemTemplate}
                 panelFooterTemplate={panelFooterTemplate}
               />
               <Button 
@@ -410,11 +459,11 @@ export const SolidExport = ({ listViewMetaData }: any) => {
             </div>
             </>
           }
-          {currentStepValue === 'summary' && (
+          {/* {currentStepValue === 'summary' && (
                 <p className="m-0">
                 Relations and Media Fields are not supported for Export.
                 </p>
-          )}
+          )} */}
         </div>
         <DownloadProgressToast
         visible={showProgress}
