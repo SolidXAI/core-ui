@@ -43,7 +43,13 @@ export const exportTemplateApi = createApi({
                 body: templateData
             }),
         }),
+         deleteExportTemplate: builder.mutation({
+            query: (id) => ({
+                url: `/export-template/${id}`,
+                method: 'DELETE',
+            }),
+        }),
     })
 })
 
-export const { useCreateExportTemplateMutation,useGetExportTemplatesQuery,useCreateExportSyncMutation,useCreateExportAsyncMutation } = exportTemplateApi
+export const { useCreateExportTemplateMutation,useGetExportTemplatesQuery,useCreateExportSyncMutation,useCreateExportAsyncMutation,useDeleteExportTemplateMutation } = exportTemplateApi

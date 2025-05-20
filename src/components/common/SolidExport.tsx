@@ -322,12 +322,9 @@ export const SolidExport = ({ listViewMetaData }: any) => {
       </div>
     );
     const handleDeleteTemplate = async(id: string) => {
-      console.log("Delete template with ID:", id);
-      // Optional: Confirm deletion
-      // Delete from state or trigger backend deletion
       const response = await deleteExportTemplate(id).unwrap();
       setTemplateOptions((prev) => prev.filter((template) => template.code !== id));
-      console.log(response)
+      setAddedTemplates((prev) => prev.filter((template) => template.code !== id));
       toast?.current?.show({
         severity: "success",
         summary: "Template Deleted",
@@ -338,7 +335,7 @@ export const SolidExport = ({ listViewMetaData }: any) => {
       return (
         <div className={styles.ExportItemWrapper}>
           <span className={styles.ExportDropdownText}>{option.name}</span>
-          <svg width="16px" height="16px" viewBox="0 0 24 24" fill="none" className={styles.ExportDropdownIcon} onClick={(e) => {
+          <svg width="16px" height="16px" viewBox="0 0 24 24" fill="none" style={{right:0}} className={styles.ExportDropdownIcon} onClick={(e) => {
               e.stopPropagation(); // Prevent triggering selection
               handleDeleteTemplate(option.code);
             }}
@@ -358,7 +355,7 @@ export const SolidExport = ({ listViewMetaData }: any) => {
        activeValue={currentStepValue}
        setActiveValue={setCurrentStepValue} />
       </div> */}
-      <div className="p-1">
+      <div className="p-3">
       { currentStepValue === 'export' && 
             <>
             <div className={`${styles.solidExportControls} gap-2`}>
