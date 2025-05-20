@@ -380,6 +380,7 @@ export { addCommasToAmount, calculateDaysOfStay, getSingularAndPlural } from '@/
 // export * from '@/helpers/menu';
 export { createPermission, deletePermission, updatePermission } from '@/helpers/permissions';
 export { revalidateTag } from '@/helpers/revalidate';
+export { useHasAllRoles, useHasAnyRole, hasAnyRole } from '@/helpers/rolesHelper';
 export { registerExtensionComponent, registerExtensionFunction } from '@/helpers/registry';
 
 // redux
@@ -457,7 +458,7 @@ export { solidChatterMessageApi, useGetchatterMessageQuery, useLazyGetchatterMes
 export {
     roleApi, useGetrolesQuery, useGetroleByIdQuery, useCreateroleMutation, useLazyGetrolesQuery, useUpdateroleMutation, useDeleteroleMutation
 } from '@/redux/api/roleApi'
-export {exportTemplateApi , useCreateExportTemplateMutation, useGetExportTemplatesQuery,useCreateExportSyncMutation,useCreateExportAsyncMutation} from '@/redux/api/exportTemplateApi';
+export { exportTemplateApi, useCreateExportTemplateMutation, useGetExportTemplatesQuery, useCreateExportSyncMutation, useCreateExportAsyncMutation } from '@/redux/api/exportTemplateApi';
 export { solidActionsApi, useCreateSolidActionMutation, useDeleteMultipleSolidActionsMutation, useDeleteSolidActionMutation, useGetSolidActionByIdQuery, useGetSolidActionsQuery, useLazyGetSolidActionByIdQuery, useLazyGetSolidActionsQuery, useUpdateSolidActionMutation } from '@/redux/api/solidActionApi';
 // export * from '@/redux/api/solidCountryApi';
 export { createSolidEntityApi } from '@/redux/api/solidEntityApi';
