@@ -255,6 +255,8 @@ export { SolidRelationManyToManyField } from '@/components/core/form/fields/rela
 export { SolidRelationManyToOneField } from '@/components/core/form/fields/relations/SolidRelationManyToOneField';
 export { SolidRelationOneToManyField } from '@/components/core/form/fields/relations/SolidRelationOneToManyField';
 
+export { SolidChatter } from '@/components/core/chatter/SolidChatter';
+
 // export * from '@/components/core/kanban/KanbanBoard';
 // export * from '@/components/core/kanban/KanbanCard';
 // export * from '@/components/core/kanban/KanbanColumn';
