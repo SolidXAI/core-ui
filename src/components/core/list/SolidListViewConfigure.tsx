@@ -12,6 +12,7 @@ import { useEffect, useRef, useState } from "react";
 import { SolidListColumnSelector } from "./SolidListColumnSelector";
 import { SolidExport } from "@/components/common/SolidExport";
 import { Dialog } from "primereact/dialog";
+import { SolidImport } from "@/components/common/SolidImport";
 
 export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, params, actionsAllowed, selectedRecords, setDialogVisible, setShowSaveFilterPopup }: any) => {
     // const [visible, setVisible] = useState<boolean>(false);
@@ -22,6 +23,7 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
     const router = useRouter();
     const [view, setView] = useState<string>("");
     const [exportView, setExportView] = useState<boolean>(false);
+    const [importView, setImportView] = useState<boolean>(false);
 
     const handleViewChange = (newView: string) => {
         if (view === newView) return; // Prevent unnecessary updates
@@ -75,6 +77,10 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
             <Dialog header="Export" visible={exportView} className="export-dialog" onHide={() => { if (!exportView) return; setExportView(false); }}>
             <SolidExport listViewMetaData={listViewMetaData}/>
             </Dialog>
+            <Dialog header="Import" visible={importView} className="export-dialog" onHide={() => { if (!importView) return; setImportView(false); }}>
+            <SolidImport listViewMetaData={listViewMetaData}/>
+            </Dialog>
+
             <OverlayPanel ref={exportRef} className="listview-export-panel">
              
             </OverlayPanel>
@@ -93,7 +99,8 @@ export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, show
                                 icon={'pi pi-trash'}
                                 onClick={() => setDialogVisible(true)}
                             />}
-                        <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2 text-base" />
+                        <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2 text-base" 
+                        onClick={() => { setImportView((importView) => !importView); }}/>
                         <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base"  
                          // @ts-ignore
                         onClick={() => { setExportView((exportView) => !exportView); }}/>
