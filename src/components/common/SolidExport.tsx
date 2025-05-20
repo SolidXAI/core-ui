@@ -64,7 +64,7 @@ export const SolidExport = ({ listViewMetaData }: any) => {
 
   const [createExportTemplate] = useCreateExportTemplateMutation();
   const [deleteExportTemplate] = useDeleteExportTemplateMutation();
-  const { data: templatesData } = useGetExportTemplatesQuery({});
+  const { data: templatesData} = useGetExportTemplatesQuery({});
   const formik = useFormik({
     initialValues: {
       selectedColumns: allColumns.filter((col) => checkedFieldNames.has(col.key)),
@@ -89,7 +89,6 @@ export const SolidExport = ({ listViewMetaData }: any) => {
   const [selectedTemplate, setSelectedTemplate] = useState<TemplateOption | null>(null);
   const [selectedFormat, setSelectedFormat] = useState<FormatOption | null>(null);
   const [templateOptions, setTemplateOptions] = useState<TemplateOption[]>([]);
-  const [addedTemplates, setAddedTemplates] = useState<TemplateOption[]>([]);
   //loading hardcode format
   const [formatOptions, setFormatOptions] = useState<FormatOption[]>([
     {
@@ -165,13 +164,13 @@ export const SolidExport = ({ listViewMetaData }: any) => {
         fields:template.fields,
         templateFormat:template.templateFormat
       }));
-      setTemplateOptions([...templates, ...addedTemplates]);
+      setTemplateOptions([...templates]);
     }
-  }, [templatesData, addedTemplates]);
+  }, [templatesData]);
   
     const handleAddTemplate = async() => {
       const tname = newTemplateName.trim();
-      if (tname) {
+      if (tname && selectedFormat) {
         setNewTemplateName(""); 
         setIsDialogVisible(false); 
         let customSelectedFields = selectedColumns.map((col) => col.key);
@@ -183,6 +182,7 @@ export const SolidExport = ({ listViewMetaData }: any) => {
           fields:fieldsData,
           modelMetadataId: solidView?.model?.id,
         };
+
         try {
           const response = await createExportTemplate(exportData).unwrap();
           toast?.current?.show({
@@ -196,12 +196,20 @@ export const SolidExport = ({ listViewMetaData }: any) => {
             fields: customSelectedFields,
             templateFormat: selectedFormat?.code || "",
           };
-          setAddedTemplates((prev) => [...prev, newAddedTemplate]);
+          setTemplateOptions((prev) => [...prev, newAddedTemplate]);
+          // ✅ Select the newly added template
           setSelectedTemplate(newAddedTemplate);
+          // ✅ Re-assign the selected format from options list
           setSelectedFormat(formatOptions.find((format) => format.code === selectedFormat?.code) || null);
         } catch (err) {
           console.error('Failed to create template:', err);
         }
+      }else{
+        toast?.current?.show({
+        severity: "error",
+        summary: "Please Select Format",
+        detail: "Please Select Format",
+      });
       }
     };
 
@@ -324,7 +332,6 @@ export const SolidExport = ({ listViewMetaData }: any) => {
     const handleDeleteTemplate = async(id: string) => {
       const response = await deleteExportTemplate(id).unwrap();
       setTemplateOptions((prev) => prev.filter((template) => template.code !== id));
-      setAddedTemplates((prev) => prev.filter((template) => template.code !== id));
       toast?.current?.show({
         severity: "success",
         summary: "Template Deleted",
