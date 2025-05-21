@@ -422,7 +422,7 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
 
     const params = {
         moduleName: fieldContext.fieldMetadata.relationModelModuleName,
-        id: "new",
+        id: formViewParams?.id,
         embeded: true,
         customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
         customCreateHandler: ((values: any) => {
