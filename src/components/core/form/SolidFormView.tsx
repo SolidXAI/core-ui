@@ -438,7 +438,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         setViewMode(newMode);
         const params = new URLSearchParams(searchParams.toString());
         params.set("viewMode", newMode);
-        router.push(`${pathname}?${params.toString()} `, { scroll: false });
+        router.push(`${pathname}?${params.toString()}`, { scroll: false });
     };
 
 
@@ -629,7 +629,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     formData.append(`${solidWorkflowField}Id`, solidWorkflowFieldValue);
                 }
             }
-            
+
             if (params.inlineCreateAutoSave === true) {
                 params.customCreateHandler(formData);
             } else {
@@ -637,18 +637,16 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     // createEntity(formData);
                     const result = await createEntity(formData).unwrap();
                     showToast("success", "Form saved", "Form saved successfully!");
-                    if (!params.embeded) {
-                        // const updatedUrl = `${pathname.replace("new", result?.data?.id)}?${searchParams.toString()} `;
-                        // router.push(updatedUrl);
+                    if (!params.embeded && result?.data?.id) {
+                        const newPathname = pathname.replace(/new$/, result.data.id);
 
-                        const currentUrl = new URL(window.location.href);
-                        // Replace "new" with the new entity id in the pathname
-                        currentUrl.pathname = currentUrl.pathname.replace(/new$/, result?.data?.id);
-                        // The search params remain unchanged, so nothing else is needed here.
-                        const updatedUrl = currentUrl.toString();
-                        router.push(updatedUrl);
-
-                        const updatedPath = currentUrl.toString();
+                        const params = new URLSearchParams(searchParams.toString());
+                        params.set("viewMode", "view");
+                      
+                        const updatedUrl = `${newPathname}?${params.toString()}`;
+                        await router.push(updatedUrl, { scroll: false });
+                      
+                        setViewMode("view")
                     }
                     return result;
                 }
@@ -968,7 +966,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
             if (visibleToRole.length > 0) {
                 if (!hasAnyRole(user?.user?.roles, visibleToRole)) {
-                return <></>
+                    return <></>
                 }
             }
 
