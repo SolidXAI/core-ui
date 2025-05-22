@@ -41,7 +41,7 @@ export const SolidChatter = ({ solidFormViewMetaData, id, refreshChatterMessage,
     });
 
     const queryDataChatterMessageDetail = {
-        populate: ['chatterMessage', 'chatterMessage.user'],
+        populate: ['chatterMessage.user'],
         filters: {
             chatterMessage: {
                 coModelName: {
