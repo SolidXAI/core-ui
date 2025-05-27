@@ -35,7 +35,7 @@ interface Question {
   key: string;
   name: string;
 }
-export const SolidExport = ({ listViewMetaData }: any) => {
+export const SolidExport = ({ listViewMetaData, filters }: any) => {
   const toast = useRef<Toast>(null);
   const entityApi = createSolidEntityApi("userViewMetadata");
   const { useUpsertSolidEntityMutation } = entityApi;
@@ -243,7 +243,7 @@ export const SolidExport = ({ listViewMetaData }: any) => {
   const handleDownload = async () => {
     const id  = selectedTemplate?.code
     try {
-      await downloadFileWithProgress(`/export-template/${id}/startExport/sync`, downloadHandlers);
+      await downloadFileWithProgress(`/export-template/${id}/startExport/sync`, downloadHandlers, filters);
     } catch (err) {
       console.error("Download failed:", err);
     }

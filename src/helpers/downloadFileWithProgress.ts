@@ -5,7 +5,8 @@ export async function downloadFileWithProgress(
   handlers: {
     onProgress?: (progress: number) => void;
     onStatusChange?: (status: "In Progress" | "success" | "error", message: string, submessage: string) => void;
-  }
+  },
+  filters:any
 ): Promise<{ fileName: string; blob: Blob }> {
   const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api`;
 
@@ -16,9 +17,11 @@ export async function downloadFileWithProgress(
     if (session?.user?.accessToken) {
       headers.set("Authorization", `Bearer ${session.user.accessToken}`);
     }
+    headers.set("Content-Type", "application/json");
     const response = await fetch(`${baseUrl}${url}`, {
       method: "POST",
       headers,
+      body: JSON.stringify({ filters })
     }); 
     if (!response.ok || !response.body) {
       throw new Error("Failed to fetch file");
