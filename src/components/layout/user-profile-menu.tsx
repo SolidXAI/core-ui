@@ -15,6 +15,7 @@ import { Dialog } from "primereact/dialog";
 import { Divider } from "primereact/divider";
 import Image from "next/image";
 import AvatarImage from '../../resources/images/Profile/Avatar.png'
+import { Avatar } from "primereact/avatar";
 const UserProfileMenu = () => {
   const router = useRouter();
 
@@ -42,6 +43,28 @@ const UserProfileMenu = () => {
     dispatch(toggleTheme()); // Dispatch Redux action
     _changeTheme(isDarkMode ? "solid-dark-purple" : "solid-light-purple", isDarkMode ? "dark" : "light");
   };
+
+  const getInitials = (value: string) => {
+    if (!value) return "";
+
+    const email = value.includes('@') ? value.split('@')[0] : value;
+    return email[0]?.toUpperCase() || "";
+  };
+
+  const getColorFromInitials = (initials: string) => {
+    let hash = 0;
+    for (let i = 0; i < initials.length; i++) {
+      hash = initials.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = Math.abs(hash) % 360;
+    return `hsl(${hue}, 60%, 60%)`;
+  };
+
+  
+  const value = user?.user?.email;
+  const initials = getInitials(value);
+  const bgColor = getColorFromInitials(initials);
+
   return (
     <div className="userProfile">
       <div
@@ -51,24 +74,26 @@ const UserProfileMenu = () => {
           //@ts-ignore
           onClick={(e: any) => op?.current?.toggle(e)}
         >
-          <Image
+          {/* <Image
             src={AvatarImage}
             alt="Solid"
             className="profile-icon relative"
             fill
-          />
+          /> */}
+          <Avatar label={initials} size="large" style={{ backgroundColor: bgColor, color: '#ffffff' }} shape="circle" />
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
-            <path d="M7 5.83301L3.5 9.33301H10.5L7 5.83301Z" fill="black" />
+            <path d="M7 5.83301L3.5 9.33301H10.5L7 5.83301Z" fill="var(--solid-primary-black)" />
           </svg>
         </div>
         <OverlayPanel ref={op} className="user-profile-panel">
           <div className="flex align-items-center p-3 gap-2 user-profile-title">
-            <Image
+            {/* <Image
               alt="avatar"
               src={AvatarImage}
               className="w-2rem relative"
               fill
-            />
+            /> */}
+            <Avatar label={initials} style={{ backgroundColor: bgColor, color: '#ffffff' }} shape="circle" />
             <div className="flex flex-column align">
               <span className="font-bold">{user?.user?.username}</span>
               <span className="mt-1">{user?.user?.email}</span>
