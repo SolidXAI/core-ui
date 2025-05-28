@@ -1179,7 +1179,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     onClick={() => { setShowChatter(true); setRefreshChatterMessage(true); }}
                                 />
                             </div>
-                            : <SolidChatter solidFormViewMetaData={solidFormViewMetaData} id={params.id} refreshChatterMessage={refreshChatterMessage} setRefreshChatterMessage={setRefreshChatterMessage} />
+                            : <SolidChatter modelSingularName={solidFormViewMetaData?.data?.solidView?.model?.singularName} id={params.id} refreshChatterMessage={refreshChatterMessage} setRefreshChatterMessage={setRefreshChatterMessage} />
                         }
                     </div>
                 }

@@ -12,7 +12,7 @@ interface FilterState {
     endDate: Date | null;
 }
 
-export const SolidChatter = ({ solidFormViewMetaData, id, refreshChatterMessage, setRefreshChatterMessage }: { solidFormViewMetaData: any, id: string, refreshChatterMessage: boolean, setRefreshChatterMessage: (value: boolean) => void }) => {
+export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, setRefreshChatterMessage }: { modelSingularName: any, id: any, refreshChatterMessage: boolean, setRefreshChatterMessage: (value: boolean) => void }) => {
     const [activeTab, setActiveTab] = useState<'email-message' | 'log' | null>('email-message');
     const [visibleBox, setVisibleBox] = useState<'email-message' | 'log' | null>(null);
     const [messages, setMessages] = useState<any[]>([]);
@@ -28,7 +28,7 @@ export const SolidChatter = ({ solidFormViewMetaData, id, refreshChatterMessage,
                 $eqi: 'custom'
             },
             coModelName: {
-                $eq: solidFormViewMetaData?.data?.solidView?.model?.singularName
+                $eq: modelSingularName
             },
             coModelEntityId: {
                 $eq: id
@@ -45,7 +45,7 @@ export const SolidChatter = ({ solidFormViewMetaData, id, refreshChatterMessage,
         filters: {
             chatterMessage: {
                 coModelName: {
-                    $eq: solidFormViewMetaData?.data?.solidView?.model?.singularName
+                    $eq: modelSingularName
                 },
                 coModelEntityId: {
                     $eq: id
@@ -209,7 +209,7 @@ export const SolidChatter = ({ solidFormViewMetaData, id, refreshChatterMessage,
             <SolidChatterHeader 
                 id={id} 
                 refetch={fetchData} 
-                solidFormViewMetaData={solidFormViewMetaData} 
+                modelSingularName={modelSingularName} 
                 activeTab={activeTab} 
                 handleTabClick={handleTabClick} 
                 visibleBox={visibleBox}
