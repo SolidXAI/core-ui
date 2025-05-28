@@ -1,7 +1,7 @@
 "use client";
 
 import { SolidCancelButton } from "@/components/common/CancelButton";
-import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
+import { createPermission, deletePermission, findPermission, updatePermission } from "@/helpers/permissions";
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
@@ -451,7 +451,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 const permissionNames = [
                     createPermission(params.modelName),
                     deletePermission(params.modelName),
-                    updatePermission(params.modelName)
+                    updatePermission(params.modelName),
+                    findPermission(params.modelName)
                 ]
                 const queryData = {
                     permissionNames: permissionNames
