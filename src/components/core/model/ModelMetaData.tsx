@@ -55,7 +55,8 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     isSystem: modelMetaData ? modelMetaData?.isSystem : false,
     enableSoftDelete: modelMetaData ? modelMetaData?.enableSoftDelete : "",
     enableAuditTracking: modelMetaData ? modelMetaData?.enableAuditTracking : "",
-    internationalisation: modelMetaData ? modelMetaData?.internationalisation : "",
+    internationalisation: modelMetaData ? modelMetaData?.internationalisation : false,
+    draftPublishWorkflow: modelMetaData ? modelMetaData?.draftPublishWorkflow: false,
     isChild: modelMetaData ? modelMetaData?.isChild : "",
     parentModelId: modelMetaData ? modelMetaData?.parentModel?.id : "",
     parentModel: modelMetaData ? modelMetaData?.parentModel : "",
@@ -103,6 +104,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     enableSoftDelete: Yup.boolean(),
     enableAuditTracking: Yup.boolean(),
     internationalisation: Yup.boolean(),
+    draftPublishWorkflow: Yup.boolean(),
     isChild: Yup.boolean(),
     parentModelId: Yup.number().when("isChild", (isChild: any, schema) => {
       if (isChild.length > 0 && isChild[0] == true) {
@@ -149,13 +151,15 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
           isSystem: values.isSystem ? values.isSystem === true : '',
           enableSoftDelete: values.enableSoftDelete === true ? true : '',
           enableAuditTracking: values.enableAuditTracking === true ? true : '',
-          internationalisation: values.internationalisation === true ? true : '',
+          internationalisation: values.internationalisation === true ? true : false,
+          draftPublishWorkflow: values.draftPublishWorkflow === true ? true : false,
           isChild: values.isChild === true ? true : '',
           ...(values.isChild == true && {
             parentModelId: values.parentModelId,
             parentModel: values.parentModel,
           }),
         };
+        console.log("Model Data to be created:", modelData);
         setModelMetaData(modelData);
         nextTab()
 
@@ -531,6 +535,30 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     className="mt-2"
                   />
                 )}
+                <div className="flex align-items-center gap-2 mt-3">
+                  <Checkbox
+                    name="internationalisation"
+                    onChange={(e) => {
+                      formik.setFieldValue("internationalisation", e.checked);
+                    }}
+                    checked={formik.values.internationalisation}
+                  ></Checkbox>
+                  <label htmlFor="internationalisation" className="form-field-label">
+                    Is Internationalisation Enabled
+                  </label>
+                </div>
+                 <div className="flex align-items-center gap-2 mt-3">
+                  <Checkbox
+                    name="draftPublishWorkflow"
+                    onChange={(e) => {
+                      formik.setFieldValue("draftPublishWorkflow", e.checked);
+                    }}
+                    checked={formik.values.draftPublishWorkflow}
+                  ></Checkbox>
+                  <label htmlFor="draftPublishWorkflow" className="form-field-label">
+                    Draft/Publish Workflow
+                  </label>
+                </div>
                 {/* <div className="field col-6">
                   <div className="flex align-items-center gap-2 mt-3">
                     <Checkbox

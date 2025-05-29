@@ -14,6 +14,7 @@ import { DownloadProgressToast } from "./DownloadProgressToast";
 
 interface FieldMetadata {
   displayName: string;
+  type: string;
 }
 interface FilterColumns {
   name: string;
@@ -54,13 +55,13 @@ export const SolidExport = ({ listViewMetaData }: any) => {
   const checkedFieldNames = new Set(
     solidView.layout.children.map((col: { attrs: { name: string } }) => col.attrs.name)
   );
-
-  const allColumns: FilterColumns[] = Object.entries(solidFieldsMetadata).map(
-    ([key, field]) => ({
-      name: field.displayName,
-      key,
-    })
-  );
+  const excludedTypes = new Set(['mediaSingle', 'mediaMultiple']);
+  const allColumns: FilterColumns[] = Object.entries(solidFieldsMetadata)
+  .filter(([, field]) => !excludedTypes.has(field.type))
+  .map(([key, field]) => ({
+    name: field.displayName,
+    key,
+  }));
 
   const [createExportTemplate] = useCreateExportTemplateMutation();
   const [deleteExportTemplate] = useDeleteExportTemplateMutation();
@@ -73,7 +74,11 @@ export const SolidExport = ({ listViewMetaData }: any) => {
      // console.log("Selected columns:", values.selectedColumns);
     }
   });
-
+  useEffect(()=>{
+    console.log("Solid Export View Metadata", solidView);
+    console.log("Solid Export Fields Metadata", solidFieldsMetadata);
+    console.log("all ",allColumns)
+  },[])
   const { selectedColumns } = formik.values;
 
   const availableColumns = allColumns.filter(
@@ -362,7 +367,7 @@ export const SolidExport = ({ listViewMetaData }: any) => {
        activeValue={currentStepValue}
        setActiveValue={setCurrentStepValue} />
       </div> */}
-      <div className="p-3">
+      <div className="p-0">
       { currentStepValue === 'export' && 
             <>
             <div className={`${styles.solidExportControls} gap-2`}>

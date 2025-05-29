@@ -2818,7 +2818,6 @@ li.header-li-px {
   background-color: transparent;
 }
 
-
 .solid-tab-view .p-tabview-panels {
   padding-top: 24px;
   padding-left: 0;
@@ -3304,3 +3303,24 @@ flex-shrink: 0; */
     background-color: #f5f5f5;
 }
 
+.solid-locale .p-tabview-panels {
+  padding:0 !important;
+}
+
+.solid-locale .p-tabview-nav li.p-highlight .p-tabview-nav-link{
+  border: none !important;
+}
+.solid-locale .p-unselectable-text.p-tabview-selected {
+  border-bottom: 2px solid var(--border-color) !important;
+}
+.solid-locale .p-unselectable-text.p-tabview-selected.p-highlight {
+  border-bottom: 2px solid var(--primary-color) !important;
+}
+
+.solid-locale li{
+  width: 50% !important;
+  text-align: center !important;
+}
+.solid-locale .p-tabview-nav li .p-tabview-nav-link {
+  border: none !important;
+}

@@ -54,6 +54,7 @@ import { SolidFormActionHeader } from "./SolidFormActionHeader";
 import { SolidFormViewShimmerLoading } from "./SolidFormViewShimmerLoading";
 import { useSelector } from "react-redux";
 import { hasAnyRole } from "@/helpers/rolesHelper";
+import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -400,7 +401,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const searchParams = useSearchParams();
 
     const [redirectToList, setRedirectToList] = useState(false);
-
+    const [selectedLocale,setSelectedLocale] = useState<string | null>(null);
     const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
 
@@ -410,7 +411,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [lightboxUrls, setLightboxUrls] = useState([]);
     const [isShowChatter, setShowChatter] = useState(true);
     const [solidWorkflowFieldValue, setSolidWorkflowFieldValue] = useState<string>("");
-
+    const [defaultTabViewOptionIndex,setDefaultTabViewOptionIndex] = useState<number>(0);
     const errorFields: string[] = [];
 
     const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
@@ -432,6 +433,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
         }
     }, [searchParams, params.id]);
 
+    // useEffect(() => {
+    //     console.log(selectedLocale);
+    //     //upddate locale and patch with locale value (field name -> locale) 
+    // },[selectedLocale])
 
     // function that updates view mode 
     const updateViewMode = (newMode: "view" | "edit") => {
@@ -440,10 +445,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
         params.set("viewMode", newMode);
         router.push(`${pathname}?${params.toString()}`, { scroll: false });
     };
-
-
-
-
 
     useEffect(() => {
         const fetchPermissions = async () => {
@@ -629,12 +630,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     formData.append(`${solidWorkflowField}Id`, solidWorkflowFieldValue);
                 }
             }
-
+            console.log("solid field",solidFieldsMetadata)
+            console.log("solidFormViewMetaData",solidFormViewMetaData)
+            if(solidFormViewMetaData?.data?.solidView?.model?.internationalisation){
+                formData.append('localeName', selectedLocale? selectedLocale : 'en-In');
+                console.log('locale added')
+            }
             if (params.inlineCreateAutoSave === true) {
                 params.customCreateHandler(formData);
             } else {
                 if (params.id === 'new') {
-                    // createEntity(formData);
+                    // default locale
                     const result = await createEntity(formData).unwrap();
                     showToast("success", "Form saved", "Form saved successfully!");
                     if (!params.embeded && result?.data?.id) {
@@ -644,7 +650,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         params.set("viewMode", "view");
                       
                         const updatedUrl = `${newPathname}?${params.toString()}`;
-                        await router.push(updatedUrl, { scroll: false });
+                       // await router.push(updatedUrl, { scroll: false });
                       
                         setViewMode("view")
                     }
@@ -806,6 +812,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     }
                 }
                 setInitialEntityData(formViewData);
+                setSelectedLocale(solidFormViewData?.data?.localeName ? solidFormViewData?.data?.localeName : 'en-In');
             }
         };
 
@@ -1121,6 +1128,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
         if (customFormComponentNew) {
             DynamicFormComponentNew = getExtensionComponent(customFormComponentNew);
         }
+
+        const handleChatterExpandClick = (option? : string) => {
+            if(option === 'chatter') {
+                setDefaultTabViewOptionIndex(0);
+            } else {
+                setDefaultTabViewOptionIndex(1);
+            }
+            setShowChatter(true);
+            setRefreshChatterMessage(true)
+        }
+
         return (
             <div className="solid-form-wrapper">
                 <Toast ref={toast} />
@@ -1141,6 +1159,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             setViewMode={setViewMode}
                             solidWorkflowFieldValue={solidWorkflowFieldValue}
                             setSolidWorkflowFieldValue={setSolidWorkflowFieldValue}
+                            draftEnabled={solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow}
+                            publish={solidFormViewMetaData?.data?.solidView?.model?.publishedAt}
                         />
                         <div className="p-4 solid-form-content">
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
@@ -1168,21 +1188,33 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         }
                         {isShowChatter === false ?
                             <div className="flex flex-column gap-2 justify-content-center p-2">
-                                <div className="chatter-collapsed-content">
+                                <div className="chatter-collapsed-content" onClick={()=>handleChatterExpandClick('chatter')}>
                                     Chatter/Audit Trail
                                 </div>
+                                {/*if solidview Internationalisation is enabled then show the locale tab */}
+                                { solidFormViewMetaData?.data?.solidView?.model?.internationalisation &&
+                                <div className="chatter-collapsed-content" onClick={()=>handleChatterExpandClick('locale')}>
+                                    Internationalisation
+                                </div>}
                                 <Button
                                     icon="pi pi-chevron-left"
                                     size="small"
                                     className="px-0"
                                     style={{ width: 30 }}
-                                    onClick={() => { setShowChatter(true); setRefreshChatterMessage(true); }}
+                                    onClick={()=>handleChatterExpandClick('default')}
                                 />
                             </div>
-                            : <SolidChatter solidFormViewMetaData={solidFormViewMetaData} id={params.id} refreshChatterMessage={refreshChatterMessage} setRefreshChatterMessage={setRefreshChatterMessage} />
+                            : solidFormViewMetaData?.data?.solidView?.model?.internationalisation ? 
+                            <SolidChatterLocaleTabView setSelectedLocale={setSelectedLocale} selectedLocale={selectedLocale} solidFormViewMetaData={solidFormViewMetaData} id={params.id} refreshChatterMessage={refreshChatterMessage} setRefreshChatterMessage={setRefreshChatterMessage} activeTab={defaultTabViewOptionIndex} internationalisation={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}/> : 
+                            <SolidChatter 
+                            solidFormViewMetaData={solidFormViewMetaData}
+                            id={params.id}
+                            refreshChatterMessage={refreshChatterMessage}
+                            setRefreshChatterMessage={setRefreshChatterMessage}/>
                         }
                     </div>
                 }
+             
                 <Dialog
                     visible={isDeleteDialogVisible}
                     header="Confirm Delete"

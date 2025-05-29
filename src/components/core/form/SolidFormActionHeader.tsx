@@ -180,6 +180,17 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     />
                                 </div>
                             }
+                            {params.embeded !== true && params.draftEnabled &&
+                                !formViewLayout.attrs.readonly && params.publish !== 'null' &&
+                                formik.dirty &&
+                                <div>
+                                    <Button
+                                        label="Draft"
+                                        size="small"
+                                        type="button"
+                                    />
+                                </div>
+                            }
                             {params.embeded == true &&
                                 actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
                                 !formViewLayout.attrs.readonly &&

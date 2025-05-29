@@ -40,7 +40,7 @@ export async function downloadFileWithProgress(
     const chunks: Uint8Array[] = [];
     let received = 0;
     let progress = 0;
-    const totalDuration = 1000; // 1 seconds
+    const totalDuration = 500; // 1 seconds
     const totalSteps = 100; // Progress steps from 0 to 100
     const progressInterval = totalDuration / totalSteps;
     while (true) {
