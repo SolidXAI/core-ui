@@ -962,7 +962,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
             // console.log(`Resolved visibility of form element ${ key } to ${ visible } `);
             // console.log(`Form element ${ key }: `, attrs);
-            const visibleToRole = attrs.roles || [];
+            const visibleToRole = attrs?.roles || [];
 
             if (visibleToRole.length > 0) {
                 if (!hasAnyRole(user?.user?.roles, visibleToRole)) {

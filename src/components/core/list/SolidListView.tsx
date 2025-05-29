@@ -739,7 +739,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       if (!fieldMetadata) {
         return;
       }
-      const visibleToRole = column.attrs.roles || [];
+      const visibleToRole = column?.attrs?.roles || [];
 
       if (visibleToRole.length > 0) {
         if (hasAnyRole(user?.user?.roles, visibleToRole)) {
@@ -922,7 +922,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           {renderColumnsDynamically(listViewMetaData)}
           {solidListViewLayout?.attrs?.rowButtons &&
             solidListViewLayout?.attrs?.rowButtons.filter((rb: any) => {
-              const roles = rb.attrs.roles || [];
+              const roles = rb?.attrs?.roles || [];
               const isInContextMenu = rb.attrs.actionInContextMenu === true;
 
               // Only check hasAnyRole if roles are provided
