@@ -643,10 +643,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
                         const params = new URLSearchParams(searchParams.toString());
                         params.set("viewMode", "view");
-                      
+
                         const updatedUrl = `${newPathname}?${params.toString()}`;
                         await router.push(updatedUrl, { scroll: false });
-                      
+
                         setViewMode("view")
                     }
                     return result;
@@ -711,6 +711,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
             if (fieldMetadata?.type === 'mediaSingle' || fieldMetadata?.type === 'mediaMultiple') {
                 toPopulateMedia.push(fieldMetadata.name);
             }
+        }
+        if (formViewLayout.attrs?.workflowField && solidFieldsMetadata[formViewLayout.attrs.workflowField]?.type === 'relation' && solidFieldsMetadata[formViewLayout.attrs.workflowField]?.relationType === 'many-to-one') {
+            toPopulate.push(solidFieldsMetadata[formViewLayout.attrs.workflowField].name);
         }
     }
     // TODO: Possible optimisation here, we are firing 2 queries to load the form view data object. 
@@ -1134,7 +1137,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             formViewLayout={formViewLayout}
                             solidView={solidView}
                             solidFormViewMetaData={solidFormViewMetaData}
-                            initialEntityData={initialEntityData}
+                            initialEntityData={solidFormViewData ? solidFormViewData.data : {}}
                             setDeleteDialogVisible={setDeleteDialogVisible}
                             setLayoutDialogVisible={setLayoutDialogVisible}
                             setRedirectToList={setRedirectToList}
