@@ -1,5 +1,5 @@
 .exportCustomProgressbar{
-    height: 2px !important;
+    height: 3px !important;
     margin-top: 5px !important;
 }
 .pExportText{
@@ -7,7 +7,7 @@
     font-size: 14px !important;
 }
 .exportDialog {
-    width: 1000px !important;
+    width: 70% !important;
     height: 700px !important;
     padding:0 !important;
     margin:0 !important;
