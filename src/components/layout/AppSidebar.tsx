@@ -9,7 +9,7 @@ import NavbarTwoMenu from "./navbar-two-menu";
 import UserProfileMenu from "./user-profile-menu";
 import Image from "next/image";
 import AppBuilderSvg from '../../resources/images/menu/app-builder.svg'
-import SettingImage from '../../resources/images/Navigation/settings.png'
+import SettingImage from '../../resources/images/Navigation/SolidSettinsIcon.svg'
 import { Avatar } from "primereact/avatar";
 
 // import menu from "@/helpers/menu";
@@ -112,7 +112,7 @@ const AppSidebar = () => {
                 ]
             }
         ],
-        icon: SettingImage
+        icon: process.env.NEXT_PUBLIC_SETTINGS_ICON ? process.env.NEXT_PUBLIC_SETTINGS_ICON : SettingImage
     };
     const updatedMenuData = menu?.data
         ? [...menu.data, ...(process.env.NEXT_PUBLIC_SHOW_SETTINGS === "true" ? [additionalMenu] : [])]
@@ -151,33 +151,32 @@ const AppSidebar = () => {
                                     ? m.icon.src
                                     : null;
                         return (
-                            <div
+                            <a
                                 key={m.title}
-                                className={`menu-item ${currentMainMenu === m.title ? "active-menu-image" : ""}`}
+                                className={`flex align-items-center menu-item ${currentMainMenu === m.title ? "active-menu-image" : ""}`}
+                                onClick={() => handleMenu(m)}
                             >
-                                <a onClick={() => handleMenu(m)}>
-                                    {m.icon ?
-                                        <Image
-                                            style={{ cursor: "pointer", mixBlendMode: "multiply" }}
-                                            src={iconSrc.startsWith("/") ? iconSrc : `${process.env.API_URL}/${iconSrc}`}
-                                            // src={m.icon}
-                                            alt={m.title}
-                                            // fill
-                                            height={30}
-                                            width={30}
-                                            className="relative"
-                                            unoptimized
-                                        />
-                                        :
-                                        // <img
-                                        //     style={{ cursor: "pointer", width: '50px' }}
-                                        //     src={`/images/menu/app-builder.svg`}
-                                        //     alt={m.title}
-                                        // />
-                                        <Avatar label={m.title.charAt(0)} shape="circle" style={{ backgroundColor: 'var(--primary-color)' }} />
-                                    }
-                                </a>
-                            </div>
+                                {m.icon ?
+                                    <Image
+                                        style={{ cursor: "pointer" }}
+                                        src={iconSrc.startsWith("/") ? iconSrc : `${process.env.API_URL}/${iconSrc}`}
+                                        // src={m.icon}
+                                        alt={m.title}
+                                        // fill
+                                        height={30}
+                                        width={30}
+                                        className="relative"
+                                        unoptimized
+                                    />
+                                    :
+                                    // <img
+                                    //     style={{ cursor: "pointer", width: '50px' }}
+                                    //     src={`/images/menu/app-builder.svg`}
+                                    //     alt={m.title}
+                                    // />
+                                    <Avatar label={m.title.charAt(0)} shape="circle" style={{ backgroundColor: 'var(--primary-color)' }} />
+                                }
+                            </a>
                         )
                     })}
                 </div>
