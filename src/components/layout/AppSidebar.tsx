@@ -158,23 +158,17 @@ const AppSidebar = () => {
                             >
                                 {m.icon ?
                                     <Image
-                                        style={{ cursor: "pointer" }}
                                         src={iconSrc.startsWith("/") ? iconSrc : `${process.env.API_URL}/${iconSrc}`}
-                                        // src={m.icon}
                                         alt={m.title}
-                                        // fill
                                         height={30}
                                         width={30}
                                         className="relative"
                                         unoptimized
                                     />
                                     :
-                                    // <img
-                                    //     style={{ cursor: "pointer", width: '50px' }}
-                                    //     src={`/images/menu/app-builder.svg`}
-                                    //     alt={m.title}
-                                    // />
-                                    <Avatar label={m.title.charAt(0)} shape="circle" style={{ backgroundColor: 'var(--primary-color)' }} />
+                                    <div>
+                                        <Avatar label={m.title.charAt(0)} shape="circle" style={{ backgroundColor: 'var(--primary-color)', fontWeight: 500 }} />
+                                    </div>
                                 }
                             </a>
                         )
