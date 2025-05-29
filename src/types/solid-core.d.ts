@@ -152,7 +152,6 @@ export type SolidListHeaderDynamicFunctionProps = {
 
 export type SolidListRowdataDynamicFunctionProps = {
     action: string,
-    attrs:string,
     params: any,
     rowData: any,
     solidListViewMetaData: any
