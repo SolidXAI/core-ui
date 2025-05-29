@@ -5,7 +5,7 @@ import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
 import { getExtensionComponent } from "@/helpers/registry";
-import { AutoComplete } from "primereact/autocomplete";
+import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { Button } from "primereact/button";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { useRelationEntityHandler } from "./widgets/helpers/useRelationEntityHandler";
@@ -14,6 +14,8 @@ import { capitalize } from "lodash";
 import { Checkbox } from "primereact/checkbox";
 import { Panel } from "primereact/panel";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
+import qs from 'qs';
+import Handlebars from 'handlebars';
 
 
 
@@ -161,6 +163,70 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
         formik.setFieldValue(fieldContext.field.attrs.name, e.value);
     };
 
+    const autoCompleteSearch = async (event: AutoCompleteCompleteEvent) => {
+        const queryData: any = {
+            offset: 0,
+            limit: 1000,
+            filters: {
+                $and: [
+                    {
+                        [fieldMetadata?.relationModel?.userKeyField?.name]: {
+                            '$containsi': event.query
+                        }
+                    }
+                ]
+            }
+        };
+        let fixedFilterToBeApplied = false;
+        let fixedFilterParsed = false;
+
+        if (fieldMetadata?.relationFieldFixedFilter || fieldLayoutInfo?.attrs?.fixedFilter) {
+            const convertedFixedFilter = fieldLayoutInfo?.attrs?.fixedFilter ? fieldLayoutInfo?.attrs?.fixedFilter : fieldMetadata?.relationFieldFixedFilter;
+            fixedFilterToBeApplied = true;
+            const fixedFilterTemplate = Handlebars.compile(convertedFixedFilter);
+            const renderedFilter = fixedFilterTemplate(formik.values);
+
+            let parsedFilter: any;
+            try {
+                parsedFilter = JSON.parse(renderedFilter);
+                const isValid = (obj: any): boolean => {
+                    if (!obj || typeof obj !== 'object') return false;
+
+                    const hasValidValue = (val: any): boolean => {
+                        if (val === null || val === undefined || val === '') return false;
+                        if (typeof val === 'object') {
+                            return Object.values(val).some(hasValidValue);
+                        }
+                        return true;
+                    };
+
+                    return hasValidValue(parsedFilter);
+                };
+
+                if (isValid(parsedFilter)) {
+                    queryData.filters.$and.push(parsedFilter);
+                    fixedFilterParsed = true;
+                } else {
+                    console.warn("Skipping invalid/empty fixed filter:", parsedFilter);
+                }
+            } catch (e) {
+                console.error("Invalid fixedFilter JSON:", renderedFilter);
+                parsedFilter = {};
+            }
+
+        }
+
+        if (fixedFilterToBeApplied && !fixedFilterParsed) {
+            console.error("Fixed filter not applied due to parsing issues or invalid data.");
+
+        } else {
+             const autocompleteQs = qs.stringify(queryData, {
+                encodeValuesOnly: true,
+            });
+            fetchRelationEntities(autocompleteQs);
+        }
+    };
+
     return (
 
         <div className="relative">
@@ -183,7 +249,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                         value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                         dropdown={!readOnlyPermission}
                         suggestions={autoCompleteItems}
-                        completeMethod={(e) => fetchRelationEntities(e.query)}
+                        completeMethod={autoCompleteSearch}
                         onChange={onChange}
                         className="solid-standard-autocomplete w-full"
                     />
@@ -232,8 +298,66 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
     const { autoCompleteItems, fetchRelationEntities, addNewRelation } = useRelationEntityHandler({ fieldContext, formik });
 
     useEffect(() => {
-        fetchRelationEntities();
-    }, []);
+        const fieldMetadata = fieldContext.fieldMetadata;
+        const fieldLayoutInfo = fieldContext.field;
+        const queryData: any = {
+            offset: 0,
+            limit: 1000,
+            filters: {
+                $and: []
+            }
+        };
+
+        let fixedFilterToBeApplied = false;
+        let fixedFilterParsed = false;
+
+        if (fieldMetadata?.relationFieldFixedFilter || fieldLayoutInfo?.attrs?.fixedFilter) {
+            const convertedFixedFilter = fieldLayoutInfo?.attrs?.fixedFilter ? fieldLayoutInfo?.attrs?.fixedFilter : fieldMetadata?.relationFieldFixedFilter;
+            fixedFilterToBeApplied = true;
+            const fixedFilterTemplate = Handlebars.compile(convertedFixedFilter);
+            const renderedFilter = fixedFilterTemplate(formik.values);
+
+            let parsedFilter: any;
+            try {
+                parsedFilter = JSON.parse(renderedFilter);
+                const isValid = (obj: any): boolean => {
+                    if (!obj || typeof obj !== 'object') return false;
+
+                    const hasValidValue = (val: any): boolean => {
+                        if (val === null || val === undefined || val === '') return false;
+                        if (typeof val === 'object') {
+                            return Object.values(val).some(hasValidValue);
+                        }
+                        return true;
+                    };
+
+                    return hasValidValue(parsedFilter);
+                };
+
+                if (isValid(parsedFilter)) {
+                    queryData.filters.$and.push(parsedFilter);
+                    fixedFilterParsed = true;
+                } else {
+                    console.warn("Skipping invalid/empty fixed filter:", parsedFilter);
+                }
+            } catch (e) {
+                console.error("Invalid fixedFilter JSON:", renderedFilter);
+                parsedFilter = {};
+            }
+
+        }
+
+        if (fixedFilterToBeApplied && !fixedFilterParsed) {
+            console.error("Fixed filter not applied due to parsing issues or invalid data.");
+
+        } else {
+             const autocompleteQs = qs.stringify(queryData, {
+                encodeValuesOnly: true,
+            });
+            fetchRelationEntities(autocompleteQs);
+        }
+
+    }, [fieldContext, formik.values]);
 
     const handleCheckboxChange = (e: any) => {
         if (formik.values[fieldLayoutInfo.attrs.name].some((item: any) => item.value === e.value)) {

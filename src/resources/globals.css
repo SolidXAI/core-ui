@@ -3067,6 +3067,7 @@ li.header-li-px {
   border-radius: 0.5rem;
   padding: 9px;
   transition: 0.2s linear;
+  position: relative;
 }
 
 .solid-media-card {
@@ -3075,6 +3076,7 @@ li.header-li-px {
   padding: 9px;
   height: 100%;
   transition: 0.2s linear;
+  position: relative;
 }
 
 .solid-mimetype-chip {

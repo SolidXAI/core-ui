@@ -16,14 +16,14 @@ interface Props {
     activeTab: any,
     handleTabClick: any,
     visibleBox: any,
-    solidFormViewMetaData: any,
+    modelSingularName: any,
     refetch: any,
     id: any,
     onFilterChange?: (filters: FilterState) => void;
 }
 
 export const SolidChatterHeader = (props: Props) => {
-    const { activeTab, visibleBox, handleTabClick, solidFormViewMetaData, refetch, id, onFilterChange } = props;
+    const { activeTab, visibleBox, handleTabClick, modelSingularName, refetch, id, onFilterChange } = props;
     const [showFilterDialog, setShowFilterDialog] = useState(false);
     const [filters, setFilters] = useState<FilterState>({
         name: '',
@@ -106,11 +106,11 @@ export const SolidChatterHeader = (props: Props) => {
             {visibleBox &&
                 <div className='mt-4'>
                     {visibleBox === "email-message" &&
-                        <SolidMessageComposer id={id} refetch={refetch} solidFormViewMetaData={solidFormViewMetaData} type={"email"} />
+                        <SolidMessageComposer id={id} refetch={refetch} modelSingularName={modelSingularName} type={"email"} />
                     }
 
                     {visibleBox === "log" &&
-                        <SolidMessageComposer id={id} refetch={refetch} solidFormViewMetaData={solidFormViewMetaData} />
+                        <SolidMessageComposer id={id} refetch={refetch} modelSingularName={modelSingularName} />
                     }
                 </div>
             }
