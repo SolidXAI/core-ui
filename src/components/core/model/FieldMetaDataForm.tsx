@@ -1760,7 +1760,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               )}
                             </div>
                           )}
-                          {currentFields.includes("relationType") && formik.values.relationType === "many-to-one" && (
+                          {currentFields.includes("relationType") && (formik.values.relationType === "many-to-one" || formik.values.relationType === "one-to-many") && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="relationCascade"
