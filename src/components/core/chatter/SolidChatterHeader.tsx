@@ -2,9 +2,11 @@
 import { Button } from 'primereact/button'
 import { Calendar } from 'primereact/calendar'
 import { Dialog } from 'primereact/dialog'
+import { AutoComplete } from 'primereact/autocomplete'
 import { useEffect, useState } from 'react'
 import styles from './chatter.module.css'
 import { SolidMessageComposer } from './SolidMessageComposer'
+import { useLazyGetusersQuery } from '@/redux/api/userApi'
 
 interface FilterState {
     name: string;
@@ -31,6 +33,8 @@ export const SolidChatterHeader = (props: Props) => {
         endDate: null
     });
     const [hasActiveFilters, setHasActiveFilters] = useState(false);
+    const [suggestions, setSuggestions] = useState<any[]>([]);
+    const [getUsers] = useLazyGetusersQuery();
 
     useEffect(() => {
         const isActive = filters.name !== '' || filters.startDate !== null || filters.endDate !== null;
@@ -59,6 +63,24 @@ export const SolidChatterHeader = (props: Props) => {
             onFilterChange(clearedFilters);
         }
         setShowFilterDialog(false);
+    };
+
+    const searchUsers = async (event: { query: string }) => {
+        try {
+            const response = await getUsers(`filters[fullName][$containsi]=${event.query}`).unwrap();
+            setSuggestions(response?.data?.records || []);
+        } catch (error) {
+            console.error('Error fetching users:', error);
+            setSuggestions([]);
+        }
+    };
+
+    const itemTemplate = (item: any) => {
+        return (
+            <div className="flex align-items-center">
+                <div>{item.fullName}</div>
+            </div>
+        );
     };
 
     return (
@@ -123,14 +145,19 @@ export const SolidChatterHeader = (props: Props) => {
                 <div className="p-fluid">
                     <div className="flex flex-column gap-2">
                         <label htmlFor="name">Name:</label>
-                        <input
-                            type="text"
-                            id="name"
-                            name="name"
-                            placeholder="Filter By User"
-                            className="p-inputtext p-inputtext-sm p-component"
+                        <AutoComplete
+                            id="fullName"
                             value={filters.name}
-                            onChange={(e) => setFilters(prev => ({ ...prev, name: e.target.value }))}
+                            suggestions={suggestions}
+                            completeMethod={searchUsers}
+                            field="fullName"
+                            onChange={(e) => setFilters(prev => ({ 
+                                ...prev, 
+                                name: typeof e.value === 'object' ? e.value.fullName : e.value 
+                            }))}
+                            placeholder="Filter By User"
+                            itemTemplate={itemTemplate}
+                            className="w-full"
                         />
                     </div>
                     <div className="flex flex-column gap-2 mt-3">
