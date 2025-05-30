@@ -402,11 +402,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     const [redirectToList, setRedirectToList] = useState(false);
     const [selectedLocale,setSelectedLocale] = useState<string | null>(null);
+    const [defaultEntityLocaleId,setDefaultEntityLocaleId] = useState<string | null>(null);
     const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
 
     const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<"view" | "edit">(params.embeded === true ? "edit" : "view");
+    const [createMode,setCreateMode] = useState<boolean>(false);
     const [openLightbox, setOpenLightbox] = useState(false);
     const [lightboxUrls, setLightboxUrls] = useState([]);
     const [isShowChatter, setShowChatter] = useState(true);
@@ -419,10 +421,21 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     useEffect(() => {
         const mode = searchParams.get('viewMode');
-
-        if (params.id === 'new') {
+        const locale = searchParams.get('locale');
+        const defaultEntityLocaleIdn = searchParams.get('defaultEntityLocaleId');
+        if(locale){
+            setDefaultTabViewOptionIndex(1)
+        }
+        if (params.id === 'new' && !locale) {
             setViewMode('edit');
+            setCreateMode(true);
             return;
+        }
+        if(locale){
+            setSelectedLocale(locale);
+        }
+        if(defaultEntityLocaleIdn){
+            setDefaultEntityLocaleId(defaultEntityLocaleIdn);
         }
 
         // Set the viewMode based on the URL
@@ -432,11 +445,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
             setViewMode('view'); // Default to 'view' if no valid mode is provided
         }
     }, [searchParams, params.id]);
-
-    // useEffect(() => {
-    //     console.log(selectedLocale);
-    //     //upddate locale and patch with locale value (field name -> locale) 
-    // },[selectedLocale])
 
     // function that updates view mode 
     const updateViewMode = (newMode: "view" | "edit") => {
@@ -630,11 +638,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     formData.append(`${solidWorkflowField}Id`, solidWorkflowFieldValue);
                 }
             }
-            console.log("solid field",solidFieldsMetadata)
-            console.log("solidFormViewMetaData",solidFormViewMetaData)
             if(solidFormViewMetaData?.data?.solidView?.model?.internationalisation){
-                formData.append('localeName', selectedLocale? selectedLocale : 'en-In');
-                console.log('locale added')
+                if(selectedLocale){
+                    formData.append('localeName', selectedLocale);
+                }
+                if(defaultEntityLocaleId){
+                    formData.append('defaultEntityLocaleId', defaultEntityLocaleId.toString());
+                }
             }
             if (params.inlineCreateAutoSave === true) {
                 params.customCreateHandler(formData);
@@ -812,7 +822,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     }
                 }
                 setInitialEntityData(formViewData);
-                setSelectedLocale(solidFormViewData?.data?.localeName ? solidFormViewData?.data?.localeName : 'en-In');
             }
         };
 
@@ -1138,7 +1147,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
             setShowChatter(true);
             setRefreshChatterMessage(true)
         }
+        const handleLocaleChangeRedirect = (locale: string,defaultEntityLocaleId:string,applicableLocales:any) => {
+           //TODO: need to check if entityId is added then record already exists in the model and need to do update operation
+           const getLocaleInfo = applicableLocales.filter((loc:any) => loc.defaultEntityLocaleId && loc.entityId && loc.locale === locale);
 
+            if(getLocaleInfo.length > 0) {
+                router.push(`/admin/core/m-swipe/new/form/${getLocaleInfo[0]?.entityId}?viewMode=edit&locale=${locale}&defaultEntityLocaleId=${defaultEntityLocaleId}`, { scroll: false });
+            } else {
+                // redirect to edit form
+                router.push(`/admin/core/m-swipe/new/form/new?viewMode=edit&locale=${locale}&defaultEntityLocaleId=${defaultEntityLocaleId}`, { scroll: false });
+            }
+        }
         return (
             <div className="solid-form-wrapper">
                 <Toast ref={toast} />
@@ -1205,7 +1224,22 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 />
                             </div>
                             : solidFormViewMetaData?.data?.solidView?.model?.internationalisation ? 
-                            <SolidChatterLocaleTabView setSelectedLocale={setSelectedLocale} selectedLocale={selectedLocale} solidFormViewMetaData={solidFormViewMetaData} id={params.id} refreshChatterMessage={refreshChatterMessage} setRefreshChatterMessage={setRefreshChatterMessage} activeTab={defaultTabViewOptionIndex} internationalisation={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}/> : 
+
+                            <SolidChatterLocaleTabView 
+                            createMode={createMode} 
+                            setSelectedLocale={setSelectedLocale} 
+                            selectedLocale={selectedLocale} 
+                            solidFormViewMetaData={solidFormViewMetaData} 
+                            id={params.id} 
+                            refreshChatterMessage={refreshChatterMessage} 
+                            setRefreshChatterMessage={setRefreshChatterMessage} 
+                            activeTab={defaultTabViewOptionIndex} 
+                            internationalisation={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}
+                            viewMode={viewMode}
+                            defaultEntityLocaleId={defaultEntityLocaleId}
+                            handleLocaleChangeRedirect={handleLocaleChangeRedirect}
+                            applicableLocales={solidFormViewMetaData?.data?.applicableLocales}
+                            /> :
                             <SolidChatter 
                             solidFormViewMetaData={solidFormViewMetaData}
                             id={params.id}

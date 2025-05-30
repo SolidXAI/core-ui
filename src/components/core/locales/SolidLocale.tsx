@@ -1,50 +1,44 @@
+"use client";
+
 import React, { useEffect, useState } from 'react';
 import { Card } from 'primereact/card';
 import { Divider } from 'primereact/divider';
 import { Dropdown } from 'primereact/dropdown';
 import styles from './SolidLocale.module.css'; // adjust path as needed
-// import { useGetLocalesQuery } from '@/redux/api/localeApi';
-// import { Button } from 'primereact/button';
 import { createSolidEntityApi } from '@/redux/api/solidEntityApi';
+import { set } from 'lodash';
 
-const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLocale }: { solidFormViewMetaData: any, id: string, selectedLocale: any, setSelectedLocale: any }) => {
-    // const [selectedLocale, setSelectedLocale] = useState(initialSelectedLocale || null);
-    const entityApi = createSolidEntityApi('locale');
-    const {
-        useCreateSolidEntityMutation: useCreateLocaleMutation,
-        useDeleteSolidEntityMutation: useDeleteLocaleMutation,
-        useGetSolidEntitiesQuery: useGetLocalesQuery,
-        useGetSolidEntityByIdQuery: useGetLocaleByIdQuery,
-        useUpdateSolidEntityMutation: useUpdateLocaleMutation
-    } = entityApi;
-
-    const { data: locales } = useGetLocalesQuery({});
-
+const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLocale,viewMode,createMode,handleLocaleChangeRedirect,
+    applicableLocales,defaultEntityLocaleId }: { solidFormViewMetaData: any, id: string, selectedLocale: any, setSelectedLocale: any,viewMode:string,createMode:boolean,handleLocaleChangeRedirect:any,applicableLocales:any,defaultEntityLocaleId:string | null }) => {
     const [localeOptions, setLocaleOptions] = useState([]);
-
     useEffect(() => {
-        console.log("SolidLocale component mounted with id:", id);
-        console.log("SolidFormViewMetaData:", solidFormViewMetaData);
-        console.log("Locales data:", locales);
-        //convert locales to options for dropdown
-        if (locales && locales.records) {
-            const localeOptions = locales.records.map((x: any) => ({
-                label: x.displayName,
-                value: x.locale
-            }));
-            setLocaleOptions(localeOptions);
-            if (selectedLocale === null || selectedLocale === undefined) {
-                setSelectedLocale(localeOptions[0]?.value || null); // Set default locale if available
-            }
-            //  setSelectedLocale(localeOptions[0]?.value || null); // Set default locale if available
+        if (!applicableLocales) return;
+
+        // Prepare dropdown options
+        const localeOptions = applicableLocales.map((x: any) => ({
+            label: x.displayName,
+            value: x.locale,
+        }));
+        setLocaleOptions(localeOptions);
+
+        const defaultLocale = applicableLocales.find(
+            (x: any) => x.isDefault === 'yes' && (createMode || x.defaultEntityLocaleId == id)
+        );
+
+        if (defaultLocale) {
+            setSelectedLocale(defaultLocale.locale);
         }
-    }, [locales]);
+    }, [applicableLocales, id, viewMode, createMode]);
+
 
     const handleLocaleChange = (e: any) => {
-        console.log(e);
-        console.log("Selected locale:", e.value);
-        setSelectedLocale(e.value);
+        const newLocale = e.value;
+        if (newLocale === selectedLocale) return;
+        setSelectedLocale(newLocale);
+        const redirectLocaleId = id === 'new' ? defaultEntityLocaleId : (defaultEntityLocaleId || id);
+        handleLocaleChangeRedirect(newLocale, redirectLocaleId, applicableLocales);
     };
+
 
     // utils/formatDate.ts
     function formatToDDMMYY(dateString: string): string {
@@ -92,7 +86,17 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
                     optionLabel="label"
                     placeholder="Select locale"
                     className="w-full"
+                    //TODO: disable if createMode is true
+                    disabled={viewMode === 'view' || createMode}
                 />
+                {viewMode === 'view' || createMode && (
+                    <div className="mt-4">
+                        <p className="text-sm font-bold text-gray-500 mb-2">Note:</p>
+                        <p className="text-sm text-gray-700">
+                        you need to create entry in default locale.
+                        </p>
+                    </div>
+                )} 
             </div>
             {/* <p className="text-sm font-bold text-gray-500 px-2">Fill in form another locale</p> */}
         </div>
