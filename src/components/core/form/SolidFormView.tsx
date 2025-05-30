@@ -622,14 +622,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
             });
 
             let solidWorkflowField = solidFormViewMetaData?.data?.solidView?.layout?.attrs?.workflowField;
-            if (solidFormViewMetaData?.data?.solidFormViewWorkflowData) {
-                if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "selectionStatic") {
-                    formData.append(solidWorkflowField, solidWorkflowFieldValue);
-                }
-                if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "many-to-one") {
-                    formData.append(`${solidWorkflowField}Id`, solidWorkflowFieldValue);
+            if (params.id !== "new") {
+                if (solidFormViewMetaData?.data?.solidFormViewWorkflowData) {
+                    if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "selectionStatic") {
+                        formData.append(solidWorkflowField, solidWorkflowFieldValue);
+                    }
+                    if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "many-to-one") {
+                        formData.append(`${solidWorkflowField}Id`, solidWorkflowFieldValue);
+                    }
                 }
             }
+
 
             if (params.inlineCreateAutoSave === true) {
                 params.customCreateHandler(formData);
@@ -638,15 +641,23 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     // createEntity(formData);
                     const result = await createEntity(formData).unwrap();
                     showToast("success", "Form saved", "Form saved successfully!");
-                    if (!params.embeded && result?.data?.id) {
-                        const newPathname = pathname.replace(/new$/, result.data.id);
+                    // if (!params.embeded && result?.data?.id) {
+                    //     const newPathname = pathname.replace(/new$/, result.data.id);
 
-                        const params = new URLSearchParams(searchParams.toString());
-                        params.set("viewMode", "view");
+                    //     const params = new URLSearchParams(searchParams.toString());
+                    //     params.set("viewMode", "view");
 
-                        const updatedUrl = `${newPathname}?${params.toString()}`;
-                        await router.push(updatedUrl, { scroll: false });
+                    //     const updatedUrl = `${newPathname}?${params.toString()}`;
+                    //     await router.push(updatedUrl, { scroll: false });
 
+                    //     setViewMode("view")
+                    // }
+                    if (!params.embeded) {
+                        const currentUrl = new URL(window.location.href);
+                        currentUrl.pathname = currentUrl.pathname.replace(/new$/, result?.data?.id);
+                        const updatedUrl = currentUrl.toString();
+                        router.push(updatedUrl);
+                        const updatedPath = currentUrl.toString();
                         setViewMode("view")
                     }
                     return result;
