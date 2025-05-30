@@ -197,7 +197,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       }
     }
     // setFilters(initialFilters);
-    const recordsInSwimlane = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsInSwimlane ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsInSwimlane : 25;
+    const recordsInSwimlane = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsInSwimlane ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsInSwimlane : 10;
     // setToPopulate(toPopulate);
     // setToPopulateMedia(toPopulateMedia);
     setRecordsInSwimlane(recordsInSwimlane);
@@ -227,7 +227,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   // All kanban view state.
   const [kanbanViewData, setKanbanViewData] = useState<any>([]);
   const [kanbanLoadMoreData, setKanbanLoadMoreData] = useState<any>({});
-  const [recordsInSwimlane, setRecordsInSwimlane] = useState(25);
+  const [recordsInSwimlane, setRecordsInSwimlane] = useState(10);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isDialogVisible, setDialogVisible] = useState(false);

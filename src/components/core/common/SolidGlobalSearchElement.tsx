@@ -52,7 +52,7 @@ const transformFiltersToRules = (filter: any, parentRule: number | null = null):
                 fieldName: key,
                 //@ts-ignore
                 matchMode,
-                value: [condition[matchMode]],
+                value: matchMode !== "$between" ? [condition[matchMode]] : condition[matchMode],
                 parentRule,
                 children: []
             };
@@ -185,25 +185,25 @@ const tranformSearchToFilters = (input: any) => {
 
     const andFilters: any[] = [];
 
-  Object.entries(grouped).forEach(([fieldName, values]) => {
-    if (values.length === 1) {
-      andFilters.push({
-        [fieldName]: {
-          $containsi: values[0]
+    Object.entries(grouped).forEach(([fieldName, values]) => {
+        if (values.length === 1) {
+            andFilters.push({
+                [fieldName]: {
+                    $containsi: values[0]
+                }
+            });
+        } else {
+            andFilters.push({
+                $or: values.map((v) => ({
+                    [fieldName]: { $containsi: v }
+                }))
+            });
         }
-      });
-    } else {
-      andFilters.push({
-        $or: values.map((v) => ({
-          [fieldName]: { $containsi: v }
-        }))
-      });
-    }
-  });
+    });
 
-  return {
-    $and: andFilters
-  };
+    return {
+        $and: andFilters
+    };
 }
 
 export const mergeSearchAndCustomFilters = (transformedFilter: any, newFilter: any, transformedFilterName: string, newFilterName: string) => {
@@ -597,7 +597,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             handleApplyCustomFilter(finalFilter);
             // }
         }
-    }, [searchChips,hasSearched]);
+    }, [searchChips, hasSearched]);
 
 
     // Saved Filter related 

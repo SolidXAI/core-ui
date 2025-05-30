@@ -83,7 +83,7 @@ export const DefaultRelationOneToManyListWidget = ({ rowData, solidListViewMetaD
     // This is the userkey that will be present within the rowData.
     if (manyToManyFieldData) {
         // Since this is a many-to-one field, we fetch the user key field of the associated model.
-        const userKeyField = fieldMetadata?.relationModel?.userKeyField?.name;
+        const userKeyField = column?.attrs?.coModelFieldToDisplay ? column?.attrs?.coModelFieldToDisplay : fieldMetadata?.relationModel?.userKeyField?.name;
 
         const manyToManyColVal = manyToManyFieldData.map((f: any) => f[userKeyField]);
 
@@ -93,11 +93,10 @@ export const DefaultRelationOneToManyListWidget = ({ rowData, solidListViewMetaD
             <>
                 {manyToManyColVal.length > 0 &&
                     <p>
-                        {manyToManyColVal[0]}
-                        <Button text className="kaban-load-more" style={{ padding: 0, paddingBottom: "3px" }} size="small"
-                            onClick={() => { }}
-                            label={manyToManyColVal.length - 1 > 0 ? `...${manyToManyColVal.length - 1} more` : ""}
-                        />
+
+                        <span>{manyToManyColVal[0]}</span>
+                        <span style={{ color: "#0895CD" }}>{manyToManyColVal.length - 1 > 0 ? `, ...${manyToManyColVal.length - 1} more` : ""}</span>
+
 
                     </p >
                 }
