@@ -852,6 +852,7 @@ export const SolidListView = (params: SolidListViewParams) => {
               selectedRecords={selectedRecords}
               setDialogVisible={setDialogVisible}
               setShowSaveFilterPopup={setShowSaveFilterPopup}
+              filters = {filters}
             />
           }
 
