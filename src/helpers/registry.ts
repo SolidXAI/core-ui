@@ -34,6 +34,8 @@ import { DefaultRelationOneToManyListWidget } from "@/components/core/list/colum
 import { SolidRelationAvatarWidget } from "@/components/core/list/widgets/SolidRelationAvatarWidget";
 import { SolidRelationFieldAvatarFormWidget } from "@/components/core/form/fields/widgets/SolidRelationFieldAvatarFormWidget";
 import { DefaultSelectionDynamicFormEditWidget, DefaultSelectionDynamicFormViewWidget } from "@/components/core/form/fields/SolidSelectionDynamicField";
+import { SolidIconEditWidget } from "@/components/core/form/fields/widgets/SolidIconEditWidget";
+import { SolidIconViewWidget } from "@/components/core/form/fields/widgets/SolidIconViewWidget";
 
 type ExtensionRegistry = {
     components: Record<string, React.ComponentType<any>>;
@@ -172,3 +174,7 @@ registerExtensionFunction("emailFormTypeLoad", hanldeEmailFormTypeLoad);
 
 // RoleMetadata
 registerExtensionComponent("RolePermissionsManyToManyFieldWidget", RolePermissionsManyToManyFieldWidget, ["inputSwitch"]);
+
+// Solid Google Material Symbols Icon
+registerExtensionComponent("SolidIconEditWidget", SolidIconEditWidget, []);
+registerExtensionComponent("SolidIconViewWidget", SolidIconViewWidget, []);
