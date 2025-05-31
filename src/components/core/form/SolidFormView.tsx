@@ -1157,7 +1157,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             solidWorkflowFieldValue={solidWorkflowFieldValue}
                             setSolidWorkflowFieldValue={setSolidWorkflowFieldValue}
                         />
-                        <div className="p-4 solid-form-content">
+                        <div className="p-4 solid-form-content h-auto">
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
                             {params.id === 'new' && DynamicFormComponentNew ? (
                                 <DynamicFormComponentNew params={params} />
