@@ -19,9 +19,9 @@ export function SolidFormViewContextMenuHeaderButton({
     solidFormViewMetaData,
     handleCustomButtonClick,
 }: SolidFormViewContextMenuHeaderButtonProps) {
-    const hasRole = !button.attrs.roles || button.attrs.roles.length === 0
+    const hasRole = !button.attrs?.roles || button?.attrs?.roles.length === 0
         ? true
-        : useHasAnyRole(button.attrs.roles);
+        : useHasAnyRole(button?.attrs?.roles);
 
     if (!hasRole) return null;
     return (

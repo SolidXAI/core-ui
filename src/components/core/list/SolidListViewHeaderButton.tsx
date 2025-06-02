@@ -3,9 +3,9 @@ import { useHasAnyRole } from "@/helpers/rolesHelper";
 import { Button } from "primereact/button";
 
 export const SolidListViewHeaderButton = ({ button, params, solidListViewMetaData, handleCustomButtonClick }: any) => {
-    const hasRole = !button.attrs.roles || button.attrs.roles.length === 0
+    const hasRole = !button?.attrs?.roles || button?.attrs?.roles.length === 0
         ? true
-        : useHasAnyRole(button.attrs.roles);
+        : useHasAnyRole(button?.attrs?.roles);
 
     if (!hasRole) return null;
 

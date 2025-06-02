@@ -449,7 +449,10 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
                 showHeader={false}
                 visible={visibleCreateRelationEntity}
                 className="solid-dialog"
-                style={{ width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "40vw" }}
+                style={{
+                    width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw",
+                    height: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.height ?? "auto"
+                }}
                 onHide={() => {
                     if (!visibleCreateRelationEntity) return;
                     setvisibleCreateRelationEntity(false);

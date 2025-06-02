@@ -37,7 +37,11 @@ export const SolidFormStepper = (props: Props) => {
 
         setSolidWorkflowFieldValue(() => {
             if (initialEntityData?.[solidWorkflowField] !== undefined) {
-                return initialEntityData[solidWorkflowField];
+                if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "relation") {
+                    return initialEntityData[solidWorkflowField]?.id || initialEntityData[solidWorkflowField];
+                } else {
+                    return initialEntityData[solidWorkflowField];
+                }
             } else if (defaultWorkflowFieldValue !== undefined) {
                 return defaultWorkflowFieldValue;
             } else {

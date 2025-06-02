@@ -1438,18 +1438,37 @@ li.header-li-px {
 .tab-error-heading .p-tabview-nav-link:focus {
   border-color: #ff5757 !important;
 }
-.tab-error-heading{
+
+.tab-error-heading {
   animation: shake 0.8s ease-in-out;
   border-bottom: 3px solid red;
   font-weight: bold;
 }
+
 @keyframes shake {
-  0% { transform: translateX(0); }
-  20% { transform: translateX(-5px); }
-  40% { transform: translateX(5px); }
-  60% { transform: translateX(-5px); }
-  80% { transform: translateX(5px); }
-  100% { transform: translateX(0); }
+  0% {
+    transform: translateX(0);
+  }
+
+  20% {
+    transform: translateX(-5px);
+  }
+
+  40% {
+    transform: translateX(5px);
+  }
+
+  60% {
+    transform: translateX(-5px);
+  }
+
+  80% {
+    transform: translateX(5px);
+  }
+
+  100% {
+    transform: translateX(0);
+  }
 }
 
 .field-selection-form {
@@ -1641,6 +1660,15 @@ li.header-li-px {
 
 }
 
+.kaban-swimlane-load-more {
+  display: flex;
+  justify-content: space-between;
+  overflow: visible;
+  height: 100%;
+  writing-mode: vertical-rl;
+  text-align: center;
+  justify-content: center;
+}
 
 .kanban-arrow-icon-container {
   transform: rotate(90deg);
@@ -3051,6 +3079,10 @@ li.header-li-px {
   row-gap: 10px;
 }
 
+.kanban-card-container {
+  margin-top: 2rem;
+}
+
 .kanban-ungrouped-column .kanban-card-container {
   flex: 1 1 calc(20% - 20px);
   max-width: calc(20% - 20px);
@@ -3066,6 +3098,7 @@ li.header-li-px {
   border-radius: 0.5rem;
   padding: 9px;
   transition: 0.2s linear;
+  position: relative;
 }
 
 .solid-media-card {
@@ -3074,6 +3107,7 @@ li.header-li-px {
   padding: 9px;
   height: 100%;
   transition: 0.2s linear;
+  position: relative;
 }
 
 .solid-mimetype-chip {
@@ -3252,75 +3286,54 @@ flex-shrink: 0; */
   height: calc(100vh - 64px);
   overflow-y: auto;
 }
+
 .solid-custom-picklist {
-    border-radius: 0.5rem;
-    border: 1px solid var(--primary-light-color);
-    background: #FFF;
-    overflow: hidden;
-    position: relative;
+  border-radius: 0.5rem;
+  border: 1px solid var(--primary-light-color);
+  background: #FFF;
+  overflow: hidden;
+  position: relative;
 }
 
 .solid-picklist-header {
-    padding: 12px 16px;
-    font-size: 0.875rem;
-    font-weight: 600;
-    background: #F3FAFF;
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: #F3FAFF;
 }
 
 .solid-source-picklist-header {
-    border-right: 1px solid var(--primary-light-color);
+  border-right: 1px solid var(--primary-light-color);
 }
 
 .solid-picklist-item-wrapper {
-    height: 2.5rem;
-    display: flex;
-    justify-content: flex-start;
-    align-items: center;
-    border-top: 1px solid var(--primary-light-color);
-    padding: 0 16px;
+  height: 2.5rem;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  border-top: 1px solid var(--primary-light-color);
+  padding: 0 16px;
 }
 
 .solid-picklist-source-item {
-    border-right: 1px solid var(--primary-light-color);
+  border-right: 1px solid var(--primary-light-color);
 }
 
 .solid-picklist-item-content {
-    font-size: 0.875rem;
-    font-weight: 600;
+  font-size: 0.875rem;
+  font-weight: 600;
 }
 
 .solid-picklist-move-button {
-    position: absolute;
-    right: 47.5%;
-    top: 50%;
-    transform: translate(-50%, -50%);
-    height: 28px;
-    width: 28px !important;
-    padding: 0;
+  position: absolute;
+  right: 47.5%;
+  top: 50%;
+  transform: translate(-50%, -50%);
+  height: 28px;
+  width: 28px !important;
+  padding: 0;
 }
 
-.solid-picklist-move-button.p-button-outlined{
-    background-color: #f5f5f5;
-}
-
-.solid-locale .p-tabview-panels {
-  padding:0 !important;
-}
-
-.solid-locale .p-tabview-nav li.p-highlight .p-tabview-nav-link{
-  border: none !important;
-}
-.solid-locale .p-unselectable-text.p-tabview-selected {
-  border-bottom: 2px solid var(--border-color) !important;
-}
-.solid-locale .p-unselectable-text.p-tabview-selected.p-highlight {
-  border-bottom: 2px solid var(--primary-color) !important;
-}
-
-.solid-locale li{
-  width: 50% !important;
-  text-align: center !important;
-}
-.solid-locale .p-tabview-nav li .p-tabview-nav-link {
-  border: none !important;
+.solid-picklist-move-button.p-button-outlined {
+  background-color: #f5f5f5;
 }

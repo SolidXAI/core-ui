@@ -22,7 +22,7 @@ import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { pascalCase } from "change-case";
 import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
-import { createPermission, deleteManyPermission, deletePermission, updatePermission } from "@/helpers/permissions";
+import { createPermission, deleteManyPermission, deletePermission, findPermission, updatePermission } from "@/helpers/permissions";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@/components/core/common/FilterComponent";
@@ -123,7 +123,8 @@ export const SolidListView = (params: SolidListViewParams) => {
           createPermission(params.modelName),
           deletePermission(params.modelName),
           updatePermission(params.modelName),
-          deleteManyPermission(params.modelName)
+          deleteManyPermission(params.modelName),
+          findPermission(params.modelName)
         ]
         const queryData = {
           permissionNames: permissionNames
@@ -739,7 +740,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       if (!fieldMetadata) {
         return;
       }
-      const visibleToRole = column.attrs.roles || [];
+      const visibleToRole = column?.attrs?.roles || [];
 
       if (visibleToRole.length > 0) {
         if (hasAnyRole(user?.user?.roles, visibleToRole)) {
@@ -851,6 +852,7 @@ export const SolidListView = (params: SolidListViewParams) => {
               selectedRecords={selectedRecords}
               setDialogVisible={setDialogVisible}
               setShowSaveFilterPopup={setShowSaveFilterPopup}
+              filters = {filters}
             />
           }
 
@@ -896,23 +898,23 @@ export const SolidListView = (params: SolidListViewParams) => {
 
           onRowClick={(e) => {
             const rowData = e.data;
-            if (solidListViewLayout?.attrs.disableRowClick !== true) {
-              if (
-                !(
-                  actionsAllowed.includes(updatePermission(params.modelName)) &&
-                  solidListViewLayout?.attrs?.edit !== false
-                )
-              ) {
-                return;
+
+            if (solidListViewLayout?.attrs.disableRowClick === true) return;
+          
+            const hasFindPermission = actionsAllowed.includes(findPermission(params.modelName));
+            const hasUpdatePermission =
+              actionsAllowed.includes(updatePermission(params.modelName)) &&
+              solidListViewLayout?.attrs?.edit !== false;
+          
+            if (!(hasFindPermission || hasUpdatePermission)) return;
+          
+            if (params.embeded === true) {
+              params.handlePopUpOpen(rowData?.id);
+            } else {
+              if (typeof window !== "undefined") {
+                sessionStorage.setItem("fromView", "list");
               }
-              if (params.embeded == true) {
-                params.handlePopUpOpen(rowData?.id);
-              } else {
-                if (typeof window !== "undefined") {
-                  sessionStorage.setItem("fromView", "list");
-                }
-                router.push(`${editButtonUrl}/${rowData?.id}?viewMode=view`);
-              }
+              router.push(`${editButtonUrl}/${rowData?.id}?viewMode=view`);
             }
           }}
         >
@@ -922,7 +924,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           {renderColumnsDynamically(listViewMetaData)}
           {solidListViewLayout?.attrs?.rowButtons &&
             solidListViewLayout?.attrs?.rowButtons.filter((rb: any) => {
-              const roles = rb.attrs.roles || [];
+              const roles = rb?.attrs?.roles || [];
               const isInContextMenu = rb.attrs.actionInContextMenu === true;
 
               // Only check hasAnyRole if roles are provided

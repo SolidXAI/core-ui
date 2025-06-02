@@ -12,7 +12,8 @@ type CustomButtonData = {
     openInPopup: boolean,
     actionInContextMenu: boolean,
     customComponentIsSystem: string,
-    closable: boolean
+    popupWidth?: string,
+    closable?: boolean
 }
 
 
@@ -20,14 +21,14 @@ export const useHandleListCustomButtonClick = () => {
     const dispatch = useDispatch();
 
     return (buttonAttrs: any, event: any) => {
-        const { action, openInPopup, closable }: CustomButtonData = buttonAttrs;
+        const { action, openInPopup }: CustomButtonData = buttonAttrs;
 
         if (openInPopup === true) {
-            const eventData = { ...event, action: action, closable: closable };
+            const eventData = { ...event, ...buttonAttrs };
             dispatch(openPopup(eventData));
 
         } else {
-            const eventData = { ...event, action: action, closable: closable };
+            const eventData = { ...event, ...buttonAttrs };
             const dynamicFunction = getExtensionFunction(action);
             if (!dynamicFunction) {
                 console.error(`Action function "${action}" not found.`);

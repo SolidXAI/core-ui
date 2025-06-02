@@ -69,7 +69,7 @@ export class SolidRelationManyToOneField implements ISolidField {
         return schema;
     }
 
-    
+
     render(formik: FormikObject) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
@@ -346,7 +346,10 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
                 header=""
                 showHeader={false}
                 visible={visibleCreateRelationEntity}
-                style={{ width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw" }}
+                style={{
+                    width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw",
+                    height: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.height ?? "auto"
+                }}
                 onHide={() => {
                     if (!visibleCreateRelationEntity) return;
                     setvisibleCreateRelationEntity(false);

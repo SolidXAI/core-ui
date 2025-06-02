@@ -1,3 +1,11 @@
+.exportCustomProgressbar{
+    height: 3px !important;
+    margin-top: 5px !important;
+}
+.pExportText{
+    color:  var(--auth-subtitle-color) !important;
+    font-size: 14px !important;
+}
 .exportDialog {
     width: 70% !important;
     height: 700px !important;
