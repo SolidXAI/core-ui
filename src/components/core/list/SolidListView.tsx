@@ -56,7 +56,7 @@ const getRandomInt = (min: number, max: number) => {
 }
 
 export const queryStringToQueryObject = () => {
-  const currentPageUrl = window.location.href; // Get the current page URL
+  const currentPageUrl = window.location.pathname; // Get the current page URL
   const encodedQueryString = localStorage.getItem(currentPageUrl); // Retrieve the encoded query string from local storage
 
   if (encodedQueryString) {
@@ -75,13 +75,13 @@ export const queryObjectToQueryString = (queryObject: string) => {
   if (queryObject) {
     const stringifiedObject = qs.stringify(queryObject);
     const encodedQueryString = btoa(stringifiedObject); // Base64 encode the stringified object
-    const currentPageUrl = window.location.href; // Get the current page URL
+    const currentPageUrl = window.location.pathname; // Get the current page URL
     localStorage.setItem(currentPageUrl, encodedQueryString); // Store in local storage with the URL as the key
     return encodedQueryString;
   }
   return null;
 };
-
+ 
 type SolidListViewParams = {
   moduleName: string;
   modelName: string;
@@ -91,9 +91,6 @@ type SolidListViewParams = {
   customLayout?: any,
   customFilter?: any
 };
-
-
-
 
 export const SolidListView = (params: SolidListViewParams) => {
   const { user } = useSelector((state: any) => state.auth);

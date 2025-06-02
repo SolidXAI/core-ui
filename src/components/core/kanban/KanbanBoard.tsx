@@ -138,7 +138,7 @@ export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, sol
                     })}
                     {groupedView !== false &&
                         <div>
-                            <Button size="small" className="kaban-swimlane-load-more" style={{ textWrap: 'nowrap' }} text onClick={handleSwimLanePagination}>Load More...</Button>
+                            <a size="small" className="kaban-swimlane-load-more" style={{ textWrap: 'nowrap' }} text onClick={handleSwimLanePagination}>Load More...</a>
                         </div>
                     }
                 </div>

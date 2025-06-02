@@ -189,7 +189,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       }
 
       // Form the "toPopulate" array. 
-      if (fieldMetadata.type === 'relation' && fieldMetadata.relationType === 'many-to-one') {
+      if (fieldMetadata.type === 'relation') {
         toPopulate.push(fieldMetadata.name);
       }
       if (fieldMetadata.type === 'mediaSingle' || fieldMetadata.type === 'mediaMultiple') {
@@ -308,20 +308,11 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     if (solidKanbanViewMetaData) {
 
       const swimlanesCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.swimlanesCount || 5;
-      if (groupByFieldName && (toPopulate || toPopulateMedia)) {
+      if (groupByFieldName) {
 
         const queryObject = queryStringToQueryObject();
         let queryString = "";
-        if (searchParams) {
-
-          // Get Object from Url
-          const queryObject = qs.parse(searchParams,
-            {
-              decoder: str => decodeURIComponent(str),
-              allowDots: true,
-            }
-          );
-
+        if (queryObject) {
           const filters = {
             $and: []
           }
@@ -349,7 +340,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             // sort: [`id:desc`],
           };
 
-          setRecordsInSwimlane(queryData.limit);
+          setRecordsInSwimlane(queryData.groupFilter.limit);
           setToPopulate(queryData.populate);
           setToPopulateMedia(queryData.populateMedia);
           setFilters(filters);
@@ -422,6 +413,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     setSelectedRecords([]);
   }
 
+
+  // Individual Swimlane Load More
   const handleLoadMore = async (groupByField: string) => {
     const { offset, limit, records } = kanbanLoadMoreData[groupByField];
     const newLoadMoreData = kanbanLoadMoreData;
@@ -598,6 +591,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
         groupBy: groupByFieldName,
         populateMedia: toPopulateMedia,
+        populate: toPopulate,
         populateGroup: true,
         groupFilter: {
           limit: recordsInSwimlane,
@@ -614,10 +608,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         encodeValuesOnly: true
       });
 
-      //Push  to Router
-      router.push(`?${queryString}`);
-
-
       const data: any = await triggerGetSolidEntities(queryString);
       if (data && data?.data?.groupRecords.length > 0) {
         const updatedData = [...kanbanViewData, ...data.data.groupRecords];
@@ -632,8 +622,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const handleApplyCustomFilter = async (transformedFilter: any) => {
 
     if (solidKanbanViewMetaData) {
-
-
       const queryfilter = {
         $and: [
         ]
@@ -651,47 +639,47 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
       const swimlanesCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.swimlanesCount || 5;
 
-      if (toPopulate) {
-        const queryData = {
+      const queryData = {
+        offset: 0,
+        limit: swimlanesCount,
+        fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
+        groupBy: groupByFieldName,
+        populateGroup: true,
+        groupFilter: {
+          limit: recordsInSwimlane,
           offset: 0,
-          limit: swimlanesCount,
-          fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
-          groupBy: groupByFieldName,
-          populateGroup: true,
-          groupFilter: {
-            limit: recordsInSwimlane,
-            offset: 0,
-            filters: updatedFilter,
-            populate: toPopulate,
-            populateMedia: toPopulateMedia
-          }
-        };
-        const queryString = qs.stringify(queryData, {
-          encodeValuesOnly: true
-        });
-
-        // s_filter and c_filter format that needs to be passed to the router
-        // only present if handleCustomFilter is applied
-        if (customFilter) {
-          let url
-          const urlData = queryData;
-          delete urlData.filters;
-          urlData.s_filter = customFilter.s_filter || {};
-          urlData.c_filter = customFilter.c_filter || {};
-          queryObjectToQueryString(urlData);
+          filters: updatedFilter,
+          populate: toPopulate,
+          populateMedia: toPopulateMedia
         }
-
-
-        const data: any = await triggerGetSolidEntities(queryString);
-
-        // Update the kanban view data with the new data based on filter
-        if (data && data?.data?.groupRecords.length > 0) {
-          const updatedData = [...data.data.groupRecords];
-          setKanbanViewData(updatedData);
-        }
-        setSelectedRecords([]);
-
       }
+      const queryString = qs.stringify(queryData, {
+        encodeValuesOnly: true
+      });
+
+      // s_filter and c_filter format that needs to be passed to the router
+      // only present if handleCustomFilter is applied
+      if (customFilter) {
+        let url
+        const urlData = queryData;
+        delete urlData.filters;
+        urlData.s_filter = customFilter.s_filter || {};
+        urlData.c_filter = customFilter.c_filter || {};
+        queryObjectToQueryString(urlData);
+      }
+
+
+      const data: any = await triggerGetSolidEntities(queryString);
+
+      // Update the kanban view data with the new data based on filter
+      setSwimLaneCurrentPageNumber(1);
+      if (data && data?.data?.groupRecords.length > 0) {
+        const updatedData = [...data.data.groupRecords];
+        setKanbanViewData(updatedData);
+      }
+      setSelectedRecords([]);
+
+
     }
 
   }
