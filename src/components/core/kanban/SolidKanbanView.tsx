@@ -591,6 +591,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
         groupBy: groupByFieldName,
         populateMedia: toPopulateMedia,
+        populate: toPopulate,
         populateGroup: true,
         groupFilter: {
           limit: recordsInSwimlane,

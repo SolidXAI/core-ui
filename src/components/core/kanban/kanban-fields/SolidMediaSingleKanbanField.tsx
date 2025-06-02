@@ -33,7 +33,8 @@ const SolidMediaSingleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, f
 
             {mimeType && mimeType.includes("image/") &&
                 <div className='my-2'>
-                    <img className='kanban-image-preview'
+                    <img className={fieldLayout?.attrs?.kanbanImagePreviewClassname ? fieldLayout?.attrs?.kanbanImagePreviewClassname : 'kanban-image-preview'}
+
                         src={url}
                         onClick={(event) => {
                             event.stopPropagation();
