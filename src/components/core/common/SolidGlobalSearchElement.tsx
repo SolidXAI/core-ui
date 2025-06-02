@@ -643,7 +643,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
         const formData = new FormData();
         formData.append("name", formValues.name);
-        formData.append("filterQueryJson", JSON.stringify(filterJson));
+        formData.append("filterQueryJson", JSON.stringify(filterJson, null, 2));
         formData.append("modelId", viewData?.data?.solidView?.model?.id);
         formData.append("viewId", viewData?.data?.solidView?.id);
         formData.append("isPrivate", formValues.isPrivate);
@@ -654,6 +654,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
         } else {
             const result = await createEntity(formData).unwrap();
+            // localStorage.setItem(window.location.href, result.data.id);
             router.push(`?savedQuery=${result.data.id}`);
 
         }
