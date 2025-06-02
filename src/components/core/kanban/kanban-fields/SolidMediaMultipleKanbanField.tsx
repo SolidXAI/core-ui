@@ -29,7 +29,7 @@ const SolidMediaMultipleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata,
 
 
     return (
-        <>
+        <div className={`${fieldLayout?.attrs?.className ? ` ${fieldLayout.attrs.className}` : ""}`}>
             {firstImage && (
                 <div className='my-2'>
                     <img className='kanban-image-preview'
@@ -128,7 +128,7 @@ const SolidMediaMultipleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata,
                     </Document>
                 )}
             </Dialog>
-        </>
+        </div>
     );
 
 };

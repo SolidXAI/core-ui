@@ -33,7 +33,7 @@ const SolidShortTextKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fie
         )
     }
     return (
-        <div>
+        <div className={`${fieldLayout?.attrs?.className ? ` ${fieldLayout.attrs.className}` : ""}`}>
             {widget === "text" && groupedView &&
                 <p className='font-medium'>{fieldLayout?.attrs?.showLabel !== false && fieldLayout?.attrs?.label ? `${fieldLayout?.attrs?.label} : ` : ""}{data && data[fieldMetadata.name] ? `${data[fieldMetadata.name]}` : ""}</p>
             }

@@ -29,7 +29,8 @@ const SolidMediaSingleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, f
 
 
     return (
-        <>
+        <div className={`${fieldLayout?.attrs?.className ? ` ${fieldLayout.attrs.className}` : ""}`}>
+
             {mimeType && mimeType.includes("image/") &&
                 <div className='my-2'>
                     <img className='kanban-image-preview'
@@ -150,7 +151,7 @@ const SolidMediaSingleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, f
                     </div>
                 )
             }
-        </>
+        </div>
     );
 
 };
