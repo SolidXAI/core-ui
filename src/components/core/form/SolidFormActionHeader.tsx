@@ -12,7 +12,7 @@ import { useEffect, useRef, useState } from "react";
 import { SolidFormViewNormalHeaderButton } from "./SolidFormViewNormalHeaderButton";
 import { SolidFormViewContextMenuHeaderButton } from "./SolidFormViewContextMenuHeaderButton";
 
-export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue }: any) => {
+export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue,published }: any) => {
     const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
     const router = useRouter();
     const pathname = usePathname();
@@ -22,7 +22,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     const [normalHeaderButtons, setNormalHeaderButtons] = useState<any>([]);
     const createHeaderTitle = `Create ${solidView.model.displayName}`;
     const editHeaderTitle = `Edit ${solidView.model.displayName}`;
-
+    const [initialPublished] = useState(published); // capture initial value
+    const isPublishedChanged = published !== initialPublished;
 
 
     useEffect(() => {
@@ -124,7 +125,6 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
             </div>
         )
     }
-
     return (
         <>
             <div className="solid-form-header">
@@ -277,14 +277,14 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             {params.embeded !== true &&
                                 actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
                                 !formViewLayout.attrs.readonly &&
-                                formik.dirty &&
-                                <div>
+                                (formik.dirty || isPublishedChanged) &&
+                                (<div>
                                     <Button
                                         label="Save"
                                         size="small"
                                         type="submit"
                                     />
-                                </div>
+                                </div>)
                             }
 
                             {/* Inline */}

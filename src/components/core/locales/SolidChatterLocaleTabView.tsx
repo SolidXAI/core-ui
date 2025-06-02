@@ -17,9 +17,11 @@ interface Props {
   viewMode:string;
   createMode: boolean;
   //setDefaultLocaleId: (localeId: string) => void;
-  handleLocaleChangeRedirect: (locale: string,defaultEntityLocaleId:string,applicableLocales:[]) => void;
+  handleLocaleChangeRedirect: (locale: string,defaultEntityLocaleId:string) => void;
   applicableLocales?: string[];
   defaultEntityLocaleId:string | null;
+  solidFormViewData: any;
+  handlePublishBtnClick:(type: string) => void;
 }
 
 const SolidChatterLocaleTabView: React.FC<Props> = ({
@@ -36,7 +38,9 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
   // setDefaultLocaleId,
   handleLocaleChangeRedirect,
   applicableLocales = [],
-  defaultEntityLocaleId
+  defaultEntityLocaleId,
+  solidFormViewData,
+  handlePublishBtnClick
 }) => {
   return (
       <TabView className="solid-locale" activeIndex={activeTab}>
@@ -58,9 +62,12 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
           viewMode={viewMode}
           createMode={createMode}
           handleLocaleChangeRedirect={handleLocaleChangeRedirect}
-         // setDefaultLocaleId={setDefaultLocaleId} 
-         defaultEntityLocaleId={defaultEntityLocaleId}
-          applicableLocales={applicableLocales}/>
+          // setDefaultLocaleId={setDefaultLocaleId} 
+          defaultEntityLocaleId={defaultEntityLocaleId}
+          applicableLocales={applicableLocales}
+          solidFormViewData={solidFormViewData}
+          handlePublishBtnClick={handlePublishBtnClick}
+          />
         </TabPanel>}
       </TabView>
   );

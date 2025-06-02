@@ -4,6 +4,11 @@
     padding: 0;
     margin: 0;
 }
+.solidLocaleButtonContainer{
+  display: flex;
+  gap: 12px; /* adjust as needed */
+  justify-content: flex-end;
+}
 .solidLocaleCardHeader{
     height: auto !important;
     width: 100%;
