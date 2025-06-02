@@ -23,7 +23,10 @@ export const InlineRelationEntityDialog = ({ visible, setVisible, fieldContext, 
     <Dialog
       visible={visible}
       showHeader={false}
-      style={{ width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw" }}
+      style={{
+      width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw",
+      height: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.height ?? "auto"
+      }}
       onHide={() => setVisible(false)}
       className="solid-dialog"
     >

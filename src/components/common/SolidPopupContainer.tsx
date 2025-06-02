@@ -22,11 +22,11 @@ const SolidPopupContainer = () => {
             visible={isOpen}
             onHide={() => dispatch(closePopup())}
             closable={false}
-            style={{ width: '50vw' }}
+            style={{ width: event.popupWidth ? event.popupWidth : '50vw' }}
             modal
             headerClassName='p-0'
             contentClassName='p-0'
-            contentStyle={{borderRadius: 6}}
+            contentStyle={{ borderRadius: 6 }}
         >
             {DynamicComponent && <DynamicComponent {...event} />}
         </Dialog>

@@ -46,7 +46,7 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
       <TabView className="solid-locale" activeIndex={activeTab}>
         <TabPanel header="Chatter/Audit Trail" className='p-2' contentClassName='p-0'>
           <SolidChatter
-            solidFormViewMetaData={solidFormViewMetaData}
+            modelSingularName={solidFormViewMetaData?.data?.solidView?.model?.singularName}
             id={id}
             refreshChatterMessage={refreshChatterMessage}
             setRefreshChatterMessage={setRefreshChatterMessage}

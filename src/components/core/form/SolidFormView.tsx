@@ -1,7 +1,7 @@
 "use client";
 
 import { SolidCancelButton } from "@/components/common/CancelButton";
-import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
+import { createPermission, deletePermission, findPermission, updatePermission } from "@/helpers/permissions";
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
@@ -460,7 +460,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 const permissionNames = [
                     createPermission(params.modelName),
                     deletePermission(params.modelName),
-                    updatePermission(params.modelName)
+                    updatePermission(params.modelName),
+                    findPermission(params.modelName)
                 ]
                 const queryData = {
                     permissionNames: permissionNames
@@ -667,12 +668,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
             });
 
             let solidWorkflowField = solidFormViewMetaData?.data?.solidView?.layout?.attrs?.workflowField;
-            if (solidFormViewMetaData?.data?.solidFormViewWorkflowData) {
-                if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "selectionStatic") {
-                    formData.append(solidWorkflowField, solidWorkflowFieldValue);
-                }
-                if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "many-to-one") {
-                    formData.append(`${solidWorkflowField}Id`, solidWorkflowFieldValue);
+            if (params.id !== "new") {
+                if (solidFormViewMetaData?.data?.solidFormViewWorkflowData) {
+                    if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "selectionStatic") {
+                        formData.append(solidWorkflowField, solidWorkflowFieldValue);
+                    }
+                    if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "many-to-one") {
+                        formData.append(`${solidWorkflowField}Id`, solidWorkflowFieldValue);
+                    }
                 }
             }
             if(solidFormViewMetaData?.data?.solidView?.model?.internationalisation){
@@ -695,15 +698,23 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     // default locale
                     const result = await createEntity(formData).unwrap();
                     showToast("success", "Form saved", "Form saved successfully!");
-                    if (!params.embeded && result?.data?.id) {
-                        const newPathname = pathname.replace(/new$/, result.data.id);
+                    // if (!params.embeded && result?.data?.id) {
+                    //     const newPathname = pathname.replace(/new$/, result.data.id);
 
-                        const params = new URLSearchParams(searchParams.toString());
-                        params.set("viewMode", "view");
-                      
-                        const updatedUrl = `${newPathname}?${params.toString()}`;
-                        await router.push(updatedUrl, { scroll: false });
-                      
+                    //     const params = new URLSearchParams(searchParams.toString());
+                    //     params.set("viewMode", "view");
+
+                    //     const updatedUrl = `${newPathname}?${params.toString()}`;
+                    //     await router.push(updatedUrl, { scroll: false });
+
+                    //     setViewMode("view")
+                    // }
+                    if (!params.embeded) {
+                        const currentUrl = new URL(window.location.href);
+                        currentUrl.pathname = currentUrl.pathname.replace(/new$/, result?.data?.id);
+                        const updatedUrl = currentUrl.toString();
+                        router.push(updatedUrl);
+                        const updatedPath = currentUrl.toString();
                         setViewMode("view")
                     }
                     return result;
@@ -768,6 +779,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
             if (fieldMetadata?.type === 'mediaSingle' || fieldMetadata?.type === 'mediaMultiple') {
                 toPopulateMedia.push(fieldMetadata.name);
             }
+        }
+        if (formViewLayout.attrs?.workflowField && solidFieldsMetadata[formViewLayout.attrs.workflowField]?.type === 'relation' && solidFieldsMetadata[formViewLayout.attrs.workflowField]?.relationType === 'many-to-one') {
+            toPopulate.push(solidFieldsMetadata[formViewLayout.attrs.workflowField].name);
         }
     }
     // TODO: Possible optimisation here, we are firing 2 queries to load the form view data object. 
@@ -1020,7 +1034,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
             // console.log(`Resolved visibility of form element ${ key } to ${ visible } `);
             // console.log(`Form element ${ key }: `, attrs);
-            const visibleToRole = attrs.roles || [];
+            const visibleToRole = attrs?.roles || [];
 
             if (visibleToRole.length > 0) {
                 if (!hasAnyRole(user?.user?.roles, visibleToRole)) {
@@ -1195,21 +1209,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
         defaultEntityLocaleId: string
         ) => {
         const defaultApplicableLocales = solidFormViewMetaData?.data?.applicableLocales || [];
-
+            //fr 4
         const matchingLocale = defaultApplicableLocales.find(
             (loc: any) =>
             loc.defaultEntityLocaleId &&
             loc.entityId &&
             loc.locale === locale
         );
-        const matchingLocaleTest = defaultApplicableLocales.find(
-            (loc: any) =>
-            loc.defaultEntityLocaleId &&
-            loc.locale === locale
-        );
-
-        console.log("matching locale",matchingLocale)
-        console.log("matching locale scenario1",matchingLocaleTest)
         // Extract the base path from the current pathname, removing query params if any
         const basePath = pathname.split('?')[0];
 
@@ -1249,7 +1255,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             formViewLayout={formViewLayout}
                             solidView={solidView}
                             solidFormViewMetaData={solidFormViewMetaData}
-                            initialEntityData={initialEntityData}
+                            initialEntityData={solidFormViewData ? solidFormViewData.data : {}}
                             setDeleteDialogVisible={setDeleteDialogVisible}
                             setLayoutDialogVisible={setLayoutDialogVisible}
                             setRedirectToList={setRedirectToList}
@@ -1261,7 +1267,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             publish={solidFormViewMetaData?.data?.solidView?.model?.publishedAt}
                             published={published}
                         />
-                        <div className="p-4 solid-form-content">
+                        <div className="p-4 solid-form-content h-auto">
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
                             {params.id === 'new' && DynamicFormComponentNew ? (
                                 <DynamicFormComponentNew params={params} />
@@ -1323,7 +1329,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             handlePublishBtnClick={handlePublishBtnClick}
                             /> :
                             <SolidChatter 
-                            solidFormViewMetaData={solidFormViewMetaData}
+                            modelSingularName={solidFormViewMetaData?.data?.solidView?.model?.singularName}
                             id={params.id}
                             refreshChatterMessage={refreshChatterMessage}
                             setRefreshChatterMessage={setRefreshChatterMessage}/>

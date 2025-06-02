@@ -48,6 +48,7 @@ export const GeneralSettings = () => {
         showLegalLinks: solidSettingsData?.data?.showLegalLinks || false,
         appTnc: solidSettingsData?.data?.appTnc || "",
         appPrivacyPolicy: solidSettingsData?.data?.appPrivacyPolicy || "",
+        enableDarkMode: solidSettingsData?.data?.enableDarkMode || true
     };
     const formik = useFormik({
         initialValues: initialValues,
@@ -286,6 +287,28 @@ export const GeneralSettings = () => {
                                                                 onChange={formik.handleChange}
                                                                 value={formik.values.appPrivacyPolicy}
                                                                 className='w-full'
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className='mt-4' style={{ borderBottom: '1px dashed #D8E2EA' }}></div>
+                                    <p className='font-bold mt-4' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Theme</p>
+                                    <div className='formgrid grid'>
+                                        <div className='col-8'>
+                                            <div className="formgrid grid">
+                                                <div className="col-6">
+                                                    <div className="formgrid grid align-items-center">
+                                                        <div className="col-5">
+                                                            <label className="form-field-label">Enable Dark Mode</label>
+                                                        </div>
+                                                        <div className="col-7">
+                                                            <InputSwitch
+                                                                name="enableDarkMode"
+                                                                checked={formik.values.enableDarkMode}
+                                                                onChange={(e) => formik.setFieldValue("enableDarkMode", e.value)}
                                                             />
                                                         </div>
                                                     </div>

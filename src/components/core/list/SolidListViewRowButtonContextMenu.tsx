@@ -5,9 +5,9 @@ import { Button } from "primereact/button";
 
 export const SolidListViewRowButtonContextMenu = ({ button, params, selectedSolidViewData, solidListViewMetaData, handleCustomButtonClick }: any) => {
     const hasRole =
-        !button.attrs.roles || button.attrs.roles.length === 0
+        !button?.attrs?.roles || button?.attrs?.roles.length === 0
             ? true
-            : useHasAnyRole(button.attrs.roles);
+            : useHasAnyRole(button?.attrs?.roles);
 
     if (!hasRole) return null;
 
