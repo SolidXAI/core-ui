@@ -31,9 +31,10 @@ import { DefaultMediaMultipleListWidget } from "@/components/core/list/columns/S
 import { DefaultRelationManyToManyListWidget } from "@/components/core/list/columns/relations/SolidRelationManyToManyColumn";
 import { DefaultRelationManyToOneListWidget } from "@/components/core/list/columns/relations/SolidRelationManyToOneColumn";
 import { DefaultRelationOneToManyListWidget } from "@/components/core/list/columns/relations/SolidRelationOneToManyColumn";
-import { SolidRelationAvatarWidget } from "@/components/core/list/widgets/SolidRelationAvatarWidget";
 import { SolidRelationFieldAvatarFormWidget } from "@/components/core/form/fields/widgets/SolidRelationFieldAvatarFormWidget";
 import { DefaultSelectionDynamicFormEditWidget, DefaultSelectionDynamicFormViewWidget } from "@/components/core/form/fields/SolidSelectionDynamicField";
+import { SolidManyToManyRelationAvatarListWidget } from "@/components/core/list/widgets/SolidManyToManyRelationAvatarListWidget";
+import { SolidManyToOneRelationAvatarListWidget } from "@/components/core/list/widgets/SolidManyToOneRelationAvatarListWidget";
 
 type ExtensionRegistry = {
     components: Record<string, React.ComponentType<any>>;
@@ -157,7 +158,8 @@ registerExtensionComponent("SolidShortTextFieldImageListWidget", SolidShortTextF
 
 // Listview custom widgets
 registerExtensionComponent("SolidShortTextAvatarWidget", SolidShortTextAvatarWidget, []);
-registerExtensionComponent("SolidRelationAvatarWidget", SolidRelationAvatarWidget, []);
+registerExtensionComponent("SolidManyToManyRelationAvatarListWidget", SolidManyToManyRelationAvatarListWidget, []);
+registerExtensionComponent("SolidManyToOneRelationAvatarListWidget", SolidManyToOneRelationAvatarListWidget, []);
 
 
 // ModuleMetadata

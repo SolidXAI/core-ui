@@ -25,7 +25,7 @@ interface ApiResponse {
     };
 }
 
-export const KanbanBoard = ({ groupedView, kanbanViewData, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLanePagination, setLightboxUrls, setOpenLightbox, editButtonUrl }: any) => {
+export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLanePagination, setLightboxUrls, setOpenLightbox, editButtonUrl }: any) => {
     const [loading, setLoading] = useState<boolean>(true);
     // State to manage the folded status of each column
     const [foldedStates, setFoldedStates] = useState<Record<string, boolean>>({});
@@ -93,8 +93,27 @@ export const KanbanBoard = ({ groupedView, kanbanViewData, solidKanbanViewMetaDa
                     );
                 })} */}
                     {kanbanViewData.map((data) => {
+                        // Find the displayName for the groupName from solidKanbanViewMetaData.solidFieldsMetadata
+                        let label = data.groupName;
+                        const fieldMeta = solidKanbanViewMetaData?.solidFieldsMetadata?.[groupByFieldName];
+                        if (
+                            fieldMeta &&
+                            fieldMeta.type === "selectionStatic" &&
+                            Array.isArray(fieldMeta.selectionStaticValues)
+                        ) {
+                            const match = fieldMeta.selectionStaticValues.find(
+                                (v: string) => {
+                                    const [value, displayName] = v.split(":");
+                                    return value === data.groupName;
+                                }
+                            );
+                            if (match) {
+                                label = match.split(":")[1];
+                            }
+                        }
+
                         const group = {
-                            label: data.groupName,
+                            label,
                             count: data.groupData.meta.totalRecords,
                             limit: data.groupData.meta.perPage,
                             currentPage: data.groupData.meta.currentPage,
@@ -119,7 +138,7 @@ export const KanbanBoard = ({ groupedView, kanbanViewData, solidKanbanViewMetaDa
                     })}
                     {groupedView !== false &&
                         <div>
-                            <Button size="small" style={{ textWrap: 'nowrap' }} text onClick={handleSwimLanePagination}>Load More...</Button>
+                            <Button size="small" className="kaban-swimlane-load-more" style={{ textWrap: 'nowrap' }} text onClick={handleSwimLanePagination}>Load More...</Button>
                         </div>
                     }
                 </div>
