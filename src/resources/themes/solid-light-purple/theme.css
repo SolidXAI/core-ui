@@ -6139,10 +6139,10 @@
     color: var(--auth-subtitle-color) !important;
   }
 
-  .solid-auth-subtitle.left,
+  /* .solid-auth-subtitle.left,
   .solid-auth-subtitle.left a {
     color: #fff !important;
-  }
+  } */
 
   .solid-custom-title {
     color: var(--solid-form-title);
