@@ -28,7 +28,7 @@ interface AuthTabsProps {
 const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
     const [initiateLogin] = useInitateLoginMutation();
-
+    const [activeIndex, setActiveIndex] = useState(0);
     useEffect(() => {
         trigger("") // Fetch settings on mount
     }, [trigger])
@@ -211,7 +211,10 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
     const AuthTabs: React.FC<AuthTabsProps> = ({ iamPasswordRegistrationEnabled, passwordlessRegistration }) => {
         if (iamPasswordRegistrationEnabled && passwordlessRegistration) {
             return (
-                <TabView className="solid-auth-tabview">
+                <TabView className="solid-auth-tabview"
+                    activeIndex={activeIndex}
+                    onTabChange={(e) => setActiveIndex(e.index)}
+                >
                     <TabPanel header="With Password">
                         <PasswordLogin />
                     </TabPanel>
