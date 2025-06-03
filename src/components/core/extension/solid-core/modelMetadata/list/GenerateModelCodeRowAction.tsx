@@ -50,8 +50,13 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
         <>
             <Toast ref={toast} />
             {event?.rowData?.module?.name != "solid-core" ?
-                <div className="p-2">
-                    <p className="">Click Ok to proceed with model code generation, please note that if the file already exists and <br></br>you have made custom changes to this file we will create a .bkp file as a backup of the existing file.</p>
+                <div className="p-4">
+                    <div className="p-dialog-header p-0">
+                        <span className="p-dialog-title">
+                            Generate Model
+                        </span>
+                    </div>
+                    <p className="mt-2">Click Ok to proceed with model code generation, please note that if the file already exists and you have made custom changes to this file we will create a .bkp file as a backup of the existing file.</p>
                     <p>Below is the list of files that will be created </p>
                     <ul>
                         <li>Model Entity File</li>
@@ -59,16 +64,21 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
                         <li>Model Service File</li>
                         <li>Model Create and Update Dto files</li>
                     </ul>
-                    <div className="flex gap-5 justify-content-center">
-                        <Button label="Ok" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={generateCodeHandler} />
-                        <Button label="Cancel" icon="pi pi-times" className='small-button' onClick={() => dispatch(closePopup())} />
+                    <div className="flex gap-3 justify-content-start">
+                        <Button size="small" label="Ok" autoFocus onClick={generateCodeHandler} />
+                        <Button size="small" label="Cancel" outlined onClick={() => dispatch(closePopup())} />
                     </div>
                 </div > :
-                <div className="p-2">
-                    <p className="">You cannot generate code for Solid Core models</p>
-                    <div className="flex gap-5 justify-content-center">
+                <div className="p-4">
+                    <div className="p-dialog-header  p-0">
+                        <span className="p-dialog-title">
+                            Generate Model
+                        </span>
+                    </div>
+                    <p className="mt-2">You cannot generate code for Solid Core models</p>
+                    <div className="flex gap-3 justify-content-start">
                         {/* <Button label="Ok" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={generateCodeHandler} /> */}
-                        <Button label="Close" icon="pi pi-times" className='small-button' onClick={() => dispatch(closePopup())} />
+                        <Button size="small" label="Cancel" outlined onClick={() => dispatch(closePopup())} />
                     </div>
                 </div >
             }

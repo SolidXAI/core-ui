@@ -1857,7 +1857,7 @@ li.header-li-px {
 
 .active-before-step-arrow {
   left: -18px;
-  z-index: 9999;
+  z-index: 1;
   top: 50%;
   transform: translateY(-38%);
 }

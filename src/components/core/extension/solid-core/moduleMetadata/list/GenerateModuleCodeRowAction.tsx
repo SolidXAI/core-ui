@@ -37,18 +37,29 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
         <>
             <Toast ref={toast} />
             {event?.rowData?.name != "solid-core" ?
-                <div className="p-2">
-                    <p className="text-center">Click Ok to proceed with module code generation, please note that if the file already exists and <br></br>you have made custom changes to this file we will create a .bkp file as a backup of the existing file.</p>
-                    <div className="flex gap-5 justify-content-center">
-                        <Button label="Ok" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={generateCodeHandler} />
-                        <Button label="Cancel" icon="pi pi-times" className='small-button' onClick={() => dispatch(closePopup())} />
+                <div className="p-4">
+                    <div className="p-dialog-header  p-0">
+                        <span className="p-dialog-title">
+                            Generate Module
+                        </span>
+                    </div>
+                    <p className="text-start mt-2">Click Ok to proceed with module code generation, please note that if the file already exists and
+                        you have made custom changes to this file we will create a .bkp file as a backup of the existing file.</p>
+                    <div className="flex gap-3 justify-content-start">
+                        <Button size="small" label="Ok" autoFocus onClick={generateCodeHandler} />
+                        <Button size="small" label="Cancel" outlined onClick={() => dispatch(closePopup())} />
                     </div>
                 </div> :
-                <div className="p-2">
-                    <p className="">You cannot generate code for Solid Core modules</p>
-                    <div className="flex gap-5 justify-content-center">
+                <div className="p-4">
+                    <div className="p-dialog-header p-0">
+                        <span className="p-dialog-title">
+                            Generate Module
+                        </span>
+                    </div>
+                    <p className="test-start mt-2">You cannot generate code for Solid Core modules</p>
+                    <div className="flex gap-3 justify-content-start">
                         {/* <Button label="Ok" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={generateCodeHandler} /> */}
-                        <Button label="Close" icon="pi pi-times" className='small-button' onClick={() => dispatch(closePopup())} />
+                        <Button size="small" label="Cancel" outlined onClick={() => dispatch(closePopup())} />
                     </div>
                 </div >}
         </>
