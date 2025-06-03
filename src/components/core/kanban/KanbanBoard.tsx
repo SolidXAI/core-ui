@@ -25,7 +25,7 @@ interface ApiResponse {
     };
 }
 
-export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLanePagination, setLightboxUrls, setOpenLightbox, editButtonUrl }: any) => {
+export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, maxSwimLanesCount, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLanePagination, setLightboxUrls, setOpenLightbox, editButtonUrl }: any) => {
     const [loading, setLoading] = useState<boolean>(true);
     // State to manage the folded status of each column
     const [foldedStates, setFoldedStates] = useState<Record<string, boolean>>({});
@@ -136,9 +136,9 @@ export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, sol
                             />
                         );
                     })}
-                    {groupedView !== false &&
+                    {groupedView !== false && kanbanViewData.length < maxSwimLanesCount &&
                         <div>
-                            <a size="small" className="kaban-swimlane-load-more" style={{ textWrap: 'nowrap' }} text onClick={handleSwimLanePagination}>Load More...</a>
+                            <a size="small" className="kaban-swimlane-load-more" style={{ textWrap: 'nowrap' }} text onClick={handleSwimLanePagination}>Load More...({maxSwimLanesCount - kanbanViewData.length})</a>
                         </div>
                     }
                 </div>
