@@ -650,6 +650,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       setFilters((prevFilters) => ({ ...(prevFilters || {}), ...(queryfilter || {}) }));
 
       const swimlanesCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.swimlanesCount || 5;
+      const { toPopulate, toPopulateMedia } = initialFilterMethod();
 
       const queryData = {
         offset: 0,
