@@ -237,6 +237,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [swimLaneCurrentPageNumber, setSwimLaneCurrentPageNumber] = useState(1);
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
+  const [maxSwimLanesCount, setMaxSwimLanesCount] = useState<number>(0);
 
 
   const showToast = (severity: "success" | "error", summary: string, detail: string) => {
@@ -271,6 +272,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   useEffect(() => {
     if (solidEntityKanbanViewData) {
       // Merge groupRecords by groupName: update existing, add new
+      setMaxSwimLanesCount(solidEntityKanbanViewData?.meta?.totalRecords || 0);
       const groupRecords = solidEntityKanbanViewData?.groupRecords || [];
       const groupMap = new Map((kanbanViewData || []).map((g: any) => [g.groupName, g]));
       groupRecords.forEach((newGroup: any) => {
@@ -759,7 +761,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       </div>
       <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
       {solidKanbanViewMetaData && kanbanViewData &&
-        <KanbanBoard groupByFieldName={groupByFieldName} groupedView={groupedView} kanbanViewData={kanbanViewData} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl}></KanbanBoard>
+        <KanbanBoard groupByFieldName={groupByFieldName} groupedView={groupedView} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl}></KanbanBoard>
       }
 
       <Dialog
