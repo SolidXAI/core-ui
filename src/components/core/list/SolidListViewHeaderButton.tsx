@@ -11,7 +11,6 @@ export const SolidListViewHeaderButton = ({ button, params, solidListViewMetaDat
 
     return (
         <Button
-            text
             type="button"
             className="w-full text-left gap-2"
             label={button.attrs.label}
