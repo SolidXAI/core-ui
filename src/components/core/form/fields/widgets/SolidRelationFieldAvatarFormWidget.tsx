@@ -15,10 +15,14 @@ export const SolidRelationFieldAvatarFormWidget = ({ formik, fieldContext }: Sol
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const userKeyFieldName = fieldMetadata.relationModel?.userKeyField?.name;
     const [fieldValue, setFieldValue] = useState<any>([]);
-    useEffect(() => {
-        console.log("fieldContext.data?.[fieldLayoutInfo.attrs.name]",fieldContext.data?.[fieldLayoutInfo.attrs.name]);
-        
-        const value = (fieldContext.data?.[fieldLayoutInfo.attrs.name] || []).map((item: any) => ({ label: item[userKeyFieldName] ?? '' }));
+    useEffect(() => {        
+        let rawValue = fieldContext.data?.[fieldLayoutInfo.attrs.name];
+        let value: any[] = [];
+        if (Array.isArray(rawValue)) {
+            value = rawValue.map((item: any) => ({ label: item?.[userKeyFieldName] ?? '' }));
+        } else if (rawValue && typeof rawValue === "object") {
+            value = [{ label: rawValue[userKeyFieldName] ?? '' }];
+        }
         if (Array.isArray(value)) {
 
             if (value.length > 0) {
@@ -26,9 +30,9 @@ export const SolidRelationFieldAvatarFormWidget = ({ formik, fieldContext }: Sol
                 setFieldValue(data);
             }
         }
-        if (value && !Array.isArray(value) && typeof value === "object") {
-            setFieldValue([value.label]);
-        }
+        // if (value && !Array.isArray(value) && typeof value === "object") {
+        //     setFieldValue([value.label]);
+        // }
     }, [fieldContext]);
 
 

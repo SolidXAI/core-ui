@@ -42,16 +42,19 @@ const SolidMediaMultipleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata,
                         }}
                         alt={firstImage.originalFileName}
                     />
-                    <p className="text-sm"
-                        style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}
-                        onClick={(event) => {
-                            event.stopPropagation();
-                            setLightboxUrls(allImageUrls);
-                            setOpenLightbox(true);
-                        }}
-                    >
-                        {firstImage.originalFileName}
-                    </p>
+                    {fieldLayout?.attrs?.showLabel !== false &&
+
+                        <p className="text-sm"
+                            style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}
+                            onClick={(event) => {
+                                event.stopPropagation();
+                                setLightboxUrls(allImageUrls);
+                                setOpenLightbox(true);
+                            }}
+                        >
+                            {firstImage.originalFileName}
+                        </p>
+                    }
                 </div>
             )}
 

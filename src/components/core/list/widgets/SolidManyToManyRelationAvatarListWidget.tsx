@@ -16,11 +16,11 @@ export const SolidManyToManyRelationAvatarListWidget = ({ rowData, solidListView
         return (
             <>
                 {manyToManyColVal.length > 0 &&
+                    <p>
+                        <AvatarWidget value={manyToManyColVal[0]}></AvatarWidget>
+                        <span style={{ color: "#0895CD", fontWeight: 'bold' }}>{manyToManyColVal.length - 1 > 0 ? ` +${manyToManyColVal.length - 1}` : ""}</span>
 
-                    manyToManyColVal.map((m: any) =>
-                        <AvatarWidget value={m}></AvatarWidget>
-
-                    )
+                    </p >
                 }
             </>
         )
