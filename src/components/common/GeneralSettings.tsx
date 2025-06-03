@@ -48,7 +48,8 @@ export const GeneralSettings = () => {
         showLegalLinks: solidSettingsData?.data?.showLegalLinks || false,
         appTnc: solidSettingsData?.data?.appTnc || "",
         appPrivacyPolicy: solidSettingsData?.data?.appPrivacyPolicy || "",
-        enableDarkMode: solidSettingsData?.data?.enableDarkMode || true
+        enableDarkMode: solidSettingsData?.data?.enableDarkMode || true,
+        copyright: solidSettingsData?.data?.copyright
     };
     const formik = useFormik({
         initialValues: initialValues,
@@ -229,6 +230,23 @@ export const GeneralSettings = () => {
                                                                 name="appDescription"
                                                                 onChange={formik.handleChange}
                                                                 value={formik.values.appDescription}
+                                                                className='w-full'
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-6 mt-4">
+                                                    <div className="formgrid grid align-items-start">
+                                                        <div className="col-5">
+                                                            <label className="form-field-label">Copyright</label>
+                                                        </div>
+                                                        <div className="col-7">
+                                                            <InputTextarea
+                                                                rows={3}
+                                                                id="copyright"
+                                                                name="copyright"
+                                                                onChange={formik.handleChange}
+                                                                value={formik.values.copyright}
                                                                 className='w-full'
                                                             />
                                                         </div>

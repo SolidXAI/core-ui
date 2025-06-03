@@ -21,6 +21,7 @@ import { useInitateLoginMutation } from "@/redux/api/authApi";
 import { AppTitle } from "@/helpers/AppTitle";
 import Image from "next/image";
 import SolidLogo from '../../resources/images/SS-Logo.png'
+// import { Checkbox } from "primereact/checkbox";
 interface AuthTabsProps {
     iamPasswordRegistrationEnabled: boolean;
     passwordlessRegistration: boolean;
@@ -34,8 +35,6 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
     }, [trigger])
     const toast = useRef<Toast>(null);
     const router = useRouter();
-
-    const [password, setPassword] = useState('');
 
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
         toast.current?.show({
@@ -54,7 +53,9 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
             <Formik
                 initialValues={{
                     email: "",
+                    // email: initialEmail,
                     password: "",
+                    // rememberMe: rememberMe,
                 }}
                 enableReinitialize={false}
                 validationSchema={Yup.object({
@@ -65,6 +66,12 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                 })}
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
                     try {
+                        // Handle Remember Me
+                        // if (values.rememberMe) {
+                        //     localStorage.setItem("rememberedEmail", values.email);
+                        // } else {
+                        //     localStorage.removeItem("rememberedEmail");
+                        // }
                         const response = await signIn("credentials", {
                             redirect: false,
                             email: values.email,
@@ -129,8 +136,17 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                     <Checkbox inputId="remember" onChange={(e: any) => setChecked(e.checked)} checked={checked} />
                                     <label htmlFor="remember" className="ml-2">Remember me</label>
                                 </div> */}
-                        <div className="mt-4 text-right">
-                            <Link href={"/auth/initiate-forgot-password"} className="solid-auth-input-label">Forgot Password?</Link>
+                        <div className="mt-4 flex align-items-center justify-content-between">
+                            {/* <div className="flex align-items-center gap-2">
+                                <Checkbox
+                                    inputId="rememberMe"
+                                    name="rememberMe"
+                                    checked={formik.values.rememberMe}
+                                    onChange={formik.handleChange}
+                                />
+                                <label htmlFor="rememberMe" className="solid-auth-input-label">Remember me</label>
+                            </div> */}
+                            <Link href={"/auth/initiate-forgot-password"} className="solid-auth-input-label font-bold">Forgot Password?</Link>
                         </div>
                         <div className="mt-4">
                             <Button className="w-full font-light auth-submit-button" label="Sign In" disabled={formik.isSubmitting} loading={formik.isSubmitting} />

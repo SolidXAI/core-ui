@@ -792,7 +792,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       <div className="page-header">
         <Toast ref={toast} />
         <div className="flex gap-3 align-items-center">
-          <p className="m-0 view-title">{solidListViewMetaData?.data?.solidView?.displayName}</p>
+          <p className="m-0 view-title">{solidListViewMetaData?.data?.solidView?.layout?.displayName}</p>
           {solidListViewLayout?.attrs?.enableGlobalSearch === true && params.embeded === false &&
             <SolidGlobalSearchElement showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} filters={filters} clearFilter={clearFilter} ref={solidGlobalSearchElementRef} viewData={solidListViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}></SolidGlobalSearchElement>
           }
@@ -967,8 +967,33 @@ export const SolidListView = (params: SolidListViewParams) => {
                 );
               })}
 
-          {actionsAllowed.includes(`${deletePermission(params.modelName)}`) && solidListViewLayout?.attrs?.delete !== false && solidListViewLayout?.attrs?.showRowDeleteInContextMenu === false &&
+          {actionsAllowed.includes(`${updatePermission(params.modelName)}`) && solidListViewLayout?.attrs?.edit !== false && solidListViewLayout?.attrs?.showRowEditInContextMenu === false &&
+            <Column
+              header="Edit"
+              body={(rowData) => {
+                return (
+                  <Button
+                    text
+                    type="button"
+                    severity="secondary"
+                    className=""
+                    label=""
+                    size="small"
+                    iconPos="left"
+                    icon={"pi pi-pencil"}
+                    onClick={() => {
+                      if (params.embeded == true) {
+                        params.handlePopUpOpen(rowData?.id);
+                      } else {
+                        router.push(`${editButtonUrl}/${rowData?.id}?viewMode=edit`)
+                      }
+                    }}
+                  />
+                )
+              }} />
+          }
 
+          {actionsAllowed.includes(`${deletePermission(params.modelName)}`) && solidListViewLayout?.attrs?.delete !== false && solidListViewLayout?.attrs?.showRowDeleteInContextMenu === false &&
             <Column
               header="Delete"
               body={(rowData) => {
@@ -988,33 +1013,6 @@ export const SolidListView = (params: SolidListViewParams) => {
                 )
               }} />
           }
-
-          {actionsAllowed.includes(`${updatePermission(params.modelName)}`) && solidListViewLayout?.attrs?.edit !== false && solidListViewLayout?.attrs?.showRowEditInContextMenu === false &&
-
-            <Column
-              header="Edit"
-              body={(rowData) => {
-                return (
-                  <Button
-                    type="button"
-                    className="w-full text-left gap-1"
-                    label="Edit"
-                    size="small"
-                    iconPos="left"
-                    icon={"pi pi-pencil"}
-                    onClick={() => {
-                      if (params.embeded == true) {
-                        params.handlePopUpOpen(selectedSolidViewData?.id);
-                      } else {
-                        router.push(`${editButtonUrl}/${selectedSolidViewData?.id}?viewMode=edit`)
-                      }
-                    }}
-                  />
-                )
-              }} />
-          }
-
-
 
           {actionsAllowed.includes(`${updatePermission(params.modelName)}`) && solidListViewLayout?.attrs?.edit !== false &&
             <Column frozen alignFrozen="right" body={(rowData) => (
