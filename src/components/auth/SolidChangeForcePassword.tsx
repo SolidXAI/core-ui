@@ -72,6 +72,27 @@ const SolidChangeForcePassword = () => {
     const isFormFieldValid = (formik: any, fieldName: string) =>
         formik.touched[fieldName] && formik.errors[fieldName];
 
+    const passwordPolicies = [
+        {
+            policy: "8 characters minimum."
+        },
+        {
+            policy: "No Spaces Allowed"
+        },
+        {
+            policy: "One uppercase letter"
+        },
+        {
+            policy: "One lowercase letter"
+        },
+        {
+            policy: "One numeric digit"
+        },
+        {
+            policy: "One special character(!, @, #, $)"
+        },
+    ]
+
     return (
         <>
             <Toast ref={toast} />
@@ -133,6 +154,24 @@ const SolidChangeForcePassword = () => {
                         severity="error"
                         text={formik?.errors?.confirmPassword?.toString()}
                     />}
+                </div>
+                <div className='mt-4'>
+                    <div className='grid'>
+                        {passwordPolicies.map((policy, index) => {
+                            return (
+                                <div key={index} className='col-6'>
+                                    <p className="solid-auth-input-label flex align-items-center gap-2">
+                                        <div className='flex align-items-center justify-content-center' style={{ height: 14, width: 14, borderRadius: '50%', backgroundColor: '#A4A4A4' }}>
+                                            <svg xmlns="http://www.w3.org/2000/svg" width="12" height="12" viewBox="0 0 12 12" fill="none">
+                                                <path d="M4.86813 8.72999L2.28979 6.15166L2.91396 5.52749L4.86813 7.48166L9.08563 3.26416L9.7098 3.88833L4.86813 8.72999Z" fill="#E8EAED" />
+                                            </svg>
+                                        </div>
+                                        {policy.policy}
+                                    </p>
+                                </div>
+                            )
+                        })}
+                    </div>
                 </div>
                 <div className="mt-4">
                     <Button className="w-full font-light auth-submit-button" label="Change Password" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
