@@ -13,14 +13,16 @@
     height: auto !important;
     width: 100%;
     background-color: var(--surface-ground);
-    padding: 0.5rem 1rem !important;
+    padding: 0 !important;
     margin: 10px 0;
 }
+
 .solidLocaleCardBody{
     padding: 0.5rem !important;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+    margin-top: 5px;
     background-color: var(--surface-ground);
 }
 .solidLocaleInfoField{

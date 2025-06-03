@@ -3354,6 +3354,19 @@ flex-shrink: 0; */
   width: 50% !important;
   text-align: center !important;
 }
+.solid-locale li.locale-card-header {
+    padding:10px !important;
+    width: 100% !important;
+    list-style-type: disc;
+    text-align: left !important;
+    color: #15803D;
+}
+.solid-locale li.locale-card-header.danger{
+   color:#EF4444;
+}
 .solid-locale .p-tabview-nav li .p-tabview-nav-link {
   border: none !important;
+  text-align: center !important;
+  align-content: center;
+  justify-content: center;
 }

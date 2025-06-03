@@ -17,11 +17,11 @@ interface Props {
   viewMode:string;
   createMode: boolean;
   //setDefaultLocaleId: (localeId: string) => void;
-  handleLocaleChangeRedirect: (locale: string,defaultEntityLocaleId:string) => void;
+  handleLocaleChangeRedirect: (locale: string,defaultEntityLocaleId:string,viewMode:string) => void;
   applicableLocales?: string[];
   defaultEntityLocaleId:string | null;
   solidFormViewData: any;
-  handlePublishBtnClick:(type: string) => void;
+  published:string | null;
 }
 
 const SolidChatterLocaleTabView: React.FC<Props> = ({
@@ -40,19 +40,10 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
   applicableLocales = [],
   defaultEntityLocaleId,
   solidFormViewData,
-  handlePublishBtnClick
+  published
 }) => {
   return (
       <TabView className="solid-locale" activeIndex={activeTab}>
-        <TabPanel header="Chatter/Audit Trail" className='p-2' contentClassName='p-0'>
-          <SolidChatter
-            modelSingularName={solidFormViewMetaData?.data?.solidView?.model?.singularName}
-            id={id}
-            refreshChatterMessage={refreshChatterMessage}
-            setRefreshChatterMessage={setRefreshChatterMessage}
-          />
-        </TabPanel>
-        {internationalisation &&
         <TabPanel header="Internationalisation" className='p-2' contentClassName='p-0'>
           <SolidLocale
           setSelectedLocale={setSelectedLocale}
@@ -62,13 +53,20 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
           viewMode={viewMode}
           createMode={createMode}
           handleLocaleChangeRedirect={handleLocaleChangeRedirect}
-          // setDefaultLocaleId={setDefaultLocaleId} 
           defaultEntityLocaleId={defaultEntityLocaleId}
           applicableLocales={applicableLocales}
           solidFormViewData={solidFormViewData}
-          handlePublishBtnClick={handlePublishBtnClick}
+          published={published}
           />
-        </TabPanel>}
+        </TabPanel>
+        <TabPanel header="Audit Trail" className='p-2' contentClassName='p-0'>
+          <SolidChatter
+            modelSingularName={solidFormViewMetaData?.data?.solidView?.model?.singularName}
+            id={id}
+            refreshChatterMessage={refreshChatterMessage}
+            setRefreshChatterMessage={setRefreshChatterMessage}
+          />
+        </TabPanel>
       </TabView>
   );
 };
