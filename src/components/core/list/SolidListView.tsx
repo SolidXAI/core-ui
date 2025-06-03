@@ -81,7 +81,7 @@ export const queryObjectToQueryString = (queryObject: string) => {
   }
   return null;
 };
- 
+
 type SolidListViewParams = {
   moduleName: string;
   modelName: string;
@@ -208,10 +208,15 @@ export const SolidListView = (params: SolidListViewParams) => {
 
         // Form the "toPopulate" array. 
         if (fieldMetadata.type === 'relation') {
-          toPopulate.push(fieldMetadata.name);
+          if (!toPopulate.includes(fieldMetadata.name)) {
+            toPopulate.push(fieldMetadata.name);
+          }
         }
         if (fieldMetadata.type === 'mediaSingle' || fieldMetadata.type === 'mediaMultiple') {
-          toPopulateMedia.push(fieldMetadata.name);
+          if (!toPopulateMedia.includes(fieldMetadata.name)) {
+            toPopulateMedia.push(fieldMetadata.name);
+          }
+
         }
       }
 
@@ -849,7 +854,7 @@ export const SolidListView = (params: SolidListViewParams) => {
               selectedRecords={selectedRecords}
               setDialogVisible={setDialogVisible}
               setShowSaveFilterPopup={setShowSaveFilterPopup}
-              filters = {filters}
+              filters={filters}
             />
           }
 
@@ -897,14 +902,14 @@ export const SolidListView = (params: SolidListViewParams) => {
             const rowData = e.data;
 
             if (solidListViewLayout?.attrs.disableRowClick === true) return;
-          
+
             const hasFindPermission = actionsAllowed.includes(findPermission(params.modelName));
             const hasUpdatePermission =
               actionsAllowed.includes(updatePermission(params.modelName)) &&
               solidListViewLayout?.attrs?.edit !== false;
-          
+
             if (!(hasFindPermission || hasUpdatePermission)) return;
-          
+
             if (params.embeded === true) {
               params.handlePopUpOpen(rowData?.id);
             } else {
@@ -984,6 +989,33 @@ export const SolidListView = (params: SolidListViewParams) => {
               }} />
           }
 
+          {actionsAllowed.includes(`${updatePermission(params.modelName)}`) && solidListViewLayout?.attrs?.edit !== false && solidListViewLayout?.attrs?.showRowEditInContextMenu === false &&
+
+            <Column
+              header="Edit"
+              body={(rowData) => {
+                return (
+                  <Button
+                    type="button"
+                    className="w-full text-left gap-1"
+                    label="Edit"
+                    size="small"
+                    iconPos="left"
+                    icon={"pi pi-pencil"}
+                    onClick={() => {
+                      if (params.embeded == true) {
+                        params.handlePopUpOpen(selectedSolidViewData?.id);
+                      } else {
+                        router.push(`${editButtonUrl}/${selectedSolidViewData?.id}?viewMode=edit`)
+                      }
+                    }}
+                  />
+                )
+              }} />
+          }
+
+
+
           {actionsAllowed.includes(`${updatePermission(params.modelName)}`) && solidListViewLayout?.attrs?.edit !== false &&
             <Column frozen alignFrozen="right" body={(rowData) => (
               rowData?.deletedAt ? (
@@ -997,7 +1029,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                       {detailsBodyTemplate(rowData)}
                       <OverlayPanel ref={op} className="solid-custom-overlay" style={{ top: 10, minWidth: 120 }}>
                         <div className="flex flex-column gap-1 p-1">
-                          {solidListViewLayout?.attrs.showDefaultEditButton !== false &&
+                          {solidListViewLayout?.attrs.showDefaultEditButton !== false && solidListViewLayout?.attrs.showRowEditInContextMenu !== false &&
                             <Button
                               type="button"
                               className="w-full text-left gap-1"

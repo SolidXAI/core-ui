@@ -270,7 +270,13 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   // After data is fetched populate the kanban view state so as to be able to render the data. 
   useEffect(() => {
     if (solidEntityKanbanViewData) {
-      const latestKanbanGroupData = [...kanbanViewData, ...solidEntityKanbanViewData?.groupRecords]
+      // Merge groupRecords by groupName: update existing, add new
+      const groupRecords = solidEntityKanbanViewData?.groupRecords || [];
+      const groupMap = new Map((kanbanViewData || []).map((g: any) => [g.groupName, g]));
+      groupRecords.forEach((newGroup: any) => {
+        groupMap.set(newGroup.groupName, newGroup);
+      });
+      const latestKanbanGroupData = Array.from(groupMap.values());
       setKanbanViewData(latestKanbanGroupData);
       const loadmoredata = Object.entries(latestKanbanGroupData).reduce((acc: any, [key, value]: any) => {
         acc[value.groupName] = {
@@ -549,32 +555,36 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     destinationGroup.groupData.records = destinationRecords;
 
     // Update the kanbanViewData state
+    const oldkanbanViewData = structuredClone(kanbanViewData);
     try {
       const formData = new FormData();
       formData.append(groupByFieldName, destinationGroupName);
+      // Update the kanbanViewData state
+      setKanbanViewData((prevData: typeof kanbanViewData) =>
+        prevData.map((group: any) => {
+          if (group.groupName === sourceGroupName) {
+            return sourceGroup;
+          }
+          if (group.groupName === destinationGroupName) {
+            return destinationGroup;
+          }
+          return group;
+        })
+      );
       const kanbanUpdateResponse = await patchKanbanView({ id: +movedItem.id, data: formData }).unwrap();
 
       if (kanbanUpdateResponse?.statusCode === 200) {
         showToast("success", "Success", "Kanban View Updated!");
-        // Update the kanbanViewData state
-        setKanbanViewData((prevData: typeof kanbanViewData) =>
-          prevData.map((group: any) => {
-            if (group.groupName === sourceGroupName) {
-              return sourceGroup;
-            }
-            if (group.groupName === destinationGroupName) {
-              return destinationGroup;
-            }
-            return group;
-          })
-        );
       } else {
         showToast("error", "Duplicate Key", kanbanUpdateResponse?.error);
+        // Update the kanbanViewData state
+        setKanbanViewData(oldkanbanViewData);
       }
     } catch (error: any) {
       // 6. Handle 500 or network errors
       console.error("API error:", error);
       showToast("error", "Something went wrong", error?.data?.message || "Something went wrong");
+      setKanbanViewData(oldkanbanViewData);
     }
   };
 
@@ -644,6 +654,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         limit: swimlanesCount,
         fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
         groupBy: groupByFieldName,
+        populateMedia: toPopulateMedia,
         populateGroup: true,
         groupFilter: {
           limit: recordsInSwimlane,
