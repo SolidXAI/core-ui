@@ -155,7 +155,7 @@ const SolidChangeForcePassword = () => {
                         text={formik?.errors?.confirmPassword?.toString()}
                     />}
                 </div>
-                <div className='mt-4'>
+                {/* <div className='mt-4'>
                     <div className='grid'>
                         {passwordPolicies.map((policy, index) => {
                             return (
@@ -172,7 +172,7 @@ const SolidChangeForcePassword = () => {
                             )
                         })}
                     </div>
-                </div>
+                </div> */}
                 <div className="mt-4">
                     <Button className="w-full font-light auth-submit-button" label="Change Password" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
                 </div>
