@@ -84,11 +84,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
      // console.log("Selected columns:", values.selectedColumns);
     }
   });
-  useEffect(()=>{
-    console.log("Solid Export View Metadata", solidView);
-    console.log("Solid Export Fields Metadata", solidFieldsMetadata);
-    console.log("all ",allColumns)
-  },[])
+
   const { selectedColumns } = formik.values;
 
   const availableColumns = allColumns.filter(
