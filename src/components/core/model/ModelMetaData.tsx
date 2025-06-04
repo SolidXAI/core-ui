@@ -159,7 +159,6 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
             parentModel: values.parentModel,
           }),
         };
-        console.log("Model Data to be created:", modelData);
         setModelMetaData(modelData);
         nextTab()
 
