@@ -156,6 +156,7 @@ export class SolidSelectionDynamicField implements ISolidField {
             </>
         );
     }
+
     renderExtensionRenderMode(widget: string, formik: FormikObject) {
         let DynamicWidget = getExtensionComponent(widget);
         const widgetProps: SolidFormFieldWidgetProps = {

@@ -417,7 +417,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
        activeValue={currentStepValue}
        setActiveValue={setCurrentStepValue} />
       </div> */}
-      <div className="p-3">
+      <div className="p-0">
       { currentStepValue === 'export' && 
             <>
             <div className={`${styles.solidExportControls} gap-2`}>

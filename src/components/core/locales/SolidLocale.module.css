@@ -1,0 +1,35 @@
+.solidLocaleContainer{
+    display: flex;
+    flex-direction: column;
+    padding: 0;
+    margin: 0;
+}
+.solidLocaleButtonContainer{
+  display: flex;
+  gap: 12px; /* adjust as needed */
+  justify-content: flex-end;
+}
+.solidLocaleCardHeader{
+    height: auto !important;
+    width: 100%;
+    background-color: var(--surface-ground);
+    padding: 0 !important;
+    margin: 10px 0;
+}
+
+.solidLocaleCardBody{
+    padding: 0.5rem !important;
+    display: flex;
+    flex-direction: column;
+    gap: 0.5rem;
+    margin-top: 5px;
+    background-color: var(--surface-ground);
+}
+.solidLocaleInfoField{
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    padding: 0.5rem;
+    gap: 0.5rem;
+}

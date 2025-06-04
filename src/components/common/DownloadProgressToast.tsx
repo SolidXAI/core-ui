@@ -2,7 +2,6 @@ import { Button } from "primereact/button";
 import { ProgressBar } from "primereact/progressbar";
 import { useEffect, useState } from "react";
 import styles from "./SolidExport.module.css";
-
 export const DownloadProgressToast = ({
   progress,
   visible,
@@ -49,7 +48,7 @@ export const DownloadProgressToast = ({
           <h2 className={`text-lg font-semibold m-0 ${status === "error" ? "text-red-500" : styles.pExportText}`}>
             {message}
           </h2>
-          <p className={`text-sm p-export-text ${status === "error" ? "text-red-400" : ""}`}>
+          <p className={`text-sm ${status === "error" ? "text-red-400" : styles.pExportText}`}>
             {submessage}
           </p>
         </div>
