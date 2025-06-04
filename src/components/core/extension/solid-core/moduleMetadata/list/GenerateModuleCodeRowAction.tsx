@@ -28,9 +28,16 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
 
 
     const generateCodeHandler = async () => {
-        const response = await generateCode({ id: event?.rowData?.id })
+        const response = await generateCode({ id: event?.rowData?.id });
+
+        if ((response as any)?.data?.statusCode === 200) {
+            showToast("success", "Generated", "Code Generated Successfully");
+            dispatch(closePopup());
+        } else {
+            const errorMessage = (response as any)?.data?.error || "Something went wrong";
+            showToast("error", "Error", errorMessage); // ✅ Only string is passed
+        }
         console.log("response", response);
-        dispatch(closePopup())
     }
 
     return (
@@ -44,10 +51,10 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
                         </span>
                     </div>
                     <div className="px-4 pb-4 pt-3">
-                        <p className="text-start">Click Ok to proceed with module code generation, please note that if the file already exists and
+                        <p className="text-start">Click <strong>Generate</strong> to proceed with module code generation, please note that if the file already exists and
                             you have made custom changes to this file we will create a .bkp file as a backup of the existing file.</p>
                         <div className="flex gap-3 justify-content-start">
-                            <Button size="small" label="Ok" autoFocus onClick={generateCodeHandler} />
+                            <Button size="small" label="Generate" autoFocus onClick={generateCodeHandler} />
                             <Button size="small" label="Cancel" outlined onClick={() => dispatch(closePopup())} />
                         </div>
                     </div>
