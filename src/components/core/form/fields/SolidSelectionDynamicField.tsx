@@ -196,7 +196,8 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
     // selection dynamic specific code. 
     const [triggerGetSelectionDynamicValues] = useLazyGetSelectionDynamicValuesQuery();
     const [selectionDynamicItems, setSelectionDynamicItems] = useState([]);
-    const isFormFieldValid = (formik: any, fieldName: string) => formik.errors[fieldName];
+    const isFormFieldValid = (formik: any, fieldName: string) =>
+        (formik.touched[fieldName] || formik.submitCount > 0) && !!formik.errors[fieldName];
 
     const selectionDynamicSearch = async (event: AutoCompleteCompleteEvent) => {
 
@@ -207,6 +208,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
             query: event.query,
             fieldId: fieldMetadata.id
         };
+        
         if (whereClause) {
             queryData.query = whereClause;
         }

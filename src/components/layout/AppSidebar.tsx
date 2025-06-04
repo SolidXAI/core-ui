@@ -155,6 +155,7 @@ const AppSidebar = () => {
                                 key={m.title}
                                 className={`flex align-items-center menu-item ${currentMainMenu === m.title ? "active-menu-image" : ""}`}
                                 onClick={() => handleMenu(m)}
+                                style={{cursor:'pointer'}}
                             >
                                 {m.icon ?
                                     <Image

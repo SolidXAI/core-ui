@@ -73,7 +73,7 @@ export const SolidChatterMessageBox = (props: Props) => {
                             {auditType === "fieldChange" ? 'Fields changed' : 'Sent message'}
                         </span>
                     </div>
-                    <i className='pi pi-ellipsis-v text-xs' />
+                    {/* <i className='pi pi-ellipsis-v text-xs' /> */}
                 </div>
             </div>
             <div className='flex align-items-center mt-1'>

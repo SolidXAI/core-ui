@@ -56,7 +56,7 @@ const getRandomInt = (min: number, max: number) => {
 }
 
 export const queryStringToQueryObject = () => {
-  const currentPageUrl = window.location.href; // Get the current page URL
+  const currentPageUrl = window.location.pathname; // Get the current page URL
   const encodedQueryString = localStorage.getItem(currentPageUrl); // Retrieve the encoded query string from local storage
 
   if (encodedQueryString) {
@@ -75,7 +75,7 @@ export const queryObjectToQueryString = (queryObject: string) => {
   if (queryObject) {
     const stringifiedObject = qs.stringify(queryObject);
     const encodedQueryString = btoa(stringifiedObject); // Base64 encode the stringified object
-    const currentPageUrl = window.location.href; // Get the current page URL
+    const currentPageUrl = window.location.pathname; // Get the current page URL
     localStorage.setItem(currentPageUrl, encodedQueryString); // Store in local storage with the URL as the key
     return encodedQueryString;
   }
@@ -91,9 +91,6 @@ type SolidListViewParams = {
   customLayout?: any,
   customFilter?: any
 };
-
-
-
 
 export const SolidListView = (params: SolidListViewParams) => {
   const { user } = useSelector((state: any) => state.auth);
@@ -211,10 +208,15 @@ export const SolidListView = (params: SolidListViewParams) => {
 
         // Form the "toPopulate" array. 
         if (fieldMetadata.type === 'relation') {
-          toPopulate.push(fieldMetadata.name);
+          if (!toPopulate.includes(fieldMetadata.name)) {
+            toPopulate.push(fieldMetadata.name);
+          }
         }
         if (fieldMetadata.type === 'mediaSingle' || fieldMetadata.type === 'mediaMultiple') {
-          toPopulateMedia.push(fieldMetadata.name);
+          if (!toPopulateMedia.includes(fieldMetadata.name)) {
+            toPopulateMedia.push(fieldMetadata.name);
+          }
+
         }
       }
 
@@ -790,7 +792,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       <div className="page-header">
         <Toast ref={toast} />
         <div className="flex gap-3 align-items-center">
-          <p className="m-0 view-title">{solidListViewMetaData?.data?.solidView?.displayName}</p>
+          <p className="m-0 view-title">{solidListViewMetaData?.data?.solidView?.layout?.displayName}</p>
           {solidListViewLayout?.attrs?.enableGlobalSearch === true && params.embeded === false &&
             <SolidGlobalSearchElement showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} filters={filters} clearFilter={clearFilter} ref={solidGlobalSearchElementRef} viewData={solidListViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}></SolidGlobalSearchElement>
           }
@@ -852,7 +854,7 @@ export const SolidListView = (params: SolidListViewParams) => {
               selectedRecords={selectedRecords}
               setDialogVisible={setDialogVisible}
               setShowSaveFilterPopup={setShowSaveFilterPopup}
-              filters = {filters}
+              filters={filters}
             />
           }
 
@@ -900,14 +902,14 @@ export const SolidListView = (params: SolidListViewParams) => {
             const rowData = e.data;
 
             if (solidListViewLayout?.attrs.disableRowClick === true) return;
-          
+
             const hasFindPermission = actionsAllowed.includes(findPermission(params.modelName));
             const hasUpdatePermission =
               actionsAllowed.includes(updatePermission(params.modelName)) &&
               solidListViewLayout?.attrs?.edit !== false;
-          
+
             if (!(hasFindPermission || hasUpdatePermission)) return;
-          
+
             if (params.embeded === true) {
               params.handlePopUpOpen(rowData?.id);
             } else {
@@ -965,8 +967,33 @@ export const SolidListView = (params: SolidListViewParams) => {
                 );
               })}
 
-          {actionsAllowed.includes(`${deletePermission(params.modelName)}`) && solidListViewLayout?.attrs?.delete !== false && solidListViewLayout?.attrs?.showRowDeleteInContextMenu === false &&
+          {actionsAllowed.includes(`${updatePermission(params.modelName)}`) && solidListViewLayout?.attrs?.edit !== false && solidListViewLayout?.attrs?.showRowEditInContextMenu === false &&
+            <Column
+              header="Edit"
+              body={(rowData) => {
+                return (
+                  <Button
+                    text
+                    type="button"
+                    severity="secondary"
+                    className=""
+                    label=""
+                    size="small"
+                    iconPos="left"
+                    icon={"pi pi-pencil"}
+                    onClick={() => {
+                      if (params.embeded == true) {
+                        params.handlePopUpOpen(rowData?.id);
+                      } else {
+                        router.push(`${editButtonUrl}/${rowData?.id}?viewMode=edit`)
+                      }
+                    }}
+                  />
+                )
+              }} />
+          }
 
+          {actionsAllowed.includes(`${deletePermission(params.modelName)}`) && solidListViewLayout?.attrs?.delete !== false && solidListViewLayout?.attrs?.showRowDeleteInContextMenu === false &&
             <Column
               header="Delete"
               body={(rowData) => {
@@ -1000,7 +1027,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                       {detailsBodyTemplate(rowData)}
                       <OverlayPanel ref={op} className="solid-custom-overlay" style={{ top: 10, minWidth: 120 }}>
                         <div className="flex flex-column gap-1 p-1">
-                          {solidListViewLayout?.attrs.showDefaultEditButton !== false &&
+                          {solidListViewLayout?.attrs.showDefaultEditButton !== false && solidListViewLayout?.attrs.showRowEditInContextMenu !== false &&
                             <Button
                               type="button"
                               className="w-full text-left gap-1"

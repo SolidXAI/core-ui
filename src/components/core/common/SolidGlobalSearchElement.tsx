@@ -654,7 +654,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
         } else {
             const result = await createEntity(formData).unwrap();
-            // localStorage.setItem(window.location.href, result.data.id);
+            // localStorage.setItem(window.location.pathname, result.data.id);
             router.push(`?savedQuery=${result.data.id}`);
 
         }
