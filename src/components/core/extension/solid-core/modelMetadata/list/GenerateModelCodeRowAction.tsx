@@ -1,10 +1,11 @@
 'use client';
+import { ProgressSpinner } from 'primereact/progressspinner';
 import { useGenerateCodeForModelMutation } from "@/redux/api/modelApi";
 import { useSeederMutation } from "@/redux/api/testApi";
 import { closePopup } from "@/redux/features/popupSlice";
 import { SolidListRowdataDynamicFunctionProps } from "@/types/solid-core";
 import { Button } from "primereact/button";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Toast } from 'primereact/toast';
 
@@ -18,6 +19,22 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
 
     const [triggerSeeder, { data }] = useSeederMutation();
 
+    // Utitlity to track if solid-api is up
+    const [isPinging, setIsPinging] = useState(false);
+    const pingBackendWithRetry = async (retries = 5, delay = 500): Promise<boolean> => {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ping`);
+                if (res.ok)
+                    return true;
+            } catch (e) {
+                // ignore and retry
+            }
+            await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+        return false;
+    };
+
     const toast = useRef<Toast>(null);
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
         toast.current?.show({
@@ -28,24 +45,49 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
         });
     };
 
-
     const generateCodeHandler = async () => {
         const response = await generateCode({ id: event?.rowData?.id });
         console.log("response", response);
         dispatch(closePopup());
         // showToast("error", "Login Error", response.error);
-
     }
 
+    // useEffect(() => {
+    //     const seeder = async () => {
+    //         if (isGenerateCodeSuceess) {
+    //             await triggerSeeder("ModuleMetadataSeederService");
+    //         }
+    //     }
+    //     seeder();
+    // }, [isGenerateCodeSuceess])
     useEffect(() => {
-        const seeder = async () => {
+        const runSeederIfBackendAlive = async () => {
             if (isGenerateCodeSuceess) {
-                await triggerSeeder("ModuleMetadataSeederService");
-            }
-        }
-        seeder();
-    }, [isGenerateCodeSuceess])
+                setIsPinging(true);
+                const isAlive = await pingBackendWithRetry(10, 500);
+                setIsPinging(false);
 
+                if (isAlive) {
+                    await triggerSeeder("ModuleMetadataSeederService");
+                } else {
+                    showToast("error", "Backend Unavailable", "Seeder not triggered. Could not reach backend.");
+                }
+            }
+        };
+        runSeederIfBackendAlive();
+    }, [isGenerateCodeSuceess]);
+
+    if (isPinging) {
+        return (
+            <>
+                <Toast ref={toast} />
+                <div className="flex flex-column align-items-center justify-content-center" style={{ padding: '2rem' }}>
+                    <ProgressSpinner />
+                    <p className="mt-3">Waiting for backend...</p>
+                </div>
+            </>
+        );
+    }
     return (
         <>
             <Toast ref={toast} />

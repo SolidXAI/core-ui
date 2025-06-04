@@ -26,7 +26,6 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
         });
     };
 
-
     const generateCodeHandler = async () => {
         const response = await generateCode({ id: event?.rowData?.id })
         console.log("response", response);
