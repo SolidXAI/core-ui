@@ -196,7 +196,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
     const [triggerGetSelectionDynamicValues] = useLazyGetSelectionDynamicValuesQuery();
     const [selectionDynamicItems, setSelectionDynamicItems] = useState([]);
     const isFormFieldValid = (formik: any, fieldName: string) =>
-        (formik.submitCount > 0 || formik.dirty) && formik.errors[fieldName];
+        (formik.touched[fieldName] || formik.submitCount > 0) && !!formik.errors[fieldName];
 
     const selectionDynamicSearch = async (event: AutoCompleteCompleteEvent) => {
 
