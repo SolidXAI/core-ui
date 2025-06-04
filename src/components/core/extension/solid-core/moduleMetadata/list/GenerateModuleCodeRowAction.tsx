@@ -37,29 +37,33 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
         <>
             <Toast ref={toast} />
             {event?.rowData?.name != "solid-core" ?
-                <div className="p-4">
-                    <div className="p-dialog-header  p-0">
+                <div className="">
+                    <div className="p-dialog-header secondary-border-bottom py-3" style={{ background: 'var(--solid-light-grey)' }}>
                         <span className="p-dialog-title">
                             Generate Module
                         </span>
                     </div>
-                    <p className="text-start mt-2">Click Ok to proceed with module code generation, please note that if the file already exists and
-                        you have made custom changes to this file we will create a .bkp file as a backup of the existing file.</p>
-                    <div className="flex gap-3 justify-content-start">
-                        <Button size="small" label="Ok" autoFocus onClick={generateCodeHandler} />
-                        <Button size="small" label="Cancel" outlined onClick={() => dispatch(closePopup())} />
+                    <div className="px-4 pb-4 pt-3">
+                        <p className="text-start">Click Ok to proceed with module code generation, please note that if the file already exists and
+                            you have made custom changes to this file we will create a .bkp file as a backup of the existing file.</p>
+                        <div className="flex gap-3 justify-content-start">
+                            <Button size="small" label="Ok" autoFocus onClick={generateCodeHandler} />
+                            <Button size="small" label="Cancel" outlined onClick={() => dispatch(closePopup())} />
+                        </div>
                     </div>
                 </div> :
-                <div className="p-4">
-                    <div className="p-dialog-header p-0">
+                <div className="">
+                    <div className="p-dialog-header secondary-border-bottom py-3" style={{ background: 'var(--solid-light-grey)' }}>
                         <span className="p-dialog-title">
                             Generate Module
                         </span>
                     </div>
-                    <p className="test-start mt-2">You cannot generate code for Solid Core modules</p>
-                    <div className="flex gap-3 justify-content-start">
-                        {/* <Button label="Ok" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={generateCodeHandler} /> */}
-                        <Button size="small" label="Cancel" outlined onClick={() => dispatch(closePopup())} />
+                    <div className="px-4 pb-4 pt-3">
+                        <p className="test-start">You cannot generate code for Solid Core modules</p>
+                        <div className="flex gap-3 justify-content-start">
+                            {/* <Button label="Ok" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={generateCodeHandler} /> */}
+                            <Button size="small" label="Cancel" outlined onClick={() => dispatch(closePopup())} />
+                        </div>
                     </div>
                 </div >}
         </>

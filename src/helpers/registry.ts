@@ -37,6 +37,7 @@ import { SolidIconEditWidget } from "@/components/core/form/fields/widgets/Solid
 import { SolidIconViewWidget } from "@/components/core/form/fields/widgets/SolidIconViewWidget";
 import { SolidManyToManyRelationAvatarListWidget } from "@/components/core/list/widgets/SolidManyToManyRelationAvatarListWidget";
 import { SolidManyToOneRelationAvatarListWidget } from "@/components/core/list/widgets/SolidManyToOneRelationAvatarListWidget";
+import { SolidShortTextFieldAvatarWidget } from "@/components/core/form/fields/widgets/SolidShortTextFieldAvatarWidget";
 
 type ExtensionRegistry = {
     components: Record<string, React.ComponentType<any>>;
@@ -144,7 +145,7 @@ registerExtensionComponent("DefaultBooleanFormViewWidget", DefaultBooleanFormVie
 
 // Formview Custom view widgets
 registerExtensionComponent("SolidRelationFieldAvatarFormWidget", SolidRelationFieldAvatarFormWidget, []);
-
+registerExtensionComponent("SolidShortTextFieldAvatarWidget", SolidShortTextFieldAvatarWidget, []);
 
 
 // Listview default widgets

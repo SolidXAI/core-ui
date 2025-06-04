@@ -156,6 +156,7 @@ export class SolidSelectionDynamicField implements ISolidField {
             </>
         );
     }
+
     renderExtensionRenderMode(widget: string, formik: FormikObject) {
         let DynamicWidget = getExtensionComponent(widget);
         const widgetProps: SolidFormFieldWidgetProps = {
@@ -196,7 +197,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
     const [triggerGetSelectionDynamicValues] = useLazyGetSelectionDynamicValuesQuery();
     const [selectionDynamicItems, setSelectionDynamicItems] = useState([]);
     const isFormFieldValid = (formik: any, fieldName: string) =>
-        (formik.submitCount > 0 || formik.dirty) && formik.errors[fieldName];
+        (formik.touched[fieldName] || formik.submitCount > 0) && !!formik.errors[fieldName];
 
     const selectionDynamicSearch = async (event: AutoCompleteCompleteEvent) => {
 
