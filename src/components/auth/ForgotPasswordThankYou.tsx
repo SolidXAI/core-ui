@@ -19,7 +19,7 @@ export const ForgotPasswordThankYou = () => {
     return (
         <div>
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
-                <h5 className='text-center font-bold'>We have sent an email to yourregistered email address</h5>
+                <h5 className='text-center font-bold'>We have sent an email to your registered email address</h5>
                 <p className='font-bold text-center'>{decodedEmail}</p>
                 <p className='text-center'>
                     Please follow the instructions in the email
