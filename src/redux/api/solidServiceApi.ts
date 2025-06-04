@@ -1,14 +1,13 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { baseQueryWithAuth } from './fetchBaseQuery';
 
-
 export const solidServiceApi = createApi({
-    reducerPath: 'actionMetadataApi',
+    reducerPath: 'solidServiceApi',
     baseQuery: baseQueryWithAuth,
     endpoints: (builder) => ({
         seeder: builder.mutation({
             query: (name) => ({
-                url: '/test/seed',
+                url: '/seed',
                 method: 'POST',
                 body: {
                     "seeder": name
@@ -21,4 +20,4 @@ export const solidServiceApi = createApi({
 
 export const {
     useSeederMutation
-} = solidServiceApi  
+} = solidServiceApi;

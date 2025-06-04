@@ -377,7 +377,7 @@ const CreateModule = ({ data }: any) => {
   return (
     <div className="solid-form-wrapper">
       <Toast ref={toast} />
-      <form style={{ width: '77.5%', borderRight: '1px solid var(--primary-light-color' }} onSubmit={formik.handleSubmit}>
+      <form style={{ width: '100%', borderRight: '1px solid var(--primary-light-color' }} onSubmit={formik.handleSubmit}>
         <div className="solid-form-header">
           {pathname.includes('new') ?
             <>
@@ -608,8 +608,7 @@ const CreateModule = ({ data }: any) => {
           </Panel>
         </div>
       </form>
-      <div style={{ width: '22.5%' }}>
-      </div>
+      {/* <div style={{ width: '22.5%' }}></div> */}
     </div>
   );
 };
