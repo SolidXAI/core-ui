@@ -100,6 +100,21 @@ export const getLayoutFieldsAsObject = (layout: any[]): any => {
         return result;
     }, {});
 }
+export const getActualFieldMetadata = (key: string, solidFieldsMetadata: Record<string, any>) => {
+    if (solidFieldsMetadata[key]) {
+        return solidFieldsMetadata[key];
+    }
+
+    if (key.endsWith("Confirm")) {
+        const baseKey = key.slice(0, -"Confirm".length); // Remove "Confirm"
+        if (solidFieldsMetadata[baseKey]) {
+            return solidFieldsMetadata[baseKey];
+        }
+    }
+
+    return null; // or handle fallback
+};
+
 
 const fieldFactory = (type: string, fieldContext: SolidFieldProps, setLightboxUrls?: any, setOpenLightbox?: any): ISolidField | null => {
     if (type === 'shortText') {
@@ -604,6 +619,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             Object.entries(values).forEach(([key, value]) => {
 
                 const fieldMetadata = solidFieldsMetadata[key];
+                //  const fieldMetadata = getActualFieldMetadata(key, solidFieldsMetadata);
                 const fieldContext: SolidFieldProps = {
                     fieldMetadata: fieldMetadata,
                     field: layoutFieldsObj[key],
@@ -611,12 +627,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     solidFormViewMetaData: solidFormViewMetaData,
                     modelName: params.modelName
                 }
-
                 let solidField = fieldFactory(fieldMetadata?.type, fieldContext);
-
                 // Append each field to the FormData
                 if (value !== undefined && value !== null && solidField) {
                     solidField.updateFormData(value, formData);
+                }
+                if( value !== undefined && value !== null && key.endsWith("Confirm")){
+                    formData.append(key, String(value))
                 }
 
             });
