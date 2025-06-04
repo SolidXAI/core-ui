@@ -1,7 +1,7 @@
 'use client';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { useGenerateCodeForModelMutation } from "@/redux/api/modelApi";
-import { useSeederMutation } from "@/redux/api/testApi";
+import { useSeederMutation } from "@/redux/api/solidServiceApi";
 import { closePopup } from "@/redux/features/popupSlice";
 import { SolidListRowdataDynamicFunctionProps } from "@/types/solid-core";
 import { Button } from "primereact/button";

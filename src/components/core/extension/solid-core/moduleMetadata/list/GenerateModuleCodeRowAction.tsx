@@ -1,6 +1,6 @@
 'use client';
 import { useGenerateCodeFormoduleMutation } from "@/redux/api/moduleApi";
-import { useSeederMutation } from "@/redux/api/testApi";
+import { useSeederMutation } from "@/redux/api/solidServiceApi";
 import { closePopup } from "@/redux/features/popupSlice";
 import { SolidListRowdataDynamicFunctionProps } from "@/types/solid-core";
 import { Button } from "primereact/button";
