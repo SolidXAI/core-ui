@@ -4,7 +4,7 @@ import { SolidListFieldWidgetProps } from "@/types/solid-core";
 export const SolidShortTextAvatarWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
     // use "widget": "SolidUserNameAvatarWidget" in the list view field 
 
-    const value = fieldMetadata?.type === 'relation' ? column?.attrs?.initialsKey ? rowData[fieldMetadata.name][column?.attrs?.initialsKey] : 'NA' : rowData[fieldMetadata.name];
+    const value = fieldMetadata?.type === 'relation' && column?.attrs?.initialsKey ? rowData[fieldMetadata.name][column?.attrs?.initialsKey] : rowData[fieldMetadata.name];
 
     const getInitials = (value: string) => {
         if (value) {
