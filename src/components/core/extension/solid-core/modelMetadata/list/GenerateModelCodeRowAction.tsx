@@ -84,6 +84,7 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
             showToast("success", "Code Generated Successfully", "Code Generated Successfully");
             setIsGenerating(false);
             dispatch(closePopup());
+            window.location.reload();
         }
         if (isSeederError) {
             console.log("isSeederError", isSeederError);

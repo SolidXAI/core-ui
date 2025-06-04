@@ -65,7 +65,6 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
 
                 if (isAlive) {
                     await triggerSeeder("ModuleMetadataSeederService");
-
                 } else {
                     dispatch(closePopup());
                     console.log("Backend is not alive, cannot run seeder");
@@ -84,6 +83,7 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
             showToast("success", "Code Generated Successfully", "Code Generated Successfully");
             setIsGenerating(false);
             dispatch(closePopup());
+            window.location.reload();
         }
         if (isSeederError) {
             console.log("isSeederError", isSeederError);
