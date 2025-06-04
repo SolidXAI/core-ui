@@ -15,7 +15,6 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
         { isLoading: isGenerateCodeUpdating, isSuccess: isGenerateCodeSuceess, isError: isGenerateCodeError, error: generateCodeError, data: generateCodeData },
     ] = useGenerateCodeFormoduleMutation();
 
-
     const toast = useRef<Toast>(null);
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
         toast.current?.show({
