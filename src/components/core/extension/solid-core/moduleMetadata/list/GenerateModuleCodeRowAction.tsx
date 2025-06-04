@@ -18,9 +18,6 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
     ] = useGenerateCodeFormoduleMutation();
     const [triggerSeeder, { data, isLoading, isSuccess: isSeederSuccess, isError: isSeederError }] = useSeederMutation();
 
-
-
-
     // Utitlity to track if solid-api is up
     const [isPinging, setIsPinging] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
@@ -57,7 +54,6 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
         // showToast("error", "Login Error", response.error);
     }
 
-
     useEffect(() => {
         const runSeederIfBackendAlive = async () => {
             if (isGenerateCodeSuceess) {
@@ -71,6 +67,8 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
                     await triggerSeeder("ModuleMetadataSeederService");
 
                 } else {
+                    dispatch(closePopup());
+                    console.log("Backend is not alive, cannot run seeder");
                     showToast("error", "Backend Unavailable", "Seeder not triggered. Could not reach backend.");
                 }
             }
@@ -79,7 +77,7 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
             runSeederIfBackendAlive();
         }, 5000);
     }, [isGenerateCodeSuceess]);
-    
+
     useEffect(() => {
         if (isSeederSuccess) {
             console.log("isSeederSuccess", data);

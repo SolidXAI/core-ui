@@ -48,7 +48,6 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
         return false;
     };
 
-
     const generateCodeHandler = async () => {
         const response = await generateCode({ id: event?.rowData?.id });
         console.log("response generate code handler", response);
@@ -66,8 +65,9 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
 
                 if (isAlive) {
                     await triggerSeeder("ModuleMetadataSeederService");
-
                 } else {
+                    dispatch(closePopup());
+                    console.log("Backend is not alive, cannot run seeder");
                     showToast("error", "Backend Unavailable", "Seeder not triggered. Could not reach backend.");
                 }
             }
@@ -76,6 +76,8 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
             runSeederIfBackendAlive();
         }, 5000);
     }, [isGenerateCodeSuceess]);
+    
+    
     useEffect(() => {
         if (isSeederSuccess) {
             console.log("isSeederSuccess", data);
@@ -89,8 +91,6 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
             setIsGenerating(false);
         }
     }, [isSeederSuccess])
-
-
 
     return (
         <>
