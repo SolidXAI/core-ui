@@ -272,7 +272,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                     <>
                         <Divider align="center">
                             <div className="inline-flex align-items-center">
-                                or
+                                OR
                             </div>
                         </Divider>
                         <SocialMediaLogin />

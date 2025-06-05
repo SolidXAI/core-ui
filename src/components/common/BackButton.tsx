@@ -8,10 +8,10 @@ export const BackButton = () => {
     const pathname = usePathname();
 
     const handleGoBack = () => {
-        const segments = pathname.split('/').filter(Boolean);
-        if (segments.length > 1) {
+        // const segments = pathname.split('/').filter(Boolean);
+        // if (segments.length > 1) {
             router.back()
-        }
+        // }
     };
     return (
         <Button
