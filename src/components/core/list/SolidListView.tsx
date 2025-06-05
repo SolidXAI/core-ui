@@ -792,7 +792,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       <div className="page-header">
         <Toast ref={toast} />
         <div className="flex gap-3 align-items-center">
-          <p className="m-0 view-title">{solidListViewMetaData?.data?.solidView?.layout?.displayName}</p>
+          {/* <p className="m-0 view-title">{solidListViewMetaData?.data?.solidView?.displayName}</p> */}
           {solidListViewLayout?.attrs?.enableGlobalSearch === true && params.embeded === false &&
             <SolidGlobalSearchElement showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} filters={filters} clearFilter={clearFilter} ref={solidGlobalSearchElementRef} viewData={solidListViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}></SolidGlobalSearchElement>
           }
