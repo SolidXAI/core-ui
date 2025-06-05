@@ -1391,7 +1391,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
 
                     </TabPanel>
 
-                    <TabPanel header="Advance Config"
+                    <TabPanel header="Advanced Config"
 
                     //  rightIcon="pi pi-cog ml-2"
                     >
@@ -1994,7 +1994,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
 
-                          {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse  && (
+                          {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="relationCoModelFieldName"
@@ -2870,7 +2870,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 checked={formik.values.isMultiSelect}
                               ></Checkbox>
                               <label htmlFor="ingredient1" className="form-field-label ml-2">
-                              Is MultiSelect
+                                Is MultiSelect
                               </label>
                             </div>
                             {isFormFieldValid(formik, "isMultiSelect") && (
