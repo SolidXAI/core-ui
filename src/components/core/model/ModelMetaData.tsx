@@ -756,7 +756,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                       }
 
                     }} checked={showTableName} disabled={params.id !== 'new'}></Checkbox>
-                    <label htmlFor="ingredient1" className="form-field-label">
+                    <label htmlFor="setTableName" className="form-field-label">
                       Set table name
                     </label>
                   </div>

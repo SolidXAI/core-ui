@@ -3,7 +3,7 @@ import { baseQueryWithAuth } from './fetchBaseQuery';
 
 
 export const solidServiceApi = createApi({
-    reducerPath: 'actionMetadataApi',
+    reducerPath: 'solidServiceApi',
     baseQuery: baseQueryWithAuth,
     endpoints: (builder) => ({
         seeder: builder.mutation({

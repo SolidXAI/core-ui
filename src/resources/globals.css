@@ -2661,6 +2661,7 @@ li.header-li-px {
   font-weight: 700;
 }
 
+
 .solid-global-search-filter .p-fieldset .p-fieldset-content {
   padding: 0 0.25rem;
 }
@@ -3370,4 +3371,8 @@ flex-shrink: 0; */
   text-align: center !important;
   align-content: center;
   justify-content: center;
+}
+
+.warning-header-popup{
+padding: 0.75rem;
 }
