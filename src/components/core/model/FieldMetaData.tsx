@@ -113,7 +113,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
         </div>
         :
         <>
-          <div className="absolute" style={{top: -3, right: 0}}>
+          <div className="absolute" style={{ top: -3, right: 0 }}>
             {/* <h3>All Fields</h3> */}
             {modelMetaData.isSystem !== true &&
               <Button
@@ -170,17 +170,17 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
                 <span>Warning</span>
               </div>
             )}
-            headerClassName="text-center"
+            headerClassName="text-center warning-header-popup"
             modal
-            footer={() => (
-              <div className="flex justify-content-center">
-                <Button label="Ok" className='small-button' onClick={() => setIsRequiredPopUp(false)} />
-              </div>
-            )}
+            style={{ width: '20vw' }}
+
             onHide={() => setIsRequiredPopUp(false)}
             className="solid-dialog"
           >
-            <p>If there is data against this model this operation might not work and manual intervention will be required</p>
+            <p className="p-2 mb-0">If there is data against this model this operation might not work and manual intervention will be required</p>
+            <div className="flex justify-content-start p-2">
+              <Button label="Ok" className='small-button' onClick={() => setIsRequiredPopUp(false)} />
+            </div>
           </Dialog>
         </>
       }

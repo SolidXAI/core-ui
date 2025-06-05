@@ -12,7 +12,7 @@ import { useEffect, useRef, useState } from "react";
 import { SolidFormViewNormalHeaderButton } from "./SolidFormViewNormalHeaderButton";
 import { SolidFormViewContextMenuHeaderButton } from "./SolidFormViewContextMenuHeaderButton";
 
-export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue }: any) => {
+export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue,internationalisationEnabled,handleDraftPublishWorkFlow,publish,draftEnabled }: any) => {
     const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
     const router = useRouter();
     const pathname = usePathname();
@@ -101,6 +101,31 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             icon={'pi pi-objects-column'}
                             onClick={() => setLayoutDialogVisible(true)}
                         />
+                        {draftEnabled && internationalisationEnabled && params.id !== 'new' &&
+                        (publish !== null ?
+                        <Button
+                            text
+                            type="button"
+                            className="w-8rem text-left gap-2 purple-200"
+                            label="Unpublish"
+                            size="small"
+                            iconPos="left"
+                            severity="contrast"
+                            icon={'pi pi-cloud-download'}
+                            onClick={() => handleDraftPublishWorkFlow('unpublish')}
+                        />:
+                        <Button
+                            text
+                            type="button"
+                            className="w-8rem text-left gap-2 purple-200"
+                            label="Publish"
+                            size="small"
+                            iconPos="left"
+                            severity="contrast"
+                            icon={'pi pi-cloud-upload'}
+                            onClick={() => handleDraftPublishWorkFlow('publish')}
+                        />
+                        )}
                         {contextMenuHeaderButtons.map((button: any, index: number) => {
                             return (
                                 <SolidFormViewContextMenuHeaderButton
@@ -121,7 +146,6 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
             </div>
         )
     }
-
     return (
         <>
             <div className="solid-form-header">
@@ -174,6 +198,17 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                         label="Save"
                                         size="small"
                                         type="submit"
+                                    />
+                                </div>
+                            }
+                            {params.embeded !== true && params.draftEnabled &&
+                                !formViewLayout.attrs.readonly && params.publish !== 'null' &&
+                                formik.dirty &&
+                                <div>
+                                    <Button
+                                        label="Draft"
+                                        size="small"
+                                        type="button"
                                     />
                                 </div>
                             }

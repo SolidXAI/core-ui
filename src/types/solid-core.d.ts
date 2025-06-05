@@ -70,6 +70,7 @@ export type LayoutAttribute = {
     renderMode?: string;
     widget?: string;
     visible?: boolean;
+    editWidget?: string;
 };
 
 // Generic representation of any node in our layout 

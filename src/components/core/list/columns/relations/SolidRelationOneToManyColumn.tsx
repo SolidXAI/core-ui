@@ -94,8 +94,8 @@ export const DefaultRelationOneToManyListWidget = ({ rowData, solidListViewMetaD
                 {manyToManyColVal.length > 0 &&
                     <p>
 
-                        <span>{manyToManyColVal[0]}</span>
-                        <span style={{ color: "#0895CD" }}>{manyToManyColVal.length - 1 > 0 ? `, ...${manyToManyColVal.length - 1} more` : ""}</span>
+                        <span style={{backgroundColor: '#f5f5f5', padding: '7px', borderRadius: '4px'}}>{manyToManyColVal[0]}</span>
+                        <span style={{ color: "#0895CD", fontWeight: 'bold' }}>{manyToManyColVal.length - 1 > 0 ? ` +${manyToManyColVal.length - 1}` : ""}</span>
 
 
                     </p >

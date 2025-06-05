@@ -31,9 +31,13 @@ import { DefaultMediaMultipleListWidget } from "@/components/core/list/columns/S
 import { DefaultRelationManyToManyListWidget } from "@/components/core/list/columns/relations/SolidRelationManyToManyColumn";
 import { DefaultRelationManyToOneListWidget } from "@/components/core/list/columns/relations/SolidRelationManyToOneColumn";
 import { DefaultRelationOneToManyListWidget } from "@/components/core/list/columns/relations/SolidRelationOneToManyColumn";
-import { SolidRelationAvatarWidget } from "@/components/core/list/widgets/SolidRelationAvatarWidget";
 import { SolidRelationFieldAvatarFormWidget } from "@/components/core/form/fields/widgets/SolidRelationFieldAvatarFormWidget";
 import { DefaultSelectionDynamicFormEditWidget, DefaultSelectionDynamicFormViewWidget } from "@/components/core/form/fields/SolidSelectionDynamicField";
+import { SolidIconEditWidget } from "@/components/core/form/fields/widgets/SolidIconEditWidget";
+import { SolidIconViewWidget } from "@/components/core/form/fields/widgets/SolidIconViewWidget";
+import { SolidManyToManyRelationAvatarListWidget } from "@/components/core/list/widgets/SolidManyToManyRelationAvatarListWidget";
+import { SolidManyToOneRelationAvatarListWidget } from "@/components/core/list/widgets/SolidManyToOneRelationAvatarListWidget";
+import { SolidShortTextFieldAvatarWidget } from "@/components/core/form/fields/widgets/SolidShortTextFieldAvatarWidget";
 
 type ExtensionRegistry = {
     components: Record<string, React.ComponentType<any>>;
@@ -141,7 +145,7 @@ registerExtensionComponent("DefaultBooleanFormViewWidget", DefaultBooleanFormVie
 
 // Formview Custom view widgets
 registerExtensionComponent("SolidRelationFieldAvatarFormWidget", SolidRelationFieldAvatarFormWidget, []);
-
+registerExtensionComponent("SolidShortTextFieldAvatarWidget", SolidShortTextFieldAvatarWidget, []);
 
 
 // Listview default widgets
@@ -157,7 +161,8 @@ registerExtensionComponent("SolidShortTextFieldImageListWidget", SolidShortTextF
 
 // Listview custom widgets
 registerExtensionComponent("SolidShortTextAvatarWidget", SolidShortTextAvatarWidget, []);
-registerExtensionComponent("SolidRelationAvatarWidget", SolidRelationAvatarWidget, []);
+registerExtensionComponent("SolidManyToManyRelationAvatarListWidget", SolidManyToManyRelationAvatarListWidget, []);
+registerExtensionComponent("SolidManyToOneRelationAvatarListWidget", SolidManyToOneRelationAvatarListWidget, []);
 
 
 // ModuleMetadata
@@ -172,3 +177,7 @@ registerExtensionFunction("emailFormTypeLoad", hanldeEmailFormTypeLoad);
 
 // RoleMetadata
 registerExtensionComponent("RolePermissionsManyToManyFieldWidget", RolePermissionsManyToManyFieldWidget, ["inputSwitch"]);
+
+// Solid Google Material Symbols Icon
+registerExtensionComponent("SolidIconEditWidget", SolidIconEditWidget, []);
+registerExtensionComponent("SolidIconViewWidget", SolidIconViewWidget, []);
