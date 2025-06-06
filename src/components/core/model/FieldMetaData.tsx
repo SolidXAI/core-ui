@@ -42,7 +42,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
     return (
       <>
 
-        {rowData.isSystem !== true &&
+        {rowData.isSystem !== true && rowData.isMarkedForRemoval !== true &&
           <Button
             icon="pi pi-pencil"
             text
@@ -56,6 +56,23 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
       </>
     )
   };
+  const bodyTemplate = (rowData: any) => {
+    return (
+      <>
+
+        {rowData.displayName &&
+          <>
+            <p>{rowData.displayName}</p>
+            {rowData.isMarkedForRemoval === true &&
+              <p className="fieldSubTitle">This field will be removed next time you generate code for this model.</p>
+
+            }
+          </>
+        }
+      </>
+    )
+  };
+
 
   // Function to delete a row
   const deleteRow = (rowData: any) => {
@@ -70,7 +87,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
   const deleteTemplate = (rowData: any) => {
     return (
       <>
-        {(pathname.includes('create') || rowData.isSystem !== true) &&
+        {(pathname.includes('create') || (rowData.isSystem !== true && rowData.isMarkedForRemoval !== true)) &&
           <Button icon="pi pi-trash" text severity="danger" onClick={() => deleteRow(rowData)} size="small" />
 
         }
@@ -102,6 +119,12 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
     }
   };
 
+
+  const rowClass = (data: any) => {
+    return {
+      'bg-primary': data.isMarkedForRemoval === true
+    };
+  };
 
 
   return (
@@ -135,8 +158,8 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
               />
             }
           </div>
-          <DataTable value={fieldMetaData} dataKey="id" tableStyle={{ minWidth: '50rem' }} size="small">
-            <Column field="displayName" header="Display Name" headerClassName="table-header-fs"></Column>
+          <DataTable value={fieldMetaData} dataKey="id" rowClassName={rowClass} tableStyle={{ minWidth: '50rem' }} size="small">
+            <Column field="displayName" header="Display Name" body={bodyTemplate} headerClassName="table-header-fs"></Column>
             <Column field="name" header="Name" headerClassName="table-header-fs"></Column>
             <Column field="type" header="Type" headerClassName="table-header-fs"></Column>
             <Column field="isMarkedForRemoval" header="Is Marked For Removal" headerClassName="table-header-fs"></Column>
