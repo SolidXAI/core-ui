@@ -1,5 +1,4 @@
 'use client';
-import { ProgressSpinner } from 'primereact/progressspinner';
 import { useGenerateCodeForModelMutation } from "@/redux/api/modelApi";
 import { useSeederMutation } from "@/redux/api/solidServiceApi";
 import { closePopup } from "@/redux/features/popupSlice";
@@ -8,6 +7,7 @@ import { Button } from "primereact/button";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Toast } from 'primereact/toast';
+import { SolidCircularLoader } from '@/components/core/common/SolidLoaders/SolidCircularLoader';
 
 
 const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
@@ -76,8 +76,8 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
             runSeederIfBackendAlive();
         }, 5000);
     }, [isGenerateCodeSuceess]);
-    
-    
+
+
     useEffect(() => {
         if (isSeederSuccess) {
             console.log("isSeederSuccess", data);
@@ -98,9 +98,9 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
             {isGenerating ?
                 <>
                     <Toast ref={toast} />
-                    <div className="flex flex-column align-items-center justify-content-center" style={{ padding: '2rem' }}>
-                        <ProgressSpinner />
-                        <p className="mt-3">Waiting for backend...</p>
+                    <div className="flex flex-column align-items-center justify-content-center" style={{ padding: '2rem', height: 200 }}>
+                        <SolidCircularLoader />
+                        <p className="mt-4 font-medium">Waiting for backend...</p>
                     </div>
                 </>
                 :
