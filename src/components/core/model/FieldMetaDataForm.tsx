@@ -1689,7 +1689,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
                           {currentFields.includes("relationType") && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="field col-12 flex-flex-column gap-2 mt-3">
                               {/* <label
                                   htmlFor="relationType"
                                   className="form-field-label"
@@ -1889,11 +1889,43 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   )}
                               </div>
                             )}
+                            {currentFields.includes("relationCoModelColumnName") && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
+                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                              <label
+                                htmlFor="relationCoModelColumnName"
+                                className="form-field-label"
+                              >
+                                Relation Co-Model Column Name
+                              </label>
+                              <InputText
+                                type="text"
+                                id="relationCoModelColumnName"
+                                name="relationCoModelColumnName"
+                                onChange={formik.handleChange}
+                                disabled={fieldMetaData?.id}
+                                value={formik.values.relationCoModelColumnName}
+                                className={classNames("", {
+                                  "p-invalid": isFormFieldValid(
+                                    formik,
+                                    "relationCoModelColumnName"
+                                  ),
+                                })}
+                              />
+                              {isFormFieldValid(formik, "relationCoModelColumnName") && (
+                                <Message
+                                  severity="error"
+                                  text={formik?.errors?.relationCoModelColumnName?.toString()}
+                                />
+                              )}
+                              <p className="fieldSubTitle">Allows you to control the column name of the foreign key. Eg. when adding a country field to state model, by default foreign key column in the state table will be called country_id, use this field to create a foreign key with a different name. </p>
+
+                            </div>
+                          )}
 
                           {currentFields.includes(
                             "relationFieldFixedFilter"
                           ) && (
-                              <div className="field col-6 flex-flex-column gap-2 mt-3">
+                              <div className="field col-12 flex-flex-column gap-2 mt-3">
                                 <label
                                   htmlFor="relationFieldFixedFilter"
                                   className="form-field-label"
@@ -1937,6 +1969,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                     text={formik?.errors?.relationFieldFixedFilter?.toString()}
                                   />
                                 )}
+                                <p className="fieldSubTitle">Many to one fields are rendered as autocomplete dropdown on the SolidX ui. Use the fixed filter to load a pre-filtered set of records from the co-model. Please note user input entered in the autocomplete is used to apply a dynamic filter.</p>
 
                               </div>
                             )}
@@ -2000,7 +2033,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 htmlFor="relationCoModelFieldName"
                                 className="form-field-label"
                               >
-                                Relation Co-Model Field Name
+                                Field Name In Parent Model
                               </label>
                               <InputText
                                 type="text"
@@ -2016,6 +2049,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   ),
                                 })}
                               />
+                               <p className="fieldSubTitle">This is field name that is created in the parent model. Eg. In case of Country and State ideally a states field can be created in the Country model when setting create inverse true.</p>
                               {isFormFieldValid(formik, "relationCoModelFieldName") && (
                                 <Message
                                   severity="error"
@@ -2057,37 +2091,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )} */}
 
-                          {currentFields.includes("relationCoModelColumnName") && formik.values.relationCreateInverse && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
-                              <label
-                                htmlFor="relationCoModelColumnName"
-                                className="form-field-label"
-                              >
-                                Relation Co-Model Column Name
-                              </label>
-                              <InputText
-                                type="text"
-                                id="relationCoModelColumnName"
-                                name="relationCoModelColumnName"
-                                onChange={formik.handleChange}
-                                disabled={fieldMetaData?.id}
-                                value={formik.values.relationCoModelColumnName}
-                                className={classNames("", {
-                                  "p-invalid": isFormFieldValid(
-                                    formik,
-                                    "relationCoModelColumnName"
-                                  ),
-                                })}
-                              />
-                              {isFormFieldValid(formik, "relationCoModelColumnName") && (
-                                <Message
-                                  severity="error"
-                                  text={formik?.errors?.relationCoModelColumnName?.toString()}
-                                />
-                              )}
-
-                            </div>
-                          )}
+                          
 
                           {currentFields.includes("relationJoinTableName") && formik.values.relationType === "many-to-many" && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
@@ -2738,7 +2742,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                         </>
                       }
 
-                      {(formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && <p className="form-wrapper-heading text-base">Settings</p>}
+                      {(formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && <p className="form-wrapper-heading text-base mt-3">Settings</p>}
                       <div className="formgrid grid">
                         {currentFields.includes("required") && (formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && (
                           <div className="field col-6 flex-flex-column gap-2 mt-3">
