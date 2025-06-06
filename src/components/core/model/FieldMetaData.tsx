@@ -135,11 +135,11 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
               />
             }
           </div>
-          <DataTable value={fieldMetaData.filter((item: any) => item.isMarkedForRemoval !== true)} dataKey="id"
-            tableStyle={{ minWidth: '50rem' }} size="small">
+          <DataTable value={fieldMetaData} dataKey="id" tableStyle={{ minWidth: '50rem' }} size="small">
             <Column field="displayName" header="Display Name" headerClassName="table-header-fs"></Column>
             <Column field="name" header="Name" headerClassName="table-header-fs"></Column>
             <Column field="type" header="Type" headerClassName="table-header-fs"></Column>
+            <Column field="isMarkedForRemoval" header="Is Marked For Removal" headerClassName="table-header-fs"></Column>
 
             {modelMetaData.isSystem !== true &&
               <Column body={editTemplate} header="Edit" headerClassName="table-header-fs" style={{ width: '10%' }} />
@@ -177,8 +177,8 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
             onHide={() => setIsRequiredPopUp(false)}
             className="solid-dialog"
           >
-            <p className="p-2 mb-0">If there is data against this model this operation might not work and manual intervention will be required</p>
-            <div className="flex justify-content-start p-2">
+            <p className="p-3 mb-0">If there is data against this model this operation might not work and manual intervention will be required</p>
+            <div className="flex justify-content-start p-3">
               <Button label="Ok" className='small-button' onClick={() => setIsRequiredPopUp(false)} />
             </div>
           </Dialog>
