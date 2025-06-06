@@ -176,9 +176,9 @@ export const SolidListView = (params: SolidListViewParams) => {
     const initialFilters: any = {};
     const toPopulate: string[] = [];
     const toPopulateMedia: string[] = [];
-
-    for (let i = 0; i < solidView.layout.children?.length; i++) {
-      const column = solidView.layout.children[i];
+    const currentLayout = params.customLayout ? params.customLayout : solidView?.layout;
+    for (let i = 0; i < currentLayout?.children.length; i++) {
+      const column = currentLayout?.children[i];
       const fieldMetadata = solidFieldsMetadata?.[column.attrs.name];
       if (!fieldMetadata?.type) {
         showFieldError(`${column.attrs.label} is not present in metadata`)
@@ -222,7 +222,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
     }
     // setFilters(initialFilters);
-    const rows = solidListViewMetaData?.data?.solidView?.layout?.attrs?.defaultPageSize ?? 25;
+    const rows = currentLayout?.attrs?.defaultPageSize ?? 25;
     const populate = toPopulate;
     const populateMedia = toPopulateMedia;
     setRows(rows);
@@ -737,7 +737,9 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (!solidView || !solidFieldsMetadata) {
       return;
     }
-    return solidView.layout.children?.map((column: any) => {
+    const currentLayout = params.customLayout ? params.customLayout : solidView.layout;
+
+    return currentLayout.children?.map((column: any) => {
       const fieldMetadata = solidFieldsMetadata[column.attrs.name];
       if (!fieldMetadata) {
         return;
@@ -922,7 +924,6 @@ export const SolidListView = (params: SolidListViewParams) => {
         >
 
           <Column selectionMode="multiple" headerStyle={{ width: "3em" }} />
-
           {renderColumnsDynamically(listViewMetaData)}
           {solidListViewLayout?.attrs?.rowButtons &&
             solidListViewLayout?.attrs?.rowButtons.filter((rb: any) => {
