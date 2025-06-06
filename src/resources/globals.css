@@ -2210,6 +2210,7 @@ li.header-li-px {
 .solid-panel-menu .p-panelmenu .p-panelmenu-content {
   border: none;
   border-radius: 0;
+  margin-left: 15px;
 }
 
 .solid-panel-menu .subMenuHead a {

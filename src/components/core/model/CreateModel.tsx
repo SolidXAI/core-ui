@@ -72,7 +72,7 @@ const CreateModel = ({ data, params }: any) => {
   useEffect(() => {
     if (data) {
       const modelData = {
-        ...data, moduleId: data?.module?.id,parentModelId: data?.parentModel
+        ...data, moduleId: data?.module?.id, parentModelId: data?.parentModel
       }
 
       setIsLoadingData(false);
@@ -178,7 +178,7 @@ const CreateModel = ({ data, params }: any) => {
         }
         return rest
       });
-      const { module, parentModel,createdAt, updatedAt, id, deletedAt, ...modelData } = modelMetaData;
+      const { module, parentModel, createdAt, updatedAt, id, deletedAt, ...modelData } = modelMetaData;
       const updateData = { ...modelData, displayName: modelData.displayName.trim(), fields: fieldData };
       updateModel({ id: data.id, data: updateData });
     }
@@ -190,7 +190,7 @@ const CreateModel = ({ data, params }: any) => {
           }
           return rest
         });
-        const { module, parentModel,...modelData } = modelMetaData;
+        const { module, parentModel, ...modelData } = modelMetaData;
         const data = { ...modelData, displayName: modelData.displayName.trim(), fields: fieldData };
         createModel(data);
         if (isCreateModelSuccess) {
@@ -369,7 +369,7 @@ const CreateModel = ({ data, params }: any) => {
             <>
               <div className="flex align-items-center gap-3">
                 <BackButton />
-                <div className="form-wrapper-title">Create Model</div>
+                <div className="form-wrapper-title">Create Model {modelMetaData?.displayName ? `- ${modelMetaData?.displayName}` : ""}</div>
               </div>
               <div className="gap-3 flex">
                 {isDirty &&
@@ -382,7 +382,7 @@ const CreateModel = ({ data, params }: any) => {
             <>
               <div className="flex align-items-center gap-3">
                 <BackButton />
-                <div className="form-wrapper-title">Edit Model</div>
+                <div className="form-wrapper-title">Edit Model {modelMetaData?.displayName ? `- ${modelMetaData?.displayName}` : ""}</div>
               </div>
               <div className="gap-3 flex">
                 {data?.isSystem !== true &&
