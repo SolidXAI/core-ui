@@ -162,7 +162,6 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
             <Column field="displayName" header="Display Name" body={bodyTemplate} headerClassName="table-header-fs"></Column>
             <Column field="name" header="Name" headerClassName="table-header-fs"></Column>
             <Column field="type" header="Type" headerClassName="table-header-fs"></Column>
-            <Column field="isMarkedForRemoval" header="Is Marked For Removal" headerClassName="table-header-fs"></Column>
 
             {modelMetaData.isSystem !== true &&
               <Column body={editTemplate} header="Edit" headerClassName="table-header-fs" style={{ width: '10%' }} />
