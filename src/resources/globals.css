@@ -1486,6 +1486,9 @@ li.header-li-px {
   padding: 0;
   padding-left: 10px;
 }
+.bg-red-row{
+  background-color: rgb(243, 43, 43);
+}
 
 .markdown-view {
   max-width: 100%;

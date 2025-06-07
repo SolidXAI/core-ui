@@ -62,11 +62,13 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
 
         {rowData.displayName &&
           <>
-            <p>{rowData.displayName}</p>
-            {rowData.isMarkedForRemoval === true &&
-              <p className="fieldSubTitle">This field will be removed next time you generate code for this model.</p>
-
-            }
+            <p>{rowData.displayName}
+              {rowData.isMarkedForRemoval === true &&
+                <>
+                  <br></br>  <span className="fieldSubTitle">This field will be removed next time you generate code for this model.</span>
+                </>
+              }
+            </p>
           </>
         }
       </>
@@ -122,7 +124,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
 
   const rowClass = (data: any) => {
     return {
-      'bg-primary': data.isMarkedForRemoval === true
+      'bg-red-row': data.isMarkedForRemoval === true
     };
   };
 
