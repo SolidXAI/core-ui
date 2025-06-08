@@ -35,7 +35,12 @@ export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, actionsAllowed,
                         {noDataText}
                     </div>
                 }
-                {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && params.embeded !== true && solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultAddButton !== false &&
+                {
+                    actionsAllowed.includes(`${createPermission(params.modelName)}`) && 
+                    solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && 
+                    params.embeded !== true && 
+                    solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultAddButton !== false &&
+
                     <div className='mt-2'>
                         <SolidCreateButton url={createButtonUrl} title={solidListViewMetaData?.data?.solidView?.displayName} />
                     </div>

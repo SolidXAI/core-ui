@@ -817,7 +817,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           }
           {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewLayout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true && searchParams.get('viewMode') !== "view" &&
             // < SolidCreateButton url={createButtonUrl} />
-            <Button type="button" icon="pi pi-plus" label="Add" size='small'
+            <Button type="button" label="Add" size='small'
               onClick={() => params.handlePopUpOpen("new")}
             ></Button>
           }

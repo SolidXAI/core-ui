@@ -65,7 +65,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
             <p>{rowData.displayName}
               {rowData.isMarkedForRemoval === true &&
                 <>
-                  <br></br>  <span className="fieldSubTitle">This field will be removed next time you generate code for this model.</span>
+                  <br></br>  <span style={{fontSize: '11px', color: 'red'}}>This field will be removed next time you generate code for this model.</span>
                 </>
               }
             </p>
@@ -122,11 +122,11 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
   };
 
 
-  const rowClass = (data: any) => {
-    return {
-      'bg-red-row': data.isMarkedForRemoval === true
-    };
-  };
+  // const rowClass = (data: any) => {
+  //   return {
+  //     'bg-red-row': data.isMarkedForRemoval === true
+  //   };
+  // };
 
 
   return (
@@ -160,7 +160,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
               />
             }
           </div>
-          <DataTable value={fieldMetaData} dataKey="id" rowClassName={rowClass} tableStyle={{ minWidth: '50rem' }} size="small">
+          <DataTable value={fieldMetaData} dataKey="id" tableStyle={{ minWidth: '50rem' }} size="small">
             <Column field="displayName" header="Display Name" body={bodyTemplate} headerClassName="table-header-fs"></Column>
             <Column field="name" header="Name" headerClassName="table-header-fs"></Column>
             <Column field="type" header="Type" headerClassName="table-header-fs"></Column>
