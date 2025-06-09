@@ -49,21 +49,21 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
     // Utitlity to track if solid-api is up
     const [isPinging, setIsPinging] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
-    // const pingBackendWithRetry = async (retries = 5, delay = 500): Promise<boolean> => {
-    //     for (let i = 0; i < retries; i++) {
-    //         try {
-    //             const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ping`);
-    //             console.log("ping response", res);
+    const pingBackendWithRetry = async (retries = 30, delay = 500): Promise<boolean> => {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ping`);
+                console.log("ping response", res);
 
-    //             if (res.ok)
-    //                 return true;
-    //         } catch (e) {
-    //             // ignore and retry
-    //         }
-    //         await new Promise((resolve) => setTimeout(resolve, delay));
-    //     }
-    //     return false;
-    // };
+                if (res.ok)
+                    return true;
+            } catch (e) {
+                // ignore and retry
+            }
+            await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+        return false;
+    };
 
     const fetchMqMessageStatus = async (retries = 30, delay = 500, generateCodeData: any): Promise<boolean> => {
         for (let i = 0; i < retries; i++) {
@@ -111,10 +111,10 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
             if (isGenerateCodeSuceess) {
                 console.log("isGenerateCodeSuceess", isGenerateCodeSuceess);
                 setIsPinging(true);
-                const isAlive = await fetchMqMessageStatus(30, 500, generateCodeData);
-                console.log("isAlive", isAlive);
+                const hasMqMessageCompleted = await fetchMqMessageStatus(30, 500, generateCodeData);
+                const isAlive = await pingBackendWithRetry(30, 500);
                 setIsPinging(false);
-                if (isAlive) {
+                if (hasMqMessageCompleted && isAlive) {
                     await triggerSeeder("ModuleMetadataSeederService");
                 } else {
                     dispatch(closePopup());
