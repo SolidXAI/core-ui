@@ -114,9 +114,9 @@ export const SolidBreadcrumb = (props: Props) => {
     ...(item.link
       ? {
         template: () => (
-          <Link href={item.link!}>
+          // <Link href={item.link!}>
             <p className="text-primary font-normal">{item.label}</p>
-          </Link>
+          // </Link>
         ),
       }
       : {}),
