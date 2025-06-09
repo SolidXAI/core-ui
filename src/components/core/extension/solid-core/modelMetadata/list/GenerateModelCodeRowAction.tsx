@@ -10,7 +10,6 @@ import { Toast } from 'primereact/toast';
 import { SolidCircularLoader } from '@/components/core/common/SolidLoaders/SolidCircularLoader';
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import qs from "qs";
-import { filter } from "lodash";
 
 
 const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
