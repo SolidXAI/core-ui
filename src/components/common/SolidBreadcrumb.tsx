@@ -18,6 +18,7 @@ interface Props {
 export const SolidBreadcrumb = (props: Props) => {
   const { solidFormViewMetaData, initialEntityData } = props;
   const modelMetadata = solidFormViewMetaData?.data?.solidView?.model;
+  const modelDisplayName = modelMetadata?.displayName;
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -33,70 +34,95 @@ export const SolidBreadcrumb = (props: Props) => {
   }
 
   const queryUserKeyField = searchParams.get("userKeyField");
+  const isNewForm = pathname.endsWith("/new");
 
   useEffect(() => {
-    if (segments.length === 6 && segments[4] === "form" && userKeyFieldValue && !queryUserKeyField) {
+    if (!isNewForm && userKeyFieldValue && !queryUserKeyField) {
       const params = new URLSearchParams(searchParams.toString());
       params.set("userKeyField", userKeyFieldValue);
       const newUrl = `${pathname}?${params.toString()}`;
       router.push(newUrl, { scroll: false });
     }
-  }, [pathname, userKeyFieldValue, queryUserKeyField, router]);
+  }, [pathname, userKeyFieldValue, queryUserKeyField, isNewForm, router]);
 
-  const [fromView, setFromView] = useState<"list" | "kanban" | null>(null);
+  const breadcrumbItems = [
+    {
+      label: modelDisplayName,
+      link: "#", // optionally link to the model list
+    },
+    {
+      label: isNewForm
+        ? `Add ${modelDisplayName} Details`
+        : decodeURIComponent(queryUserKeyField || userKeyFieldValue || ""),
+    },
+  ];
+  // useEffect(() => {
+  //   if (segments.length === 6 && segments[4] === "form" && userKeyFieldValue && !queryUserKeyField) {
+  //     const params = new URLSearchParams(searchParams.toString());
+  //     params.set("userKeyField", userKeyFieldValue);
+  //     const newUrl = `${pathname}?${params.toString()}`;
+  //     router.push(newUrl, { scroll: false });
+  //   }
+  // }, [pathname, userKeyFieldValue, queryUserKeyField, router]);
 
-  useEffect(() => {
-    if (typeof window !== "undefined") {
-      const storedView = sessionStorage.getItem("fromView");
-      if (storedView === "list" || storedView === "kanban") {
-        setFromView(storedView);
-      }
-    }
-  }, []);
+  // const [fromView, setFromView] = useState<"list" | "kanban" | null>(null);
 
-  let breadcrumbItems: BreadcrumbItem[] = [];
+  // useEffect(() => {
+  //   if (typeof window !== "undefined") {
+  //     const storedView = sessionStorage.getItem("fromView");
+  //     if (storedView === "list" || storedView === "kanban") {
+  //       setFromView(storedView);
+  //     }
+  //   }
+  // }, []);
 
-  if (segments.length >= 4 && segments[0] === "admin" && segments[1] === "core") {
-    const moduleName = segments[2].replace(/-/g, " ");
-    const modelName = segments[3].replace(/-/g, " ");
+  // let breadcrumbItems: BreadcrumbItem[] = [];
 
-    breadcrumbItems.push({
-      label: moduleName,
-      link: `/admin/core/${segments[2]}/home`,
-    });
+  // if (segments.length >= 4 && segments[0] === "admin" && segments[1] === "core") {
+  //   const moduleName = segments[2].replace(/-/g, " ");
+  //   const modelName = segments[3].replace(/-/g, " ");
 
-    if (segments.length >= 5) {
-      if (segments[4] === "form" && segments.length === 6) {
-        const view = fromView ?? "list";
-        breadcrumbItems.push({
-          label: view === "kanban" ? "Kanban" : "List",
-          link: `/admin/core/${segments[2]}/${segments[3]}/${view}`,
-        });
-      } else {
-        breadcrumbItems.push({
-          label: modelName,
-          link: `/admin/core/${segments[2]}/${segments[3]}`,
-        });
-      }
-    }
+  //   breadcrumbItems.push({
+  //     label: moduleName,
+  //     link: `/admin/core/${segments[2]}/home`,
+  //   });
 
-    if (segments.length === 6 && segments[4] === "form") {
-      breadcrumbItems.push({
-        label: queryUserKeyField ? decodeURIComponent(queryUserKeyField) : segments[5],
-      });
-    }
-  }
+  //   if (segments.length >= 5) {
+  //     if (segments[4] === "form" && segments.length === 6) {
+  //       const view = fromView ?? "list";
+  //       breadcrumbItems.push({
+  //         label: view === "kanban" ? "Kanban" : "List",
+  //         link: `/admin/core/${segments[2]}/${segments[3]}/${view}`,
+  //       });
+  //     } else {
+  //       breadcrumbItems.push({
+  //         label: modelName,
+  //         link: `/admin/core/${segments[2]}/${segments[3]}`,
+  //       });
+  //     }
+  //   }
 
-  const items = breadcrumbItems.map((item) => ({
+  //   if (segments.length === 6 && segments[4] === "form") {
+  //     breadcrumbItems.push({
+  //       label: queryUserKeyField ? decodeURIComponent(queryUserKeyField) : segments[5],
+  //     });
+  //   }
+  // }
+
+  const items = breadcrumbItems.map((item, index) => ({
     label: item.label,
     ...(item.link
       ? {
-          template: () => (
-            <Link href={item.link!}>
-              <p className="text-primary font-normal">{item.label}</p>
-            </Link>
-          ),
-        }
+        template: () => (
+          // <Link href={item.link!}>
+          <p
+            className={`text-primary ${index === 1 ? 'font-bold' : 'font-normal'}`}
+          >
+            {item.label}
+          </p>
+          // </Link>
+        ),
+      }
       : {}),
   }));
 
