@@ -109,13 +109,17 @@ export const SolidBreadcrumb = (props: Props) => {
   //   }
   // }
 
-  const items = breadcrumbItems.map((item) => ({
+  const items = breadcrumbItems.map((item, index) => ({
     label: item.label,
     ...(item.link
       ? {
         template: () => (
           // <Link href={item.link!}>
-            <p className="text-primary font-normal">{item.label}</p>
+          <p
+            className={`text-primary ${index === 1 ? 'font-bold' : 'font-normal'}`}
+          >
+            {item.label}
+          </p>
           // </Link>
         ),
       }
