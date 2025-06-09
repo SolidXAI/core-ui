@@ -53,7 +53,7 @@ export const SolidBreadcrumb = (props: Props) => {
     {
       label: isNewForm
         ? `Add ${modelDisplayName} Details`
-        : decodeURIComponent(queryUserKeyField || userKeyFieldValue || ""),
+        : decodeURIComponent(queryUserKeyField || userKeyFieldValue || segments[segments.length - 1]  || ""),
     },
   ];
   // useEffect(() => {
@@ -116,7 +116,7 @@ export const SolidBreadcrumb = (props: Props) => {
         template: () => (
           // <Link href={item.link!}>
           <p
-            className={`text-primary ${index === 1 ? 'font-bold' : 'font-normal'}`}
+            className={`${index === 1 ? 'font-bold' : 'font-normal'}`}
           >
             {item.label}
           </p>
