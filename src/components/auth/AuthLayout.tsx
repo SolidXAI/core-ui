@@ -73,12 +73,12 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 {solidSettingsData?.data?.authPagesLayout === 'left' &&
                     <div className='col-6 flex align-items-center justify-content-center solid-login-dark-bg'>
                         <div className="w-full">
-                            {process.env.NEXT_PUBLIC_AUTH_LOGO && solidSettingsData?.data?.appLogoPosition === "in_form_view" &&
+                            {solidSettingsData?.data?.appLogo && solidSettingsData?.data?.appLogoPosition === "in_form_view" &&
                                 <div className="flex justify-content-center">
                                     <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
                                         <Image
                                             alt="solid logo"
-                                            src={process.env.NEXT_PUBLIC_AUTH_LOGO ?? SolidLogo}
+                                            src={`${process.env.API_URL}/${solidSettingsData?.data?.appLogo}` ?? SolidLogo}
                                             className="relative"
                                             fill
                                         />
@@ -95,11 +95,11 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                                 ${solidSettingsData?.data?.authPagesLayout === 'left' ? 'solid-left-layout' : ''} 
                                 ${solidSettingsData?.data?.authPagesLayout === 'right' ? 'solid-right-layout' : ''}`.trim()}
                 >
-                    {process.env.NEXT_PUBLIC_AUTH_LOGO && solidSettingsData?.data?.appLogoPosition === "in_image_view" &&
+                    {solidSettingsData?.data?.appLogo && solidSettingsData?.data?.appLogoPosition === "in_image_view" &&
                         <div className={`solid-logo flex align-items-center gap-3 ${solidSettingsData?.data?.appLogoPosition}`}>
                             <Image
                                 alt="solid logo"
-                                src={process.env.NEXT_PUBLIC_AUTH_LOGO ?? SolidLogo}
+                                src={`${process.env.API_URL}/${solidSettingsData?.data?.appLogo}` ?? SolidLogo}
                                 className="relative"
                                 fill
                             />
@@ -123,12 +123,12 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 {solidSettingsData?.data?.authPagesLayout === 'right' &&
                     <div className='col-6 flex align-items-center justify-content-center solid-login-dark-bg'>
                         <div className="w-full">
-                            {process.env.NEXT_PUBLIC_AUTH_LOGO && solidSettingsData?.data?.appLogoPosition === "in_form_view" &&
+                            {solidSettingsData?.data?.appLogo && solidSettingsData?.data?.appLogoPosition === "in_form_view" &&
                                 <div className="flex justify-content-center">
                                     <div className={`solid-logo flex align-items-center gap-3 ${solidSettingsData?.data?.appLogoPosition}`}>
                                         <Image
                                             alt="solid logo"
-                                            src={process.env.NEXT_PUBLIC_AUTH_LOGO ?? SolidLogo}
+                                            src={`${process.env.API_URL}/${solidSettingsData?.data?.appLogo}` ?? SolidLogo}
                                             className="relative"
                                             fill
                                         />

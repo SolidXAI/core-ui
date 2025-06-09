@@ -52,10 +52,10 @@ const SolidInitiateRegisterOtp = () => {
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`} style={{ minWidth: 480 }}>
                 {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${process.env.NEXT_PUBLIC_AUTH_LOGO_POSITION}`}>
+                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogo_POSITION}`}>
                             <Image
                                 alt="solid logo"
-                                src={process.env.NEXT_PUBLIC_AUTH_LOGO ?? SolidLogo}
+                                src={`${process.env.API_URL}/${solidSettingsData?.data?.appLogo}` ?? SolidLogo}
                                 className="relative"
                                 fill
                             />

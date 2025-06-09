@@ -146,6 +146,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 />
                                 <label htmlFor="rememberMe" className="solid-auth-input-label">Remember me</label>
                             </div> */}
+                            <div></div>
                             <Link href={"/auth/initiate-forgot-password"} className="solid-auth-input-label font-bold">Forgot Password?</Link>
                         </div>
                         <div className="mt-4">
@@ -254,10 +255,10 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${process.env.NEXT_PUBLIC_AUTH_LOGO_POSITION}`}>
+                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogo_POSITION}`}>
                             <Image
                                 alt="solid logo"
-                                src={process.env.NEXT_PUBLIC_AUTH_LOGO ?? SolidLogo}
+                                src={`${process.env.API_URL}/${solidSettingsData?.data?.appLogo}` ?? SolidLogo}
                                 className="relative"
                                 fill
                             />
