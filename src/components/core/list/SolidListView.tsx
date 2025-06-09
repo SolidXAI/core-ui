@@ -270,7 +270,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   // All list view state.
   const [listViewData, setListViewData] = useState<any[]>([]);
   const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(25);
+  const [rows, setRows] = useState(solidListViewLayout?.attrs?.defaultPageSize ? solidListViewLayout?.attrs?.defaultPageSize : 10);
   const [totalRecords, setTotalRecords] = useState(0);
   const [sortField, setSortField] = useState("");
   const [sortOrder, setSortOrder] = useState(0);
