@@ -78,7 +78,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                                     <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
                                         <Image
                                             alt="solid logo"
-                                            src={`${process.env.API_URL}/${solidSettingsData?.data?.appLogo}` ?? SolidLogo}
+                                            src={solidSettingsData?.data?.appLogo ?? SolidLogo}
                                             className="relative"
                                             fill
                                         />
@@ -99,7 +99,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                         <div className={`solid-logo flex align-items-center gap-3 ${solidSettingsData?.data?.appLogoPosition}`}>
                             <Image
                                 alt="solid logo"
-                                src={`${process.env.API_URL}/${solidSettingsData?.data?.appLogo}` ?? SolidLogo}
+                                src={solidSettingsData?.data?.appLogo ?? SolidLogo}
                                 className="relative"
                                 fill
                             />
@@ -128,7 +128,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                                     <div className={`solid-logo flex align-items-center gap-3 ${solidSettingsData?.data?.appLogoPosition}`}>
                                         <Image
                                             alt="solid logo"
-                                            src={`${process.env.API_URL}/${solidSettingsData?.data?.appLogo}` ?? SolidLogo}
+                                            src={solidSettingsData?.data?.appLogo ?? SolidLogo}
                                             className="relative"
                                             fill
                                         />

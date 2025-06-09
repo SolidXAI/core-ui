@@ -258,7 +258,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogo_POSITION}`}>
                             <Image
                                 alt="solid logo"
-                                src={`${process.env.API_URL}/${solidSettingsData?.data?.appLogo}` ?? SolidLogo}
+                                src={solidSettingsData?.data?.appLogo ?? SolidLogo}
                                 className="relative"
                                 fill
                             />
