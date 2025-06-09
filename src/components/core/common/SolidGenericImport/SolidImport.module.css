@@ -1,0 +1,21 @@
+.SolidImportContextWrapper {
+    height: 50vh;
+    border-radius: 6px;
+    border: 1px solid var(--primary-light-color);
+}
+
+.StepperText {
+    position: absolute;
+    left: 50%;
+    top: 50%;
+    transform: translate(-50%, -50%);
+    font-weight: 600;
+}
+
+.ActiveStepperText {
+    color: var(--surface-0) !important;
+}
+
+.DeactiveStepperText {
+    color: var(--solid-primary-black) !important;
+}

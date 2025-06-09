@@ -205,6 +205,10 @@
   --primary-900: #260955;
 }
 
+.solid-primary-black-text {
+  color: var(--solid-primary-black);
+}
+
 .solid-primary-title {
   color: var(--solid-title) !important;
 }
