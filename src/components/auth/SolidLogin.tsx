@@ -146,6 +146,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 />
                                 <label htmlFor="rememberMe" className="solid-auth-input-label">Remember me</label>
                             </div> */}
+                            <div></div>
                             <Link href={"/auth/initiate-forgot-password"} className="solid-auth-input-label font-bold">Forgot Password?</Link>
                         </div>
                         <div className="mt-4">
