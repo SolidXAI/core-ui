@@ -66,7 +66,7 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
     //     return false;
     // };
 
-    const fetchMqMessageStatus = async (retries = 5, delay = 500, generateCodeData: any): Promise<boolean> => {
+    const fetchMqMessageStatus = async (retries = 30, delay = 500, generateCodeData: any): Promise<boolean> => {
         for (let i = 0; i < retries; i++) {
             try {
                 const query = {
@@ -87,6 +87,9 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
                         console.log("messageStatus", messageStage);
                         if (messageStage === "succeeded") {
                             return true
+                        }
+                        if (messageStage === "failed") {
+                            return false
                         }
                     }
                 }
