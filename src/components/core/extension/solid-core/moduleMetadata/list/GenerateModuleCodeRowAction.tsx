@@ -111,7 +111,7 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
             if (isGenerateCodeSuceess) {
                 console.log("isGenerateCodeSuceess", isGenerateCodeSuceess);
                 setIsPinging(true);
-                const isAlive = await fetchMqMessageStatus(10, 500, generateCodeData);
+                const isAlive = await fetchMqMessageStatus(30, 500, generateCodeData);
                 console.log("isAlive", isAlive);
                 setIsPinging(false);
 
