@@ -388,10 +388,10 @@ export const SolidListView = (params: SolidListViewParams) => {
         if (queryObject.c_filter) {
           filters.$and.push(queryObject.c_filter);
         }
-        setRows(queryData.limit);
+        setRows(Number(queryData.limit));
         setToPopulate(queryData?.populate);
         setToPopulateMedia(queryData?.populateMedia);
-        setFirst(queryData?.offset);
+        setFirst(Number(queryData?.offset));
         setSortField(queryData?.sort[0]?.field);
         setSortOrder(queryData?.sort[0]?.order);
         setFilters(filters);
