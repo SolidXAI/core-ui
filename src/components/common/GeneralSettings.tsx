@@ -49,7 +49,8 @@ export const GeneralSettings = () => {
         appTnc: solidSettingsData?.data?.appTnc || "",
         appPrivacyPolicy: solidSettingsData?.data?.appPrivacyPolicy || "",
         enableDarkMode: solidSettingsData?.data?.enableDarkMode || true,
-        copyright: solidSettingsData?.data?.copyright
+        copyright: solidSettingsData?.data?.copyright,
+        forceChangePasswordOnFirstLogin: solidSettingsData?.data?.forceChangePasswordOnFirstLogin || false
     };
     const formik = useFormik({
         initialValues: initialValues,
@@ -408,6 +409,20 @@ export const GeneralSettings = () => {
                                                                 name="iamGoogleOAuthEnabled"
                                                                 checked={formik.values.iamGoogleOAuthEnabled}
                                                                 onChange={(e) => formik.setFieldValue("iamGoogleOAuthEnabled", e.value)}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                 <div className="col-6 mt-3">
+                                                    <div className="formgrid grid align-items-center">
+                                                        <div className="col-5">
+                                                            <label className="form-field-label">Force Password change on first Login </label>
+                                                        </div>
+                                                        <div className="col-7">
+                                                            <InputSwitch
+                                                                name="forceChangePasswordOnFirstLogin"
+                                                                checked={formik.values.forceChangePasswordOnFirstLogin}
+                                                                onChange={(e) => formik.setFieldValue("forceChangePasswordOnFirstLogin", e.value)}
                                                             />
                                                         </div>
                                                     </div>

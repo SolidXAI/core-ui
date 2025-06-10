@@ -1,14 +1,9 @@
 "use client";
 
 import React, { useEffect, useState } from 'react';
-import { Card } from 'primereact/card';
 import { Divider } from 'primereact/divider';
 import { Dropdown } from 'primereact/dropdown';
-import styles from './SolidLocale.module.css'; // adjust path as needed
-import { createSolidEntityApi } from '@/redux/api/solidEntityApi';
-import { set } from 'lodash';
-import { Button } from 'primereact/button';
-
+import "./solid-locale.css";
 const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLocale,viewMode,createMode,handleLocaleChangeRedirect,
     applicableLocales,defaultEntityLocaleId,solidFormViewData,published}: { solidFormViewMetaData: any, id: string, selectedLocale: any, setSelectedLocale: any,viewMode:string,createMode:boolean,handleLocaleChangeRedirect:any,applicableLocales:any,defaultEntityLocaleId:string | null,solidFormViewData:any ,published:string | null }) => {
     const [localeOptions, setLocaleOptions] = useState([]);
@@ -66,39 +61,39 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
 
 
     return (
-        <div className={styles.solidLocaleContainer}>
-            <div className={`${styles.solidLocaleButtonContainer} flex gap-3`}>
+        <div className="solidLocaleContainer">
+            <div className="solidLocaleButtonContainer flex gap-3">
             </div>
-            {solidFormViewData && 
-            (<div className={styles.solidLocaleCardHeader}>
+            {solidFormViewData && (viewMode === 'edit') &&
+            (<div className="solidLocaleCardHeader">
                 {solidFormViewMetaData.data.solidView?.model?.draftPublishWorkflow &&
                 published !== null ? (
-                    <li className='locale-card-header'>
+                    <li className="solidCustomLocaleCardHeader">
                         Editing <span className="font-bold">published version</span>
                     </li>
                 ) : (
-                    <li className='locale-card-header danger'>
+                    <li className="solidCustomLocaleCardHeaderDanger">
                         Editing <span className="font-bold">unpublished version</span>
                     </li>
                 )}
                 </div>
                 )
             }
-            <div className={styles.solidLocaleCardBody}>
+            <div className="solidLocaleCardBody">
                 <h3 className="text-lg font-semibold p-0 m-0">Information</h3>
                 <Divider className="my-2" />
                 <div className="space-y-2">
-                    <div className={styles.solidLocaleInfoField}>
+                    <div className="solidLocaleInfoField">
                         <p className="text-sm font-bold text-gray-500 m-0">Created At</p>
                         <p className="text-sm m-0">{formatToDDMMYYWithTime(solidFormViewData?.data?.createdAt)}</p>
                     </div>
-                    <div className={styles.solidLocaleInfoField}>
+                    <div className="solidLocaleInfoField">
                         <p className="text-sm font-bold text-gray-500 m-0">Updated At</p>
                         <p className="text-sm m-0">
                             {formatToDDMMYYWithTime(solidFormViewData?.data?.updatedAt)}
                         </p>
                     </div>
-                    <div className={styles.solidLocaleInfoField}>
+                    <div className="solidLocaleInfoField">
                         <p className="text-sm font-bold text-gray-500 m-0">Published At</p>
                         <p className="text-sm m-0">{formatToDDMMYYWithTime(published ?? '')}</p>
                     </div>
@@ -116,7 +111,7 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
                     disabled={createMode}
                 />
                 {viewMode === 'view' || createMode && (
-                <p className="text-sm text-gray-700 mt-0"> By default record will be created in <b>{defautlLocale}</b></p>
+                <p className="text-sm text-gray-700 mt-0 ml-0"> By default record will be created in <b>{defautlLocale}</b></p>
                 )} 
             </div>
             {/* <p className="text-sm font-bold text-gray-500 px-2">Fill in form another locale</p> */}

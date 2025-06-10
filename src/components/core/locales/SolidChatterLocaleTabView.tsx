@@ -2,9 +2,7 @@ import React from 'react';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { SolidChatter } from '../chatter/SolidChatter';
 import SolidLocale from './SolidLocale';
-import styles from './SolidLocale.module.css';
-   // adjust path as needed
-
+import './solid-locale.css';
 interface Props {
   solidFormViewMetaData: any;
   id: string;
@@ -43,8 +41,8 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
   published
 }) => {
   return (
-      <TabView className="solid-locale" activeIndex={activeTab}>
-        <TabPanel header="Internationalisation" className='p-2' contentClassName='p-0'>
+      <TabView className="solidCustomLocaleTabviewPanels" activeIndex={activeTab}>
+        <TabPanel header="Internationalisation" className={`solidCustomLocaleTab p-2`} contentClassName='p-0'>
           <SolidLocale
           setSelectedLocale={setSelectedLocale}
           solidFormViewMetaData={solidFormViewMetaData}
@@ -59,7 +57,7 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
           published={published}
           />
         </TabPanel>
-        <TabPanel header="Audit Trail" className='p-2' contentClassName='p-0'>
+        <TabPanel header="Audit Trail" className={`solidCustomLocaleTab p-2`} contentClassName='p-0'>
           <SolidChatter
             modelSingularName={solidFormViewMetaData?.data?.solidView?.model?.singularName}
             id={id}
@@ -72,7 +70,3 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
 };
 
 export default SolidChatterLocaleTabView;
-function setRefreshChatterMessage(value: boolean): void {
-  throw new Error('Function not implemented.');
-}
-
