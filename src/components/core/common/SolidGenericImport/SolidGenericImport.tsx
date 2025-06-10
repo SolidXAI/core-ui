@@ -1,3 +1,4 @@
+"use client"
 import { Dialog } from 'primereact/dialog';
 import React, { useState } from 'react'
 import { SolidImportStepper } from './SolidImportStepper';
@@ -25,10 +26,10 @@ export const SolidGenericImport = ({
             <SolidImportStepper importStep={importStep} setImportStep={setImportStep} />
             <div className='px-4 py-3'>
                 {importStep === 1 &&
-                    <SolidImportInstructions setImportStep={setImportStep} listViewMetaData={listViewMetaData}/>
+                    <SolidImportInstructions setImportStep={setImportStep} listViewMetaData={listViewMetaData} />
                 }
                 {importStep === 2 &&
-                    <ImportWrapper setImportStep={setImportStep} />
+                    <ImportWrapper setImportStep={setImportStep} listViewMetaData={listViewMetaData} />
                 }
             </div>
         </Dialog>

@@ -1,14 +1,51 @@
-import { useCallback, useState } from 'react';
+"use client"
+import { useCallback, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from 'primereact/button'
 import styles from './SolidImport.module.css'
 import { DocumentSvg } from './DocumentSvg';
-export const SolidImportDropzone = ({ setImportStep, setImportTransactionContext }: any) => {
+import { useCreateImportTransactionMutation } from '@/redux/api/importTransactionApi';
+import { Toast } from 'primereact/toast';
+export const SolidImportDropzone = ({ setImportStep, setImportTransactionContext, setTransactionId, modelMetadataId }: any) => {
+    const toast = useRef<Toast>(null);
+    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
+        toast.current?.show({
+            severity,
+            summary,
+            detail,
+            life: 3000,
+        });
+    };
+
     const [file, setFile] = useState<File | null>(null);
+    const [createImportTransaction, { isLoading }] = useCreateImportTransactionMutation();
+
+
+    const uploadFile = async (uploadFile: File) => {
+        const formData = new FormData();
+        formData.append('fileLocation', uploadFile);
+        formData.append('modelMetadataId', modelMetadataId);
+
+        try {
+            const response = await createImportTransaction(formData).unwrap();
+            console.log('Upload success:', response);
+            if (response?.statusCode === 200) {
+                setFile(uploadFile);
+                showToast("success", "File Uploaded", "File Uploaded Successfully");
+                setTransactionId?.(response?.data?.id);
+            } else {
+                showToast("error", "Failed", "Fail to upload file")
+            }
+        } catch (error) {
+            console.error('Upload failed:', error);
+            showToast("error", "Failed", "Fail to upload file")
+        }
+    };
 
     const onDrop = useCallback((acceptedFiles: File[]) => {
         if (acceptedFiles.length > 0) {
-            setFile(acceptedFiles[0]);
+            const selectedFile = acceptedFiles[0];
+            uploadFile(selectedFile); // 👈 Auto upload on drop
         }
     }, []);
 
@@ -34,6 +71,7 @@ export const SolidImportDropzone = ({ setImportStep, setImportTransactionContext
 
     return (
         <div>
+            <Toast ref={toast} />
             <div className={styles.SolidImportContextWrapper}>
                 <div {...getRootProps({ className: styles.dropzone })} className='h-full flex align-items-center justify-content-center'>
                     <input {...getInputProps()} />
@@ -64,7 +102,17 @@ export const SolidImportDropzone = ({ setImportStep, setImportTransactionContext
                 </div>
             </div>
             <div className='mt-3 flex align-items-center gap-3'>
-                <Button label='Continue' size='small' onClick={() => setImportTransactionContext(true)} />
+                <Button
+                    label='Continue'
+                    size='small'
+                    onClick={() => {
+                        if (!file) {
+                            showToast("error", "Missing File", "Please upload file");
+                            return;
+                        }
+                        setImportTransactionContext(true);
+                    }}
+                />
                 <Button label='Cancel' size='small' outlined onClick={() => setImportStep(1)} />
             </div>
         </div>

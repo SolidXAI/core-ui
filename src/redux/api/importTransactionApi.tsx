@@ -15,16 +15,7 @@ export const importTransactionApi = createApi({
         getImportTemplate: builder.query({
             query: ({ id, format }) => {
                 return `/import-transaction/import-template/${id}/${format}`
-            },
-            transformResponse: (response: any) => {
-                if (response.error) {
-                    throw new Error(response.error);
-                }
-                return {
-                    records: response.data.records,
-                    meta: response.data.meta
-                }
-            },
+            }
         }),
         // create transaction / upload file here
         createImportTransaction: builder.mutation({
@@ -47,34 +38,19 @@ export const importTransactionApi = createApi({
         getImportMappingInfo: builder.query({
             query: ({ id }) => {
                 return `/import-transaction/${id}/import-mapping-info`
-            },
-            transformResponse: (response: any) => {
-                if (response.error) {
-                    throw new Error(response.error);
-                }
-                return {
-                    records: response.data.records,
-                    meta: response.data.meta
-                }
-            },
+            }
         }),
         createImportSync: builder.mutation({
             query: ({ id }) => ({
                 url: `/import-transaction/${id}/start-import/sync`,
+                method: 'POST',
             }),
-            transformResponse: (response: any) => {
-                return {
-                    file: response
-                }
-            }
         }),
         createImportAsync: builder.mutation({
-            query: ({ id, templateData }) => ({
+            query: ({ id }) => ({
                 url: `/import-transaction/${id}/start-import/async`,
-                method: 'POST',
-                body: templateData
             }),
-        })
+        }),
     })
 })
 

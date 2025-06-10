@@ -1,15 +1,26 @@
+"use client"
 import React, { useState } from 'react'
 import { SolidImportDropzone } from './SolidImportDropzone'
 import { SolidImportTransaction } from './SolidImportTransaction'
 
-export const ImportWrapper = ({ setImportStep }: any) => {
+export const ImportWrapper = ({ setImportStep, listViewMetaData }: any) => {
     const [importTransactionContext, setImportTransactionContext] = useState(false);
+    const [transactionId, setTransactionId] = useState(null);
+    const modelMetadataId = listViewMetaData?.data?.solidView?.model?.id;
     return (
         <div>
             {!importTransactionContext ?
-                <SolidImportDropzone setImportStep={setImportStep} setImportTransactionContext={setImportTransactionContext} />
+                <SolidImportDropzone
+                    setImportStep={setImportStep}
+                    setImportTransactionContext={setImportTransactionContext}
+                    setTransactionId={setTransactionId}
+                    modelMetadataId={modelMetadataId}
+                />
                 :
-                <SolidImportTransaction setImportTransactionContext={setImportTransactionContext} />
+                <SolidImportTransaction
+                    transactionId={transactionId}
+                    setImportTransactionContext={setImportTransactionContext}
+                />
             }
         </div>
     )
