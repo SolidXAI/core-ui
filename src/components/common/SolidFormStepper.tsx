@@ -97,8 +97,12 @@ export const SolidFormStepper = (props: Props) => {
     }
 
     const handleButtonClick = (stepValue: any) => {
-        formik.setFieldValue(solidWorkflowFieldKey, stepValue);
-        formik.handleSubmit();
+        if (solidWorkflowFieldEnabled === false || id === "new" || viewMode === "view") {
+            return
+        } else {
+            formik.setFieldValue(solidWorkflowFieldKey, stepValue);
+            formik.handleSubmit();
+        }
     }
 
     const activeIndex = solidFormViewWorkflowData.findIndex((step: any) => step.value === solidWorkflowFieldValue);
@@ -107,7 +111,7 @@ export const SolidFormStepper = (props: Props) => {
     return (
         <>
             <Toast ref={toast} />
-            <div className='flex solid-dynamic-stepper' style={solidWorkflowFieldEnabled === false || id === "new" || viewMode === "view" ? { pointerEvents: 'none' } : {}}>
+            <div className='flex solid-dynamic-stepper'>
                 {visibleSteps.map((step: any, index: number) => {
                     const isActive = index === activeIndex;
                     const isBeforeActive = index < activeIndex;
