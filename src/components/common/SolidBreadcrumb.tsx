@@ -15,10 +15,18 @@ interface Props {
   initialEntityData?: any;
 }
 
+const toTitleCase = (str: string) => {
+  return str
+    .replace(/[-_]/g, " ")
+    .replace(/([a-z])([A-Z])/g, "$1 $2")
+    .replace(/\b\w/g, (char) => char.toUpperCase());
+};
+
 export const SolidBreadcrumb = (props: Props) => {
   const { solidFormViewMetaData, initialEntityData } = props;
+  console.log("solidFormViewMetaData",solidFormViewMetaData);
+  
   const modelMetadata = solidFormViewMetaData?.data?.solidView?.model;
-  const modelDisplayName = modelMetadata?.displayName;
   const pathname = usePathname();
   const router = useRouter();
   const searchParams = useSearchParams();
@@ -45,17 +53,37 @@ export const SolidBreadcrumb = (props: Props) => {
     }
   }, [pathname, userKeyFieldValue, queryUserKeyField, isNewForm, router]);
 
-  const breadcrumbItems = [
-    {
+  const [fromView, setFromView] = useState<"list" | "kanban" | null>(null);
+
+  useEffect(() => {
+    if (typeof window !== "undefined") {
+      const storedView = sessionStorage.getItem("fromView");
+      if (storedView === "list" || storedView === "kanban") {
+        setFromView(storedView);
+      }
+    }
+  }, []);
+
+  const breadcrumbItems: BreadcrumbItem[] = [];
+
+  if (segments.length >= 4 && segments[0] === "admin" && segments[1] === "core") {
+    const moduleName = segments[2];
+    const modelName = segments[3];
+    const modelDisplayName = toTitleCase(modelName);
+
+    // Link to model list or kanban view based on stored view
+    breadcrumbItems.push({
       label: modelDisplayName,
-      link: "#", // optionally link to the model list
-    },
-    {
+      link: `/admin/core/${moduleName}/${modelName}/${fromView || "list"}`,
+    });
+
+    breadcrumbItems.push({
       label: isNewForm
         ? `Add ${modelDisplayName} Details`
-        : decodeURIComponent(queryUserKeyField || userKeyFieldValue || segments[segments.length - 1]  || ""),
-    },
-  ];
+        : decodeURIComponent(queryUserKeyField || userKeyFieldValue || segments[segments.length - 1] || ""),
+    });
+  }
+
   // useEffect(() => {
   //   if (segments.length === 6 && segments[4] === "form" && userKeyFieldValue && !queryUserKeyField) {
   //     const params = new URLSearchParams(searchParams.toString());
@@ -114,13 +142,13 @@ export const SolidBreadcrumb = (props: Props) => {
     ...(item.link
       ? {
         template: () => (
-          // <Link href={item.link!}>
+          <Link href={item.link!}>
           <p
             className={`${index === 1 ? 'font-bold' : 'font-normal'}`}
           >
             {item.label}
           </p>
-          // </Link>
+          </Link>
         ),
       }
       : {}),
