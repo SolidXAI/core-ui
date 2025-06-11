@@ -56,7 +56,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     enableSoftDelete: modelMetaData ? modelMetaData?.enableSoftDelete : "",
     enableAuditTracking: modelMetaData ? modelMetaData?.enableAuditTracking : "",
     internationalisation: modelMetaData ? modelMetaData?.internationalisation : "",
-    draftPublishWorkflow: modelMetaData ? modelMetaData?.draftPublishWorkflow: "",
+    draftPublishWorkflow: modelMetaData ? modelMetaData?.draftPublishWorkflow : "",
     isChild: modelMetaData ? modelMetaData?.isChild : "",
     parentModelId: modelMetaData ? modelMetaData?.parentModel?.id : "",
     parentModel: modelMetaData ? modelMetaData?.parentModel : "",
@@ -66,14 +66,14 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
   const [showTableName, setShowTableName] = useState<any>(false);
   const [showParentModel, setShowParentModel] = useState<any>(false);
 
-  useEffect(() => {
-    if (modelMetaData && modelMetaData.tableName) {
-      setShowTableName(true)
-    }
-    if (modelMetaData && modelMetaData.isChild) {
-      setShowParentModel(true)
-    }
-  }, [modelMetaData])
+  // useEffect(() => {
+  //   if (modelMetaData && modelMetaData.tableName) {
+  //     setShowTableName(true)
+  //   }
+  //   if (modelMetaData && modelMetaData.isChild) {
+  //     setShowParentModel(true)
+  //   }
+  // }, [modelMetaData])
 
   const validationSchema = Yup.object({
     singularName: Yup.string()
@@ -89,7 +89,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
       //   "Invalid format. Use lowercase letters and hyphens only."
       // )
       .required("Plural Name is required."),
-    tableName: Yup.string().nullable()
+    tableName: Yup.string().required()
       .matches(
         /^[a-z0-9_]+$/,
         "Table name must be in snake_case (lowercase letters, numbers, and underscores only)."
@@ -145,7 +145,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
           description: values.description,
           dataSource: values.dataSource,
           dataSourceType: values.dataSourceType,
-          tableName: showTableName === true ? values?.tableName : tableName,
+          tableName: values?.tableName || tableName,
           moduleId: values.moduleId,
           module: values.module,
           isSystem: values.isSystem ? values.isSystem === true : '',
@@ -546,7 +546,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     Is Internationalisation Enabled
                   </label>
                 </div>
-                 <div className="flex align-items-center gap-2 mt-3">
+                <div className="flex align-items-center gap-2 mt-3">
                   <Checkbox
                     name="draftPublishWorkflow"
                     onChange={(e) => {
@@ -680,10 +680,8 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                         formik.setFieldValue("singularName", toCamelCase);
                         formik.setFieldValue("pluralName", toPluralCamelCase);
                       }
-                      if (showTableName == true) {
-                        if (params.id === 'new') {
-                          formik.setFieldValue("tableName", toSnakeCase);
-                        }
+                      if (params.id === 'new') {
+                        formik.setFieldValue("tableName", toSnakeCase);
                       }
 
 
@@ -744,7 +742,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   )}
                 </div>
 
-                <div className="mt-4">
+                {/* <div className="mt-4">
                   <div className="flex align-items-center gap-2">
                     <Checkbox onChange={e => {
                       setShowTableName(e.checked);
@@ -760,31 +758,31 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                       Set table name
                     </label>
                   </div>
-                </div>
-                {showTableName &&
-                  <div className="flex flex-column gap-1 mt-4">
-                    <label htmlFor="tableName" className="form-field-label">
-                      Table Name
-                    </label>
-                    <InputText
-                      disabled={params.id !== 'new'}
-                      type="text"
-                      id="tableName"
-                      name="tableName"
-                      onChange={formik.handleChange}
-                      value={formik.values.tableName}
-                      className={classNames("", {
-                        "p-invalid": isFormFieldValid(formik, "tableName") || formErrors["tableName"],
-                      })}
+                </div> */}
+                {/* {showTableName && */}
+                <div className="flex flex-column gap-1 mt-4">
+                  <label htmlFor="tableName" className="form-field-label">
+                    Table Name
+                  </label>
+                  <InputText
+                    disabled={params.id !== 'new'}
+                    type="text"
+                    id="tableName"
+                    name="tableName"
+                    onChange={formik.handleChange}
+                    value={formik.values.tableName}
+                    className={classNames("", {
+                      "p-invalid": isFormFieldValid(formik, "tableName") || formErrors["tableName"],
+                    })}
+                  />
+                  {(isFormFieldValid(formik, "tableName") || (formErrors["tableName"])) && (
+                    <Message
+                      severity="error"
+                      text={formik?.errors?.tableName?.toString()}
                     />
-                    {(isFormFieldValid(formik, "tableName") || (formErrors["tableName"])) && (
-                      <Message
-                        severity="error"
-                        text={formik?.errors?.tableName?.toString()}
-                      />
-                    )}
-                  </div>
-                }
+                  )}
+                </div>
+                {/* } */}
                 <div className="flex flex-column gap-1 mt-4">
                   <label htmlFor="description" className="form-field-label">
                     Description
