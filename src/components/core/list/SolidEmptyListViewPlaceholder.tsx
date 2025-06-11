@@ -14,9 +14,9 @@ export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, actionsAllowed,
 
     return (
         <div className="page-parent-wrapper">
-            <div className="page-header">
+            {/* <div className="page-header">
                 <p className="m-0 view-title">{solidListViewMetaData?.data?.solidView?.layout?.displayName}</p>
-            </div>
+            </div> */}
             <div className='solid-empty-listview-placeholder-container'>
                 {process.env.NEXT_PUBLIC_DEFAULT_LIST_VIEW_NODATA_IMAGE &&
                     <Image
