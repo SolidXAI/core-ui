@@ -228,11 +228,11 @@ export const GeneralSettings = () => {
                         <div className="p-4 solid-form-content">
                             {pathname.includes("app-settings") &&
                                 <>
-                                    <p className='font-bold ' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>App Logo </p>
                                     <div className='formgrid grid'>
                                         <div className='col-8'>
                                             <div className="formgrid grid">
                                                 <div className="col-6">
+                                                    <p className='font-bold ' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>App Logo </p>
                                                     <div>
                                                         <div {...getAppLogoRootProps()} className="solid-dropzone-wrapper" style={{ borderRadius: 8 }}>
                                                             <input {...getAppLogoInputProps()} />
@@ -304,6 +304,7 @@ export const GeneralSettings = () => {
                                                     </div>
                                                 </div>
                                                 <div className="col-6">
+                                                    <p className='font-bold ' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Company Logo </p>
                                                     <div>
                                                         <div {...getCompanyLogoRootProps()} className="solid-dropzone-wrapper" style={{ borderRadius: 8 }}>
                                                             <input {...getCompanyLogoInputProps()} />
