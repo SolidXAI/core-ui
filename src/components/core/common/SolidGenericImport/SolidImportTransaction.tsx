@@ -1,7 +1,7 @@
 "use client"
 import { Button } from 'primereact/button'
 import styles from './SolidImport.module.css'
-import { useCreateImportSyncMutation, useLazyGetImportMappingInfoQuery } from '@/redux/api/importTransactionApi';
+import { useCreateImportSyncMutation, useLazyGetImportMappingInfoQuery, usePatchUpdateImportTransactionMutation } from '@/redux/api/importTransactionApi';
 import React, { useEffect, useRef, useState } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { Toast } from 'primereact/toast';
@@ -17,9 +17,10 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
         });
     };
     const [trigger, { data: mappingInfo, isLoading, isError }] = useLazyGetImportMappingInfoQuery();
+    const [patchUpdateImportTransaction] = usePatchUpdateImportTransactionMutation();
     const [createImportSync, { isLoading: isImporting }] = useCreateImportSyncMutation();
-
     const [fieldMapping, setFieldMapping] = useState<Record<string, string>>({});
+    const [visibleHeaders, setVisibleHeaders] = useState<string[]>([]);
 
     useEffect(() => {
         if (transactionId) {
@@ -29,67 +30,150 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
 
     useEffect(() => {
         const defaultMapping: Record<string, string> = {};
-        mappingInfo?.data?.importableFields.forEach((field: any) => {
-            defaultMapping[field.name] = field.name;
+        const headers: string[] = [];
+        mappingInfo?.data?.sampleImportedRecordInfo?.forEach((sample: any) => {
+            defaultMapping[sample.cellHeader] = sample.defaultMappedFieldName || "";
+            headers.push(sample.cellHeader);
         });
         setFieldMapping(defaultMapping);
-    }, [mappingInfo?.data?.importableFields]);
+        setVisibleHeaders(headers);
+    }, [mappingInfo?.data]);
+
 
     const dropdownOptions = mappingInfo?.data?.importableFields.map((field: any) => ({
         label: field.displayName,
         value: field.name,
     }));
 
-    const handleChange = (fileField: string, selectedField: string) => {
+    const handleChange = (cellHeader: string, selectedField: string) => {
         setFieldMapping((prev) => ({
             ...prev,
-            [fileField]: selectedField,
+            [cellHeader]: selectedField,
         }));
     };
 
+    const handleRemoveRow = (cellHeader: string) => {
+        setVisibleHeaders((prev) => prev.filter(header => header !== cellHeader));
+        setFieldMapping((prev) => {
+            const updated = { ...prev };
+            delete updated[cellHeader];
+            return updated;
+        });
+    };
+
+
     const handleImportTransaction = async () => {
         try {
-            const result = await createImportSync({
-                id: transactionId
+            const mappingArray = Object.entries(fieldMapping).map(([header, fieldName]) => ({
+                header,
+                fieldName,
+            }));
+
+            const patchData = {
+                status: "mapping_created",
+                mapping: JSON.stringify(mappingArray),
+            };
+            const patchResult = await patchUpdateImportTransaction({
+                id: transactionId,
+                data: patchData,
             }).unwrap();
-            if (result?.statusCode) {
-                showToast("success", "Import", "File Import Successfully");
-            } else {
-                showToast("error", "Failed", "Failed to Import file")
+            if (patchResult?.statusCode === 200) {
+                try {
+                    const importResult = await createImportSync({ id: transactionId }).unwrap();
+
+                    if (importResult?.statusCode === 200) {
+                        showToast("success", "Import", "File Imported Successfully");
+                    } else {
+                        showToast("error", "Failed", "Failed to Import file");
+                    }
+                } catch (importError: any) {
+                    showToast("error", "Import Error", importError?.data?.error);
+                }
             }
-        } catch (error) {
-            showToast("error", "Failed", "Something went wrong")
+        } catch (error: any) {
+            const errorMessage = error?.data?.error || "Something went wrong while updating mapping";
+            showToast("error", "Error", errorMessage);
         }
     };
 
+    const sampleRecords = mappingInfo?.data?.sampleImportedRecordInfo ?? [];
+
     return (
         <div>
+            <Toast ref={toast} />
             <div className={styles.SolidImportContextWrapper}>
                 <div className='grid m-0' style={{ height: '100%', overflowY: 'auto' }}>
-                    <div className="col-6 font-bold p-3 relative" style={{ background: 'var(--gray-100)', borderBottom: '1px solid var(--primary-light-color)' }}>
+                    <div className="col-6 font-bold p-3 relative" style={{ background: 'var(--gray-100)', borderBottom: '1px solid var(--primary-light-color)', maxHeight: 49 }}>
                         File Column
                         <div className={styles.TransactionsHeaderDivider}></div>
                     </div>
-                    <div className="col-6 font-bold p-3" style={{ background: 'var(--gray-100)', borderBottom: '1px solid var(--primary-light-color)' }}>
+                    <div className="col-6 font-bold p-3" style={{ background: 'var(--gray-100)', borderBottom: '1px solid var(--primary-light-color)', maxHeight: 49 }}>
                         SolidX Field
                     </div>
-                    {mappingInfo?.data?.importableFields.map((field: any) => (
-                        <React.Fragment key={field.name}>
-                            <div className="col-6 py-2 px-3 flex flex-column justify-content-center" style={{ borderBottom: '1px solid var(--gray-100)' }}>
-                                <div className="font-medium text-primary">{field.displayName}</div>
-                                <div className="text-sm" style={{ color: 'var(--solid-grey-500)' }}>{field.name}</div>
-                            </div>
-                            <div className="col-6 py-2 px-3" style={{ borderBottom: '1px solid var(--gray-100)' }}>
-                                <Dropdown
-                                    value={fieldMapping[field.name]}
-                                    options={dropdownOptions}
-                                    onChange={(e) => handleChange(field.name, e.value)}
-                                    className='w-full p-inputtext-sm'
-                                    placeholder="Select field"
-                                />
-                            </div>
-                        </React.Fragment>
-                    ))}
+                    {sampleRecords.length > 0 ? (
+                        sampleRecords
+                            ?.filter((sample: any) => visibleHeaders.includes(sample.cellHeader))
+                            .map((sample: any) => {
+                                const fieldMeta = mappingInfo.data.importableFields.find(
+                                    (f: any) => f.name === fieldMapping[sample.cellHeader]
+                                );
+                                const isRequired = fieldMeta?.required;
+                                // {sampleRecords
+                                //     ?.filter((sample: any) => visibleHeaders.includes(sample.cellHeader))
+                                //     ?.sort((a: any, b: any) => {
+                                //         const aRequired = mappingInfo.data.importableFields.find((f: any) => f.name === fieldMapping[a.cellHeader])?.required;
+                                //         const bRequired = mappingInfo.data.importableFields.find((f: any) => f.name === fieldMapping[b.cellHeader])?.required;
+                                //         return (bRequired ? 1 : 0) - (aRequired ? 1 : 0); // true comes before false
+                                //     })
+                                //     .map((sample: any) => {
+                                //         const fieldMeta = mappingInfo.data.importableFields.find(
+                                //             (f: any) => f.name === fieldMapping[sample.cellHeader]
+                                //         );
+                                //         const isRequired = fieldMeta?.required;
+                                return (
+                                    <React.Fragment key={sample.cellHeader}>
+                                        <div
+                                            className="col-6 py-2 px-3 flex flex-column justify-content-center"
+                                            style={{ borderBottom: "1px solid var(--gray-100)" }}
+                                        >
+                                            <div className="font-medium text-primary">{sample.cellHeader}</div>
+                                            <div className="text-sm" style={{ color: "var(--solid-grey-500)" }}>
+                                                {sample.cellValue || ""}
+                                            </div>
+                                        </div>
+                                        <div className="col-6 py-2 px-3 flex align-items-center gap-2" style={{ borderBottom: "1px solid var(--gray-100)" }}>
+                                            <Dropdown
+                                                value={fieldMapping[sample.cellHeader]}
+                                                options={dropdownOptions}
+                                                onChange={(e) => handleChange(sample.cellHeader, e.value)}
+                                                className="w-full p-inputtext-sm"
+                                                placeholder="Select field"
+                                            />
+                                            {!isRequired ? (
+                                                <span
+                                                    onClick={() => handleRemoveRow(sample.cellHeader)}
+                                                    title="Remove this row"
+                                                    style={{ cursor: 'pointer' }}
+                                                >
+                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                                        <rect width="16" height="16" rx="8" fill="#F0F0F0" />
+                                                        <path d="M5.6 11L5 10.4L7.4 8L5 5.6L5.6 5L8 7.4L10.4 5L11 5.6L8.6 8L11 10.4L10.4 11L8 8.6L5.6 11Z" fill="#4B4D52" />
+                                                    </svg>
+                                                </span>
+                                            )
+                                                :
+                                                <span style={{ height: 16, width: 16 }}></span>
+                                            }
+                                        </div>
+                                    </React.Fragment>
+                                );
+                            })
+                    ) : (
+                        <div className='col-12 flex flex-column align-items-center'>
+                            <h4>No Sample Imported Record Info Found</h4>
+                            <p>Please Add Records</p>
+                        </div>
+                    )}
                 </div>
             </div>
             <div className='mt-3 flex align-items-center gap-3'>
@@ -98,10 +182,10 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
                     size='small'
                     onClick={handleImportTransaction}
                     loading={isImporting}
-                    disabled={isImporting}
+                    disabled={isImporting || mappingInfo?.data?.sampleImportedRecordInfo?.length === 0}
                 />
                 <Button label='Cancel' size='small' outlined onClick={() => setImportTransactionContext(false)} />
             </div>
-        </div>
+        </div >
     )
 }
