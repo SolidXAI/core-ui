@@ -94,6 +94,11 @@ export const GeneralSettings = () => {
                     delete updatedSettings.appLogo;
                 }
 
+                if (updatedSettings.companylogo && updatedSettings.companylogo instanceof File) {
+                    formData.append("companylogo", updatedSettings.companylogo);
+                    delete updatedSettings.companylogo;
+                }
+
                 // Append remaining settings as JSON string
                 formData.append("settings", JSON.stringify(updatedSettings));
 
