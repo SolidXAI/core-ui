@@ -61,7 +61,6 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
         });
     };
 
-
     const handleImportTransaction = async () => {
         try {
             const mappingArray = Object.entries(fieldMapping).map(([header, fieldName]) => ({
@@ -78,17 +77,21 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
                 data: patchData,
             }).unwrap();
             if (patchResult?.statusCode === 200) {
+
+                // Sync
                 try {
                     const importResult = await createImportSync({ id: transactionId }).unwrap();
 
                     if (importResult?.statusCode === 200) {
-                        showToast("success", "Import", "File Imported Successfully");
+                        showToast("success", "Import", "Records Imported Successfully");
                     } else {
-                        showToast("error", "Failed", "Failed to Import file");
+                        showToast("error", "Failed", "Failed to Import Records");
                     }
                 } catch (importError: any) {
                     showToast("error", "Import Error", importError?.data?.error);
                 }
+
+                // Async
             }
         } catch (error: any) {
             const errorMessage = error?.data?.error || "Something went wrong while updating mapping";
@@ -102,12 +105,12 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
         <div>
             <Toast ref={toast} />
             <div className={styles.SolidImportContextWrapper}>
-                <div className='grid m-0' style={{ height: '100%', overflowY: 'auto' }}>
-                    <div className="col-6 font-bold p-3 relative" style={{ background: 'var(--gray-100)', borderBottom: '1px solid var(--primary-light-color)', maxHeight: 49 }}>
+                <div className='grid m-0 relative'>
+                    <div className={`col-6 font-bold p-3 ${styles.ImportTableHeader}`}>
                         File Column
                         <div className={styles.TransactionsHeaderDivider}></div>
                     </div>
-                    <div className="col-6 font-bold p-3" style={{ background: 'var(--gray-100)', borderBottom: '1px solid var(--primary-light-color)', maxHeight: 49 }}>
+                    <div className={`col-6 font-bold p-3 ${styles.ImportTableHeader}`}>
                         SolidX Field
                     </div>
                     {sampleRecords.length > 0 ? (
@@ -118,7 +121,8 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
                                     (f: any) => f.name === fieldMapping[sample.cellHeader]
                                 );
                                 const isRequired = fieldMeta?.required;
-                                // {sampleRecords
+                                // {sampleRecords.length > 0 ? (
+                                //    sampleRecords    
                                 //     ?.filter((sample: any) => visibleHeaders.includes(sample.cellHeader))
                                 //     ?.sort((a: any, b: any) => {
                                 //         const aRequired = mappingInfo.data.importableFields.find((f: any) => f.name === fieldMapping[a.cellHeader])?.required;
@@ -186,6 +190,6 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
                 />
                 <Button label='Cancel' size='small' outlined onClick={() => setImportTransactionContext(false)} />
             </div>
-        </div >
+        </div>
     )
 }

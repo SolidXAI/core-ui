@@ -57,7 +57,7 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
         <div>
             <div className={styles.SolidImportContextWrapper}>
                 <div className='p-3 h-full'>
-                    <div className='grid h-full' style={{ overflow: 'hidden' }}>
+                    <div className='grid'>
                         <div className={`${importInstructionsData?.data?.custom.length > 0 ? 'col-7' : 'col-12'}`} style={{ borderRight: importInstructionsData?.data?.custom.length > 0 ? '1px solid var(--primary-light-color)' : '', overflowY: 'auto', height: '48vh' }}>
                             <h5 className='solid-primary-black-text'>Standard Instructions</h5>
                             <ol className='p-0' style={{ listStyleType: 'none' }}>

@@ -49,6 +49,7 @@ export const importTransactionApi = createApi({
         createImportAsync: builder.mutation({
             query: ({ id }) => ({
                 url: `/import-transaction/${id}/start-import/async`,
+                method: 'POST',
             }),
         }),
     })
