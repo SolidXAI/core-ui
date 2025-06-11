@@ -19,11 +19,11 @@ export class SolidDateField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        if (value instanceof Date && !isNaN(value.getTime())) {
-            formData.append(fieldLayoutInfo.attrs.name, value.toISOString().split('T')[0]);
-        } else if (value) {
-            formData.append(fieldLayoutInfo.attrs.name, value);
-        }
+        // if (value instanceof Date && !isNaN(value.getTime())) {
+        //     formData.append(fieldLayoutInfo.attrs.name, value.toISOString().split('T')[0]);
+        // } else if (value) {
+        formData.append(fieldLayoutInfo.attrs.name, value);
+        // }
     }
 
     initialValue(): any {
@@ -167,7 +167,7 @@ export const DefaultDateFormViewWidget = ({ formik, fieldContext }: SolidFormFie
                 {formik.values[fieldLayoutInfo.attrs.name] instanceof Date
                     ? formik.values[fieldLayoutInfo.attrs.name].toLocaleDateString()
                     : formik.values[fieldLayoutInfo.attrs.name]}
-                </p>
+            </p>
         </div>
     );
 }
