@@ -815,11 +815,11 @@ export const SolidListView = (params: SolidListViewParams) => {
 
 
           {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewLayout?.attrs?.create !== false && params.embeded !== true && solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultAddButton !== false &&
-            <SolidCreateButton url={createButtonUrl} />
+            <SolidCreateButton url={createButtonUrl} solidListViewLayout={solidListViewLayout} />
           }
           {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidListViewLayout?.attrs?.create !== false && params.embeded == true && params.inlineCreate == true && searchParams.get('viewMode') !== "view" &&
             // < SolidCreateButton url={createButtonUrl} />
-            <Button type="button" icon="pi pi-plus" label="Add" size='small'
+            <Button type="button" icon={solidListViewLayout?.attrs?.addButtonIcon ? solidListViewLayout?.attrs?.addButtonIcon : "pi pi-plus"} label={solidListViewLayout?.attrs?.addButtonTitle ? solidListViewLayout?.attrs?.addButtonTitle : "Add"} className={`${solidListViewLayout?.attrs?.addButtonClassName}`} size='small'
               onClick={() => params.handlePopUpOpen("new")}
             ></Button>
           }
