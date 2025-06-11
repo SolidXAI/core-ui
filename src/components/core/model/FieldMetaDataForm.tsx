@@ -562,8 +562,8 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
   const [ormTypeOptions, setOrmTypeOptions] = useState([]);
   const [selectedOrmType, setSelectedOrmType] = useState<any>(fieldMetaData?.ormType);
 
-  const [isUserKeyFields, setUserKeyFields] = useState(false);
-  const [userKeyData, setUserKeyData] = useState([]);
+  const [askForUserKeyField, setAskForUserKeyField] = useState(false);
+  const [userKeyFieldData, setUserKeyFieldData] = useState([]);
 
   const [
     filteredExternalIdProvider,
@@ -755,7 +755,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
   };
 
   const searchUserKeyField = () => {
-    return userKeyData;
+    return userKeyFieldData;
   }
 
   const searchComputedFieldValueType = async (event: any) => {
@@ -1068,14 +1068,14 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
 
       if (result && result.records) {
         if (!result?.records[0]?.userKeyField) {
-          setUserKeyFields(true);
+          setAskForUserKeyField(true);
           const validUserKeyFields = result?.records[0]?.fields?.filter(
             (field: any) => field?.unique === true && field?.type === 'shortText'
           );
-          setUserKeyData(validUserKeyFields)
+          setUserKeyFieldData(validUserKeyFields)
         } else {
-          setUserKeyFields(false);
-          setUserKeyData([]);
+          setAskForUserKeyField(false);
+          setUserKeyFieldData([]);
         }
       }
     }
@@ -1921,6 +1921,38 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
 
                             </div>
                           )}
+                          {askForUserKeyField && (
+                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                              <label
+                                htmlFor="userKey"
+                                className="form-field-label"
+                              >
+                                Set User Key
+                              </label>
+
+                              <SingleSelectAutoCompleteField
+                                key="userKey"
+                                formik={formik}
+                                isFormFieldValid={isFormFieldValid}
+                                fieldName="userKey"
+                                fieldNameId="userKey"
+                                labelKey="displayName"
+                                valueKey="name"
+                                searchData={searchUserKeyField}
+                                existingData={formik.values.userKey}
+                              />
+                              <p className="fieldSubTitle">The co-model you have selected does not have a user key specified. Use the above dropdown to choose from one of the "unique" fields in this co-model to be set as its userkey. User keys are required in co-models being used in many-to-one or one-to-many relations as in SolidX when a many-to-one field is rendered it uses an autocomplete dropdown, and the user key value is what is displayed as the label in the dropdown.</p>
+                              {isFormFieldValid(
+                                formik,
+                                "userKey"
+                              ) && (
+                                  <Message
+                                    severity="error"
+                                    text={formik?.errors?.userKey?.toString()}
+                                  />
+                                )}
+                            </div>
+                          )}
 
                           {currentFields.includes(
                             "relationFieldFixedFilter"
@@ -1973,38 +2005,6 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
 
                               </div>
                             )}
-                          {isUserKeyFields && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
-                              <label
-                                htmlFor="userKey"
-                                className="form-field-label"
-                              >
-                                Set User Key
-                              </label>
-
-
-                              <SingleSelectAutoCompleteField
-                                key="userKey"
-                                formik={formik}
-                                isFormFieldValid={isFormFieldValid}
-                                fieldName="userKey"
-                                fieldNameId="userKey"
-                                labelKey="displayName"
-                                valueKey="name"
-                                searchData={searchUserKeyField}
-                                existingData={formik.values.userKey}
-                              />
-                              {isFormFieldValid(
-                                formik,
-                                "userKey"
-                              ) && (
-                                  <Message
-                                    severity="error"
-                                    text={formik?.errors?.userKey?.toString()}
-                                  />
-                                )}
-                            </div>
-                          )}
 
                           {currentFields.includes("relationCreateInverse") && (
                             <div className="field col-6 flex flex-column gap-2 mt-3">

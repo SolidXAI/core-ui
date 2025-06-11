@@ -20,7 +20,7 @@ export class SolidDateField implements ISolidField {
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
         if (value instanceof Date && !isNaN(value.getTime())) {
-            formData.append(fieldLayoutInfo.attrs.name, value.toISOString());
+            formData.append(fieldLayoutInfo.attrs.name, value.toISOString().split('T')[0]);
         } else if (value) {
             formData.append(fieldLayoutInfo.attrs.name, value);
         }
