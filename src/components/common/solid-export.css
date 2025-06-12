@@ -1,0 +1,103 @@
+.exportCustomProgressbar{
+    height: 3px !important;
+    margin-top: 5px !important;
+}
+.pExportText{
+    color:  var(--auth-subtitle-color) !important;
+    font-size: 14px !important;
+}
+.exportDialog {
+    width: 70% !important;
+    height: 700px !important;
+    padding:0 !important;
+    margin:0 !important;
+}
+.solidExportControls{
+    display: flex;
+    justify-content: flex-end;
+    margin: 0px 10px !important;
+}
+.exportCancelButton{
+    background-color: var(--primary-color) !important;
+    border: 1px solid  var(--primary-color)  !important;
+    border-radius: 12px;
+}
+.ExportItemWrapper {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+    justify-content: space-between;
+    width: 100%;
+    padding: 4px 0;
+  }
+  
+.ExportDropdownText {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    margin-right: 8px;
+ }
+.ExportDropdownIcon {
+    flex-shrink: 0;
+    cursor: pointer;
+}
+.exportCustomProgressbar{
+    height:3px !important;
+    margin-top: 5px !important;
+}
+.pExportText{
+    color:  var(--auth-subtitle-color) !important;
+    font-size: 14px !important;
+}
+.exportCustomProgressbar .p-progressbar-label {
+  display: none !important;
+}
+.SolidExportProgressToaster {
+    position: fixed;
+    bottom: 1rem;
+    right: 1rem;
+    padding: 1rem;
+    background-color: var(--primary-light-color);
+    color: white;
+    border-radius: 6px;
+    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
+    min-width: 500px;
+    z-index: 1000;
+}
+
+.solidCustomPicklist{
+  border-radius: 0.5rem;
+  border: 1px solid var(--primary-light-color) !important;
+  background: #FFF !important;
+  overflow: hidden;
+  position: relative;
+}
+
+.solidCustomPicklistHeader {
+  padding: 12px 16px;
+  font-size: 0.875rem;
+  font-weight: 600;
+  background: #F3FAFF;
+}
+
+.solidCustomPicklistSourceHeader {
+  border-right: 1px solid var(--primary-light-color);
+}
+
+.solidCustomPicklistItemWrapper {
+  height: 2.5rem;
+  display: flex;
+  justify-content: flex-start;
+  align-items: center;
+  border-top: 1px solid var(--primary-light-color);
+  padding: 0 16px;
+}
+
+.solidCustomPicklistSourceItem {
+  border-right: 1px solid var(--primary-light-color);
+}
+
+.solidCustomPicklistItemContent {
+  font-size: 0.875rem;
+  font-weight: 600;
+}

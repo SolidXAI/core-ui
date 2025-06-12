@@ -15,7 +15,7 @@ import { Dialog } from "primereact/dialog";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { useHandleListCustomButtonClick } from "@/components/common/useHandleListCustomButtonClick";
 import { SolidListViewHeaderContextMenuButton } from "./SolidListViewHeaderContextMenuButton";
-import styles from "../../common/SolidExport.module.css";
+import "../../common/solid-export.css";
 
 export const SolidListViewConfigure = ({ listViewMetaData, solidListViewLayout, setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, params, actionsAllowed, selectedRecords, setDialogVisible, setShowSaveFilterPopup, filters}: any) => {
     // const [visible, setVisible] = useState<boolean>(false);
@@ -78,7 +78,7 @@ export const SolidListViewConfigure = ({ listViewMetaData, solidListViewLayout, 
                 // @ts-ignore
                 onClick={(e) => op.current.toggle(e)}
             />
-            <Dialog header="Export" visible={exportView} className={styles.exportDialog} onHide={() => { if (!exportView) return; setExportView(false); }}>
+            <Dialog header="Export" visible={exportView} className="exportDialog" onHide={() => { if (!exportView) return; setExportView(false); }}>
                 <SolidExport listViewMetaData={listViewMetaData} filters= {filters} />
             </Dialog>
             <OverlayPanel ref={exportRef} className="listview-export-panel">
