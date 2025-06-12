@@ -3210,8 +3210,9 @@ flex-shrink: 0; */
 }
 
 .solid-empty-listview-placeholder-container {
-  border-top: 1px solid var(--primary-light-color) !important;
-  height: calc(100vh - 54px);
+  /* border-top: 1px solid var(--primary-light-color) !important; */
+  /* height: calc(100vh - 54px); */
+  height: 100%;
   background-color: var(--solid-list-view-placeholder);
   display: flex;
   flex-direction: column;
@@ -3288,6 +3289,6 @@ flex-shrink: 0; */
   overflow-y: auto;
 }
 
-.warning-header-popup{
-padding: 0.75rem;
+.warning-header-popup {
+  padding: 0.75rem;
 }

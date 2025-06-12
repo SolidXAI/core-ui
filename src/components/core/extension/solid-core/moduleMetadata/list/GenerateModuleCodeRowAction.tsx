@@ -1,10 +1,10 @@
 'use client';
+import { SolidCircularLoader } from "@/components/core/common/SolidLoaders/SolidCircularLoader";
 import { useGenerateCodeFormoduleMutation } from "@/redux/api/moduleApi";
 import { useSeederMutation } from "@/redux/api/solidServiceApi";
 import { closePopup } from "@/redux/features/popupSlice";
 import { SolidListRowdataDynamicFunctionProps } from "@/types/solid-core";
 import { Button } from "primereact/button";
-import { ProgressSpinner } from "primereact/progressspinner";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -97,9 +97,9 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
             {isGenerating ?
                 <>
                     <Toast ref={toast} />
-                    <div className="flex flex-column align-items-center justify-content-center" style={{ padding: '2rem' }}>
-                        <ProgressSpinner />
-                        <p className="mt-3">Waiting for backend...</p>
+                    <div className="flex flex-column align-items-center justify-content-center" style={{ padding: '2rem', height: 200 }}>
+                        <SolidCircularLoader />
+                        <p className="mt-4 font-medium">Waiting for backend...</p>
                     </div>
                 </>
                 :

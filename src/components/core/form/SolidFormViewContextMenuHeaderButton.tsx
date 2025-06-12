@@ -28,12 +28,11 @@ export function SolidFormViewContextMenuHeaderButton({
         <Button
             text
             type="button"
-            className="w-full text-left gap-2"
+            className={`w-full text-left gap-2 ${button?.attrs?.className ? button?.attrs?.className : ''}`}
             label={button.attrs.label}
             size="small"
             iconPos="left"
-            severity="contrast"
-            icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+            icon={button?.attrs?.icon ? button?.attrs?.icon : "pi pi-pencil"}
             onClick={() => {
                 const event = {
                     action: button.attrs.action,

@@ -71,6 +71,9 @@ export type LayoutAttribute = {
     widget?: string;
     visible?: boolean;
     editWidget?: string;
+    viewWidget?: string;
+    showLabel?: boolean;
+    inlineListLayout?: any;
 };
 
 // Generic representation of any node in our layout 
