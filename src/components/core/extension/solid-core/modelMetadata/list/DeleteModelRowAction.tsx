@@ -6,7 +6,9 @@ import { Button } from "primereact/button";
 import { useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Toast } from 'primereact/toast';
-import styles from './deleteModelRowAction.module.css';
+import { DataTable } from "primereact/datatable";
+import { Column } from "primereact/column";
+import { Checkbox } from "primereact/checkbox";
 
 
 const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
@@ -55,53 +57,34 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
                 </span>
             </div>
             <div className="px-4 pb-4 pt-3">
-                <div style={{ padding: '20px', fontFamily: 'Arial' }}>
-                    <p>
+                <div>
+                    <p className="form-field-label font-medium">
                         Deleting a model should be done carefully. The below files will be impacted as part of deleting a model:
                     </p>
-
-                    <table className="model-table">
-                        <thead>
-                            <tr>
-                                <th>File Name</th>
-                                <th>Description</th>
-                                <th>Intervention</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {rows.map((row, idx) => (
-                                <tr key={idx}>
-                                    <td>{row.file}</td>
-                                    <td>{row.description}</td>
-                                    <td className={row.manual ? 'manual' : ''}>{row.intervention}</td>
-                                </tr>
-                            ))}
-                        </tbody>
-                    </table>
-
-
-                    <div style={{ marginBottom: '20px' }}>
-                        <label>
-                            <input
-                                type="checkbox"
+                    <DataTable value={rows} size="small">
+                        <Column field="file" header="File Name" />
+                        <Column field="description" header="Description" />
+                        <Column field="intervention" header="Intervention" />
+                    </DataTable>
+                    <div className="my-4">
+                        <div className="flex align-items-center">
+                            <Checkbox
+                                inputId="confirmation"
+                                name="confirm"
                                 checked={isConfirmed}
-                                onChange={() => setIsConfirmed(!isConfirmed)}
-                                style={{ marginRight: '8px' }}
-                            />
-                            I confirm that #7 &amp; #9 will be done by me manually after the automatic steps above are applied.
-                        </label>
+                                onChange={() => setIsConfirmed(!isConfirmed)} />
+                            <label htmlFor="confirmation" className="ml-2 form-field-label">
+                                I confirm that #7 &amp; #9 will be done by me manually after the automatic steps above are applied.
+                            </label>
+                        </div>
                     </div>
-
-
                 </div>
-
-
                 <div className="flex gap-3 justify-content-start">
                     <Button size="small" label="Apply" disabled={!isConfirmed} autoFocus onClick={deleteModelHandler} />
                     <Button size="small" label="Cancel" outlined onClick={() => dispatch(closePopup())} />
                 </div>
             </div>
-        </div >
+        </div>
     )
 }
 
