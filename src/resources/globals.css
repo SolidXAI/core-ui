@@ -1486,7 +1486,8 @@ li.header-li-px {
   padding: 0;
   padding-left: 10px;
 }
-.bg-red-row{
+
+.bg-red-row {
   background-color: rgb(243, 43, 43);
 }
 
@@ -2349,12 +2350,13 @@ li.header-li-px {
 
 .solid-logo.in_form_view {
   margin-bottom: 30px;
+  justify-content: center;
 }
 
 .solid-logo img {
-  width: 2.375rem !important;
-  height: 2.375rem !important;
+  max-width: 350px !important;
 }
+
 
 .solid-logo-title {
   line-height: 1.3;
