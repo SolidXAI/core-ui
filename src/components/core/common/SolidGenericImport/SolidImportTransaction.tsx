@@ -5,8 +5,9 @@ import { useCreateImportSyncMutation, useLazyGetImportMappingInfoQuery, usePatch
 import React, { useEffect, useRef, useState } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { Toast } from 'primereact/toast';
+import { Dialog } from 'primereact/dialog';
 
-export const SolidImportTransaction = ({ setImportTransactionContext, transactionId }: any) => {
+export const SolidImportTransaction = ({ setImportTransactionContext, transactionId, setOpenImportDialog }: any) => {
     const toast = useRef<Toast>(null);
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
         toast.current?.show({
@@ -21,6 +22,8 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
     const [createImportSync, { isLoading: isImporting }] = useCreateImportSyncMutation();
     const [fieldMapping, setFieldMapping] = useState<Record<string, string>>({});
     const [visibleHeaders, setVisibleHeaders] = useState<string[]>([]);
+    const [showImportStatusDialog, setShowImportStatusDialog] = useState(false);
+    const [importStatusResult, setImportStatusResult] = useState<any>(null)
 
     useEffect(() => {
         if (transactionId) {
@@ -81,11 +84,13 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
                 // Sync
                 try {
                     const importResult = await createImportSync({ id: transactionId }).unwrap();
-
+                    setImportStatusResult(importResult)
                     if (importResult?.statusCode === 200) {
-                        showToast("success", "Import", "Records Imported Successfully");
+                        // showToast("success", "Import", "Records Imported Successfully");
+                        setShowImportStatusDialog(true);
                     } else {
-                        showToast("error", "Failed", "Failed to Import Records");
+                        // showToast("error", "Failed", "Failed to Import Records");
+                        setShowImportStatusDialog(true);
                     }
                 } catch (importError: any) {
                     showToast("error", "Import Error", importError?.data?.error);
@@ -100,6 +105,7 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
     };
 
     const sampleRecords = mappingInfo?.data?.sampleImportedRecordInfo ?? [];
+    console.log("importStatusResult", importStatusResult);
 
     return (
         <div>
@@ -190,6 +196,33 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
                 />
                 <Button label='Cancel' size='small' outlined onClick={() => setImportTransactionContext(false)} />
             </div>
+            <Dialog header="Import Status" showHeader={false} visible={showImportStatusDialog} style={{ width: '50vw' }} onHide={() => { if (!showImportStatusDialog) return; setShowImportStatusDialog(false); }}>
+                {/* <p className="m-0">
+                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
+                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
+                    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
+                    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
+                </p> */}
+                {importStatusResult?.statusCode === 200 ?
+                    <div>
+                        <h2>Successfull Import</h2>
+                        <Button
+                            label='Show Imported Records'
+                            size='small'
+                            onClick={() => {
+                                setShowImportStatusDialog(false);
+                                setTimeout(() => {
+                                    setOpenImportDialog(false);
+                                }, 100);
+                            }}
+                        />
+                    </div>
+                    :
+                    <div>
+
+                    </div>
+                }
+            </Dialog>
         </div>
     )
 }

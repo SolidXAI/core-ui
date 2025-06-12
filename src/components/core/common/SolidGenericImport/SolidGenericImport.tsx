@@ -10,7 +10,7 @@ import { ImportWrapper } from './ImportWrapper';
 export const SolidGenericImport = ({
     openImportDialog,
     setOpenImportDialog,
-    listViewMetaData
+    listViewMetaData,
 }: any) => {
     console.log("metadata", listViewMetaData);
     const [importStep, setImportStep] = useState<number>(1)
@@ -29,7 +29,7 @@ export const SolidGenericImport = ({
                     <SolidImportInstructions setImportStep={setImportStep} listViewMetaData={listViewMetaData} />
                 }
                 {importStep === 2 &&
-                    <ImportWrapper setImportStep={setImportStep} listViewMetaData={listViewMetaData} />
+                    <ImportWrapper setImportStep={setImportStep} listViewMetaData={listViewMetaData} setOpenImportDialog={setOpenImportDialog}/>
                 }
             </div>
         </Dialog>
