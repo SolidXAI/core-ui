@@ -8,6 +8,8 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Toast } from 'primereact/toast';
 import { SolidCircularLoader } from '@/components/core/common/SolidLoaders/SolidCircularLoader';
+import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
+import qs from "qs";
 
 
 const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
@@ -16,6 +18,21 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
         generateCode,
         { isLoading: isGenerateCodeUpdating, isSuccess: isGenerateCodeSuceess, isError: isGenerateCodeError, error: generateCodeError, data: generateCodeData },
     ] = useGenerateCodeForModelMutation();
+
+    const mqMessageApi = createSolidEntityApi("mqMessage");
+    const {
+
+        useGetSolidEntitiesQuery: useGetMqMessageQuery,
+        useLazyGetSolidEntitiesQuery: useLazyGetMqMessageQuery,
+    } = mqMessageApi;
+
+
+    const [getMqMessageStatus, {
+        data: solidListViewMetaData,
+        error: solidListViewMetaDataError,
+        isLoading: solidListViewMetaDataIsLoading,
+        isError: solidListViewMetaDataIsError
+    }] = useLazyGetMqMessageQuery();
 
     const toast = useRef<Toast>(null);
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
@@ -32,7 +49,7 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
     // Utitlity to track if solid-api is up
     const [isPinging, setIsPinging] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
-    const pingBackendWithRetry = async (retries = 5, delay = 500): Promise<boolean> => {
+    const pingBackendWithRetry = async (retries = 30, delay = 500): Promise<boolean> => {
         for (let i = 0; i < retries; i++) {
             try {
                 const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ping`);
@@ -48,21 +65,59 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
         return false;
     };
 
+    const fetchMqMessageStatus = async (retries = 30, delay = 500, generateCodeData: any): Promise<boolean> => {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const query = {
+
+                    filters: {
+                        messageId: {
+                            $eq: generateCodeData?.data?.messageId
+                        }
+                    }
+                };
+                const queryString = qs.stringify(query, {
+                    encodeValuesOnly: true,
+                });
+                const res = await getMqMessageStatus(queryString)
+                if (res.isSuccess === true) {
+                    if (res.data.records.length > 0) {
+                        const messageStage = res.data.records[0].stage;
+                        console.log("messageStatus", messageStage);
+                        if (messageStage === "succeeded") {
+                            return true
+                        }
+                        if (messageStage === "failed") {
+                            return false
+                        }
+                    }
+                }
+            } catch (e) {
+                // ignore and retry
+            }
+            await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+        return false;
+    };
+
     const generateCodeHandler = async () => {
-        const response = await generateCode({ id: event?.rowData?.id });
+        const response: any = await generateCode({ id: event?.rowData?.id });
         console.log("response generate code handler", response);
         setIsGenerating(true);
     }
 
     useEffect(() => {
-        const runSeederIfBackendAlive = async () => {
+        const runSeederIfQueueStatusIsSuccess = async () => {
             if (isGenerateCodeSuceess) {
-                console.log("isGenerateCodeSuceess", isGenerateCodeSuceess);
-                setIsPinging(true);
+                // console.log("isGenerateCodeSuceess", isGenerateCodeSuceess);
+                // setIsPinging(true);
+                // const hasMqMessageCompleted = await fetchMqMessageStatus(30, 500, generateCodeData);
                 const isAlive = await pingBackendWithRetry(10, 500);
-                console.log("isAlive", isAlive);
                 setIsPinging(false);
 
+                // const hasMqMessageCompleted = true;
+                // const isAlive = true;
+                // if (hasMqMessageCompleted && isAlive) {
                 if (isAlive) {
                     await triggerSeeder("ModuleMetadataSeederService");
                 } else {
@@ -73,10 +128,9 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
             }
         };
         setTimeout(() => {
-            runSeederIfBackendAlive();
+            runSeederIfQueueStatusIsSuccess();
         }, 5000);
     }, [isGenerateCodeSuceess]);
-
 
     useEffect(() => {
         if (isSeederSuccess) {

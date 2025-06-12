@@ -42,7 +42,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
     return (
       <>
 
-        {rowData.isSystem !== true &&
+        {rowData.isSystem !== true && rowData.isMarkedForRemoval !== true &&
           <Button
             icon="pi pi-pencil"
             text
@@ -56,6 +56,25 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
       </>
     )
   };
+  const bodyTemplate = (rowData: any) => {
+    return (
+      <>
+
+        {rowData.displayName &&
+          <>
+            <p>{rowData.displayName}
+              {rowData.isMarkedForRemoval === true &&
+                <>
+                  <br></br>  <span style={{fontSize: '11px', color: 'red'}}>This field will be removed next time you generate code for this model.</span>
+                </>
+              }
+            </p>
+          </>
+        }
+      </>
+    )
+  };
+
 
   // Function to delete a row
   const deleteRow = (rowData: any) => {
@@ -70,7 +89,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
   const deleteTemplate = (rowData: any) => {
     return (
       <>
-        {(pathname.includes('create') || rowData.isSystem !== true) &&
+        {(pathname.includes('create') || (rowData.isSystem !== true && rowData.isMarkedForRemoval !== true)) &&
           <Button icon="pi pi-trash" text severity="danger" onClick={() => deleteRow(rowData)} size="small" />
 
         }
@@ -102,6 +121,12 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
     }
   };
 
+
+  // const rowClass = (data: any) => {
+  //   return {
+  //     'bg-red-row': data.isMarkedForRemoval === true
+  //   };
+  // };
 
 
   return (
@@ -135,9 +160,8 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
               />
             }
           </div>
-          <DataTable value={fieldMetaData.filter((item: any) => item.isMarkedForRemoval !== true)} dataKey="id"
-            tableStyle={{ minWidth: '50rem' }} size="small">
-            <Column field="displayName" header="Display Name" headerClassName="table-header-fs"></Column>
+          <DataTable value={fieldMetaData} dataKey="id" tableStyle={{ minWidth: '50rem' }} size="small">
+            <Column field="displayName" header="Display Name" body={bodyTemplate} headerClassName="table-header-fs"></Column>
             <Column field="name" header="Name" headerClassName="table-header-fs"></Column>
             <Column field="type" header="Type" headerClassName="table-header-fs"></Column>
 
@@ -177,8 +201,8 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
             onHide={() => setIsRequiredPopUp(false)}
             className="solid-dialog"
           >
-            <p className="p-2 mb-0">If there is data against this model this operation might not work and manual intervention will be required</p>
-            <div className="flex justify-content-start p-2">
+            <p className="p-3 mb-0">If there is data against this model this operation might not work and manual intervention will be required</p>
+            <div className="flex justify-content-start p-3">
               <Button label="Ok" className='small-button' onClick={() => setIsRequiredPopUp(false)} />
             </div>
           </Dialog>

@@ -1,4 +1,5 @@
 "use client"
+
 import { useSession } from 'next-auth/react'
 import styles from './solidModuleHome.module.css'
 import { Button } from 'primereact/button';
@@ -9,7 +10,12 @@ import { FieldSvg } from '../Svg/FieldSvg';
 import { ModelSvg } from '../Svg/ModelSvg';
 import { ModuleSvg } from '../Svg/ModuleSvg';
 import { HomePageModuleSvg } from '../Svg/HomePageModuleSvg';
-export const SolidModuleHome = () => {
+
+type SolidModuleHomeProps = {
+    moduleName?: string;
+};
+
+export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomeProps) => {
     const { data: session, status } = useSession();
     //@ts-ignore
     const user = session?.user?.user?.username;
@@ -18,7 +24,7 @@ export const SolidModuleHome = () => {
         <div className="h-screen surface-0">
             <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
                 <p className="m-0 view-title">
-                    Dashboard
+                    {moduleName}
                 </p>
             </div>
             <div></div>
@@ -39,8 +45,38 @@ export const SolidModuleHome = () => {
                         <HomePageModuleSvg />
                     </div>
                 </div>
+
+                {/* Cards */}
                 <div className='grid'>
-                    <div className='col'>
+                    {[{
+                        icon: <DocsSvg />,
+                        title: 'Admin Docs',
+                        class: styles.dashboardCardOne
+                    }, {
+                        icon: <DevDocs />,
+                        title: 'Dev Docs',
+                        class: styles.dashboardCardTwo
+                    }, {
+                        icon: <SettingsSvg />,
+                        title: 'Settings',
+                        class: styles.dashboardCardThree
+                    }].map(({ icon, title, class: cardClass }, i) => (
+                        <div className='col' key={i}>
+                            <div className={`${styles.solidModuleHomeColorCards} ${cardClass}`}>
+                                <div>
+                                    <div className={styles.solidModuleHomeCardSvgWrapper}>{icon}</div>
+                                    <h3 className={`${styles.solidModuleHomeTitle1} mt-4`}>{title}</h3>
+                                    <p className='mb-0 mt-2 text-xs'>
+                                        Lorem ipsum dolor sit amet consectetur. Rhoncus commodo ullamcorper posuere morbi vulputate vitae enim.
+                                    </p>
+                                </div>
+                                <div>
+                                    <Button outlined label='Add' size='small' icon="pi pi-plus" iconPos='right' className="font-bold" style={{ background: 'var(--solid-module-home-add-button-bg)' }} />
+                                </div>
+                            </div>
+                        </div>
+                    ))}
+                    {/* <div className='col'>
                         <div className={`${styles.solidModuleHomeColorCards} ${styles.dashboardCardOne}`}>
                             <div>
                                 <div className={styles.solidModuleHomeCardSvgWrapper}>
@@ -93,7 +129,7 @@ export const SolidModuleHome = () => {
                                 <Button outlined label='Add' size='small' icon="pi pi-plus" iconPos='right' className="font-bold" style={{ background: 'var(--solid-module-home-add-button-bg)' }} />
                             </div>
                         </div>
-                    </div>
+                    </div> */}
                 </div>
                 <div>
                     <h5 className='font-bold'>
@@ -101,7 +137,26 @@ export const SolidModuleHome = () => {
                     </h5>
 
                     <div className='grid'>
-                        <div className='col'>
+                        {[{
+                            icon: <ModuleSvg />,
+                            title: 'Add Module'
+                        }, {
+                            icon: <ModelSvg />,
+                            title: 'Add Model'
+                        }, {
+                            icon: <FieldSvg />,
+                            title: 'Add Field'
+                        }].map(({ icon, title }, i) => (
+                            <div className='col' key={i}>
+                                <div className={styles.solidModuleHomeActionCard}>
+                                    <div>
+                                        <div className={styles.solidModuleHomeActionCardSvgWrapper}>{icon}</div>
+                                        <h3 className={`${styles.solidModuleHomeTitle1} mt-4`}>{title}</h3>
+                                    </div>
+                                </div>
+                            </div>
+                        ))}
+                        {/* <div className='col'>
                             <div className={`${styles.solidModuleHomeActionCard}`}>
                                 <div>
                                     <div className={styles.solidModuleHomeActionCardSvgWrapper}>
@@ -136,7 +191,7 @@ export const SolidModuleHome = () => {
                                     </h3>
                                 </div>
                             </div>
-                        </div>
+                        </div> */}
                     </div>
                 </div>
             </div>
