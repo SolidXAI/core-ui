@@ -788,7 +788,9 @@ export const SolidListView = (params: SolidListViewParams) => {
   // }
 
 
-
+  const handleFetchUpdatedRecords = () => {
+    setQueryString(first, rows, sortField, sortOrder, filters, showArchived);
+  }
   return (
     <div className="page-parent-wrapper">
       <div className="page-header">
@@ -857,6 +859,7 @@ export const SolidListView = (params: SolidListViewParams) => {
               setDialogVisible={setDialogVisible}
               setShowSaveFilterPopup={setShowSaveFilterPopup}
               filters={filters}
+              handleFetchUpdatedRecords={handleFetchUpdatedRecords}
             />
           }
 

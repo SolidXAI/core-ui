@@ -7,8 +7,9 @@ import { Dropdown } from 'primereact/dropdown';
 import { Toast } from 'primereact/toast';
 import { Dialog } from 'primereact/dialog';
 import { Divider } from 'primereact/divider';
+import { SolidImportTransactionStatus } from './SolidImportTransactionStatus';
 
-export const SolidImportTransaction = ({ setImportTransactionContext, transactionId, setOpenImportDialog }: any) => {
+export const SolidImportTransaction = ({ setImportTransactionContext, transactionId, setOpenImportDialog, handleFetchUpdatedRecords }: any) => {
     const toast = useRef<Toast>(null);
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
         toast.current?.show({
@@ -85,11 +86,13 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
                 // Sync
                 try {
                     const importResult = await createImportSync({ id: transactionId }).unwrap();
-                    if (importResult?.statusCode === 200) {
+
+                    if (importResult?.data?.status === "import_succeeded") {
                         setImportStatusResult(importResult)
                         setShowImportStatusDialog(true);
-                    } else {
-                        showToast("error", "Failed", "Failed to Import Records");
+                    }
+                    if (importResult?.data?.status === "import_failed") {
+                        setImportStatusResult(importResult);
                         setShowImportStatusDialog(true);
                     }
                 } catch (importError: any) {
@@ -103,14 +106,6 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
             showToast("error", "Error", errorMessage);
         }
     };
-
-    const handleSuccessSyncImport = () => {
-        setShowImportStatusDialog(false);
-        setOpenImportDialog(false);
-        setTimeout(() => {
-            window.location.reload();
-        }, 300);
-    }
 
     const sampleRecords = mappingInfo?.data?.sampleImportedRecordInfo ?? [];
 
@@ -205,15 +200,13 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
             </div>
             <Dialog header="Import Status" headerClassName='px-3 py-2' contentClassName='p-0' visible={showImportStatusDialog} style={{ width: '30vw' }} onHide={() => { if (!showImportStatusDialog) return; setShowImportStatusDialog(false); }}>
                 <Divider className='m-0' />
-                <div className='flex flex-column align-items-center mt-3 px-3 pt-3 pb-4'>
-                    <h2>Import Successfull</h2>
-                    <p>{importStatusResult?.data?.importedIds.length} Records Imported</p>
-                    <Button
-                        label='Show Imported Records'
-                        size='small'
-                        onClick={() => handleSuccessSyncImport()}
-                    />
-                </div>
+                <SolidImportTransactionStatus
+                    importStatusResult={importStatusResult}
+                    transactionId={transactionId}
+                    setShowImportStatusDialog={setShowImportStatusDialog}
+                    setOpenImportDialog={setOpenImportDialog}
+                    handleFetchUpdatedRecords={handleFetchUpdatedRecords}
+                />
             </Dialog>
         </div>
     )

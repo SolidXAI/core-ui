@@ -3,7 +3,7 @@ import React, { useState } from 'react'
 import { SolidImportDropzone } from './SolidImportDropzone'
 import { SolidImportTransaction } from './SolidImportTransaction'
 
-export const ImportWrapper = ({ setImportStep, listViewMetaData, setOpenImportDialog }: any) => {
+export const SolidImportWrapper = ({ setImportStep, listViewMetaData, setOpenImportDialog, handleFetchUpdatedRecords }: any) => {
     const [importTransactionContext, setImportTransactionContext] = useState(false);
     const [transactionId, setTransactionId] = useState(null);
     const modelMetadataId = listViewMetaData?.data?.solidView?.model?.id;
@@ -21,6 +21,7 @@ export const ImportWrapper = ({ setImportStep, listViewMetaData, setOpenImportDi
                     transactionId={transactionId}
                     setImportTransactionContext={setImportTransactionContext}
                     setOpenImportDialog={setOpenImportDialog}
+                    handleFetchUpdatedRecords={handleFetchUpdatedRecords}
                 />
             }
         </div>

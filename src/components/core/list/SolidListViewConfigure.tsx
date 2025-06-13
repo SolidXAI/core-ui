@@ -33,7 +33,8 @@ export const SolidListViewConfigure = (
         selectedRecords,
         setDialogVisible,
         setShowSaveFilterPopup,
-        filters
+        filters,
+        handleFetchUpdatedRecords
     }:
         any) => {
     // const [visible, setVisible] = useState<boolean>(false);
@@ -246,6 +247,7 @@ export const SolidListViewConfigure = (
                     openImportDialog={openImportDialog}
                     setOpenImportDialog={setOpenImportDialog}
                     listViewMetaData={listViewMetaData}
+                    handleFetchUpdatedRecords={handleFetchUpdatedRecords}
                 />
             }
         </div>

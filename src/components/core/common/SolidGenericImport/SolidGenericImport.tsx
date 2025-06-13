@@ -2,17 +2,15 @@
 import { Dialog } from 'primereact/dialog';
 import React, { useState } from 'react'
 import { SolidImportStepper } from './SolidImportStepper';
-import { SolidImportDropzone } from './SolidImportDropzone';
-import { SolidImportTransaction } from './SolidImportTransaction';
 import { SolidImportInstructions } from './SolidImportInstructions';
-import { ImportWrapper } from './ImportWrapper';
+import { SolidImportWrapper } from './SolidImportWrapper';
 
 export const SolidGenericImport = ({
     openImportDialog,
     setOpenImportDialog,
     listViewMetaData,
+    handleFetchUpdatedRecords
 }: any) => {
-    console.log("metadata", listViewMetaData);
     const [importStep, setImportStep] = useState<number>(1)
     return (
         <Dialog
@@ -29,7 +27,7 @@ export const SolidGenericImport = ({
                     <SolidImportInstructions setImportStep={setImportStep} listViewMetaData={listViewMetaData} />
                 }
                 {importStep === 2 &&
-                    <ImportWrapper setImportStep={setImportStep} listViewMetaData={listViewMetaData} setOpenImportDialog={setOpenImportDialog}/>
+                    <SolidImportWrapper handleFetchUpdatedRecords={handleFetchUpdatedRecords} setImportStep={setImportStep} listViewMetaData={listViewMetaData} setOpenImportDialog={setOpenImportDialog}/>
                 }
             </div>
         </Dialog>
