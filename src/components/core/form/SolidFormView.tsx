@@ -430,9 +430,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
             setCreateMode(true);
             return;
         }
+
         if(locale){
             setSelectedLocale(locale);
         }
+       
         if(defaultEntityLocaleIdn){
             setDefaultEntityLocaleId(defaultEntityLocaleIdn);
         }
@@ -544,6 +546,19 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
         }
     }, [isEntityCreateSuccess, isEntityUpdateSuceess, isEntityDeleteSuceess]);
+
+    useEffect(()=>{
+        if(solidFormViewMetaData?.data?.solidView?.model?.internationalisation){
+            if(params.id !== 'new'){
+            const matchedLocale = solidFormViewMetaData?.data?.applicableLocales?.find((x: any) => x.isDefault === 'yes'  && x.defaultEntityLocaleId == params.id );
+                if (matchedLocale) setSelectedLocale(matchedLocale.locale);
+            }else{
+                const defaultLocale = solidFormViewMetaData?.data?.applicableLocales.find((x: any) => x.isDefault === 'yes');
+                setSelectedLocale(defaultLocale?.locale || null);
+            }
+        }
+       
+    },[params.modelName,solidFormViewMetaData])
 
     function isFetchBaseQueryErrorWithErrorResponse(error: any): error is FetchBaseQueryError & { data: ErrorResponseData } {
         return error && typeof error === 'object' && 'data' in error && 'message' in error.data;
