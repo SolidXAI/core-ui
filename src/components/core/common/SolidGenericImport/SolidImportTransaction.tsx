@@ -6,6 +6,7 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { Toast } from 'primereact/toast';
 import { Dialog } from 'primereact/dialog';
+import { Divider } from 'primereact/divider';
 
 export const SolidImportTransaction = ({ setImportTransactionContext, transactionId, setOpenImportDialog }: any) => {
     const toast = useRef<Toast>(null);
@@ -84,12 +85,11 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
                 // Sync
                 try {
                     const importResult = await createImportSync({ id: transactionId }).unwrap();
-                    setImportStatusResult(importResult)
                     if (importResult?.statusCode === 200) {
-                        // showToast("success", "Import", "Records Imported Successfully");
+                        setImportStatusResult(importResult)
                         setShowImportStatusDialog(true);
                     } else {
-                        // showToast("error", "Failed", "Failed to Import Records");
+                        showToast("error", "Failed", "Failed to Import Records");
                         setShowImportStatusDialog(true);
                     }
                 } catch (importError: any) {
@@ -104,8 +104,15 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
         }
     };
 
+    const handleSuccessSyncImport = () => {
+        setShowImportStatusDialog(false);
+        setOpenImportDialog(false);
+        setTimeout(() => {
+            window.location.reload();
+        }, 300);
+    }
+
     const sampleRecords = mappingInfo?.data?.sampleImportedRecordInfo ?? [];
-    console.log("importStatusResult", importStatusResult);
 
     return (
         <div>
@@ -196,32 +203,17 @@ export const SolidImportTransaction = ({ setImportTransactionContext, transactio
                 />
                 <Button label='Cancel' size='small' outlined onClick={() => setImportTransactionContext(false)} />
             </div>
-            <Dialog header="Import Status" showHeader={false} visible={showImportStatusDialog} style={{ width: '50vw' }} onHide={() => { if (!showImportStatusDialog) return; setShowImportStatusDialog(false); }}>
-                {/* <p className="m-0">
-                    Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
-                    Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
-                    consequat. Duis aute irure dolor in reprehenderit in voluptate velit esse cillum dolore eu fugiat nulla pariatur.
-                    Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
-                </p> */}
-                {importStatusResult?.statusCode === 200 ?
-                    <div>
-                        <h2>Successfull Import</h2>
-                        <Button
-                            label='Show Imported Records'
-                            size='small'
-                            onClick={() => {
-                                setShowImportStatusDialog(false);
-                                setTimeout(() => {
-                                    setOpenImportDialog(false);
-                                }, 100);
-                            }}
-                        />
-                    </div>
-                    :
-                    <div>
-
-                    </div>
-                }
+            <Dialog header="Import Status" headerClassName='px-3 py-2' contentClassName='p-0' visible={showImportStatusDialog} style={{ width: '30vw' }} onHide={() => { if (!showImportStatusDialog) return; setShowImportStatusDialog(false); }}>
+                <Divider className='m-0' />
+                <div className='flex flex-column align-items-center mt-3 px-3 pt-3 pb-4'>
+                    <h2>Import Successfull</h2>
+                    <p>{importStatusResult?.data?.importedIds.length} Records Imported</p>
+                    <Button
+                        label='Show Imported Records'
+                        size='small'
+                        onClick={() => handleSuccessSyncImport()}
+                    />
+                </div>
             </Dialog>
         </div>
     )
