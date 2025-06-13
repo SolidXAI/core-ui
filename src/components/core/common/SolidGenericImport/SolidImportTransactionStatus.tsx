@@ -52,7 +52,7 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
   };
   return (
     <div className='flex flex-column align-items-center mt-3 px-3 pt-3 pb-4'>
-      <h2>
+      <h4>
         {importStatusResult?.data?.status === "import_succeeded" &&
           "Import Successful"}
 
@@ -60,7 +60,7 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
           (importStatusResult?.data?.importedIds?.length > 0
             ? "Import Completed with Some Failures"
             : "Import Failed – No Records Imported")}
-      </h2>
+      </h4>
 
       {importStatusResult?.data?.importedIds?.length > 0 && (
         <p>
