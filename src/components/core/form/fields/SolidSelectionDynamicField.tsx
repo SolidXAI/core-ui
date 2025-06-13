@@ -200,35 +200,35 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
         (formik.touched[fieldName] || formik.submitCount > 0) && !!formik.errors[fieldName];
 
     const selectionDynamicSearch = async (event: AutoCompleteCompleteEvent) => {
+        try {
+            const query = event.query ?? "";
+            const queryData = {
+                offset: 0,
+                limit: 10,
+                query: whereClause || query,
+                fieldId: fieldMetadata.id,
+            };
+            let sdQs = qs.stringify(queryData, {
+                encodeValuesOnly: true,
+                // encoder: (str, defaultEncoder, charset, type) => {
+                //     if (type === 'key' || type === 'value') {
+                //         if (str === queryData.query) return str;
+                //     }
+                //     return defaultEncoder(str);
+                // }
+            });
+            // TODO: do error handling here, possible errors like modelname is incorrect etc...
+            const sdResponse = await triggerGetSelectionDynamicValues(sdQs).unwrap();
+            const items = Array.isArray(sdResponse?.data) ? sdResponse.data : [];
 
-        // Get the list view layout & metadata first. 
-        const queryData = {
-            offset: 0,
-            limit: 10,
-            query: event.query,
-            fieldId: fieldMetadata.id
-        };
-        
-        if (whereClause) {
-            queryData.query = whereClause;
-        }
-        let sdQs = qs.stringify(queryData, {
-            encodeValuesOnly: true,
-            // encoder: (str, defaultEncoder, charset, type) => {
-            //     if (type === 'key' || type === 'value') {
-            //         if (str === queryData.query) return str;
-            //     }
-            //     return defaultEncoder(str);
-            // }
-        });
-        // TODO: do error handling here, possible errors like modelname is incorrect etc...
-        const sdResponse = await triggerGetSelectionDynamicValues(sdQs);
+            // TODO: if no data found then can we show no matching "entities", where entities can be replaced with the model plural name,
+            // const sdData = sdResponse.data.data;
 
-        // TODO: if no data found then can we show no matching "entities", where entities can be replaced with the model plural name,
-        const sdData = sdResponse.data.data;
-
-        // @ts-ignore
-        setSelectionDynamicItems(sdData);
+            // @ts-ignore
+            setSelectionDynamicItems([...items]);
+        } catch (err) {
+            setSelectionDynamicItems([]);
+        } 
     }
 
 
@@ -246,7 +246,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                     multiple={isMultiSelect}
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                     disabled={formDisabled || fieldDisabled}
-                    {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
+                    // {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                     id={fieldLayoutInfo.attrs.name}
                     field="label"
                     // value={formik.values[fieldLayoutInfo.attrs.name] || null}
@@ -258,6 +258,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                     // onChange={formik.handleChange}
                     onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
                     className="solid-standard-autocomplete"
+                    emptyMessage="No records found"
                 />
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
