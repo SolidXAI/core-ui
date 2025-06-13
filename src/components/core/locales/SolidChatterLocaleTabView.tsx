@@ -41,8 +41,8 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
   published
 }) => {
   return (
-      <TabView className="solidCustomLocaleTabviewPanels" activeIndex={activeTab}>
-        <TabPanel header="Internationalisation" className={`solidCustomLocaleTab p-2`} contentClassName='p-0'>
+      <TabView className="SolidCustomLocaleTabviewPanels" activeIndex={activeTab}>
+        <TabPanel header="Internationalisation" className={`SolidCustomLocaleTab p-2`} contentClassName='p-0'>
           <SolidLocale
           setSelectedLocale={setSelectedLocale}
           solidFormViewMetaData={solidFormViewMetaData}
@@ -57,7 +57,7 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
           published={published}
           />
         </TabPanel>
-        <TabPanel header="Audit Trail" className={`solidCustomLocaleTab p-2`} contentClassName='p-0'>
+        <TabPanel header="Audit Trail" className={`SolidCustomLocaleTab p-2`} contentClassName='p-0'>
           <SolidChatter
             modelSingularName={solidFormViewMetaData?.data?.solidView?.model?.singularName}
             id={id}

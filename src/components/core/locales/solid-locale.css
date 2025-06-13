@@ -1,87 +1,35 @@
-.solidLocaleContainer{
-    display: flex;
-    flex-direction: column;
-    padding: 0;
-    margin: 0;
-}
-.solidLocaleButtonContainer{
-  display: flex;
-  gap: 12px; /* adjust as needed */
-  justify-content: flex-end;
-}
-.solidLocaleCardHeader{
-    height: auto !important;
-    width: 100%;
-    background-color: var(--surface-ground);
-    padding: 0 !important;
-    margin: 10px 0;
-}
-
-.solidLocaleCardBody{
-    padding: 0.5rem !important;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    margin-top: 5px;
-    background-color: var(--surface-ground);
-}
-.solidLocaleInfoField{
-    display: flex;
-    flex-direction: row;
-    align-items: center;
-    justify-content: space-between;
-    padding: 0.5rem;
-    gap: 0.5rem;
-}
-
-/* Locale tabview modular*/
-.solidCustomLocaleTabviewPanels {
+.SolidCustomLocaleTabviewPanels {
   padding: 0 !important;
 }
 
-.solidCustomLocaleTabHighlight .p-tabview-nav-link {
+.SolidCustomLocaleTabHighlight .p-tabview-nav-link {
   border: none !important;
 }
 
-.solidCustomLocaleTabviewPanels .p-unselectable-text.p-tabview-selected {
+.SolidCustomLocaleTabviewPanels .p-unselectable-text.p-tabview-selected {
   border-bottom: 2px solid var(--border-color) !important;
 }
-.solidCustomLocaleTabviewPanels .p-unselectable-text.p-tabview-selected.p-highlight {
+.SolidCustomLocaleTabviewPanels .p-unselectable-text.p-tabview-selected.p-highlight {
   border-bottom: 2px solid var(--primary-color) !important;
 }
-.solidCustomLocaleCardHeader {
-  padding: 10px !important;
-  width: 100% !important;
-  list-style-type: disc;
-  text-align: left !important;
-  color: #15803D;
-}
 
-.solidCustomLocaleCardHeaderDanger {
-  padding: 10px !important;
-  width: 100% !important;
-  list-style-type: disc;
-  text-align: left !important;
-  color: #EF4444;
-}
-
-.solidCustomLocaleTabviewPanels .p-tabview-nav li .p-tabview-nav-link {
+.SolidCustomLocaleTabviewPanels .p-tabview-nav li .p-tabview-nav-link {
   border: none !important;
   text-align: center !important;
   align-content: center !important;
   justify-content: center !important;
 } 
 
-.solidCustomLocaleTab {
+.SolidCustomLocaleTab {
   flex: 1;
   text-align: center !important;
 }
 
-.solidCustomLocaleTabviewPanels .p-tabview-panels{
+.SolidCustomLocaleTabviewPanels .p-tabview-panels{
   width: 100% !important;
   padding: 0 !important;
 }
 
-.solidCustomLocaleTabviewPanels .p-tabview-nav-link{
+.SolidCustomLocaleTabviewPanels .p-tabview-nav-link{
   border: none !important;
 }

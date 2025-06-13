@@ -61,39 +61,39 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
 
 
     return (
-        <div className="solidLocaleContainer">
-            <div className="solidLocaleButtonContainer flex gap-3">
+        <div className="flex flex-column p-0 m-0">
+            <div className="flex justify-content-end gap-3">
             </div>
             {solidFormViewData && (viewMode === 'edit') &&
-            (<div className="solidLocaleCardHeader">
+            (<div className="w-full" style={{ backgroundColor: 'var(--surface-ground)', margin: '10px 0', padding: 0 }}>
                 {solidFormViewMetaData.data.solidView?.model?.draftPublishWorkflow &&
                 published !== null ? (
-                    <li className="solidCustomLocaleCardHeader">
+                    <li className="w-full text-left list-disc" style={{ padding: '10px', color: '#15803D' }}>
                         Editing <span className="font-bold">published version</span>
                     </li>
                 ) : (
-                    <li className="solidCustomLocaleCardHeaderDanger">
+                    <li className="w-full text-left list-disc" style={{ padding: '10px', color: '#EF4444' }}>
                         Editing <span className="font-bold">unpublished version</span>
                     </li>
                 )}
                 </div>
                 )
             }
-            <div className="solidLocaleCardBody">
+            <div className="flex flex-column gap-2 mt-2" style={{ backgroundColor: 'var(--surface-ground)', padding: '0.5rem' }}>
                 <h3 className="text-lg font-semibold p-0 m-0">Information</h3>
                 <Divider className="my-2" />
                 <div className="space-y-2">
-                    <div className="solidLocaleInfoField">
+                    <div className='flex align-items-center justify-content-between gap-2 p-2'>
                         <p className="text-sm font-bold text-gray-500 m-0">Created At</p>
                         <p className="text-sm m-0">{formatToDDMMYYWithTime(solidFormViewData?.data?.createdAt)}</p>
                     </div>
-                    <div className="solidLocaleInfoField">
+                    <div className='flex align-items-center justify-content-between gap-2 p-2'>
                         <p className="text-sm font-bold text-gray-500 m-0">Updated At</p>
                         <p className="text-sm m-0">
                             {formatToDDMMYYWithTime(solidFormViewData?.data?.updatedAt)}
                         </p>
                     </div>
-                    <div className="solidLocaleInfoField">
+                    <div className='flex align-items-center justify-content-between gap-2 p-2'>
                         <p className="text-sm font-bold text-gray-500 m-0">Published At</p>
                         <p className="text-sm m-0">{formatToDDMMYYWithTime(published ?? '')}</p>
                     </div>
