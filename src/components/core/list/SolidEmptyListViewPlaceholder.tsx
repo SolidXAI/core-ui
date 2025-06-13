@@ -3,6 +3,7 @@ import { SolidCreateButton } from '../common/SolidCreateButton'
 import Image from 'next/image'
 import { Button } from 'primereact/button'
 import { useHandleListCustomButtonClick } from '@/components/common/useHandleListCustomButtonClick'
+import { useHasAnyRole } from '@/helpers/rolesHelper'
 
 export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, actionsAllowed, params, solidListViewMetaData }: any) => {
     const noDataText = solidListViewMetaData?.data?.solidView?.layout?.attrs?.listViewNoDataHelperText
@@ -11,6 +12,40 @@ export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, actionsAllowed,
             : null)
 
     const handleCustomButtonClick = useHandleListCustomButtonClick()
+
+    const CustomActionButtons = () => {
+        return (
+            <div>
+                {solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultAddButton === false && solidListViewMetaData?.data?.solidView?.layout?.attrs?.headerButtons &&
+                    solidListViewMetaData?.data?.solidView?.layout?.attrs?.headerButtons.map((button: any) => {
+                        const hasRole = !button?.attrs?.roles || button?.attrs?.roles.length === 0
+                            ? true
+                            : useHasAnyRole(button?.attrs?.roles);
+
+                        if (!hasRole) return null;
+                        return (
+                            <Button
+                                text
+                                type="button"
+                                className="w-full text-left gap-2"
+                                label={button.attrs.label}
+                                size="small"
+                                iconPos="left"
+                                icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                                onClick={() => {
+                                    const event = {
+                                        params,
+                                        solidListViewMetaData: solidListViewMetaData.data
+                                    }
+                                    handleCustomButtonClick(button.attrs, event)
+                                }}
+                            />
+                        );
+                    })
+                }
+            </div>
+        )
+    }
 
     return (
         <div className="page-parent-wrapper">
@@ -36,16 +71,17 @@ export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, actionsAllowed,
                     </div>
                 }
                 {
-                    actionsAllowed.includes(`${createPermission(params.modelName)}`) && 
-                    solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false && 
-                    params.embeded !== true && 
+                    actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
+                    solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false &&
+                    params.embeded !== true &&
                     solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultAddButton !== false &&
 
                     <div className='mt-2'>
                         <SolidCreateButton url={createButtonUrl} title={solidListViewMetaData?.data?.solidView?.displayName} />
                     </div>
                 }
-                <div>
+                <CustomActionButtons />
+                {/* <div>
                     {solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultAddButton === false && solidListViewMetaData?.data?.solidView?.layout?.attrs?.headerButtons &&
                         solidListViewMetaData?.data?.solidView?.layout?.attrs?.headerButtons.map((button: any) => {
                             return (
@@ -68,7 +104,7 @@ export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, actionsAllowed,
                             );
                         })
                     }
-                </div>
+                </div> */}
             </div>
         </div>
     )
