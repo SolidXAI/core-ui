@@ -201,13 +201,16 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
 
     const selectionDynamicSearch = async (event: AutoCompleteCompleteEvent) => {
         try {
-            const query = event.query ?? "";
+            // const query = event.query ?? "";
             const queryData = {
                 offset: 0,
                 limit: 10,
-                query: whereClause || query,
+                query: event.query,
                 fieldId: fieldMetadata.id,
             };
+            if (whereClause) {
+                queryData.query = whereClause;
+            }
             let sdQs = qs.stringify(queryData, {
                 encodeValuesOnly: true,
                 // encoder: (str, defaultEncoder, charset, type) => {
@@ -228,7 +231,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
             setSelectionDynamicItems([...items]);
         } catch (err) {
             setSelectionDynamicItems([]);
-        } 
+        }
     }
 
 
