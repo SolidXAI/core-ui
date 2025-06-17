@@ -3216,9 +3216,9 @@ flex-shrink: 0; */
 }
 
 .solid-empty-listview-placeholder-container {
-  /* border-top: 1px solid var(--primary-light-color) !important; */
-  /* height: calc(100vh - 54px); */
-  height: 100%;
+  border-top: 1px solid var(--primary-light-color) !important;
+  height: calc(100vh - 64px);
+  /* height: 100%; */
   background-color: var(--solid-list-view-placeholder);
   display: flex;
   flex-direction: column;

@@ -48,7 +48,7 @@ export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, actionsAllowed,
     }
 
     return (
-        <div className="page-parent-wrapper">
+        <>
             {/* <div className="page-header">
                 <p className="m-0 view-title">{solidListViewMetaData?.data?.solidView?.layout?.displayName}</p>
             </div> */}
@@ -106,6 +106,6 @@ export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, actionsAllowed,
                     }
                 </div> */}
             </div>
-        </div>
+        </>
     )
 }

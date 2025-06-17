@@ -48,8 +48,7 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
     }
   };
 
-  const { status, importedIds = [], failedCount = 0 } = importStatusResult?.data || {};
-  const successCount = importedIds.length;
+  const { status, failedCount = 0, importedCount = 0 } = importStatusResult?.data || {};
 
   const handleSuccessSyncImport = () => {
     setOpenImportDialog(false);
@@ -68,12 +67,12 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
 
   const getStatusTag = () => {
     if (status === "import_succeeded") {
-      return <Button type='button' size='small' icon="pi pi-check-circle" severity="success" label={`${successCount} row${successCount > 1 ? 's' : ''} imported successfully`} />;
+      return <Button type='button' size='small' icon="pi pi-check-circle" severity="success" label={`${importedCount} row${importedCount > 1 ? 's' : ''} imported successfully`} />;
     }
-    if (status === "import_failed" && successCount === 0) {
+    if (status === "import_failed" && importedCount === 0) {
       return <Button type='button' size='small' icon="pi pi-times-circle" severity="danger" label="Import Failed" />;
     }
-    if (status === "import_failed" && successCount > 0) {
+    if (status === "import_failed" && importedCount > 0) {
       return <Button type='button' size='small' icon="pi pi-exclamation-triangle" severity="warning" label="Completed with Some Errors" />;
     }
     return <div>Import Status</div>;
@@ -82,28 +81,28 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
   return (
     <div>
       <div style={{ borderRadius: 6, border: '1px solid var(--primary-light-color)' }}>
-        <div className='p-3' style={{ borderBottom: '1px solid var(--primary-light-color)', pointerEvents: 'none'}}>
+        <div className='p-3' style={{ borderBottom: '1px solid var(--primary-light-color)', pointerEvents: 'none' }}>
           {getStatusTag()}
         </div>
         <div className='font-bold' style={{ color: 'var(--solid-primary-black)' }}>
           <div className='p-3 flex justify-content-between'>
-            <span>No. of Successful Rows:</span> <span>{successCount ?? 0}</span>
+            <span>No. of Successful Rows</span> <span>{importedCount ?? 0}</span>
           </div>
-          {/* <div className='px-3'>
-            <Divider className='my-0' />
+          <div className='px-3'>
+            <div style={{ borderTop: '1px dashed var(--primary-light-color)' }}></div>
           </div>
           <div className='p-3 flex justify-content-between'>
-            <span>No. of Failed Rows:</span> <span>{failedCount ?? 0}</span>
-          </div> */}
+            <span>No. of Failed Rows</span> <span>{failedCount ?? 0}</span>
+          </div>
         </div>
       </div>
       <div className='mt-3 flex align-items-center gap-3'>
-        {successCount > 0 &&
+        {importedCount > 0 &&
           <Button
             label='View Imported Records'
             size='small'
             onClick={() => {
-              if (status === "import_failed" && successCount > 0) {
+              if (status === "import_failed" && importedCount > 0) {
                 setShowPartialDialog(true);
               } else {
                 handleSuccessSyncImport();

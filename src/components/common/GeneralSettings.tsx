@@ -57,7 +57,7 @@ export const GeneralSettings = () => {
         showLegalLinks: solidSettingsData?.data?.showLegalLinks || false,
         appTnc: solidSettingsData?.data?.appTnc || "",
         appPrivacyPolicy: solidSettingsData?.data?.appPrivacyPolicy || "",
-        enableDarkMode: solidSettingsData?.data?.enableDarkMode || true,
+        enableDarkMode: solidSettingsData?.data?.enableDarkMode || false,
         copyright: solidSettingsData?.data?.copyright,
         forceChangePasswordOnFirstLogin: solidSettingsData?.data?.forceChangePasswordOnFirstLogin || false
     };
@@ -665,7 +665,7 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                 <div className="col-6 mt-3">
+                                                <div className="col-6 mt-3">
                                                     <div className="formgrid grid align-items-center">
                                                         <div className="col-5">
                                                             <label className="form-field-label">Force Password change on first Login </label>
@@ -722,33 +722,37 @@ export const GeneralSettings = () => {
                                         </div>
                                     </div>
                                     <div className='mt-4' style={{ borderBottom: '1px dashed #D8E2EA' }}></div>
-                                    <p className='font-bold mt-4' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Authentication Screen Theme</p>
-                                    <div className='formgrid grid'>
-                                        <div className='col-8'>
-                                            <div className="flex align-items-center gap-3">
-                                                <div className="flex align-items-center">
-                                                    <RadioButton
-                                                        inputId="theme-light"
-                                                        name="authPagesTheme"
-                                                        value="light"
-                                                        checked={formik.values.authPagesTheme === "light"}
-                                                        onChange={(e) => formik.setFieldValue("authPagesTheme", e.value)}
-                                                    />
-                                                    <label htmlFor="theme-light" className="ml-2">Solid Light</label>
-                                                </div>
-                                                <div className="flex align-items-center">
-                                                    <RadioButton
-                                                        inputId="theme-dark"
-                                                        name="authPagesTheme"
-                                                        value="dark"
-                                                        checked={formik.values.authPagesTheme === "dark"}
-                                                        onChange={(e) => formik.setFieldValue("authPagesTheme", e.value)}
-                                                    />
-                                                    <label htmlFor="theme-dark" className="ml-2">Solid Dark</label>
+                                    {solidSettingsData?.data?.enableDarkMode === true &&
+                                        <>
+                                            <p className='font-bold mt-4' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Authentication Screen Theme</p>
+                                            <div className='formgrid grid'>
+                                                <div className='col-8'>
+                                                    <div className="flex align-items-center gap-3">
+                                                        <div className="flex align-items-center">
+                                                            <RadioButton
+                                                                inputId="theme-light"
+                                                                name="authPagesTheme"
+                                                                value="light"
+                                                                checked={formik.values.authPagesTheme === "light"}
+                                                                onChange={(e) => formik.setFieldValue("authPagesTheme", e.value)}
+                                                            />
+                                                            <label htmlFor="theme-light" className="ml-2">Solid Light</label>
+                                                        </div>
+                                                        <div className="flex align-items-center">
+                                                            <RadioButton
+                                                                inputId="theme-dark"
+                                                                name="authPagesTheme"
+                                                                value="dark"
+                                                                checked={formik.values.authPagesTheme === "dark"}
+                                                                onChange={(e) => formik.setFieldValue("authPagesTheme", e.value)}
+                                                            />
+                                                            <label htmlFor="theme-dark" className="ml-2">Solid Dark</label>
+                                                        </div>
+                                                    </div>
                                                 </div>
                                             </div>
-                                        </div>
-                                    </div>
+                                        </>
+                                    }
                                 </>
                             }
 
