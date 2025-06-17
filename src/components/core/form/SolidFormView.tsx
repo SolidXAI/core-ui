@@ -684,7 +684,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
             }
             if(solidFormViewMetaData?.data?.solidView?.model?.internationalisation){
-                if(selectedLocale){
+                if(selectedLocale && !formData.has('localeName')){
                     formData.append('localeName', selectedLocale);
                 }
                 if(defaultEntityLocaleId){
