@@ -76,7 +76,7 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
     if (status === "import_failed" && successCount > 0) {
       return <Button type='button' size='small' icon="pi pi-exclamation-triangle" severity="warning" label="Completed with Some Errors" />;
     }
-    return null;
+    return <div>Import Status</div>;
   };
 
   return (
