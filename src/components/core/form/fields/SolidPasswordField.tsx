@@ -36,11 +36,6 @@ export class SolidPasswordField implements ISolidField {
         const fieldDefaultValue = this.fieldContext?.fieldMetadata?.defaultValue;
 
         const existingValue = this.fieldContext.data[fieldName];
-
-        // return {
-        //     [fieldName]: existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '',
-        //     [`${fieldName}Confirm`]: ''
-        // }
         return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
     }
 
@@ -75,12 +70,6 @@ export class SolidPasswordField implements ISolidField {
         }
 
          return schema;
-        // return Yup.object({
-        //     [fieldName]: schema,
-        //     [confirmFieldName]: Yup.string()
-        //       .required(`${fieldLabel} confirmation is required.`)
-        //       .oneOf([Yup.ref(fieldName)], `${fieldLabel} confirmation must match.`),
-        //   });
     }
 
     render(formik: FormikObject) {
@@ -144,81 +133,6 @@ export class SolidPasswordField implements ISolidField {
         )
     }
 }
-
-// export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
-//     const fieldMetadata = fieldContext.fieldMetadata;
-//     const fieldLayoutInfo = fieldContext.field;
-//     const className = fieldLayoutInfo.attrs?.className || 'field col-12';
-//     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-//     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
-//     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
-//     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
-//     const readOnlyPermission = fieldContext.readOnly;
-
-//     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-
-//     const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
-//     const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
-
-//     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
-//     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
-//     return (
-//         <div className="relative">
-//             <div className="flex flex-column gap-2 mt-4">
-//                 {showFieldLabel != false &&
-//                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
-//                         {fieldLabel}
-//                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
-//                         <SolidFieldTooltip fieldContext={fieldContext} />
-//                     </label>
-//                 }
-//                 <Password
-//                     id={fieldLayoutInfo.attrs.name}
-//                     name={fieldMetadata.name}
-//                     value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-//                     onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-//                     onBlur={(e) => fieldContext.onBlur(e, 'onFieldBlur')}
-//                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-//                     disabled={formDisabled || fieldDisabled}
-//                     toggleMask
-//                     autoComplete="new-password"
-//                 />
-//             </div>
-//             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-//                 <div className="absolute mt-1">
-//                     <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-//                 </div>
-//             )}
-
-//             <div className="flex flex-column gap-2 mt-4">
-//                 <label htmlFor={`${fieldLayoutInfo.attrs.name}Confirm`} className="form-field-label">
-//                     Confirm {fieldLabel}
-//                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
-//                 </label>
-//                 <Password
-//                     id={`${fieldLayoutInfo.attrs.name}Confirm`}
-//                     name={`${fieldLayoutInfo.attrs.name}Confirm`}
-//                     value={formik.values[`${fieldLayoutInfo.attrs.name}Confirm`] || ''}
-//                     onChange={(e) => {
-//                         formik.setFieldValue(`${fieldLayoutInfo.attrs.name}Confirm`, e.target.value);
-//                     }}
-//                     onBlur={(e) => {
-//                         formik.setFieldTouched(`${fieldLayoutInfo.attrs.name}Confirm`, true);
-//                     }}
-//                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-//                     disabled={formDisabled || fieldDisabled}
-//                     toggleMask
-//                     autoComplete="new-password"
-//                 />
-//                 {isFormFieldValid(formik, `${fieldLayoutInfo.attrs.name}Confirm`) && (
-//                     <div className="absolute mt-1">
-//                         <Message severity="error" text={formik?.errors[`${fieldLayoutInfo.attrs.name}Confirm`]?.toString()} />
-//                     </div>
-//                 )}
-//             </div>
-//         </div>
-//     );
-// }
 
 export const DefaultPasswordFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
