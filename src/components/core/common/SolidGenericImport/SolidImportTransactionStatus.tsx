@@ -82,7 +82,7 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
   return (
     <div>
       <div style={{ borderRadius: 6, border: '1px solid var(--primary-light-color)' }}>
-        <div className='p-3' style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
+        <div className='p-3' style={{ borderBottom: '1px solid var(--primary-light-color)', pointerEvents: 'none'}}>
           {getStatusTag()}
         </div>
         <div className='font-bold' style={{ color: 'var(--solid-primary-black)' }}>
