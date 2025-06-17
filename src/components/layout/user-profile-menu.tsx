@@ -68,6 +68,7 @@ const UserProfileMenu = () => {
   const value = user?.user?.email;
   const initials = getInitials(value);
   const bgColor = getColorFromInitials(initials);
+  console.log("user details", user);
 
   return (
     <div className="userProfile">
@@ -101,6 +102,11 @@ const UserProfileMenu = () => {
             <div className="flex flex-column align">
               <span className="font-bold">{user?.user?.username}</span>
               <span className="mt-1">{user?.user?.email}</span>
+              <span className="mt-1">
+                {user?.user?.roles
+                  ?.filter((role: any) => role !== "Internal User")
+                  .join(" | ")}
+              </span>
             </div>
           </div>
 
