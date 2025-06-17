@@ -812,6 +812,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const handleDynamicLayout = async () => {
             if (solidFormViewMetaData) {
                 let formLayout = solidFormViewMetaData;
+                let customLayout = params?.customLayout;
                 const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormLayoutLoad;
                 let DynamicFunctionComponent = null;
                 const event: SolidLoadForm = {
@@ -819,7 +820,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     fieldsMetadata: solidFormViewMetaData,
                     formData: solidFormViewData?.data,
                     type: 'onFormLayoutLoad',
-                    viewMetadata: solidFormViewMetaData?.data?.solidView
+                    viewMetadata: solidFormViewMetaData?.data?.solidView,
+                    formViewLayout: formViewLayout
                 }
                 if (dynamicHeader) {
                     DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
@@ -838,6 +840,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     }
                                 };
                                 formLayout = newFormLayout;
+                                customLayout = updatedFormLayout.newLayout;
                             }
                         } catch (error) {
                             console.error('Error in DynamicFunctionComponent:', error);
@@ -847,7 +850,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 setFormViewMetaData(formLayout);
                 setPublished(solidFormViewData?.data?.publishedAt)
                 if (params.customLayout) {
-                    setFormViewLayout(params.customLayout);
+                    setFormViewLayout(customLayout);
                 } else {
                     setFormViewLayout(formLayout.data.solidView.layout);
                 }
@@ -869,7 +872,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     fieldsMetadata: solidFormViewMetaData,
                     formData: solidFormViewData?.data,
                     type: dynamicHeader,
-                    viewMetadata: solidFormViewMetaData?.data?.solidView
+                    viewMetadata: solidFormViewMetaData?.data?.solidView,
+                    formViewLayout: formViewLayout
                 };
 
                 if (dynamicHeader) {
@@ -977,7 +981,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         // @ts-ignore
                         // TODO: HP & OR: This will be fixed once we figure out how to get types exported from solid-core-ui
                         type: eventType,
-                        viewMetadata: solidView
+                        viewMetadata: solidView,
+                        formViewLayout: formViewLayout
                     }
 
                     // Invoke the dynamic change handler: 
