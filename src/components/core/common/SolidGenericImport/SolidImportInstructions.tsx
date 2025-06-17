@@ -102,7 +102,7 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
             </div>
             <div className='mt-3 flex align-items-center gap-3'>
                 <Button label='Continue' size='small' onClick={() => setImportStep(2)} />
-                <Button label='Cancel' size='small' outlined />
+                {/* <Button label='Cancel' size='small' outlined /> */}
             </div>
         </div>
     )

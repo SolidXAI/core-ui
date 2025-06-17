@@ -6,7 +6,7 @@ import styles from './SolidImport.module.css'
 import { DocumentSvg } from './DocumentSvg';
 import { useCreateImportTransactionMutation } from '@/redux/api/importTransactionApi';
 import { Toast } from 'primereact/toast';
-export const SolidImportDropzone = ({ setImportStep, setImportTransactionContext, setTransactionId, modelMetadataId }: any) => {
+export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMetadataId }: any) => {
     const toast = useRef<Toast>(null);
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
         toast.current?.show({
@@ -112,10 +112,10 @@ export const SolidImportDropzone = ({ setImportStep, setImportTransactionContext
                             showToast("error", "Missing File", "Please upload file");
                             return;
                         }
-                        setImportTransactionContext(true);
+                        setImportStep(3);
                     }}
+                    disabled={!file}
                 />
-                <Button label='Cancel' size='small' outlined onClick={() => setImportStep(1)} />
             </div>
         </div>
     )

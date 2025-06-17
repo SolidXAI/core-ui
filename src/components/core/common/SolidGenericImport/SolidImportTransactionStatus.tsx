@@ -1,11 +1,12 @@
+"use client"
+
 import { getSession } from 'next-auth/react';
 import { Button } from 'primereact/button';
-import React from 'react'
+import styles from './SolidImport.module.css'
 
-export const SolidImportTransactionStatus = ({ importStatusResult, transactionId, setShowImportStatusDialog, setOpenImportDialog, handleFetchUpdatedRecords }: any) => {
+export const SolidImportTransactionStatus = ({ importStatusResult, transactionId, setOpenImportDialog, handleFetchUpdatedRecords }: any) => {
 
   const handleSuccessSyncImport = () => {
-    setShowImportStatusDialog(false);
     setTimeout(() => {
       setOpenImportDialog(false);
       setTimeout(() => {
@@ -50,29 +51,34 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
     } catch (error) {
     }
   };
+
+  
   return (
-    <div className='flex flex-column align-items-center mt-3 px-3 pt-3 pb-4'>
-      <h4>
-        {importStatusResult?.data?.status === "import_succeeded" &&
-          "Import Successful"}
+    <div>
+      <div className={styles.SolidImportContextWrapper}>
+        <div className='flex flex-column align-items-center mt-3 px-3 pt-3 pb-4'>
+          <h4>
+            {importStatusResult?.data?.status === "import_succeeded" &&
+              "Import Successful"}
 
-        {importStatusResult?.data?.status === "import_failed" &&
-          (importStatusResult?.data?.importedIds?.length > 0
-            ? "Import Completed with Some Failures"
-            : "Import Failed – No Records Imported")}
-      </h4>
+            {importStatusResult?.data?.status === "import_failed" &&
+              (importStatusResult?.data?.importedIds?.length > 0
+                ? "Import Completed with Some Failures"
+                : "Import Failed – No Records Imported")}
+          </h4>
 
-      {importStatusResult?.data?.importedIds?.length > 0 && (
-        <p>
-          {importStatusResult.data.importedIds.length}{" "}
-          {importStatusResult.data.importedIds.length === 1 ? "Record" : "Records"} Imported
-        </p>
-      )}
-
-      <div className='flex gap-3 mt-3'>
+          {importStatusResult?.data?.importedIds?.length > 0 && (
+            <p>
+              {importStatusResult.data.importedIds.length}{" "}
+              {importStatusResult.data.importedIds.length === 1 ? "Record" : "Records"} Imported
+            </p>
+          )}
+        </div>
+      </div>
+      <div className='mt-3 flex align-items-center gap-3'>
         {importStatusResult?.data?.importedIds.length > 0 &&
           <Button
-            label='Show Imported Records'
+            label='view Imported Records'
             size='small'
             onClick={() => handleSuccessSyncImport()}
           />
@@ -83,7 +89,7 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
             size='small'
             icon="pi pi-download"
             outlined
-            severity='danger'
+            severity='contrast'
             onClick={() => handleDownloadFailedRecords(transactionId)}
           />
         }
