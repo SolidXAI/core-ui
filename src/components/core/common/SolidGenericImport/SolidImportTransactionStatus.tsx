@@ -76,13 +76,13 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
     if (status === "import_failed" && successCount > 0) {
       return <Button type='button' size='small' icon="pi pi-exclamation-triangle" severity="warning" label="Completed with Some Errors" />;
     }
-    return null;
+    return <div>Import Status</div>;
   };
 
   return (
     <div>
       <div style={{ borderRadius: 6, border: '1px solid var(--primary-light-color)' }}>
-        <div className='p-3' style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
+        <div className='p-3' style={{ borderBottom: '1px solid var(--primary-light-color)', pointerEvents: 'none'}}>
           {getStatusTag()}
         </div>
         <div className='font-bold' style={{ color: 'var(--solid-primary-black)' }}>

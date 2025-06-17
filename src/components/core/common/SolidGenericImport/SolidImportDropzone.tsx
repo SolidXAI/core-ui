@@ -84,7 +84,7 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
                         <p className='text-center m-0'>Excel files are recommended as formatting is automatic.<br />
                             But, you can also use .csv files</p>
                         <div className='flex justify-content-center mt-3'>
-                            <Button label="Click to browse" size="small" onClick={open} severity='secondary' outlined />
+                            <Button label="Click to browse" size="small" severity='secondary' outlined />
                         </div>
                     </div>
                     {/* ) : ( */}
