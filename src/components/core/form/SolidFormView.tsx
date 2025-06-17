@@ -812,7 +812,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const handleDynamicLayout = async () => {
             if (solidFormViewMetaData) {
                 let formLayout = solidFormViewMetaData;
-                let customLayout = params.customLayout;
+                let customLayout = params?.customLayout;
                 const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormLayoutLoad;
                 let DynamicFunctionComponent = null;
                 const event: SolidLoadForm = {
