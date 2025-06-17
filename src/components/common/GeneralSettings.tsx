@@ -101,7 +101,9 @@ export const GeneralSettings = () => {
                 }
 
                 // Append remaining settings as JSON string
-                formData.append("settings", JSON.stringify(updatedSettings));
+                if (Object.keys(updatedSettings).length > 0) {
+                    formData.append("settings", JSON.stringify(updatedSettings));
+                }
 
                 // Call the mutation (your API)
                 const response = await bulkUpdateSolidSettings({ data: formData }).unwrap();
@@ -251,6 +253,7 @@ export const GeneralSettings = () => {
                                                                         Drag and Drop or <span className='text-primary'> Logo</span> to upload
                                                                     </div>
                                                                     <p>Supported format:PNG, JPG, JPEG, SVG, WEBP | Max size: 2 MB</p>
+                                                                    <small className='mb-2'>Note: 200px image width is ideal.</small>
                                                                     <div>
                                                                         <Button outlined size='small' severity='secondary' label='Click to Browse' type="button" />
                                                                     </div>
@@ -264,6 +267,7 @@ export const GeneralSettings = () => {
                                                                         Drag and Drop or <span className='text-primary'> Logo</span> to upload
                                                                     </div>
                                                                     <p>Supported format:PNG, JPG, JPEG, SVG, WEBP | Max size: 2 MB</p>
+                                                                    <small className='mb-2'>Note: 200px image width is ideal.</small>
                                                                     <div>
                                                                         <Button outlined size='small' severity='secondary' label='Click to Browse' type="button" />
                                                                     </div>
@@ -323,6 +327,7 @@ export const GeneralSettings = () => {
                                                                         Drag and Drop or <span className='text-primary'> Company Logo</span> to upload
                                                                     </div>
                                                                     <p>Supported format:PNG, JPG, JPEG, SVG, WEBP | Max size: 2 MB</p>
+                                                                    <small className='mb-2'>Note: 200px image width is ideal.</small>
                                                                     <div>
                                                                         <Button outlined size='small' severity='secondary' label='Click to Browse' type="button" />
                                                                     </div>
@@ -336,6 +341,7 @@ export const GeneralSettings = () => {
                                                                         Drag and Drop or <span className='text-primary'> Company Logo</span> to upload
                                                                     </div>
                                                                     <p>Supported format:PNG, JPG, JPEG, SVG, WEBP | Max size: 2 MB</p>
+                                                                    <small className='mb-2'>Note: 200px image width is ideal.</small>
                                                                     <div>
                                                                         <Button outlined size='small' severity='secondary' label='Click to Browse' type="button" />
                                                                     </div>

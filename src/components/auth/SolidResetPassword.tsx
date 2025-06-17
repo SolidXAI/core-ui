@@ -80,10 +80,10 @@ const SolidResetPassword = () => {
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogo_POSITION}`}>
+                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
                             <Image
                                 alt="solid logo"
-                                src={solidSettingsData?.data?.appLogo ?? SolidLogo}
+                                src={solidSettingsData?.data?.appLogo || SolidLogo}
                                 className="relative"
                                 fill
                             />
