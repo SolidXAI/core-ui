@@ -102,6 +102,21 @@ export const getLayoutFieldsAsObject = (layout: any[]): any => {
         return result;
     }, {});
 }
+export const getActualFieldMetadata = (key: string, solidFieldsMetadata: Record<string, any>) => {
+    if (solidFieldsMetadata[key]) {
+        return solidFieldsMetadata[key];
+    }
+
+    if (key.endsWith("Confirm")) {
+        const baseKey = key.slice(0, -"Confirm".length); // Remove "Confirm"
+        if (solidFieldsMetadata[baseKey]) {
+            return solidFieldsMetadata[baseKey];
+        }
+    }
+
+    return null; // or handle fallback
+};
+
 
 const fieldFactory = (type: string, fieldContext: SolidFieldProps, setLightboxUrls?: any, setOpenLightbox?: any): ISolidField | null => {
     if (type === 'shortText') {
@@ -430,9 +445,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
             setCreateMode(true);
             return;
         }
+
         if(locale){
             setSelectedLocale(locale);
         }
+       
         if(defaultEntityLocaleIdn){
             setDefaultEntityLocaleId(defaultEntityLocaleIdn);
         }
@@ -545,6 +562,18 @@ const SolidFormView = (params: SolidFormViewProps) => {
         }
     }, [isEntityCreateSuccess, isEntityUpdateSuceess, isEntityDeleteSuceess]);
 
+    useEffect(()=>{
+      
+        if(solidFormViewMetaData?.data?.solidView?.model?.internationalisation){
+            const matchedLocale = solidFormViewMetaData?.data?.applicableLocales?.find((x: any) => x.isDefault === 'yes');
+            //this is to attach default locale when adding data in popup view where relations exists
+            if(matchedLocale && searchParams.get("activeTab")){
+                setSelectedLocale(matchedLocale.locale);
+            }
+        }
+       
+    },[params.modelName,solidFormViewMetaData])
+
     function isFetchBaseQueryErrorWithErrorResponse(error: any): error is FetchBaseQueryError & { data: ErrorResponseData } {
         return error && typeof error === 'object' && 'data' in error && 'message' in error.data;
     }
@@ -624,6 +653,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             Object.entries(values).forEach(([key, value]) => {
 
                 const fieldMetadata = solidFieldsMetadata[key];
+                //  const fieldMetadata = getActualFieldMetadata(key, solidFieldsMetadata);
                 const fieldContext: SolidFieldProps = {
                     fieldMetadata: fieldMetadata,
                     field: layoutFieldsObj[key],
@@ -631,12 +661,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     solidFormViewMetaData: solidFormViewMetaData,
                     modelName: params.modelName
                 }
-
                 let solidField = fieldFactory(fieldMetadata?.type, fieldContext);
-
                 // Append each field to the FormData
                 if (value !== undefined && value !== null && solidField) {
                     solidField.updateFormData(value, formData);
+                }
+                if( value !== undefined && value !== null && key.endsWith("Confirm")){
+                    formData.append(key, String(value))
                 }
 
             });
@@ -653,7 +684,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
             }
             if(solidFormViewMetaData?.data?.solidView?.model?.internationalisation){
-                if(selectedLocale){
+                if(selectedLocale && !formData.has('localeName')){
                     formData.append('localeName', selectedLocale);
                 }
                 if(defaultEntityLocaleId){

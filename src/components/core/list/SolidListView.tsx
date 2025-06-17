@@ -270,7 +270,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   // All list view state.
   const [listViewData, setListViewData] = useState<any[]>([]);
   const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(25);
+  const [rows, setRows] = useState(solidListViewLayout?.attrs?.defaultPageSize ? solidListViewLayout?.attrs?.defaultPageSize : 10);
   const [totalRecords, setTotalRecords] = useState(0);
   const [sortField, setSortField] = useState("");
   const [sortOrder, setSortOrder] = useState(0);
@@ -388,10 +388,10 @@ export const SolidListView = (params: SolidListViewParams) => {
         if (queryObject.c_filter) {
           filters.$and.push(queryObject.c_filter);
         }
-        setRows(queryData.limit);
+        setRows(Number(queryData.limit));
         setToPopulate(queryData?.populate);
         setToPopulateMedia(queryData?.populateMedia);
-        setFirst(queryData?.offset);
+        setFirst(Number(queryData?.offset));
         setSortField(queryData?.sort[0]?.field);
         setSortOrder(queryData?.sort[0]?.order);
         setFilters(filters);
@@ -866,15 +866,15 @@ export const SolidListView = (params: SolidListViewParams) => {
         </div>
       </div>
       <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);} .greyed-out-row { background-color: #f5f5f5 !important; color: #a0a0a0 !important; opacity: 0.6;}`}</style>
-      <div className="solid-datatable-wrapper">
-        {isListViewEmptyWithoutFilters ?
-          <SolidEmptyListViewPlaceholder
-            createButtonUrl={createButtonUrl}
-            actionsAllowed={actionsAllowed}
-            params={params}
-            solidListViewMetaData={solidListViewMetaData}
-          />
-          :
+      {isListViewEmptyWithoutFilters ?
+        <SolidEmptyListViewPlaceholder
+          createButtonUrl={createButtonUrl}
+          actionsAllowed={actionsAllowed}
+          params={params}
+          solidListViewMetaData={solidListViewMetaData}
+        />
+        :
+        <div className="solid-datatable-wrapper">
           <DataTable
             value={listViewData}
             rowClassName={(rowData) => {
@@ -1092,8 +1092,8 @@ export const SolidListView = (params: SolidListViewParams) => {
               )}></Column>
             }
           </DataTable>
-        }
-      </div>
+        </div>
+      }
       <Dialog
         visible={isDialogVisible}
         header="Confirm Delete"

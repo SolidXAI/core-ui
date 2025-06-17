@@ -4,15 +4,22 @@ import { useFormik } from 'formik';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { Toast } from 'primereact/toast';
-import { useEffect, useRef } from 'react'
+import { useCallback, useEffect, useRef, useState } from 'react'
 import { CancelButton } from './CancelButton';
 import { InputSwitch } from 'primereact/inputswitch';
 import { RadioButton } from 'primereact/radiobutton';
 import { handleError } from '@/helpers/ToastContainer';
 import { usePathname } from 'next/navigation';
 import { InputTextarea } from 'primereact/inputtextarea';
+import Image from 'next/image';
+import SolidLogo from '../../resources/images/SS-Logo.png'
+import { useDropzone } from 'react-dropzone';
+
 
 export const GeneralSettings = () => {
+    const [appLogoPreview, setAppLogoPreview] = useState<string | null>(null);
+    const [companyLogoPreview, setCompanyLogoPreview] = useState<string | null>(null);
+
     const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery()
     useEffect(() => {
         trigger("") // Fetch settings on mount
@@ -30,6 +37,8 @@ export const GeneralSettings = () => {
         });
     };
     const initialValues = {
+        appLogo: solidSettingsData?.data?.appLogo || "",
+        companylogo: solidSettingsData?.data?.companylogo || "",
         allowPublicRegistration: solidSettingsData?.data?.allowPublicRegistration || false,
         iamPasswordRegistrationEnabled: solidSettingsData?.data?.iamPasswordRegistrationEnabled || false,
         passwordlessRegistration: solidSettingsData?.data?.passwordlessRegistration || false,
@@ -49,7 +58,8 @@ export const GeneralSettings = () => {
         appTnc: solidSettingsData?.data?.appTnc || "",
         appPrivacyPolicy: solidSettingsData?.data?.appPrivacyPolicy || "",
         enableDarkMode: solidSettingsData?.data?.enableDarkMode || true,
-        copyright: solidSettingsData?.data?.copyright
+        copyright: solidSettingsData?.data?.copyright,
+        forceChangePasswordOnFirstLogin: solidSettingsData?.data?.forceChangePasswordOnFirstLogin || false
     };
     const formik = useFormik({
         initialValues: initialValues,
@@ -57,14 +67,13 @@ export const GeneralSettings = () => {
         onSubmit: async (values) => {
             try {
                 const updatedSettings: Record<string, any> = {};
-
                 const currentSettings = solidSettingsData?.data || {};
 
                 // Compare values and collect only changed ones
                 Object.entries(values).forEach(([key, value]) => {
                     const currentValue = currentSettings[key];
 
-                    // Handle boolean, string, null values consistently
+                    // Normalize null/undefined for consistent comparison
                     const normalizedCurrent = currentValue === undefined || currentValue === null ? "" : currentValue;
                     const normalizedValue = value === undefined || value === null ? "" : value;
 
@@ -77,9 +86,28 @@ export const GeneralSettings = () => {
                     showToast("success", "No Changes", "No settings were updated");
                     return;
                 }
-                const response = await bulkUpdateSolidSettings({
-                    data: { settings: updatedSettings },
-                }).unwrap();
+
+                const formData = new FormData();
+
+                // Extract appLogo if changed
+                if (updatedSettings.appLogo && updatedSettings.appLogo instanceof File) {
+                    formData.append("appLogo", updatedSettings.appLogo);
+                    delete updatedSettings.appLogo;
+                }
+
+                if (updatedSettings.companylogo && updatedSettings.companylogo instanceof File) {
+                    formData.append("companylogo", updatedSettings.companylogo);
+                    delete updatedSettings.companylogo;
+                }
+
+                // Append remaining settings as JSON string
+                if (Object.keys(updatedSettings).length > 0) {
+                    formData.append("settings", JSON.stringify(updatedSettings));
+                }
+
+                // Call the mutation (your API)
+                const response = await bulkUpdateSolidSettings({ data: formData }).unwrap();
+
                 if (response.statusCode === 200) {
                     showToast("success", "Updated", "Settings updated")
                 }
@@ -108,6 +136,88 @@ export const GeneralSettings = () => {
         right: 'The form will appear on the right side of the screen, and the banner will be positioned on the left side.'
     };
 
+    const onAppLogoDrop = useCallback(
+        (acceptedFiles: File[]) => {
+            const file = acceptedFiles[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) {
+                    toast.current?.show({
+                        severity: "error",
+                        summary: "File too large",
+                        detail: "Maximum file size is 2MB",
+                        life: 3000,
+                    });
+                    return;
+                }
+                formik.setFieldValue("appLogo", file);
+                setAppLogoPreview(URL.createObjectURL(file));
+            }
+        },
+        [formik]
+    );
+
+    const onCompanyLogoDrop = useCallback((acceptedFiles: File[]) => {
+        const file = acceptedFiles[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+                toast.current?.show({
+                    severity: "error",
+                    summary: "File too large",
+                    detail: "Maximum file size is 2MB",
+                    life: 3000,
+                });
+                return;
+            }
+            formik.setFieldValue("companylogo", file);
+            setCompanyLogoPreview(URL.createObjectURL(file));
+        }
+    }, [formik]);
+
+    const {
+        getRootProps: getAppLogoRootProps,
+        getInputProps: getAppLogoInputProps,
+        isDragActive: isAppLogoDragActive
+    } = useDropzone({
+        accept: {
+            'image/png': ['.png'],
+            'image/jpeg': ['.jpeg', '.jpg'],
+            'image/svg+xml': ['.svg'],
+            'image/webp': ['.webp']
+        },
+        multiple: false,
+        onDrop: onAppLogoDrop
+    });
+    const {
+        getRootProps: getCompanyLogoRootProps,
+        getInputProps: getCompanyLogoInputProps,
+        isDragActive: isCompanyLogoDragActive
+    } = useDropzone({
+        accept: {
+            'image/png': ['.png'],
+            'image/jpeg': ['.jpeg', '.jpg'],
+            'image/svg+xml': ['.svg'],
+            'image/webp': ['.webp']
+        },
+        multiple: false,
+        onDrop: onCompanyLogoDrop
+    });
+
+    const removeAppLogo = () => {
+        formik.setFieldValue("appLogo", null);
+        if (appLogoPreview) {
+            URL.revokeObjectURL(appLogoPreview);
+            setAppLogoPreview(null);
+        }
+    };
+
+    const removeCompanyLogo = () => {
+        formik.setFieldValue("companylogo", null);
+        if (companyLogoPreview) {
+            URL.revokeObjectURL(companyLogoPreview);
+            setCompanyLogoPreview(null);
+        }
+    };
+
     return (
         <div className="page-parent-wrapper">
             <Toast ref={toast} />
@@ -117,22 +227,165 @@ export const GeneralSettings = () => {
                         <div className="page-header secondary-border-bottom">
                             <div className="form-wrapper-title">Settings</div>
                             <div className="gap-3 flex">
-                                <Button label="Save" size="small" onClick={() => showError()} type="submit" />
+                                {formik.dirty &&
+                                    <Button label="Save" size="small" onClick={() => showError()} type="submit" />
+                                }
                                 <CancelButton />
                             </div>
                         </div>
                         <div className="p-4 solid-form-content">
                             {pathname.includes("app-settings") &&
                                 <>
-                                    <p className='font-bold ' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>App Logo </p>
                                     <div className='formgrid grid'>
                                         <div className='col-8'>
                                             <div className="formgrid grid">
                                                 <div className="col-6">
-                                                    <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
-                                                            <label className="form-field-label">App Logo</label>
+                                                    <p className='font-bold ' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>App Logo </p>
+                                                    <div>
+                                                        <div {...getAppLogoRootProps()} className="solid-dropzone-wrapper" style={{ borderRadius: 8 }}>
+                                                            <input {...getAppLogoInputProps()} />
+                                                            {isAppLogoDragActive ?
+                                                                <div className='solid-dropzone'>
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                                        <path d="M11 16V7.85L8.4 10.45L7 9L12 4L17 9L15.6 10.45L13 7.85V16H11ZM6 20C5.45 20 4.97917 19.8042 4.5875 19.4125C4.19583 19.0208 4 18.55 4 18V15H6V18H18V15H20V18C20 18.55 19.8042 19.0208 19.4125 19.4125C19.0208 19.8042 18.55 20 18 20H6Z" fill="#666666" />
+                                                                    </svg>
+                                                                    <div className='font-bold mt-2'>
+                                                                        Drag and Drop or <span className='text-primary'> Logo</span> to upload
+                                                                    </div>
+                                                                    <p>Supported format:PNG, JPG, JPEG, SVG, WEBP | Max size: 2 MB</p>
+                                                                    <small className='mb-2'>Note: 200px image width is ideal.</small>
+                                                                    <div>
+                                                                        <Button outlined size='small' severity='secondary' label='Click to Browse' type="button" />
+                                                                    </div>
+                                                                </div>
+                                                                :
+                                                                <div className='solid-dropzone'>
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                                        <path d="M11 16V7.85L8.4 10.45L7 9L12 4L17 9L15.6 10.45L13 7.85V16H11ZM6 20C5.45 20 4.97917 19.8042 4.5875 19.4125C4.19583 19.0208 4 18.55 4 18V15H6V18H18V15H20V18C20 18.55 19.8042 19.0208 19.4125 19.4125C19.0208 19.8042 18.55 20 18 20H6Z" fill="#666666" />
+                                                                    </svg>
+                                                                    <div className='font-bold mt-2'>
+                                                                        Drag and Drop or <span className='text-primary'> Logo</span> to upload
+                                                                    </div>
+                                                                    <p>Supported format:PNG, JPG, JPEG, SVG, WEBP | Max size: 2 MB</p>
+                                                                    <small className='mb-2'>Note: 200px image width is ideal.</small>
+                                                                    <div>
+                                                                        <Button outlined size='small' severity='secondary' label='Click to Browse' type="button" />
+                                                                    </div>
+                                                                </div>
+                                                            }
                                                         </div>
+                                                        <div className="mt-2">
+                                                            {(() => {
+                                                                const logoSrc = (SolidLogo as any).src || SolidLogo;
+
+                                                                let src = appLogoPreview
+                                                                    ? appLogoPreview
+                                                                    : formik.values.appLogo
+                                                                        ? formik.values.appLogo
+                                                                        : logoSrc
+
+                                                                const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
+
+                                                                if (!isBlobOrAbsolute && !src.startsWith("/")) {
+                                                                    src = `${process.env.API_URL}/${src}`;
+                                                                }
+                                                                return (
+                                                                    <Image
+                                                                        src={src}
+                                                                        alt="App Logo"
+                                                                        width={200}
+                                                                        height={120}
+                                                                        style={{ objectFit: "contain", maxHeight: 150 }}
+                                                                        unoptimized
+                                                                    />
+                                                                );
+                                                            })()}
+                                                        </div>
+                                                        {formik.values.appLogo && (
+                                                            <Button
+                                                                label="Remove"
+                                                                severity="danger"
+                                                                icon="pi pi-times"
+                                                                size="small"
+                                                                className="mt-2"
+                                                                onClick={removeAppLogo}
+                                                            />
+                                                        )}
+                                                    </div>
+                                                </div>
+                                                <div className="col-6">
+                                                    <p className='font-bold ' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Company Logo </p>
+                                                    <div>
+                                                        <div {...getCompanyLogoRootProps()} className="solid-dropzone-wrapper" style={{ borderRadius: 8 }}>
+                                                            <input {...getCompanyLogoInputProps()} />
+                                                            {isCompanyLogoDragActive ?
+                                                                <div className='solid-dropzone'>
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                                        <path d="M11 16V7.85L8.4 10.45L7 9L12 4L17 9L15.6 10.45L13 7.85V16H11ZM6 20C5.45 20 4.97917 19.8042 4.5875 19.4125C4.19583 19.0208 4 18.55 4 18V15H6V18H18V15H20V18C20 18.55 19.8042 19.0208 19.4125 19.4125C19.0208 19.8042 18.55 20 18 20H6Z" fill="#666666" />
+                                                                    </svg>
+                                                                    <div className='font-bold mt-2'>
+                                                                        Drag and Drop or <span className='text-primary'> Company Logo</span> to upload
+                                                                    </div>
+                                                                    <p>Supported format:PNG, JPG, JPEG, SVG, WEBP | Max size: 2 MB</p>
+                                                                    <small className='mb-2'>Note: 200px image width is ideal.</small>
+                                                                    <div>
+                                                                        <Button outlined size='small' severity='secondary' label='Click to Browse' type="button" />
+                                                                    </div>
+                                                                </div>
+                                                                :
+                                                                <div className='solid-dropzone'>
+                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
+                                                                        <path d="M11 16V7.85L8.4 10.45L7 9L12 4L17 9L15.6 10.45L13 7.85V16H11ZM6 20C5.45 20 4.97917 19.8042 4.5875 19.4125C4.19583 19.0208 4 18.55 4 18V15H6V18H18V15H20V18C20 18.55 19.8042 19.0208 19.4125 19.4125C19.0208 19.8042 18.55 20 18 20H6Z" fill="#666666" />
+                                                                    </svg>
+                                                                    <div className='font-bold mt-2'>
+                                                                        Drag and Drop or <span className='text-primary'> Company Logo</span> to upload
+                                                                    </div>
+                                                                    <p>Supported format:PNG, JPG, JPEG, SVG, WEBP | Max size: 2 MB</p>
+                                                                    <small className='mb-2'>Note: 200px image width is ideal.</small>
+                                                                    <div>
+                                                                        <Button outlined size='small' severity='secondary' label='Click to Browse' type="button" />
+                                                                    </div>
+                                                                </div>
+                                                            }
+                                                        </div>
+                                                        <div className="mt-2">
+                                                            {(() => {
+                                                                const logoSrc = (SolidLogo as any).src || SolidLogo;
+
+                                                                let src = companyLogoPreview
+                                                                    ? companyLogoPreview
+                                                                    : formik.values.companylogo
+                                                                        ? formik.values.companylogo
+                                                                        : logoSrc
+
+                                                                const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
+
+                                                                if (!isBlobOrAbsolute && !src.startsWith("/")) {
+                                                                    src = `${process.env.API_URL}/${src}`;
+                                                                }
+
+                                                                return (
+                                                                    <Image
+                                                                        src={src}
+                                                                        alt="Company Logo"
+                                                                        width={200}
+                                                                        height={120}
+                                                                        style={{ objectFit: "contain", maxHeight: 150 }}
+                                                                        unoptimized
+                                                                    />
+                                                                );
+                                                            })()}
+                                                        </div>
+                                                        {formik.values.companylogo && (
+                                                            <Button
+                                                                label="Remove"
+                                                                severity="danger"
+                                                                icon="pi pi-times"
+                                                                size="small"
+                                                                className="mt-2"
+                                                                onClick={removeCompanyLogo}
+                                                            />
+                                                        )}
                                                     </div>
                                                 </div>
                                             </div>
@@ -408,6 +661,20 @@ export const GeneralSettings = () => {
                                                                 name="iamGoogleOAuthEnabled"
                                                                 checked={formik.values.iamGoogleOAuthEnabled}
                                                                 onChange={(e) => formik.setFieldValue("iamGoogleOAuthEnabled", e.value)}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                 <div className="col-6 mt-3">
+                                                    <div className="formgrid grid align-items-center">
+                                                        <div className="col-5">
+                                                            <label className="form-field-label">Force Password change on first Login </label>
+                                                        </div>
+                                                        <div className="col-7">
+                                                            <InputSwitch
+                                                                name="forceChangePasswordOnFirstLogin"
+                                                                checked={formik.values.forceChangePasswordOnFirstLogin}
+                                                                onChange={(e) => formik.setFieldValue("forceChangePasswordOnFirstLogin", e.value)}
                                                             />
                                                         </div>
                                                     </div>
