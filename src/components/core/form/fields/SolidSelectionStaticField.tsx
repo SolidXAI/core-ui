@@ -213,7 +213,7 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
                     multiple={isMultiSelect}
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                     disabled={formDisabled || fieldDisabled}
-                    // {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
+                    {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                     id={fieldLayoutInfo.attrs.name}
                     name={fieldLayoutInfo.attrs.name}
                     field="label"
