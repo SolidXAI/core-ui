@@ -1,6 +1,6 @@
 "use client";
 import { useFormik } from "formik";
-import styles from './SolidExport.module.css'
+import './solid-export.css';
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import React, { useEffect, useRef, useState } from "react";
@@ -333,7 +333,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
     }
   };
   const renderSourceItem = (item: Question) => (
-          <div key={item.key} className="solid-picklist-item-wrapper solid-picklist-source-item">
+          <div key={item.key} className="flex justify-content-start align-items-center border-top-1 w-full p-1 SolidCustomPicklistItemWrapper SolidCustomPicklistSourceItem">
               <div className="flex items-center gap-2">
                   <svg onClick={() => moveToSelected(item)} width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <g opacity="0.4">
@@ -341,7 +341,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
                         <path d="M7.42857 8.57143H4V7.42857H7.42857V4H8.57143V7.42857H12V8.57143H8.57143V12H7.42857V8.57143Z" fill="#4B4D52"/>
                         </g>
                         </svg>
-                  <label htmlFor={item.key} className="ml-2 solid-picklist-item-content">
+                  <label htmlFor={item.key} className="text-sm font-semibold ml-2">
                       {item.name}
                   </label>
               </div>
@@ -349,12 +349,12 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
   );
   
   const renderTargetItem = (item: Question) => (
-          <div key={item.key} className="solid-picklist-item-wrapper gap-2">
+          <div key={item.key} className="flex justify-content-start align-items-center border-top-1 w-full p-1 SolidCustomPicklistItemWrapper">
               <svg width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                 <path d="M7.46672 11.7331C7.46672 12.0997 7.33616 12.4136 7.07505 12.6747C6.81394 12.9359 6.50005 13.0664 6.13338 13.0664C5.76672 13.0664 5.45283 12.9359 5.19172 12.6747C4.9306 12.4136 4.80005 12.0997 4.80005 11.7331C4.80005 11.3664 4.9306 11.0525 5.19172 10.7914C5.45283 10.5303 5.76672 10.3997 6.13338 10.3997C6.50005 10.3997 6.81394 10.5303 7.07505 10.7914C7.33616 11.0525 7.46672 11.3664 7.46672 11.7331ZM7.46672 7.73307C7.46672 8.09974 7.33616 8.41363 7.07505 8.67474C6.81394 8.93585 6.50005 9.06641 6.13338 9.06641C5.76672 9.06641 5.45283 8.93585 5.19172 8.67474C4.9306 8.41363 4.80005 8.09974 4.80005 7.73307C4.80005 7.36641 4.9306 7.05252 5.19172 6.79141C5.45283 6.5303 5.76672 6.39974 6.13338 6.39974C6.50005 6.39974 6.81394 6.5303 7.07505 6.79141C7.33616 7.05252 7.46672 7.36641 7.46672 7.73307ZM7.46672 3.73307C7.46672 4.09974 7.33616 4.41363 7.07505 4.67474C6.81394 4.93585 6.50005 5.06641 6.13338 5.06641C5.76672 5.06641 5.45283 4.93585 5.19172 4.67474C4.9306 4.41363 4.80005 4.09974 4.80005 3.73307C4.80005 3.36641 4.9306 3.05252 5.19172 2.79141C5.45283 2.5303 5.76672 2.39974 6.13338 2.39974C6.50005 2.39974 6.81394 2.5303 7.07505 2.79141C7.33616 3.05252 7.46672 3.36641 7.46672 3.73307Z" fill="black" fill-opacity="0.25"/>
                 <path d="M11.7333 11.7331C11.7333 12.0997 11.6028 12.4136 11.3417 12.6747C11.0805 12.9359 10.7667 13.0664 10.4 13.0664C10.0333 13.0664 9.71943 12.9359 9.45832 12.6747C9.19721 12.4136 9.06665 12.0997 9.06665 11.7331C9.06665 11.3664 9.19721 11.0525 9.45832 10.7914C9.71943 10.5303 10.0333 10.3997 10.4 10.3997C10.7667 10.3997 11.0805 10.5303 11.3417 10.7914C11.6028 11.0525 11.7333 11.3664 11.7333 11.7331ZM11.7333 7.73307C11.7333 8.09974 11.6028 8.41363 11.3417 8.67474C11.0805 8.93585 10.7667 9.06641 10.4 9.06641C10.0333 9.06641 9.71943 8.93585 9.45832 8.67474C9.19721 8.41363 9.06665 8.09974 9.06665 7.73307C9.06665 7.36641 9.19721 7.05252 9.45832 6.79141C9.71943 6.5303 10.0333 6.39974 10.4 6.39974C10.7667 6.39974 11.0805 6.5303 11.3417 6.79141C11.6028 7.05252 11.7333 7.36641 11.7333 7.73307ZM11.7333 3.73307C11.7333 4.09974 11.6028 4.41363 11.3417 4.67474C11.0805 4.93585 10.7667 5.06641 10.4 5.06641C10.0333 5.06641 9.71943 4.93585 9.45832 4.67474C9.19721 4.41363 9.06665 4.09974 9.06665 3.73307C9.06665 3.36641 9.19721 3.05252 9.45832 2.79141C9.71943 2.5303 10.0333 2.39974 10.4 2.39974C10.7667 2.39974 11.0805 2.5303 11.3417 2.79141C11.6028 3.05252 11.7333 3.36641 11.7333 3.73307Z" fill="black" fill-opacity="0.25"/>
               </svg>
-              <span className="solid-picklist-item-content flex-1">{item.name}</span>
+              <span className="text-sm font-semibold flex-1">{item.name}</span>
               <svg width="16" height="16"  onClick={() => moveToAvailable(item)} cursor='pointer' viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
                         <rect width="16" height="16" rx="8" fill="#F0F0F0"/>
                         <path d="M5.6 11L5 10.4L7.4 8L5 5.6L5.6 5L8 7.4L10.4 5L11 5.6L8.6 8L11 10.4L10.4 11L8 8.6L5.6 11Z" fill="#4B4D52"/>
@@ -363,7 +363,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
   );
   const maxVisibleRows = Math.max(availableColumns.length, selectedColumns.length);
   const renderEmptyRow = (index: number) => (
-    <div key={`empty-${index}`} className="solid-picklist-item-wrapper" />
+    <div key={`empty-${index}`} className="SolidCustomPicklistItemWrapper"/>
   );
     // Dialog footer (Save and Cancel buttons)
     const dialogFooter = (
@@ -376,7 +376,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
         />
         <Button
           label="Cancel"
-          className={styles.exportCancelButton}
+          className="ExportCancelButton"
           onClick={() => {
             setNewTemplateName("");
             setIsDialogVisible(false);
@@ -395,9 +395,9 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
     };
     const itemTemplate = (option: TemplateOption) => {
       return (
-        <div className={styles.ExportItemWrapper}>
-          <span className={styles.ExportDropdownText}>{option.name}</span>
-          <svg width="16px" height="16px" viewBox="0 0 24 24" fill="none" style={{right:0}} className={styles.ExportDropdownIcon} onClick={(e) => {
+        <div className="flex align-items-center justify-content-between w-full py-1">
+          <span className="ExportDropdownText">{option.name}</span>
+          <svg width="16px" height="16px" viewBox="0 0 24 24" fill="none" style={{right:0}} className="ExportDropdownIcon" onClick={(e) => {
               e.stopPropagation(); // Prevent triggering selection
               handleDeleteTemplate(option.code);
             }}
@@ -420,7 +420,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
       <div className="p-0">
       { currentStepValue === 'export' && 
             <>
-            <div className={`${styles.solidExportControls} gap-2`}>
+            <div className="SolidExportControls mx-2 gap-2">
               <div className="flex align-items-center">
                 <Checkbox inputId="applyFilters" onChange={e => setCheckedApplyFilter(!!e.checked)} checked={checkApplyFilter} />
                 <label htmlFor="applyFilters" className="ml-2">  Apply Filters</label>
@@ -496,11 +496,11 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
                     autoFocus
                   />
             </Dialog>
-            <div className="solid-custom-picklist mt-2">
+            <div className="SolidCustomPicklist mt-2">
                         <div className="flex">
                             {/* All Questions */}
                             <div className="w-6">
-                                <div className="solid-picklist-header solid-source-picklist-header">Available Fields</div>
+                                <div className="text-sm font-semibold SolidCustomPicklistSourceHeader" style={{ padding: '12px 16px', background: '#F3FAFF' }}>Available Fields</div>
                                 <div>
                                     {availableColumns.map(renderSourceItem)}
                                     {Array.from({ length: maxVisibleRows - availableColumns.length }).map((_, i) =>
@@ -511,7 +511,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
 
                             {/* Selected Questions */}
                             <div className="w-6">
-                                <div className="solid-picklist-header">Selected Fields</div>
+                                <div className="text-sm font-semibold" style={{ padding: '12px 16px', background: '#F3FAFF' }} >Selected Fields</div>
                                 <div>
                                     {selectedColumns.map(renderTargetItem)}
                                     {Array.from({ length: maxVisibleRows - selectedColumns.length }).map((_, i) =>
