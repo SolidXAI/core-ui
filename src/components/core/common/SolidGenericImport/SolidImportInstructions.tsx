@@ -86,8 +86,11 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
                                                         </p>
                                                         <div className='flex flex-wrap'>
                                                             {values.map((item, i) => (
-                                                                <span key={i}>{item},</span>
+                                                                <span key={i}>
+                                                                    {item}{i < values.length - 1 ? ', ' : ''}
+                                                                </span>
                                                             ))}
+
                                                         </div>
                                                     </li>
                                                 );
