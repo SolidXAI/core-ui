@@ -74,6 +74,8 @@ export type LayoutAttribute = {
     viewWidget?: string;
     showLabel?: boolean;
     inlineListLayout?: any;
+    inlineCreateLayout?: any;
+    formButtons?: any;
 };
 
 // Generic representation of any node in our layout 

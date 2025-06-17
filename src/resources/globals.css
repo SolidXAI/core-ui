@@ -1486,6 +1486,9 @@ li.header-li-px {
   padding: 0;
   padding-left: 10px;
 }
+.bg-red-row{
+  background-color: rgb(243, 43, 43);
+}
 
 .markdown-view {
   max-width: 100%;
@@ -2210,6 +2213,7 @@ li.header-li-px {
 .solid-panel-menu .p-panelmenu .p-panelmenu-content {
   border: none;
   border-radius: 0;
+  margin-left: 15px;
 }
 
 .solid-panel-menu .subMenuHead a {

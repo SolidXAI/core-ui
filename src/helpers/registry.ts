@@ -38,6 +38,7 @@ import { SolidIconViewWidget } from "@/components/core/form/fields/widgets/Solid
 import { SolidManyToManyRelationAvatarListWidget } from "@/components/core/list/widgets/SolidManyToManyRelationAvatarListWidget";
 import { SolidManyToOneRelationAvatarListWidget } from "@/components/core/list/widgets/SolidManyToOneRelationAvatarListWidget";
 import { SolidShortTextFieldAvatarWidget } from "@/components/core/form/fields/widgets/SolidShortTextFieldAvatarWidget";
+import DeleteModelRowAction from "@/components/core/extension/solid-core/modelMetadata/list/DeleteModelRowAction";
 
 type ExtensionRegistry = {
     components: Record<string, React.ComponentType<any>>;
@@ -97,6 +98,8 @@ export const getExtensionFunction = (name: string) => {
 registerExtensionComponent("CustomHtml", CustomHtml, []);
 registerExtensionComponent("GenerateModelCodeRowAction", GenerateModelCodeRowAction, []);
 registerExtensionComponent("GenerateModuleCodeRowAction", GenerateModuleCodeRowAction, []);
+registerExtensionComponent("DeleteModelRowAction", DeleteModelRowAction, []);
+
 
 
 // Formview Default Edit widgets
