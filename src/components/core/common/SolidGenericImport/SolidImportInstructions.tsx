@@ -68,28 +68,34 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
                                         <Button label='Excel Download' icon="pi pi-download" iconPos='right' size='small' onClick={() => handleTemplateDownload('excel')} />
                                     </div>
                                 </li>
-                                {importInstructionsData?.data?.standard &&
-                                    (Object.entries(importInstructionsData.data.standard) as [string, string[]][])
-                                        .map(([key, values], index) => {
-                                            if (!values?.length) return null;
+                                {(() => {
+                                    let count = 2; // Start numbering from 2
+                                    return (importInstructionsData?.data?.standard &&
+                                        (Object.entries(importInstructionsData.data.standard) as [string, string[]][])
+                                            .map(([key, values]) => {
+                                                if (!values?.length) return null;
 
-                                            const titleCaseKey = key
-                                                .replace(/([A-Z])/g, ' $1')    // Convert camelCase to spaced words
-                                                .replace(/^./, str => str.toUpperCase()); // Capitalize first letter
+                                                const titleCaseKey = key
+                                                    .replace(/([A-Z])/g, ' $1')
+                                                    .replace(/^./, str => str.toUpperCase());
 
-                                            return (
-                                                <li key={key} className='mt-2'>
-                                                    <p className='font-medium solid-primary-black-text'>{index + 2}. {titleCaseKey}:</p>
-                                                    <div className='flex flex-wrap '>
-                                                        {values.map((item, i) => (
-                                                            <span key={i}>{item},</span>
-                                                        ))}
-                                                    </div>
-                                                </li>
-                                            );
-                                        }
-                                        )
-                                }
+                                                const rendered = (
+                                                    <li key={key} className='mt-3'>
+                                                        <p className='font-medium solid-primary-black-text mb-1'>
+                                                            {count}. {titleCaseKey}:
+                                                        </p>
+                                                        <div className='flex flex-wrap'>
+                                                            {values.map((item, i) => (
+                                                                <span key={i}>{item},</span>
+                                                            ))}
+                                                        </div>
+                                                    </li>
+                                                );
+
+                                                count++;
+                                                return rendered;
+                                            }));
+                                })()}
                             </ol>
                         </div>
                         {importInstructionsData?.data?.custom.length > 0 &&

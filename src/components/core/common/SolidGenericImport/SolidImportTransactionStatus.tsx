@@ -2,18 +2,13 @@
 
 import { getSession } from 'next-auth/react';
 import { Button } from 'primereact/button';
-import styles from './SolidImport.module.css'
+import { Dialog } from 'primereact/dialog';
+import { Divider } from 'primereact/divider';
+import { useState } from 'react';
 
 export const SolidImportTransactionStatus = ({ importStatusResult, transactionId, setOpenImportDialog, handleFetchUpdatedRecords }: any) => {
 
-  const handleSuccessSyncImport = () => {
-    setTimeout(() => {
-      setOpenImportDialog(false);
-      setTimeout(() => {
-        handleFetchUpdatedRecords();
-      }, 150);
-    }, 150);
-  };
+  const [showPartialDialog, setShowPartialDialog] = useState(false);
 
   const handleDownloadFailedRecords = async (transactionId: number) => {
     try {
@@ -49,51 +44,116 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
+      console.error("Download failed:", error);
     }
   };
 
-  
+  const { status, importedIds = [], failedCount = 0 } = importStatusResult?.data || {};
+  const successCount = importedIds.length;
+
+  const handleSuccessSyncImport = () => {
+    setOpenImportDialog(false);
+    setTimeout(() => {
+      handleFetchUpdatedRecords();
+    }, 150);
+  };
+
+  const handlePartialDialogConfirm = async () => {
+    await handleDownloadFailedRecords(transactionId);
+    setOpenImportDialog(false);
+    setTimeout(() => {
+      handleFetchUpdatedRecords();
+    }, 150);
+  };
+
+  const getStatusTag = () => {
+    if (status === "import_succeeded") {
+      return <Button type='button' size='small' icon="pi pi-check-circle" severity="success" label={`${successCount} row${successCount > 1 ? 's' : ''} imported successfully`} />;
+    }
+    if (status === "import_failed" && successCount === 0) {
+      return <Button type='button' size='small' icon="pi pi-times-circle" severity="danger" label="Import Failed" />;
+    }
+    if (status === "import_failed" && successCount > 0) {
+      return <Button type='button' size='small' icon="pi pi-exclamation-triangle" severity="warning" label="Completed with Some Errors" />;
+    }
+    return null;
+  };
+
   return (
     <div>
-      <div className={styles.SolidImportContextWrapper}>
-        <div className='flex flex-column align-items-center mt-3 px-3 pt-3 pb-4'>
-          <h4>
-            {importStatusResult?.data?.status === "import_succeeded" &&
-              "Import Successful"}
-
-            {importStatusResult?.data?.status === "import_failed" &&
-              (importStatusResult?.data?.importedIds?.length > 0
-                ? "Import Completed with Some Failures"
-                : "Import Failed – No Records Imported")}
-          </h4>
-
-          {importStatusResult?.data?.importedIds?.length > 0 && (
-            <p>
-              {importStatusResult.data.importedIds.length}{" "}
-              {importStatusResult.data.importedIds.length === 1 ? "Record" : "Records"} Imported
-            </p>
-          )}
+      <div style={{ borderRadius: 6, border: '1px solid var(--primary-light-color)' }}>
+        <div className='p-3' style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
+          {getStatusTag()}
+        </div>
+        <div className='font-bold' style={{ color: 'var(--solid-primary-black)' }}>
+          <div className='p-3 flex justify-content-between'>
+            <span>No. of Successful Rows:</span> <span>{successCount ?? 0}</span>
+          </div>
+          {/* <div className='px-3'>
+            <Divider className='my-0' />
+          </div>
+          <div className='p-3 flex justify-content-between'>
+            <span>No. of Failed Rows:</span> <span>{failedCount ?? 0}</span>
+          </div> */}
         </div>
       </div>
       <div className='mt-3 flex align-items-center gap-3'>
-        {importStatusResult?.data?.importedIds.length > 0 &&
+        {successCount > 0 &&
           <Button
-            label='view Imported Records'
+            label='View Imported Records'
             size='small'
-            onClick={() => handleSuccessSyncImport()}
+            onClick={() => {
+              if (status === "import_failed" && successCount > 0) {
+                setShowPartialDialog(true);
+              } else {
+                handleSuccessSyncImport();
+              }
+            }
+            }
           />
         }
-        {importStatusResult?.data?.status === "import_failed" &&
+        {status === "import_failed" &&
           <Button
             label="Download Failed Records"
             size='small'
             icon="pi pi-download"
             outlined
-            severity='contrast'
+            severity='secondary'
             onClick={() => handleDownloadFailedRecords(transactionId)}
           />
         }
       </div>
+      <Dialog
+        header="View Imported Records"
+        visible={showPartialDialog}
+        onHide={() => setShowPartialDialog(false)}
+        style={{
+          width: '50vh'
+        }}
+        footer={
+          <div className="flex justify-content-start gap-2">
+            <Button
+              label="Yes"
+              size='small'
+              icon="pi pi-download"
+              onClick={handlePartialDialogConfirm}
+            />
+            <Button
+              label="No"
+              size='small'
+              icon="pi pi-times"
+              severity="secondary"
+              outlined
+              onClick={() => {
+                handleSuccessSyncImport();
+              }}
+            />
+          </div>
+        }
+        modal
+      >
+        <p>Do you want to download failed records before viewing the successful imports?</p>
+      </Dialog>
     </div>
   )
 }
