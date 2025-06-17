@@ -548,16 +548,15 @@ const SolidFormView = (params: SolidFormViewProps) => {
     }, [isEntityCreateSuccess, isEntityUpdateSuceess, isEntityDeleteSuceess]);
 
     useEffect(()=>{
+
         if(solidFormViewMetaData?.data?.solidView?.model?.internationalisation){
-            if(params.id !== 'new'){
-            const matchedLocale = solidFormViewMetaData?.data?.applicableLocales?.find((x: any) => x.isDefault === 'yes'  && x.defaultEntityLocaleId == params.id );
-                if (matchedLocale) setSelectedLocale(matchedLocale.locale);
-            }else{
-                const defaultLocale = solidFormViewMetaData?.data?.applicableLocales.find((x: any) => x.isDefault === 'yes');
-                setSelectedLocale(defaultLocale?.locale || null);
+            const matchedLocale = solidFormViewMetaData?.data?.applicableLocales?.find((x: any) => x.isDefault === 'yes');
+            //this is to attach default locale when adding data in popup view where relations exists
+            if(matchedLocale && searchParams.get("activeTab")){
+                setSelectedLocale(matchedLocale.locale);
             }
         }
-       
+
     },[params.modelName,solidFormViewMetaData])
 
     function isFetchBaseQueryErrorWithErrorResponse(error: any): error is FetchBaseQueryError & { data: ErrorResponseData } {
@@ -668,7 +667,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
             }
             if(solidFormViewMetaData?.data?.solidView?.model?.internationalisation){
-                if(selectedLocale){
+                if (selectedLocale && !formData.has('localeName')) {
+                    console.log("locale debugging ",selectedLocale)
                     formData.append('localeName', selectedLocale);
                 }
                 if(defaultEntityLocaleId){

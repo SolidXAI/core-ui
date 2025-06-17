@@ -113,7 +113,6 @@ export const SolidListView = (params: SolidListViewParams) => {
   const handleCustomButtonClick = useHandleListCustomButtonClick()
 
   useEffect(() => {
-    console.log('useEffect: [params.modelName]');
     const fetchPermissions = async () => {
       if (params.modelName) {
         const permissionNames = [
@@ -235,7 +234,6 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   // Set the initial filter state based on the metadata.
   useEffect(() => {
-    console.log('useEffect: [solidListViewMetaData] line no 227');
     // refetch();
     if (solidListViewMetaData) {
       if (params.customLayout) {
@@ -251,7 +249,6 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   // set layout and actions for create and edit buttons and view modes
   useEffect(() => {
-    console.log('useEffect: [solidListViewMetaData] line no 245');
     if (solidListViewMetaData) {
       const createActionUrl = solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction && solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.type === "custom" ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.customComponent : "form/new";
       const editActionUrl = solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction && solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.type === "custom" ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.customComponent : "form";
@@ -316,7 +313,6 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   // After data is fetched populate the list view state so as to be able to render the data. 
   useEffect(() => {
-    console.log('useEffect: [solidListViewMetaData] line no 310');
     if (solidEntityListViewData) {
       const cleanedRecords = solidEntityListViewData.records.map((record) => {
         const newRecord = { ...record };
@@ -363,7 +359,6 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   // Fetch data after toPopulate has been populated...
   useEffect(() => {
-    console.log('useEffect: [isDeleteSolidEntitiesSucess, isDeleteSolidSingleEntitySuccess, recoverByIdIsSuccess, recoverByIsSuccess, solidListViewMetaData]');
     if (solidListViewMetaData) {
       const queryObject = queryStringToQueryObject();
 
@@ -407,8 +402,6 @@ export const SolidListView = (params: SolidListViewParams) => {
   }, [isDeleteSolidEntitiesSucess, isDeleteSolidSingleEntitySuccess, recoverByIdIsSuccess, recoverByIsSuccess, solidListViewMetaData]);
 
   useEffect(() => {
-    console.log('useEffect: [first, rows, sortField, sortOrder, showArchived, toPopulate, toPopulateMedia, customFilter, queryDataLoaded]');
-
     if (queryDataLoaded) {
       setQueryString(
         first,
@@ -651,7 +644,6 @@ export const SolidListView = (params: SolidListViewParams) => {
   }
 
   useEffect(() => {
-    console.log('useEffect: [recoverIsError, recoverByIdIsError]');
     if (recoverIsError || recoverByIdIsError) {
       showError(recoverByIdIsError ? recoverByIdError : recoverError);
     }
