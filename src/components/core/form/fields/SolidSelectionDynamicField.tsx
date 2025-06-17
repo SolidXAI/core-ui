@@ -249,7 +249,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                     multiple={isMultiSelect}
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                     disabled={formDisabled || fieldDisabled}
-                    // {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
+                    {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                     id={fieldLayoutInfo.attrs.name}
                     field="label"
                     // value={formik.values[fieldLayoutInfo.attrs.name] || null}
