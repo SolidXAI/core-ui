@@ -97,6 +97,7 @@ export type SolidUiEvent = {
     formData: Record<string, any>;
     viewMetadata: SolidView;
     fieldsMetadata: FieldsMetadata;
+    formViewLayout: LayoutNode;
 };
 
 export type SolidLoadForm = {
@@ -105,6 +106,7 @@ export type SolidLoadForm = {
     formData: Record<string, any>;
     viewMetadata: SolidView;
     fieldsMetadata: FieldsMetadata;
+    formViewLayout: LayoutNode;
 }
 
 export type SolidFormWidgetProps = {
