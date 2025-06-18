@@ -294,7 +294,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                         dropdown={!readOnlyPermission}
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}
-                        onChange={formik.handleChange}
+                        onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
                         onFocus={(e) => e.target.select()}
                         className="w-full solid-standard-autocomplete"
                     />
