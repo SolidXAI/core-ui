@@ -3298,3 +3298,8 @@ flex-shrink: 0; */
 .warning-header-popup {
   padding: 0.75rem;
 }
+.password-field-component {
+padding:10px !important;
+border:2px solid rgba(216, 226, 234, 0.40);
+border-radius:8px !important;
+}
