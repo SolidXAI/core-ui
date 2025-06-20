@@ -1,0 +1,31 @@
+.SolidSettingTab {
+    border-radius: 6px;
+    padding: 10px 16px;
+    cursor: pointer;
+}
+
+.SolidActiveSetting {
+    background-color: var(--surface-hover);
+    color: var(--primary-color);
+    font-weight: 600;
+}
+
+.SolidDeActiveSetting {
+    background-color: transparent;
+    font-weight: 400;
+}
+
+.SolidDeActiveSetting:hover {
+    background-color: var(--surface-hover);
+}
+
+.SolidSettingTabWrapper {
+    border-right: 1px solid var(--primary-light-color);
+    /* background-color: var(--surface-c); */
+}
+
+.SolidAccountSettingFormWrapper {
+    min-height: 60vh;
+    max-height: 80vh;
+    overflow-y: hidden;
+}

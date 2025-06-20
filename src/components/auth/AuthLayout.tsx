@@ -95,7 +95,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                                 ${solidSettingsData?.data?.authPagesLayout === 'left' ? 'solid-left-layout' : ''} 
                                 ${solidSettingsData?.data?.authPagesLayout === 'right' ? 'solid-right-layout' : ''}`.trim()}
                 >
-                    {solidSettingsData?.data?.appLogoPosition === "in_image_view" &&
+                    {solidSettingsData?.data?.appLogoPosition === "in_image_view" && solidSettingsData?.data?.authPagesLayout !== 'center' &&
                         <div className={`solid-logo flex align-items-center gap-3 ${solidSettingsData?.data?.appLogoPosition}`}>
                             <Image
                                 alt="solid logo"
