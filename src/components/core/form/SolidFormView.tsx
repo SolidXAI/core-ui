@@ -418,19 +418,19 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [confirmVisible, setConfirmVisible] = useState(false);
     const confirmResolveRef = useRef<(value: boolean) => void>();
     const [redirectToList, setRedirectToList] = useState(false);
-    const [selectedLocale,setSelectedLocale] = useState<string | null>(null);
-    const [defaultEntityLocaleId,setDefaultEntityLocaleId] = useState<string | null>(null);
+    const [selectedLocale, setSelectedLocale] = useState<string | null>(null);
+    const [defaultEntityLocaleId, setDefaultEntityLocaleId] = useState<string | null>(null);
     const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
-    const [published,setPublished]=useState<string | null>(null);
+    const [published, setPublished] = useState<string | null>(null);
     const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
     const [viewMode, setViewMode] = useState<"view" | "edit">(params.embeded === true ? "edit" : "view");
-    const [createMode,setCreateMode] = useState<boolean>(false);
+    const [createMode, setCreateMode] = useState<boolean>(false);
     const [openLightbox, setOpenLightbox] = useState(false);
     const [lightboxUrls, setLightboxUrls] = useState([]);
     const [isShowChatter, setShowChatter] = useState(true);
     const [solidWorkflowFieldValue, setSolidWorkflowFieldValue] = useState<string>("");
-    const [defaultTabViewOptionIndex,setDefaultTabViewOptionIndex] = useState<number>(0);
+    const [defaultTabViewOptionIndex, setDefaultTabViewOptionIndex] = useState<number>(0);
     const errorFields: string[] = [];
 
     const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
@@ -446,11 +446,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
             return;
         }
 
-        if(locale){
+        if (locale) {
             setSelectedLocale(locale);
         }
-       
-        if(defaultEntityLocaleIdn){
+
+        if (defaultEntityLocaleIdn) {
             setDefaultEntityLocaleId(defaultEntityLocaleIdn);
         }
 
@@ -528,7 +528,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     // - - - - - - - - - - - -- - - - - - - - - - - - METADATA here
     // Get the form view layout & metadata first. 
-    const formViewMetaDataQs = qs.stringify({ ...params, viewType: 'form',defaultEntityLocaleId:defaultEntityLocaleId }, {
+    const formViewMetaDataQs = qs.stringify({ ...params, viewType: 'form', defaultEntityLocaleId: defaultEntityLocaleId }, {
         encodeValuesOnly: true,
     });
     const [formViewMetaData, setFormViewMetaData] = useState({});
@@ -562,17 +562,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
         }
     }, [isEntityCreateSuccess, isEntityUpdateSuceess, isEntityDeleteSuceess]);
 
-    useEffect(()=>{
-      
-        if(solidFormViewMetaData?.data?.solidView?.model?.internationalisation){
+    useEffect(() => {
+
+        if (solidFormViewMetaData?.data?.solidView?.model?.internationalisation) {
             const matchedLocale = solidFormViewMetaData?.data?.applicableLocales?.find((x: any) => x.isDefault === 'yes');
             //this is to attach default locale when adding data in popup view where relations exists
-            if(matchedLocale && searchParams.get("activeTab")){
+            if (matchedLocale && searchParams.get("activeTab")) {
                 setSelectedLocale(matchedLocale.locale);
             }
         }
-       
-    },[params.modelName,solidFormViewMetaData])
+
+    }, [params.modelName, solidFormViewMetaData])
 
     function isFetchBaseQueryErrorWithErrorResponse(error: any): error is FetchBaseQueryError & { data: ErrorResponseData } {
         return error && typeof error === 'object' && 'data' in error && 'message' in error.data;
@@ -633,7 +633,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             detail,
             life: 3000,
         });
-    };  
+    };
 
     const confirmDialogWithPromise = () => {
         return new Promise<boolean>((resolve) => {
@@ -666,7 +666,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 if (value !== undefined && value !== null && solidField) {
                     solidField.updateFormData(value, formData);
                 }
-                if( value !== undefined && value !== null && key.endsWith("Confirm")){
+                if (value !== undefined && value !== null && key.endsWith("Confirm")) {
                     formData.append(key, String(value))
                 }
 
@@ -683,16 +683,16 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     }
                 }
             }
-            if(solidFormViewMetaData?.data?.solidView?.model?.internationalisation){
-                if(selectedLocale && !formData.has('localeName')){
+            if (solidFormViewMetaData?.data?.solidView?.model?.internationalisation) {
+                if (selectedLocale && !formData.has('localeName')) {
                     formData.append('localeName', selectedLocale);
                 }
-                if(defaultEntityLocaleId){
+                if (defaultEntityLocaleId) {
                     formData.append('defaultEntityLocaleId', defaultEntityLocaleId.toString());
                 }
             }
-            if(solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow){
-                if(published){
+            if (solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow) {
+                if (published) {
                     formData.append('publishedAt', published);
                 }
             }
@@ -1205,9 +1205,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
             DynamicFormComponentNew = getExtensionComponent(customFormComponentNew);
         }
 
-        const handleChatterExpandClick = (option? : string) => {
+        const handleChatterExpandClick = (option?: string) => {
             setShowChatter(true);
-            if(option === 'chatter') {
+            if (option === 'chatter') {
                 setDefaultTabViewOptionIndex(1);
                 setRefreshChatterMessage(true)
             } else {
@@ -1215,42 +1215,42 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
         }
         //en 4 null
-       const handleLocaleChangeRedirect = (
-        locale: string,
-        defaultEntityLocaleId: string,
-        viewMode:string,
+        const handleLocaleChangeRedirect = (
+            locale: string,
+            defaultEntityLocaleId: string,
+            viewMode: string,
         ) => {
-        let newViewMode = viewMode;
-        const defaultApplicableLocales = solidFormViewMetaData?.data?.applicableLocales || [];
+            let newViewMode = viewMode;
+            const defaultApplicableLocales = solidFormViewMetaData?.data?.applicableLocales || [];
             //fr 4
-        const matchingLocale = defaultApplicableLocales.find(
-            (loc: any) =>
-            loc.defaultEntityLocaleId &&
-            loc.entityId &&
-            loc.locale === locale
-        );
-        // Extract the base path from the current pathname, removing query params if any
-        const basePath = pathname.split('?')[0];
+            const matchingLocale = defaultApplicableLocales.find(
+                (loc: any) =>
+                    loc.defaultEntityLocaleId &&
+                    loc.entityId &&
+                    loc.locale === locale
+            );
+            // Extract the base path from the current pathname, removing query params if any
+            const basePath = pathname.split('?')[0];
 
-        // Determine entity part of the path (new or existing entityId)
-        const entityPart = matchingLocale?.entityId ?? 'new';
-            if(entityPart === 'new' && viewMode === 'view'){
+            // Determine entity part of the path (new or existing entityId)
+            const entityPart = matchingLocale?.entityId ?? 'new';
+            if (entityPart === 'new' && viewMode === 'view') {
                 newViewMode = 'edit'
-            }else if(entityPart !== 'new' && viewMode === 'view'){
+            } else if (entityPart !== 'new' && viewMode === 'view') {
                 newViewMode = 'view'
-            }else{
+            } else {
                 newViewMode = 'edit'
             }
-        // Construct new pathname using existing basePath and replacing entity segment
-        const updatedPath = basePath.replace(/\/form\/[^/]+/, `/form/${entityPart}`);
+            // Construct new pathname using existing basePath and replacing entity segment
+            const updatedPath = basePath.replace(/\/form\/[^/]+/, `/form/${entityPart}`);
 
-        const queryParams = new URLSearchParams({
-            viewMode: newViewMode,
-            locale,
-            defaultEntityLocaleId,
-        });
+            const queryParams = new URLSearchParams({
+                viewMode: newViewMode,
+                locale,
+                defaultEntityLocaleId,
+            });
 
-        router.push(`${updatedPath}?${queryParams.toString()}`, { scroll: false });
+            router.push(`${updatedPath}?${queryParams.toString()}`, { scroll: false });
         };
 
         const handleConfirmAccept = () => {
@@ -1262,19 +1262,19 @@ const SolidFormView = (params: SolidFormViewProps) => {
             confirmResolveRef.current?.(false);
             setConfirmVisible(false);
         };
-        const handleDraftPublishWorkFlow=async(type:string)=>{
+        const handleDraftPublishWorkFlow = async (type: string) => {
             const userChoice = await confirmDialogWithPromise();
             if (!userChoice) return; // Optional: handle cancel
             let finalPublishedValue = type === 'publish' ? new Date().toISOString() : '';
             setPublished(finalPublishedValue);
-            let formdata =  new FormData();
-            formdata.append('publishedAt',finalPublishedValue)
+            let formdata = new FormData();
+            formdata.append('publishedAt', finalPublishedValue)
             const result = await patchEntity({ id: +params.id, data: formdata }).unwrap();
             setPublished(result?.data?.publishedAt);
-            if(type === 'publish'){
+            if (type === 'publish') {
                 showToast("success", "Saved", "Marked as publish !");
                 //todo: patch request
-            }else{
+            } else {
                 showToast("success", "Saved", "Marked as unpublish !");
             }
         }
@@ -1303,7 +1303,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             internationalisationEnabled={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}
                             handleDraftPublishWorkFlow={handleDraftPublishWorkFlow}
                         />
-                        <div className={`p-4 solid-form-content ${params.embeded === true ? 'h-auto' : ''}`}>
+                        <div className={`p-4 solid-form-content ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
                             {params.id === 'new' && DynamicFormComponentNew ? (
                                 <DynamicFormComponentNew params={params} />
@@ -1329,12 +1329,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         }
                         {isShowChatter === false ?
                             <div className="flex flex-column gap-2 justify-content-center p-2">
-                                 {/*if solidview Internationalisation is enabled then show the locale tab */}
-                                { solidFormViewMetaData?.data?.solidView?.model?.internationalisation &&
-                                <div className="chatter-collapsed-content" onClick={()=>handleChatterExpandClick('locale')}>
-                                    Internationalisation
-                                </div>}
-                                <div className="chatter-collapsed-content" onClick={()=>handleChatterExpandClick('chatter')}>
+                                {/*if solidview Internationalisation is enabled then show the locale tab */}
+                                {solidFormViewMetaData?.data?.solidView?.model?.internationalisation &&
+                                    <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('locale')}>
+                                        Internationalisation
+                                    </div>}
+                                <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('chatter')}>
                                     Audit Trail
                                 </div>
                                 <Button
@@ -1342,37 +1342,37 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     size="small"
                                     className="px-0"
                                     style={{ width: 30 }}
-                                    onClick={()=>handleChatterExpandClick('default')}
+                                    onClick={() => handleChatterExpandClick('default')}
                                 />
                             </div>
-                            : solidFormViewMetaData?.data?.solidView?.model?.internationalisation ? 
+                            : solidFormViewMetaData?.data?.solidView?.model?.internationalisation ?
 
-                            <SolidChatterLocaleTabView 
-                            createMode={createMode} 
-                            setSelectedLocale={setSelectedLocale} 
-                            selectedLocale={selectedLocale} 
-                            solidFormViewMetaData={solidFormViewMetaData} 
-                            id={params.id} 
-                            refreshChatterMessage={refreshChatterMessage} 
-                            setRefreshChatterMessage={setRefreshChatterMessage} 
-                            activeTab={defaultTabViewOptionIndex} 
-                            internationalisation={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}
-                            viewMode={viewMode}
-                            defaultEntityLocaleId={defaultEntityLocaleId}
-                            handleLocaleChangeRedirect={handleLocaleChangeRedirect}
-                            applicableLocales={solidFormViewMetaData?.data?.applicableLocales}
-                            solidFormViewData={solidFormViewData}
-                            published={published}
-                            /> :
-                            <SolidChatter 
-                            modelSingularName={solidFormViewMetaData?.data?.solidView?.model?.singularName}
-                            id={params.id}
-                            refreshChatterMessage={refreshChatterMessage}
-                            setRefreshChatterMessage={setRefreshChatterMessage}/>
+                                <SolidChatterLocaleTabView
+                                    createMode={createMode}
+                                    setSelectedLocale={setSelectedLocale}
+                                    selectedLocale={selectedLocale}
+                                    solidFormViewMetaData={solidFormViewMetaData}
+                                    id={params.id}
+                                    refreshChatterMessage={refreshChatterMessage}
+                                    setRefreshChatterMessage={setRefreshChatterMessage}
+                                    activeTab={defaultTabViewOptionIndex}
+                                    internationalisation={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}
+                                    viewMode={viewMode}
+                                    defaultEntityLocaleId={defaultEntityLocaleId}
+                                    handleLocaleChangeRedirect={handleLocaleChangeRedirect}
+                                    applicableLocales={solidFormViewMetaData?.data?.applicableLocales}
+                                    solidFormViewData={solidFormViewData}
+                                    published={published}
+                                /> :
+                                <SolidChatter
+                                    modelSingularName={solidFormViewMetaData?.data?.solidView?.model?.singularName}
+                                    id={params.id}
+                                    refreshChatterMessage={refreshChatterMessage}
+                                    setRefreshChatterMessage={setRefreshChatterMessage} />
                         }
                     </div>
                 }
-             
+
                 <Dialog
                     visible={isDeleteDialogVisible}
                     header="Confirm Delete"
@@ -1407,25 +1407,25 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     />
                 }
 
-            <ConfirmDialog
-                visible={confirmVisible}
-                onHide={() => setConfirmVisible(false)}
-                header="Confirmation"
-                acceptLabel="Yes, confrim"
-                rejectLabel="No, cancel"
-                acceptClassName="p-button-danger"
-                rejectClassName="p-button-text"
-                position="center"
-                accept={handleConfirmAccept}
-                reject={handleConfirmReject}
-                message={
-                  <div className="flex flex-col items-center justify-center text-center space-y-3">
-                    <p className="text-gray-800 text-base">
-                        Are you sure you want to {published !== null ? 'unpublish' : 'publish'}?
-                    </p>
-                </div>
-                }
-            />
+                <ConfirmDialog
+                    visible={confirmVisible}
+                    onHide={() => setConfirmVisible(false)}
+                    header="Confirmation"
+                    acceptLabel="Yes, confrim"
+                    rejectLabel="No, cancel"
+                    acceptClassName="p-button-danger"
+                    rejectClassName="p-button-text"
+                    position="center"
+                    accept={handleConfirmAccept}
+                    reject={handleConfirmReject}
+                    message={
+                        <div className="flex flex-col items-center justify-center text-center space-y-3">
+                            <p className="text-gray-800 text-base">
+                                Are you sure you want to {published !== null ? 'unpublish' : 'publish'}?
+                            </p>
+                        </div>
+                    }
+                />
             </div>
         );
     }
