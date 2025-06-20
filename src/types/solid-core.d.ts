@@ -76,6 +76,7 @@ export type LayoutAttribute = {
     inlineListLayout?: any;
     inlineCreateLayout?: any;
     formButtons?: any;
+    whereClause?: string;
 };
 
 // Generic representation of any node in our layout 

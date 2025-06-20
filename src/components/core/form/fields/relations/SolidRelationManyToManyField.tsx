@@ -154,6 +154,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
     const readOnlyPermission = fieldContext.readOnly;
     const disabled = fieldLayoutInfo.attrs?.disabled;
     const readOnly = fieldLayoutInfo.attrs?.readOnly;
+    const whereClause = fieldLayoutInfo.attrs.whereClause;
 
     const [visibleCreateDialog, setVisibleCreateDialog] = useState(false);
     const { autoCompleteItems, fetchRelationEntities, addNewRelation } = useRelationEntityHandler({ fieldContext, formik });
@@ -216,13 +217,20 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
 
         }
 
+        let autocompleteQs = qs.stringify(queryData, {
+            encodeValuesOnly: true,
+        });
+        if (whereClause) {
+            autocompleteQs = `${autocompleteQs}&${whereClause}`;
+        }
+
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
             console.error("Fixed filter not applied due to parsing issues or invalid data.");
 
         } else {
-             const autocompleteQs = qs.stringify(queryData, {
-                encodeValuesOnly: true,
-            });
+            //  const autocompleteQs = qs.stringify(queryData, {
+            //     encodeValuesOnly: true,
+            // });
             fetchRelationEntities(autocompleteQs);
         }
     };
