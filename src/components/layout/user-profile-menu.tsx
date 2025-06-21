@@ -14,8 +14,9 @@ import { useRouter } from "next/navigation";
 import { Dialog } from "primereact/dialog";
 import { Divider } from "primereact/divider";
 import { Avatar } from "primereact/avatar";
-import {  useLazyGetSolidSettingsQuery } from "@/redux/api/solidSettingsApi";
+import { useLazyGetSolidSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { SolidAccountSettings } from "../core/common/SolidAccountSettings/SolidAccountSettings";
+import { useGetUserQuery } from "@/redux/api/userApi";
 const UserProfileMenu = () => {
   const [showProfileSettingsDialog, setShowProfileSettingsDialog] = useState(false);
   const router = useRouter();
@@ -27,7 +28,10 @@ const UserProfileMenu = () => {
   const { changeTheme } = useContext(PrimeReactContext);
   const { layoutConfig, setLayoutConfig } = useContext(LayoutContext);
   const { theme } = useSelector((state: any) => state.theme); // Get current theme from Redux
-  const { user } = useSelector((state: any) => state.auth);
+  const userId = useSelector((state: any) => state.auth?.user?.user?.id);
+  const { data: userData } = useGetUserQuery(userId, {
+    skip: !userId,
+  });
   const [checked, setChecked] = useState(theme === "dark");
   const [confirmLogout, setConfirmLogout] = useState(false);
   const dispatch = useDispatch();
@@ -65,11 +69,27 @@ const UserProfileMenu = () => {
   };
 
 
-  const value = user?.user?.email;
+  const value = userData?.data?.email;
   const initials = getInitials(value);
   const bgColor = getColorFromInitials(initials);
-  console.log("user details", user);
 
+  const UserProfileAvatar = () => {
+    return (
+      userData?.data?._media?.profilePicture?.[0]?._full_url ?
+        <Avatar
+          image={userData?.data?._media?.profilePicture?.[0]?._full_url}
+          shape="circle"
+          size="large"
+        />
+        :
+        <Avatar
+          label={initials}
+          size="large"
+          shape="circle"
+          style={{ backgroundColor: bgColor, color: '#ffffff' }}
+        />
+    )
+  }
   return (
     <div className="userProfile">
       <div
@@ -85,7 +105,7 @@ const UserProfileMenu = () => {
             className="profile-icon relative"
             fill
           /> */}
-          <Avatar label={initials} size="large" style={{ backgroundColor: bgColor, color: '#ffffff' }} shape="circle" />
+          <UserProfileAvatar />
           <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
             <path d="M7 5.83301L3.5 9.33301H10.5L7 5.83301Z" fill="var(--solid-primary-black)" />
           </svg>
@@ -98,16 +118,17 @@ const UserProfileMenu = () => {
               className="w-2rem relative"
               fill
             /> */}
-            <Avatar label={initials} style={{ backgroundColor: bgColor, color: '#ffffff' }} shape="circle" />
+            <UserProfileAvatar />
             <div className="flex flex-column align">
               {solidSettingsData?.data?.system?.enableUsername ?
-                <span className="font-bold">{user?.user?.username}</span>
+                <span className="font-bold">{userData?.data?.username}</span>
                 :
-                <span className="mt-1">{user?.user?.email}</span>
+                <span className="mt-1">{userData?.data?.email}</span>
               }
               <span className="mt-1 font-medium">
-                {user?.user?.roles
-                  ?.filter((role: any) => role !== "Internal User")
+                {userData?.data?.roles
+                  ?.filter((role: any) => role.name !== "Internal User")
+                  .map((role: any) => role.name)
                   .join(" | ")}
               </span>
             </div>
