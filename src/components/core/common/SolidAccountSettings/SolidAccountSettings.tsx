@@ -2,7 +2,7 @@
 
 import { Dialog } from "primereact/dialog";
 import { useState } from "react";
-import { SolidPersnoalInfo } from "./SolidPersnoalInfo";
+import { SolidPersonalInfo } from "./SolidPersonalInfo";
 import { SolidNotifications } from "./SolidNotifications";
 import { SolidChangePassword } from "./SolidChangePassword";
 import styles from './SolidAccountSettings.module.css'
@@ -29,7 +29,7 @@ export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfile
     const renderSettingComponent = () => {
         switch (setting.key) {
             case "personal_info":
-                return <SolidPersnoalInfo />;
+                return <SolidPersonalInfo />;
             case "notifications":
                 return <SolidNotifications />;
             case "change_password":

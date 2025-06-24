@@ -14,7 +14,7 @@ import { useSelector } from "react-redux";
 import styles from './SolidAccountSettings.module.css'
 
 
-export const SolidPersnoalInfo = () => {
+export const SolidPersonalInfo = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
     const toast = useRef<Toast>(null);
 
