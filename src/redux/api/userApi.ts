@@ -97,6 +97,18 @@ export const userApi = createApi({
         method: 'DELETE',
       }),
     }),
+
+    getUser: builder.query({
+      query: (userId) => `/user/${userId}?populateMedia[]=profilePicture&populate[]=roles`,
+    }),
+
+    updateUserProfile: builder.mutation({
+      query: ({ data }) => ({
+        url: `/user/profile`,
+        method: 'POST',
+        body: data,
+      }),
+    }),
   }),
 });
 
@@ -116,5 +128,8 @@ export const {
   useDeleteMultipleUsersMutation,
   useLazyGetusersByIdQuery,
   useRegisterUserMutation,
-  useUpdateSessionQuery
+  useUpdateSessionQuery,
+  useGetUserQuery,
+  useLazyGetUserQuery,
+  useUpdateUserProfileMutation
 } = userApi;

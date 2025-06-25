@@ -50,6 +50,11 @@ export class SolidRelationManyToManyField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
+        //if empty then clear the field
+        if(!value || value.length === 0) {
+            formData.append(`${fieldLayoutInfo.attrs.name}Command`, "clear");
+            
+        }
         if (value && value.length > 0) {
             const shouldUseOriginal = value.every((item: any) => item.original && item.original.id);
 

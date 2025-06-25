@@ -143,7 +143,7 @@ const AppSidebar = () => {
 
             <div className="sidebar-left">
                 <div className="navbar-menu">
-                    {updatedMenuData.length > 0 && updatedMenuData.map((m: any) => {
+                    {menu?.data.length > 0 && menu?.data.map((m: any) => {
                         const iconSrc =
                             typeof m.icon === "string"
                                 ? m.icon
