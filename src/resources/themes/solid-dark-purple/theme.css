@@ -194,6 +194,10 @@
   --primary-900: #0e545f;
 }
 
+.solid-primary-black-text {
+  color: var(--solid-primary-black);
+}
+
 .p-editor-container .p-editor-toolbar {
   background: #18191D;
   border-top-right-radius: 6px;

@@ -50,6 +50,11 @@ export class SolidRelationManyToManyField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
+        //if empty then clear the field
+        if(!value || value.length === 0) {
+            formData.append(`${fieldLayoutInfo.attrs.name}Command`, "clear");
+            
+        }
         if (value && value.length > 0) {
             const shouldUseOriginal = value.every((item: any) => item.original && item.original.id);
 
@@ -154,6 +159,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
     const readOnlyPermission = fieldContext.readOnly;
     const disabled = fieldLayoutInfo.attrs?.disabled;
     const readOnly = fieldLayoutInfo.attrs?.readOnly;
+    const whereClause = fieldLayoutInfo.attrs.whereClause;
 
     const [visibleCreateDialog, setVisibleCreateDialog] = useState(false);
     const { autoCompleteItems, fetchRelationEntities, addNewRelation } = useRelationEntityHandler({ fieldContext, formik });
@@ -216,13 +222,20 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
 
         }
 
+        let autocompleteQs = qs.stringify(queryData, {
+            encodeValuesOnly: true,
+        });
+        if (whereClause) {
+            autocompleteQs = `${autocompleteQs}&${whereClause}`;
+        }
+
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
             console.error("Fixed filter not applied due to parsing issues or invalid data.");
 
         } else {
-             const autocompleteQs = qs.stringify(queryData, {
-                encodeValuesOnly: true,
-            });
+            //  const autocompleteQs = qs.stringify(queryData, {
+            //     encodeValuesOnly: true,
+            // });
             fetchRelationEntities(autocompleteQs);
         }
     };

@@ -12,7 +12,7 @@ import { useEffect, useRef, useState } from "react";
 import { SolidFormViewNormalHeaderButton } from "./SolidFormViewNormalHeaderButton";
 import { SolidFormViewContextMenuHeaderButton } from "./SolidFormViewContextMenuHeaderButton";
 
-export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue }: any) => {
+export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled }: any) => {
     const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
     const router = useRouter();
     const pathname = usePathname();
@@ -101,6 +101,31 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             icon={'pi pi-objects-column'}
                             onClick={() => setLayoutDialogVisible(true)}
                         />
+                        {draftEnabled && internationalisationEnabled && params.id !== 'new' &&
+                            (publish !== null ?
+                                <Button
+                                    text
+                                    type="button"
+                                    className="w-8rem text-left gap-2 purple-200"
+                                    label="Unpublish"
+                                    size="small"
+                                    iconPos="left"
+                                    severity="contrast"
+                                    icon={'pi pi-cloud-download'}
+                                    onClick={() => handleDraftPublishWorkFlow('unpublish')}
+                                /> :
+                                <Button
+                                    text
+                                    type="button"
+                                    className="w-8rem text-left gap-2 purple-200"
+                                    label="Publish"
+                                    size="small"
+                                    iconPos="left"
+                                    severity="contrast"
+                                    icon={'pi pi-cloud-upload'}
+                                    onClick={() => handleDraftPublishWorkFlow('publish')}
+                                />
+                            )}
                         {contextMenuHeaderButtons.map((button: any, index: number) => {
                             return (
                                 <SolidFormViewContextMenuHeaderButton
@@ -121,7 +146,6 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
             </div>
         )
     }
-
     return (
         <>
             <div className="solid-form-header">
@@ -177,6 +201,17 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     />
                                 </div>
                             }
+                            {params.embeded !== true && params.draftEnabled &&
+                                !formViewLayout.attrs.readonly && params.publish !== 'null' &&
+                                formik.dirty &&
+                                <div>
+                                    <Button
+                                        label="Draft"
+                                        size="small"
+                                        type="button"
+                                    />
+                                </div>
+                            }
                             {params.embeded == true &&
                                 actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
                                 !formViewLayout.attrs.readonly &&
@@ -208,7 +243,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                     <>
                         <div className="flex align-items-center gap-3">
                             {params.embeded !== true && <BackButton />}
-                            <div className="form-wrapper-title"> {viewMode ==="edit" ? editHeaderTitle : solidView.model.displayName}</div>
+                            <div className="form-wrapper-title"> {viewMode === "edit" ? editHeaderTitle : solidView.model.displayName}</div>
                         </div>
 
                         <div className="gap-3 flex">
@@ -245,74 +280,74 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             })
                             }
                             {
-                                solidView?.layout?.attrs?.showAddFormButton !== false && params.embeded !== true && viewMode === "view" &&
+                                !formViewLayout.attrs.readonly &&
+                                solidView?.layout?.attrs?.showAddFormButton !== false &&
+                                params.embeded !== true &&
+                                viewMode === "view" &&
                                 actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
-                                <Button type="button" icon="pi pi-plus" label="Add" size='small'
-                                    onClick={() => router.replace('new?viewMode=edit')}
-                                >
-                                </Button>
+
+                                <Button type="button" label="Add" size='small' onClick={() => router.replace('new?viewMode=edit')} />
                             }
-                            {solidView?.layout?.attrs?.showEditFormButton !== false && params.embeded !== true && viewMode === "view" &&
+                            {
+                                !formViewLayout.attrs.readonly &&
+                                solidView?.layout?.attrs?.showEditFormButton !== false &&
+                                params.embeded !== true &&
+                                viewMode === "view" &&
                                 actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
+
                                 <div>
-                                    <Button
-                                        label="Edit"
-                                        size="small"
-                                        onClick={() => updateViewMode("edit")}
-                                        type="button"
-                                    />
+                                    <Button label="Edit" size="small" onClick={() => updateViewMode("edit")} type="button" />
                                 </div>
                             }
 
-                            {params.embeded !== true &&
+                            {
+                                params.embeded !== true &&
                                 actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
                                 !formViewLayout.attrs.readonly &&
                                 formik.dirty &&
+                                
                                 <div>
-                                    <Button
-                                        label="Save"
-                                        size="small"
-                                        type="submit"
-                                    />
+                                    <Button label="Save" size="small" type="submit" />
                                 </div>
                             }
 
                             {/* Inline */}
-                            {params.embeded == true &&
+                            {
+                                params.embeded == true &&
                                 actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
                                 !formViewLayout.attrs.readonly &&
                                 formik.dirty &&
+
                                 <div>
-                                    <Button
-                                        label="Save"
-                                        size="small"
-                                        type="submit"
-                                    />
+                                    <Button label="Save" size="small" type="submit" />
                                 </div>
                             }
-                            {params.embeded == true &&
+                            {
+                                params.embeded == true &&
                                 actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
                                 !formViewLayout.attrs.readonly &&
+                                
                                 <div>
-                                    <Button
-                                        size="small"
-                                        type="button"
-                                        label="Delete"
-                                        severity="danger"
-                                        onClick={() => setDeleteDialogVisible(true)}
-                                    />
+                                    <Button size="small" type="button" label="Delete" severity="danger" onClick={() => setDeleteDialogVisible(true)} />
                                 </div>
                             }
-                            {params.embeded == true &&
+                            {
+                                params.embeded == true &&
+                                
                                 <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' style={{ minWidth: 66 }} />
                             }
-                            {params.embeded !== true &&
+                            {
+                                params.embeded !== true &&
+                                
                                 <SolidCancelButton />
                             }
-                            {formViewLayout?.attrs?.showCogWheelFormButton !== false &&
+                            {
+                                formViewLayout?.attrs?.showCogWheelFormButton !== false &&
                                 actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
                                 actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
-                                <FormActionDropdown />}
+
+                                <FormActionDropdown />
+                            }
                         </div>
                     </>
                 )}

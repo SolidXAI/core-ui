@@ -205,6 +205,10 @@
   --primary-900: #260955;
 }
 
+.solid-primary-black-text {
+  color: var(--solid-primary-black);
+}
+
 .solid-primary-title {
   color: var(--solid-title) !important;
 }
@@ -6139,10 +6143,10 @@
     color: var(--auth-subtitle-color) !important;
   }
 
-  .solid-auth-subtitle.left,
+  /* .solid-auth-subtitle.left,
   .solid-auth-subtitle.left a {
     color: #fff !important;
-  }
+  } */
 
   .solid-custom-title {
     color: var(--solid-form-title);

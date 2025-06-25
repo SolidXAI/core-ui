@@ -190,7 +190,6 @@ export const DefaultShortTextFormViewWidget = ({ formik, fieldContext }: SolidFo
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-    console.log("formik.values[fieldLayoutInfo.attrs.name]", formik.values[fieldLayoutInfo.attrs.name]);
     
     return (
         <div className="mt-2 flex-column gap-2">

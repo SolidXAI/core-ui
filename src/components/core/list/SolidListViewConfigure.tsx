@@ -15,12 +15,31 @@ import { Dialog } from "primereact/dialog";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { useHandleListCustomButtonClick } from "@/components/common/useHandleListCustomButtonClick";
 import { SolidListViewHeaderContextMenuButton } from "./SolidListViewHeaderContextMenuButton";
-import styles from "../../common/SolidExport.module.css";
+import "../../common/solid-export.css";
+import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
 
-export const SolidListViewConfigure = ({ listViewMetaData, solidListViewLayout, setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, params, actionsAllowed, selectedRecords, setDialogVisible, setShowSaveFilterPopup, filters}: any) => {
+export const SolidListViewConfigure = (
+    { listViewMetaData,
+        solidListViewLayout,
+        setShowArchived,
+        showArchived,
+        viewData,
+        sizeOptions,
+        setSize,
+        size,
+        viewModes,
+        params,
+        actionsAllowed,
+        selectedRecords,
+        setDialogVisible,
+        setShowSaveFilterPopup,
+        filters,
+        handleFetchUpdatedRecords
+    }:
+        any) => {
     // const [visible, setVisible] = useState<boolean>(false);
     const handleCustomButtonClick = useHandleListCustomButtonClick();
-
+    const [openImportDialog, setOpenImportDialog] = useState<boolean>(false);
     const op = useRef(null);
     const exportRef = useRef(null);
     const customizeLayout = useRef<OverlayPanel | null>(null);
@@ -78,7 +97,7 @@ export const SolidListViewConfigure = ({ listViewMetaData, solidListViewLayout, 
                 // @ts-ignore
                 onClick={(e) => op.current.toggle(e)}
             />
-            <Dialog header="Export" visible={exportView} className={styles.exportDialog} onHide={() => { if (!exportView) return; setExportView(false); }}>
+            <Dialog header="Export" visible={exportView} className="ExportDialog p-0 m-0" onHide={() => { if (!exportView) return; setExportView(false); }}>
                 <SolidExport listViewMetaData={listViewMetaData} filters= {filters} />
             </Dialog>
             <OverlayPanel ref={exportRef} className="listview-export-panel">
@@ -99,7 +118,9 @@ export const SolidListViewConfigure = ({ listViewMetaData, solidListViewLayout, 
                                 icon={'pi pi-trash'}
                                 onClick={() => setDialogVisible(true)}
                             />}
-                        <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2 text-base" />
+                        <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2 text-base"
+                            onClick={() => setOpenImportDialog(true)}
+                        />
                         <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base"
                             // @ts-ignore
                             onClick={() => { setExportView((exportView) => !exportView); }} />
@@ -221,6 +242,14 @@ export const SolidListViewConfigure = ({ listViewMetaData, solidListViewLayout, 
                     </OverlayPanel>
                 </div>
             </OverlayPanel>
+            {openImportDialog &&
+                <SolidGenericImport
+                    openImportDialog={openImportDialog}
+                    setOpenImportDialog={setOpenImportDialog}
+                    listViewMetaData={listViewMetaData}
+                    handleFetchUpdatedRecords={handleFetchUpdatedRecords}
+                />
+            }
         </div>
     )
 }

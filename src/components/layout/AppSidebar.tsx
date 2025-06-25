@@ -143,7 +143,7 @@ const AppSidebar = () => {
 
             <div className="sidebar-left">
                 <div className="navbar-menu">
-                    {updatedMenuData.length > 0 && updatedMenuData.map((m: any) => {
+                    {menu?.data.length > 0 && menu?.data.map((m: any) => {
                         const iconSrc =
                             typeof m.icon === "string"
                                 ? m.icon
@@ -155,6 +155,7 @@ const AppSidebar = () => {
                                 key={m.title}
                                 className={`flex align-items-center menu-item ${currentMainMenu === m.title ? "active-menu-image" : ""}`}
                                 onClick={() => handleMenu(m)}
+                                style={{cursor:'pointer'}}
                             >
                                 {m.icon ?
                                     <Image
