@@ -9,6 +9,7 @@ import { Toast } from 'primereact/toast';
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Checkbox } from "primereact/checkbox";
+import { kebabCase } from "lodash";
 
 
 const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
@@ -37,16 +38,17 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
 
 
     const rows = [
-        { file: '<singularName>.entity.ts', description: 'The TypeORM model that needs to be deleted.', intervention: 'Automatic' },
-        { file: '<singularName>.create.dto.ts', description: 'The TypeORM model that needs to be deleted.', intervention: 'Automatic' },
-        { file: '<singularName>.update.dto.ts', description: 'The TypeORM model that needs to be deleted.', intervention: 'Automatic' },
-        { file: '<singularName>.repository.ts', description: 'The TypeORM model that needs to be deleted.', intervention: 'Automatic' },
-        { file: '<singularName>.service.ts', description: 'The TypeORM model that needs to be deleted.', intervention: 'Automatic' },
-        { file: '<singularName>.controller.ts', description: 'The TypeORM model that needs to be deleted.', intervention: 'Automatic' },
-        { file: '<moduleName>.module.ts', description: 'Remove all references and imports of the above files.', intervention: 'Manual (X)', manual: true },
-        { file: '<moduleName>-metadata.json', description: 'Remove references to this model in the model metadata, menu, action & view sections.', intervention: 'Automatic' },
+        { file: `${kebabCase(event.rowData.singularName)}.entity.ts`, description: 'The TypeORM model that needs to be deleted.', intervention: 'Automatic' },
+        { file: `${kebabCase(event.rowData.singularName)}.create.dto.ts`, description: 'The TypeORM model that needs to be deleted.', intervention: 'Automatic' },
+        { file: `${kebabCase(event.rowData.singularName)}.update.dto.ts`, description: 'The TypeORM model that needs to be deleted.', intervention: 'Automatic' },
+        { file: `${kebabCase(event.rowData.singularName)}.repository.ts`, description: 'The TypeORM model that needs to be deleted.', intervention: 'Automatic' },
+        { file: `${kebabCase(event.rowData.singularName)}.service.ts`, description: 'The TypeORM model that needs to be deleted.', intervention: 'Automatic' },
+        { file: `${kebabCase(event.rowData.singularName)}.controller.ts`, description: 'The TypeORM model that needs to be deleted.', intervention: 'Automatic' },
+        { file: `${kebabCase(event.rowData.singularName)}.module.ts`, description: 'Remove all references and imports of the above files.', intervention: 'Manual (X)', manual: true },
+        { file: `${kebabCase(event.rowData.singularName)}-metadata.json`, description: 'Remove references to this model in the model metadata, menu, action & view sections.', intervention: 'Automatic' },
         { file: '-', description: 'Drop database table. Removes the database table from the DB, this is a very risky step. Best to review all relations to other models etc and then do this manually.', intervention: 'Manual (X)', manual: true },
     ];
+
 
 
     return (
