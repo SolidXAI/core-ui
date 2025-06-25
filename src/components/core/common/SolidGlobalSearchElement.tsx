@@ -541,6 +541,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         if (e.key === "Enter" && inputValue?.trim()) {
             handleAddChip();
             e.preventDefault();
+            setShowOverlay(false);
         } else if (e.key === "Backspace" && inputValue === "") {
             if (searchChips.length > 0) {
                 // Remove last search chip only
