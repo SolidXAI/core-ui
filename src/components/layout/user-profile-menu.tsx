@@ -17,7 +17,10 @@ import { Avatar } from "primereact/avatar";
 import { useLazyGetSolidSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { SolidAccountSettings } from "../core/common/SolidAccountSettings/SolidAccountSettings";
 import { useGetUserQuery } from "@/redux/api/userApi";
+import { handleLogout } from "@/nextAuth/handleLogout";
+import { Toast } from "primereact/toast";
 const UserProfileMenu = () => {
+  const toast = useRef(null);
   const [showProfileSettingsDialog, setShowProfileSettingsDialog] = useState(false);
   const router = useRouter();
   const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
@@ -92,6 +95,7 @@ const UserProfileMenu = () => {
   }
   return (
     <div className="userProfile">
+      <Toast ref={toast} />
       <div
         className="">
         <div
@@ -173,7 +177,7 @@ const UserProfileMenu = () => {
       </div>
       <Dialog header="Logout" headerClassName="py-2" contentClassName="px-0 pb-0" visible={confirmLogout} style={{ width: '20vw' }} onHide={() => { if (!confirmLogout) return; setConfirmLogout(false); }}
         footer={<div className="flex align-items-center gap-2">
-          <Button label="Logout" size="small" onClick={e => logoutHandler()} />
+          <Button label="Logout" size="small" onClick={() => handleLogout(toast)} />
           <Button label="Cancel" size="small" onClick={() => setConfirmLogout(false)} outlined />
         </div>}
       >
