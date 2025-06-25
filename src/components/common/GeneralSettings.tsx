@@ -36,90 +36,92 @@ export const GeneralSettings = () => {
             life: 3000,
         });
     };
+
     const initialValues = {
-        appLogo: solidSettingsData?.data?.appLogo || "",
-        companylogo: solidSettingsData?.data?.companylogo || "",
-        allowPublicRegistration: solidSettingsData?.data?.allowPublicRegistration || false,
-        iamPasswordRegistrationEnabled: solidSettingsData?.data?.iamPasswordRegistrationEnabled || false,
-        passwordlessRegistration: solidSettingsData?.data?.passwordlessRegistration || false,
-        activateUserOnRegistration: solidSettingsData?.data?.activateUserOnRegistration || false,
-        iamGoogleOAuthEnabled: solidSettingsData?.data?.iamGoogleOAuthEnabled || false,
-        shouldQueueEmails: solidSettingsData?.data?.shouldQueueEmails || false,
-        shouldQueueSms: solidSettingsData?.data?.shouldQueueSms || false,
-        authPagesTheme: solidSettingsData?.data?.authPagesTheme || "light",
-        authPagesLayout: solidSettingsData?.data?.authPagesLayout || "center",
-        defaultRole: solidSettingsData?.data?.defaultRole || "Admin",
-        appLogoPosition: solidSettingsData?.data?.appLogoPosition || "in_form_view",
-        showAuthContent: solidSettingsData?.data?.showAuthContent || false,
-        appTitle: solidSettingsData?.data?.appTitle || "SolidX",
-        appSubtitle: solidSettingsData?.data?.appSubtitle || "Welcome To",
-        appDescription: solidSettingsData?.data?.appDescription || "appDescription",
-        showLegalLinks: solidSettingsData?.data?.showLegalLinks || false,
-        appTnc: solidSettingsData?.data?.appTnc || "",
-        appPrivacyPolicy: solidSettingsData?.data?.appPrivacyPolicy || "",
-        enableDarkMode: solidSettingsData?.data?.enableDarkMode || false,
-        copyright: solidSettingsData?.data?.copyright,
-        forceChangePasswordOnFirstLogin: solidSettingsData?.data?.forceChangePasswordOnFirstLogin || false
+        appLogo: solidSettingsData?.data?.system?.appLogo ?? null,
+        companylogo: solidSettingsData?.data?.system?.companylogo ?? null,
+        allowPublicRegistration: solidSettingsData?.data?.system?.allowPublicRegistration ?? false,
+        iamPasswordRegistrationEnabled: solidSettingsData?.data?.system?.iamPasswordRegistrationEnabled ?? false,
+        passwordlessRegistration: solidSettingsData?.data?.system?.passwordlessRegistration ?? false,
+        activateUserOnRegistration: solidSettingsData?.data?.system?.activateUserOnRegistration ?? false,
+        iamGoogleOAuthEnabled: solidSettingsData?.data?.system?.iamGoogleOAuthEnabled ?? false,
+        shouldQueueEmails: solidSettingsData?.data?.system?.shouldQueueEmails ?? false,
+        shouldQueueSms: solidSettingsData?.data?.system?.shouldQueueSms ?? false,
+        authPagesTheme: solidSettingsData?.data?.system?.authPagesTheme ?? "light",
+        authPagesLayout: solidSettingsData?.data?.system?.authPagesLayout ?? "center",
+        defaultRole: solidSettingsData?.data?.system?.defaultRole ?? "Admin",
+        appLogoPosition: solidSettingsData?.data?.system?.appLogoPosition ?? "in_form_view",
+        showAuthContent: solidSettingsData?.data?.system?.showAuthContent ?? false,
+        appTitle: solidSettingsData?.data?.system?.appTitle ?? "SolidX",
+        appSubtitle: solidSettingsData?.data?.system?.appSubtitle ?? "Welcome To",
+        appDescription: solidSettingsData?.data?.system?.appDescription ?? "appDescription",
+        showLegalLinks: solidSettingsData?.data?.system?.showLegalLinks ?? false,
+        appTnc: solidSettingsData?.data?.system?.appTnc ?? null,
+        appPrivacyPolicy: solidSettingsData?.data?.system?.appPrivacyPolicy ?? null,
+        enableDarkMode: solidSettingsData?.data?.system?.enableDarkMode ?? false,
+        copyright: solidSettingsData?.data?.system?.copyright ?? null,
+        forceChangePasswordOnFirstLogin: solidSettingsData?.data?.system?.forceChangePasswordOnFirstLogin ?? false
     };
     const formik = useFormik({
         initialValues: initialValues,
         enableReinitialize: true,
         onSubmit: async (values) => {
             try {
-                const updatedSettings: Record<string, any> = {};
-                const currentSettings = solidSettingsData?.data || {};
+                const updatedSettingsArray: Array<{ key: string; value: string; type: string }> = [];
+                const currentSettings = solidSettingsData?.data?.system || {};
 
-                // Compare values and collect only changed ones
+                const formData = new FormData();
+
+                // Compare changed fields
                 Object.entries(values).forEach(([key, value]) => {
                     const currentValue = currentSettings[key];
 
-                    // Normalize null/undefined for consistent comparison
-                    const normalizedCurrent = currentValue === undefined || currentValue === null ? "" : currentValue;
-                    const normalizedValue = value === undefined || value === null ? "" : value;
+                    const normalizedCurrent = currentValue ?? "";
+                    const normalizedValue = value ?? "";
 
                     if (normalizedCurrent !== normalizedValue) {
-                        updatedSettings[key] = value;
+                        // If file, append to formData and use placeholder value in JSON
+                        if (value instanceof File) {
+                            formData.append(key, value);
+                            updatedSettingsArray.push({
+                                key,
+                                value: "",
+                                type: "system",
+                            });
+                        } else {
+                            updatedSettingsArray.push({
+                                key,
+                                value: value,
+                                type: "system",
+                            });
+                        }
                     }
                 });
 
-                if (Object.keys(updatedSettings).length === 0) {
+                if (updatedSettingsArray.length === 0) {
                     showToast("success", "No Changes", "No settings were updated");
                     return;
                 }
 
-                const formData = new FormData();
+                // Append settings array to formData
+                formData.append("settings", JSON.stringify(updatedSettingsArray));
 
-                // Extract appLogo if changed
-                if (updatedSettings.appLogo && updatedSettings.appLogo instanceof File) {
-                    formData.append("appLogo", updatedSettings.appLogo);
-                    delete updatedSettings.appLogo;
-                }
-
-                if (updatedSettings.companylogo && updatedSettings.companylogo instanceof File) {
-                    formData.append("companylogo", updatedSettings.companylogo);
-                    delete updatedSettings.companylogo;
-                }
-
-                // Append remaining settings as JSON string
-                if (Object.keys(updatedSettings).length > 0) {
-                    formData.append("settings", JSON.stringify(updatedSettings));
-                }
-
-                // Call the mutation (your API)
+                // Call API
                 const response = await bulkUpdateSolidSettings({ data: formData }).unwrap();
 
                 if (response.statusCode === 200) {
-                    showToast("success", "Updated", "Settings updated")
+                    showToast("success", "Updated", "Settings updated");
                 }
 
             } catch (error) {
                 showToast("error", "Failed", "Something went wrong");
             }
         },
-    })
+    });
+
 
     const showError = async () => {
-        const errors = await formik.validateForm(); // Trigger validation and get the updated errors
+        const errors = await formik.validateForm();
         const errorMessages = Object.values(errors);
 
         if (errorMessages.length > 0 && toast.current) {
@@ -722,7 +724,7 @@ export const GeneralSettings = () => {
                                         </div>
                                     </div>
                                     <div className='mt-4' style={{ borderBottom: '1px dashed #D8E2EA' }}></div>
-                                    {solidSettingsData?.data?.enableDarkMode === true &&
+                                    {solidSettingsData?.data?.system?.enableDarkMode === true &&
                                         <>
                                             <p className='font-bold mt-4' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Authentication Screen Theme</p>
                                             <div className='formgrid grid'>
