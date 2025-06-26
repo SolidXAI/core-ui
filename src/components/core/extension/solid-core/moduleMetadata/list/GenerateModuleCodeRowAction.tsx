@@ -111,12 +111,13 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
             if (isGenerateCodeSuceess) {
                 console.log("isGenerateCodeSuceess", isGenerateCodeSuceess);
                 setIsPinging(true);
-                const hasMqMessageCompleted = await fetchMqMessageStatus(30, 500, generateCodeData);
+                // const hasMqMessageCompleted = await fetchMqMessageStatus(30, 500, generateCodeData);
                 const isAlive = await pingBackendWithRetry(30, 500);
 
                 setIsPinging(false);
 
-                if (hasMqMessageCompleted && isAlive) {
+                // if (hasMqMessageCompleted && isAlive) {
+                if (isAlive) {
                     await triggerSeeder("ModuleMetadataSeederService");
                 } else {
                     dispatch(closePopup());

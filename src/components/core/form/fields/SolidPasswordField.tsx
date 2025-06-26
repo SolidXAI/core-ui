@@ -179,58 +179,60 @@ export const DefaultPasswordFormCreateWidget = ({ formik, fieldContext }: SolidF
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
     return (
-        <div className="relative">
-            <div className="flex flex-column gap-2 mt-4">
-                {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
-                        {fieldLabel}
-                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                        <SolidFieldTooltip fieldContext={fieldContext} />
-                    </label>
-                }
-                <Password
-                    id={fieldLayoutInfo.attrs.name}
-                    name={fieldMetadata.name}
-                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                    onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-                    onBlur={(e) => fieldContext.onBlur(e, 'onFieldBlur')}
-                    readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                    disabled={formDisabled || fieldDisabled}
-                    toggleMask
-                    autoComplete="new-password"
-                />
-            </div>
-            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <div className="absolute mt-1">
-                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+        <div className="relative ">
+            <div className="password-field-component">
+                <div className="flex flex-column gap-2 mt-4">
+                    {showFieldLabel != false &&
+                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
+                            {fieldLabel}
+                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                            <SolidFieldTooltip fieldContext={fieldContext} />
+                        </label>
+                    }
+                    <Password
+                        id={fieldLayoutInfo.attrs.name}
+                        name={fieldMetadata.name}
+                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                        onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
+                        onBlur={(e) => fieldContext.onBlur(e, 'onFieldBlur')}
+                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                        disabled={formDisabled || fieldDisabled}
+                        toggleMask
+                        autoComplete="new-password"
+                    />
                 </div>
-            )}
-
-            <div className="flex flex-column gap-2 mt-4">
-                <label htmlFor={`${fieldLayoutInfo.attrs.name}Confirm`} className="form-field-label">
-                    Confirm {fieldLabel}
-                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                </label>
-                <Password
-                    id={`${fieldLayoutInfo.attrs.name}Confirm`}
-                    name={`${fieldLayoutInfo.attrs.name}Confirm`}
-                    value={formik.values[`${fieldLayoutInfo.attrs.name}Confirm`] || ''}
-                    onChange={(e) => {
-                        formik.setFieldValue(`${fieldLayoutInfo.attrs.name}Confirm`, e.target.value);
-                    }}
-                    onBlur={(e) => {
-                        formik.setFieldTouched(`${fieldLayoutInfo.attrs.name}Confirm`, true);
-                    }}
-                    readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                    disabled={formDisabled || fieldDisabled}
-                    toggleMask
-                    autoComplete="new-password"
-                />
-                {isFormFieldValid(formik, `${fieldLayoutInfo.attrs.name}Confirm`) && (
+                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                     <div className="absolute mt-1">
-                        <Message severity="error" text={formik?.errors[`${fieldLayoutInfo.attrs.name}Confirm`]?.toString()} />
+                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                     </div>
                 )}
+
+                <div className="flex flex-column gap-2 mt-4">
+                    <label htmlFor={`${fieldLayoutInfo.attrs.name}Confirm`} className="form-field-label">
+                        Confirm {fieldLabel}
+                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                    </label>
+                    <Password
+                        id={`${fieldLayoutInfo.attrs.name}Confirm`}
+                        name={`${fieldLayoutInfo.attrs.name}Confirm`}
+                        value={formik.values[`${fieldLayoutInfo.attrs.name}Confirm`] || ''}
+                        onChange={(e) => {
+                            formik.setFieldValue(`${fieldLayoutInfo.attrs.name}Confirm`, e.target.value);
+                        }}
+                        onBlur={(e) => {
+                            formik.setFieldTouched(`${fieldLayoutInfo.attrs.name}Confirm`, true);
+                        }}
+                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                        disabled={formDisabled || fieldDisabled}
+                        toggleMask
+                        autoComplete="new-password"
+                    />
+                    {isFormFieldValid(formik, `${fieldLayoutInfo.attrs.name}Confirm`) && (
+                        <div className="absolute mt-1">
+                            <Message severity="error" text={formik?.errors[`${fieldLayoutInfo.attrs.name}Confirm`]?.toString()} />
+                        </div>
+                    )}
+                </div>
             </div>
         </div>
     );
