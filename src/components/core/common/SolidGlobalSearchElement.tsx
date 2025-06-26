@@ -750,7 +750,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                                         if (inputValue?.trim()) setShowOverlay(true);
                                     }}
                                     onBlur={() => {
-                                        // Delay so you can click buttons inside overlay
                                         setTimeout(() => setShowOverlay(false), 150);
                                     }}
 
