@@ -856,42 +856,42 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
             }
         };
-
-        handleDynamicLayout();
-    }, [solidFormViewMetaData, solidFormViewData]);
-
-    useEffect(() => {
         const handleDynamicFunction = async () => {
-            if (solidFormViewData) {
                 const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormDataLoad;
-
                 let DynamicFunctionComponent = null;
                 let formViewData = solidFormViewData?.data;
 
                 const event: SolidLoadForm = {
                     fieldsMetadata: solidFormViewMetaData,
                     formData: solidFormViewData?.data,
-                    type: dynamicHeader,
+                    type: "onFormDataLoad",
                     viewMetadata: solidFormViewMetaData?.data?.solidView,
                     formViewLayout: formViewLayout
                 };
 
                 if (dynamicHeader) {
                     DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
-
                     if (DynamicFunctionComponent) {
                         const updatedFormData = await DynamicFunctionComponent(event);
-
+                        
                         if (updatedFormData && updatedFormData?.dataChanged && updatedFormData?.newFormData) {
                             formViewData = updatedFormData.newFormData;
                         }
                     }
+                    if (formViewData) {
+                        setInitialEntityData(formViewData);
+                    }
                 }
-                setInitialEntityData(formViewData);
-            }
         };
 
         handleDynamicFunction();
+        handleDynamicLayout();
+    }, [solidFormViewMetaData, solidFormViewData]);
+
+    useEffect(() => {
+        if (solidFormViewData) {
+            setInitialEntityData(solidFormViewData.data);
+        }
     }, [solidFormViewData]);
 
     let formik: FormikObject;
