@@ -21,21 +21,20 @@ import { useInitateLoginMutation } from "@/redux/api/authApi";
 import { AppTitle } from "@/helpers/AppTitle";
 import Image from "next/image";
 import SolidLogo from '../../resources/images/SS-Logo.png'
+// import { Checkbox } from "primereact/checkbox";
 interface AuthTabsProps {
     iamPasswordRegistrationEnabled: boolean;
     passwordlessRegistration: boolean;
 }
-const SolidLogin = () => {
+const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
     const [initiateLogin] = useInitateLoginMutation();
-
+    const [activeIndex, setActiveIndex] = useState(0);
     useEffect(() => {
         trigger("") // Fetch settings on mount
     }, [trigger])
     const toast = useRef<Toast>(null);
     const router = useRouter();
-
-    const [password, setPassword] = useState('');
 
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
         toast.current?.show({
@@ -54,7 +53,9 @@ const SolidLogin = () => {
             <Formik
                 initialValues={{
                     email: "",
+                    // email: initialEmail,
                     password: "",
+                    // rememberMe: rememberMe,
                 }}
                 enableReinitialize={false}
                 validationSchema={Yup.object({
@@ -65,6 +66,12 @@ const SolidLogin = () => {
                 })}
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
                     try {
+                        // Handle Remember Me
+                        // if (values.rememberMe) {
+                        //     localStorage.setItem("rememberedEmail", values.email);
+                        // } else {
+                        //     localStorage.removeItem("rememberedEmail");
+                        // }
                         const response = await signIn("credentials", {
                             redirect: false,
                             email: values.email,
@@ -91,11 +98,11 @@ const SolidLogin = () => {
                 {(formik) => (
                     <Form>
                         <div className="flex flex-column gap-2 mt-3">
-                            <label htmlFor="email" className="solid-auth-input-label">Username or Email</label>
+                            <label htmlFor="email" className="solid-auth-input-label">{signInValidatorLabel ? signInValidatorLabel : "Username or Email"}</label>
                             <InputText
                                 id="email"
                                 name="email"
-                                placeholder="Email ID"
+                                placeholder={signInValidatorPlaceholder ? signInValidatorPlaceholder : "Email ID"}
                                 onChange={formik.handleChange}
                                 value={formik.values.email}
                                 invalid={!!formik.errors.email}
@@ -113,7 +120,7 @@ const SolidLogin = () => {
                                 id="password"
                                 name="password"
                                 value={formik.values.password}
-                                onChange={formik.handleChange} 
+                                onChange={formik.handleChange}
                                 toggleMask
                                 invalid={!!formik.errors.password}
                                 inputClassName="w-full"
@@ -129,8 +136,18 @@ const SolidLogin = () => {
                                     <Checkbox inputId="remember" onChange={(e: any) => setChecked(e.checked)} checked={checked} />
                                     <label htmlFor="remember" className="ml-2">Remember me</label>
                                 </div> */}
-                        <div className="mt-4 text-right">
-                            <Link href={"/auth/initiate-forgot-password"} className="solid-auth-input-label">Forgot Password?</Link>
+                        <div className="mt-4 flex align-items-center justify-content-between">
+                            {/* <div className="flex align-items-center gap-2">
+                                <Checkbox
+                                    inputId="rememberMe"
+                                    name="rememberMe"
+                                    checked={formik.values.rememberMe}
+                                    onChange={formik.handleChange}
+                                />
+                                <label htmlFor="rememberMe" className="solid-auth-input-label">Remember me</label>
+                            </div> */}
+                            <div></div>
+                            <Link href={"/auth/initiate-forgot-password"} className="solid-auth-input-label font-bold">Forgot Password?</Link>
                         </div>
                         <div className="mt-4">
                             <Button className="w-full font-light auth-submit-button" label="Sign In" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
@@ -181,11 +198,11 @@ const SolidLogin = () => {
                 {(formik) => (
                     <Form>
                         <div className="flex flex-column gap-2 mt-3">
-                            <label htmlFor="email" className="solid-auth-input-label">Email</label>
+                            <label htmlFor="email" className="solid-auth-input-label">{signInValidatorLabel ? signInValidatorLabel : "Username or Email"}</label>
                             <InputText
                                 id="email"
                                 name="email"
-                                placeholder="Email ID"
+                                placeholder={signInValidatorPlaceholder ? signInValidatorPlaceholder : "Email ID"}
                                 onChange={formik.handleChange}
                                 value={formik.values.email}
                                 invalid={!!formik.errors.email}
@@ -211,7 +228,10 @@ const SolidLogin = () => {
     const AuthTabs: React.FC<AuthTabsProps> = ({ iamPasswordRegistrationEnabled, passwordlessRegistration }) => {
         if (iamPasswordRegistrationEnabled && passwordlessRegistration) {
             return (
-                <TabView className="solid-auth-tabview">
+                <TabView className="solid-auth-tabview"
+                    activeIndex={activeIndex}
+                    onTabChange={(e) => setActiveIndex(e.index)}
+                >
                     <TabPanel header="With Password">
                         <PasswordLogin />
                     </TabPanel>
@@ -235,10 +255,10 @@ const SolidLogin = () => {
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${process.env.NEXT_PUBLIC_AUTH_LOGO_POSITION}`}>
+                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
                             <Image
                                 alt="solid logo"
-                                src={process.env.NEXT_PUBLIC_AUTH_LOGO ?? SolidLogo}
+                                src={solidSettingsData?.data?.appLogo || SolidLogo}
                                 className="relative"
                                 fill
                             />
@@ -253,7 +273,7 @@ const SolidLogin = () => {
                     <>
                         <Divider align="center">
                             <div className="inline-flex align-items-center">
-                                or
+                                OR
                             </div>
                         </Divider>
                         <SocialMediaLogin />

@@ -8,6 +8,7 @@ import { useRelationEntityHandler } from "@/components/core/form/fields/relation
 import { InlineRelationEntityDialog } from "@/components/core/form/fields/relations/widgets/helpers/InlineRelationEntityDialog";
 import { Checkbox } from "primereact/checkbox";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import qs from 'qs';
 
 const groupByController = (items: any[]) => {
     const grouped: { [key: string]: any[] } = {};
@@ -30,7 +31,14 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
     const [visibleDialogs, setVisibleDialogs] = useState<{ [key: string]: boolean }>({});
 
     useEffect(() => {
-        fetchRelationEntities();
+        const queryData: any = {
+            offset: 0,
+            limit: 1000
+        };
+        const autocompleteQs = qs.stringify(queryData, {
+            encodeValuesOnly: true,
+        });
+        fetchRelationEntities(autocompleteQs);
     }, []);
 
     const handleCheckboxChange = (e: any) => {
