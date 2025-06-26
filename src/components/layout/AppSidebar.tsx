@@ -14,16 +14,23 @@ import { Avatar } from "primereact/avatar";
 
 // import menu from "@/helpers/menu";
 
-const AppSidebar = () => {
+const AppSidebar = ({ setMenuItemError }: { setMenuItemError: (error: any) => void }) => {
     const dispatch = useDispatch();
 
     // const [show, setShow] = useState(false);
     const visibleNavbar = useSelector(
         (state: any) => state.navbarState.visibleNavbar
     );
-    const { data: menu } = useGetSolidMenuBasedOnRoleQuery("");
+    const { data: menu, isError: isErrorGetMenuItem, error: errorInGetMenuItem } = useGetSolidMenuBasedOnRoleQuery("");
 
-
+    useEffect(() => {
+        if (isErrorGetMenuItem && errorInGetMenuItem) {
+          setMenuItemError(errorInGetMenuItem);
+        } else {
+          setMenuItemError(null);
+        }
+      }, [isErrorGetMenuItem, errorInGetMenuItem, setMenuItemError]);
+    
     const [currentMenu, setCurrentMenu] = useState();
     const [currentMainMenu, setCurrentMainMenu] = useState();
     const [searchTerm, setSearchTerm] = useState("");
@@ -155,7 +162,7 @@ const AppSidebar = () => {
                                 key={m.title}
                                 className={`flex align-items-center menu-item ${currentMainMenu === m.title ? "active-menu-image" : ""}`}
                                 onClick={() => handleMenu(m)}
-                                style={{cursor:'pointer'}}
+                                style={{ cursor: 'pointer' }}
                             >
                                 {m.icon ?
                                     <Image

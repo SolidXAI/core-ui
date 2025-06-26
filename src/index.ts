@@ -653,4 +653,5 @@ export { SolidThemeProvider } from '@/components/common/SolidThemeProvider';
 
 // Error Boundries
 export { OnlineStatusWrapper } from '@/components/ErrorBoundries/OnlineStatusWrapper';
-export { ServerError } from '@/components/ErrorBoundries/ServerError';
+export { ServerUnreachableError } from '@/components/ErrorBoundries/ServerUnreachableError';
+export { ServerErrorPage } from '@/components/ErrorBoundries/ServerErrorPage';

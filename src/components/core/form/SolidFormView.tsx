@@ -56,6 +56,7 @@ import { useSelector } from "react-redux";
 import { hasAnyRole } from "@/helpers/rolesHelper";
 import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 import { ConfirmDialog } from "primereact/confirmdialog";
+import { SolidGenericErrorComponent } from "@/components/ErrorBoundries/SolidGenericErrorComponent";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -433,7 +434,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [defaultTabViewOptionIndex, setDefaultTabViewOptionIndex] = useState<number>(0);
     const errorFields: string[] = [];
 
-    const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
+    const [triggerCheckIfPermissionExists, { isError: isCheckPermissionError, error: permissionError }] = useLazyCheckIfPermissionExistsQuery();
     const op = useRef(null);
 
     useEffect(() => {
@@ -535,7 +536,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [formViewLayout, setFormViewLayout] = useState<any>(null);
     const {
         data: solidFormViewMetaData,
-        isLoading: solidFormViewMetaDataIsLoading
+        isLoading: solidFormViewMetaDataIsLoading,
+        isError: isErrorInGetSolidFormMetadata,
+        error: getSolidFormMedata
     } = useGetSolidViewLayoutQuery(formViewMetaDataQs);
     const [refreshChatterMessage, setRefreshChatterMessage] = useState<boolean>(true);
     useEffect(() => {
@@ -799,6 +802,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
         data: solidFormViewData,
         isLoading: solidFormViewDataIsLoading,
         refetch: refetchSolidFormViewData,
+        isError : isErrorSolidEntityGetIdError,
+        error: errorSolidEntiryGetId
     } = useGetSolidEntityByIdQuery({ id: params.id, qs: formViewDataQs }, {
         skip: params.id === 'new'
     });
@@ -895,6 +900,18 @@ const SolidFormView = (params: SolidFormViewProps) => {
     }, [solidFormViewData]);
 
     let formik: FormikObject;
+
+    if (isCheckPermissionError && permissionError) {
+        return <SolidGenericErrorComponent error={permissionError} />
+    }
+
+    if (isErrorInGetSolidFormMetadata && getSolidFormMedata) {
+        return <SolidGenericErrorComponent error={getSolidFormMedata} />
+    }
+
+    if (isErrorSolidEntityGetIdError && errorSolidEntiryGetId) {
+        return <SolidGenericErrorComponent error={errorSolidEntiryGetId} />
+    }
 
     // If either the metadata or the data of this form is loading, then we simply render a loading screen...
     if (solidFormViewMetaDataIsLoading || solidFormViewDataIsLoading || !formViewLayout) {

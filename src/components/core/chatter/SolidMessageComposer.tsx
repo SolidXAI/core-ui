@@ -7,8 +7,18 @@ import { useEffect, useState, useRef } from 'react'
 import { useGetSolidViewLayoutQuery } from '@/redux/api/solidViewApi'
 import { useSelector } from 'react-redux'
 import { FileUpload } from 'primereact/fileupload';
+import { Toast } from 'primereact/toast'
 
 export const SolidMessageComposer = ({ type, modelSingularName, refetch, id }: { type?: string, modelSingularName?: any, refetch?: any, id?: any }) => {
+    const toast = useRef<Toast>(null);
+    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
+        toast.current?.show({
+            severity,
+            summary,
+            detail,
+            life: 3000,
+        });
+    };
     const [message, setMessage] = useState('');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const { user } = useSelector((state: any) => state.auth);
@@ -47,11 +57,14 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id }: {
                 formData.append(`messageAttachments`, file);
             });
 
-            await createChatterMessage(formData).unwrap();
+            const response = await createChatterMessage(formData).unwrap();            
+            if (response?.statusCode !== 200) {
+                showToast("error", response?.error, response?.message[0]);
+            }
             setMessage('');
             setSelectedFiles([]);
-        } catch (error) {
-            console.error('Error creating message:', error);
+        } catch (error:any) {
+            showToast("error", error?.data?.error, error?.data?.message[0]);
         }
     };
 
@@ -63,6 +76,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id }: {
 
     return (
         <form className={styles.chatterMessageComposer} onSubmit={handleSubmit}>
+            <Toast ref={toast} />
             {/* {type === 'email' &&
                 <div className='flex align-items-center gap-1 text-sm mb-2'>
                     <span className='font-bold'>To:</span>
