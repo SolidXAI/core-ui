@@ -6,8 +6,8 @@ const hanldeEmailFormTypeLoad = (event: any) => {
     const layout = viewMetadata.layout;
     if (formData?.type && type === 'onFormLayoutLoad') {
         const layoutManager = new SolidViewLayoutManager(layout);
-        const renderMode = formData.type === 'text' ? 'DefaultLongTextFormEditWidget' : 'DefaultRichTextFormEditWidget';
-        layoutManager.updateNodeAttributes('body', { "editWidget": renderMode});
+        const renderMode = formData.type === 'text' ? 'longText' : 'richText';
+        layoutManager.updateNodeAttributes('body', { "renderMode": renderMode});
         return {
             layoutChanged: true,
             dataChanged: false,

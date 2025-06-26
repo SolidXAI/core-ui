@@ -14,7 +14,7 @@ import { Password } from "primereact/password";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
 import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import { AppTitle } from "@/helpers/AppTitle";
@@ -27,7 +27,6 @@ interface AuthTabsProps {
 }
 
 const SolidRegister = () => {
-    const [activeIndex, setActiveIndex] = useState(0);
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
     useEffect(() => {
         trigger("")
@@ -289,10 +288,7 @@ const SolidRegister = () => {
     const AuthTabs: React.FC<AuthTabsProps> = ({ iamPasswordRegistrationEnabled, passwordlessRegistration }) => {
         if (iamPasswordRegistrationEnabled && passwordlessRegistration) {
             return (
-                <TabView className="solid-auth-tabview"
-                    activeIndex={activeIndex}
-                    onTabChange={(e) => setActiveIndex(e.index)}
-                >
+                <TabView className="solid-auth-tabview">
                     <TabPanel header="With Password">
                         <PasswordSignup />
                     </TabPanel>
@@ -315,10 +311,10 @@ const SolidRegister = () => {
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
+                        <div className={`solid-logo flex align-items-center ${process.env.NEXT_PUBLIC_AUTH_LOGO_POSITION}`}>
                             <Image
                                 alt="solid logo"
-                                src={solidSettingsData?.data?.appLogo || SolidLogo}
+                                src={process.env.NEXT_PUBLIC_AUTH_LOGO ?? SolidLogo}
                                 className="relative"
                                 fill
                             />

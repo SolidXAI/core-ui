@@ -2,15 +2,6 @@
     background-color: var(--solid-dashboard-welcome-bg);
     padding: 24px;
     border-radius: 0.5rem;
-    position: relative;
-    overflow: hidden;
-}
-
-.homeSvg {
-    position: absolute;
-    right: 0;
-    top: 0;
-    bottom: 0;
 }
 
 .solidModuleHomeTitle1 {

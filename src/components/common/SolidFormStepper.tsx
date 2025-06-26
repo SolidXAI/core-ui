@@ -5,23 +5,19 @@ import React, { useEffect, useRef, useState } from 'react'
 import { createSolidEntityApi } from '@/redux/api/solidEntityApi';
 import { useFormik } from 'formik';
 import { Toast } from 'primereact/toast';
-import { useSearchParams } from 'next/navigation';
 
 interface Props {
     solidFormViewMetaData?: any;
     modelName?: any,
     initialEntityData?: any;
-    id?: any,
-    solidWorkflowFieldValue?: any
-    setSolidWorkflowFieldValue?: any
+    id?: any
 }
 
 export const SolidFormStepper = (props: Props) => {
-    const { solidFormViewMetaData, modelName, initialEntityData, id, solidWorkflowFieldValue, setSolidWorkflowFieldValue } = props;
+    const { solidFormViewMetaData, modelName, initialEntityData, id } = props;
     const toast = useRef<Toast>(null);
     const formStepperOverlay = useRef(null);
-    const searchParams = useSearchParams();
-    const viewMode = searchParams.get('viewMode');
+
     const solidFormViewWorkflowData = solidFormViewMetaData?.data?.solidFormViewWorkflowData;
     const solidWorkflowField = solidFormViewMetaData?.data?.solidView?.layout?.attrs?.workflowField;
     const solidWorkflowFieldEnabled = solidFormViewMetaData?.data?.solidView?.layout?.attrs?.workflowFieldUpdateEnabled;
@@ -29,6 +25,7 @@ export const SolidFormStepper = (props: Props) => {
     const defaultWorkflowFieldDisplayName = solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.displayName
     const activeStep = solidFormViewMetaData?.data?.solidFormViewWorkflowData[0].value
     const [solidWorkflowFieldKey, setSolidWorkflowFieldKey] = useState<string>("");
+    const [solidWorkflowFieldValue, setSolidWorkflowFieldValue] = useState<string>("");
 
     useEffect(() => {
         if (!solidWorkflowField) return;
@@ -37,11 +34,7 @@ export const SolidFormStepper = (props: Props) => {
 
         setSolidWorkflowFieldValue(() => {
             if (initialEntityData?.[solidWorkflowField] !== undefined) {
-                if (solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.type === "relation") {
-                    return initialEntityData[solidWorkflowField]?.id || initialEntityData[solidWorkflowField];
-                } else {
-                    return initialEntityData[solidWorkflowField];
-                }
+                return initialEntityData[solidWorkflowField];
             } else if (defaultWorkflowFieldValue !== undefined) {
                 return defaultWorkflowFieldValue;
             } else {
@@ -97,12 +90,8 @@ export const SolidFormStepper = (props: Props) => {
     }
 
     const handleButtonClick = (stepValue: any) => {
-        if (solidWorkflowFieldEnabled === false || id === "new" || viewMode === "view") {
-            return
-        } else {
-            formik.setFieldValue(solidWorkflowFieldKey, stepValue);
-            formik.handleSubmit();
-        }
+        formik.setFieldValue(solidWorkflowFieldKey, stepValue);
+        formik.handleSubmit();
     }
 
     const activeIndex = solidFormViewWorkflowData.findIndex((step: any) => step.value === solidWorkflowFieldValue);
@@ -111,7 +100,7 @@ export const SolidFormStepper = (props: Props) => {
     return (
         <>
             <Toast ref={toast} />
-            <div className='flex solid-dynamic-stepper'>
+            <div className='flex solid-dynamic-stepper' style={solidWorkflowFieldEnabled === false ? { pointerEvents: 'none' } : {}}>
                 {visibleSteps.map((step: any, index: number) => {
                     const isActive = index === activeIndex;
                     const isBeforeActive = index < activeIndex;

@@ -78,7 +78,6 @@
   --solid-admin-card-color-1: #4F99FB;
   --solid-admin-card-color-2: #A968EE;
   --solid-admin-card-color-3: #FFCA61;
-  --solid-primary-black: #000;
   color-scheme: light;
 }
 
@@ -203,10 +202,6 @@
   --primary-700: #4c1b94;
   --primary-800: #391275;
   --primary-900: #260955;
-}
-
-.solid-primary-black-text {
-  color: var(--solid-primary-black);
 }
 
 .solid-primary-title {
@@ -6143,10 +6138,10 @@
     color: var(--auth-subtitle-color) !important;
   }
 
-  /* .solid-auth-subtitle.left,
+  .solid-auth-subtitle.left,
   .solid-auth-subtitle.left a {
     color: #fff !important;
-  } */
+  }
 
   .solid-custom-title {
     color: var(--solid-form-title);

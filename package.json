@@ -1,6 +1,6 @@
 {
   "name": "@solidstarters/solid-core-ui",
-  "version": "1.1.140",
+  "version": "1.1.95",
   "scripts": {
     "prebuild": "npm run copy-resources && npm run copy-styles",
     "build": "tsc && tsc-alias",
@@ -51,7 +51,6 @@
     "qs": "^6.13.0",
     "quill": "^2.0.3",
     "react-pdf": "^9.2.1",
-    "react-range": "^1.10.0",
     "stripe": "^13.5.0",
     "uuid": "^10.0.0",
     "xlsx": "^0.18.5",

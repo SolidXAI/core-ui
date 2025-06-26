@@ -10,7 +10,6 @@ import { Slider } from "primereact/slider";
 import styles from './solidFields.module.css'
 import { useState } from "react";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
-import { Range } from "react-range";
 
 export class SolidIntegerField implements ISolidField {
 
@@ -134,7 +133,7 @@ export const DefaultIntegerFormEditWidget = ({ formik, fieldContext }: SolidForm
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                        <SolidFieldTooltip fieldContext={fieldContext} />
+                        <SolidFieldTooltip fieldContext={fieldContext}/>
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
@@ -171,75 +170,35 @@ export const SolidIntegerSliderStyleFormEditWidget = ({ formik, fieldContext }: 
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
     const min = fieldMetadata.min || 0;
     const max = fieldMetadata.max || 5;
-    const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
-    const fieldName = fieldLayoutInfo.attrs.name;
-    const currentValue = Number(formik.values[fieldName] ?? min);
+    const [sliderValue, setsliderValue] = useState((formik.values[fieldLayoutInfo.attrs.name] || min) * 20);
+
+    const handleChange = (e: any) => {
+        const newValue = Math.round(e.value / 20);
+        formik.setFieldValue(fieldLayoutInfo.attrs.name, newValue);
+        setsliderValue(e.value);
+    };
 
     return (
-        <div className="w-full" style={{ height: '60px' }}>
+        <div className="w-full" style={{height: '60px'}}>
             {showFieldLabel != false && (
                 <div className="font-medium mb-2">{fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                 </div>
             )}
             <div className="relative h-12">
-                <Range
-                    step={1}
-                    min={min}
-                    max={max}
-                    values={[currentValue]}
-                    onChange={(values) => {
-                        formik.setFieldValue(fieldName, values[0]);
-                    }}
-                    renderTrack={({ props, children }) => {
-                        const percent = ((currentValue - min) / (max - min)) * 100;
-                        return (
-                            <div
-                                {...props}
-                                style={{
-                                    ...props.style,
-                                    height: "10px",
-                                    width: "100%",
-                                    borderRadius: "8px",
-                                    backgroundColor: "var(--primary-light-color)",
-                                    position: "relative",
-                                }}
-                            >
-                                <div
-                                    style={{
-                                        position: "absolute",
-                                        height: "100%",
-                                        width: `${percent}%`,
-                                        backgroundColor: "var(--primary-color)",
-                                        borderRadius: "5px",
-                                        top: 0,
-                                        left: 0,
-                                    }}
-                                />
-                                {children}
-                            </div>
-                        )
-                    }}
-                    renderThumb={({ props }) => (
-                        <div
-                            {...props}
-                            key={props.key}
-                            style={{
-                                ...props.style,
-                                height: "18px",
-                                width: "18px",
-                                border: "4px solid var(--surface-0)",
-                                borderRadius: '50%',
-                                backgroundColor: "var(--primary-color)",
-                            }}
-                        />
-                    )}
+                <Slider 
+                    value={sliderValue} 
+                    onChange={(e) => handleChange(e)} 
+                    className={`w-full ${styles.solidCustomSlider}`} 
+                    step={20} 
+                    min={0}
+                    max={100}
                 />
                 <div className="flex align-item-center justify-content-between mt-2">
                     {Array.from({ length: max - min + 1 }, (_, i) => {
                         const num = i + min;
                         return (
-                            <span
+                            <span 
                                 key={num}
                                 className="text-sm"
                             >
@@ -248,11 +207,6 @@ export const SolidIntegerSliderStyleFormEditWidget = ({ formik, fieldContext }: 
                         );
                     })}
                 </div>
-                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                    <div className="absolute mt-2">
-                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                    </div>
-                )}
             </div>
         </div>
     );

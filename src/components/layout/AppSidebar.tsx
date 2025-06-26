@@ -9,7 +9,7 @@ import NavbarTwoMenu from "./navbar-two-menu";
 import UserProfileMenu from "./user-profile-menu";
 import Image from "next/image";
 import AppBuilderSvg from '../../resources/images/menu/app-builder.svg'
-import SettingImage from '../../resources/images/Navigation/SolidSettinsIcon.svg'
+import SettingImage from '../../resources/images/Navigation/settings.png'
 import { Avatar } from "primereact/avatar";
 
 // import menu from "@/helpers/menu";
@@ -112,7 +112,7 @@ const AppSidebar = () => {
                 ]
             }
         ],
-        icon: process.env.NEXT_PUBLIC_SETTINGS_ICON ? process.env.NEXT_PUBLIC_SETTINGS_ICON : SettingImage
+        icon: SettingImage
     };
     const updatedMenuData = menu?.data
         ? [...menu.data, ...(process.env.NEXT_PUBLIC_SHOW_SETTINGS === "true" ? [additionalMenu] : [])]
@@ -143,7 +143,7 @@ const AppSidebar = () => {
 
             <div className="sidebar-left">
                 <div className="navbar-menu">
-                    {menu?.data.length > 0 && menu?.data.map((m: any) => {
+                    {updatedMenuData.length > 0 && updatedMenuData.map((m: any) => {
                         const iconSrc =
                             typeof m.icon === "string"
                                 ? m.icon
@@ -151,27 +151,33 @@ const AppSidebar = () => {
                                     ? m.icon.src
                                     : null;
                         return (
-                            <a
+                            <div
                                 key={m.title}
-                                className={`flex align-items-center menu-item ${currentMainMenu === m.title ? "active-menu-image" : ""}`}
-                                onClick={() => handleMenu(m)}
-                                style={{cursor:'pointer'}}
+                                className={`menu-item ${currentMainMenu === m.title ? "active-menu-image" : ""}`}
                             >
-                                {m.icon ?
-                                    <Image
-                                        src={iconSrc.startsWith("/") ? iconSrc : `${process.env.API_URL}/${iconSrc}`}
-                                        alt={m.title}
-                                        height={30}
-                                        width={30}
-                                        className="relative"
-                                        unoptimized
-                                    />
-                                    :
-                                    <div>
-                                        <Avatar label={m.title.charAt(0)} shape="circle" style={{ backgroundColor: 'var(--primary-color)', fontWeight: 500 }} />
-                                    </div>
-                                }
-                            </a>
+                                <a onClick={() => handleMenu(m)}>
+                                    {m.icon ?
+                                        <Image
+                                            style={{ cursor: "pointer", mixBlendMode: "multiply" }}
+                                            src={iconSrc.startsWith("/") ? iconSrc : `${process.env.API_URL}/${iconSrc}`}
+                                            // src={m.icon}
+                                            alt={m.title}
+                                            // fill
+                                            height={30}
+                                            width={30}
+                                            className="relative"
+                                            unoptimized
+                                        />
+                                        :
+                                        // <img
+                                        //     style={{ cursor: "pointer", width: '50px' }}
+                                        //     src={`/images/menu/app-builder.svg`}
+                                        //     alt={m.title}
+                                        // />
+                                        <Avatar label={m.title.charAt(0)} shape="circle" style={{ backgroundColor: 'var(--primary-color)' }} />
+                                    }
+                                </a>
+                            </div>
                         )
                     })}
                 </div>
