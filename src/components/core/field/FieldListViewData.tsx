@@ -270,7 +270,7 @@ export const FieldListViewData = () => {
         removableSort
       >
         {/* <Column selectionMode="multiple" headerStyle={{ width: "3em" }} /> */}
-          <Column field="id" header="Id" className="text-sm" sortable headerClassName="table-header-fs"></Column>
+        <Column field="id" header="Id" className="text-sm" sortable headerClassName="table-header-fs"></Column>
         <Column
           field="displayName"
           header="displayName"
