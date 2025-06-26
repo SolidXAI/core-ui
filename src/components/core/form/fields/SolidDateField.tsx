@@ -19,7 +19,14 @@ export class SolidDateField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        if (value) {
+
+        if (value instanceof Date && !isNaN(value.getTime())) {
+            const localDate = new Date(value);
+            const utcDate = new Date(Date.UTC(localDate.getFullYear(), localDate.getMonth(), localDate.getDate()));
+            // "2025-06-10T00:00:00.000Z"
+            const isoString = utcDate.toISOString(); 
+            formData.append(fieldLayoutInfo.attrs.name, isoString.split('T')[0]);
+        } else if (value) {
             formData.append(fieldLayoutInfo.attrs.name, value);
         }
     }
@@ -61,7 +68,7 @@ export class SolidDateField implements ISolidField {
             editWidget = 'DefaultDateFormEditWidget';
         }
         if (!viewWidget) {
-            viewWidget = 'DefaultShortTextFormViewWidget';
+            viewWidget = 'DefaultDateFormViewWidget';
         }
         const viewMode: string = this.fieldContext.viewMode;
 
@@ -139,7 +146,7 @@ export const DefaultDateFormEditWidget = ({ formik, fieldContext }: SolidFormFie
                     value={formik.values[fieldLayoutInfo.attrs.name] ? new Date(formik.values[fieldLayoutInfo.attrs.name]) : Date()}
                     // dateFormat="mm/dd/yy"
                     // placeholder="mm/dd/yyyy hh:mm"
-                    mask="99/99/9999 99:99"
+                    mask="99/99/9999"
                     hideOnDateTimeSelect
                     className=""
                 />
@@ -149,6 +156,23 @@ export const DefaultDateFormEditWidget = ({ formik, fieldContext }: SolidFormFie
                     <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 </div>
             )}
+        </div>
+    );
+}
+
+export const DefaultDateFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    return (
+        <div className="mt-2 flex-column gap-2">
+            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            {/* <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name]}</p> */}
+            <p className="m-0">
+                {formik.values[fieldLayoutInfo.attrs.name] instanceof Date
+                    ? formik.values[fieldLayoutInfo.attrs.name].toLocaleDateString()
+                    : formik.values[fieldLayoutInfo.attrs.name]}
+            </p>
         </div>
     );
 }

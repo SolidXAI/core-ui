@@ -53,17 +53,17 @@ const SolidInitialLoginOtp = () => {
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`} style={{ minWidth: 480 }}>
                 {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${process.env.NEXT_PUBLIC_AUTH_LOGO_POSITION}`}>
+                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
                             <Image
                                 alt="solid logo"
-                                src={process.env.NEXT_PUBLIC_AUTH_LOGO ?? SolidLogo}
+                                src={solidSettingsData?.data?.appLogo || SolidLogo}
                                 className="relative"
                                 fill
                             />
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>OTP Verification</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-4' : 'text-left'}`}>OTP Verification</h2>
                 <p className="solid-auth-subtitle text-sm">
                     Please enter the OTP sent to your email to complete verification
                 </p>

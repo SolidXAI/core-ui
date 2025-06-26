@@ -7,9 +7,9 @@ import { SolidShortTextFieldImageListWidget } from "@/components/core/list/widge
 import { SolidShortTextAvatarWidget } from "@/components/core/list/widgets/SolidShortTextAvatarWidget";
 import GenerateModelCodeRowAction from "@/components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction";
 import GenerateModuleCodeRowAction from "@/components/core/extension/solid-core/moduleMetadata/list/GenerateModuleCodeRowAction";
-import { DefaultBooleanFormEditWidget, SolidBooleanCheckboxStyleFormEditWidget, SolidBooleanSwitchStyleFormEditWidget } from "@/components/core/form/fields/SolidBooleanField";
-import { DefaultDateFormEditWidget } from "@/components/core/form/fields/SolidDateField";
-import { DefaultDateTimeFormEditWidget } from "@/components/core/form/fields/SolidDateTimeField";
+import { DefaultBooleanFormEditWidget, DefaultBooleanFormViewWidget, SolidBooleanCheckboxStyleFormEditWidget, SolidBooleanSwitchStyleFormEditWidget } from "@/components/core/form/fields/SolidBooleanField";
+import { DefaultDateFormEditWidget, DefaultDateFormViewWidget } from "@/components/core/form/fields/SolidDateField";
+import { DefaultDateTimeFormEditWidget, DefaultDateTimeFormViewWidget } from "@/components/core/form/fields/SolidDateTimeField";
 import { DefaultDecimalFormEditWidget } from "@/components/core/form/fields/SolidDecimalField";
 import { DefaultEmailFormEditWidget } from "@/components/core/form/fields/SolidEmailField";
 import { DefaultIntegerFormEditWidget, SolidIntegerSliderStyleFormEditWidget } from "@/components/core/form/fields/SolidIntegerField";
@@ -17,7 +17,7 @@ import { DefaultJsonFormEditWidget, DefaultJsonFormViewWidget } from "@/componen
 import { DefaultLongTextFormEditWidget } from "@/components/core/form/fields/SolidLongTextField";
 import { DefaultMediaMultipleFormEditWidget, DefaultMediaMultipleFormViewWidget } from "@/components/core/form/fields/SolidMediaMultipleField";
 import { DefaultMediaSingleFormEditWidget, DefaultMediaSingleFormViewWidget } from "@/components/core/form/fields/SolidMediaSingleField";
-import { DefaultPasswordFormEditWidget, DefaultPasswordFormViewWidget } from "@/components/core/form/fields/SolidPasswordField";
+import { DefaultPasswordFormCreateWidget, DefaultPasswordFormEditWidget, DefaultPasswordFormViewWidget } from "@/components/core/form/fields/SolidPasswordField";
 import { DefaultRichTextFormEditWidget, DefaultRichTextFormViewWidget } from "@/components/core/form/fields/SolidRichTextField";
 import { DefaultSelectionStaticAutocompleteFormEditWidget, DefaultSelectionStaticFormViewWidget, SolidSelectionStaticRadioFormEditWidget } from "@/components/core/form/fields/SolidSelectionStaticField";
 import { DefaultShortTextFormEditWidget, DefaultShortTextFormViewWidget } from "@/components/core/form/fields/SolidShortTextField";
@@ -31,9 +31,14 @@ import { DefaultMediaMultipleListWidget } from "@/components/core/list/columns/S
 import { DefaultRelationManyToManyListWidget } from "@/components/core/list/columns/relations/SolidRelationManyToManyColumn";
 import { DefaultRelationManyToOneListWidget } from "@/components/core/list/columns/relations/SolidRelationManyToOneColumn";
 import { DefaultRelationOneToManyListWidget } from "@/components/core/list/columns/relations/SolidRelationOneToManyColumn";
-import { SolidRelationAvatarWidget } from "@/components/core/list/widgets/SolidRelationAvatarWidget";
 import { SolidRelationFieldAvatarFormWidget } from "@/components/core/form/fields/widgets/SolidRelationFieldAvatarFormWidget";
 import { DefaultSelectionDynamicFormEditWidget, DefaultSelectionDynamicFormViewWidget } from "@/components/core/form/fields/SolidSelectionDynamicField";
+import { SolidIconEditWidget } from "@/components/core/form/fields/widgets/SolidIconEditWidget";
+import { SolidIconViewWidget } from "@/components/core/form/fields/widgets/SolidIconViewWidget";
+import { SolidManyToManyRelationAvatarListWidget } from "@/components/core/list/widgets/SolidManyToManyRelationAvatarListWidget";
+import { SolidManyToOneRelationAvatarListWidget } from "@/components/core/list/widgets/SolidManyToOneRelationAvatarListWidget";
+import { SolidShortTextFieldAvatarWidget } from "@/components/core/form/fields/widgets/SolidShortTextFieldAvatarWidget";
+import DeleteModelRowAction from "@/components/core/extension/solid-core/modelMetadata/list/DeleteModelRowAction";
 
 type ExtensionRegistry = {
     components: Record<string, React.ComponentType<any>>;
@@ -93,6 +98,8 @@ export const getExtensionFunction = (name: string) => {
 registerExtensionComponent("CustomHtml", CustomHtml, []);
 registerExtensionComponent("GenerateModelCodeRowAction", GenerateModelCodeRowAction, []);
 registerExtensionComponent("GenerateModuleCodeRowAction", GenerateModuleCodeRowAction, []);
+registerExtensionComponent("DeleteModelRowAction", DeleteModelRowAction, []);
+
 
 
 // Formview Default Edit widgets
@@ -122,6 +129,7 @@ registerExtensionComponent("DefaultRelationManyToManyCheckBoxFormEditWidget", De
 registerExtensionComponent("SolidSelectionStaticRadioFormEditWidget", SolidSelectionStaticRadioFormEditWidget, []);
 registerExtensionComponent("DefaultSelectionDynamicFormEditWidget", DefaultSelectionDynamicFormEditWidget, []);
 registerExtensionComponent("DefaultRelationOneToManyFormEditWidget", DefaultRelationOneToManyFormEditWidget, []);
+registerExtensionComponent("DefaultPasswordFormCreateWidget", DefaultPasswordFormCreateWidget, []);
 
 // Formview Custom Edit widgets
 
@@ -137,10 +145,14 @@ registerExtensionComponent("DefaultJsonFormViewWidget", DefaultJsonFormViewWidge
 registerExtensionComponent("DefaultRelationManyToOneFormViewWidget", DefaultRelationManyToOneFormViewWidget, []);
 registerExtensionComponent("DefaultSelectionStaticFormViewWidget", DefaultSelectionStaticFormViewWidget, []);
 registerExtensionComponent("DefaultSelectionDynamicFormViewWidget", DefaultSelectionDynamicFormViewWidget, []);
+registerExtensionComponent("DefaultBooleanFormViewWidget", DefaultBooleanFormViewWidget, []);
+registerExtensionComponent("DefaultDateFormViewWidget", DefaultDateFormViewWidget, []);
+registerExtensionComponent("DefaultDateTimeFormViewWidget", DefaultDateTimeFormViewWidget, []);
+
 
 // Formview Custom view widgets
 registerExtensionComponent("SolidRelationFieldAvatarFormWidget", SolidRelationFieldAvatarFormWidget, []);
-
+registerExtensionComponent("SolidShortTextFieldAvatarWidget", SolidShortTextFieldAvatarWidget, []);
 
 
 // Listview default widgets
@@ -156,7 +168,8 @@ registerExtensionComponent("SolidShortTextFieldImageListWidget", SolidShortTextF
 
 // Listview custom widgets
 registerExtensionComponent("SolidShortTextAvatarWidget", SolidShortTextAvatarWidget, []);
-registerExtensionComponent("SolidRelationAvatarWidget", SolidRelationAvatarWidget, []);
+registerExtensionComponent("SolidManyToManyRelationAvatarListWidget", SolidManyToManyRelationAvatarListWidget, []);
+registerExtensionComponent("SolidManyToOneRelationAvatarListWidget", SolidManyToOneRelationAvatarListWidget, []);
 
 
 // ModuleMetadata
@@ -171,3 +184,7 @@ registerExtensionFunction("emailFormTypeLoad", hanldeEmailFormTypeLoad);
 
 // RoleMetadata
 registerExtensionComponent("RolePermissionsManyToManyFieldWidget", RolePermissionsManyToManyFieldWidget, ["inputSwitch"]);
+
+// Solid Google Material Symbols Icon
+registerExtensionComponent("SolidIconEditWidget", SolidIconEditWidget, []);
+registerExtensionComponent("SolidIconViewWidget", SolidIconViewWidget, []);
