@@ -11,7 +11,7 @@ export const CreateButton = () => {
 
     return (
         <div>
-            <Button type="button" label="Add" size='small' onClick={() => router.push(createPAth)} className='small-button'/>
+            <Button type="button" icon="pi pi-plus" label="Add" size='small' onClick={() => router.push(createPAth)} className='small-button'/>
         </div>
     )
 }

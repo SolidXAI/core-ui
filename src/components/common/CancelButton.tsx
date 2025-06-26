@@ -18,7 +18,7 @@ export const CancelButton = () => {
     };
     return (
         <div>
-            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse' style={{ minWidth: 66 }}/>
+            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse' />
         </div>
     )
 }
@@ -42,7 +42,7 @@ export const SolidCancelButton = () => {
     };
     return (
         <div>
-            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse' style={{ minWidth: 66 }}/>
+            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse' />
         </div>
     )
 }

@@ -12,18 +12,18 @@ export const useRelationEntityHandler = ({ fieldContext, formik, autoCompleteLim
 
   const [autoCompleteItems, setAutoCompleteItems] = useState([]);
 
-  const fetchRelationEntities = async (autocompleteQs = "", limit = autoCompleteLimit) => {
-    // const queryData = {
-    //   offset: 0,
-    //   limit: limit,
-    //   filters: {
-    //     [fieldMetadata?.relationModel?.userKeyField?.name]: {
-    //       '$containsi': query
-    //     }
-    //   }
-    // };
+  const fetchRelationEntities = async (query = "", limit = autoCompleteLimit) => {
+    const queryData = {
+      offset: 0,
+      limit: limit,
+      filters: {
+        [fieldMetadata?.relationModel?.userKeyField?.name]: {
+          '$containsi': query
+        }
+      }
+    };
 
-    // const autocompleteQs = qs.stringify(queryData, { encodeValuesOnly: true });
+    const autocompleteQs = qs.stringify(queryData, { encodeValuesOnly: true });
 
     const response = await triggerGetSolidEntities(autocompleteQs);
     const data = response.data;

@@ -12,34 +12,9 @@ import { useEffect, useRef, useState } from "react";
 import { SolidListColumnSelector } from "./SolidListColumnSelector";
 import { SolidExport } from "@/components/common/SolidExport";
 import { Dialog } from "primereact/dialog";
-import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
-import { useHandleListCustomButtonClick } from "@/components/common/useHandleListCustomButtonClick";
-import { SolidListViewHeaderContextMenuButton } from "./SolidListViewHeaderContextMenuButton";
-import "../../common/solid-export.css";
-import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
 
-export const SolidListViewConfigure = (
-    { listViewMetaData,
-        solidListViewLayout,
-        setShowArchived,
-        showArchived,
-        viewData,
-        sizeOptions,
-        setSize,
-        size,
-        viewModes,
-        params,
-        actionsAllowed,
-        selectedRecords,
-        setDialogVisible,
-        setShowSaveFilterPopup,
-        filters,
-        handleFetchUpdatedRecords
-    }:
-        any) => {
+export const SolidListViewConfigure = ({ listViewMetaData, setShowArchived, showArchived, viewData, sizeOptions, setSize, size, viewModes, params, actionsAllowed, selectedRecords, setDialogVisible, setShowSaveFilterPopup }: any) => {
     // const [visible, setVisible] = useState<boolean>(false);
-    const handleCustomButtonClick = useHandleListCustomButtonClick();
-    const [openImportDialog, setOpenImportDialog] = useState<boolean>(false);
     const op = useRef(null);
     const exportRef = useRef(null);
     const customizeLayout = useRef<OverlayPanel | null>(null);
@@ -97,11 +72,11 @@ export const SolidListViewConfigure = (
                 // @ts-ignore
                 onClick={(e) => op.current.toggle(e)}
             />
-            <Dialog header="Export" visible={exportView} className="ExportDialog p-0 m-0" onHide={() => { if (!exportView) return; setExportView(false); }}>
-                <SolidExport listViewMetaData={listViewMetaData} filters= {filters} />
+            <Dialog header="Export" visible={exportView} className="export-dialog" onHide={() => { if (!exportView) return; setExportView(false); }}>
+            <SolidExport listViewMetaData={listViewMetaData}/>
             </Dialog>
             <OverlayPanel ref={exportRef} className="listview-export-panel">
-
+             
             </OverlayPanel>
             <OverlayPanel ref={op} className="listview-cogwheel-panel">
                 <div className="p-2">
@@ -118,27 +93,14 @@ export const SolidListViewConfigure = (
                                 icon={'pi pi-trash'}
                                 onClick={() => setDialogVisible(true)}
                             />}
-                        <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2 text-base"
-                            onClick={() => setOpenImportDialog(true)}
-                        />
-                        <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base"
-                            // @ts-ignore
-                            onClick={() => { setExportView((exportView) => !exportView); }} />
+                        <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2 text-base" />
+                        <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base"  
+                         // @ts-ignore
+                        onClick={() => { setExportView((exportView) => !exportView); }}/>
                         {/* <Button text icon='pi pi-share-alt' label="Share" size="small" severity="secondary" className="text-left gap-2" /> */}
                         {/* {viewData?.data?.solidView?.model?.enableSoftDelete &&
                         <Button text severity="secondary" size="small" className="text-left w-13rem" label={showArchived ? "Hide Archived Records" : "Show Archived Records"} iconPos="left" onClick={() => { setShowArchived(!showArchived); }} />
                         } */}
-                        {solidListViewLayout?.attrs?.headerButtons
-                            ?.filter((rb: any) => rb.attrs.actionInContextMenu === true)
-                            ?.map((button: any, index: number) => (
-                                <SolidListViewHeaderContextMenuButton
-                                    key={index}
-                                    button={button}
-                                    params={params}
-                                    solidListViewMetaData={listViewMetaData}
-                                    handleCustomButtonClick={handleCustomButtonClick}
-                                />
-                            ))}
                         {viewData?.data?.solidView?.model?.enableSoftDelete && (
                             <div className="flex align-items-center px-3 gap-2 mt-2 mb-1">
                                 <Checkbox
@@ -242,14 +204,6 @@ export const SolidListViewConfigure = (
                     </OverlayPanel>
                 </div>
             </OverlayPanel>
-            {openImportDialog &&
-                <SolidGenericImport
-                    openImportDialog={openImportDialog}
-                    setOpenImportDialog={setOpenImportDialog}
-                    listViewMetaData={listViewMetaData}
-                    handleFetchUpdatedRecords={handleFetchUpdatedRecords}
-                />
-            }
         </div>
     )
 }

@@ -122,28 +122,10 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
 
   // Now render the form dynamically...
   const renderFormElementDynamically: any = (element: any, solidKanbanViewMetaData: any) => {
-    const { type, attrs, body, children } = element;
+    const { type, attrs, children } = element;
     // const key = attrs?.name ?? generateRandomKey();
     const key = attrs?.name;
     switch (type) {
-      case "div":
-        if (!children)
-          children = [];
-        return <div key={key} {...attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</div>
-      case "span":
-        return <span key={key} {...attrs}>{body}</span>
-      case "p":
-        return <p key={key} className={attrs?.className} {...attrs}>{body}</p>
-      case "h1":
-        return <h1 key={key} {...attrs}>{body}</h1>
-      case "h2":
-        return <h2 key={key} {...attrs}>{body}</h2>
-      case "ul":
-        if (!children)
-          children = [];
-        return <ul key={key} {...attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</ul>
-      case "li":
-        return <li key={key} {...attrs}>{body}</li>
       case "card":
         return <SolidCard key={key}>{children.map((element: any) => renderFormElementDynamically(element, solidKanbanViewMetaData))}</SolidCard>;
       case "row":

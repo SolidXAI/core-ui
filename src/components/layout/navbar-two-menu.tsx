@@ -15,18 +15,13 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
         ? pathname === item?.url // Exact match check for settings pages
         : currentItem === activeParentPath
 
-        // currentItem === activeParentPath ?' p-highlight' : ''
+    // currentItem === activeParentPath ?' p-highlight' : ''
         return (
             <div key={item?.key} className={`flex align-items-center cursor-pointer menuHead px-3 ${isSettingsPage ? ' p-highlight' : ''}`} onClick={options.onClick}>
                 <Link href={item?.url ? item?.url : '#'} className="w-full flex justify-content-between font-normal">
-                    <div className="flex align-items-center" style={{gap: 10}}>
-                        {item.icon && (
-                            // material-symbols-${item.iconVariant ?? 'outlined'}
-                            <span className={`material-symbols-outlined`} style={{ fontSize: 18 }}>
-                                {item.icon}
-                            </span>
-                        )}
-                        <span>
+                    <div className="flex align-items-center gap-3">
+                        <span className={item.icon} />
+                        <span className="">
                             {item.label}
                         </span>
                     </div>
@@ -42,8 +37,7 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
         return menuItems.map((mi) => ({
             key: mi.key,
             label: mi.title,
-            icon: mi.icon ?? "",
-            // iconVariant: mi.iconVariant,
+            icon: mi.children ? "pi pi-folder" : "",
             template: itemRenderer,
             url: mi.path ? mi.path : null,
             items: mi.children ? createMenuItems(mi.children) : null, // Recursively add children
