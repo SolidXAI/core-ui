@@ -77,10 +77,10 @@ const SolidForgotPassword = () => {
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
+                        <div className={`solid-logo flex align-items-center ${process.env.NEXT_PUBLIC_AUTH_LOGO_POSITION}`}>
                             <Image
                                 alt="solid logo"
-                                src={solidSettingsData?.data?.appLogo || SolidLogo}
+                                src={process.env.NEXT_PUBLIC_AUTH_LOGO ?? SolidLogo}
                                 className="relative"
                                 fill
                             />
@@ -107,7 +107,7 @@ const SolidForgotPassword = () => {
                         />}
                     </div>
                     <div className="mt-4">
-                        <Button className="w-full font-light auth-submit-button" label="Continue" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
+                        <Button className="w-full font-light auth-submit-button" label="Send OTP" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
                         <Button type="button" label="Back" className="w-full auth-back-button text-center mt-1" link onClick={() => (window.location.href = '/auth/login')} />
                     </div>
                 </form>

@@ -87,7 +87,7 @@ const CreateUser = ({ data, params }: any) => {
     email: data ? data.email : "",
     mobile: data ? data.mobile : "",
     password: "",
-    confirmPassword: "",
+    passwordConfirm: "",
   };
 
   const validationSchema = Yup.object({
@@ -108,8 +108,7 @@ const CreateUser = ({ data, params }: any) => {
       .string()
       .email("Invalid email address")
       .required("Email is required."),
-    password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
-    confirmPassword: Yup.string().oneOf([Yup.ref('password')], 'Passwords must match').required('Confirm password is required'),
+    password: Yup.string(),
     mobile: Yup.number().required("Mobile is required."),
   });
 
@@ -212,6 +211,7 @@ const CreateUser = ({ data, params }: any) => {
         };
         if (values.password) {
           userData.password = values.password;
+          userData.passwordConfirm = values.password;
         }
         updateUser({ id: data.id, data: userData });
 
@@ -381,14 +381,17 @@ const CreateUser = ({ data, params }: any) => {
                       </label>
                       <Password
                         id="password"
-                        name="password"
                         autoComplete="off"
                         aria-autocomplete="none"
                         value={formik.values.password}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
+                        onChange={(e) => {
+                          formik.setFieldValue("password", e.target.value);
+                        }}
                         toggleMask
-                        invalid={isFormFieldValid(formik, "password")}
+                        className={classNames("", {
+                          "p-invalid": isFormFieldValid(formik, "name"),
+                        })}
+
                         inputClassName="w-full"
                         feedback={false}
                       />
@@ -399,30 +402,7 @@ const CreateUser = ({ data, params }: any) => {
                         />
                       )}
                     </div>
-                    <div className="field col-6 flex flex-column gap-2 my-4">
-                      <label htmlFor="Confirm Password" className="form-field-label">
-                        Confirm Password
-                      </label>
-                      <Password
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        autoComplete="off"
-                        aria-autocomplete="none"
-                        value={formik.values.confirmPassword}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        toggleMask
-                        invalid={isFormFieldValid(formik, "confirmPassword")}
-                        inputClassName="w-full"
-                        feedback={false}
-                      />
-                      {isFormFieldValid(formik, "confirmPassword") && (
-                        <Message
-                          severity="error"
-                          text={formik?.errors?.confirmPassword?.toString()}
-                        />
-                      )}
-                    </div>
+
                   </div>
                 </Panel>
 

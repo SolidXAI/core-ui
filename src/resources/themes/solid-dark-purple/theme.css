@@ -67,7 +67,6 @@
   --solid-admin-card-color-1: #4F99FB;
   --solid-admin-card-color-2: #A968EE;
   --solid-admin-card-color-3: #FFCA61;
-  --solid-primary-black: #fff;
   color-scheme: dark;
 }
 
@@ -192,10 +191,6 @@
   --primary-700: #1894a7;
   --primary-800: #137483;
   --primary-900: #0e545f;
-}
-
-.solid-primary-black-text {
-  color: var(--solid-primary-black);
 }
 
 .p-editor-container .p-editor-toolbar {

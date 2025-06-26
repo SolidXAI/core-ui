@@ -164,8 +164,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
                 embeded: true,
                 isCustomCreate: false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
-                modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
-                parentData: userKeyField ? { [userKeyField]: { solidManyToOneLabel: fieldContext.data[userKeyField], solidManyToOneValue: fieldContext.data['id'] } } : {}
+                modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName)
             }
             setformViewParams(formviewparams);
             setvisibleCreateRelationEntity(true);
@@ -225,7 +224,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
             isCustomCreate: false,
             customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
             modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
-            parentData: userKeyField ? { [userKeyField]: { solidManyToOneLabel: fieldContext.data[userKeyField], solidManyToOneValue: fieldContext.data['id'] } } : {}
+            parentData: userKeyField ? { [userKeyField]: { label: fieldContext.data[userKeyField], value: fieldContext.data['id'] } } : {}
         }
         setformViewParams(formviewparams)
 
@@ -245,7 +244,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
         currentUrl.searchParams.set('viewMode', 'edit');
         const updatedPath = currentUrl.toString();
         try {
-            console.log("updatedPath", updatedPath);
+
             router.push(updatedPath);
             await formik.handleSubmit();
         } catch {
@@ -274,13 +273,14 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
                 <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
             }
 
-            <Dialog showHeader={false} headerClassName="py-2" contentClassName="px-0 pb-0" contentStyle={{ borderRadius: 6 }} visible={showSaveParentEntityConfirmationPopup} style={{ width: '20vw' }} onHide={() => { if (!showSaveParentEntityConfirmationPopup) return; setShowSaveParentEntityConfirmationPopup(false); }}>
+            <Dialog showHeader={false} headerClassName="py-2" contentClassName="px-0 pb-0" visible={showSaveParentEntityConfirmationPopup} style={{ width: '20vw' }} onHide={() => { if (!showSaveParentEntityConfirmationPopup) return; setShowSaveParentEntityConfirmationPopup(false); }}>
+                <Divider className="m-0" />
                 <div className="p-4">
                     <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
                         Before Creating {fieldLabel} you need to save {capitalize(fieldContext.modelName)}.
                         Please click save if you wish to proceed ?
                     </p>
-                    <div className="flex align-items-center justify-content-start gap-2 mt-3">
+                    <div className="flex align-items-center justify-content-center gap-2 mt-3">
                         <Button label="Save" size="small" onClick={saveParentEntity} />
                         <Button label="Cancel" size="small" onClick={() => setShowSaveParentEntityConfirmationPopup(false)} outlined className='bg-primary-reverse' />
                     </div>
@@ -308,7 +308,6 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
     const readOnlyPermission = fieldContext.readOnly;
     const pathname = usePathname();
     const lastPathSegment = pathname.split('/').pop();
-    const userKeyField: any = Object.entries(fieldContext.solidFormViewMetaData.data.solidFieldsMetadata).find(([_, value]: any) => value.isUserKey)?.[0];
 
     const handlePopupOpen = (id: any) => {
 
@@ -318,8 +317,7 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
             embeded: true,
             isCustomCreate: false,
             customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
-            modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
-            parentData: userKeyField ? { [userKeyField]: { solidManyToOneLabel: fieldContext.data[userKeyField], solidManyToOneValue: fieldContext.data['id'] } } : {}
+            modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName)
         }
         setformViewParams(formviewparams);
         setvisibleCreateRelationEntity(true);
@@ -375,7 +373,6 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
             inlineCreateAutoSave: false,
             customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
             modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
-            parentData: userKeyField ? { [userKeyField]: { solidManyToOneLabel: fieldContext.data[userKeyField], solidManyToOneValue: fieldContext.data['id'] } } : {}
         }
         setformViewParams(formviewparams)
 
@@ -418,21 +415,19 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
     const fieldLayoutInfo = fieldContext.field;
     const className = fieldLayoutInfo.attrs?.className || 'col-12';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-    const userKeyField: any = Object.entries(fieldContext.solidFormViewMetaData.data.solidFieldsMetadata).find(([_, value]: any) => value.isUserKey)?.[0];
 
     const params = {
         moduleName: fieldContext.fieldMetadata.relationModelModuleName,
-        id: formViewParams?.id,
+        id: "new",
         embeded: true,
-        customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
+        layout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
         customCreateHandler: ((values: any) => {
             setvisibleCreateRelationEntity(false);
             customCreateHandler(values)
         }),
         inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
         handlePopupClose: handlePopupClose,
-        modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
-        parentData: userKeyField ? { [userKeyField]: { solidManyToOneLabel: fieldContext.data[userKeyField], solidManyToOneValue: fieldContext.data['id'] } } : {}
+        modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName)
     }
 
     return (
@@ -449,10 +444,7 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
                 showHeader={false}
                 visible={visibleCreateRelationEntity}
                 className="solid-dialog"
-                style={{
-                    width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw",
-                    height: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.height ?? "auto"
-                }}
+                style={{ width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "40vw" }}
                 onHide={() => {
                     if (!visibleCreateRelationEntity) return;
                     setvisibleCreateRelationEntity(false);

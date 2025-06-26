@@ -12,7 +12,7 @@ interface FilterState {
     endDate: Date | null;
 }
 
-export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, setRefreshChatterMessage }: { modelSingularName: any, id: any, refreshChatterMessage: boolean, setRefreshChatterMessage: (value: boolean) => void }) => {
+export const SolidChatter = ({ solidFormViewMetaData, id, refreshChatterMessage, setRefreshChatterMessage }: { solidFormViewMetaData: any, id: string, refreshChatterMessage: boolean, setRefreshChatterMessage: (value: boolean) => void }) => {
     const [activeTab, setActiveTab] = useState<'email-message' | 'log' | null>('email-message');
     const [visibleBox, setVisibleBox] = useState<'email-message' | 'log' | null>(null);
     const [messages, setMessages] = useState<any[]>([]);
@@ -28,7 +28,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                 $eqi: 'custom'
             },
             coModelName: {
-                $eq: modelSingularName
+                $eq: solidFormViewMetaData?.data?.solidView?.model?.singularName
             },
             coModelEntityId: {
                 $eq: id
@@ -41,11 +41,11 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
     });
 
     const queryDataChatterMessageDetail = {
-        populate: ['chatterMessage.user'],
+        populate: ['chatterMessage', 'chatterMessage.user'],
         filters: {
             chatterMessage: {
                 coModelName: {
-                    $eq: modelSingularName
+                    $eq: solidFormViewMetaData?.data?.solidView?.model?.singularName
                 },
                 coModelEntityId: {
                     $eq: id
@@ -209,7 +209,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
             <SolidChatterHeader 
                 id={id} 
                 refetch={fetchData} 
-                modelSingularName={modelSingularName} 
+                solidFormViewMetaData={solidFormViewMetaData} 
                 activeTab={activeTab} 
                 handleTabClick={handleTabClick} 
                 visibleBox={visibleBox}

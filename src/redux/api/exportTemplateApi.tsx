@@ -4,7 +4,6 @@ import { baseQueryWithAuth } from './fetchBaseQuery';
 export const exportTemplateApi = createApi({
     reducerPath: 'exportTemplateApi',
     baseQuery: baseQueryWithAuth,
-    tagTypes: ['ExportTemplates'],
     endpoints: (builder) => ({
         createExportTemplate: builder.mutation({
             query: (templateData) => ({
@@ -25,8 +24,7 @@ export const exportTemplateApi = createApi({
                     records: response.data.records,
                     meta: response.data.meta
                 }
-            },
-            providesTags: ['ExportTemplates'],
+            }
         }),
         createExportSync: builder.mutation({
             query: ({id}) => ({
@@ -45,14 +43,7 @@ export const exportTemplateApi = createApi({
                 body: templateData
             }),
         }),
-         deleteExportTemplate: builder.mutation({
-            query: (id) => ({
-                url: `/export-template/${id}`,
-                method: 'DELETE',
-            }),
-            invalidatesTags: ['ExportTemplates'],
-        }),
     })
 })
 
-export const { useCreateExportTemplateMutation,useGetExportTemplatesQuery,useCreateExportSyncMutation,useCreateExportAsyncMutation,useDeleteExportTemplateMutation } = exportTemplateApi
+export const { useCreateExportTemplateMutation,useGetExportTemplatesQuery,useCreateExportSyncMutation,useCreateExportAsyncMutation } = exportTemplateApi

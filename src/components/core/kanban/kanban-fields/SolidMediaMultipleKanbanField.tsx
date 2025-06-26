@@ -29,11 +29,10 @@ const SolidMediaMultipleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata,
 
 
     return (
-        <div className={`${fieldLayout?.attrs?.className ? ` ${fieldLayout.attrs.className}` : ""}`}>
+        <>
             {firstImage && (
                 <div className='my-2'>
-                    <img
-                        className={fieldLayout?.attrs?.kanbanImagePreviewClassname ? fieldLayout?.attrs?.kanbanImagePreviewClassname : 'kanban-image-preview'}
+                    <img className='kanban-image-preview'
                         src={firstImage._full_url}
                         onClick={(event) => {
                             event.stopPropagation();
@@ -42,19 +41,16 @@ const SolidMediaMultipleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata,
                         }}
                         alt={firstImage.originalFileName}
                     />
-                    {fieldLayout?.attrs?.showLabel !== false &&
-
-                        <p className="text-sm"
-                            style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                setLightboxUrls(allImageUrls);
-                                setOpenLightbox(true);
-                            }}
-                        >
-                            {firstImage.originalFileName}
-                        </p>
-                    }
+                    <p className="text-sm"
+                        style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            setLightboxUrls(allImageUrls);
+                            setOpenLightbox(true);
+                        }}
+                    >
+                        {firstImage.originalFileName}
+                    </p>
                 </div>
             )}
 
@@ -132,7 +128,7 @@ const SolidMediaMultipleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata,
                     </Document>
                 )}
             </Dialog>
-        </div>
+        </>
     );
 
 };

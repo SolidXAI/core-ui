@@ -24,7 +24,9 @@ export class SolidBooleanField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        formData.append(fieldLayoutInfo.attrs.name, value === "true" || value === true ? "true" : "");
+        if (value) {
+            formData.append(fieldLayoutInfo.attrs.name, value === "true" ? "true" : "");
+        }
     }
 
     initialValue(): any {
@@ -87,7 +89,7 @@ export class SolidBooleanField implements ISolidField {
             editWidget = 'booleanSelectbox';
         }
         if (!viewWidget) {
-            viewWidget = 'DefaultBooleanFormViewWidget';
+            viewWidget = 'DefaultShortTextFormViewWidget';
         }
         const viewMode: string = this.fieldContext.viewMode;
 
@@ -317,7 +319,7 @@ export const SolidBooleanSwitchStyleFormEditWidget = ({ formik, fieldContext }: 
                     <div className="flex align-items-center">
                         <InputSwitch
                             id={fieldLayoutInfo.attrs.name}
-                            checked={formik.values[fieldLayoutInfo.attrs.name] === true || formik.values[fieldLayoutInfo.attrs.name] === "true"}
+                            checked={formik.values[fieldLayoutInfo.attrs.name] === true}
                             onChange={handleChange}
                             disabled={formDisabled || fieldDisabled}
                             readOnly={formReadonly || fieldReadonly || readOnlyPermission}
@@ -340,18 +342,3 @@ export const SolidBooleanSwitchStyleFormEditWidget = ({ formik, fieldContext }: 
 }
 
 
-
-
-export const DefaultBooleanFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
-
-    const fieldMetadata = fieldContext.fieldMetadata;
-    const fieldLayoutInfo = fieldContext.field;
-    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-
-    return (
-        <div className="mt-2 flex-column gap-2">
-            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
-            <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name] === true || formik.values[fieldLayoutInfo.attrs.name] === "true" ? "true" : "false"}</p>
-        </div>
-    );
-}

@@ -29,12 +29,10 @@ const SolidMediaSingleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, f
 
 
     return (
-        <div className={`${fieldLayout?.attrs?.className ? ` ${fieldLayout.attrs.className}` : ""}`}>
-
+        <>
             {mimeType && mimeType.includes("image/") &&
                 <div className='my-2'>
-                    <img className={fieldLayout?.attrs?.kanbanImagePreviewClassname ? fieldLayout?.attrs?.kanbanImagePreviewClassname : 'kanban-image-preview'}
-
+                    <img className='kanban-image-preview'
                         src={url}
                         onClick={(event) => {
                             event.stopPropagation();
@@ -43,19 +41,15 @@ const SolidMediaSingleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, f
                         }}
                         alt={header}
                     />
-                    {fieldLayout?.attrs.showLabel !== false &&
-
-                        <p className="text-sm" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}
-                            onClick={(event) => {
-                                event.stopPropagation();
-                                setLightboxUrls([{ src: url }]);
-                                setOpenLightbox(true);
-                            }}
-                        >
-                            {fileName}
-                        </p>
-                    }
-
+                    <p className="text-sm" style={{ wordWrap: 'break-word', overflowWrap: 'break-word' }}
+                        onClick={(event) => {
+                            event.stopPropagation();
+                            setLightboxUrls([{ src: url }]);
+                            setOpenLightbox(true);
+                        }}
+                    >
+                        {fileName}
+                    </p>
                 </div>
             }
             {/* Render PDF - Open Lightbox on Click */}
@@ -156,7 +150,7 @@ const SolidMediaSingleKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, f
                     </div>
                 )
             }
-        </div>
+        </>
     );
 
 };

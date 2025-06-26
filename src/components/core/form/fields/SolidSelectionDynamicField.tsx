@@ -31,7 +31,7 @@ export class SolidSelectionDynamicField implements ISolidField {
         // return { label: optionValue || '', value: optionValue || '' };
         const stripBracketsAndQuotes = (str: string) =>
             str.replace(/^\[?"?/, '').replace(/"?\]?$/, '').trim();
-
+    
         const cleanValue = (val: any) => {
             if (typeof val === 'string') {
                 const cleaned = stripBracketsAndQuotes(val);
@@ -45,7 +45,7 @@ export class SolidSelectionDynamicField implements ISolidField {
                 return { label: strVal, value: strVal };
             }
         };
-
+    
         if (isMultiSelect) {
             if (Array.isArray(optionValue)) {
                 return optionValue.map(cleanValue);
@@ -105,20 +105,20 @@ export class SolidSelectionDynamicField implements ISolidField {
 
         // return schema;
         const isMultiSelect = fieldMetadata?.isMultiSelect;
-
+    
         if (!fieldMetadata.required) {
-            return Yup.mixed();
+          return Yup.mixed();
         }
-
+    
         if (isMultiSelect) {
-            return Yup.array()
-                .min(1, `${fieldLabel} is required.`)
-                .of(Yup.object().shape({ label: Yup.string(), value: Yup.string() }));
+          return Yup.array()
+            .min(1, `${fieldLabel} is required.`)
+            .of(Yup.object().shape({ label: Yup.string(), value: Yup.string() }));
         }
-
+    
         return Yup.object().shape({
-            label: Yup.string(),
-            value: Yup.string().required(`${fieldLabel} is required.`),
+          label: Yup.string(),
+          value: Yup.string().required(`${fieldLabel} is required.`),
         });
     }
 
@@ -156,7 +156,6 @@ export class SolidSelectionDynamicField implements ISolidField {
             </>
         );
     }
-
     renderExtensionRenderMode(widget: string, formik: FormikObject) {
         let DynamicWidget = getExtensionComponent(widget);
         const widgetProps: SolidFormFieldWidgetProps = {
@@ -190,48 +189,43 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
     const whereClause = fieldLayoutInfo.attrs.whereClause;
-
+    
     const isMultiSelect = fieldMetadata?.isMultiSelect;
 
     // selection dynamic specific code. 
     const [triggerGetSelectionDynamicValues] = useLazyGetSelectionDynamicValuesQuery();
     const [selectionDynamicItems, setSelectionDynamicItems] = useState([]);
-    const isFormFieldValid = (formik: any, fieldName: string) =>
-        (formik.touched[fieldName] || formik.submitCount > 0) && !!formik.errors[fieldName];
+    const isFormFieldValid = (formik: any, fieldName: string) => formik.errors[fieldName];
 
     const selectionDynamicSearch = async (event: AutoCompleteCompleteEvent) => {
-        try {
-            // const query = event.query ?? "";
-            const queryData = {
-                offset: 0,
-                limit: 10,
-                query: event.query,
-                fieldId: fieldMetadata.id,
-            };
-            if (whereClause) {
-                queryData.query = whereClause;
-            }
-            let sdQs = qs.stringify(queryData, {
-                encodeValuesOnly: true,
-                // encoder: (str, defaultEncoder, charset, type) => {
-                //     if (type === 'key' || type === 'value') {
-                //         if (str === queryData.query) return str;
-                //     }
-                //     return defaultEncoder(str);
-                // }
-            });
-            // TODO: do error handling here, possible errors like modelname is incorrect etc...
-            const sdResponse = await triggerGetSelectionDynamicValues(sdQs).unwrap();
-            const items = Array.isArray(sdResponse?.data) ? sdResponse.data : [];
 
-            // TODO: if no data found then can we show no matching "entities", where entities can be replaced with the model plural name,
-            // const sdData = sdResponse.data.data;
-
-            // @ts-ignore
-            setSelectionDynamicItems([...items]);
-        } catch (err) {
-            setSelectionDynamicItems([]);
+        // Get the list view layout & metadata first. 
+        const queryData = {
+            offset: 0,
+            limit: 10,
+            query: event.query,
+            fieldId: fieldMetadata.id
+        };
+        if (whereClause) {
+            queryData.query = whereClause;
         }
+        let sdQs = qs.stringify(queryData, {
+            encodeValuesOnly: true,
+            // encoder: (str, defaultEncoder, charset, type) => {
+            //     if (type === 'key' || type === 'value') {
+            //         if (str === queryData.query) return str;
+            //     }
+            //     return defaultEncoder(str);
+            // }
+        });
+        // TODO: do error handling here, possible errors like modelname is incorrect etc...
+        const sdResponse = await triggerGetSelectionDynamicValues(sdQs);
+
+        // TODO: if no data found then can we show no matching "entities", where entities can be replaced with the model plural name,
+        const sdData = sdResponse.data.data;
+
+        // @ts-ignore
+        setSelectionDynamicItems(sdData);
     }
 
 
@@ -261,18 +255,17 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                     // onChange={formik.handleChange}
                     onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
                     className="solid-standard-autocomplete"
-                    emptyMessage="No records found"
                 />
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <div className="absolute mt-1">
-                    <Message severity="error"
+                    <Message severity="error" 
                         text={
                             // formik?.errors[fieldLayoutInfo.attrs.name]?.toString()
                             typeof formik.errors[fieldLayoutInfo?.attrs?.name] === 'object'
-                                ? formik.errors[fieldLayoutInfo?.attrs?.name]?.value?.toString()
-                                : formik.errors[fieldLayoutInfo?.attrs?.name]?.toString()
-                        }
+                            ? formik.errors[fieldLayoutInfo?.attrs?.name]?.value?.toString()
+                            : formik.errors[fieldLayoutInfo?.attrs?.name]?.toString()
+                        } 
                     />
                 </div>
             )}
@@ -286,7 +279,7 @@ export const DefaultSelectionDynamicFormViewWidget = ({ formik, fieldContext }: 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-    const value = formik.values[fieldLayoutInfo.attrs.name];
+    const value  =formik.values[fieldLayoutInfo.attrs.name];
     const isMultiSelect = fieldMetadata?.isMultiSelect;
 
     let values: string[] = [];
@@ -305,7 +298,7 @@ export const DefaultSelectionDynamicFormViewWidget = ({ formik, fieldContext }: 
             values = value.map(v => (typeof v === 'object' && v.label ? v.label : String(v)));
         }
     }
-
+    
     return (
         // <div className="mt-2 flex-column gap-2">
         //     <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
@@ -316,14 +309,14 @@ export const DefaultSelectionDynamicFormViewWidget = ({ formik, fieldContext }: 
             <p className="m-0">
                 {isMultiSelect ? (
                     values.length > 0 ? (
-                        <span>{values.join(', ')}</span> // ✅ Join with commas
+                    <span>{values.join(', ')}</span> // ✅ Join with commas
                     ) : (
-                        <span className="text-gray-500">No selection</span>
+                    <span className="text-gray-500">No selection</span>
                     )
                 ) : (
                     value && value?.label ? value.label : <span className="text-gray-500">No selection</span>
                 )}
-            </p>
+                </p>
         </div>
     );
 }
