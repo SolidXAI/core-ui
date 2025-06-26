@@ -10,9 +10,9 @@ const SolidIntKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fieldLayo
     };
     return (
         fieldMetadata?.name === "fileSize" ?
-            <p className='m-0 text-sm'>Size : {data && data[fieldMetadata.name] ? `${formatFileSize(data[fieldMetadata.name])}` : ""}</p>
+            <p className={`m-0 text-sm${fieldLayout?.attrs?.className ? ` ${fieldLayout.attrs.className}` : ""}`}> {fieldLayout?.attrs?.showLabel !== false && fieldLayout?.attrs?.label ? `${fieldLayout?.attrs?.label} : ` : ""}{data && data[fieldMetadata.name] ? `${formatFileSize(data[fieldMetadata.name])}` : ""}</p>
             :
-            <p className='m-0'>{data && data[fieldMetadata.name] ? `${data[fieldMetadata.name]}` : ""}</p>
+            <p className={`m-0 ${fieldLayout?.attrs?.className ? ` ${fieldLayout.attrs.className}` : ""}`}>{fieldLayout?.attrs?.showLabel !== false && fieldLayout?.attrs?.label ? `${fieldLayout?.attrs?.label} : ` : ""}{data && data[fieldMetadata.name] ? `${data[fieldMetadata.name]}` : ""}</p>
     );
 
 };

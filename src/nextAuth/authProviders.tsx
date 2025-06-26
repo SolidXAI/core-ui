@@ -27,8 +27,8 @@ const authProviders: NextAuthOptions = {
         }),
         CredentialsProvider({
             // @ts-ignore
-            async authorize(credentials: Credentials) {
-                console.log('Credentials provider called');
+            async authorize(credentials: Credentials, req: any) {
+                const userAgent = req.headers['user-agent'];
 
                 const { username, email, password, accessToken, accessCode } = credentials;
                 try {
@@ -36,6 +36,9 @@ const authProviders: NextAuthOptions = {
                         let config = {
                             method: 'get',
                             url: `${process.env.API_URL}/api/iam/google/authenticate?accessCode=${accessCode}`,
+                            headers: {
+                                'User-Agent': userAgent,
+                            }
                         };
                         const loginResponse = await axios.request(config);
                         if (loginResponse.status == 400) {
@@ -109,7 +112,8 @@ const authProviders: NextAuthOptions = {
                                 url: `${process.env.API_URL}/api/iam/authenticate`,
                                 headers: {
                                     'accept': '*/*',
-                                    'Content-Type': 'application/json'
+                                    'Content-Type': 'application/json',
+                                    'User-Agent': userAgent,
                                 },
                                 data: data
                             };
@@ -179,7 +183,7 @@ const authProviders: NextAuthOptions = {
             const bufferTime = 60000;
             if (Date.now() >= (token.accessTokenExpires as number - bufferTime)) {
                 // Call the refresh token function
-                return await refreshAccessToken(token); 
+                return await refreshAccessToken(token);
             }
 
             // If there is no user (first time login or session), we return the user data
@@ -202,7 +206,7 @@ const authProviders: NextAuthOptions = {
         // @ts-ignore
         session: async ({ session, token }) => {
             console.log("Session callback called");
-            
+
             const user = token.user || {};  // Default to an empty object if user is undefined or null
             session.error = token.error ? token.error : null;
             // if (token.error) {

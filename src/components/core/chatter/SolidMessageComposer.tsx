@@ -8,7 +8,7 @@ import { useGetSolidViewLayoutQuery } from '@/redux/api/solidViewApi'
 import { useSelector } from 'react-redux'
 import { FileUpload } from 'primereact/fileupload';
 
-export const SolidMessageComposer = ({ type, solidFormViewMetaData, refetch, id }: { type?: string, solidFormViewMetaData?: any, refetch?: any, id?: any }) => {
+export const SolidMessageComposer = ({ type, modelSingularName, refetch, id }: { type?: string, modelSingularName?: any, refetch?: any, id?: any }) => {
     const [message, setMessage] = useState('');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
     const { user } = useSelector((state: any) => state.auth);
@@ -40,7 +40,7 @@ export const SolidMessageComposer = ({ type, solidFormViewMetaData, refetch, id 
             formData.append('messageSubType', "audit_insert");
             formData.append('messageBody', message);
             formData.append('coModelEntityId', id);
-            formData.append('coModelName', solidFormViewMetaData?.data?.solidView?.model?.singularName);
+            formData.append('coModelName', modelSingularName);
             formData.append('userId', user?.user?.id || 1);
 
             selectedFiles.forEach((file, index) => {
