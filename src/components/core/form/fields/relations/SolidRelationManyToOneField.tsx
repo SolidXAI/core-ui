@@ -39,9 +39,12 @@ export class SolidRelationManyToOneField implements ISolidField {
             return { solidManyToOneLabel: manyToOneColVal || '', solidManyToOneValue: manyToOneFieldData?.id || '', ...manyToOneFieldData };
         }
         if (this.fieldContext.parentData) {
-            const [key, value]: any = Object.entries(this.fieldContext.parentData)[0] || [];
-            if (key && value !== undefined) {
-                return { solidManyToOneLabel: value.solidManyToOneLabel, solidManyToOneValue: value.solidManyToOneValue };
+            const parentDataForKey = this.fieldContext.parentData[userKeyField];
+            if (parentDataForKey && typeof parentDataForKey === 'object') {
+                const [key, value]: any = Object.entries(this.fieldContext.parentData)[0] || [];
+                if (key && value !== undefined) {
+                    return { solidManyToOneLabel: value.solidManyToOneLabel, solidManyToOneValue: value.solidManyToOneValue };
+                }
             }
         }
         return {}
@@ -69,14 +72,16 @@ export class SolidRelationManyToOneField implements ISolidField {
         return schema;
     }
 
-    
+
     render(formik: FormikObject) {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
 
-        const isVisible = fieldLayoutInfo.attrs?.visible !== false && !this.fieldContext.parentData;
+        const isVisible = this.fieldContext.parentData 
+            ? fieldLayoutInfo.attrs?.visible === true 
+            : fieldLayoutInfo.attrs?.visible !== false;
 
         if (!isVisible) {
             return null;
@@ -289,7 +294,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                         dropdown={!readOnlyPermission}
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}
-                        onChange={formik.handleChange}
+                        onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
                         onFocus={(e) => e.target.select()}
                         className="w-full solid-standard-autocomplete"
                     />
@@ -346,7 +351,10 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
                 header=""
                 showHeader={false}
                 visible={visibleCreateRelationEntity}
-                style={{ width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw" }}
+                style={{
+                    width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw",
+                    height: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.height ?? "auto"
+                }}
                 onHide={() => {
                     if (!visibleCreateRelationEntity) return;
                     setvisibleCreateRelationEntity(false);

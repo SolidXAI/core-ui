@@ -60,7 +60,7 @@ export class SolidDateTimeField implements ISolidField {
             editWidget = 'DefaultDateTimeFormEditWidget';
         }
         if (!viewWidget) {
-            viewWidget = 'DefaultShortTextFormViewWidget';
+            viewWidget = 'DefaultDateTimeFormViewWidget';
         }
         const viewMode: string = this.fieldContext.viewMode;
 
@@ -150,6 +150,23 @@ export const DefaultDateTimeFormEditWidget = ({ formik, fieldContext }: SolidFor
                     <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 </div>
             )}
+        </div>
+    );
+}
+
+export const DefaultDateTimeFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    return (
+        <div className="mt-2 flex-column gap-2">
+            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            {/* <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name]}</p> */}
+            <p className="m-0">
+                {formik.values[fieldLayoutInfo.attrs.name] instanceof Date
+                    ? formik.values[fieldLayoutInfo.attrs.name].toLocaleDateString()
+                    : formik.values[fieldLayoutInfo.attrs.name]}
+            </p>
         </div>
     );
 }

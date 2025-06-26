@@ -562,8 +562,8 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
   const [ormTypeOptions, setOrmTypeOptions] = useState([]);
   const [selectedOrmType, setSelectedOrmType] = useState<any>(fieldMetaData?.ormType);
 
-  const [isUserKeyFields, setUserKeyFields] = useState(false);
-  const [userKeyData, setUserKeyData] = useState([]);
+  const [askForUserKeyField, setAskForUserKeyField] = useState(false);
+  const [userKeyFieldData, setUserKeyFieldData] = useState([]);
 
   const [
     filteredExternalIdProvider,
@@ -755,7 +755,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
   };
 
   const searchUserKeyField = () => {
-    return userKeyData;
+    return userKeyFieldData;
   }
 
   const searchComputedFieldValueType = async (event: any) => {
@@ -1068,14 +1068,14 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
 
       if (result && result.records) {
         if (!result?.records[0]?.userKeyField) {
-          setUserKeyFields(true);
+          setAskForUserKeyField(true);
           const validUserKeyFields = result?.records[0]?.fields?.filter(
             (field: any) => field?.unique === true && field?.type === 'shortText'
           );
-          setUserKeyData(validUserKeyFields)
+          setUserKeyFieldData(validUserKeyFields)
         } else {
-          setUserKeyFields(false);
-          setUserKeyData([]);
+          setAskForUserKeyField(false);
+          setUserKeyFieldData([]);
         }
       }
     }
@@ -1391,7 +1391,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
 
                     </TabPanel>
 
-                    <TabPanel header="Advance Config"
+                    <TabPanel header="Advanced Config"
 
                     //  rightIcon="pi pi-cog ml-2"
                     >
@@ -1689,7 +1689,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
                           {currentFields.includes("relationType") && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="field col-12 flex-flex-column gap-2 mt-3">
                               {/* <label
                                   htmlFor="relationType"
                                   className="form-field-label"
@@ -1760,7 +1760,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               )}
                             </div>
                           )}
-                          {currentFields.includes("relationType") && formik.values.relationType === "many-to-one" && (
+                          {currentFields.includes("relationType") && (formik.values.relationType === "many-to-one" || formik.values.relationType === "one-to-many") && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="relationCascade"
@@ -1889,11 +1889,75 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   )}
                               </div>
                             )}
+                            {currentFields.includes("relationCoModelColumnName") && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
+                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                              <label
+                                htmlFor="relationCoModelColumnName"
+                                className="form-field-label"
+                              >
+                                Relation Co-Model Column Name
+                              </label>
+                              <InputText
+                                type="text"
+                                id="relationCoModelColumnName"
+                                name="relationCoModelColumnName"
+                                onChange={formik.handleChange}
+                                disabled={fieldMetaData?.id}
+                                value={formik.values.relationCoModelColumnName}
+                                className={classNames("", {
+                                  "p-invalid": isFormFieldValid(
+                                    formik,
+                                    "relationCoModelColumnName"
+                                  ),
+                                })}
+                              />
+                              {isFormFieldValid(formik, "relationCoModelColumnName") && (
+                                <Message
+                                  severity="error"
+                                  text={formik?.errors?.relationCoModelColumnName?.toString()}
+                                />
+                              )}
+                              <p className="fieldSubTitle">Allows you to control the column name of the foreign key. Eg. when adding a country field to state model, by default foreign key column in the state table will be called country_id, use this field to create a foreign key with a different name. </p>
+
+                            </div>
+                          )}
+                          {askForUserKeyField && (
+                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                              <label
+                                htmlFor="userKey"
+                                className="form-field-label"
+                              >
+                                Set User Key
+                              </label>
+
+                              <SingleSelectAutoCompleteField
+                                key="userKey"
+                                formik={formik}
+                                isFormFieldValid={isFormFieldValid}
+                                fieldName="userKey"
+                                fieldNameId="userKey"
+                                labelKey="displayName"
+                                valueKey="name"
+                                searchData={searchUserKeyField}
+                                existingData={formik.values.userKey}
+                              />
+                              <p className="fieldSubTitle">The co-model you have selected does not have a user key specified. Use the above dropdown to choose from one of the "unique" fields in this co-model to be set as its userkey. User keys are required in co-models being used in many-to-one or one-to-many relations as in SolidX when a many-to-one field is rendered it uses an autocomplete dropdown, and the user key value is what is displayed as the label in the dropdown.</p>
+                              {isFormFieldValid(
+                                formik,
+                                "userKey"
+                              ) && (
+                                  <Message
+                                    severity="error"
+                                    text={formik?.errors?.userKey?.toString()}
+                                  />
+                                )}
+                            </div>
+                          )}
 
                           {currentFields.includes(
                             "relationFieldFixedFilter"
                           ) && (
-                              <div className="field col-6 flex-flex-column gap-2 mt-3">
+                              <div className="field col-12 flex-flex-column gap-2 mt-3">
                                 <label
                                   htmlFor="relationFieldFixedFilter"
                                   className="form-field-label"
@@ -1937,41 +2001,10 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                     text={formik?.errors?.relationFieldFixedFilter?.toString()}
                                   />
                                 )}
+                                <p className="fieldSubTitle">Many to one fields are rendered as autocomplete dropdown on the SolidX ui. Use the fixed filter to load a pre-filtered set of records from the co-model. Please note user input entered in the autocomplete is used to apply a dynamic filter.</p>
 
                               </div>
                             )}
-                          {isUserKeyFields && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
-                              <label
-                                htmlFor="userKey"
-                                className="form-field-label"
-                              >
-                                Set User Key
-                              </label>
-
-
-                              <SingleSelectAutoCompleteField
-                                key="userKey"
-                                formik={formik}
-                                isFormFieldValid={isFormFieldValid}
-                                fieldName="userKey"
-                                fieldNameId="userKey"
-                                labelKey="displayName"
-                                valueKey="name"
-                                searchData={searchUserKeyField}
-                                existingData={formik.values.userKey}
-                              />
-                              {isFormFieldValid(
-                                formik,
-                                "userKey"
-                              ) && (
-                                  <Message
-                                    severity="error"
-                                    text={formik?.errors?.userKey?.toString()}
-                                  />
-                                )}
-                            </div>
-                          )}
 
                           {currentFields.includes("relationCreateInverse") && (
                             <div className="field col-6 flex flex-column gap-2 mt-3">
@@ -1994,13 +2027,13 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
 
-                          {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse  && (
+                          {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="relationCoModelFieldName"
                                 className="form-field-label"
                               >
-                                Relation Co-Model Field Name
+                                Field Name In Parent Model
                               </label>
                               <InputText
                                 type="text"
@@ -2016,6 +2049,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   ),
                                 })}
                               />
+                               <p className="fieldSubTitle">This is field name that is created in the parent model. Eg. In case of Country and State ideally a states field can be created in the Country model when setting create inverse true.</p>
                               {isFormFieldValid(formik, "relationCoModelFieldName") && (
                                 <Message
                                   severity="error"
@@ -2057,37 +2091,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )} */}
 
-                          {currentFields.includes("relationCoModelColumnName") && formik.values.relationCreateInverse && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
-                              <label
-                                htmlFor="relationCoModelColumnName"
-                                className="form-field-label"
-                              >
-                                Relation Co-Model Column Name
-                              </label>
-                              <InputText
-                                type="text"
-                                id="relationCoModelColumnName"
-                                name="relationCoModelColumnName"
-                                onChange={formik.handleChange}
-                                disabled={fieldMetaData?.id}
-                                value={formik.values.relationCoModelColumnName}
-                                className={classNames("", {
-                                  "p-invalid": isFormFieldValid(
-                                    formik,
-                                    "relationCoModelColumnName"
-                                  ),
-                                })}
-                              />
-                              {isFormFieldValid(formik, "relationCoModelColumnName") && (
-                                <Message
-                                  severity="error"
-                                  text={formik?.errors?.relationCoModelColumnName?.toString()}
-                                />
-                              )}
-
-                            </div>
-                          )}
+                          
 
                           {currentFields.includes("relationJoinTableName") && formik.values.relationType === "many-to-many" && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
@@ -2738,7 +2742,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                         </>
                       }
 
-                      {(formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && <p className="form-wrapper-heading text-base">Settings</p>}
+                      {(formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && <p className="form-wrapper-heading text-base mt-3">Settings</p>}
                       <div className="formgrid grid">
                         {currentFields.includes("required") && (formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && (
                           <div className="field col-6 flex-flex-column gap-2 mt-3">
@@ -2870,7 +2874,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 checked={formik.values.isMultiSelect}
                               ></Checkbox>
                               <label htmlFor="ingredient1" className="form-field-label ml-2">
-                              Is MultiSelect
+                                Is MultiSelect
                               </label>
                             </div>
                             {isFormFieldValid(formik, "isMultiSelect") && (

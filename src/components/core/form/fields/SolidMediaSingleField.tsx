@@ -242,7 +242,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
 
             setFileDetails({
                 name: fileName,
-                type: fieldValue.mimeType,
+                type: fieldValue.mimeType ? fieldValue.mimeType : fieldValue.type,
                 fileUrl,
                 fileSize
             });
@@ -449,7 +449,7 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
 
             setFileDetails({
                 name: fileName,
-                type: fieldValue.mimeType,
+                type: fieldValue.mimeType ? fieldValue.mimeType : fieldValue.type,
                 fileUrl,
                 fileSize
             });

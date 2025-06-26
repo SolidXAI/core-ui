@@ -33,15 +33,15 @@ const SolidShortTextKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fie
         )
     }
     return (
-        <div>
+        <div className={`${fieldLayout?.attrs?.className ? ` ${fieldLayout.attrs.className}` : ""}`}>
             {widget === "text" && groupedView &&
-                <p className='font-medium'>{data && data[fieldMetadata.name] ? `${data[fieldMetadata.name]}` : ""}</p>
+                <p className='font-medium'>{fieldLayout?.attrs?.showLabel !== false && fieldLayout?.attrs?.label ? `${fieldLayout?.attrs?.label} : ` : ""}{data && data[fieldMetadata.name] ? `${data[fieldMetadata.name]}` : ""}</p>
             }
             {widget === "text" && !groupedView && fieldMetadata?.name === 'originalFileName' &&
-                <p className='font-medium'>{data && data[fieldMetadata.name] ? `${data[fieldMetadata.name]}` : ""}</p>
+                <p className='font-medium'>{fieldLayout?.attrs?.showLabel !== false && fieldLayout?.attrs?.label ? `${fieldLayout?.attrs?.label} : ` : ""}{data && data[fieldMetadata.name] ? `${data[fieldMetadata.name]}` : ""}</p>
             }
             {widget === "text" && !groupedView && fieldMetadata?.name === 'mimeType' &&
-                <span className='solid-mimetype-chip'>{data && data[fieldMetadata.name] ? `${data[fieldMetadata.name]}` : ""}</span>
+                <span className='solid-mimetype-chip'>{fieldLayout?.attrs?.showLabel !== false && fieldLayout?.attrs?.label ? `${fieldLayout?.attrs?.label} : ` : ""}{data && data[fieldMetadata.name] ? `${data[fieldMetadata.name]}` : ""}</span>
             }
             {widget === "image" && !groupedView && mimeType && mimeType.includes("image/") &&
                 < div className='mt-3'>

@@ -70,6 +70,13 @@ export type LayoutAttribute = {
     renderMode?: string;
     widget?: string;
     visible?: boolean;
+    editWidget?: string;
+    viewWidget?: string;
+    showLabel?: boolean;
+    inlineListLayout?: any;
+    inlineCreateLayout?: any;
+    formButtons?: any;
+    whereClause?: string;
 };
 
 // Generic representation of any node in our layout 
@@ -91,6 +98,7 @@ export type SolidUiEvent = {
     formData: Record<string, any>;
     viewMetadata: SolidView;
     fieldsMetadata: FieldsMetadata;
+    formViewLayout: LayoutNode;
 };
 
 export type SolidLoadForm = {
@@ -99,6 +107,7 @@ export type SolidLoadForm = {
     formData: Record<string, any>;
     viewMetadata: SolidView;
     fieldsMetadata: FieldsMetadata;
+    formViewLayout: LayoutNode;
 }
 
 export type SolidFormWidgetProps = {
@@ -152,8 +161,8 @@ export type SolidListHeaderDynamicFunctionProps = {
 
 export type SolidListRowdataDynamicFunctionProps = {
     action: string,
-    params: any
-    rowData: any
+    params: any,
+    rowData: any,
     solidListViewMetaData: any
 }
 
