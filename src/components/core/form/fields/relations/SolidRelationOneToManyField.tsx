@@ -80,7 +80,7 @@ export class SolidRelationOneToManyField implements ISolidField {
             layout: fieldLayoutInfo
         }
 
-        DefaultRelationOneToManyFormEditWidget
+        // DefaultRelationOneToManyFormEditWidget
 
 
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
