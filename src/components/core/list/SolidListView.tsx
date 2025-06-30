@@ -957,14 +957,13 @@ export const SolidListView = (params: SolidListViewParams) => {
                       header={button.attrs.label}
                       body={(rowData) => {
                         return (
-                          <Button
-                            text
+                          <Button                            
                             type="button"
-                            className=""
+                            icon={button?.attrs?.icon ? button?.attrs?.icon : "pi pi-pencil"}
+                            className={`w-full text-left gap-2 ${button?.attrs?.className ? button?.attrs?.className : ''}`}
                             label={button.attrs.showLabel !== false ? button.attrs.label : ''}
                             size="small"
                             iconPos="left"
-                            icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
                             onClick={() => {
                               const event = {
                                 params,
