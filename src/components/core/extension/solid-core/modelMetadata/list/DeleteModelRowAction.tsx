@@ -10,17 +10,18 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Checkbox } from "primereact/checkbox";
 import { kebabCase } from "lodash";
+import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 
 
 const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     const [isConfirmed, setIsConfirmed] = useState(false);
 
     const dispatch = useDispatch();
-    const [
-        generateCode,
-        { isLoading: isGenerateCodeUpdating, isSuccess: isGenerateCodeSuceess, isError: isGenerateCodeError, error: generateCodeError, data: generateCodeData },
-    ] = useGenerateCodeForModelMutation();
-
+    const entityApi = createSolidEntityApi(event.params.modelName);
+    const {useDeleteSolidEntityMutation} = entityApi;
+    const [deleteSolidSingleEntiry, { 
+        isError:isSolidEntitiesDeleteError , 
+    }] = useDeleteSolidEntityMutation()
 
     const toast = useRef<Toast>(null);
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
@@ -33,9 +34,12 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     };
 
     const deleteModelHandler = async () => {
-        const response: any = await generateCode({ id: event?.rowData?.id });
+        const res :any= await deleteSolidSingleEntiry(event.rowData.id)
+        if(!isSolidEntitiesDeleteError && res && res.data){
+            dispatch(closePopup());
+            showToast('success', 'Model Deleted', `Model ${event.rowData.singularName} has been deleted successfully.`);
+        }
     }
-
 
     const rows = [
         { file: `${kebabCase(event.rowData.singularName)}.entity.ts`, description: 'The TypeORM model that needs to be deleted.', intervention: 'Automatic' },

@@ -8,6 +8,7 @@ export const createSolidEntityApi = (entityName: string) => {
     return createApi({
         reducerPath: `genericSolid${entityName}Api`,
         baseQuery: baseQueryWithAuth,
+        tagTypes: [entityName],
         endpoints: (builder) => ({
             getSolidEntities: builder.query({
                 query: (qs) => {
@@ -23,7 +24,8 @@ export const createSolidEntityApi = (entityName: string) => {
                         groupMeta: response?.data?.groupMeta,
                         groupRecords: response?.data?.groupRecords ? response.data.groupRecords : [],
                     }
-                }
+                },
+                providesTags: (result) => [{ type: entityName }],
             }),
             getSolidKanbanEntities: builder.query({
                 query: (qs) => {
@@ -69,12 +71,14 @@ export const createSolidEntityApi = (entityName: string) => {
                     method: 'DELETE',
                     body: data
                 }),
+                invalidatesTags: [{ type: entityName }]
             }),
             deleteSolidEntity: builder.mutation({
                 query: (id) => ({
                     url: `/${kebabEntityName}/${id}`,
                     method: 'DELETE',
                 }),
+                invalidatesTags: [{ type: entityName }]
             }),
             recoverSolidEntityById: builder.query({
                 query: (id) => `/${kebabEntityName}/recover/${id}`,
