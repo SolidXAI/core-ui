@@ -2614,7 +2614,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 {fieldMetaData?.computedFieldTriggerConfig === null
                                   &&
                                   <div className="mb-3">
-                                    <Message severity="error" text={`You seem to be using an old configuration of ComputedFieldProvider. Please change your current computed field provider i.e ${formik.values.computedFieldValueProvider} to implement IEntityComputedFieldProvider before continuing.`} />
+                                    <Message severity="error" text={`You seem to be using an old configuration of ComputedFieldProvider. Please change your current computed field provider i.e ${fieldMetaData?.computedFieldValueProvider} to implement IEntityComputedFieldProvider before continuing.`} />
                                   </div>
                                 }
                                 <div className="flex align-items-center gap-2">
