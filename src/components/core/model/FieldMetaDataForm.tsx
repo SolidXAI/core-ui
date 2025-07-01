@@ -26,7 +26,7 @@ import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
 import qs from "qs";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as Yup from "yup";
 import FieldSelector from "./FieldSelector";
 
@@ -127,6 +127,189 @@ const SelectionStaticValues = ({ enumValue, onUpdate, onDelete, onAdd }: any) =>
 
 }
 
+interface SelectComputedFieldTriggerValuesProps {
+  index: number;
+  row: {
+    moduleName: string;
+    modelName: string;
+    operations: string[];
+  };
+  onChange: (index: number, updatedRow: any) => void;
+  onDelete: (index: number) => void;
+  isLastRow: boolean;
+  disableDelete: boolean;
+  formik: any;
+  isFormFieldValid: (formik: any, field: string) => boolean;
+  searchModuleName: (event: any) => Promise<any[]>;
+  searchModelName: (event: any) => Promise<any[]>;
+  params?: any,
+  errors?: any,
+  touched?: any,
+}
+
+const triggerOperationOptions = [
+  { label: "beforeInsert", value: "before-insert" },
+  { label: "afterInsert", value: "after-insert" },
+  { label: "beforeUpdate", value: "before-update" },
+  { label: "afterUpdate", value: "after-update" },
+  { label: "beforeRemove", value: "before-delete" },
+  { label: "afterRemove", value: "after-delete" },
+];
+
+const formatDisplayName = (value: string): string => {
+  return value
+    .split('-')
+    .map(word => word.charAt(0).toUpperCase() + word.slice(1))
+    .join(' ');
+};
+
+
+const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValuesProps> = ({
+  index,
+  row,
+  onChange,
+  onDelete,
+  disableDelete,
+  formik,
+  isFormFieldValid,
+  searchModuleName,
+  searchModelName,
+  params,
+  errors,
+  touched,
+}: any) => {
+  const [filteredOperations, setFilteredOperations] = useState<{ label: string; value: string }[]>([]);
+
+  useEffect(() => {
+    if (!row.moduleName && params?.moduleName) {
+      formik.setFieldValue(`computedFieldTriggerConfig[${index}].moduleName`, params.moduleName);
+    }
+    if (!row.modelName && params?.modelName) {
+      formik.setFieldValue(`computedFieldTriggerConfig[${index}].modelName`, params.modelName);
+    }
+  }, [params?.moduleName, params?.modelName]);
+
+  const searchOperations = (event: any) => {
+    const query = event.query.toLowerCase();
+    setFilteredOperations(
+      triggerOperationOptions.filter((item) =>
+        item.label.toLowerCase().includes(query)
+      )
+    );
+  };
+
+  return (
+    <div className="flex align-items-start gap-3 mt-2">
+
+      <div className="">
+        <label
+          htmlFor="moduleName"
+          className="form-field-label"
+        >
+          Module
+        </label>
+        <div className="mt-2">
+          <SingleSelectAutoCompleteField
+            key={`moduleName-${index}`}
+            formik={formik}
+            isFormFieldValid={isFormFieldValid}
+            fieldName={`computedFieldTriggerConfig[${index}].moduleName`}
+            fieldNameId={`computedFieldTriggerConfig[${index}].moduleName`}
+            labelKey="name"
+            valueKey="name"
+            searchData={searchModuleName}
+            existingData={row.moduleName ? { name: row.moduleName } : params?.moduleName ? { name: params.moduleName } : null}
+          />
+        </div>
+        {errors?.moduleName && (
+          <Message severity="error" text={errors.moduleName} />
+        )}
+      </div>
+
+      <div className="">
+        <label
+          htmlFor="modelName"
+          className="form-field-label"
+        >
+          Model
+        </label>
+        <div className="mt-2">
+          <SingleSelectAutoCompleteField
+            key={`modelName-${index}`}
+            formik={formik}
+            isFormFieldValid={isFormFieldValid}
+            fieldName={`computedFieldTriggerConfig[${index}].modelName`}
+            fieldNameId={`computedFieldTriggerConfig[${index}].modelName`}
+            labelKey="displayName"
+            valueKey="singularName"
+            searchData={searchModelName}
+            existingData={
+              row.modelName
+                ? {
+                  singularName: row.modelName,
+                  displayName: row.displayName || formatDisplayName(row.modelName),
+                }
+                : params?.modelName
+                  ? {
+                    singularName: params.modelName,
+                    displayName: formatDisplayName(params.modelName),
+                  }
+                  : null
+            }
+          />
+        </div>
+        {errors?.modelName && (
+          <Message severity="error" text={errors.modelName} />
+        )}
+      </div>
+
+
+      {/* operations */}
+      <div>
+        <label
+          htmlFor="operations"
+          className="form-field-label"
+        >
+          Operations
+        </label>
+        <div className="mt-2">
+          <AutoComplete
+            multiple
+            dropdown
+            value={triggerOperationOptions.filter(opt => (row.operations || []).includes(opt.value))}
+            suggestions={filteredOperations}
+            completeMethod={searchOperations}
+            field="label"
+            onChange={(e) =>
+              onChange(index, {
+                ...row,
+                operations: e.value.map((val: any) => val.value),
+              })
+            }
+            placeholder="Select operations"
+            className="solid-standard-autocomplete max-w-16rem"
+          />
+        </div>
+        {errors?.operations && (
+          <Message severity="error" text={errors.operations} />
+        )}
+      </div>
+
+      {/* Trash Button to delete the row */}
+      <Button
+        icon="pi pi-trash"
+        size="small"
+        onClick={() => onDelete(index)}
+        disabled={disableDelete}
+        outlined
+        severity="danger"
+        type="button"
+      />
+    </div>
+  );
+
+}
+
 const fieldBasedPayloadFormating = (values: any, currentFields: string[], fieldMetaData: any) => {
   // const booleanFields: string | any[] = [
   //   "isSystem",
@@ -163,6 +346,12 @@ const fieldBasedPayloadFormating = (values: any, currentFields: string[], fieldM
     const prettified = JSON.stringify(JSON.parse(values.computedFieldValueProviderCtxt), null, 2);
     transformedPayload.computedFieldValueProviderCtxt = prettified
   }
+
+  if (currentFields.includes("computedFieldTriggerConfig")) {
+    // const prettified = JSON.stringify(values.computedFieldTriggerConfig, null, 2);
+    transformedPayload.computedFieldTriggerConfig = values.computedFieldTriggerConfig
+  }
+
   if (currentFields.includes("relationCreateInverse")) {
     transformedPayload.relationCreateInverse = values.relationCreateInverse == false ? false : true
   }
@@ -490,10 +679,17 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
       ),
 
     }),
-    ...(currentFields.includes("computedFieldValueType") && {
-      computedFieldValueType: Yup.string().required(
-        "Computed Field Value Type is required"
-      ),
+    ...(currentFields.includes("computedFieldTriggerConfig") && {
+      computedFieldTriggerConfig: Yup.array()
+        .of(
+          Yup.object().shape({
+            moduleName: Yup.string().required("Module name is required"),
+            modelName: Yup.string().required("Model name is required"),
+            operations: Yup.array().of(Yup.string()).min(1, "Select at least one operation"),
+          })
+        )
+        .min(1, "At least one trigger config is required")
+        .required("Computed Field Trigger Config is required"),
     }),
 
     ...(currentFields.includes("columnName") && {
@@ -522,7 +718,6 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
 };
 
 const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaData, allFields, deleteModelFunction, setVisiblePopup, params, setIsRequiredPopUp, showToaster }: any) => {
-
   const booleanOptions = ["false", "true"];
   const [isBackPopupVisible, setIsBackPopupVisible] = useState(false);
   const [showColumnName, setShowColumnName] = useState<any>(false);
@@ -754,6 +949,70 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     }
   };
 
+  const searchModuleName = async (event: any) => {
+    try {
+      const query = event.query;
+      const queryData = {
+        limit: 10,
+        offset: 0,
+        filters: {
+          name: {
+            $containsi: query,
+          },
+        },
+      };
+
+      const queryString = qs.stringify(queryData, {
+        encodeValuesOnly: true,
+      });
+
+      const result = await triggerGetModules(queryString).unwrap(); // Unwrap to access the data
+
+      if (result && result.records) {
+        const updatedSuggestion = [...result.records];
+        return updatedSuggestion
+      } else {
+        return []
+      }
+    } catch (error) {
+      return []
+    }
+  };
+
+  const getSearchModelNameHandler = useCallback(
+    (moduleName: string) => {
+      return async (event: any) => {
+        try {
+          const query = event.query;
+          const queryData: any = {
+            limit: 10,
+            offset: 0,
+            filters: {
+              module: {
+                name: {
+                  $containsi: moduleName,
+                },
+              },
+            },
+          };
+
+          if (query) {
+            queryData.filters.singularName = {
+              $containsi: query,
+            };
+          }
+
+          const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
+          const result = await triggerGetModels(queryString).unwrap();
+          return result?.records ?? [];
+        } catch (error) {
+          return [];
+        }
+      };
+    },
+    [] // or include dependencies like triggerGetModels if needed
+  );
+
   const searchUserKeyField = () => {
     return userKeyFieldData;
   }
@@ -882,6 +1141,24 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
   ];
 
 
+  const parseComputedFieldTriggerConfig = (input: any) => {
+    try {
+      if (typeof input === "string") {
+        const parsed = JSON.parse(input);
+        return Array.isArray(parsed) ? parsed : [parsed];
+      } else if (Array.isArray(input)) {
+        return input;
+      } else if (typeof input === "object" && input !== null) {
+        return [input];
+      }
+    } catch {
+      return [{ moduleName: "", modelName: "", operations: [] }];
+    }
+
+    return [{ moduleName: "", modelName: "", operations: [] }];
+  };
+
+
   const initialValues = {
     name: fieldMetaData ? fieldMetaData?.name : null,
     displayName: fieldMetaData ? fieldMetaData?.displayName : null,
@@ -918,7 +1195,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     selectionStaticValues: fieldMetaData ? fieldMetaData?.selectionStaticValues : [""],
     selectionValueType: fieldMetaData ? fieldMetaData?.selectionValueType : null,
     computedFieldValueProvider: fieldMetaData ? fieldMetaData?.computedFieldValueProvider : null,
-    computedFieldValueType: fieldMetaData ? fieldMetaData?.computedFieldValueType : null,
+    computedFieldTriggerConfig: parseComputedFieldTriggerConfig(fieldMetaData?.computedFieldTriggerConfig),
     computedFieldValueProviderCtxt: fieldMetaData ? fieldMetaData?.computedFieldValueProviderCtxt : "",
     // externalIdProvider: fieldMetaData ? fieldMetaData?.externalIdProvider : null,
     // externalIdProviderCtxt: fieldMetaData ? fieldMetaData?.externalIdProviderCtxt : "",
@@ -1109,6 +1386,34 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
       setIsDirty(true);
     }
   }, [formik.dirty]);
+
+  const handleChange = (index: number, updatedRow: any) => {
+    const updatedRows = [...formik.values.computedFieldTriggerConfig];
+    updatedRows[index] = updatedRow;
+    formik.setFieldValue("computedFieldTriggerConfig", updatedRows);
+  };
+
+  const handleAdd = () => {
+    const updatedRows = [
+      ...formik.values.computedFieldTriggerConfig,
+      { moduleName: '', modelName: '', operations: [] }
+    ];
+    formik.setFieldValue("computedFieldTriggerConfig", updatedRows);
+  };
+
+  const handleDelete = (index: number) => {
+    const updatedRows = formik.values.computedFieldTriggerConfig.filter((_: any, i: number) => i !== index);
+    formik.setFieldValue("computedFieldTriggerConfig", updatedRows.length > 0 ? updatedRows : [{ moduleName: '', modelName: '', operations: [] }]);
+  };
+
+  console.log("formik.values.computedFieldTriggerConfig", formik.values.computedFieldTriggerConfig);
+
+  const computedFieldSearchHandlers = useMemo(() => {
+    return formik.values.computedFieldTriggerConfig.map(row =>
+      getSearchModelNameHandler(row.moduleName)
+    );
+  }, [formik.values.computedFieldTriggerConfig]);
+
 
   return (
     <div>
@@ -1889,7 +2194,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   )}
                               </div>
                             )}
-                            {currentFields.includes("relationCoModelColumnName") && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
+                          {currentFields.includes("relationCoModelColumnName") && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="relationCoModelColumnName"
@@ -2049,7 +2354,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   ),
                                 })}
                               />
-                               <p className="fieldSubTitle">This is field name that is created in the parent model. Eg. In case of Country and State ideally a states field can be created in the Country model when setting create inverse true.</p>
+                              <p className="fieldSubTitle">This is field name that is created in the parent model. Eg. In case of Country and State ideally a states field can be created in the Country model when setting create inverse true.</p>
                               {isFormFieldValid(formik, "relationCoModelFieldName") && (
                                 <Message
                                   severity="error"
@@ -2091,7 +2396,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )} */}
 
-                          
+
 
                           {currentFields.includes("relationJoinTableName") && formik.values.relationType === "many-to-many" && (
                             <div className="field col-6 flex-flex-column gap-2 mt-3">
@@ -2266,54 +2571,6 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 )}
                             </div>
                           )}
-                          {currentFields.includes("computedFieldValueType") && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
-                              <label
-                                htmlFor="computedFieldValueType"
-                                className="form-field-label"
-                              >
-                                Computed Field Value Type
-                              </label>
-                              <AutoComplete
-
-                                value={selectedComputedFieldValueType}
-                                invalid={isFormFieldValid(formik, "computedFieldValueType")}
-                                suggestions={filteredComputedFieldValueTypes}
-                                completeMethod={searchComputedFieldValueType}
-                                virtualScrollerOptions={{ itemSize: 38 }}
-                                field="label"
-                                dropdown
-                                className="solid-standard-autocomplete"
-                                onChange={(e) => {
-                                  setSelectedComputedFieldValueType(e.value);
-                                  formik.setFieldValue("computedFieldValueType", e.value.value);
-                                }}
-                              />
-
-                              {/* <Dropdown
-                                id="mediaTypes"
-                                name="mediaTypes"
-                                value={formik.values.mediaTypes}
-                                options={fieldDefaultMetaData.data.mediaTypes}
-                                onChange={(e) =>
-                                  formik.setFieldValue("mediaTypes", e.value)
-                                }
-                                placeholder="Select a Data Source"
-                                className={classNames("", {
-                                  "p-invalid": isFormFieldValid(
-                                    formik,
-                                    "mediaTypes"
-                                  ),
-                                })}
-                              /> */}
-                              {isFormFieldValid(formik, "computedFieldValueType") && (
-                                <Message
-                                  severity="error"
-                                  text={formik?.errors?.computedFieldValueType?.toString()}
-                                />
-                              )}
-                            </div>
-                          )}
 
                           {currentFields.includes(
                             "computedFieldValueProvider"
@@ -2323,9 +2580,8 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   htmlFor="computedFieldValueProvider"
                                   className="form-field-label"
                                 >
-                                  Computed Field Provider
+                                  IEntity Computed Field Provider
                                 </label>
-
                                 <SingleSelectAutoCompleteField
                                   key="computedFieldValueProvider"
                                   formik={formik}
@@ -2340,19 +2596,6 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   additionalAction={(e: any) => setMarkdownText(e.target.value.help)}
 
                                 />
-                                {/* <InputText
-                                    type="text"
-                                    id="computedFieldValueProvider"
-                                    name="computedFieldValueProvider"
-                                    onChange={formik.handleChange}
-                                    value={formik.values.computedFieldValueProvider}
-                                    className={classNames("", {
-                                      "p-invalid": isFormFieldValid(
-                                        formik,
-                                        "computedFieldValueProvider"
-                                      ),
-                                    })}
-                                  /> */}
                                 {isFormFieldValid(
                                   formik,
                                   "computedFieldValueProvider"
@@ -2362,6 +2605,59 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                       text={formik?.errors?.computedFieldValueProvider?.toString()}
                                     />
                                   )}
+                              </div>
+                            )}
+                          {currentFields.includes(
+                            "computedFieldTriggerConfig"
+                          ) && (
+                              <div className="field col-12 flex-flex-column gap-2 mt-3">
+                                {fieldMetaData?.computedFieldTriggerConfig === null
+                                  &&
+                                  <div className="mb-3">
+                                    <Message severity="error" text={`You seem to be using an old configuration of ComputedFieldProvider. Please change your current computed field provider i.e ${formik.values.computedFieldValueProvider} to implement IEntityComputedFieldProvider before continuing.`} />
+                                  </div>
+                                }
+                                <div className="flex align-items-center gap-2">
+                                  <label
+                                    htmlFor="computedFieldTriggerConfig"
+                                    className="form-field-label"
+                                  >
+                                    Computed Field Trigger Config
+                                  </label>
+                                  <div>
+                                    <Button
+                                      icon="pi pi-plus"
+                                      size="small"
+                                      onClick={handleAdd}
+                                      type="button"
+                                      className="ml-2"
+                                    />
+                                  </div>
+                                </div>
+                                {
+                                  formik.values.computedFieldTriggerConfig.map((row: any, index: number) => (
+                                    <SelectComputedFieldTriggerValues
+                                      key={index}
+                                      index={index}
+                                      row={row}
+                                      onChange={handleChange}
+                                      onDelete={handleDelete}
+                                      isLastRow={index === formik.values.computedFieldTriggerConfig.length - 1}
+                                      disableDelete={formik.values.computedFieldTriggerConfig.length === 1}
+                                      formik={formik}
+                                      isFormFieldValid={isFormFieldValid}
+                                      searchModuleName={searchModuleName}
+                                      searchModelName={computedFieldSearchHandlers[index]}
+                                      params={params}
+                                      errors={formik.errors.computedFieldTriggerConfig?.[index]}
+                                    />
+                                  ))}
+                                {typeof formik.errors.computedFieldTriggerConfig === 'string' && (
+                                  <Message
+                                    severity="error"
+                                    text={formik.errors.computedFieldTriggerConfig}
+                                  />
+                                )}
                               </div>
                             )}
                           {/* {currentFields.includes("externalIdProvider") && (
