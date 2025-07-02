@@ -1,177 +1,3 @@
-// components
-// ├── CustomFooter
-// │   ├── CustomFooter.tsx
-// │   └── FooterForm.tsx
-// ├── CustomHeader
-// │   ├── CallIcon.tsx
-// │   ├── CustomDropdown.tsx
-// │   ├── CustomHeader.tsx
-// │   ├── EmailIcon.tsx
-// │   ├── HeaderCart.tsx
-// │   └── productNavData.tsx
-// ├── FormView
-// │   ├── DetailsViews.tsx
-// │   ├── OrderAddressDetails.tsx
-// │   ├── OrderPaymentDetails.tsx
-// │   ├── OrderTableDetails.tsx
-// │   └── OrderedProductDetail.tsx
-// ├── Tag
-// │   └── CustomTag.tsx
-// ├── auth
-// │   ├── Login.tsx
-// │   └── Register.tsx
-// ├── common
-// │   ├── AuthBanner.tsx
-// │   ├── AutoCompleteField.tsx
-// │   ├── CancelButton.tsx
-// │   ├── CodeEditor.tsx
-// │   ├── CreateButton.tsx
-// │   ├── DropzonePlaceholder.tsx
-// │   ├── DropzoneUpload.tsx
-// │   ├── FilterComponent.tsx
-// │   ├── HeaderDynamicTitles.tsx
-// │   ├── MarkdownViewer.tsx
-// │   ├── MultipleSelectAutoCompleteField.tsx
-// │   ├── SingleSelectAutoCompleteField.tsx
-// │   └── SocialMediaLogin.tsx
-// ├── core
-// │   ├── common
-// │   │   ├── SolidListViewOptions.tsx
-// │   │   ├── SolidCreateButton.tsx
-// │   │   ├── SolidGlobalSearchElement.tsx
-// │   │   └── SolidSearchBox.tsx
-// │   ├── field
-// │   │   └── FieldListViewData.tsx
-// │   ├── form
-// │   │   ├── SolidFormView.tsx
-// │   │   └── fields
-// │   │       ├── ISolidField.tsx
-// │   │       ├── SolidBooleanField.tsx
-// │   │       ├── SolidDateField.tsx
-// │   │       ├── SolidDateTimeField.tsx
-// │   │       ├── SolidDecimalField.tsx
-// │   │       ├── SolidIntegerField.tsx
-// │   │       ├── SolidJsonField.tsx
-// │   │       ├── SolidLongTextField.tsx
-// │   │       ├── SolidMediaMultipleField.tsx
-// │   │       ├── SolidMediaSingleField.tsx
-// │   │       ├── SolidRelationField.tsx
-// │   │       ├── SolidRichTextField.tsx
-// │   │       ├── SolidSelectionDynamicField.tsx
-// │   │       ├── SolidSelectionStaticField.tsx
-// │   │       ├── SolidShortTextField.tsx
-// │   │       ├── SolidTimeField.tsx
-// │   │       └── relations
-// │   │           ├── SolidRelationManyToManyField.tsx
-// │   │           ├── SolidRelationManyToOneField.tsx
-// │   │           └── SolidRelationOneToManyField.tsx
-// │   ├── kanban
-// │   │   ├── KanbanBoard.tsx
-// │   │   ├── KanbanCard.tsx
-// │   │   ├── KanbanColumn.tsx
-// │   │   ├── SolidKanbanFilter.tsx
-// │   │   ├── SolidKanbanView.tsx
-// │   │   ├── SolidKanbanViewSearchColumn.tsx
-// │   │   ├── SolidManyToOneFilterElement.tsx
-// │   │   ├── SolidSelectionDynamicFilterElement.tsx
-// │   │   ├── SolidSelectionStaticFilterElement.tsx
-// │   │   ├── SolidVarInputsFilterElement.tsx
-// │   │   └── columns
-// │   │       ├── SolidBigintColumn.tsx
-// │   │       ├── SolidBooleanColumn.tsx
-// │   │       ├── SolidComputedColumn.tsx
-// │   │       ├── SolidDateColumn.tsx
-// │   │       ├── SolidDatetimeColumn.tsx
-// │   │       ├── SolidDecimalColumn.tsx
-// │   │       ├── SolidExternalIdColumn.tsx
-// │   │       ├── SolidFloatColumn.tsx
-// │   │       ├── SolidIdColumn.tsx
-// │   │       ├── SolidIntColumn.tsx
-// │   │       ├── SolidLongTextColumn.tsx
-// │   │       ├── SolidMediaMultipleColumn.tsx
-// │   │       ├── SolidMediaSingleColumn.tsx
-// │   │       ├── SolidRelationColumn.tsx
-// │   │       ├── SolidRichTextColumn.tsx
-// │   │       ├── SolidSelectionDynamicColumn.tsx
-// │   │       ├── SolidSelectionStaticColumn.tsx
-// │   │       ├── SolidShortTextColumn.tsx
-// │   │       ├── SolidTimeColumn.tsx
-// │   │       ├── SolidUuidColumn.tsx
-// │   │       └── relations
-// │   │           └── SolidRelationManyToOneColumn.tsx
-// │   ├── list
-// │   │   ├── SolidListView.tsx
-// │   │   ├── SolidListViewColumn.tsx
-// │   │   ├── SolidListingHeader.tsx
-// │   │   ├── SolidManyToOneFilterElement.tsx
-// │   │   ├── SolidSelectionDynamicFilterElement.tsx
-// │   │   ├── SolidSelectionStaticFilterElement.tsx
-// │   │   ├── SolidVarInputsFilterElement.tsx
-// │   │   └── columns
-// │   │       ├── SolidBigintColumn.tsx
-// │   │       ├── SolidBooleanColumn.tsx
-// │   │       ├── SolidComputedColumn.tsx
-// │   │       ├── SolidDateColumn.tsx
-// │   │       ├── SolidDatetimeColumn.tsx
-// │   │       ├── SolidDecimalColumn.tsx
-// │   │       ├── SolidExternalIdColumn.tsx
-// │   │       ├── SolidFloatColumn.tsx
-// │   │       ├── SolidIdColumn.tsx
-// │   │       ├── SolidIntColumn.tsx
-// │   │       ├── SolidLongTextColumn.tsx
-// │   │       ├── SolidMediaMultipleColumn.tsx
-// │   │       ├── SolidMediaSingleColumn.tsx
-// │   │       ├── SolidRelationColumn.tsx
-// │   │       ├── SolidRichTextColumn.tsx
-// │   │       ├── SolidSelectionDynamicColumn.tsx
-// │   │       ├── SolidSelectionStaticColumn.tsx
-// │   │       ├── SolidShortTextColumn.tsx
-// │   │       ├── SolidTimeColumn.tsx
-// │   │       ├── SolidUuidColumn.tsx
-// │   │       └── relations
-// │   │           └── SolidRelationManyToOneColumn.tsx
-// │   ├── model
-// │   │   ├── CreateModel.tsx
-// │   │   ├── FieldMetaData.tsx
-// │   │   ├── FieldMetaDataForm.tsx
-// │   │   ├── FieldSelector.tsx
-// │   │   ├── ModelListViewData.tsx
-// │   │   └── ModelMetaData.tsx
-// │   ├── module
-// │   │   ├── CreateModule.tsx
-// │   │   └── ModuleListViewData.tsx
-// │   └── users
-// │       ├── CreateUser.tsx
-// │       ├── CreateUserRole.tsx
-// │       └── UserListView.tsx
-// ├── layout
-// │   ├── AdminSidebar.tsx
-// │   ├── ButtonLoader.tsx
-// │   ├── CustomPagination.tsx
-// │   ├── DashboardHeader.tsx
-// │   ├── FilterMenu.tsx
-// │   ├── Footer.tsx
-// │   ├── GlobalSearch.tsx
-// │   ├── Header.tsx
-// │   ├── ListingHeader.tsx
-// │   ├── Loader.tsx
-// │   ├── UserSidebar.tsx
-// │   ├── navbar-one.tsx
-// │   ├── navbar-two-menu.tsx
-// │   ├── navbar-two.tsx
-// │   ├── user-profile-menu.tsx
-// │   └── user-profile.tsx
-// ├── modelsComponents
-// │   ├── GridViewData.tsx
-// │   ├── ListViewData.tsx
-// │   ├── cardBadge.tsx
-// │   ├── filterIcon.tsx
-// │   ├── gridItem.tsx
-// │   └── listItem.tsx
-// └── tables
-//     ├── DemoData.tsx
-//     ├── DynamicTable.tsx
-//     └── ListViewTable.tsx
 export { CustomFooter } from '@/components/CustomFooter/CustomFooter';
 export { FooterForm } from '@/components/CustomFooter/FooterForm';
 
@@ -296,6 +122,7 @@ export { SolidVarInputsFilterElement } from '@/components/core/list/SolidVarInpu
 // export * from '@/components/core/list/columns/SolidBigintColumn';
 // export * from '@/components/core/list/columns/SolidBooleanColumn';
 // export * from '@/components/core/list/columns/SolidComputedColumn';
+export { default as SolidDashboard } from '@/components/core/dashboard/SolidDashboard'; 
 
 export { dateFilterMatchModeOptions } from '@/components/core/list/columns/SolidDateColumn';
 // export * from '@/components/core/list/columns/SolidDatetimeColumn';
@@ -363,15 +190,6 @@ export type { Product } from '@/components/tables/ListViewTable';
 // automationComponents
 // categoriesComponents
 
-// helpers
-// ├── ToastContainer.tsx
-// ├── authHeader.ts
-// ├── countries.tsx
-// ├── helpers.ts
-// ├── menu.tsx
-// ├── permissions.ts
-// └── revalidate.ts
-
 export { ToastContainer, handleError, handleSuccess } from '@/helpers/ToastContainer';
 export { getAuthCookieName, getAuthHeader } from '@/helpers/authHeader';
 export { AppTitle } from '@/helpers/AppTitle'
@@ -383,50 +201,6 @@ export { revalidateTag } from '@/helpers/revalidate';
 export { useHasAllRoles, useHasAnyRole, hasAnyRole } from '@/helpers/rolesHelper';
 export { registerExtensionComponent, registerExtensionFunction } from '@/helpers/registry';
 
-// redux
-// ├── api
-// │   ├── articleApi.ts
-// │   ├── authApi.ts
-// │   ├── automationApi.ts
-// │   ├── categoryApi.tsx
-// │   ├── cityApi.tsx
-// │   ├── cmsBannerImageApi.tsx
-// │   ├── countryApi.tsx
-// │   ├── fetchBaseQuery.tsx
-// │   ├── fieldApi.ts
-// │   ├── mediaApi.ts
-// │   ├── mediaStorageProviderApi.ts
-// │   ├── menuApi.tsx
-// │   ├── menuItemsApi.tsx
-// │   ├── modelApi.ts
-// │   ├── moduleApi.ts
-// │   ├── orderAttributeApi.tsx
-// │   ├── permissionApi.ts
-// │   ├── pincodeApi.tsx
-// │   ├── productData.tsx
-// │   ├── radixExtraModelAttributeApi.tsx
-// │   ├── radixModelMetadataApi.tsx
-// │   ├── radixModelsApi.tsx
-// │   ├── ratingApi.ts
-// │   ├── reviewApi.ts
-// │   ├── roleApi.ts
-// │   ├── solidActionApi.ts
-// │   ├── solidCountryApi.tsx
-// │   ├── solidEntityApi.tsx
-// │   ├── solidMenuApi.ts
-// │   ├── solidViewApi.ts
-// │   ├── stateApi.tsx
-// │   ├── tagApi.ts
-// │   ├── tagGroupApi.tsx
-// │   └── userApi.ts
-// ├── features
-// │   ├── authSlice.ts
-// │   ├── dataViewSlice.ts
-// │   ├── navbarSlice.ts
-// │   ├── popupSlice.ts
-// │   ├── themeSlice.ts
-// │   └── userSlice.ts
-// ├── hooks.ts
 // export * from '@/redux/api/articleApi';
 export { authApi, useForgotPasswordMutation, useRegisterMutation, useRegisterPrivateMutation, useResetPasswordMutation, useUpdateUserMutation, useInitateLoginMutation, useConfirmOtpLoginMutation, useInitateRegisterMutation, useConfirmOtpRegisterMutation, } from '@/redux/api/authApi';
 // export * from '@/redux/api/automationApi';
