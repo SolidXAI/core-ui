@@ -781,7 +781,20 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                                             <Button
                                                 key={index}
                                                 className="p-2 flex gap-1 text-color"
-                                                onClick={() => handleAddChip(value)}
+                                                // onClick={() => handleAddChip(value)}
+                                                onMouseDown={(e) => {
+                                                    e.preventDefault(); // Prevent focus loss from input
+                                                    const currentValue = inputValue?.trim();
+                                                    if (currentValue) {
+                                                        setSearchChips((prev) => [...prev, {
+                                                            columnName: value,
+                                                            value: currentValue,
+                                                        }]);
+                                                        setInputValue("");
+                                                        setHasSearched(true);
+                                                        setShowOverlay(false);
+                                                    }
+                                                }}
                                                 text
                                                 severity="secondary"
                                                 size="small"
