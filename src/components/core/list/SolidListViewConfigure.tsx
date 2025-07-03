@@ -104,56 +104,73 @@ export const SolidListViewConfigure = (
 
             </OverlayPanel>
             <OverlayPanel ref={op} className="listview-cogwheel-panel">
-                <div className="p-2">
-                    <div className="flex flex-column">
-                        {actionsAllowed.includes(`${deleteManyPermission(params.modelName)}`) && viewData?.data?.solidView?.layout?.attrs?.delete !== false && selectedRecords.length > 0 &&
-                            <Button
-                                text
-                                type="button"
-                                className="text-left gap-2 text-base"
-                                label="Delete"
-                                size="small"
-                                iconPos="left"
-                                severity="danger"
-                                icon={'pi pi-trash'}
-                                onClick={() => setDialogVisible(true)}
-                            />}
-                        <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2 text-base"
-                            onClick={() => setOpenImportDialog(true)}
-                        />
-                        <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base"
-                            // @ts-ignore
-                            onClick={() => { setExportView((exportView) => !exportView); }} />
-                        {/* <Button text icon='pi pi-share-alt' label="Share" size="small" severity="secondary" className="text-left gap-2" /> */}
-                        {/* {viewData?.data?.solidView?.model?.enableSoftDelete &&
+                {(
+                    (actionsAllowed.includes(`${deleteManyPermission(params.modelName)}`) &&
+                        viewData?.data?.solidView?.layout?.attrs?.delete !== false &&
+                        selectedRecords.length > 0) ||
+                    solidListViewLayout?.attrs?.enableImport !== false ||
+                    solidListViewLayout?.attrs?.enableExport !== false ||
+                    (solidListViewLayout?.attrs?.headerButtons
+                        ?.some((rb: any) => rb.attrs.actionInContextMenu === true)) ||
+                    viewData?.data?.solidView?.model?.enableSoftDelete
+                ) && (
+                        <>
+                            <div className="p-2">
+                                <div className="flex flex-column">
+                                    {actionsAllowed.includes(`${deleteManyPermission(params.modelName)}`) && viewData?.data?.solidView?.layout?.attrs?.delete !== false && selectedRecords.length > 0 &&
+                                        <Button
+                                            text
+                                            type="button"
+                                            className="text-left gap-2 text-base"
+                                            label="Delete"
+                                            size="small"
+                                            iconPos="left"
+                                            severity="danger"
+                                            icon={'pi pi-trash'}
+                                            onClick={() => setDialogVisible(true)}
+                                        />}
+                                    {solidListViewLayout?.attrs?.enableImport !== false && (
+                                        <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2 text-base"
+                                            onClick={() => setOpenImportDialog(true)}
+                                        />
+                                    )}
+                                    {solidListViewLayout?.attrs?.enableExport !== false && (
+                                        <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base"
+                                            // @ts-ignore
+                                            onClick={() => { setExportView((exportView) => !exportView); }} />
+                                    )}
+                                    {/* <Button text icon='pi pi-share-alt' label="Share" size="small" severity="secondary" className="text-left gap-2" /> */}
+                                    {/* {viewData?.data?.solidView?.model?.enableSoftDelete &&
                         <Button text severity="secondary" size="small" className="text-left w-13rem" label={showArchived ? "Hide Archived Records" : "Show Archived Records"} iconPos="left" onClick={() => { setShowArchived(!showArchived); }} />
                         } */}
-                        {solidListViewLayout?.attrs?.headerButtons
-                            ?.filter((rb: any) => rb.attrs.actionInContextMenu === true)
-                            ?.map((button: any, index: number) => (
-                                <SolidListViewHeaderContextMenuButton
-                                    key={index}
-                                    button={button}
-                                    params={params}
-                                    solidListViewMetaData={listViewMetaData}
-                                    handleCustomButtonClick={handleCustomButtonClick}
-                                />
-                            ))}
-                        {viewData?.data?.solidView?.model?.enableSoftDelete && (
-                            <div className="flex align-items-center px-3 gap-2 mt-2 mb-1">
-                                <Checkbox
-                                    inputId="showArchived"
-                                    checked={showArchived}
-                                    onChange={() => setShowArchived(!showArchived)}
-                                />
-                                <label htmlFor="showArchived" className="ml-2 text-base solid-secondary-text-color">
-                                    Show Archived Records
-                                </label>
+                                    {solidListViewLayout?.attrs?.headerButtons
+                                        ?.filter((rb: any) => rb.attrs.actionInContextMenu === true)
+                                        ?.map((button: any, index: number) => (
+                                            <SolidListViewHeaderContextMenuButton
+                                                key={index}
+                                                button={button}
+                                                params={params}
+                                                solidListViewMetaData={listViewMetaData}
+                                                handleCustomButtonClick={handleCustomButtonClick}
+                                            />
+                                        ))}
+                                    {viewData?.data?.solidView?.model?.enableSoftDelete && (
+                                        <div className="flex align-items-center px-3 gap-2 mt-2 mb-1">
+                                            <Checkbox
+                                                inputId="showArchived"
+                                                checked={showArchived}
+                                                onChange={() => setShowArchived(!showArchived)}
+                                            />
+                                            <label htmlFor="showArchived" className="ml-2 text-base solid-secondary-text-color">
+                                                Show Archived Records
+                                            </label>
+                                        </div>
+                                    )}
+                                </div>
                             </div>
-                        )}
-                    </div>
-                </div>
-                <Divider className="m-0" />
+                            <Divider className="m-0" />
+                        </>
+                    )}
                 <div className="p-2 relative flex flex-column gap-1">
                     <Button
                         icon='pi pi-sliders-h'
