@@ -4,7 +4,7 @@ import './solid-dashboard.css';
 import { GridStack, GridStackOptions, GridStackWidget } from 'gridstack';
 import { useEffect, useRef } from 'react';
 
-interface SolidDashboardBodyProps {
+export interface SolidDashboardBodyProps {
   dashboardOptions?: GridStackOptions;
   widgetOptions?: GridStackWidget[];
 }
