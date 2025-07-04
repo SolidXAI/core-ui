@@ -142,7 +142,7 @@ interface SelectComputedFieldTriggerValuesProps {
   isFormFieldValid: (formik: any, field: string) => boolean;
   searchModuleName: (event: any) => Promise<any[]>;
   searchModelName: (event: any) => Promise<any[]>;
-  params?: any,
+  modelMetaData?: any,
   errors?: any,
   touched?: any,
 }
@@ -174,20 +174,20 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
   isFormFieldValid,
   searchModuleName,
   searchModelName,
-  params,
+  modelMetaData,
   errors,
   touched,
 }: any) => {
   const [filteredOperations, setFilteredOperations] = useState<{ label: string; value: string }[]>([]);
 
   useEffect(() => {
-    if (!row.moduleName && params?.moduleName) {
-      formik.setFieldValue(`computedFieldTriggerConfig[${index}].moduleName`, params.moduleName);
+    if (!row.moduleName && modelMetaData?.module?.name) {
+      formik.setFieldValue(`computedFieldTriggerConfig[${index}].moduleName`, modelMetaData?.module?.name);
     }
-    if (!row.modelName && params?.modelName) {
-      formik.setFieldValue(`computedFieldTriggerConfig[${index}].modelName`, params.modelName);
+    if (!row.modelName && modelMetaData?.singularName) {
+      formik.setFieldValue(`computedFieldTriggerConfig[${index}].modelName`, modelMetaData?.singularName);
     }
-  }, [params?.moduleName, params?.modelName]);
+  }, [modelMetaData?.module?.name, modelMetaData?.singularName]);
 
   const searchOperations = (event: any) => {
     const query = event.query.toLowerCase();
@@ -215,10 +215,22 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
             isFormFieldValid={isFormFieldValid}
             fieldName={`computedFieldTriggerConfig[${index}].moduleName`}
             fieldNameId={`computedFieldTriggerConfig[${index}].moduleName`}
-            labelKey="name"
+            labelKey="displayName"
             valueKey="name"
             searchData={searchModuleName}
-            existingData={row.moduleName ? { name: row.moduleName } : params?.moduleName ? { name: params.moduleName } : null}
+            existingData={
+              row.moduleName
+                ? {
+                  name: row.moduleName,
+                  displayName: row.displayName || formatDisplayName(row.moduleName),
+                }
+                : modelMetaData?.module?.name
+                  ? {
+                    name: modelMetaData.module.name,
+                    displayName: modelMetaData.module.displayName || formatDisplayName(modelMetaData.module.name),
+                  }
+                  : null
+            }
           />
         </div>
         {errors?.moduleName && (
@@ -249,10 +261,10 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
                   singularName: row.modelName,
                   displayName: row.displayName || formatDisplayName(row.modelName),
                 }
-                : params?.modelName
+                : modelMetaData?.singularName
                   ? {
-                    singularName: params.modelName,
-                    displayName: formatDisplayName(params.modelName),
+                    singularName: modelMetaData?.singularName,
+                    displayName: modelMetaData?.displayName || formatDisplayName(modelMetaData.displayName),
                   }
                   : null
             }
@@ -2648,7 +2660,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                       isFormFieldValid={isFormFieldValid}
                                       searchModuleName={searchModuleName}
                                       searchModelName={computedFieldSearchHandlers[index]}
-                                      params={params}
+                                      modelMetaData={modelMetaData}
                                       errors={formik.errors.computedFieldTriggerConfig?.[index]}
                                     />
                                   ))}
