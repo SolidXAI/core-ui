@@ -901,9 +901,9 @@ export const SolidListView = (params: SolidListViewParams) => {
             loading={false}
             // loading={loading || isLoading}
             // loadingIcon="pi pi-spinner"
-            selection={[...selectedRecords, ...selectedRecoverRecords]}
-            onSelectionChange={onSelectionChange}
-            selectionMode="checkbox"
+            selection={params.embeded === true ? null : [...selectedRecords, ...selectedRecoverRecords]}
+            onSelectionChange={params.embeded === true ? undefined : onSelectionChange}
+            selectionMode={params.embeded === true ? null : "checkbox"}
             removableSort
             filterIcon={<FilterIcon />}
             tableClassName="solid-data-table"
@@ -933,8 +933,9 @@ export const SolidListView = (params: SolidListViewParams) => {
               }
             }}
           >
-
-            <Column selectionMode="multiple" headerStyle={{ width: "3em" }} />
+            {params.embeded === true ? null :
+              <Column selectionMode="multiple" headerStyle={{ width: "3em" }} />
+            }
             {renderColumnsDynamically(listViewMetaData)}
             {solidListViewLayout?.attrs?.rowButtons &&
               solidListViewLayout?.attrs?.rowButtons.filter((rb: any) => {
