@@ -9,7 +9,7 @@ import { Divider } from "primereact/divider";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { RadioButton } from "primereact/radiobutton";
 import { useEffect, useRef, useState } from "react";
-import { SolidListColumnSelector } from "./SolidListColumnSelector";
+import { SolidListColumnSelector } from "./SolidColumnSelector/SolidListColumnSelector";
 import { SolidExport } from "@/components/common/SolidExport";
 import { Dialog } from "primereact/dialog";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
@@ -251,7 +251,7 @@ export const SolidListViewConfigure = (
                                         ))}
                                     </div>
                                 </AccordionTab>
-                                <AccordionTab header="Column Selector">
+                                <AccordionTab header="Column Selector" headerClassName="pb-0">
                                     <SolidListColumnSelector listViewMetaData={listViewMetaData} />
                                 </AccordionTab>
                             </Accordion>
