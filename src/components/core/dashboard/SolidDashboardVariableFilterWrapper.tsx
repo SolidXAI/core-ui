@@ -1,13 +1,14 @@
+"use client";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Divider } from "primereact/divider";
 import SolidDashboardVariableFilter from "./SolidDashboardVariableFilter";
 import { SolidDashboardVariableRecord } from "./SolidDashboard";
-export interface SolidDashboardVariableFilterProps {
+export interface SolidDashboardVariablesFilterProps {
   dashboardVariables: SolidDashboardVariableRecord[];
 }
 
-const SolidDashboardVariableFilterWrapper: React.FC<SolidDashboardVariableFilterProps> = ({dashboardVariables}) => {
+const SolidDashboardVariableFilterWrapper: React.FC<SolidDashboardVariablesFilterProps> = ({dashboardVariables}) => {
   return (
       <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={true} style={{ width: '65vw' }} onHide={() => { console.log('Dialog closed'); }}>
         <div className="flex align-items-center justify-content-between px-3">
