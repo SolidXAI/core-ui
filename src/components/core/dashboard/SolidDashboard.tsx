@@ -7,8 +7,8 @@ import SolidDashboardVariableFilterWrapper from './SolidDashboardVariableFilterW
 
 export enum SolidDashboardVariableType {
   DATE = 'date',
-  SELECTION_STATIC = 'selection-static',
-  SELECTION_DYNAMIC = 'selection-dynamic',
+  SELECTION_STATIC = 'selectionStatic',
+  SELECTION_DYNAMIC = 'selectionDynamic',
 }
 
 enum SOURCE_TYPE {
@@ -19,6 +19,11 @@ export interface SolidDashboardVariableRecord {
   name: string;
   type: SolidDashboardVariableType;
   isMultiple: boolean;
+  selectionStaticValues?: string[]; // For static selection variables
+  selectionDyanmicSourceType?: SOURCE_TYPE; // For dynamic selection variables
+  selectionDynamicProviderName?: string; // For dynamic selection variables
+  selectionDynamicSQL?: string; // For dynamic selection variables
+  sourceType?: SOURCE_TYPE;
 }
 
 const SolidDashboard = () => {
@@ -65,6 +70,11 @@ function handleDashboardData(data: DashboardResponse, setLayoutOption: Dispatch<
       name: variable.variableName,
       type: variable.variableType,
       isMultiple: variable.isMultiple || false,
+      selectionStaticValues: variable.selectionStaticValues ? JSON.parse(variable.selectionStaticValues) : [],
+      selectionDyanmicSourceType: variable.selectionDyanmicSourceType || SOURCE_TYPE.SQL,
+      selectionDynamicProviderName: variable.selectionDynamicProviderName || '',
+      selectionDynamicSQL: variable.selectionDynamicSQL || '',
+      sourceType: variable.sourceType || SOURCE_TYPE.SQL,
     }));
     setDashboardVariables(formattedVariables);
   }

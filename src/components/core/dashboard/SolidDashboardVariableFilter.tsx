@@ -18,7 +18,7 @@ const SolidDashboardVariableFilteredVariable: React.FC<SolidDashboardVariableFil
         case SolidDashboardVariableType.DATE:
             return <SolidDashboardVariableDate />;
         case SolidDashboardVariableType.SELECTION_STATIC:
-            return <SolidDashboardVariableSelectionStatic />;
+            return <SolidDashboardVariableSelectionStatic selectionOptions={dashboardVariable.selectionStaticValues ?? []} />;
         case SolidDashboardVariableType.SELECTION_DYNAMIC:
             return <SolidDashboardVariableSelectionDynamic />;
         default:
