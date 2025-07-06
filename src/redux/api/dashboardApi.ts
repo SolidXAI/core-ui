@@ -8,7 +8,7 @@ interface Dashboard {
   [key: string]: any;
 }
 
-interface DashboardResponse {
+export interface DashboardResponse {
   records: Dashboard[];
   meta: {
     totalCount: number;

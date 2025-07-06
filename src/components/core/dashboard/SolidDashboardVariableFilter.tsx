@@ -1,7 +1,7 @@
 import { Button } from "primereact/button";
 import { Dropdown } from "primereact/dropdown";
-import { SolidFilterFields } from "../filter/SolidFilterFields";
-const SolidDashboardVariableFilterRule = () => {
+import { SolidDashboardVariableFilterProps } from "./SolidDashboardVariableFilterWrapper";
+const SolidDashboardVariableFilterRule: React.FC<SolidDashboardVariableFilterProps> = ({dashboardVariables}) => {
     return (
         <div className='flex align-items-center gap-3'>
             <div className='formgrid grid w-full'>
@@ -10,7 +10,7 @@ const SolidDashboardVariableFilterRule = () => {
                         onChange={ () => {
                             console.log("Field Name Changed");
                         }}
-                        options={[]}
+                        options={dashboardVariables}
                         optionLabel='name'
                         optionValue='value'
                         placeholder="Select Dashboard Variable"
@@ -21,7 +21,7 @@ const SolidDashboardVariableFilterRule = () => {
                     <div className='formgrid grid w-full'>
                         {
                             <div className='col-12'>
-                                SolidFilterFields
+                                {JSON.stringify(dashboardVariables)}
                             </div>
                         }
                     </div>
@@ -39,10 +39,10 @@ const SolidDashboardVariableFilterRule = () => {
     )
 }
 
-export const SolidDashboardVariableFilter = () => {
+export const SolidDashboardVariableFilter: React.FC<SolidDashboardVariableFilterProps> = ({dashboardVariables}) => {
     return (
         <div className=''>
-            <SolidDashboardVariableFilterRule />
+            <SolidDashboardVariableFilterRule dashboardVariables={dashboardVariables} />
             <div className='flex gap-3 mt-3'>
                 <Button label="Apply" size="small" onClick={() => { console.log("Dashboard variable filter applied") }} type="submit" />
                 <Button type='button' label='Cancel' outlined size='small' onClick={() => { console.log("Dashboard variable filter cancelled") }} />
