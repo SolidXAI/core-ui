@@ -16,6 +16,11 @@ export interface DashboardResponse {
   };
 }
 
+export interface SelectionDynamicOption {
+  value: string;
+  label: string;
+}
+
 // API Definition
 export const dashboardApi = createApi({
   reducerPath: "dashboardApi",
@@ -34,8 +39,18 @@ export const dashboardApi = createApi({
         };
       },
     }),
+    getDashboardVariableSelectionDynamicValues: builder.query<SelectionDynamicOption[], string>({
+      query: (qs) => `/dashboard/selection-dynamic-values?${qs}`,
+      transformResponse: (response: any) => {
+        console.log(`Dashboard Variable Selection Dynamic Values Response:`, response);
+        if (response.error) {
+          throw new Error(response.error);
+        }
+        return response.data;
+      },
+    }),
   }),
 });
 
 // Hooks
-export const { useGetDashboardQuery, useLazyGetDashboardQuery } = dashboardApi;
+export const { useGetDashboardQuery, useLazyGetDashboardQuery, useGetDashboardVariableSelectionDynamicValuesQuery, useLazyGetDashboardVariableSelectionDynamicValuesQuery } = dashboardApi;
