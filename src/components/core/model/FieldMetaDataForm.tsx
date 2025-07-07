@@ -2592,7 +2592,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   htmlFor="computedFieldValueProvider"
                                   className="form-field-label"
                                 >
-                                  IEntity Computed Field Provider
+                                  Computed Field Provider
                                 </label>
                                 <SingleSelectAutoCompleteField
                                   key="computedFieldValueProvider"
