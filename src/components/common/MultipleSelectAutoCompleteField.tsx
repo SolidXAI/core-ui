@@ -51,7 +51,7 @@ export const MultipleSelectAutoCompleteField = ({ formik, isFormFieldValid, rela
                 }
                 if (relationField === true) {
                     formik.setFieldValue(fieldName, e.value);
-                    formik.setFieldValue(fieldNameId, e.value.id);
+                    // formik.setFieldValue(fieldNameId, e.value.id);
                 } else {
                     const mediaTypes = e.value.map((i: any) => i[valueKey]);
                     formik.setFieldValue(fieldName, mediaTypes);
