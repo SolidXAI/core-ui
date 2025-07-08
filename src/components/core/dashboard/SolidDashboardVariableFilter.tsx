@@ -1,5 +1,6 @@
 "use client";
 import { Button } from "primereact/button";
+import { Divider } from "primereact/divider"
 import { Dispatch, SetStateAction, useState } from "react";
 import { ISolidDashboardVariableFilterRule, SolidDashboardVariableType } from "./SolidDashboard";
 import SolidDashboardVariableDate from "./variable-filters/SolidDashboardVariableDate";
@@ -41,9 +42,9 @@ const SolidDashboardVariableFilteredVariable: React.FC<SolidDashboardVariableFil
         case SolidDashboardVariableType.DATE:
             return <SolidDashboardVariableDate rule={dashboardVariableFilterRule} onChange={onChange} />;
         case SolidDashboardVariableType.SELECTION_STATIC:
-            return <SolidDashboardVariableSelectionStatic selectionOptions={dashboardVariableFilterRule.selectionStaticValues ?? []}  rule={dashboardVariableFilterRule} onChange={onChange} />;
+            return <SolidDashboardVariableSelectionStatic selectionOptions={dashboardVariableFilterRule.selectionStaticValues ?? []} rule={dashboardVariableFilterRule} onChange={onChange} />;
         case SolidDashboardVariableType.SELECTION_DYNAMIC:
-            return <SolidDashboardVariableSelectionDynamic rule={dashboardVariableFilterRule} onChange={onChange}  />;
+            return <SolidDashboardVariableSelectionDynamic rule={dashboardVariableFilterRule} onChange={onChange} />;
         default:
             return <></>
     }
@@ -79,7 +80,10 @@ const SolidDashboardVariableFilterRule: React.FC<SolidDashboardVariableFilterRul
 export const SolidDashboardVariableFilter: React.FC<SolidDashboardVariableFilterProps> = ({ dashboardVariableFilterRules, setDashboardVariableFilterRules, closeFilterDialog }) => {
     return (
         <div className=''>
-            <SolidDashboardVariableFilterRule dashboardVariableFilterRules={dashboardVariableFilterRules} setDashboardVariableFilterRules={setDashboardVariableFilterRules} />
+            <div className="px-3 py-2">
+                <SolidDashboardVariableFilterRule dashboardVariableFilterRules={dashboardVariableFilterRules} setDashboardVariableFilterRules={setDashboardVariableFilterRules} />
+            </div>
+            <Divider className="m-0" />
             <div className='flex gap-3 mt-3'>
                 <Button label="Apply" size="small" onClick={() => { console.log(dashboardVariableFilterRules) }} type="submit" />
                 <Button type='button' label='Cancel' outlined size='small' onClick={closeFilterDialog} />

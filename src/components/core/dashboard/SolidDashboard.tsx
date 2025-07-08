@@ -141,7 +141,7 @@ const SolidDashboard = () => {
 
 
   return (
-    <div className="p-4">
+    <div className="h-screen surface-0">
       {isLoading && <p>Loading dashboard...</p>}
       {error && <p className="text-red-600">Failed to load dashboard.</p>}
       {!isLoading && !error && (
