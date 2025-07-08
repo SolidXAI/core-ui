@@ -2,6 +2,7 @@
 import { Dropdown } from 'primereact/dropdown';
 import { InputTypes, SolidVarInputsFilterElement } from '../../filter/SolidVarInputsFilterElement';
 import { SolidDashboardVariableFilteredVariableProps } from '../SolidDashboardVariableFilter';
+import { SolidDashboardVariableVarInputsFilterElement } from '../SolidDashboardVariableVarInputsFilterElement';
 
 export const dateFilterMatchModeOptions = [
     { label: 'Equals', value: "$eqi" },
@@ -40,7 +41,7 @@ const SolidDashboardVariableDate: React.FC<SolidDashboardVariableFilteredVariabl
                 className="w-full p-inputtext-sm"
             />
             <div className='flex flex-column gap-2 w-full'>
-                <SolidVarInputsFilterElement
+                <SolidDashboardVariableVarInputsFilterElement
                     values={[rule.value]} //FIXME: This should be an array of date values, but currently it's a single value
                     onChange={(e: any) => {
                         onChange(rule.id, 'value', e)
@@ -50,7 +51,7 @@ const SolidDashboardVariableDate: React.FC<SolidDashboardVariableFilteredVariabl
                     inputType={InputTypes.Date}
                     fieldMetadata={null}
                 >
-                </SolidVarInputsFilterElement>
+                </SolidDashboardVariableVarInputsFilterElement>
             </div>
         </div>
     );

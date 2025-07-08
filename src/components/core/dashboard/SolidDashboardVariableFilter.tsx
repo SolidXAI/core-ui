@@ -81,7 +81,7 @@ export const SolidDashboardVariableFilter: React.FC<SolidDashboardVariableFilter
         <div className=''>
             <SolidDashboardVariableFilterRule dashboardVariableFilterRules={dashboardVariableFilterRules} setDashboardVariableFilterRules={setDashboardVariableFilterRules} />
             <div className='flex gap-3 mt-3'>
-                <Button label="Apply" size="small" onClick={() => { console.log("transform rules pending ...") }} type="submit" />
+                <Button label="Apply" size="small" onClick={() => { console.log(dashboardVariableFilterRules) }} type="submit" />
                 <Button type='button' label='Cancel' outlined size='small' onClick={closeFilterDialog} />
             </div>
         </div>

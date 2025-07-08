@@ -81,7 +81,7 @@ function getDefaultFilterRules(variables: any) {
       case SolidDashboardVariableType.SELECTION_DYNAMIC:
         return {
           ...variable,
-          value: '', // Default value for dynamic selection variable
+          value: [{label: "Oswald Rodrigues", value: "oswald@logicloop.io"}], // Default value for dynamic selection variable
           matchMode: '$in', // Default match mode for selection dynamic variable
         };
       default:

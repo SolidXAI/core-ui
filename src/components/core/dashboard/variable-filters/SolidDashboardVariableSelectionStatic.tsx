@@ -3,6 +3,7 @@ import { Dropdown } from 'primereact/dropdown';
 // import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { InputTypes, SolidVarInputsFilterElement } from '../../filter/SolidVarInputsFilterElement';
 import { SolidDashboardVariableFilteredVariableProps } from '../SolidDashboardVariableFilter';
+import { SolidDashboardVariableVarInputsFilterElement } from '../SolidDashboardVariableVarInputsFilterElement';
 
 
 // Contains the selection options for the static selection filter e.g in format "value:label"
@@ -40,7 +41,7 @@ const SolidDashboardVariableSelectionStatic = ({ selectionOptions, rule, onChang
                 className="w-full p-inputtext-sm"
             />
             <div className='flex flex-column gap-2 w-full'>
-                <SolidVarInputsFilterElement
+                <SolidDashboardVariableVarInputsFilterElement
                     values={[rule.value?.includes(":") ? rule.value.split(":")[0] : null] }
                     onChange={(e: any) => {
                         onChange(rule.id, 'value', e)
@@ -50,7 +51,7 @@ const SolidDashboardVariableSelectionStatic = ({ selectionOptions, rule, onChang
                     inputType={InputTypes.SelectionStatic}
                     fieldMetadata={fieldMetadata}
                 >
-                </SolidVarInputsFilterElement>
+                </SolidDashboardVariableVarInputsFilterElement>
             </div>
         </div>
     );
