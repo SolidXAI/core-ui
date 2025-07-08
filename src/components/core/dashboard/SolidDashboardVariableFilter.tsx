@@ -53,27 +53,26 @@ const SolidDashboardVariableFilteredVariable: React.FC<SolidDashboardVariableFil
 const SolidDashboardVariableFilterRule: React.FC<SolidDashboardVariableFilterRuleProps> = ({ dashboardVariableFilterRules, setDashboardVariableFilterRules }) => {
     const [selectedVariable, setSelectedVariable] = useState<ISolidDashboardVariableFilterRule | null>(null);
     return (
-        <>
+        <div className="flex flex-column gap-2">
             {dashboardVariableFilterRules.map((rule) => (
-                <div className='flex align-items-center gap-3'>
-                    <div className='formgrid grid w-full'>
-                        <div className='col-4'>
-                            <div className="w-full p-inputtext-sm border rounded px-2 py-1 bg-gray-100">
-                                {rule?.name || 'No variable selected'}
-                            </div>                </div>
-                        <div className='col-8'>
-                            <div className='formgrid grid w-full'>
-                                {
-                                    <div className='col-12'>
-                                        <SolidDashboardVariableFilteredVariable rule={rule} onChange={getRuleOnChangeFunc(setDashboardVariableFilterRules)} />
-                                    </div>
-                                }
-                            </div>
+                <div className='formgrid grid w-full'>
+                    <div className='col-4'>
+                        <div>
+                            {rule?.name || 'No variable selected'}
+                        </div>
+                    </div>
+                    <div className='col-8'>
+                        <div className='formgrid grid w-full'>
+                            {
+                                <div className='col-12'>
+                                    <SolidDashboardVariableFilteredVariable rule={rule} onChange={getRuleOnChangeFunc(setDashboardVariableFilterRules)} />
+                                </div>
+                            }
                         </div>
                     </div>
                 </div>
             ))}
-        </>
+        </div>
     )
 }
 
@@ -84,7 +83,7 @@ export const SolidDashboardVariableFilter: React.FC<SolidDashboardVariableFilter
                 <SolidDashboardVariableFilterRule dashboardVariableFilterRules={dashboardVariableFilterRules} setDashboardVariableFilterRules={setDashboardVariableFilterRules} />
             </div>
             <Divider className="m-0" />
-            <div className='flex gap-3 mt-3'>
+            <div className='flex gap-3 p-3'>
                 <Button label="Apply" size="small" onClick={() => { console.log(dashboardVariableFilterRules) }} type="submit" />
                 <Button type='button' label='Cancel' outlined size='small' onClick={closeFilterDialog} />
             </div>
