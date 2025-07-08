@@ -291,26 +291,33 @@ const SolidSheet = ({ children }: any) => (
     </div>
 );
 
-const SolidNotebook = ({ children, activeTab }: any) => {
+const SolidNotebook = ({ children, activeTab, embeded }: any) => {
     const childrenArray = children;
     const router = useRouter();
 
+    // Local state to manage active tab in embedded context
+    const [localActiveTab, setLocalActiveTab] = useState(activeTab);
+
     const activeIndex = useMemo(() => {
         return childrenArray.findIndex((child: any) => {
-            return child.key === activeTab;
+            return child.key === (embeded ? localActiveTab : activeTab);
         });
-    }, [childrenArray, activeTab]);
-
+    }, [childrenArray, activeTab, localActiveTab, embeded]);
 
     const handleTabChange = (e: any) => {
         const selectedChild = childrenArray[e.index] as any;
         const newTabLabel = selectedChild?.key;
 
         if (newTabLabel) {
-            const currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.set('activeTab', newTabLabel);
-            const updatedPath = currentUrl.toString();
-            router.push(updatedPath);
+            if (!embeded) {
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('activeTab', newTabLabel);
+                const updatedPath = currentUrl.toString();
+                router.push(updatedPath);
+            } else {
+                // Update the active tab state locally for embedded view
+                setLocalActiveTab(newTabLabel);
+            }
         }
     };
 
@@ -1117,7 +1124,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
                 case "notebook":
                     if (visible === true) {
-                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</SolidNotebook>;
+                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""}  embeded={params.embeded}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</SolidNotebook>;
                     }
                 case "page":
                     if (visible === true) {
