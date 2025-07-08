@@ -4,7 +4,7 @@ import moment from 'moment';
 import qs from 'qs';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import SolidDashboardBody, { SolidDashboardBodyProps } from './SolidDashboardBody';
-import SolidDashboardVariableFilterWrapper from './SolidDashboardVariableFilterWrapper';
+import SolidDashboardVariableFilterDialog from './SolidDashboardVariableFilterWrapper';
 
 export enum SolidDashboardVariableType {
   DATE = 'date',
@@ -30,40 +30,6 @@ export interface ISolidDashboardVariableRecord {
 export interface ISolidDashboardVariableFilterRule extends ISolidDashboardVariableRecord {
   value: string | string[]; // The value(s) selected by the user
   matchMode: string;
-}
-
-const SolidDashboard = () => {
-  const { data, isLoading, error } = useGetDashboardQuery(getQueryParams()) //FIXME : error handling should be done properly
-  // Define a state called layoutOption and pass it after destructing the widgetOptions and dashboardOptions from layoutOption
-  const [layoutOption, setLayoutOption] = useState<SolidDashboardBodyProps>({});
-  // const [dashboardVariables, setDashboardVariables] = useState<SolidDashboardVariableRecord[]>([]);
-  const [dashboardVariableFilterRules, setDashboardVariableFilterRules] = useState<ISolidDashboardVariableFilterRule[]>([]);
-
-  useEffect(() => {
-    // Invoke the dashboard api to fetch the dashboard data
-    console.log('Dashboard Data testing:', isLoading, data, error);
-    if (!isLoading && data) {
-      // Assuming data contains the layout options
-      handleDashboardData(data, setLayoutOption, setDashboardVariableFilterRules);
-    }
-  }, [isLoading, data]);
-
-
-  return (
-    <div className="p-4">
-      {isLoading && <p>Loading dashboard...</p>}
-      {error && <p className="text-red-600">Failed to load dashboard.</p>}
-      {!isLoading && !error && (
-        <>
-          <SolidDashboardVariableFilterWrapper dashboardVariableFilterRules={dashboardVariableFilterRules} />
-          <SolidDashboardBody
-            dashboardOptions={layoutOption.dashboardOptions ?? {}}
-            widgetOptions={layoutOption.widgetOptions ?? []}
-          />
-        </>
-      )}
-    </div>
-  );
 }
 
 function handleDashboardData(data: DashboardResponse, setLayoutOption: Dispatch<SetStateAction<SolidDashboardBodyProps>>, setDashboardVariableFilterRules: Dispatch<SetStateAction<ISolidDashboardVariableFilterRule[]>>) {
@@ -154,4 +120,39 @@ function getDashboardLayoutOptions(dashboardRecord: any) {
     dashboardOptions: layoutJsonParsed.dashboardOptions || {}
   };
 }
+
+const SolidDashboard = () => {
+  const { data, isLoading, error } = useGetDashboardQuery(getQueryParams()) //FIXME : error handling should be done properly
+  // Define a state called layoutOption and pass it after destructing the widgetOptions and dashboardOptions from layoutOption
+  const [layoutOption, setLayoutOption] = useState<SolidDashboardBodyProps>({});
+  // const [dashboardVariables, setDashboardVariables] = useState<SolidDashboardVariableRecord[]>([]);
+  const [dashboardVariableFilterRules, setDashboardVariableFilterRules] = useState<ISolidDashboardVariableFilterRule[]>([]);
+
+  useEffect(() => {
+    // Invoke the dashboard api to fetch the dashboard data
+    console.log('Dashboard Data testing:', isLoading, data, error);
+    if (!isLoading && data) {
+      // Assuming data contains the layout options
+      handleDashboardData(data, setLayoutOption, setDashboardVariableFilterRules);
+    }
+  }, [isLoading, data]);
+
+
+  return (
+    <div className="p-4">
+      {isLoading && <p>Loading dashboard...</p>}
+      {error && <p className="text-red-600">Failed to load dashboard.</p>}
+      {!isLoading && !error && (
+        <>
+          <SolidDashboardVariableFilterDialog dashboardVariableFilterRules={dashboardVariableFilterRules} setDashboardVariableFilterRules={setDashboardVariableFilterRules} />
+          <SolidDashboardBody
+            dashboardOptions={layoutOption.dashboardOptions ?? {}}
+            widgetOptions={layoutOption.widgetOptions ?? []}
+          />
+        </>
+      )}
+    </div>
+  );
+}
+
 export default SolidDashboard;

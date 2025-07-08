@@ -1,18 +1,29 @@
 "use client";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
-import { useState } from "react";
+import { Dispatch, SetStateAction, useState } from "react";
 import { ISolidDashboardVariableFilterRule, SolidDashboardVariableType } from "./SolidDashboard";
-import { SolidDashboardVariablesFilterProps } from "./SolidDashboardVariableFilterWrapper";
+import { SolidDashboardVariablesFilterDialogProps } from "./SolidDashboardVariableFilterWrapper";
 import SolidDashboardVariableDate from "./variable-filters/SolidDashboardVariableDate";
 import SolidDashboardVariableSelectionDynamic from "./variable-filters/SolidDashboardVariableSelectionDynamic";
 import SolidDashboardVariableSelectionStatic from "./variable-filters/SolidDashboardVariableSelectionStatic";
 
-export interface SolidDashboardVariableFilterProps {
+export interface SolidDashboardVariableFilteredVariableProps {
     dashboardVariableFilterRule: ISolidDashboardVariableFilterRule;
+    // setDashboardVariableFilterRules: Dispatch<SetStateAction<ISolidDashboardVariableFilterRule[]>>;
+
+}
+export interface SolidDashboardVariableFilterRuleProps {
+    dashboardVariableFilterRules: ISolidDashboardVariableFilterRule[];
+    setDashboardVariableFilterRules: Dispatch<SetStateAction<ISolidDashboardVariableFilterRule[]>>;
+}
+export interface SolidDashboardVariableFilterProps {
+    dashboardVariableFilterRules: ISolidDashboardVariableFilterRule[];
+    setDashboardVariableFilterRules: Dispatch<SetStateAction<ISolidDashboardVariableFilterRule[]>>;
+    closeFilterDialog: () => void;
 }
 
-const SolidDashboardVariableFilteredVariable: React.FC<SolidDashboardVariableFilterProps> = ({ dashboardVariableFilterRule }) => {
+const SolidDashboardVariableFilteredVariable: React.FC<SolidDashboardVariableFilteredVariableProps> = ({ dashboardVariableFilterRule }) => {
     switch (dashboardVariableFilterRule.type) {
         case SolidDashboardVariableType.DATE:
             return <SolidDashboardVariableDate />;
@@ -25,7 +36,7 @@ const SolidDashboardVariableFilteredVariable: React.FC<SolidDashboardVariableFil
     }
 }
 
-const SolidDashboardVariableFilterRule: React.FC<SolidDashboardVariablesFilterProps> = ({ dashboardVariableFilterRules }) => {
+const SolidDashboardVariableFilterRule: React.FC<SolidDashboardVariableFilterRuleProps> = ({ dashboardVariableFilterRules, setDashboardVariableFilterRules }) => {
     const [selectedVariable, setSelectedVariable] = useState<ISolidDashboardVariableFilterRule | null>(null);
     return (
         <>
@@ -43,7 +54,6 @@ const SolidDashboardVariableFilterRule: React.FC<SolidDashboardVariablesFilterPr
                                         <SolidDashboardVariableFilteredVariable dashboardVariableFilterRule={rule} />
                                     </div>
                                 }
-
                             </div>
                         </div>
                     </div>
@@ -53,14 +63,13 @@ const SolidDashboardVariableFilterRule: React.FC<SolidDashboardVariablesFilterPr
     )
 }
 
-export const SolidDashboardVariableFilter: React.FC<SolidDashboardVariablesFilterProps> = ({ dashboardVariableFilterRules }) => {
+export const SolidDashboardVariableFilter: React.FC<SolidDashboardVariableFilterProps> = ({ dashboardVariableFilterRules, setDashboardVariableFilterRules, closeFilterDialog }) => {
     return (
         <div className=''>
-
-            <SolidDashboardVariableFilterRule dashboardVariableFilterRules={dashboardVariableFilterRules} />
+            <SolidDashboardVariableFilterRule dashboardVariableFilterRules={dashboardVariableFilterRules} setDashboardVariableFilterRules={setDashboardVariableFilterRules} />
             <div className='flex gap-3 mt-3'>
-                <Button label="Apply" size="small" onClick={() => { console.log("Dashboard variable filter applied") }} type="submit" />
-                <Button type='button' label='Cancel' outlined size='small' onClick={() => { console.log("Dashboard variable filter cancelled") }} />
+                <Button label="Apply" size="small" onClick={() => { console.log("transform rules pending ...") }} type="submit" />
+                <Button type='button' label='Cancel' outlined size='small' onClick={closeFilterDialog} />
             </div>
         </div>
     );

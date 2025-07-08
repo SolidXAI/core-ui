@@ -4,20 +4,24 @@ import { Dialog } from "primereact/dialog";
 import { Divider } from "primereact/divider";
 import SolidDashboardVariableFilter from "./SolidDashboardVariableFilter";
 import { ISolidDashboardVariableFilterRule, ISolidDashboardVariableRecord } from "./SolidDashboard";
-export interface SolidDashboardVariablesFilterProps {
+import { Dispatch, SetStateAction } from "react";
+import React from "react";
+export interface SolidDashboardVariablesFilterDialogProps {
   dashboardVariableFilterRules: ISolidDashboardVariableFilterRule[];
+  setDashboardVariableFilterRules: Dispatch<SetStateAction<ISolidDashboardVariableFilterRule[]>>;
 }
 
-const SolidDashboardVariableFilterWrapper: React.FC<SolidDashboardVariablesFilterProps> = ({dashboardVariableFilterRules}) => {
+const SolidDashboardVariableFilterDialog: React.FC<SolidDashboardVariablesFilterDialogProps> = ({dashboardVariableFilterRules, setDashboardVariableFilterRules}) => {
+  const [showFilterDialog, setShowFilterDialog] = React.useState(true);
   return (
-      <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={true} style={{ width: '65vw' }} onHide={() => { console.log('Dialog closed'); }}>
+      <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={showFilterDialog} style={{ width: '65vw' }} onHide={() => { if (!showFilterDialog) return; setShowFilterDialog(false); }}>
         <div className="flex align-items-center justify-content-between px-3">
           <h5 className="solid-custom-title m-0">Add Variable Filter</h5>
-          <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => {console.log("Cancel clicked")}} />
+          <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => {setShowFilterDialog(false)}} />
         </div>
         <Divider className="m-0" />
-        <SolidDashboardVariableFilter dashboardVariableFilterRules={dashboardVariableFilterRules}/>
+        <SolidDashboardVariableFilter dashboardVariableFilterRules={dashboardVariableFilterRules} setDashboardVariableFilterRules={setDashboardVariableFilterRules} closeFilterDialog={() => {setShowFilterDialog(false)}}/>
       </Dialog>
   );
 }
-export default SolidDashboardVariableFilterWrapper;
+export default SolidDashboardVariableFilterDialog;
