@@ -23,13 +23,36 @@ const SolidChangeForcePassword = () => {
             life: 3000,
         });
     };
+
+    const envPasswordRegex = process.env.NEXT_PUBLIC_PASSWORD_REGEX;
+    const envPasswordHelperText = process.env.NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC;
+    let passwordRegex: RegExp | null = null;
+    try {
+        if (envPasswordRegex) {
+            const unescaped = JSON.parse(`"${envPasswordRegex}"`);
+            passwordRegex = new RegExp(unescaped);
+        }
+    } catch (error) {
+        console.error("Invalid password regex in .env:", error);
+    }
+
+    const newPasswordValidation = passwordRegex
+        ? Yup.string()
+            .matches(passwordRegex, 'Password does not meet complexity requirements')
+            .required('New password is required')
+        : Yup.string().min(6, 'Password must be at least 6 characters')
+            .required('New password is required');
+
     const validationSchema = Yup.object({
         email: Yup.string().email('Invalid email format').required('Email is required'),
         currentPassword: Yup.string().min(6, 'Password must be at least 6 characters').required('Current password is required'),
-        newPassword: Yup.string().min(6, 'Password must be at least 6 characters').required('New password is required'),
-        confirmPassword: Yup.string().oneOf([Yup.ref('newPassword')], 'Passwords must match').required('Confirm password is required'),
+        newPassword: newPasswordValidation,
+        confirmPassword: Yup.string()
+            .oneOf([Yup.ref('newPassword')], 'Passwords must match')
+            .required('Confirm password is required'),
         id: Yup.number().required('User ID is required'),
     });
+
     const formik = useFormik({
         initialValues: {
             email: session?.data?.user?.user?.email,
@@ -173,6 +196,19 @@ const SolidChangeForcePassword = () => {
                         })}
                     </div>
                 </div> */}
+                {envPasswordHelperText && (
+                    <div className="mt-4">
+                        <div className="grid">
+                            {envPasswordHelperText
+                                .split('\\n')
+                                .map((text, idx) => (
+                                    <div key={idx} className="col-6 pt-0">
+                                        <div className='flex gap-2'><span>•</span><span>{text}</span></div>
+                                    </div>
+                                ))}
+                        </div>
+                    </div>
+                )}
                 <div className="mt-4">
                     <Button className="w-full font-light auth-submit-button" label="Change Password" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
                 </div>
