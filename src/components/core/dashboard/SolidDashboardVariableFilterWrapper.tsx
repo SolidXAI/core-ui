@@ -22,7 +22,7 @@ const SolidDashboardVariableFilterDialog: React.FC<SolidDashboardVariablesFilter
         <Button size="small" label="Filter" outlined onClick={()=>setShowFilterDialog(true)}/>
       </div>
 
-      <Dialog header={<h5>Add Variable Filter</h5>} headerClassName="px-3 py-2" contentClassname="p-0" visible={showFilterDialog} style={{ width: '65vw' }} onHide={() => { if (!showFilterDialog) return; setShowFilterDialog(false); }}>
+      <Dialog header={<h5>Add Variable Filter</h5>} headerClassName="px-3 py-2" contentClassName="p-0" visible={showFilterDialog} style={{ width: '65vw' }} onHide={() => { if (!showFilterDialog) return; setShowFilterDialog(false); }}>
         <SolidDashboardVariableFilter dashboardVariableFilterRules={dashboardVariableFilterRules} setDashboardVariableFilterRules={setDashboardVariableFilterRules} closeFilterDialog={() => { setShowFilterDialog(false) }} />
       </Dialog>
     </div>
