@@ -1,5 +1,6 @@
 "use client";
 import { DashboardResponse, useGetDashboardQuery } from '@/redux/api/dashboardApi';
+import moment from 'moment';
 import qs from 'qs';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import SolidDashboardBody, { SolidDashboardBodyProps } from './SolidDashboardBody';
@@ -15,7 +16,7 @@ enum SOURCE_TYPE {
   SQL = 'sql',
   PROVIDER = 'provider',
 }
-export interface SolidDashboardVariableRecord {
+export interface ISolidDashboardVariableRecord {
   name: string;
   type: SolidDashboardVariableType;
   isMultiple: boolean;
@@ -26,18 +27,24 @@ export interface SolidDashboardVariableRecord {
   sourceType?: SOURCE_TYPE;
 }
 
+export interface ISolidDashboardVariableFilterRule extends ISolidDashboardVariableRecord {
+  value: string | string[]; // The value(s) selected by the user
+  matchMode: string;
+}
+
 const SolidDashboard = () => {
   const { data, isLoading, error } = useGetDashboardQuery(getQueryParams()) //FIXME : error handling should be done properly
   // Define a state called layoutOption and pass it after destructing the widgetOptions and dashboardOptions from layoutOption
   const [layoutOption, setLayoutOption] = useState<SolidDashboardBodyProps>({});
-  const [dashboardVariables, setDashboardVariables] = useState<SolidDashboardVariableRecord[]>([]);
+  // const [dashboardVariables, setDashboardVariables] = useState<SolidDashboardVariableRecord[]>([]);
+  const [dashboardVariableFilterRules, setDashboardVariableFilterRules] = useState<ISolidDashboardVariableFilterRule[]>([]);
 
   useEffect(() => {
     // Invoke the dashboard api to fetch the dashboard data
     console.log('Dashboard Data testing:', isLoading, data, error);
     if (!isLoading && data) {
       // Assuming data contains the layout options
-      handleDashboardData(data, setLayoutOption, setDashboardVariables);
+      handleDashboardData(data, setLayoutOption, setDashboardVariableFilterRules);
     }
   }, [isLoading, data]);
 
@@ -48,7 +55,7 @@ const SolidDashboard = () => {
       {error && <p className="text-red-600">Failed to load dashboard.</p>}
       {!isLoading && !error && (
         <>
-          <SolidDashboardVariableFilterWrapper dashboardVariables={dashboardVariables} />
+          <SolidDashboardVariableFilterWrapper dashboardVariableFilterRules={dashboardVariableFilterRules} />
           <SolidDashboardBody
             dashboardOptions={layoutOption.dashboardOptions ?? {}}
             widgetOptions={layoutOption.widgetOptions ?? []}
@@ -59,25 +66,65 @@ const SolidDashboard = () => {
   );
 }
 
-function handleDashboardData(data: DashboardResponse, setLayoutOption: Dispatch<SetStateAction<SolidDashboardBodyProps>>, setDashboardVariables: Dispatch<SetStateAction<SolidDashboardVariableRecord[]>>) {
+function handleDashboardData(data: DashboardResponse, setLayoutOption: Dispatch<SetStateAction<SolidDashboardBodyProps>>, setDashboardVariableFilterRules: Dispatch<SetStateAction<ISolidDashboardVariableFilterRule[]>>) {
   const { records, meta } = data;
   if (records && records.length > 0) {
+    // Set the layout options for the dashboard body
     const dashboardData = records[0]; // Assuming we want the first dashboard
     setLayoutOption(getDashboardLayoutOptions(dashboardData));
-    // Extract dashboard variables from the dashboard data
+
+    // Set the filter rules based on the dashboard variables
     const variables = dashboardData.dashboardVariables || [];
-    const formattedVariables = variables.map((variable: any) => ({
-      name: variable.variableName,
-      type: variable.variableType,
-      isMultiple: variable.isMultiple || false,
-      selectionStaticValues: variable.selectionStaticValues ? JSON.parse(variable.selectionStaticValues) : [],
-      selectionDyanmicSourceType: variable.selectionDyanmicSourceType || SOURCE_TYPE.SQL,
-      selectionDynamicProviderName: variable.selectionDynamicProviderName || '',
-      selectionDynamicSQL: variable.selectionDynamicSQL || '',
-      sourceType: variable.sourceType || SOURCE_TYPE.SQL,
-    }));
-    setDashboardVariables(formattedVariables);
+    const defaultRules = getDefaultFilterRules(variables);
+    setDashboardVariableFilterRules(defaultRules);
   }
+}
+
+function getDefaultFilterRules(variables: any) {
+  const formattedVariables: ISolidDashboardVariableRecord[] = variables.map((variable: any) => ({
+    name: variable.variableName,
+    type: variable.variableType,
+    isMultiple: variable.isMultiple || false,
+    selectionStaticValues: variable.selectionStaticValues ? JSON.parse(variable.selectionStaticValues) : [],
+    selectionDyanmicSourceType: variable.selectionDyanmicSourceType || SOURCE_TYPE.SQL,
+    selectionDynamicProviderName: variable.selectionDynamicProviderName || '',
+    selectionDynamicSQL: variable.selectionDynamicSQL || '',
+    sourceType: variable.sourceType || SOURCE_TYPE.SQL,
+  }));
+
+  // Set the filter rules based on the formatted variables
+  const filterRules = formattedVariables.map((variable: ISolidDashboardVariableRecord) => {
+    // Based on the variable type, set default values and match modes
+    // Date variables will be for the last 1 month by default
+    // Selection variables will be '' the first option by default
+    switch (variable.type) {
+      case SolidDashboardVariableType.DATE:
+        return {
+          ...variable,
+          value: moment().subtract(1, 'months').format('MM/DD/YYYY'), // Value need to be 1 month ago for date variable
+          matchMode: '$gte', // Default match mode for date variable
+        };
+      case SolidDashboardVariableType.SELECTION_STATIC:
+        return {
+          ...variable,
+          value: variable?.selectionStaticValues?.[0] || '', // Default to first static selection value
+          matchMode: '$eq', // Default match mode for selection static variable
+        };
+      case SolidDashboardVariableType.SELECTION_DYNAMIC:
+        return {
+          ...variable,
+          value: '', // Default value for dynamic selection variable
+          matchMode: '$eq', // Default match mode for selection dynamic variable
+        };
+      default:
+        return {
+          ...variable,
+          value: '', // Default value for other types
+          matchMode: '$eq',
+        };
+    }
+  });
+  return filterRules;
 }
 
 function getQueryParams() {
