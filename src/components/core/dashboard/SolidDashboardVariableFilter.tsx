@@ -1,17 +1,14 @@
 "use client";
 import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
 import { Dispatch, SetStateAction, useState } from "react";
 import { ISolidDashboardVariableFilterRule, SolidDashboardVariableType } from "./SolidDashboard";
-import { SolidDashboardVariablesFilterDialogProps } from "./SolidDashboardVariableFilterWrapper";
 import SolidDashboardVariableDate from "./variable-filters/SolidDashboardVariableDate";
 import SolidDashboardVariableSelectionDynamic from "./variable-filters/SolidDashboardVariableSelectionDynamic";
 import SolidDashboardVariableSelectionStatic from "./variable-filters/SolidDashboardVariableSelectionStatic";
 
 export interface SolidDashboardVariableFilteredVariableProps {
-    dashboardVariableFilterRule: ISolidDashboardVariableFilterRule;
-    // setDashboardVariableFilterRules: Dispatch<SetStateAction<ISolidDashboardVariableFilterRule[]>>;
-
+    rule: ISolidDashboardVariableFilterRule;
+    onChange: (id: number, key: keyof ISolidDashboardVariableFilterRule, value: any) => void;
 }
 export interface SolidDashboardVariableFilterRuleProps {
     dashboardVariableFilterRules: ISolidDashboardVariableFilterRule[];
@@ -23,14 +20,30 @@ export interface SolidDashboardVariableFilterProps {
     closeFilterDialog: () => void;
 }
 
-const SolidDashboardVariableFilteredVariable: React.FC<SolidDashboardVariableFilteredVariableProps> = ({ dashboardVariableFilterRule }) => {
+// Create a function onChange func which return a function that updates the state of the dashboardVariableFilterRules  and takes id, key, value as parameters
+function getRuleOnChangeFunc(
+    setDashboardVariableFilterRules: Dispatch<SetStateAction<ISolidDashboardVariableFilterRule[]>>
+) {
+    return (
+        id: number,
+        key: keyof ISolidDashboardVariableFilterRule,
+        value: any,
+    ) => {
+        setDashboardVariableFilterRules((prevRules) =>
+            prevRules.map((r) => (r.id === id ? { ...r, [key]: value } : r))
+        );
+        console.log("Updated rule:", id, key, value);
+    };
+}
+
+const SolidDashboardVariableFilteredVariable: React.FC<SolidDashboardVariableFilteredVariableProps> = ({ rule: dashboardVariableFilterRule, onChange }) => {
     switch (dashboardVariableFilterRule.type) {
         case SolidDashboardVariableType.DATE:
-            return <SolidDashboardVariableDate />;
+            return <SolidDashboardVariableDate rule={dashboardVariableFilterRule} onChange={onChange} />;
         case SolidDashboardVariableType.SELECTION_STATIC:
-            return <SolidDashboardVariableSelectionStatic selectionOptions={dashboardVariableFilterRule.selectionStaticValues ?? []} />;
+            return <SolidDashboardVariableSelectionStatic selectionOptions={dashboardVariableFilterRule.selectionStaticValues ?? []}  rule={dashboardVariableFilterRule} onChange={onChange} />;
         case SolidDashboardVariableType.SELECTION_DYNAMIC:
-            return <SolidDashboardVariableSelectionDynamic />;
+            return <SolidDashboardVariableSelectionDynamic rule={dashboardVariableFilterRule} onChange={onChange}  />;
         default:
             return <></>
     }
@@ -51,7 +64,7 @@ const SolidDashboardVariableFilterRule: React.FC<SolidDashboardVariableFilterRul
                             <div className='formgrid grid w-full'>
                                 {
                                     <div className='col-12'>
-                                        <SolidDashboardVariableFilteredVariable dashboardVariableFilterRule={rule} />
+                                        <SolidDashboardVariableFilteredVariable rule={rule} onChange={getRuleOnChangeFunc(setDashboardVariableFilterRules)} />
                                     </div>
                                 }
                             </div>

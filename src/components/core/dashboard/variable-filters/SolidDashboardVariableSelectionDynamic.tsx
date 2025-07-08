@@ -1,6 +1,7 @@
 "use client";
 import { Dropdown } from 'primereact/dropdown';
 import { SolidDashboardSelectionDynamicFilterElement } from './SolidDashboardSelectionDynamicFilterElement';
+import { SolidDashboardVariableFilteredVariableProps } from '../SolidDashboardVariableFilter';
 // import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 
 const SolidDashboardVariableSelectionDynamicValue = () => {
@@ -9,7 +10,7 @@ const SolidDashboardVariableSelectionDynamicValue = () => {
     )
 }
 
-const SolidDashboardVariableSelectionDynamic = ({ }) => {
+const SolidDashboardVariableSelectionDynamic = ({ rule, onChange}: SolidDashboardVariableFilteredVariableProps) => {
     // const showFilterOperator = false;
     // const columnDataType = fieldMetadata.selectionValueType === 'int' ? 'numeric' : 'text';
     const filterMatchModeOptions = [
@@ -29,8 +30,8 @@ const SolidDashboardVariableSelectionDynamic = ({ }) => {
             <Dropdown
                 value={null}
                 onChange={(e: any) => {
-                    // onChange(rule.id, 'matchMode', e.value)
-                    console.warn('Match mode change not implemented for dynamic selection', e.value);
+                    onChange(rule.id, 'matchMode', e.value)
+                    // console.warn('Match mode change not implemented for dynamic selection', e.value);
                 }}
                 options={filterMatchModeOptions}
                 optionLabel='label'

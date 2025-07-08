@@ -2,14 +2,15 @@
 import { Dropdown } from 'primereact/dropdown';
 // import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { InputTypes, SolidVarInputsFilterElement } from '../../filter/SolidVarInputsFilterElement';
+import { SolidDashboardVariableFilteredVariableProps } from '../SolidDashboardVariableFilter';
 
 
 // Contains the selection options for the static selection filter e.g in format "value:label"
-export interface SolidDashboardVariableSelectionStaticProps {
+export interface SolidDashboardVariableSelectionStaticProps extends SolidDashboardVariableFilteredVariableProps {
     selectionOptions: string[];
 }
 
-const SolidDashboardVariableSelectionStatic = ({ selectionOptions }: SolidDashboardVariableSelectionStaticProps) => {
+const SolidDashboardVariableSelectionStatic = ({ selectionOptions, rule, onChange }: SolidDashboardVariableSelectionStaticProps) => {
 
     // const filterable = column.attrs.filterable;
     // const showFilterOperator = false;
@@ -27,10 +28,10 @@ const SolidDashboardVariableSelectionStatic = ({ selectionOptions }: SolidDashbo
     return (
         <div className='flex align-items-start gap-3 w-full'>
             <Dropdown
-                value={null}
+                value={rule.matchMode}
                 onChange={(e: any) => {
-                    // onChange(rule.id, 'matchMode', e.value)
-                    console.warn('Match mode change not implemented for static selection', e.value);
+                    onChange(rule.id, 'matchMode', e.value)
+                    // console.warn('Match mode change not implemented for static selection', e.value);
                 }}
                 options={filterMatchModeOptions}
                 optionLabel='label'
@@ -40,10 +41,10 @@ const SolidDashboardVariableSelectionStatic = ({ selectionOptions }: SolidDashbo
             />
             <div className='flex flex-column gap-2 w-full'>
                 <SolidVarInputsFilterElement
-                    values={null}
+                    values={[rule.value?.includes(":") ? rule.value.split(":")[0] : null] }
                     onChange={(e: any) => {
-                        // onChange(rule.id, 'value', e)
-                        console.warn('Value change not implemented for static selection', e);
+                        onChange(rule.id, 'value', e)
+                        // console.warn('Value change not implemented for static selection', e);
                     }}
                     numberOfInputs={0}
                     inputType={InputTypes.SelectionStatic}

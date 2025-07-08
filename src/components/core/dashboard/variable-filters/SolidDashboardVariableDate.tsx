@@ -1,6 +1,7 @@
 "use client";
 import { Dropdown } from 'primereact/dropdown';
 import { InputTypes, SolidVarInputsFilterElement } from '../../filter/SolidVarInputsFilterElement';
+import { SolidDashboardVariableFilteredVariableProps } from '../SolidDashboardVariableFilter';
 
 export const dateFilterMatchModeOptions = [
     { label: 'Equals', value: "$eqi" },
@@ -14,7 +15,7 @@ export const dateFilterMatchModeOptions = [
     { label: 'Between', value: "$between" }
 ];
 
-const SolidDashboardVariableDate = ({}) => {
+const SolidDashboardVariableDate: React.FC<SolidDashboardVariableFilteredVariableProps> = ({rule, onChange}) => {
     // const filterable = column.attrs.filterable;
     const showFilterOperator = false;
     const columnDataType = 'date';
@@ -27,10 +28,10 @@ const SolidDashboardVariableDate = ({}) => {
     return (
         <div className='flex align-items-start gap-3 w-full'>
             <Dropdown
-                value={null}
+                value={rule.matchMode}
                 onChange={(e: any) => {
-                    // onChange(rule.id, 'matchMode', e.value)
-                    console.log('Match mode changed:', e.value);
+                    onChange(rule.id, 'matchMode', e.value)
+                    // console.log('Match mode changed:', e.value);
                 }}
                 options={dateFilterMatchModeOptions}
                 optionLabel='label'
@@ -40,10 +41,10 @@ const SolidDashboardVariableDate = ({}) => {
             />
             <div className='flex flex-column gap-2 w-full'>
                 <SolidVarInputsFilterElement
-                    values={null}
+                    values={[rule.value]} //FIXME: This should be an array of date values, but currently it's a single value
                     onChange={(e: any) => {
-                        // onChange(rule.id, 'value', e)
-                        console.log('Value changed:', e);
+                        onChange(rule.id, 'value', e)
+                        // console.log('Value changed:', e);
                     }}
                     numberOfInputs={0}
                     inputType={InputTypes.Date}

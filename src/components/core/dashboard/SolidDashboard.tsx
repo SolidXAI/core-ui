@@ -17,6 +17,7 @@ enum SOURCE_TYPE {
   PROVIDER = 'provider',
 }
 export interface ISolidDashboardVariableRecord {
+  id : number;
   name: string;
   type: SolidDashboardVariableType;
   isMultiple: boolean;
@@ -28,7 +29,7 @@ export interface ISolidDashboardVariableRecord {
 }
 
 export interface ISolidDashboardVariableFilterRule extends ISolidDashboardVariableRecord {
-  value: string | string[]; // The value(s) selected by the user
+  value: any; // The value(s) selected by the user
   matchMode: string;
 }
 
@@ -48,6 +49,7 @@ function handleDashboardData(data: DashboardResponse, setLayoutOption: Dispatch<
 
 function getDefaultFilterRules(variables: any) {
   const formattedVariables: ISolidDashboardVariableRecord[] = variables.map((variable: any) => ({
+    id: variable.id,
     name: variable.variableName,
     type: variable.variableType,
     isMultiple: variable.isMultiple || false,
@@ -67,20 +69,20 @@ function getDefaultFilterRules(variables: any) {
       case SolidDashboardVariableType.DATE:
         return {
           ...variable,
-          value: moment().subtract(1, 'months').format('MM/DD/YYYY'), // Value need to be 1 month ago for date variable
+          value: moment().subtract(1, 'months').toDate(), // Value need to be 1 month ago for date variable
           matchMode: '$gte', // Default match mode for date variable
         };
       case SolidDashboardVariableType.SELECTION_STATIC:
         return {
           ...variable,
           value: variable?.selectionStaticValues?.[0] || '', // Default to first static selection value
-          matchMode: '$eq', // Default match mode for selection static variable
+          matchMode: '$in', // Default match mode for selection static variable
         };
       case SolidDashboardVariableType.SELECTION_DYNAMIC:
         return {
           ...variable,
           value: '', // Default value for dynamic selection variable
-          matchMode: '$eq', // Default match mode for selection dynamic variable
+          matchMode: '$in', // Default match mode for selection dynamic variable
         };
       default:
         return {
