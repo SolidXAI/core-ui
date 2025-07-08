@@ -39,10 +39,10 @@ export class SolidRelationOneToManyField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        if(!value || value.length === 0) {
-            formData.append(`${fieldLayoutInfo.attrs.name}Command`, "clear");
+        // if(!value || value.length === 0) {
+        //     formData.append(`${fieldLayoutInfo.attrs.name}Command`, "clear");
             
-        }
+        // }
         if (value) {
             formData.append(`${fieldLayoutInfo.attrs.name}Id`, value.value);
         }
