@@ -331,7 +331,7 @@ const SolidNotebook = ({ children, activeTab, embeded }: any) => {
     )
 };
 
-const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData }: any) => {
+const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData, solidFormViewData }: any) => {
     const solidView = solidFormViewMetaData.data.solidView;
     const solidFieldsMetadata = solidFormViewMetaData.data.solidFieldsMetadata;
 
@@ -341,7 +341,8 @@ const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData }
         formData: formik.values,
         field: field,
         fieldsMetadata: solidFieldsMetadata,
-        viewMetadata: solidView
+        viewMetadata: solidView,
+        formViewData: solidFormViewData
     }
 
     return (
@@ -1146,6 +1147,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 formik={formik}
                                 fieldMetadata={fieldMetadata}
                                 solidFormViewMetaData={solidFormViewMetaData}
+                                solidFormViewData={solidFormViewData}
                             />
                         }
                     }

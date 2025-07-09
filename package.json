@@ -26,6 +26,7 @@
   "dependencies": {
     "@faker-js/faker": "^9.9.0",
     "@hello-pangea/dnd": "^18.0.1",
+    "@monaco-editor/react": "^4.7.0",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
     "bootstrap": "^5.3.3",

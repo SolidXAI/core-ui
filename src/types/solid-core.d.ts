@@ -111,12 +111,17 @@ export type SolidLoadForm = {
     formViewLayout: LayoutNode;
 }
 
+export type SolidChartRendererProps = {
+    question: any;
+};
+
 export type SolidFormWidgetProps = {
     field: any;
     // This comes from Formik...
     formData: Record<string, any>;
     viewMetadata: SolidView;
     fieldsMetadata: FieldsMetadata;
+    formViewData: any;
 };
 
 export type SolidFormFieldWidgetProps = {

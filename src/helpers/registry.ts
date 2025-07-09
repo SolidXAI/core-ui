@@ -14,7 +14,7 @@ import { DefaultDecimalFormEditWidget } from "@/components/core/form/fields/Soli
 import { DefaultEmailFormEditWidget } from "@/components/core/form/fields/SolidEmailField";
 import { DefaultIntegerFormEditWidget, SolidIntegerSliderStyleFormEditWidget } from "@/components/core/form/fields/SolidIntegerField";
 import { DefaultJsonFormEditWidget, DefaultJsonFormViewWidget } from "@/components/core/form/fields/SolidJsonField";
-import { DefaultLongTextFormEditWidget } from "@/components/core/form/fields/SolidLongTextField";
+import { DefaultLongTextFormEditWidget, CodeEditorFormEditWidget } from "@/components/core/form/fields/SolidLongTextField";
 import { DefaultMediaMultipleFormEditWidget, DefaultMediaMultipleFormViewWidget } from "@/components/core/form/fields/SolidMediaMultipleField";
 import { DefaultMediaSingleFormEditWidget, DefaultMediaSingleFormViewWidget } from "@/components/core/form/fields/SolidMediaSingleField";
 import { DefaultPasswordFormCreateWidget, DefaultPasswordFormEditWidget, DefaultPasswordFormViewWidget } from "@/components/core/form/fields/SolidPasswordField";
@@ -107,7 +107,7 @@ registerExtensionComponent("BarChartWidget", BarChartWidget, []);
 registerExtensionComponent("DefaultDateFormEditWidget", DefaultDateFormEditWidget, []);
 registerExtensionComponent("DefaultBooleanFormEditWidget", DefaultBooleanFormEditWidget, ["booleanSelectbox"]);
 registerExtensionComponent("SolidBooleanCheckboxStyleFormEditWidget", SolidBooleanCheckboxStyleFormEditWidget, ["booleanCheckbox"]);
-registerExtensionComponent("SolidBooleanSwitchStyleFormEditWidget", SolidBooleanSwitchStyleFormEditWidget,[]);
+registerExtensionComponent("SolidBooleanSwitchStyleFormEditWidget", SolidBooleanSwitchStyleFormEditWidget, []);
 
 
 registerExtensionComponent("DefaultDateTimeFormEditWidget", DefaultDateTimeFormEditWidget, []);
@@ -117,6 +117,7 @@ registerExtensionComponent("DefaultIntegerFormEditWidget", DefaultIntegerFormEdi
 registerExtensionComponent("SolidIntegerSliderStyleFormEditWidget", SolidIntegerSliderStyleFormEditWidget, ["integerSlider"]);
 registerExtensionComponent("DefaultJsonFormEditWidget", DefaultJsonFormEditWidget, []);
 registerExtensionComponent("DefaultLongTextFormEditWidget", DefaultLongTextFormEditWidget, []);
+registerExtensionComponent("CodeEditorFormEditWidget", CodeEditorFormEditWidget, ["codeEditor"]);
 registerExtensionComponent("DefaultMediaMultipleFormEditWidget", DefaultMediaMultipleFormEditWidget, []);
 registerExtensionComponent("DefaultMediaSingleFormEditWidget", DefaultMediaSingleFormEditWidget, []);
 registerExtensionComponent("DefaultPasswordFormEditWidget", DefaultPasswordFormEditWidget, []);

@@ -241,6 +241,7 @@ export { createSolidEntityApi } from '@/redux/api/solidEntityApi';
 export { solidMenusApi, useCreateSolidMenuMutation, useDeleteMultipleSolidMenusMutation, useDeleteSolidMenuMutation, useGetSolidMenuBasedOnRoleQuery, useGetSolidMenuByIdQuery, useGetSolidMenusQuery, useLazyGetSolidMenuBasedOnRoleQuery, useLazyGetSolidMenuByIdQuery, useLazyGetSolidMenusQuery, useUpdateSolidMenuMutation } from '@/redux/api/solidMenuApi';
 export { solidViewsApi, useCreateSolidViewMutation, useDeleteMultipleSolidViewsMutation, useDeleteSolidViewMutation, useGetSolidViewByIdQuery, useGetSolidViewLayoutQuery, useGetSolidViewsQuery, useLazyGetSolidViewByIdQuery, useLazyGetSolidViewsQuery, useUpdateSolidViewMutation } from '@/redux/api/solidViewApi';
 export { dashboardApi} from '@/redux/api/dashboardApi';
+export { questionApi } from '@/redux/api/questionApi';
 // export * from '@/redux/api/stateApi';
 // export * from '@/redux/api/tagApi';
 // export * from '@/redux/api/tagGroupApi';
@@ -418,7 +419,8 @@ export type {
     LayoutNodeType,
     SolidUiEvents,
     SolidUiEvent,
-    SolidFormWidgetProps
+    SolidFormWidgetProps,
+    SolidChartRendererProps
 } from '@/types';
 export { GeneralSettings } from '@/components/common/GeneralSettings';
 
