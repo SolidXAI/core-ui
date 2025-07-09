@@ -2,6 +2,7 @@
 import { Dropdown } from 'primereact/dropdown';
 import { SolidDashboardVariableFilteredVariableProps } from '../SolidDashboardVariableFilter';
 import { InputTypes, SolidDashboardVariableVarInputsFilterElement } from '../SolidDashboardVariableVarInputsFilterElement';
+import { getNumberOfInputs } from '../dashboard-utils';
 // import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 
 const SolidDashboardVariableSelectionDynamic = ({ rule, onChange }: SolidDashboardVariableFilteredVariableProps) => {
@@ -11,7 +12,7 @@ const SolidDashboardVariableSelectionDynamic = ({ rule, onChange }: SolidDashboa
         { label: 'In', value: "$in" },
         { label: 'Not In', value: "$notIn" },
     ];
-    // const numberOfInputs = getNumberOfInputs(rule.matchMode);
+    const numberOfInputs = getNumberOfInputs(rule.matchMode);
     const fieldMetadata = {
         selectionDynamicValues: [], // Placeholder for dynamic selection values
         selectionValueType: 'string', // Assuming string type for dynamic selection
@@ -38,7 +39,7 @@ const SolidDashboardVariableSelectionDynamic = ({ rule, onChange }: SolidDashboa
                         onChange(rule.id, 'value', e)
                         // console.warn('Value change not implemented for static selection', e);
                     }}
-                    numberOfInputs={0}
+                    numberOfInputs={numberOfInputs}
                     inputType={InputTypes.SelectionDynamic}
                     fieldMetadata={fieldMetadata}
                 >

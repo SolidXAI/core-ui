@@ -1,7 +1,8 @@
 "use client";
 import { Dropdown } from 'primereact/dropdown';
 // import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
-import { InputTypes, SolidVarInputsFilterElement } from '../../filter/SolidVarInputsFilterElement';
+import { InputTypes } from '../../filter/SolidVarInputsFilterElement';
+import { getNumberOfInputs } from '../dashboard-utils';
 import { SolidDashboardVariableFilteredVariableProps } from '../SolidDashboardVariableFilter';
 import { SolidDashboardVariableVarInputsFilterElement } from '../SolidDashboardVariableVarInputsFilterElement';
 
@@ -26,6 +27,8 @@ const SolidDashboardVariableSelectionStatic = ({ selectionOptions, rule, onChang
         selectionValueType: 'string', // Assuming string type for static selection
     };
 
+    const numberOfInputs = getNumberOfInputs(rule.matchMode);
+
     return (
         <div className='flex align-items-start gap-3 w-full'>
             <Dropdown
@@ -47,7 +50,7 @@ const SolidDashboardVariableSelectionStatic = ({ selectionOptions, rule, onChang
                         onChange(rule.id, 'value', e)
                         // console.warn('Value change not implemented for static selection', e);
                     }}
-                    numberOfInputs={0}
+                    numberOfInputs={numberOfInputs}
                     inputType={InputTypes.SelectionStatic}
                     fieldMetadata={fieldMetadata}
                 >

@@ -3,6 +3,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { InputTypes, SolidVarInputsFilterElement } from '../../filter/SolidVarInputsFilterElement';
 import { SolidDashboardVariableFilteredVariableProps } from '../SolidDashboardVariableFilter';
 import { SolidDashboardVariableVarInputsFilterElement } from '../SolidDashboardVariableVarInputsFilterElement';
+import { getNumberOfInputs } from '../dashboard-utils';
 
 export const dateFilterMatchModeOptions = [
     { label: 'Equals', value: "$eqi" },
@@ -24,7 +25,7 @@ const SolidDashboardVariableDate: React.FC<SolidDashboardVariableFilteredVariabl
 
     // TODO: the body template to be controlled based on the format that one is expecting the date to be displayed in.
     // const header = column.attrs.label ?? fieldMetadata.displayName;
-    // const numberOfInputs = getNumberOfInputs(rule.matchMode);
+    const numberOfInputs = getNumberOfInputs(rule.matchMode);
 
     return (
         <div className='flex align-items-start gap-3 w-full'>
@@ -42,14 +43,14 @@ const SolidDashboardVariableDate: React.FC<SolidDashboardVariableFilteredVariabl
             />
             <div className='flex flex-column gap-2 w-full'>
                 <SolidDashboardVariableVarInputsFilterElement
-                    values={[rule.value]} //FIXME: This should be an array of date values, but currently it's a single value
+                    values={[rule.value]} 
                     onChange={(e: any) => {
                         onChange(rule.id, 'value', e)
                         // console.log('Value changed:', e);
                     }}
-                    numberOfInputs={0}
+                    numberOfInputs={numberOfInputs}
                     inputType={InputTypes.Date}
-                    fieldMetadata={null}
+                    fieldMetadata={null} //TODO : probably avoid passing this if not needed
                 >
                 </SolidDashboardVariableVarInputsFilterElement>
             </div>

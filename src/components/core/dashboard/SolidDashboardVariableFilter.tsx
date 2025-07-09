@@ -33,7 +33,7 @@ function getRuleOnChangeFunc(
         setDashboardVariableFilterRules((prevRules) =>
             prevRules.map((r) => (r.id === id ? { ...r, [key]: value } : r))
         );
-        console.log("Updated rule:", id, key, value);
+        // console.log("Updated rule:", id, key, value);
     };
 }
 

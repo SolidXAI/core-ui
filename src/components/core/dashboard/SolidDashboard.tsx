@@ -81,7 +81,7 @@ function getDefaultFilterRules(variables: any) {
       case SolidDashboardVariableType.SELECTION_DYNAMIC:
         return {
           ...variable,
-          value: [{label: "Oswald Rodrigues", value: "oswald@logicloop.io"}], // Default value for dynamic selection variable
+          value: [{label: "Oswald Rodrigues", value: "oswald@logicloop.io"}], //FIXME: Default value for dynamic selection variable
           matchMode: '$in', // Default match mode for selection dynamic variable
         };
       default:
@@ -132,7 +132,7 @@ const SolidDashboard = () => {
 
   useEffect(() => {
     // Invoke the dashboard api to fetch the dashboard data
-    console.log('Dashboard Data testing:', isLoading, data, error);
+    // console.log('Dashboard Data testing:', isLoading, data, error);
     if (!isLoading && data) {
       // Assuming data contains the layout options
       handleDashboardData(data, setLayoutOption, setDashboardVariableFilterRules);
