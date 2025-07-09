@@ -24,12 +24,13 @@
     "access": "public"
   },
   "dependencies": {
+    "@faker-js/faker": "^9.9.0",
     "@hello-pangea/dnd": "^18.0.1",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
     "bootstrap": "^5.3.3",
     "change-case": "^5.4.4",
-    "chart.js": "^4.4.3",
+    "chart.js": "^4.5.0",
     "cloudinary": "^1.40.0",
     "copyfile": "^0.1.2",
     "copyfiles": "^2.4.1",
@@ -104,7 +105,7 @@
     "next-connect": "^1.0.0",
     "node-geocoder": "^4.2.0",
     "react": "18.2.0",
-    "react-chartjs-2": "^5.2.0",
+    "react-chartjs-2": "^5.3.0",
     "react-datepicker": "^4.17.0",
     "react-dom": "18.2.0",
     "react-dropzone": "^14.2.3",
