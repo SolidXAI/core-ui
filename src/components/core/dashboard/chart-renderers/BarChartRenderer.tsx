@@ -1,19 +1,10 @@
 "use client";
-import {
-    Chart as ChartJS,
-    CategoryScale,
-    LinearScale,
-    BarElement,
-    Title,
-    Tooltip,
-    Legend,
-} from 'chart.js';
 import { Bar } from 'react-chartjs-2';
-import { faker } from '@faker-js/faker';
 import { SolidChartRendererProps } from "@/types/solid-core";
 import { Message } from 'primereact/message';
 import { useGetQuestionDataByIdQuery } from '@/redux/api/questionApi';
 import { ProgressSpinner } from 'primereact/progressspinner';
+import "@/components/core/dashboard/chart-renderers/init-chartjs";
 
 const BarChartRenderer = ({ question }: SolidChartRendererProps) => {
     if (!question) {
@@ -34,15 +25,6 @@ const BarChartRenderer = ({ question }: SolidChartRendererProps) => {
 
     // const [books, setBooks] = useState<any[]>([]);
     // useEffect(() => {}, []);
-
-    ChartJS.register(
-        CategoryScale,
-        LinearScale,
-        BarElement,
-        Title,
-        Tooltip,
-        Legend
-    );
 
     // const options = {
     //     responsive: true,
