@@ -111,7 +111,7 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
             }
           />
         }
-        {status === "import_failed" &&
+        {status === "import_failed" && transactionId &&
           <Button
             label="Download Failed Records"
             size='small'
