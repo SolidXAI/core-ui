@@ -1,0 +1,13 @@
+.SolidDashboardContentWrapper {
+    background-color: var(--hightlight-bg-secondary);
+}
+
+.SolidChartCardWrapper {
+    box-shadow: 0px 6px 15px 1px rgba(0, 0, 0, 0.05);
+    border-radius: 8px;
+    background-color: var(--surface-card);
+}
+
+.SolidChartTitle {
+    color: var(--solid-dark-title);
+}

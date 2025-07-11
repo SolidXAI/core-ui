@@ -5,6 +5,7 @@ import BarChartRenderer from "@/components/core/dashboard/chart-renderers/BarCha
 import LineChartRenderer from "@/components/core/dashboard/chart-renderers/LineChartRenderer";
 import { Message } from 'primereact/message';
 import PieChartRenderer from "@/components/core/dashboard/chart-renderers/PieChartRenderer";
+import { SolidQuestionRenderer } from "@/components/core/dashboard/SolidQuestionRenderer";
 
 const ChartFormPreviewWidget = ({ formData, field, fieldsMetadata, viewMetadata, formViewData }: SolidFormWidgetProps) => {
     console.log(`formData: `);
@@ -31,9 +32,7 @@ const ChartFormPreviewWidget = ({ formData, field, fieldsMetadata, viewMetadata,
     return (
         <>
             <div className="flex justify-center">
-                {visualisedAs === 'bar' && <BarChartRenderer question={formViewData?.data} />}
-                {visualisedAs === 'line' && <LineChartRenderer question={formViewData?.data} />}
-                {visualisedAs === 'pie' && <PieChartRenderer question={formViewData?.data} />}
+                <SolidQuestionRenderer question={formViewData?.data} />
             </div>
         </>
     );

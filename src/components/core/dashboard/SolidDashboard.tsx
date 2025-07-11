@@ -17,7 +17,7 @@ enum SOURCE_TYPE {
   PROVIDER = 'provider',
 }
 export interface ISolidDashboardVariableRecord {
-  id : number;
+  id: number;
   name: string;
   type: SolidDashboardVariableType;
   isMultiple: boolean;
@@ -33,13 +33,14 @@ export interface ISolidDashboardVariableFilterRule extends ISolidDashboardVariab
   matchMode: string;
 }
 
-function handleDashboardData(data: DashboardResponse, setLayoutOption: Dispatch<SetStateAction<SolidDashboardBodyProps>>, setDashboardVariableFilterRules: Dispatch<SetStateAction<ISolidDashboardVariableFilterRule[]>>) {
+function handleDashboardData(data: DashboardResponse, setLayoutOption: Dispatch<SetStateAction<SolidDashboardBodyProps>>, setDashboardVariableFilterRules: Dispatch<SetStateAction<ISolidDashboardVariableFilterRule[]>>, setQuestions: any) {
   const { records, meta } = data;
   if (records && records.length > 0) {
     // Set the layout options for the dashboard body
+
     const dashboardData = records[0]; // Assuming we want the first dashboard
     setLayoutOption(getDashboardLayoutOptions(dashboardData));
-
+    setQuestions(dashboardData.questions)
     // Set the filter rules based on the dashboard variables
     const variables = dashboardData.dashboardVariables || [];
     const defaultRules = getDefaultFilterRules(variables);
@@ -81,7 +82,7 @@ function getDefaultFilterRules(variables: any) {
       case SolidDashboardVariableType.SELECTION_DYNAMIC:
         return {
           ...variable,
-          value: [{label: "Oswald Rodrigues", value: "oswald@logicloop.io"}], //FIXME: Default value for dynamic selection variable
+          value: [{ label: "Oswald Rodrigues", value: "oswald@logicloop.io" }], //FIXME: Default value for dynamic selection variable
           matchMode: '$in', // Default match mode for selection dynamic variable
         };
       default:
@@ -104,7 +105,7 @@ function getQueryParams() {
         }
       }
     },
-    populate: ['dashboardVariables']
+    populate: ['dashboardVariables', 'questions']
   };
   const urlQuery = qs.stringify(query, {
     encodeValuesOnly: true,
@@ -129,13 +130,13 @@ const SolidDashboard = () => {
   const [layoutOption, setLayoutOption] = useState<SolidDashboardBodyProps>({});
   // const [dashboardVariables, setDashboardVariables] = useState<SolidDashboardVariableRecord[]>([]);
   const [dashboardVariableFilterRules, setDashboardVariableFilterRules] = useState<ISolidDashboardVariableFilterRule[]>([]);
-
+  const [questions, setQuestions] = useState<any[]>([]);
   useEffect(() => {
     // Invoke the dashboard api to fetch the dashboard data
     // console.log('Dashboard Data testing:', isLoading, data, error);
     if (!isLoading && data) {
       // Assuming data contains the layout options
-      handleDashboardData(data, setLayoutOption, setDashboardVariableFilterRules);
+      handleDashboardData(data, setLayoutOption, setDashboardVariableFilterRules, setQuestions);
     }
   }, [isLoading, data]);
 
@@ -147,10 +148,11 @@ const SolidDashboard = () => {
       {!isLoading && !error && (
         <>
           <SolidDashboardVariableFilterDialog dashboardVariableFilterRules={dashboardVariableFilterRules} setDashboardVariableFilterRules={setDashboardVariableFilterRules} />
-          <SolidDashboardBody
+          <SolidDashboardBody questions={questions} />
+          {/* <SolidDashboardBody
             dashboardOptions={layoutOption.dashboardOptions ?? {}}
             widgetOptions={layoutOption.widgetOptions ?? []}
-          />
+          /> */}
         </>
       )}
     </div>
