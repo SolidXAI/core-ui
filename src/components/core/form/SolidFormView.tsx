@@ -56,6 +56,8 @@ import { useSelector } from "react-redux";
 import { hasAnyRole } from "@/helpers/rolesHelper";
 import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 import { ConfirmDialog } from "primereact/confirmdialog";
+import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
+import { SolidXAIModule } from "../solid-ai/SolidXAIModule";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -437,7 +439,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [lightboxUrls, setLightboxUrls] = useState([]);
     const [isShowChatter, setShowChatter] = useState(true);
     const [solidWorkflowFieldValue, setSolidWorkflowFieldValue] = useState<string>("");
-    const [defaultTabViewOptionIndex, setDefaultTabViewOptionIndex] = useState<number>(0);
+    const [defaultTabViewOptionIndex, setDefaultTabViewOptionIndex] = useState<number>(1);
     const errorFields: string[] = [];
 
     const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
@@ -1216,11 +1218,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
             setShowChatter(true);
             if (option === 'chatter') {
                 setDefaultTabViewOptionIndex(1);
-                setRefreshChatterMessage(true)
+                setRefreshChatterMessage(true);
+            } else if (option === 'locale') {
+                setDefaultTabViewOptionIndex(2);
             } else {
-                setDefaultTabViewOptionIndex(0);
+                setDefaultTabViewOptionIndex(3);
             }
-        }
+        };
+        
         //en 4 null
         const handleLocaleChangeRedirect = (
             locale: string,
@@ -1344,6 +1349,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('chatter')}>
                                     Audit Trail
                                 </div>
+                                <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('solidx-ai')}>
+                                    <div className="flex gap-2"><SolidXAIIcon /> SolidX AI</div>
+                                </div>
                                 <Button
                                     icon="pi pi-chevron-left"
                                     size="small"
@@ -1352,30 +1360,35 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     onClick={() => handleChatterExpandClick('default')}
                                 />
                             </div>
-                            : solidFormViewMetaData?.data?.solidView?.model?.internationalisation ?
+                            :
 
-                                <SolidChatterLocaleTabView
-                                    createMode={createMode}
-                                    setSelectedLocale={setSelectedLocale}
-                                    selectedLocale={selectedLocale}
-                                    solidFormViewMetaData={solidFormViewMetaData}
-                                    id={params.id}
-                                    refreshChatterMessage={refreshChatterMessage}
-                                    setRefreshChatterMessage={setRefreshChatterMessage}
-                                    activeTab={defaultTabViewOptionIndex}
-                                    internationalisation={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}
-                                    viewMode={viewMode}
-                                    defaultEntityLocaleId={defaultEntityLocaleId}
-                                    handleLocaleChangeRedirect={handleLocaleChangeRedirect}
-                                    applicableLocales={solidFormViewMetaData?.data?.applicableLocales}
-                                    solidFormViewData={solidFormViewData}
-                                    published={published}
-                                /> :
-                                <SolidChatter
-                                    modelSingularName={solidFormViewMetaData?.data?.solidView?.model?.singularName}
-                                    id={params.id}
-                                    refreshChatterMessage={refreshChatterMessage}
-                                    setRefreshChatterMessage={setRefreshChatterMessage} />
+                            defaultTabViewOptionIndex === 3 ?
+                                <SolidXAIModule />
+                                :
+                                solidFormViewMetaData?.data?.solidView?.model?.internationalisation ?
+
+                                    <SolidChatterLocaleTabView
+                                        createMode={createMode}
+                                        setSelectedLocale={setSelectedLocale}
+                                        selectedLocale={selectedLocale}
+                                        solidFormViewMetaData={solidFormViewMetaData}
+                                        id={params.id}
+                                        refreshChatterMessage={refreshChatterMessage}
+                                        setRefreshChatterMessage={setRefreshChatterMessage}
+                                        activeTab={defaultTabViewOptionIndex}
+                                        internationalisation={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}
+                                        viewMode={viewMode}
+                                        defaultEntityLocaleId={defaultEntityLocaleId}
+                                        handleLocaleChangeRedirect={handleLocaleChangeRedirect}
+                                        applicableLocales={solidFormViewMetaData?.data?.applicableLocales}
+                                        solidFormViewData={solidFormViewData}
+                                        published={published}
+                                    /> :
+                                    <SolidChatter
+                                        modelSingularName={solidFormViewMetaData?.data?.solidView?.model?.singularName}
+                                        id={params.id}
+                                        refreshChatterMessage={refreshChatterMessage}
+                                        setRefreshChatterMessage={setRefreshChatterMessage} />
                         }
                     </div>
                 }
