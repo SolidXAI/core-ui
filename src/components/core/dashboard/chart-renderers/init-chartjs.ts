@@ -8,6 +8,7 @@ import {
     Title,
     Tooltip,
     Legend,
+    ArcElement,
 } from 'chart.js';
 
 // Only register once globally
@@ -19,5 +20,6 @@ ChartJS.register(
     PointElement,
     Title,
     Tooltip,
-    Legend
+    Legend,
+    ArcElement
 );

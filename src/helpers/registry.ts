@@ -39,7 +39,7 @@ import { SolidManyToManyRelationAvatarListWidget } from "@/components/core/list/
 import { SolidManyToOneRelationAvatarListWidget } from "@/components/core/list/widgets/SolidManyToOneRelationAvatarListWidget";
 import { SolidShortTextFieldAvatarWidget } from "@/components/core/form/fields/widgets/SolidShortTextFieldAvatarWidget";
 import DeleteModelRowAction from "@/components/core/extension/solid-core/modelMetadata/list/DeleteModelRowAction";
-import ChartFormPreviewWidget from "@/components/core/extension/solid-core/question/ChartWidget";
+import ChartFormPreviewWidget from "@/components/core/extension/solid-core/question/ChartFormPreviewWidget";
 
 type ExtensionRegistry = {
     components: Record<string, React.ComponentType<any>>;
