@@ -1,6 +1,6 @@
 {
   "name": "@solidstarters/solid-core-ui",
-  "version": "1.1.149",
+  "version": "1.1.153",
   "scripts": {
     "prebuild": "npm run copy-resources && npm run copy-styles",
     "build": "tsc && tsc-alias",
@@ -25,7 +25,7 @@
   },
   "dependencies": {
     "@faker-js/faker": "^9.9.0",
-    "@hello-pangea/dnd": "^18.0.1",
+    "@hello-pangea/dnd": "18.0.1",
     "@monaco-editor/react": "^4.7.0",
     "axios": "^1.7.2",
     "bcryptjs": "^2.4.3",
@@ -94,8 +94,8 @@
     "@types/node": "20.5.9",
     "@types/pluralize": "^0.0.33",
     "@types/qs": "^6.9.15",
-    "@types/react": "^18.3.23",
-    "@types/react-dom": "^18.3.7",
+    "@types/react": "18.3.18",
+    "@types/react-dom": "18.3.5",
     "@types/react-js-pagination": "^3.0.7",
     "@types/uuid": "^10.0.0",
     "@uiw/react-codemirror": "^4.23.3",

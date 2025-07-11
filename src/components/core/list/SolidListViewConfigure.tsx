@@ -1,10 +1,10 @@
 "use client"
-import { deleteManyPermission, deletePermission } from "@/helpers/permissions";
+import { deleteManyPermission } from "@/helpers/permissions";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
-import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
+import { Checkbox } from "primereact/checkbox";
 import { Divider } from "primereact/divider";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { RadioButton } from "primereact/radiobutton";
@@ -12,11 +12,11 @@ import { useEffect, useRef, useState } from "react";
 import { SolidListColumnSelector } from "./SolidColumnSelector/SolidListColumnSelector";
 import { SolidExport } from "@/components/common/SolidExport";
 import { Dialog } from "primereact/dialog";
-import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { useHandleListCustomButtonClick } from "@/components/common/useHandleListCustomButtonClick";
 import { SolidListViewHeaderContextMenuButton } from "./SolidListViewHeaderContextMenuButton";
 import "../../common/solid-export.css";
 import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
+import { useHasAnyRole } from "@/helpers/rolesHelper";
 
 export const SolidListViewConfigure = (
     { listViewMetaData,
@@ -86,6 +86,28 @@ export const SolidListViewConfigure = (
         return () => document.removeEventListener("click", handleClickOutside);
     }, [isOverlayOpen])
 
+    const isHeaderActionEnabled = (actionKey: string) => {
+        const headerActions = solidListViewLayout?.attrs?.configureViewActions;
+
+        // If configureViewActions is defined but this action isn't listed, treat as true
+        if (headerActions && !headerActions[actionKey]) return true;
+
+        const action = headerActions?.[actionKey];
+
+        // ✅ Check roles first if defined
+        if (Array.isArray(action?.roles) && action.roles.length > 0) {
+            return useHasAnyRole(action.roles);
+        }
+
+        // ✅ Then fallback to `enabled` boolean if defined
+        if (typeof action?.enabled === "boolean") {
+            return action.enabled;
+        }
+
+        // ✅ Default to true if nothing is defined
+        return true;
+    };
+
     return (
         <div className="position-relative">
             <Button
@@ -98,7 +120,7 @@ export const SolidListViewConfigure = (
                 onClick={(e) => op.current.toggle(e)}
             />
             <Dialog header="Export" visible={exportView} className="ExportDialog p-0 m-0" onHide={() => { if (!exportView) return; setExportView(false); }}>
-                <SolidExport listViewMetaData={listViewMetaData} filters= {filters} />
+                <SolidExport listViewMetaData={listViewMetaData} filters={filters} />
             </Dialog>
             <OverlayPanel ref={exportRef} className="listview-export-panel">
 
@@ -108,8 +130,8 @@ export const SolidListViewConfigure = (
                     (actionsAllowed.includes(`${deleteManyPermission(params.modelName)}`) &&
                         viewData?.data?.solidView?.layout?.attrs?.delete !== false &&
                         selectedRecords.length > 0) ||
-                    solidListViewLayout?.attrs?.enableImport !== false ||
-                    solidListViewLayout?.attrs?.enableExport !== false ||
+                    isHeaderActionEnabled('import') ||
+                    isHeaderActionEnabled('export') ||
                     (solidListViewLayout?.attrs?.headerButtons
                         ?.some((rb: any) => rb.attrs.actionInContextMenu === true)) ||
                     viewData?.data?.solidView?.model?.enableSoftDelete
@@ -129,20 +151,16 @@ export const SolidListViewConfigure = (
                                             icon={'pi pi-trash'}
                                             onClick={() => setDialogVisible(true)}
                                         />}
-                                    {solidListViewLayout?.attrs?.enableImport !== false && (
+                                    {isHeaderActionEnabled('import') && (
                                         <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2 text-base"
                                             onClick={() => setOpenImportDialog(true)}
                                         />
                                     )}
-                                    {solidListViewLayout?.attrs?.enableExport !== false && (
+                                    {isHeaderActionEnabled('export') && (
                                         <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base"
                                             // @ts-ignore
                                             onClick={() => { setExportView((exportView) => !exportView); }} />
                                     )}
-                                    {/* <Button text icon='pi pi-share-alt' label="Share" size="small" severity="secondary" className="text-left gap-2" /> */}
-                                    {/* {viewData?.data?.solidView?.model?.enableSoftDelete &&
-                        <Button text severity="secondary" size="small" className="text-left w-13rem" label={showArchived ? "Hide Archived Records" : "Show Archived Records"} iconPos="left" onClick={() => { setShowArchived(!showArchived); }} />
-                        } */}
                                     {solidListViewLayout?.attrs?.headerButtons
                                         ?.filter((rb: any) => rb.attrs.actionInContextMenu === true)
                                         ?.map((button: any, index: number) => (
@@ -172,7 +190,7 @@ export const SolidListViewConfigure = (
                         </>
                     )}
                 <div className="p-2 relative flex flex-column gap-1">
-                    <Button
+                    {isHeaderActionEnabled('customizeLayout') && (<Button
                         icon='pi pi-sliders-h'
                         label="Customize Layout"
                         severity={isOverlayOpen ? undefined : "secondary"}
@@ -187,16 +205,16 @@ export const SolidListViewConfigure = (
                     >
                         <i className="pi pi-chevron-right text-sm"></i>
                     </Button>
-                    <Button text icon='pi pi-save' label="Save Custom Filter" size="small" severity="secondary" className="text-left gap-2 text-base" onClick={() => setShowSaveFilterPopup(true)} />
-                    {/* <p className="mt-3 mb-1 font-medium" style={{ color: 'var(--gray-400)' }}>Saved Layouts</p> */}
-                    {/* <Button text severity="secondary" label="Diet Tracking" icon="pi pi-plus" size="small" /> */}
+                    )}
+                    {isHeaderActionEnabled('saveCustomFilter') &&
+                        <Button text icon='pi pi-save' label="Save Custom Filter" size="small" severity="secondary" className="text-left gap-2 text-base" onClick={() => setShowSaveFilterPopup(true)} />
+                    }
                     <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}
                         onShow={() => setIsOverlayOpen(true)}
                         onHide={() => {
                             setTimeout(() => setIsOverlayOpen(false), 50); // ✅ Ensure state updates
                         }}
                     >
-
                         <div className="solid-layout-accordion">
                             <Accordion multiple expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up" activeIndex={[2]}>
                                 {viewModes && viewModes.length > 0 &&
@@ -214,12 +232,6 @@ export const SolidListViewConfigure = (
                                                     />
                                                     <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
                                                         {option.label}
-                                                        {/* <Image
-                                                        src={option.image}
-                                                        alt={option.value}
-                                                        fill
-                                                        className='relative row-spacing-img'
-                                                    /> */}
                                                     </label>
                                                 </div>
                                             ))}
@@ -228,7 +240,6 @@ export const SolidListViewConfigure = (
                                 }
                                 <AccordionTab header="Row Spacing">
                                     <div className="flex flex-column gap-1 p-1flex flex-column gap-1 p-1">
-                                        {/* <p className="m-0 px-3">Row Spacing</p> */}
                                         {sizeOptions.map((option: any) => (
                                             <div key={option.value} className={`flex align-items-center ${option.value === size ? 'solid-active-view' : 'solid-view'}`}>
                                                 <RadioButton

@@ -691,6 +691,11 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
       ),
 
     }),
+    ...(currentFields.includes("computedFieldValueType") && {
+      computedFieldValueType: Yup.string().required(
+        "Computed Field Value Type is required"
+      ),
+    }),
     ...(currentFields.includes("computedFieldTriggerConfig") && {
       computedFieldTriggerConfig: Yup.array()
         .of(
@@ -1207,6 +1212,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     selectionStaticValues: fieldMetaData ? fieldMetaData?.selectionStaticValues : [""],
     selectionValueType: fieldMetaData ? fieldMetaData?.selectionValueType : null,
     computedFieldValueProvider: fieldMetaData ? fieldMetaData?.computedFieldValueProvider : null,
+    computedFieldValueType: fieldMetaData ? fieldMetaData?.computedFieldValueType : null,
     computedFieldTriggerConfig: parseComputedFieldTriggerConfig(fieldMetaData?.computedFieldTriggerConfig),
     computedFieldValueProviderCtxt: fieldMetaData ? fieldMetaData?.computedFieldValueProviderCtxt : "",
     // externalIdProvider: fieldMetaData ? fieldMetaData?.externalIdProvider : null,
@@ -2581,6 +2587,55 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                     text={formik?.errors?.selectionStaticValues?.toString()}
                                   />
                                 )}
+                            </div>
+                          )}
+
+                          {currentFields.includes("computedFieldValueType") && (
+                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                              <label
+                                htmlFor="computedFieldValueType"
+                                className="form-field-label"
+                              >
+                                Computed Field Value Type
+                              </label>
+                              <AutoComplete
+
+                                value={selectedComputedFieldValueType}
+                                invalid={isFormFieldValid(formik, "computedFieldValueType")}
+                                suggestions={filteredComputedFieldValueTypes}
+                                completeMethod={searchComputedFieldValueType}
+                                virtualScrollerOptions={{ itemSize: 38 }}
+                                field="label"
+                                dropdown
+                                className="solid-standard-autocomplete"
+                                onChange={(e) => {
+                                  setSelectedComputedFieldValueType(e.value);
+                                  formik.setFieldValue("computedFieldValueType", e.value.value);
+                                }}
+                              />
+
+                              {/* <Dropdown
+                                id="mediaTypes"
+                                name="mediaTypes"
+                                value={formik.values.mediaTypes}
+                                options={fieldDefaultMetaData.data.mediaTypes}
+                                onChange={(e) =>
+                                  formik.setFieldValue("mediaTypes", e.value)
+                                }
+                                placeholder="Select a Data Source"
+                                className={classNames("", {
+                                  "p-invalid": isFormFieldValid(
+                                    formik,
+                                    "mediaTypes"
+                                  ),
+                                })}
+                              /> */}
+                              {isFormFieldValid(formik, "computedFieldValueType") && (
+                                <Message
+                                  severity="error"
+                                  text={formik?.errors?.computedFieldValueType?.toString()}
+                                />
+                              )}
                             </div>
                           )}
 
