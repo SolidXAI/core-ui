@@ -8,6 +8,7 @@ import { Dispatch, SetStateAction, useState } from "react";
 import React from "react";
 import { Calendar } from "primereact/calendar";
 import { Nullable } from "primereact/ts-helpers";
+
 export interface SolidDashboardVariablesFilterDialogProps {
   dashboardVariableFilterRules: ISolidDashboardVariableFilterRule[];
   setDashboardVariableFilterRules: Dispatch<SetStateAction<ISolidDashboardVariableFilterRule[]>>;
@@ -23,7 +24,7 @@ const SolidDashboardVariableFilterDialog: React.FC<SolidDashboardVariablesFilter
         Dashboard
       </p>
       <div>
-        <Calendar value={dates} onChange={(e) => setDates(e.value)} selectionMode="range" readOnlyInput hideOnRangeSelection inputClassName="h-2rem"/>
+        <Calendar value={dates} onChange={(e) => setDates(e.value)} selectionMode="range" readOnlyInput hideOnRangeSelection inputClassName="h-2rem" />
         {/* <Button size="small" label="Filter" outlined onClick={()=>setShowFilterDialog(true)}/> */}
       </div>
 

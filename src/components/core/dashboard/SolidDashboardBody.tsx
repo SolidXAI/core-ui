@@ -1,9 +1,9 @@
 'use client';
 import 'gridstack/dist/gridstack.min.css';
-import { GridStack, GridStackOptions, GridStackWidget } from 'gridstack';
-import { useEffect, useRef } from 'react';
+import { GridStackOptions, GridStackWidget } from 'gridstack';
 import styles from './SolidDashboard.module.css'
 import { SolidQuestionRenderer } from './SolidQuestionRenderer';
+
 export interface SolidDashboardBodyProps {
   dashboardOptions?: GridStackOptions;
   widgetOptions?: GridStackWidget[];

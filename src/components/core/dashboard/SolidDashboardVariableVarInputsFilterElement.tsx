@@ -26,8 +26,6 @@ export const SolidDashboardVariableVarInputsFilterElement = ({ values, onChange,
         }
     }
 
-
-
     // TODO: Ideally values will be an array, so we can spread them here instead of making a nested array.
     const [inputs, setInputs] = useState([...values]);
     useEffect(() => {

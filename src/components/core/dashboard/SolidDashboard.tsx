@@ -148,7 +148,9 @@ const SolidDashboard = () => {
       {!isLoading && !error && (
         <>
           <SolidDashboardVariableFilterDialog dashboardVariableFilterRules={dashboardVariableFilterRules} setDashboardVariableFilterRules={setDashboardVariableFilterRules} />
+
           <SolidDashboardBody questions={questions} />
+
           {/* <SolidDashboardBody
             dashboardOptions={layoutOption.dashboardOptions ?? {}}
             widgetOptions={layoutOption.widgetOptions ?? []}
