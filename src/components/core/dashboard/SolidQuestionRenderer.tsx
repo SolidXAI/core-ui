@@ -4,6 +4,7 @@ import BarChartRenderer from './chart-renderers/BarChartRenderer';
 import LineChartRenderer from './chart-renderers/LineChartRenderer';
 import PieChartRenderer from './chart-renderers/PieChartRenderer';
 import styles from './SolidDashboard.module.css'
+import PrimeReactMeterGroupRenderer from './chart-renderers/PrimeReactMeterGroupRenderer';
 
 type SolidQuestionRendererProps = {
     question: any;
@@ -21,6 +22,7 @@ export const SolidQuestionRenderer = ({ question, filters = [], isPreview = fals
                 {question.visualisedAs === 'bar' && <BarChartRenderer question={question} filters={filters} isPreview={isPreview} />}
                 {question.visualisedAs === 'line' && <LineChartRenderer question={question} filters={filters} isPreview={isPreview} />}
                 {question.visualisedAs === 'pie' && <PieChartRenderer question={question} filters={filters} isPreview={isPreview} />}
+                {question.visualisedAs === 'prime-meter-group' && <PrimeReactMeterGroupRenderer question={question} filters={filters} isPreview={isPreview} />}
             </div>
         </div>
     )
