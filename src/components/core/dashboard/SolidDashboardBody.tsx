@@ -3,13 +3,17 @@ import 'gridstack/dist/gridstack.min.css';
 import { GridStackOptions, GridStackWidget } from 'gridstack';
 import styles from './SolidDashboard.module.css'
 import { SolidQuestionRenderer } from './SolidQuestionRenderer';
+import { SqlExpression } from '@/types/solid-core';
 
 export interface SolidDashboardBodyProps {
   dashboardOptions?: GridStackOptions;
   widgetOptions?: GridStackWidget[];
+  // Replace `any` with a proper `Question` type when available
+  questions: any[];
+  filters: SqlExpression[];
 }
 
-const SolidDashboardBody = ({ questions }: any) => {
+const SolidDashboardBody = ({ questions, filters = [] }: SolidDashboardBodyProps) => {
   // const gridRef = useRef<HTMLDivElement>(null);
 
   // useEffect(() => {
@@ -38,10 +42,10 @@ const SolidDashboardBody = ({ questions }: any) => {
     <div className={`h-full p-4 overflow-y-auto ${styles.SolidDashboardContentWrapper}`}>
       {/* <div className="grid-stack" ref={gridRef}></div> */}
       <div className='grid'>
-        {questions.map((question: any) => {
+        {questions && questions.map((question: any) => {
           return (
             <div className='col-4 p-3'>
-              <SolidQuestionRenderer question={question} key={question.id} />
+              <SolidQuestionRenderer question={question} filters={filters} key={question.id} isPreview={false} />
             </div>
           )
         })}

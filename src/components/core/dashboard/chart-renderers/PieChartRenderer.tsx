@@ -5,8 +5,9 @@ import { SolidChartRendererProps } from "@/types/solid-core";
 import { Message } from 'primereact/message';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Pie } from 'react-chartjs-2';
+import qs from 'qs';
 
-const PieChartRenderer = ({ question }: SolidChartRendererProps) => {
+const PieChartRenderer = ({ question, filters = [], isPreview = false }: SolidChartRendererProps) => {
     if (!question) {
         return (
             <>
@@ -17,7 +18,15 @@ const PieChartRenderer = ({ question }: SolidChartRendererProps) => {
     console.log(`Rendering PieChartRenderer using question id: ${question.id}`);
 
     // load the question data.
-    const { data: questionData, isLoading: questionDataIsLoading, error: questionDataError } = useGetQuestionDataByIdQuery({ id: question.id, qs: '' });
+    const queryParams = qs.stringify(
+        {
+            isPreview,
+            filters,
+        },
+        // ensures proper handling of arrays
+        { arrayFormat: 'brackets' }
+    );
+    const { data: questionData, isLoading: questionDataIsLoading, error: questionDataError } = useGetQuestionDataByIdQuery({ id: question.id, qs: queryParams });
 
     console.log(`Question data: `); console.log(questionData);
     console.log(`Question data is loading: `); console.log(questionDataIsLoading);

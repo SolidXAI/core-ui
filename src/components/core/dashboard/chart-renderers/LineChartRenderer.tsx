@@ -5,8 +5,9 @@ import { useGetQuestionDataByIdQuery } from '@/redux/api/questionApi';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Line } from 'react-chartjs-2';
 import "@/components/core/dashboard/chart-renderers/init-chartjs";
+import qs from 'qs';
 
-const LineChartRenderer = ({ question }: SolidChartRendererProps) => {
+const LineChartRenderer = ({ question, filters=[], isPreview=false }: SolidChartRendererProps) => {
     if (!question) {
         return (
             <>
@@ -17,7 +18,15 @@ const LineChartRenderer = ({ question }: SolidChartRendererProps) => {
     console.log(`Rendering LineChartRenderer using question id: ${question.id}`);
 
     // load the question data.
-    const { data: questionData, isLoading: questionDataIsLoading, error: questionDataError } = useGetQuestionDataByIdQuery({ id: question.id, qs: '' });
+    const queryParams = qs.stringify(
+        {
+            isPreview,
+            filters,
+        },
+        // ensures proper handling of arrays
+        { arrayFormat: 'brackets' }
+    );
+    const { data: questionData, isLoading: questionDataIsLoading, error: questionDataError } = useGetQuestionDataByIdQuery({ id: question.id, qs: queryParams });
 
     console.log(`Question data: `); console.log(questionData);
     console.log(`Question data is loading: `); console.log(questionDataIsLoading);

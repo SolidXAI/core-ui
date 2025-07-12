@@ -1,10 +1,7 @@
 "use client";
 
 import { SolidFormWidgetProps } from "@/types";
-import BarChartRenderer from "@/components/core/dashboard/chart-renderers/BarChartRenderer";
-import LineChartRenderer from "@/components/core/dashboard/chart-renderers/LineChartRenderer";
 import { Message } from 'primereact/message';
-import PieChartRenderer from "@/components/core/dashboard/chart-renderers/PieChartRenderer";
 import { SolidQuestionRenderer } from "@/components/core/dashboard/SolidQuestionRenderer";
 
 const ChartFormPreviewWidget = ({ formData, field, fieldsMetadata, viewMetadata, formViewData }: SolidFormWidgetProps) => {
@@ -32,7 +29,7 @@ const ChartFormPreviewWidget = ({ formData, field, fieldsMetadata, viewMetadata,
     return (
         <>
             <div className="flex justify-center">
-                <SolidQuestionRenderer question={formViewData?.data} />
+                <SolidQuestionRenderer question={formViewData?.data} isPreview={true} filters={[]} />
             </div>
         </>
     );

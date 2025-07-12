@@ -5,6 +5,7 @@ import qs from 'qs';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import SolidDashboardBody, { SolidDashboardBodyProps } from './SolidDashboardBody';
 import SolidDashboardVariableFilterDialog from './SolidDashboardVariableFilterWrapper';
+import { SqlExpression } from '@/types/solid-core';
 
 export enum SolidDashboardVariableType {
   DATE = 'date',
@@ -16,6 +17,7 @@ enum SOURCE_TYPE {
   SQL = 'sql',
   PROVIDER = 'provider',
 }
+
 export interface ISolidDashboardVariableRecord {
   id: number;
   name: string;
@@ -28,26 +30,46 @@ export interface ISolidDashboardVariableRecord {
   sourceType?: SOURCE_TYPE;
 }
 
+// TODO [HP]: We can remove references to this as we now have a SqlExpression 
 export interface ISolidDashboardVariableFilterRule extends ISolidDashboardVariableRecord {
   value: any; // The value(s) selected by the user
   matchMode: string;
 }
 
-function handleDashboardData(data: DashboardResponse, setLayoutOption: Dispatch<SetStateAction<SolidDashboardBodyProps>>, setDashboardVariableFilterRules: Dispatch<SetStateAction<ISolidDashboardVariableFilterRule[]>>, setQuestions: any) {
+function handleDashboardData(
+  data: DashboardResponse,
+  setLayoutOption: Dispatch<SetStateAction<SolidDashboardBodyProps>>,
+  setDashboardVariableFilterRules: Dispatch<SetStateAction<ISolidDashboardVariableFilterRule[]>>,
+  setQuestions: any,
+  setFilters: any
+) {
   const { records, meta } = data;
   if (records && records.length > 0) {
     // Set the layout options for the dashboard body
-
     const dashboardData = records[0]; // Assuming we want the first dashboard
     setLayoutOption(getDashboardLayoutOptions(dashboardData));
     setQuestions(dashboardData.questions)
+
+    // TODO [HP]: We can remove references to this as we now have a SqlExpression 
     // Set the filter rules based on the dashboard variables
     const variables = dashboardData.dashboardVariables || [];
     const defaultRules = getDefaultFilterRules(variables);
     setDashboardVariableFilterRules(defaultRules);
+
+    // Read the variables and default values and oprerators and pre-populate the filters array.
+    const filters = variables.map((variable: any) => {
+      return {
+        variableName: variable.variableName,
+        operator: variable.defaultOperator,
+        value: JSON.parse(variable.defaultValue),
+      }
+    });
+    setFilters(filters);
+
   }
 }
 
+// TODO [HP]: Maybe we don't need this at all...since now we are using SqlExpression directly...
 function getDefaultFilterRules(variables: any) {
   const formattedVariables: ISolidDashboardVariableRecord[] = variables.map((variable: any) => ({
     id: variable.id,
@@ -96,12 +118,15 @@ function getDefaultFilterRules(variables: any) {
   return filterRules;
 }
 
-function getQueryParams() {
+function getQueryParams(moduleName: string, dashboardId: number) {
   const query = {
     filters: {
+      id: {
+        $eq: dashboardId
+      },
       module: {
         name: {
-          $eq: 'library-management'
+          $eq: moduleName
         }
       }
     },
@@ -120,26 +145,41 @@ function getDashboardLayoutOptions(dashboardRecord: any) {
   // This function can be used to fetch or define default dashboard layout options
   return {
     widgetOptions: layoutJsonParsed.widgetOptions || [],
-    dashboardOptions: layoutJsonParsed.dashboardOptions || {}
+    dashboardOptions: layoutJsonParsed.dashboardOptions || {},
+    questions: [],
+    filters: []
   };
 }
 
-const SolidDashboard = () => {
-  const { data, isLoading, error } = useGetDashboardQuery(getQueryParams()) //FIXME : error handling should be done properly
+type SolidDashboardViewProps = {
+  moduleName: string;
+  dashboardId: number;
+};
+
+const SolidDashboard = (params: SolidDashboardViewProps) => {
+  const { data, isLoading, error } = useGetDashboardQuery(getQueryParams(params.moduleName, params.dashboardId)) // FIXME : error handling should be done properly
   // Define a state called layoutOption and pass it after destructing the widgetOptions and dashboardOptions from layoutOption
-  const [layoutOption, setLayoutOption] = useState<SolidDashboardBodyProps>({});
-  // const [dashboardVariables, setDashboardVariables] = useState<SolidDashboardVariableRecord[]>([]);
+  // TODO [HP]: Shouldn't the type of this state variable be something different? Why are we muddling this with layout but calling it body props? 
+  // TODO [HP]: Body props should be clearly made up of Gridstack layout options, the questions that make up the body & the filter[] which is an array of SqlExpressions
+  // TODO [HP]: This is fully CONFUSED
+  const [layoutOption, setLayoutOption] = useState<SolidDashboardBodyProps>({
+    filters: [],
+    questions: [],
+  });
+
+  // TODO [HP]: replace dashboardVariableFilterRules with filters everywhere...
   const [dashboardVariableFilterRules, setDashboardVariableFilterRules] = useState<ISolidDashboardVariableFilterRule[]>([]);
+  const [filters, setFilters] = useState<SqlExpression[]>([]);
+
   const [questions, setQuestions] = useState<any[]>([]);
   useEffect(() => {
     // Invoke the dashboard api to fetch the dashboard data
     // console.log('Dashboard Data testing:', isLoading, data, error);
     if (!isLoading && data) {
       // Assuming data contains the layout options
-      handleDashboardData(data, setLayoutOption, setDashboardVariableFilterRules, setQuestions);
+      handleDashboardData(data, setLayoutOption, setDashboardVariableFilterRules, setQuestions, setFilters);
     }
   }, [isLoading, data]);
-
 
   return (
     <div className="h-screen surface-0">
@@ -147,9 +187,13 @@ const SolidDashboard = () => {
       {error && <p className="text-red-600">Failed to load dashboard.</p>}
       {!isLoading && !error && (
         <>
-          <SolidDashboardVariableFilterDialog dashboardVariableFilterRules={dashboardVariableFilterRules} setDashboardVariableFilterRules={setDashboardVariableFilterRules} />
+          <SolidDashboardVariableFilterDialog
+            dashboardVariableFilterRules={dashboardVariableFilterRules}
+            setDashboardVariableFilterRules={setDashboardVariableFilterRules}
+            setFilters={setFilters}
+          />
 
-          <SolidDashboardBody questions={questions} />
+          <SolidDashboardBody questions={questions} filters={filters} />
 
           {/* <SolidDashboardBody
             dashboardOptions={layoutOption.dashboardOptions ?? {}}
