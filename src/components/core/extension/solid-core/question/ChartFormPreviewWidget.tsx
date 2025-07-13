@@ -27,11 +27,9 @@ const ChartFormPreviewWidget = ({ formData, field, fieldsMetadata, viewMetadata,
     const visualisedAs = formData.visualisedAs.value;
 
     return (
-        <>
-            <div className="flex justify-center">
+            <div className="mt-3 p-2">
                 <SolidQuestionRenderer question={formViewData?.data} isPreview={true} filters={[]} />
             </div>
-        </>
     );
 };
 
