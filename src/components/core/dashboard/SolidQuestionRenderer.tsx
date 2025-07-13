@@ -5,6 +5,7 @@ import LineChartRenderer from './chart-renderers/LineChartRenderer';
 import PieChartRenderer from './chart-renderers/PieChartRenderer';
 import styles from './SolidDashboard.module.css'
 import PrimeReactMeterGroupRenderer from './chart-renderers/PrimeReactMeterGroupRenderer';
+import PrimeReactDatatableRenderer from './chart-renderers/PrimeReactDatatableRenderer';
 
 type SolidQuestionRendererProps = {
     question: any;
@@ -23,6 +24,7 @@ export const SolidQuestionRenderer = ({ question, filters = [], isPreview = fals
                 {question.visualisedAs === 'line' && <LineChartRenderer question={question} filters={filters} isPreview={isPreview} />}
                 {question.visualisedAs === 'pie' && <PieChartRenderer question={question} filters={filters} isPreview={isPreview} />}
                 {question.visualisedAs === 'prime-meter-group' && <PrimeReactMeterGroupRenderer question={question} filters={filters} isPreview={isPreview} />}
+                {question.visualisedAs === 'prime-datatable' && <PrimeReactDatatableRenderer question={question} filters={filters} isPreview={isPreview} />}
             </div>
         </div>
     )

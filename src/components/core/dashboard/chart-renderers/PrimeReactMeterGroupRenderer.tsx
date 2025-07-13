@@ -45,12 +45,7 @@ const PrimeReactMeterGroupRenderer = ({ question, filters = [], isPreview = fals
             {!questionDataIsLoading && <div className="card flex justify-content-center"><MeterGroup values={questionData.data} /></div>}
         </>
     )
-    // return (
-    //     <>
-    //         {questionDataIsLoading && <ProgressSpinner />}
-    //         {!questionDataIsLoading && <Bar options={options} data={questionData.data} />}
-    //     </>
-    // );
+
 };
 
 export default PrimeReactMeterGroupRenderer;
