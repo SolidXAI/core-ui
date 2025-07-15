@@ -4,11 +4,14 @@ import { Message } from "primereact/message";
 import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { Editor } from "primereact/editor";
+// import { Editor } from "primereact/editor";
 import { useState } from "react";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
+import { useEffect, useRef } from 'react';
+import Editor from '@monaco-editor/react';
+
 
 export class SolidLongTextField implements ISolidField {
 
@@ -161,6 +164,53 @@ export const DefaultLongTextFormEditWidget = ({ formik, fieldContext }: SolidFor
 }
 
 
+export const CodeEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
 
+    const readOnly = fieldLayoutInfo.attrs?.readonly || fieldContext.readOnly;
+    const disabled = fieldLayoutInfo.attrs?.disabled;
 
+    // Default to SQL
+    const language = fieldLayoutInfo.attrs.editorLanguage || 'ts'; 
 
+    const value = formik.values[fieldLayoutInfo.attrs.name] || '';
+
+    const isFormFieldValid = (formik: any, fieldName: string) =>
+        formik.touched[fieldName] && formik.errors[fieldName];
+
+    return (
+        <div className="mt-4">
+            {fieldLayoutInfo?.attrs?.showLabel !== false && (
+                <label className="form-field-label mb-10">
+                    {fieldLabel}
+                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                    <SolidFieldTooltip fieldContext={fieldContext} />
+                </label>
+            )}
+
+            <div className="border border-gray-300 rounded overflow-hidden">
+                <Editor
+                    height="200px"
+                    defaultLanguage={language}
+                    value={value}
+                    onChange={(val) => formik.setFieldValue(fieldLayoutInfo.attrs.name, val)}
+                    options={{
+                        readOnly,
+                        minimap: { enabled: false },
+                        lineNumbers: 'on',
+                        fontSize: 14,
+                        scrollBeyondLastLine: false,
+                    }}
+                />
+            </div>
+
+            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                <div className="mt-1">
+                    <Message severity="error" text={formik.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                </div>
+            )}
+        </div>
+    );
+};

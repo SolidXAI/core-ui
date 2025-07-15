@@ -1770,6 +1770,7 @@ li.header-li-px {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   width: 30px;
+  cursor: pointer;
 }
 
 .solid-form-header {

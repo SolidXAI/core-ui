@@ -111,18 +111,48 @@ export type SolidLoadForm = {
     formViewLayout: LayoutNode;
 }
 
+export enum SqlExpressionOperator {
+    EQUALS = '$equals',
+    NOT_EQUALS = '$notEquals',
+    CONTAINS = '$contains',
+    NOT_CONTAINS = '$notContains',
+    STARTS_WITH = '$startsWith',
+    ENDS_WITH = '$endsWith',
+    IN = '$in',
+    NOT_IN = '$notIn',
+    BETWEEN = '$between',
+    LT = '$lt',
+    LTE = '$lte',
+    GT = '$gt',
+    GTE = '$gte'
+}
+
+export interface SqlExpression {
+    variableName: string;
+    operator: SqlExpressionOperator;
+    value: string[];
+}
+
+export type SolidChartRendererProps = {
+    question: any;
+    filters: SqlExpression[];
+    isPreview: boolean;
+};
+
 export type SolidFormWidgetProps = {
     field: any;
     // This comes from Formik...
     formData: Record<string, any>;
     viewMetadata: SolidView;
     fieldsMetadata: FieldsMetadata;
+    formViewData: any;
 };
 
 export type SolidFormFieldWidgetProps = {
     formik: any;
     fieldContext?: SolidFieldProps;
 }
+
 export type SolidListFieldWidgetProps = {
     rowData: any;
     solidListViewMetaData: any
@@ -144,7 +174,6 @@ export type SolidShortTextImageRenderModeWidgetProps = {
     data: string;
 }
 
-
 export type SolidFormDynamicFunctionProps = {
     action: string,
     params: any,
@@ -158,7 +187,6 @@ export type SolidListHeaderDynamicFunctionProps = {
     params: any,
     solidListViewMetaData: any
 }
-
 
 export type SolidListRowdataDynamicFunctionProps = {
     action: string,
