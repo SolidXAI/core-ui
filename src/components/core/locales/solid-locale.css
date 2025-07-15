@@ -22,11 +22,12 @@
 
 .SolidCustomLocaleTab {
   flex: 1;
-  text-align: center !important;
+  /* text-align: center !important; */
 }
 
 .SolidCustomLocaleTabviewPanels .p-tabview-panels{
   width: 100% !important;
+  height: 100%;
   padding: 0 !important;
 }
 

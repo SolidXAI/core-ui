@@ -440,7 +440,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [lightboxUrls, setLightboxUrls] = useState([]);
     const [isShowChatter, setShowChatter] = useState(true);
     const [solidWorkflowFieldValue, setSolidWorkflowFieldValue] = useState<string>("");
-    const [defaultTabViewOptionIndex, setDefaultTabViewOptionIndex] = useState<number>(1);
+    const [defaultTabViewOptionIndex, setDefaultTabViewOptionIndex] = useState<number>(0);
     const errorFields: string[] = [];
 
     const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
@@ -867,31 +867,31 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
         };
         const handleDynamicFunction = async () => {
-                const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormDataLoad;
-                let DynamicFunctionComponent = null;
-                let formViewData = solidFormViewData?.data;
+            const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormDataLoad;
+            let DynamicFunctionComponent = null;
+            let formViewData = solidFormViewData?.data;
 
-                const event: SolidLoadForm = {
-                    fieldsMetadata: solidFormViewMetaData,
-                    formData: solidFormViewData?.data,
-                    type: "onFormDataLoad",
-                    viewMetadata: solidFormViewMetaData?.data?.solidView,
-                    formViewLayout: formViewLayout
-                };
+            const event: SolidLoadForm = {
+                fieldsMetadata: solidFormViewMetaData,
+                formData: solidFormViewData?.data,
+                type: "onFormDataLoad",
+                viewMetadata: solidFormViewMetaData?.data?.solidView,
+                formViewLayout: formViewLayout
+            };
 
-                if (dynamicHeader) {
-                    DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
-                    if (DynamicFunctionComponent) {
-                        const updatedFormData = await DynamicFunctionComponent(event);
-                        
-                        if (updatedFormData && updatedFormData?.dataChanged && updatedFormData?.newFormData) {
-                            formViewData = updatedFormData.newFormData;
-                        }
-                    }
-                    if (formViewData) {
-                        setInitialEntityData(formViewData);
+            if (dynamicHeader) {
+                DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
+                if (DynamicFunctionComponent) {
+                    const updatedFormData = await DynamicFunctionComponent(event);
+
+                    if (updatedFormData && updatedFormData?.dataChanged && updatedFormData?.newFormData) {
+                        formViewData = updatedFormData.newFormData;
                     }
                 }
+                if (formViewData) {
+                    setInitialEntityData(formViewData);
+                }
+            }
         };
 
         handleDynamicFunction();
@@ -1127,7 +1127,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
                 case "notebook":
                     if (visible === true) {
-                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""}  embeded={params.embeded}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</SolidNotebook>;
+                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</SolidNotebook>;
                     }
                 case "page":
                     if (visible === true) {
@@ -1218,16 +1218,16 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         const handleChatterExpandClick = (option?: string) => {
             setShowChatter(true);
-            if (option === 'chatter') {
+            if (option === 'locale') {
+                setDefaultTabViewOptionIndex(0);
+            } else if (option === 'chatter') {
                 setDefaultTabViewOptionIndex(1);
                 setRefreshChatterMessage(true);
-            } else if (option === 'locale') {
-                setDefaultTabViewOptionIndex(2);
             } else {
-                setDefaultTabViewOptionIndex(3);
+                setDefaultTabViewOptionIndex(2);
             }
-        };
-        
+        };        
+
         //en 4 null
         const handleLocaleChangeRedirect = (
             locale: string,
@@ -1363,34 +1363,21 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 />
                             </div>
                             :
-
-                            defaultTabViewOptionIndex === 3 ?
-                                <SolidXAIModule />
-                                :
-                                solidFormViewMetaData?.data?.solidView?.model?.internationalisation ?
-
-                                    <SolidChatterLocaleTabView
-                                        createMode={createMode}
-                                        setSelectedLocale={setSelectedLocale}
-                                        selectedLocale={selectedLocale}
-                                        solidFormViewMetaData={solidFormViewMetaData}
-                                        id={params.id}
-                                        refreshChatterMessage={refreshChatterMessage}
-                                        setRefreshChatterMessage={setRefreshChatterMessage}
-                                        activeTab={defaultTabViewOptionIndex}
-                                        internationalisation={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}
-                                        viewMode={viewMode}
-                                        defaultEntityLocaleId={defaultEntityLocaleId}
-                                        handleLocaleChangeRedirect={handleLocaleChangeRedirect}
-                                        applicableLocales={solidFormViewMetaData?.data?.applicableLocales}
-                                        solidFormViewData={solidFormViewData}
-                                        published={published}
-                                    /> :
-                                    <SolidChatter
-                                        modelSingularName={solidFormViewMetaData?.data?.solidView?.model?.singularName}
-                                        id={params.id}
-                                        refreshChatterMessage={refreshChatterMessage}
-                                        setRefreshChatterMessage={setRefreshChatterMessage} />
+                            <SolidChatterLocaleTabView
+                                createMode={createMode}
+                                setSelectedLocale={setSelectedLocale}
+                                selectedLocale={selectedLocale}
+                                solidFormViewMetaData={solidFormViewMetaData}
+                                id={params.id}
+                                refreshChatterMessage={refreshChatterMessage}
+                                setRefreshChatterMessage={setRefreshChatterMessage}
+                                activeTab={defaultTabViewOptionIndex}
+                                viewMode={viewMode}
+                                defaultEntityLocaleId={defaultEntityLocaleId}
+                                handleLocaleChangeRedirect={handleLocaleChangeRedirect}
+                                solidFormViewData={solidFormViewData}
+                                published={published}
+                            />
                         }
                     </div>
                 }

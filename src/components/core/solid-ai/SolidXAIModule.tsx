@@ -7,8 +7,8 @@ import { SolidXAIThreadWrapper } from "./SolidXAIThreadWrapper"
 
 export const SolidXAIModule = () => {
   return (
-    <div className='h-full relative'>
-      <SolidXAIModuleHeader />
+    <div className='relative' style={{height: 'calc(100% - 45px)'}}>
+      {/* <SolidXAIModuleHeader /> */}
       {/* <SolidXAIThreadWrapper /> */}
       <SolidXAIEmptyPlaceholder />
       <SolidXAIInputBox />
