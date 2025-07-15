@@ -16,7 +16,7 @@ interface FilterColumns {
     key: string;
 }
 
-export const SolidListColumnSelector = ({ listViewMetaData }: any) => {
+export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: any) => {
     const toast = useRef<Toast>(null);
     const [isDragging, setIsDragging] = useState(false);
     const entityApi = createSolidEntityApi('userViewMetadata');
@@ -214,7 +214,7 @@ export const SolidListColumnSelector = ({ listViewMetaData }: any) => {
                     <Button type='submit' label="Apply" size="small" />
                     <Button type='button' outlined label="Cancel" size="small"
                         // @ts-ignore
-                        onClick={(e) => op.current.hide(e)}
+                        onClick={(e) => customizeLayout.current.hide(e)}
                     />
                 </div>
             </form>

@@ -263,7 +263,7 @@ export const SolidListViewConfigure = (
                                     </div>
                                 </AccordionTab>
                                 <AccordionTab header="Column Selector" headerClassName="pb-0">
-                                    <SolidListColumnSelector listViewMetaData={listViewMetaData} />
+                                    <SolidListColumnSelector listViewMetaData={listViewMetaData} customizeLayout={customizeLayout}/>
                                 </AccordionTab>
                             </Accordion>
                         </div>
