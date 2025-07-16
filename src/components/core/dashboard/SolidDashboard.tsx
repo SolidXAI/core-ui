@@ -118,18 +118,21 @@ function getDefaultFilterRules(variables: any) {
   return filterRules;
 }
 
-function getQueryParams(moduleName: string, dashboardId: number) {
-  const query = {
-    filters: {
-      id: {
-        $eq: dashboardId
-      },
-      module: {
-        name: {
-          $eq: moduleName
-        }
+function getQueryParams(moduleName: string, dashboardId?: number) {
+  const filters: any = {
+    module: {
+      name: {
+        $eq: moduleName
       }
-    },
+    }
+  };
+
+  if (dashboardId !== undefined) {
+    filters.id = { $eq: dashboardId };
+  }
+
+  const query = {
+    filters,
     populate: ['dashboardVariables', 'questions']
   };
   const urlQuery = qs.stringify(query, {
@@ -153,7 +156,7 @@ function getDashboardLayoutOptions(dashboardRecord: any) {
 
 type SolidDashboardViewProps = {
   moduleName: string;
-  dashboardId: number;
+  dashboardId?: number;
 };
 
 const SolidDashboard = (params: SolidDashboardViewProps) => {

@@ -6,6 +6,7 @@ import PieChartRenderer from './chart-renderers/PieChartRenderer';
 import styles from './SolidDashboard.module.css'
 import PrimeReactMeterGroupRenderer from './chart-renderers/PrimeReactMeterGroupRenderer';
 import PrimeReactDatatableRenderer from './chart-renderers/PrimeReactDatatableRenderer';
+import { Message } from 'primereact/message';
 
 type SolidQuestionRendererProps = {
     question: any;
@@ -14,6 +15,14 @@ type SolidQuestionRendererProps = {
 };
 
 export const SolidQuestionRenderer = ({ question, filters = [], isPreview = false }: SolidQuestionRendererProps) => {
+    if (!question) {
+        return (
+            <div className={`${styles.SolidChartCardWrapper} p-4`}>
+                <Message text="Preview Unavailable" />
+            </div>
+        );
+    }
+
     const textAlign = question?.textAlign ?? 'start'
     return (
         <div className={`${styles.SolidChartCardWrapper} p-4`}>

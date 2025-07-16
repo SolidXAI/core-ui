@@ -11,3 +11,12 @@
 .SolidChartTitle {
     color: var(--solid-dark-title);
 }
+
+.SolidDashboardDateRangeFilterWrapper{
+    border: 1px solid var(--gray-300);
+    border-radius: 6px;
+}
+
+.SolidDashboardDateRangeFilter input{
+    border: none !important;
+}
