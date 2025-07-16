@@ -43,8 +43,8 @@ const SolidDashboardVariableFilterDialog: React.FC<SolidDashboardVariablesFilter
             };
             setFilters(prev => {
               // Remove any existing dashboardDate filter and replace with the new one
-              const filtered = prev.filter(f => f.variableName !== 'dashboardDate');
-              return [...filtered, filter];
+              // const filtered = prev.filter(f => f.variableName !== 'dashboardDate');
+              return [filter];
             });
           }
 
