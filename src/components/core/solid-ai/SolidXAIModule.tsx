@@ -9,8 +9,8 @@ export const SolidXAIModule = () => {
   return (
     <div className='relative' style={{height: 'calc(100% - 45px)'}}>
       {/* <SolidXAIModuleHeader /> */}
-      {/* <SolidXAIThreadWrapper /> */}
-      <SolidXAIEmptyPlaceholder />
+      <SolidXAIThreadWrapper />
+      {/* <SolidXAIEmptyPlaceholder /> */}
       <SolidXAIInputBox />
     </div>
   )
