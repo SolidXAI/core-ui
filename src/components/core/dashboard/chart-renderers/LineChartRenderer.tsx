@@ -1,7 +1,7 @@
 "use client";
 import { SolidChartRendererProps } from "@/types/solid-core";
 import { Message } from 'primereact/message';
-import { useGetQuestionDataByIdQuery } from '@/redux/api/questionApi';
+import { useGetDashboardQuestionDataByIdQuery } from '@/redux/api/dashboardQuestionApi';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Line } from 'react-chartjs-2';
 import "@/components/core/dashboard/chart-renderers/init-chartjs";
@@ -26,13 +26,13 @@ const LineChartRenderer = ({ question, filters=[], isPreview=false }: SolidChart
         // ensures proper handling of arrays
         { arrayFormat: 'brackets' }
     );
-    const { data: questionData, isLoading: questionDataIsLoading, error: questionDataError } = useGetQuestionDataByIdQuery({ id: question.id, qs: queryParams });
+    const { data: questionData, isLoading: questionDataIsLoading, error: questionDataError } = useGetDashboardQuestionDataByIdQuery({ id: question.id, qs: queryParams });
 
     console.log(`Question data: `); console.log(questionData);
     console.log(`Question data is loading: `); console.log(questionDataIsLoading);
     console.log(`Question data error: `); console.log(questionDataError);
 
-    const options = JSON.parse(question.barChartLabelOptions);
+    const options = JSON.parse(question.chartOptions);
 
     return (
         <>
