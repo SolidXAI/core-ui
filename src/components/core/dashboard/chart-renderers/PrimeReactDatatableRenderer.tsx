@@ -20,12 +20,12 @@ const PrimeReactDatatableRenderer = ({ options, visualizationData }: PrimeReactD
     //   }
     // }    
 
-    const size = options.size || 'small';
-    const showGridlines = options.showGridLines || false;
-    const stripedRows = options.stripedRows || false;
-    const paginator = options.pagination || false;
-    const rows = options.pagination?.rows || 10;
-    const rowsPerPageOptions = options.pagination?.rowsPerPageOptions || [5, 10, 25, 50];
+    const size = options?.size || 'small';
+    const showGridlines = options?.showGridLines || false;
+    const stripedRows = options?.stripedRows || false;
+    const paginator = options?.pagination || false;
+    const rows = options?.pagination?.rows || 10;
+    const rowsPerPageOptions = options?.pagination?.rowsPerPageOptions || [5, 10, 25, 50];
 
     if (!visualizationData) {
         return (
