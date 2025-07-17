@@ -196,3 +196,17 @@ export type SolidListRowdataDynamicFunctionProps = {
 }
 
 export type RootState = ReturnType<ReturnType<typeof initializeStore>['getState']>;
+
+
+export interface AiInteraction {
+    id: number;
+    threadId: string;
+    role: 'human' | 'gen-ai' | string;
+    message: string;
+    contentType?: string;
+    status?: string;
+    errorMessage?: string;
+    modelUsed?: string;
+    responseTimeMs?: number;
+    metadata?: Record<string, any>;
+}

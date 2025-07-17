@@ -1,41 +1,15 @@
 "use client";
-import { SolidChartRendererProps } from "@/types/solid-core";
-import { Message } from 'primereact/message';
-import { MeterGroup } from 'primereact/metergroup';
-import { useGetDashboardQuestionDataByIdQuery } from '@/redux/api/dashboardQuestionApi';
-import "@/components/core/dashboard/chart-renderers/init-chartjs";
-import qs from 'qs';
-import { ProgressSpinner } from "primereact/progressspinner";
+// import "@/components/core/dashboard/chart-renderers/init-chartjs";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
+import { ProgressSpinner } from "primereact/progressspinner";
 
-const PrimeReactDatatableRenderer = ({ question, filters = [], isPreview = false }: SolidChartRendererProps) => {
-    if (!question) {
-        return (
-            <>
-                <Message text="Preview Unavailable" />
-            </>
-        )
-    }
-    console.log(`Rendering PrimeReactDatatableRenderer using question id: ${question.id}`);
+type PrimeReactDatatableRendererProps = {
+    options: any;
+    visualizationData: any;
+}
 
-    // load the question data.
-    const queryParams = qs.stringify(
-        {
-            isPreview,
-            filters,
-        },
-        // ensures proper handling of arrays
-        { arrayFormat: 'brackets' }
-    );
-    const { data: questionData, isLoading: questionDataIsLoading, error: questionDataError } = useGetDashboardQuestionDataByIdQuery({ id: question.id, qs: queryParams });
-
-    console.log(`Question data: `); console.log(questionData);
-    console.log(`Question data is loading: `); console.log(questionDataIsLoading);
-    console.log(`Question data error: `); console.log(questionDataError);
-
-
-    const options = JSON.parse(question.chartOptions);
+const PrimeReactDatatableRenderer = ({ options, visualizationData }: PrimeReactDatatableRendererProps) => {
     // {
     //   "size": "small",
     //   "showGridlines": true,
@@ -53,7 +27,7 @@ const PrimeReactDatatableRenderer = ({ question, filters = [], isPreview = false
     const rows = options.pagination?.rows || 10;
     const rowsPerPageOptions = options.pagination?.rowsPerPageOptions || [5, 10, 25, 50];
 
-    if (!questionData) {
+    if (!visualizationData) {
         return (
             <>
                 <ProgressSpinner />
@@ -61,22 +35,18 @@ const PrimeReactDatatableRenderer = ({ question, filters = [], isPreview = false
         );
     }
 
-    const columns = questionData.data.columns;
-    const data = questionData.data.data;
+    const columns = visualizationData.columns;
+    const data = visualizationData.rows;
 
     return (
         <>
-            {questionDataIsLoading && <ProgressSpinner />}
-            {!questionDataIsLoading && (
-                <DataTable value={data} tableStyle={{ minWidth: '50rem' }} size={size} showGridlines={showGridlines} stripedRows={stripedRows} paginator={paginator} rows={rows} rowsPerPageOptions={rowsPerPageOptions} >
-                    {
-                        columns.map((col: any, i: number) => (
-                            <Column key={col.field} field={col.field} header={col.header} />
-                        ))
-                    }
-                </DataTable>)
-
-            }
+            <DataTable value={data} tableStyle={{ minWidth: '50rem' }} size={size} showGridlines={showGridlines} stripedRows={stripedRows} paginator={paginator} rows={rows} rowsPerPageOptions={rowsPerPageOptions} >
+                {
+                    columns.map((col: any, i: number) => (
+                        <Column key={col.field} field={col.field} header={col.header} />
+                    ))
+                }
+            </DataTable>
         </>
     )
 };
