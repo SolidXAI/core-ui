@@ -92,7 +92,7 @@ const SolidDashboardBody = ({ questions, filters = [] }: SolidDashboardBodyProps
               <div className="col-12 p-3" key={question.id}>
                 <div className={`${styles.SolidChartCardWrapper} p-4`} style={{ maxHeight: '40vh', overflowY: 'scroll' }}>
                   <div className={`font-medium text-${textAlign} ${styles.SolidChartTitle}`}>{question.name}</div>
-                  <div className={`mt-2 font-bold text-2xl text-${textAlign} ${styles.SolidChartTitle}`}>{questionData.data.kpi}</div>
+                  <div className={`mt-2 font-bold text-3xl text-${textAlign} ${styles.SolidChartTitle}`}>{questionData.data.kpi}</div>
                   <div className='mt-3'>
 
                     <PrimeReactDatatableRenderer

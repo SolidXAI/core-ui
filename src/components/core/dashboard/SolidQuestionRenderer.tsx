@@ -65,7 +65,7 @@ export const SolidQuestionRenderer = ({ question, filters = [], isPreview = fals
             {!questionDataIsLoading &&
             <div className={`${styles.SolidChartCardWrapper} p-4 h-full`}>
                 <div className={`font-medium text-${textAlign} ${styles.SolidChartTitle}`}>{question.name}</div>
-                <div className={`mt-2 font-bold text-2xl text-${textAlign} ${styles.SolidChartTitle}`}>{questionData.data.kpi}</div>
+                <div className={`mt-2 font-bold text-3xl text-${textAlign} ${styles.SolidChartTitle}`}>{questionData.data.kpi}</div>
                 <div className='mt-3'>
                     {['bar', 'line', 'pie'].includes(question.visualisedAs) && <ChartJsRenderer options={options} visualizationData={questionData.data.visualizationData} visualizedAs={question.visualisedAs}  />}
                     {question.visualisedAs === 'prime-meter-group' && <MeterGroup values={questionData.data.visualizationData.dataset}  max={questionData?.data?.visualizationData?.dataset?.reduce((total: number, item: DataItem) => total + item.value, 0)}/>}
