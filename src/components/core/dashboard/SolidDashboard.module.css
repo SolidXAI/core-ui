@@ -1,5 +1,6 @@
 .SolidDashboardContentWrapper {
     background-color: var(--hightlight-bg-secondary);
+    height: calc(100vh - 64px) !important;
 }
 
 .SolidChartCardWrapper {

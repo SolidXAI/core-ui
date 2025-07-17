@@ -63,7 +63,7 @@ export const SolidQuestionRenderer = ({ question, filters = [], isPreview = fals
         <>
             {questionDataIsLoading && <ProgressSpinner />}
             {!questionDataIsLoading &&
-            <div className={`${styles.SolidChartCardWrapper} p-4`}>
+            <div className={`${styles.SolidChartCardWrapper} p-4 h-full`}>
                 <div className={`font-medium text-${textAlign} ${styles.SolidChartTitle}`}>{question.name}</div>
                 <div className={`mt-2 font-bold text-2xl text-${textAlign} ${styles.SolidChartTitle}`}>{questionData.data.kpi}</div>
                 <div className='mt-3'>
