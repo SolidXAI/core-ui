@@ -41,15 +41,20 @@ const SolidDashboardBody = ({ questions, filters = [] }: SolidDashboardBodyProps
   //     grid.destroy(false);
   //   };
   // }, [dashboardOptions, widgetOptions]);
-  // const queryParams = qs.stringify(
-  //   {
-  //     isPreview: false,
-  //     filters,
-  //   },
-  //   // ensures proper handling of arrays
-  //   { arrayFormat: 'brackets' }
-  // );
-  // const { data: questionData, isLoading: questionDataIsLoading, error: questionDataError } = useGetDashboardQuestionDataByIdQuery({ id: question.id, qs: queryParams });
+
+
+  // Fallback sequencing
+  const questionsWithDefaultIndex = questions.map((q, index) => ({
+    ...q,
+    defaultIndex: index + 1,
+  }));
+
+
+  const sortedQuestions = [...questionsWithDefaultIndex].sort((a, b) => {
+    const aSeq = a.sequenceNumber ?? a.defaultIndex;
+    const bSeq = b.sequenceNumber ?? b.defaultIndex;
+    return aSeq - bSeq;
+  });
 
 
   return (
@@ -63,7 +68,7 @@ const SolidDashboardBody = ({ questions, filters = [] }: SolidDashboardBodyProps
             </div>
           )
         })} */}
-        {questions
+        {sortedQuestions
           .filter((question: any) => question.visualisedAs !== 'prime-datatable')
           .map((question: any) => (
             <div className="col-4 p-3" key={question.id}>
@@ -75,7 +80,7 @@ const SolidDashboardBody = ({ questions, filters = [] }: SolidDashboardBodyProps
             </div>
           ))}
 
-        {questions
+        {sortedQuestions
           .filter((question: any) => question.visualisedAs === 'prime-datatable')
           .map((question: any) => {
             const queryParams = qs.stringify({ isPreview: false, filters }, { arrayFormat: 'brackets' });
