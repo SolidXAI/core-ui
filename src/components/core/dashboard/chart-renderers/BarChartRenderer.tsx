@@ -36,7 +36,7 @@ const BarChartRenderer = ({ question, filters = [], isPreview = false }: SolidCh
     return (
         <>
             {questionDataIsLoading && <ProgressSpinner />}
-            {!questionDataIsLoading && <Bar options={options} data={questionData.data} />}
+            {!questionDataIsLoading && <Bar options={options} data={questionData.data.visualizationData} />}
         </>
     );
 };

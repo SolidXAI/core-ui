@@ -61,8 +61,8 @@ const PrimeReactDatatableRenderer = ({ question, filters = [], isPreview = false
         );
     }
 
-    const columns = questionData.data.columns;
-    const data = questionData.data.data;
+    const columns = questionData.data.visualizationData.columns;
+    const data = questionData.data.visualizationData.rows;
 
     return (
         <>

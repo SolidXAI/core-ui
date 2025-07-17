@@ -42,7 +42,7 @@ const PrimeReactMeterGroupRenderer = ({ question, filters = [], isPreview = fals
     return (
         <>
             {questionDataIsLoading && <ProgressSpinner />}
-            {!questionDataIsLoading && <div className="card flex justify-content-center"><MeterGroup values={questionData.data} /></div>}
+            {!questionDataIsLoading && <div className="card flex justify-content-center"><MeterGroup values={questionData.data.visualizationData.dataset} /></div>}
         </>
     )
 

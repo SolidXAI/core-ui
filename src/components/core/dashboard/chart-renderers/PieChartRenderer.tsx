@@ -35,7 +35,7 @@ const PieChartRenderer = ({ question, filters = [], isPreview = false }: SolidCh
     return (
         <>
             {questionDataIsLoading && <ProgressSpinner />}
-            {!questionDataIsLoading && <Pie data={questionData.data} />}
+            {!questionDataIsLoading && <Pie data={questionData.dat.visualizationData} />}
         </>
     );
 };

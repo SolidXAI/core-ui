@@ -37,7 +37,7 @@ const LineChartRenderer = ({ question, filters=[], isPreview=false }: SolidChart
     return (
         <>
             {questionDataIsLoading && <ProgressSpinner />}
-            {!questionDataIsLoading && <Line options={options} data={questionData.data} />}
+            {!questionDataIsLoading && <Line options={options} data={questionData.data.visualizationData} />}
         </>
     );
 };
