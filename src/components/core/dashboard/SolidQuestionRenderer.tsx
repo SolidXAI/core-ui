@@ -55,7 +55,7 @@ export const SolidQuestionRenderer = ({ question, filters = [], isPreview = fals
     console.log(`Question data: `); console.log(questionData);
     console.log(`Question data is loading: `); console.log(questionDataIsLoading);
     console.log(`Question data error: `); console.log(questionDataError);
-    const options = JSON.parse(question.chartOptions);
+    const options = JSON.parse(question?.chartOptions);
     // const kpi = questionData.data.kpi;
     // const visualizationData = questionData.data.visualizationData;
     // const visualizedAs = question.data.visualisedAs;
