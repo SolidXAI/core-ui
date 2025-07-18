@@ -42,7 +42,10 @@ export const createSolidEntityApi = (entityName: string) => {
                 }
             }),
             getSolidEntityById: builder.query({
-                query: ({ id, qs }) => `/${kebabEntityName}/${id}?${qs}`,
+                query:({ id, qs }) => { 
+                    return`/${kebabEntityName}/${id}?${qs}`
+                },
+                providesTags: () => [{ type: entityName }],
             }),
             createSolidEntity: builder.mutation({
                 query: (entity) => ({
@@ -64,6 +67,7 @@ export const createSolidEntityApi = (entityName: string) => {
                     method: 'PUT',
                     body: data,
                 }),
+                invalidatesTags: [{ type: entityName }]
             }),
             deleteMultipleSolidEntities: builder.mutation({
                 query: (data) => ({

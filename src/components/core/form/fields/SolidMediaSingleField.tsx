@@ -75,6 +75,7 @@ export class SolidMediaSingleField implements ISolidField {
                         value === null || // Allow null
                         value === undefined || // Allow undefined
                         value instanceof File || // Allow File
+                        value === 'false' ||
                         typeof value === "object" // Allow object
                 );
         }
