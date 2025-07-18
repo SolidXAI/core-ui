@@ -81,7 +81,9 @@ export class SolidPasswordField implements ISolidField {
         let editWidget = fieldLayoutInfo.attrs.editWidget;
         let createWidget = fieldLayoutInfo?.attrs?.createWidget;
         const pathname = usePathname();
-        const isNew = pathname.endsWith('/new');
+        const isCreateForm = pathname.endsWith('/new');
+        const data = this.fieldContext.data || {};
+        const isFieldDataEmpty = Object.keys(data).length === 0;
         if (!createWidget) {
             createWidget = 'DefaultPasswordFormCreateWidget';
         }
@@ -100,14 +102,14 @@ export class SolidPasswordField implements ISolidField {
                     <></>
                         // this.renderExtensionRenderMode(viewWidget, formik)
                     }
-                    {viewMode === "edit" && !isNew &&
+                    {viewMode === "edit" && (!isCreateForm && !isFieldDataEmpty) &&
                         <>
                             {editWidget &&
                                 this.renderExtensionRenderMode(editWidget, formik)
                             }
                         </>
                     }
-                    {viewMode === "edit" && isNew &&
+                    {viewMode === "edit" && (isCreateForm || isFieldDataEmpty) &&
                         <>
                             {createWidget &&
                                 this.renderExtensionRenderMode(createWidget, formik)
