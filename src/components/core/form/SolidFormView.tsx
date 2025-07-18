@@ -440,7 +440,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [lightboxUrls, setLightboxUrls] = useState([]);
     const [isShowChatter, setShowChatter] = useState(true);
     const [solidWorkflowFieldValue, setSolidWorkflowFieldValue] = useState<string>("");
-    const [defaultTabViewOptionIndex, setDefaultTabViewOptionIndex] = useState<number>(0);
+    const [defaultTabViewOptionIndex, setDefaultTabViewOptionIndex] = useState<number>(1);
     const errorFields: string[] = [];
 
     const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
@@ -1351,9 +1351,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('chatter')}>
                                     Audit Trail
                                 </div>
-                                <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('solidx-ai')}>
+                                {/* <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('solidx-ai')}>
                                     <div className="flex gap-2"><SolidXAIIcon /> SolidX AI</div>
-                                </div>
+                                </div> */}
                                 <Button
                                     icon="pi pi-chevron-left"
                                     size="small"
