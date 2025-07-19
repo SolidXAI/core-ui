@@ -241,7 +241,7 @@ export { createSolidEntityApi } from '@/redux/api/solidEntityApi';
 export { solidMenusApi, useCreateSolidMenuMutation, useDeleteMultipleSolidMenusMutation, useDeleteSolidMenuMutation, useGetSolidMenuBasedOnRoleQuery, useGetSolidMenuByIdQuery, useGetSolidMenusQuery, useLazyGetSolidMenuBasedOnRoleQuery, useLazyGetSolidMenuByIdQuery, useLazyGetSolidMenusQuery, useUpdateSolidMenuMutation } from '@/redux/api/solidMenuApi';
 export { solidViewsApi, useCreateSolidViewMutation, useDeleteMultipleSolidViewsMutation, useDeleteSolidViewMutation, useGetSolidViewByIdQuery, useGetSolidViewLayoutQuery, useGetSolidViewsQuery, useLazyGetSolidViewByIdQuery, useLazyGetSolidViewsQuery, useUpdateSolidViewMutation } from '@/redux/api/solidViewApi';
 export { dashboardApi} from '@/redux/api/dashboardApi';
-export { dashboardQuestionApi as questionApi } from '@/redux/api/dashboardQuestionApi';
+export { dashboardQuestionApi } from '@/redux/api/dashboardQuestionApi';
 // export * from '@/redux/api/stateApi';
 // export * from '@/redux/api/tagApi';
 // export * from '@/redux/api/tagGroupApi';

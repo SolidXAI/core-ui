@@ -1226,7 +1226,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             } else {
                 setDefaultTabViewOptionIndex(2);
             }
-        };        
+        };
 
         //en 4 null
         const handleLocaleChangeRedirect = (
@@ -1351,9 +1351,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('chatter')}>
                                     Audit Trail
                                 </div>
-                                {/* <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('solidx-ai')}>
-                                    <div className="flex gap-2"><SolidXAIIcon /> SolidX AI</div>
-                                </div> */}
+                                {
+                                    process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' && 
+                                    (
+                                        <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('solidx-ai')}>
+                                            <div className="flex gap-2"> <SolidXAIIcon /> SolidX AI </div>
+                                        </div>
+                                    )
+                                }
                                 <Button
                                     icon="pi pi-chevron-left"
                                     size="small"

@@ -11,18 +11,26 @@ interface SolidXAIInputBoxProps {
 
 export const SolidXAIInputBox = ({ onTriggerComplete }: SolidXAIInputBoxProps) => {
     const [prompt, setPrompt] = useState('');
+    const [sending, setSending] = useState(false);
     const [triggerMcpClientJob, { isLoading }] = useTriggerMcpClientJobMutation();
 
     const handleSend = async () => {
+        console.log(`handleSend invoked...`);
+
         if (!prompt.trim()) return;
+        if (sending || !prompt.trim()) return;
+        setSending(true);
         try {
             const response = await triggerMcpClientJob({ prompt }).unwrap();
             if (response?.data && onTriggerComplete) {
+                console.log(`Invoking onTriggerComplete with data ${response.data}`);
                 onTriggerComplete(response.data);
             }
             setPrompt('');
         } catch (err) {
             console.error("Failed to trigger MCP client job", err);
+        } finally {
+            setSending(false);
         }
     };
 
@@ -42,7 +50,7 @@ export const SolidXAIInputBox = ({ onTriggerComplete }: SolidXAIInputBoxProps) =
                 }}
             />
             <div className='flex justify-content-end mb-3 mr-3'>
-                <Button icon="pi pi-send" rounded raised size='small' onClick={handleSend} disabled={isLoading} />
+                <Button icon="pi pi-send" rounded raised size='small' onClick={handleSend} disabled={isLoading || sending} />
             </div>
         </div>
     );

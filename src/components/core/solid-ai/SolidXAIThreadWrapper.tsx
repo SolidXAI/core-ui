@@ -18,35 +18,21 @@ export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId }: SolidXA
 
     // Create the RTK slices for this entity
     const aiInteractionApi = createSolidEntityApi('aiInteraction');
-    const {
-        useCreateSolidEntityMutation,
-        useDeleteMultipleSolidEntitiesMutation,
-        useDeleteSolidEntityMutation,
-        useGetSolidEntitiesQuery,
-        useGetSolidEntityByIdQuery,
-        useLazyGetSolidEntitiesQuery,
-        useLazyGetSolidEntityByIdQuery,
-        usePrefetch,
-        useUpdateSolidEntityMutation,
-        useRecoverSolidEntityByIdQuery,
-        useLazyRecoverSolidEntityByIdQuery,
-        useRecoverSolidEntityMutation
-    } = aiInteractionApi;
-
-    const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading, error }] = useLazyGetSolidEntitiesQuery();
+    const { useLazyGetSolidEntitiesQuery } = aiInteractionApi;
+    const [triggerGetSolidEntities, { data: aiInteractionsData }] = useLazyGetSolidEntitiesQuery();
 
     // State used to show all aiInteractions in the system.
     // TODO: shall we create an interface to represent the aiInteraction model records from the server?
     const [interactions, setInteractions] = useState<AiInteraction[]>([]);
 
     useEffect(() => {
-        if (solidEntityListViewData?.records) {
-            const sorted = [...solidEntityListViewData.records].sort(
+        if (aiInteractionsData?.records) {
+            const sorted = [...aiInteractionsData.records].sort(
                 (a, b) => a.id - b.id
             );
             setInteractions(sorted);
         }
-    }, [solidEntityListViewData]);
+    }, [aiInteractionsData]);
 
     // Trigger a call to fetch all aiInteractions. 
     useEffect(() => {
@@ -88,7 +74,7 @@ export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId }: SolidXA
             ref={containerRef}
             className={`px-3 pt-3 flex flex-column gap-3 overflow-y-auto overflow-x-hidden ${styles.SolidXAIThreadWrapper}`}
         >
-            {interactions.map((interaction, index) => {
+            {interactions.map((interaction) => {
                 const { role } = interaction; // assume role is 'user', 'assistant', or 'thinking'
 
                 switch (role) {

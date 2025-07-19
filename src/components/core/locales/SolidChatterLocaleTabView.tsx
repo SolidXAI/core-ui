@@ -63,9 +63,14 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
           setRefreshChatterMessage={setRefreshChatterMessage}
         />
       </TabPanel>
-      {/* <TabPanel header="SolidX AI" className={`SolidCustomLocaleTab py-2`} contentClassName='h-full'>
-        <SolidXAIModule />
-      </TabPanel> */}
+      {
+        process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' &&
+        (
+          <TabPanel header="SolidX AI" className={`SolidCustomLocaleTab py-2`} contentClassName='h-full'>
+            <SolidXAIModule />
+          </TabPanel>
+        )
+      }
     </TabView>
   );
 };
