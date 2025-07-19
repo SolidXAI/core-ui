@@ -8,21 +8,33 @@ import { Calendar } from "primereact/calendar";
 import { Nullable } from "primereact/ts-helpers";
 import { SqlExpression } from "@/types/solid-core";
 import styles from './SolidDashboard.module.css'
+import { Tooltip } from "primereact/tooltip";
 export interface SolidDashboardVariablesFilterDialogProps {
   dashboardVariableFilterRules: ISolidDashboardVariableFilterRule[];
   setDashboardVariableFilterRules: Dispatch<SetStateAction<ISolidDashboardVariableFilterRule[]>>;
   setFilters: Dispatch<SetStateAction<SqlExpression[]>>;
+  data: any
 }
 
-const SolidDashboardVariableFilterDialog: React.FC<SolidDashboardVariablesFilterDialogProps> = ({ dashboardVariableFilterRules, setDashboardVariableFilterRules, setFilters }) => {
+const SolidDashboardVariableFilterDialog: React.FC<SolidDashboardVariablesFilterDialogProps> = ({ dashboardVariableFilterRules, setDashboardVariableFilterRules, setFilters, data }) => {
+
   const [showFilterDialog, setShowFilterDialog] = useState(false);
   const [dates, setDates] = useState<Nullable<(Date | null)[]>>(null);
 
   // TODO [HP]: Currently this is static, we need this to be dynamic how we are invoking setFilters below has to be fully dynamic...
   return (
     <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
-      <p className="m-0 view-title">
-        Dashboard
+      <p className="m-0 view-title flex align-items-center gap-1">
+        {data?.records[0]?.displayName ? data?.records[0]?.displayName : data?.records[0]?.name}
+        {data?.records[0]?.description &&
+          <>
+            <Tooltip className='solid-field-tooltip' target=".solid-field-tooltip-icon" />
+            <i className="pi pi-info-circle solid-field-tooltip-icon"
+              data-pr-tooltip={data?.records[0]?.description}
+              data-pr-position={'right'}
+            />
+          </>
+        }
       </p>
       <div>
         <div className={`flex align-items-center ${styles.SolidDashboardDateRangeFilterWrapper}`}>
