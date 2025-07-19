@@ -11,15 +11,16 @@ import { AiInteraction } from '@/types/solid-core'
 type SolidXAIThreadWrapperProps = {
     threadId: string;
     latestInteractionId?: string | null;
+    thinking?: boolean;
 };
 
-export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId }: SolidXAIThreadWrapperProps) => {
+export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking }: SolidXAIThreadWrapperProps) => {
     const containerRef = useRef<HTMLDivElement | null>(null);
 
     // Create the RTK slices for this entity
     const aiInteractionApi = createSolidEntityApi('aiInteraction');
     const { useLazyGetSolidEntitiesQuery } = aiInteractionApi;
-    const [triggerGetSolidEntities, { data: aiInteractionsData }] = useLazyGetSolidEntitiesQuery();
+    const [triggerGetAiInteractions, { data: aiInteractionsData }] = useLazyGetSolidEntitiesQuery();
 
     // State used to show all aiInteractions in the system.
     // TODO: shall we create an interface to represent the aiInteraction model records from the server?
@@ -49,8 +50,8 @@ export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId }: SolidXA
         };
 
         const queryString = qs.stringify(queryParams, { encodeValuesOnly: true });
-        triggerGetSolidEntities(queryString);
-    }, [threadId, latestInteractionId]);
+        triggerGetAiInteractions(queryString);
+    }, [threadId, latestInteractionId, thinking]);
 
     useEffect(() => {
         if (containerRef.current) {
@@ -86,6 +87,8 @@ export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId }: SolidXA
                         return null;
                 }
             })}
+
+            {thinking && <SolidXAIThinking />}
         </div>
     );
 }

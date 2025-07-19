@@ -242,6 +242,7 @@ export { solidMenusApi, useCreateSolidMenuMutation, useDeleteMultipleSolidMenusM
 export { solidViewsApi, useCreateSolidViewMutation, useDeleteMultipleSolidViewsMutation, useDeleteSolidViewMutation, useGetSolidViewByIdQuery, useGetSolidViewLayoutQuery, useGetSolidViewsQuery, useLazyGetSolidViewByIdQuery, useLazyGetSolidViewsQuery, useUpdateSolidViewMutation } from '@/redux/api/solidViewApi';
 export { dashboardApi} from '@/redux/api/dashboardApi';
 export { dashboardQuestionApi } from '@/redux/api/dashboardQuestionApi';
+export { aiInteractionApi } from '@/redux/api/aiInteractionApi';
 // export * from '@/redux/api/stateApi';
 // export * from '@/redux/api/tagApi';
 // export * from '@/redux/api/tagGroupApi';
