@@ -11,6 +11,11 @@ export const SolidXAIModule = () => {
   const [latestInteractionId, setLatestInteractionId] = useState<string | null>(null);
   const [thinking, setThinking] = useState(false);
 
+  // TODO: START REFACTORING - reusable code alert
+  // TODO: This method can be refactored out into a separate file... 
+  // TODO: It is present in a commented form in this file src/components/core/extension/solid-core/moduleMetadata/list/GenerateModuleCodeRowAction.tsx
+  // TODO: It is present in a commented form in this file src/components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction.tsx
+
   const mqMessageApi = createSolidEntityApi("mqMessage");
   const {
     useGetSolidEntitiesQuery: useGetMqMessageQuery,
@@ -57,6 +62,7 @@ export const SolidXAIModule = () => {
     }
     return false;
   };
+  // TODO: END REFACTORING - reusable code alert
 
   useEffect(() => {
     if (!latestInteractionId) return;

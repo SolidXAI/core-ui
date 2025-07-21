@@ -46,7 +46,7 @@ export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking 
                 }
             },
             // Ensures first interaction comes first
-            // sort: ['id:asc'],
+            sort: ['id:desc'],
         };
 
         const queryString = qs.stringify(queryParams, { encodeValuesOnly: true });

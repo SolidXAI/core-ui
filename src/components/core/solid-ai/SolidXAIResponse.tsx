@@ -1,11 +1,30 @@
 "use client"
+import { useSeederMutation } from "@/redux/api/solidServiceApi";
 import { Button } from 'primereact/button'
 import styles from './SolidXAI.module.css'
 import { SolidXAIIcon } from './SolidXAIIcon'
 import { AiInteraction } from '@/types/solid-core'
-
+import { useApplySolidAiInteractionMutation } from '@/redux/api/aiInteractionApi'
+import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import { closePopup } from "@/redux/features/popupSlice";
+import { Toast } from "primereact/toast";
+import { SolidCircularLoader } from "../common/SolidLoaders/SolidCircularLoader";
 
 export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }) => {
+    const renderContent = () => {
+
+        switch (interaction.contentType) {
+            case 'json':
+                return (
+                    <JsonDisplay interaction={interaction} />
+                )
+            case 'plain_text':
+            default:
+                return <PlainTextDisplay interaction={interaction} />
+        }
+    }
+
     return (
         <div className={`${styles.SolidXAIResponseWrapper}`}>
             <div className='flex align-items-start gap-3'>
@@ -13,14 +32,164 @@ export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }
                     <Button icon={<SolidXAIIcon />} size="small" raised text rounded />
                 </div>
                 <div className={`mt-3 p-3 ${styles.SolidXAIResponse}`}>
-                    {/* <div>
-                        A machine learning model for predicting house prices using linear regression has been generated and is ready for training with your data.
-                    </div> */}
-                    <div>
-                        {interaction.message}
-                    </div>
+                    {renderContent()}
                 </div>
             </div>
         </div>
+    )
+}
+
+export interface PlainTextDisplayProps {
+    interaction: AiInteraction
+}
+
+export const PlainTextDisplay: React.FC<PlainTextDisplayProps> = ({ interaction }) => {
+    return (
+        <div style={{ fontSize: '0.95rem', whiteSpace: 'pre-wrap' }}>
+            {interaction.message}
+        </div>
+    )
+}
+
+export interface JsonDisplayProps {
+    interaction: AiInteraction
+}
+
+export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
+    const dispatch = useDispatch();
+
+    const [applyInteraction, {
+        isLoading: isApplyInteractionLoading,
+        isSuccess: isApplyInteractionSuceess,
+        isError: isApplyInteractionError,
+        error: applyInteractionError,
+        data: applyInteractionData
+    }] = useApplySolidAiInteractionMutation();
+
+    const handlePreview = () => {
+        console.log('Preview clicked for interaction:', interaction.id)
+    }
+
+    const handleApply = async () => {
+        try {
+            const response = await applyInteraction({ id: interaction.id }).unwrap()
+            setIsGenerating(true);
+            console.log('Apply successful:', response)
+        } catch (err) {
+            console.error('Failed to apply interaction:', err)
+        }
+    }
+
+    // TODO: START REFACTORING - reusable code alert
+    // TODO: This method can be refactored out into a separate file... 
+    // TODO: The if condition below isGenerating in the JSX part can also be refactored out... 
+
+    // const toast = useRef<Toast>(null);
+    // const showToast = (severity: "success" | "error", summary: string, detail: string) => {
+    //     toast.current?.show({
+    //         severity,
+    //         summary,
+    //         detail,
+    //         life: 3000,
+    //     });
+    // };
+
+    const [triggerSeeder, {
+        data,
+        isLoading,
+        isSuccess: isSeederSuccess,
+        isError: isSeederError
+    }] = useSeederMutation();
+
+    // Utitlity to track if solid-api is up
+    const [isPinging, setIsPinging] = useState(false);
+    const [isGenerating, setIsGenerating] = useState(false);
+    const pingBackendWithRetry = async (retries = 30, delay = 500): Promise<boolean> => {
+        for (let i = 0; i < retries; i++) {
+            try {
+                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ping`);
+                console.log("ping response", res);
+
+                if (res.ok)
+                    return true;
+            } catch (e) {
+                // ignore and retry
+            }
+            await new Promise((resolve) => setTimeout(resolve, delay));
+        }
+        return false;
+    };
+
+    useEffect(() => {
+        const runSeederIfBackendAlive = async () => {
+            if (isApplyInteractionSuceess) {
+                console.log("isApplyInteractionSuceess", isApplyInteractionSuceess);
+                setIsPinging(true);
+
+                const isAlive = await pingBackendWithRetry(30, 500);
+
+                setIsPinging(false);
+
+                if (isAlive) {
+                    await triggerSeeder("ModuleMetadataSeederService");
+                } else {
+                    dispatch(closePopup());
+                    console.log("Backend is not alive, cannot run seeder");
+                    // showToast("error", "Backend Unavailable", "Seeder not triggered. Could not reach backend.");
+                }
+            }
+        };
+        setTimeout(() => {
+            runSeederIfBackendAlive();
+        }, 5000);
+    }, [isApplyInteractionSuceess]);
+
+    useEffect(() => {
+        if (isSeederSuccess) {
+            console.log("isSeederSuccess", data);
+            // showToast("success", "Code Generated Successfully", "Code Generated Successfully");
+            setIsGenerating(false);
+            dispatch(closePopup());
+            window.location.reload();
+        }
+        if (isSeederError) {
+            console.log("isSeederError", isSeederError);
+            // showToast("error", "Seeder Error", "Could not run seeder. Please try again.");
+            setIsGenerating(false);
+        }
+    }, [isSeederSuccess])
+    // TODO: END REFACTORING - reusable code alert
+
+    let formattedJson = ''
+    try {
+        const parsed = JSON.parse(interaction.message)
+        formattedJson = JSON.stringify(parsed, null, 2)
+    } catch (e) {
+        formattedJson = 'Invalid JSON'
+    }
+
+    return (
+        <>
+            {isGenerating ?
+                <>
+                    <div className="flex flex-column align-items-center justify-content-center" style={{ padding: '2rem', height: 200 }}>
+                        <SolidCircularLoader />
+                        <p className="mt-4 font-medium">Waiting for backend...</p>
+                    </div>
+                </>
+                :
+                <>
+                    <div>
+                        <pre style={{ fontSize: '0.85rem', whiteSpace: 'pre-wrap' }}>
+                            {formattedJson}
+                        </pre>
+                        <div className="flex gap-2 mt-2">
+                            <button onClick={handleApply} style={{ fontSize: '0.75rem' }} disabled={isApplyInteractionLoading}>apply</button>
+                            <button onClick={handlePreview} style={{ fontSize: '0.75rem' }}>edit & apply</button>
+                        </div>
+                    </div>
+                </>
+            }
+        </>
     )
 }

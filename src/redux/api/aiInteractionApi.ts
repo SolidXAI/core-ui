@@ -12,6 +12,17 @@ interface TriggerMcpClientJobResponse {
     data: string; // UUID
 }
 
+interface ApplySolidAiInteractionRequest {
+    id: number;
+}
+
+interface ApplySolidAiInteractionResponse {
+    statusCode: number;
+    message: string[];
+    error: string;
+    data: string; // UUID
+}
+
 export const aiInteractionApi = createApi({
     reducerPath: "aiInteractionApi",
     baseQuery: baseQueryWithAuth,
@@ -23,7 +34,17 @@ export const aiInteractionApi = createApi({
                 body,
             }),
         }),
+        applySolidAiInteraction: builder.mutation<ApplySolidAiInteractionResponse, ApplySolidAiInteractionRequest>({
+            query: (body) => ({
+                url: `/ai-interaction/${body.id}/apply-solid-ai-interaction`,
+                method: "POST",
+                // body,
+            }),
+        }),
     }),
 });
 
-export const { useTriggerMcpClientJobMutation } = aiInteractionApi;
+export const {
+    useTriggerMcpClientJobMutation,
+    useApplySolidAiInteractionMutation,
+} = aiInteractionApi;

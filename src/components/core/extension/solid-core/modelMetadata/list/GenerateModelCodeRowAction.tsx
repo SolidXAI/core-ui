@@ -8,31 +8,76 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Toast } from 'primereact/toast';
 import { SolidCircularLoader } from '@/components/core/common/SolidLoaders/SolidCircularLoader';
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
-import qs from "qs";
 
 
 const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     const dispatch = useDispatch();
-    const [
-        generateCode,
-        { isLoading: isGenerateCodeUpdating, isSuccess: isGenerateCodeSuceess, isError: isGenerateCodeError, error: generateCodeError, data: generateCodeData },
-    ] = useGenerateCodeForModelMutation();
+    const [generateCode, {
+        isLoading: isGenerateCodeUpdating,
+        isSuccess: isGenerateCodeSuceess,
+        isError: isGenerateCodeError,
+        error: generateCodeError,
+        data: generateCodeData
+    }] = useGenerateCodeForModelMutation();
 
-    const mqMessageApi = createSolidEntityApi("mqMessage");
-    const {
+    // const mqMessageApi = createSolidEntityApi("mqMessage");
+    // const {
+    //     useGetSolidEntitiesQuery: useGetMqMessageQuery,
+    //     useLazyGetSolidEntitiesQuery: useLazyGetMqMessageQuery,
+    // } = mqMessageApi;
+    // const [getMqMessageStatus, {
+    //     data: solidListViewMetaData,
+    //     error: solidListViewMetaDataError,
+    //     isLoading: solidListViewMetaDataIsLoading,
+    //     isError: solidListViewMetaDataIsError
+    // }] = useLazyGetMqMessageQuery();
+    // const fetchMqMessageStatus = async (retries = 30, delay = 500, generateCodeData: any): Promise<boolean> => {
+    //     for (let i = 0; i < retries; i++) {
+    //         try {
+    //             const query = {
+    //                 filters: {
+    //                     messageId: {
+    //                         $eq: generateCodeData?.data?.messageId
+    //                     }
+    //                 }
+    //             };
+    //             const queryString = qs.stringify(query, {
+    //                 encodeValuesOnly: true,
+    //             });
+    //             const res = await getMqMessageStatus(queryString)
+    //             if (res.isSuccess === true) {
+    //                 if (res.data.records.length > 0) {
+    //                     const messageStage = res.data.records[0].stage;
+    //                     console.log("messageStatus", messageStage);
+    //                     if (messageStage === "succeeded") {
+    //                         return true
+    //                     }
+    //                     if (messageStage === "failed") {
+    //                         return false
+    //                     }
+    //                 }
+    //             }
+    //         } catch (e) {
+    //             // ignore and retry
+    //         }
+    //         await new Promise((resolve) => setTimeout(resolve, delay));
+    //     }
+    //     return false;
+    // };
 
-        useGetSolidEntitiesQuery: useGetMqMessageQuery,
-        useLazyGetSolidEntitiesQuery: useLazyGetMqMessageQuery,
-    } = mqMessageApi;
+    const generateCodeHandler = async () => {
+        const response: any = await generateCode({ id: event?.rowData?.id });
+        console.log("response generate code handler", response);
+        setIsGenerating(true);
+    }
 
-
-    const [getMqMessageStatus, {
-        data: solidListViewMetaData,
-        error: solidListViewMetaDataError,
-        isLoading: solidListViewMetaDataIsLoading,
-        isError: solidListViewMetaDataIsError
-    }] = useLazyGetMqMessageQuery();
+    // TODO: START REFACTORING - reusable code alert
+    const [triggerSeeder, {
+        data,
+        isLoading,
+        isSuccess: isSeederSuccess,
+        isError: isSeederError
+    }] = useSeederMutation();
 
     const toast = useRef<Toast>(null);
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
@@ -43,8 +88,6 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
             life: 3000,
         });
     };
-
-    const [triggerSeeder, { data, isLoading, isSuccess: isSeederSuccess, isError: isSeederError }] = useSeederMutation();
 
     // Utitlity to track if solid-api is up
     const [isPinging, setIsPinging] = useState(false);
@@ -64,47 +107,6 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
         }
         return false;
     };
-
-    const fetchMqMessageStatus = async (retries = 30, delay = 500, generateCodeData: any): Promise<boolean> => {
-        for (let i = 0; i < retries; i++) {
-            try {
-                const query = {
-
-                    filters: {
-                        messageId: {
-                            $eq: generateCodeData?.data?.messageId
-                        }
-                    }
-                };
-                const queryString = qs.stringify(query, {
-                    encodeValuesOnly: true,
-                });
-                const res = await getMqMessageStatus(queryString)
-                if (res.isSuccess === true) {
-                    if (res.data.records.length > 0) {
-                        const messageStage = res.data.records[0].stage;
-                        console.log("messageStatus", messageStage);
-                        if (messageStage === "succeeded") {
-                            return true
-                        }
-                        if (messageStage === "failed") {
-                            return false
-                        }
-                    }
-                }
-            } catch (e) {
-                // ignore and retry
-            }
-            await new Promise((resolve) => setTimeout(resolve, delay));
-        }
-        return false;
-    };
-
-    const generateCodeHandler = async () => {
-        const response: any = await generateCode({ id: event?.rowData?.id });
-        console.log("response generate code handler", response);
-        setIsGenerating(true);
-    }
 
     useEffect(() => {
         const runSeederIfQueueStatusIsSuccess = async () => {
@@ -146,6 +148,7 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
             setIsGenerating(false);
         }
     }, [isSeederSuccess])
+    // TODO: END REFACTORING - reusable code alert
 
     return (
         <>
