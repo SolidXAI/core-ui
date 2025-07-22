@@ -118,7 +118,7 @@ function getDefaultFilterRules(variables: any) {
   return filterRules;
 }
 
-function getQueryParams(moduleName: string, dashboardId?: number) {
+function getQueryParams(moduleName: string, dashboardId?: number, dashboardName?:string) {
   const filters: any = {
     module: {
       name: {
@@ -129,6 +129,8 @@ function getQueryParams(moduleName: string, dashboardId?: number) {
 
   if (dashboardId !== undefined) {
     filters.id = { $eq: dashboardId };
+  } else if (dashboardName !== undefined) {
+    filters.name = { $eq: dashboardName };
   }
 
   const query = {
@@ -157,10 +159,11 @@ function getDashboardLayoutOptions(dashboardRecord: any) {
 type SolidDashboardViewProps = {
   moduleName: string;
   dashboardId?: number;
+  dashboardName?:string;
 };
 
 const SolidDashboard = (params: SolidDashboardViewProps) => {
-  const { data, isLoading, error } = useGetDashboardQuery(getQueryParams(params.moduleName, params.dashboardId)) // FIXME : error handling should be done properly
+  const { data, isLoading, error } = useGetDashboardQuery(getQueryParams(params.moduleName, params.dashboardId, params.dashboardName)) // FIXME : error handling should be done properly
   // Define a state called layoutOption and pass it after destructing the widgetOptions and dashboardOptions from layoutOption
   // TODO [HP]: Shouldn't the type of this state variable be something different? Why are we muddling this with layout but calling it body props? 
   // TODO [HP]: Body props should be clearly made up of Gridstack layout options, the questions that make up the body & the filter[] which is an array of SqlExpressions
