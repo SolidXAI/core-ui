@@ -76,7 +76,7 @@ export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking 
             className={`px-3 pt-3 flex flex-column gap-3 overflow-y-auto overflow-x-hidden ${styles.SolidXAIThreadWrapper}`}
         >
             {interactions.map((interaction) => {
-                const { role } = interaction; // assume role is 'user', 'assistant', or 'thinking'
+                const { role } = interaction;
 
                 switch (role) {
                     case 'human':

@@ -140,6 +140,8 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
             }
         };
         setTimeout(() => {
+            // TODO: Do we want to check if the "apply" mutation response contains a flag indicating that the last aiReponse application will lead to a server reboot?
+            // TODO: Do we want to check if the "apply" mutation response contains a flag indicating that the last aiReponse application will need "seed" to be run?
             runSeederIfBackendAlive();
         }, 5000);
     }, [isApplyInteractionSuceess]);
