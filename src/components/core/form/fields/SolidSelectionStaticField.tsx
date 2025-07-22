@@ -101,23 +101,33 @@ export class SolidSelectionStaticField implements ISolidField {
         let schema: Schema;
 
         if (isMultiSelect) {
-            // Expecting an array of objects with shape { value: string }
-            schema = Yup.array()
-                .of(Yup.object({
-                    value: Yup.string().required(`${fieldLabel} is required.`)
-                }))
-                .min(1, `${fieldLabel} is required.`);
+            // For multi-select, create array schema
+            if (fieldMetadata.required) {
+                schema = Yup.array()
+                    .of(Yup.object({
+                        value: Yup.string().required(`${fieldLabel} is required.`)
+                    }))
+                    .min(1, `${fieldLabel} is required.`)
+                    .required(`${fieldLabel} is required.`);
+            } else {
+                schema = Yup.array()
+                    .of(Yup.object({
+                        value: Yup.string()
+                    }))
+                    .nullable(); // Allow null/undefined for non-required fields
+            }
         } else {
-            schema = Yup.object({
-                value: Yup.string().required(`${fieldLabel} is required.`)
-            });
+            // For single select, create object schema
+            if (fieldMetadata.required) {
+                schema = Yup.object({
+                    value: Yup.string().required(`${fieldLabel} is required.`)
+                }).required(`${fieldLabel} is required.`);
+            } else {
+                schema = Yup.object({
+                    value: Yup.string()
+                }).nullable(); // Allow null/undefined for non-required fields
+            }
         }
-
-        // 1. required 
-        if (fieldMetadata.required) {
-            schema = schema.required(`${fieldLabel} is required.`);
-        }
-
         return schema;
     }
 

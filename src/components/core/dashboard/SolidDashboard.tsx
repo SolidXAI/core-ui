@@ -194,6 +194,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
             dashboardVariableFilterRules={dashboardVariableFilterRules}
             setDashboardVariableFilterRules={setDashboardVariableFilterRules}
             setFilters={setFilters}
+            data={data}
           />
 
           <SolidDashboardBody questions={questions} filters={filters} />
