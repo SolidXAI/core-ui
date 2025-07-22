@@ -6,8 +6,9 @@ import { createSolidEntityApi } from '@/redux/api/solidEntityApi'
 import { SolidXAIInputBox } from "./SolidXAIInputBox";
 import { SolidXAIThreadWrapper } from "./SolidXAIThreadWrapper";
 import { useEffect, useState } from 'react';
+import { SolidXAIModuleHeader } from "./SolidXAIModuleHeader";
 
-export const SolidXAIModule = () => {
+export const SolidXAIModule = ({ showHeader, inListView }: any) => {
   const [latestInteractionId, setLatestInteractionId] = useState<string | null>(null);
   const [thinking, setThinking] = useState(false);
 
@@ -85,7 +86,10 @@ export const SolidXAIModule = () => {
   }, [latestInteractionId]);
 
   return (
-    <div className='relative' style={{ height: 'calc(100% - 45px)' }}>
+    <div className='relative' style={{ height: inListView ? '100%' : 'calc(100% - 45px)', backgroundColor: 'var(--surface-section)' }}>
+      {showHeader &&
+        <SolidXAIModuleHeader />
+      }
       <SolidXAIThreadWrapper
         threadId="thread-1"
         latestInteractionId={latestInteractionId}
