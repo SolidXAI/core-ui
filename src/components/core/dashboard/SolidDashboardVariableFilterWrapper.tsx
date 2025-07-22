@@ -46,7 +46,7 @@ const SolidDashboardVariableFilterDialog: React.FC<SolidDashboardVariablesFilter
 
             if (newDates && newDates.length === 2 && newDates[0] && newDates[1]) {
               const filter: SqlExpression = {
-                variableName: 'dashboardDate',
+                variableName: data?.records[0]?.dashboardVariables[0]?.variableName,
                 // @ts-ignore
                 operator: '$between',
                 value: [
