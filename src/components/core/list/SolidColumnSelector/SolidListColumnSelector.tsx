@@ -18,6 +18,8 @@ interface FilterColumns {
 }
 
 export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: any) => {
+    console.log("listViewMetaData column selector", listViewMetaData);
+
     const toast = useRef<Toast>(null);
     const [isDragging, setIsDragging] = useState(false);
     const entityApi = createSolidEntityApi('userViewMetadata');
@@ -109,17 +111,21 @@ export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: a
                 .filter(col => selectedKeys.includes(col.key))
                 .map(({ key }) => {
                     const existingChild = currentChildren.find((child: any) => child.attrs.name === key);
-                    return existingChild ?? {
+                    if (existingChild) return existingChild;
+                
+                    const fieldType = allFieldMeta[key]?.type;
+                    const isTextType = fieldType === "shortText" || fieldType === "longText";
+                
+                    return {
                         type: 'field',
                         attrs: {
                             name: key,
                             label: allFieldMeta[key]?.displayName || key,
-                            sortable: true,
-                            filterable: true,
+                            ...(isTextType ? { isSearchable: true } : {}),
                         },
                     };
                 });
-
+                
             // Now build updated solidView
             const updatedView = {
                 layout: {
@@ -201,7 +207,7 @@ export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: a
                                                         {column.name}
                                                     </label>
                                                 </div>
-                                                <DragActive active={snapshot.isDragging}/>
+                                                <DragActive active={snapshot.isDragging} />
                                             </div>
                                         )}
                                     </Draggable>
@@ -223,7 +229,7 @@ export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: a
     )
 }
 
-const DragActive = ({active}: any) => {
+const DragActive = ({ active }: any) => {
     return (
         <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
             <path d="M7.46354 11.7331C7.46354 12.0997 7.33299 12.4136 7.07187 12.6747C6.81076 12.9359 6.49687 13.0664 6.13021 13.0664C5.76354 13.0664 5.44965 12.9359 5.18854 12.6747C4.92743 12.4136 4.79688 12.0997 4.79688 11.7331C4.79688 11.3664 4.92743 11.0525 5.18854 10.7914C5.44965 10.5303 5.76354 10.3997 6.13021 10.3997C6.49687 10.3997 6.81076 10.5303 7.07187 10.7914C7.33299 11.0525 7.46354 11.3664 7.46354 11.7331ZM7.46354 7.73307C7.46354 8.09974 7.33299 8.41363 7.07187 8.67474C6.81076 8.93585 6.49687 9.06641 6.13021 9.06641C5.76354 9.06641 5.44965 8.93585 5.18854 8.67474C4.92743 8.41363 4.79688 8.09974 4.79688 7.73307C4.79688 7.36641 4.92743 7.05252 5.18854 6.79141C5.44965 6.5303 5.76354 6.39974 6.13021 6.39974C6.49687 6.39974 6.81076 6.5303 7.07187 6.79141C7.33299 7.05252 7.46354 7.36641 7.46354 7.73307ZM7.46354 3.73307C7.46354 4.09974 7.33299 4.41363 7.07187 4.67474C6.81076 4.93585 6.49687 5.06641 6.13021 5.06641C5.76354 5.06641 5.44965 4.93585 5.18854 4.67474C4.92743 4.41363 4.79688 4.09974 4.79688 3.73307C4.79688 3.36641 4.92743 3.05252 5.18854 2.79141C5.44965 2.5303 5.76354 2.39974 6.13021 2.39974C6.49687 2.39974 6.81076 2.5303 7.07187 2.79141C7.33299 3.05252 7.46354 3.36641 7.46354 3.73307Z" fill="var(--icon-color)" fill-opacity={active ? "0.75" : "0.25"} />
