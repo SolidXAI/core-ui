@@ -6,7 +6,9 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import SolidDashboardBody, { SolidDashboardBodyProps } from './SolidDashboardBody';
 import SolidDashboardVariableFilterDialog from './SolidDashboardVariableFilterWrapper';
 import { SqlExpression } from '@/types/solid-core';
-
+import styles from './SolidDashboard.module.css';
+import { SolidXAIIcon } from '../solid-ai/SolidXAIIcon';
+import { SolidXAIModule } from '../solid-ai/SolidXAIModule';
 export enum SolidDashboardVariableType {
   DATE = 'date',
   SELECTION_STATIC = 'selectionStatic',
@@ -118,7 +120,7 @@ function getDefaultFilterRules(variables: any) {
   return filterRules;
 }
 
-function getQueryParams(moduleName: string, dashboardId?: number, dashboardName?:string) {
+function getQueryParams(moduleName: string, dashboardId?: number, dashboardName?: string) {
   const filters: any = {
     module: {
       name: {
@@ -159,7 +161,7 @@ function getDashboardLayoutOptions(dashboardRecord: any) {
 type SolidDashboardViewProps = {
   moduleName: string;
   dashboardId?: number;
-  dashboardName?:string;
+  dashboardName?: string;
 };
 
 const SolidDashboard = (params: SolidDashboardViewProps) => {
@@ -176,7 +178,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
   // TODO [HP]: replace dashboardVariableFilterRules with filters everywhere...
   const [dashboardVariableFilterRules, setDashboardVariableFilterRules] = useState<ISolidDashboardVariableFilterRule[]>([]);
   const [filters, setFilters] = useState<SqlExpression[]>([]);
-
+  const [isOpenSolidXAiPanel, setIsOpenSolidXAiPanel] = useState(false);
   const [questions, setQuestions] = useState<any[]>([]);
   useEffect(() => {
     // Invoke the dashboard api to fetch the dashboard data
@@ -186,27 +188,40 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
       handleDashboardData(data, setLayoutOption, setDashboardVariableFilterRules, setQuestions, setFilters);
     }
   }, [isLoading, data]);
+  const toggleSolidXAiPanel = () => setIsOpenSolidXAiPanel(!isOpenSolidXAiPanel);
 
   return (
-    <div className="h-screen surface-0">
-      {isLoading && <p>Loading dashboard...</p>}
-      {error && <p className="text-red-600">Failed to load dashboard.</p>}
-      {!isLoading && !error && (
-        <>
-          <SolidDashboardVariableFilterDialog
-            dashboardVariableFilterRules={dashboardVariableFilterRules}
-            setDashboardVariableFilterRules={setDashboardVariableFilterRules}
-            setFilters={setFilters}
-            data={data}
-          />
+    <div className={`h-screen surface-0 relative`}>
+      <div className={`h-full flex-grow-1 relative ${styles.SolidDashboardPageContentWrapper} ${isOpenSolidXAiPanel ? styles.SolidDashboardPageContentWrapperShrink : ''}`}>
+        {isLoading && <p>Loading dashboard...</p>}
+        {error && <p className="text-red-600">Failed to load dashboard.</p>}
+        {!isLoading && !error && (
+          <>
+            <SolidDashboardVariableFilterDialog
+              dashboardVariableFilterRules={dashboardVariableFilterRules}
+              setDashboardVariableFilterRules={setDashboardVariableFilterRules}
+              setFilters={setFilters}
+              data={data}
+            />
 
-          <SolidDashboardBody questions={questions} filters={filters} />
+            <SolidDashboardBody questions={questions} filters={filters} />
 
-          {/* <SolidDashboardBody
+            {/* <SolidDashboardBody
             dashboardOptions={layoutOption.dashboardOptions ?? {}}
             widgetOptions={layoutOption.widgetOptions ?? []}
           /> */}
-        </>
+          </>
+        )}
+        {process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' && (
+          <button className={styles.SolidXAIFloatingBtn} onClick={toggleSolidXAiPanel}>
+            <div className="flex gap-2"> <SolidXAIIcon /> SolidX AI </div>
+          </button>
+        )}
+      </div>
+      {process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' && (
+        <div className={`${styles.SolidXAIListPanel} ${isOpenSolidXAiPanel ? styles.SolidXAIListPanelOpen : ''}`}>
+          <SolidXAIModule showHeader inListView />
+        </div>
       )}
     </div>
   );
