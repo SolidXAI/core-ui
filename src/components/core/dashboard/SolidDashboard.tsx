@@ -279,7 +279,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
                 top: 0,
                 bottom: 0,
                 height:'100%',
-                zIndex: 100,
+                zIndex: 9,
               }}
               onMouseDown={() => setIsResizing(true)}
             />

@@ -1371,7 +1371,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     left: 0,
                                     top: 0,
                                     bottom: 0,
-                                    zIndex: 100,
+                                    zIndex: 9,
                                 }}
                                 onMouseDown={() => setIsResizingChatterLocale(true)}
                             />
