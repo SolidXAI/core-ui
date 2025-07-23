@@ -8,7 +8,7 @@ interface PopupEvent {
   [key: string]: any;
 }
 
-interface PopupState {
+export interface PopupState {
   isOpen: boolean;
   event: PopupEvent | null;
 }
