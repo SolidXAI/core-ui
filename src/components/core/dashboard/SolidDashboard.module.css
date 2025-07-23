@@ -25,11 +25,8 @@
 
 .SolidDashboardPageContentWrapper {
     transition: width 0.3s ease;
-}
-
-.SolidDashboardPageContentWrapperShrink {
-    width: calc(100% - 380px);
-    transition: width 0.3s ease;
+    min-width: 0;
+    border-right: 1px solid var(--primary-light-color);
 }
 
 .SolidXAIFloatingBtn {

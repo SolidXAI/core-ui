@@ -439,12 +439,43 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [openLightbox, setOpenLightbox] = useState(false);
     const [lightboxUrls, setLightboxUrls] = useState([]);
     const [isShowChatter, setShowChatter] = useState(true);
+    const [chatterLocaleWidth, setChatterLocaleWidth] = useState(() => {
+        const stored = localStorage.getItem('chatter_locale_width');
+        return stored ? parseInt(stored, 10) : 380; // default width
+    });
+    const [isResizingChatterLocale, setIsResizingChatterLocale] = useState(false);
+
     const [solidWorkflowFieldValue, setSolidWorkflowFieldValue] = useState<string>("");
     const [defaultTabViewOptionIndex, setDefaultTabViewOptionIndex] = useState<number>(1);
     const errorFields: string[] = [];
 
     const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
     const op = useRef(null);
+
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isResizingChatterLocale) return;
+            const newWidth = window.innerWidth - e.clientX;
+            const clampedWidth = Math.max(280, Math.min(newWidth, 700));
+            setChatterLocaleWidth(clampedWidth);
+            localStorage.setItem('chatter_locale_width', clampedWidth.toString());
+        };
+
+        const handleMouseUp = () => {
+            setIsResizingChatterLocale(false);
+        };
+
+        if (isResizingChatterLocale) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+        }
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isResizingChatterLocale]);
+
 
     useEffect(() => {
         const mode = searchParams.get('viewMode');
@@ -1295,7 +1326,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         return (
             <div className="solid-form-wrapper">
                 <Toast ref={toast} />
-                <div className="solid-form-section" style={{ borderRight: params.embeded !== true ? '1px solid var(--primary-light-color' : '' }} >
+                <div className="solid-form-section" style={{ borderRight: params.embeded !== true ? '1px solid var(--primary-light-color)' : '' }} >
                     <form style={{ width: '100%' }} onSubmit={formik.handleSubmit}>
                         <SolidFormActionHeader
                             formik={formik}
@@ -1330,7 +1361,21 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     </form>
                 </div>
                 {params.embeded !== true &&
-                    <div className={`chatter-section ${isShowChatter === false ? 'collapsed' : ''}`}>
+                    <div className={`chatter-section ${isShowChatter === false ? 'collapsed' : ''}`} style={{ width: chatterLocaleWidth }}>
+                        {isShowChatter && (
+                            <div
+                                style={{
+                                    width: 5,
+                                    cursor: 'col-resize',
+                                    position: 'absolute',
+                                    left: 0,
+                                    top: 0,
+                                    bottom: 0,
+                                    zIndex: 100,
+                                }}
+                                onMouseDown={() => setIsResizingChatterLocale(true)}
+                            />
+                        )}
                         {isShowChatter === true &&
                             <Button
                                 icon="pi pi-angle-double-right"
@@ -1352,7 +1397,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     Audit Trail
                                 </div>
                                 {
-                                    process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' && 
+                                    process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' &&
                                     (
                                         <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('solidx-ai')}>
                                             <div className="flex gap-2"> <SolidXAIIcon /> SolidX AI </div>

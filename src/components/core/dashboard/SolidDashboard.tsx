@@ -9,6 +9,7 @@ import { SqlExpression } from '@/types/solid-core';
 import styles from './SolidDashboard.module.css';
 import { SolidXAIIcon } from '../solid-ai/SolidXAIIcon';
 import { SolidXAIModule } from '../solid-ai/SolidXAIModule';
+import { Button } from 'primereact/button';
 export enum SolidDashboardVariableType {
   DATE = 'date',
   SELECTION_STATIC = 'selectionStatic',
@@ -179,6 +180,8 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
   const [dashboardVariableFilterRules, setDashboardVariableFilterRules] = useState<ISolidDashboardVariableFilterRule[]>([]);
   const [filters, setFilters] = useState<SqlExpression[]>([]);
   const [isOpenSolidXAiPanel, setIsOpenSolidXAiPanel] = useState(false);
+  const [chatterWidth, setChatterWidth] = useState(380);
+  const [isResizing, setIsResizing] = useState(false);
   const [questions, setQuestions] = useState<any[]>([]);
   useEffect(() => {
     // Invoke the dashboard api to fetch the dashboard data
@@ -188,11 +191,62 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
       handleDashboardData(data, setLayoutOption, setDashboardVariableFilterRules, setQuestions, setFilters);
     }
   }, [isLoading, data]);
-  const toggleSolidXAiPanel = () => setIsOpenSolidXAiPanel(!isOpenSolidXAiPanel);
 
+  useEffect(() => {
+    const storedOpen = localStorage.getItem('d_solidxai_open');
+    const storedWidth = localStorage.getItem('d_solidxai_width');
+  
+    if (storedOpen !== null) {
+      setIsOpenSolidXAiPanel(storedOpen === 'true');
+    }
+  
+    if (storedWidth !== null) {
+      const width = parseInt(storedWidth, 10);
+      if (!isNaN(width)) {
+        setChatterWidth(width);
+      }
+    }
+  }, []);
+  
+
+  useEffect(() => {
+    if (isResizing) {
+      const handleMouseMove = (e: MouseEvent) => {
+        const newWidth = window.innerWidth - e.clientX;
+        const clampedWidth = Math.max(280, Math.min(newWidth, 700));
+        setChatterWidth(clampedWidth);
+        localStorage.setItem('d_solidxai_width', clampedWidth.toString());
+      };
+  
+      const handleMouseUp = () => {
+        setIsResizing(false);
+      };
+  
+      window.addEventListener('mousemove', handleMouseMove);
+      window.addEventListener('mouseup', handleMouseUp);
+  
+      return () => {
+        window.removeEventListener('mousemove', handleMouseMove);
+        window.removeEventListener('mouseup', handleMouseUp);
+      };
+    }
+  }, [isResizing]);
+  
+
+  const handleOpen = () => {
+    setIsOpenSolidXAiPanel(true);
+    localStorage.setItem('d_solidxai_open', 'true');
+  };
+  
+  const handleClose = () => {
+    setIsOpenSolidXAiPanel(false);
+    localStorage.setItem('d_solidxai_open', 'false');
+  };
+
+  
   return (
-    <div className={`h-screen surface-0 relative`}>
-      <div className={`h-full flex-grow-1 relative ${styles.SolidDashboardPageContentWrapper} ${isOpenSolidXAiPanel ? styles.SolidDashboardPageContentWrapperShrink : ''}`}>
+    <div className={`h-screen surface-0 flex`}>
+      <div className={`h-full flex-grow-1 ${styles.SolidDashboardPageContentWrapper}`}>
         {isLoading && <p>Loading dashboard...</p>}
         {error && <p className="text-red-600">Failed to load dashboard.</p>}
         {!isLoading && !error && (
@@ -212,17 +266,54 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
           /> */}
           </>
         )}
-        {process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' && (
-          <button className={styles.SolidXAIFloatingBtn} onClick={toggleSolidXAiPanel}>
-            <div className="flex gap-2"> <SolidXAIIcon /> SolidX AI </div>
-          </button>
-        )}
       </div>
       {process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' && (
-        <div className={`${styles.SolidXAIListPanel} ${isOpenSolidXAiPanel ? styles.SolidXAIListPanelOpen : ''}`}>
-          <SolidXAIModule showHeader inListView />
+        <div className={`chatter-section ${isOpenSolidXAiPanel === false ? 'collapsed' : ''}`} style={{ width: chatterWidth }}>
+          {isOpenSolidXAiPanel &&(
+            <div
+              style={{
+                width: 5,
+                cursor: 'col-resize',
+                position: 'absolute',
+                left: 0,
+                top: 0,
+                bottom: 0,
+                height:'100%',
+                zIndex: 100,
+              }}
+              onMouseDown={() => setIsResizing(true)}
+            />
+          )}
+          {isOpenSolidXAiPanel &&
+            <Button
+              icon="pi pi-angle-double-right"
+              size="small"
+              text
+              className="chatter-collapse-btn"
+              style={{ width: 30, height: 30, aspectRatio: '1/1' }}
+              onClick={handleClose}
+            />
+          }
+
+          {isOpenSolidXAiPanel === false ?
+            <div className="flex flex-column gap-2 justify-content-center p-2">
+              <div className="chatter-collapsed-content" onClick={handleOpen}>
+                <div className="flex gap-2"> <SolidXAIIcon /> SolidX AI </div>
+              </div>
+              <Button
+                icon="pi pi-chevron-left"
+                size="small"
+                className="px-0"
+                style={{ width: 30 }}
+                onClick={handleOpen}
+              />
+            </div>
+            :
+            <SolidXAIModule showHeader inListView />
+          }
         </div>
       )}
+
     </div>
   );
 }
