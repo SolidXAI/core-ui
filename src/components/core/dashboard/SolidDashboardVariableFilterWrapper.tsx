@@ -24,7 +24,7 @@ const SolidDashboardVariableFilterDialog: React.FC<SolidDashboardVariablesFilter
   // TODO [HP]: Currently this is static, we need this to be dynamic how we are invoking setFilters below has to be fully dynamic...
   return (
     <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
-      <p className="m-0 view-title flex align-items-center gap-1">
+      <p className="view-title flex align-items-center gap-1" style={{ margin: '4.3px 0 !important' }}>
         {data?.records[0]?.displayName ? data?.records[0]?.displayName : data?.records[0]?.name}
         {data?.records[0]?.description &&
           <>
