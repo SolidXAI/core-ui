@@ -1160,7 +1160,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                 top: 0,
                 bottom: 0,
                 height: '100%',
-                zIndex: 100,
+                zIndex: 9,
               }}
               onMouseDown={() => setIsResizing(true)}
             />
