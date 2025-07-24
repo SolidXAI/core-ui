@@ -10,6 +10,10 @@ import { useDispatch } from "react-redux";
 import { closePopup } from "@/redux/features/popupSlice";
 import { Toast } from "primereact/toast";
 import { SolidCircularLoader } from "../common/SolidLoaders/SolidCircularLoader";
+import { Dialog } from "primereact/dialog";
+import { javascript } from '@codemirror/lang-javascript';
+import { oneDark } from '@codemirror/theme-one-dark';
+import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct import
 
 export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }) => {
     const renderContent = () => {
@@ -57,6 +61,8 @@ export interface JsonDisplayProps {
 
 export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
     const dispatch = useDispatch();
+    const [editAndApplyDialog, setEditAndApplyDialog] = useState(false);
+    const [editedFormattedJson, setEditedFormattedJson] = useState<string>('{}');
 
     const [applyInteraction, {
         isLoading: isApplyInteractionLoading,
@@ -68,9 +74,20 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
 
     const handlePreview = () => {
         console.log('Preview clicked for interaction:', interaction.id)
+        setEditAndApplyDialog(true)
     }
 
     const handleApply = async () => {
+        try {
+            const response = await applyInteraction({ id: interaction.id }).unwrap()
+            setIsGenerating(true);
+            console.log('Apply successful:', response)
+        } catch (err) {
+            console.error('Failed to apply interaction:', err)
+        }
+    }
+
+    const handleEditedApply = async() => {
         try {
             const response = await applyInteraction({ id: interaction.id }).unwrap()
             setIsGenerating(true);
@@ -186,12 +203,25 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
                             {formattedJson}
                         </pre>
                         <div className="flex gap-2 mt-2">
-                            <button onClick={handleApply} style={{ fontSize: '0.75rem' }} disabled={isApplyInteractionLoading}>apply</button>
-                            <button onClick={handlePreview} style={{ fontSize: '0.75rem' }}>edit & apply</button>
+                            <Button size="small" onClick={handleApply} style={{ fontSize: '0.75rem' }} disabled={isApplyInteractionLoading}>apply</Button>
+                            <Button size="small" outlined onClick={handlePreview} style={{ fontSize: '0.75rem' }}>edit & apply</Button>
                         </div>
                     </div>
                 </>
             }
+            {editAndApplyDialog && <Dialog header="Edit And Apply" visible={editAndApplyDialog} style={{ width: '50vw' }} onHide={() => { if (!editAndApplyDialog) return; setEditAndApplyDialog(false); }}>
+                <CodeMirror
+                    value={formattedJson}
+                    style={{ fontSize: '10px' }}
+                    theme={oneDark}
+                    extensions={[javascript(), EditorView.lineWrapping]}
+                    onChange={(e: any) => {
+                        setEditedFormattedJson(e);
+                    }}
+                // Line numbers are now handled through a theme or extension
+                />
+                <Button className="mt-2" label="Apply" size="small" onClick={handleEditedApply}  />
+            </Dialog>}
         </>
     )
 }
