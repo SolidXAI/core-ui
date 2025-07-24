@@ -48,3 +48,10 @@ export const {
     useTriggerMcpClientJobMutation,
     useApplySolidAiInteractionMutation,
 } = aiInteractionApi;
+
+export type {
+    ApplySolidAiInteractionRequest,
+    ApplySolidAiInteractionResponse,
+    TriggerMcpClientJobRequest,
+    TriggerMcpClientJobResponse
+  };
