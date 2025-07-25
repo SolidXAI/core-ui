@@ -15,7 +15,7 @@ type SolidXAIThreadWrapperProps = {
 };
 
 export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking }: SolidXAIThreadWrapperProps) => {
-    const containerRef = useRef<HTMLDivElement | null>(null);
+    const bottomRef = useRef<HTMLDivElement | null>(null);
 
     // Create the RTK slices for this entity
     const aiInteractionApi = createSolidEntityApi('aiInteraction');
@@ -54,10 +54,24 @@ export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking 
     }, [threadId, latestInteractionId, thinking]);
 
     useEffect(() => {
-        if (containerRef.current) {
-            containerRef.current.scrollTop = containerRef.current.scrollHeight;
-        }
-    });
+        if (interactions.length === 0) return;
+
+        const timeout = setTimeout(() => {
+            bottomRef.current?.scrollIntoView({ behavior: 'auto' });
+        }, 50); // small delay to ensure DOM is ready
+
+        return () => clearTimeout(timeout);
+    }, [interactions, thinking]);
+
+
+    // useEffect(() => {
+    //     if (containerRef.current) {
+    //          containerRef.current.scrollTo({
+    //         top: containerRef.current.scrollHeight,
+    //         behavior: 'smooth',
+    //     });
+    //     }
+    // }, [interactions, thinking]);
 
     // return (
     //     <div
@@ -72,7 +86,6 @@ export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking 
 
     return (
         <div
-            ref={containerRef}
             className={`px-3 pt-3 flex flex-column gap-3 overflow-y-auto overflow-x-hidden ${styles.SolidXAIThreadWrapper}`}
         >
             {interactions.map((interaction) => {
@@ -89,6 +102,7 @@ export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking 
             })}
 
             {thinking && <SolidXAIThinking />}
+            <div ref={bottomRef} />
         </div>
     );
 }

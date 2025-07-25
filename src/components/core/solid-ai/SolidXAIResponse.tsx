@@ -35,7 +35,7 @@ export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }
                 <div>
                     <Button icon={<SolidXAIIcon />} size="small" raised text rounded />
                 </div>
-                <div className={`mt-3 p-3 ${styles.SolidXAIResponse}`}>
+                <div className={`mt-3`}>
                     {renderContent()}
                 </div>
             </div>
@@ -49,7 +49,7 @@ export interface PlainTextDisplayProps {
 
 export const PlainTextDisplay: React.FC<PlainTextDisplayProps> = ({ interaction }) => {
     return (
-        <div style={{ fontSize: '0.95rem', whiteSpace: 'pre-wrap' }}>
+        <div className={`p-3 ${styles.SolidXAIResponse}`}>
             {interaction.message}
         </div>
     )
@@ -60,6 +60,8 @@ export interface JsonDisplayProps {
 }
 
 export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
+    console.log("Rendering JSON display for interaction:", interaction);
+
     const dispatch = useDispatch();
     const [editAndApplyDialog, setEditAndApplyDialog] = useState(false);
     const [editedFormattedJson, setEditedFormattedJson] = useState<string>('{}');
@@ -80,6 +82,7 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
     const handleApply = async () => {
         try {
             const response = await applyInteraction({ id: interaction.id }).unwrap()
+
             setIsGenerating(true);
             console.log('Apply successful:', response)
         } catch (err) {
@@ -87,7 +90,7 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
         }
     }
 
-    const handleEditedApply = async() => {
+    const handleEditedApply = async () => {
         try {
             const response = await applyInteraction({ id: interaction.id }).unwrap()
             setIsGenerating(true);
@@ -191,20 +194,31 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
         <>
             {isGenerating ?
                 <>
-                    <div className="flex flex-column align-items-center justify-content-center" style={{ padding: '2rem', height: 200 }}>
+                    {/* <div className="flex flex-column align-items-center justify-content-center">
                         <SolidCircularLoader />
                         <p className="mt-4 font-medium">Waiting for backend...</p>
-                    </div>
+                    </div> */}
+                    <Dialog header={false} closable={false} draggable={false} visible={true} onHide={() => { }} style={{ width: '20vw' }}>
+                        <div className="flex flex-column align-items-center justify-content-center py-5">
+                            <SolidCircularLoader />
+                            <p className="mt-4 font-medium">Generating...</p>
+                        </div>
+                    </Dialog>
                 </>
                 :
                 <>
                     <div>
-                        <pre style={{ fontSize: '0.85rem', whiteSpace: 'pre-wrap' }}>
-                            {formattedJson}
-                        </pre>
-                        <div className="flex gap-2 mt-2">
-                            <Button size="small" onClick={handleApply} style={{ fontSize: '0.75rem' }} disabled={isApplyInteractionLoading}>apply</Button>
-                            <Button size="small" outlined onClick={handlePreview} style={{ fontSize: '0.75rem' }}>edit & apply</Button>
+                        <div className="border-round-lg overflow-hidden">
+                            <CodeMirror
+                                value={formattedJson}
+                                style={{ fontSize: '10px' }}
+                                theme={oneDark}
+                                extensions={[javascript(), EditorView.lineWrapping]}
+                            />
+                        </div>
+                        <div className="flex gap-2 mt-3">
+                            <Button size="small" onClick={handleApply} disabled={isApplyInteractionLoading}>Apply</Button>
+                            <Button size="small" outlined onClick={handlePreview}>Edit & Apply</Button>
                         </div>
                     </div>
                 </>
@@ -218,9 +232,8 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
                     onChange={(e: any) => {
                         setEditedFormattedJson(e);
                     }}
-                // Line numbers are now handled through a theme or extension
                 />
-                <Button className="mt-2" label="Apply" size="small" onClick={handleEditedApply}  />
+                <Button className="mt-3" label="Apply" size="small" onClick={handleEditedApply} />
             </Dialog>}
         </>
     )
