@@ -1005,7 +1005,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
             const { name: fieldName, value, type, checked } = event.target;
 
             // TODO: check if there is a change handler registered with this form view, load it and fire it.
-            const changeHandler = solidView.layout[eventType];
+            let changeHandler = solidView.layout.attrs[eventType];
+            if (!changeHandler) {
+                changeHandler = solidView.layout[eventType];
+            }
 
             if (changeHandler) {
                 // Get hold of the dynamic module...
