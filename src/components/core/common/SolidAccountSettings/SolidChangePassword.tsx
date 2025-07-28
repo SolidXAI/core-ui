@@ -1,4 +1,5 @@
 "use client"
+import { handleLogout } from '@/nextAuth/handleLogout';
 import { useChangePasswordMutation } from '@/redux/api/authApi';
 import { useFormik } from 'formik';
 import { useSession } from 'next-auth/react';
@@ -80,6 +81,7 @@ export const SolidChangePassword = () => {
                     })
                 } else {
                     showToast("success", "Password Change Successfully", "Password Change Successfully");
+                    handleLogout(toast)
                     resetForm();
                 }
             } catch (err: any) {
