@@ -15,6 +15,7 @@ type SolidXAIThreadWrapperProps = {
 };
 
 export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking }: SolidXAIThreadWrapperProps) => {
+    const bottomRef = useRef<HTMLDivElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
 
     // Create the RTK slices for this entity
@@ -25,20 +26,17 @@ export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking 
     // State used to show all aiInteractions in the system.
     // TODO: shall we create an interface to represent the aiInteraction model records from the server?
     const [interactions, setInteractions] = useState<AiInteraction[]>([]);
-
-    useEffect(() => {
-        if (aiInteractionsData?.records) {
-            const sorted = [...aiInteractionsData.records].sort(
-                (a, b) => a.id - b.id
-            );
-            setInteractions(sorted);
-        }
-    }, [aiInteractionsData]);
+    const [offset, setOffset] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const [isPaginating, setIsPaginating] = useState(false);
+    const limit = 100;
 
     // Trigger a call to fetch all aiInteractions. 
     useEffect(() => {
+        if (!threadId) return;
+
         const queryParams: any = {
-            limit: 100,
+            limit,
             offset: 0,
             filters: {
                 'threadId': {
@@ -54,10 +52,84 @@ export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking 
     }, [threadId, latestInteractionId, thinking]);
 
     useEffect(() => {
-        if (containerRef.current) {
-            containerRef.current.scrollTop = containerRef.current.scrollHeight;
+        if (!offset || offset === 0) return; // avoid double-fetching newest data
+
+        const queryParams: any = {
+            limit,
+            offset, // ✅ this is your pagination offset
+            filters: {
+                threadId: {
+                    $eq: threadId,
+                },
+            },
+            sort: ['id:desc'], // maintain consistent sort
+        };
+
+        const queryString = qs.stringify(queryParams, { encodeValuesOnly: true });
+
+        triggerGetAiInteractions(queryString);
+    }, [offset, threadId]);
+
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!aiInteractionsData?.records || !container) return;
+
+        const prevScrollHeight = container.scrollHeight;
+
+        const sorted = [...aiInteractionsData.records].sort((a, b) => a.id - b.id);
+
+        setInteractions((prev) => {
+            const existingIds = new Set(prev.map((i) => i.id));
+            const unique = sorted.filter((i) => !existingIds.has(i.id));
+
+            if (offset === 0 && !isPaginating) {
+                // 🆕 This is a fresh load (or update triggered by new interaction)
+                return sorted; // replace everything
+            }
+
+            return isPaginating
+                ? [...unique, ...prev] // prepend older interactions
+                : [...prev, ...unique]; // append new interactions
+        });
+
+        if (aiInteractionsData.records.length < limit) {
+            setHasMore(false);
         }
-    });
+
+        // After pagination, restore scroll position
+        if (isPaginating) {
+            setTimeout(() => {
+                const newScrollHeight = container.scrollHeight;
+                container.scrollTop = newScrollHeight - prevScrollHeight;
+                setIsPaginating(false);
+            }, 0);
+        }
+    }, [aiInteractionsData])
+
+    useEffect(() => {
+        const container = containerRef.current;
+        if (!container) return;
+
+        const handleScroll = () => {
+            if (container.scrollTop === 0 && hasMore) {
+                setIsPaginating(true);
+                setOffset((prev) => prev + limit);
+            }
+        };
+
+        container.addEventListener('scroll', handleScroll);
+        return () => container.removeEventListener('scroll', handleScroll);
+    }, [hasMore]);
+
+    useEffect(() => {
+        if (interactions.length === 0 || isPaginating) return;
+
+        const timeout = setTimeout(() => {
+            bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
+        }, 50); // small delay to ensure DOM is ready
+
+        return () => clearTimeout(timeout);
+    }, [interactions, thinking]);
 
     // return (
     //     <div
@@ -89,6 +161,7 @@ export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking 
             })}
 
             {thinking && <SolidXAIThinking />}
+            <div ref={bottomRef} />
         </div>
     );
 }
