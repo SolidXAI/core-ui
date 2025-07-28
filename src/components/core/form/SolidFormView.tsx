@@ -606,9 +606,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
     useEffect(() => {
 
         if (solidFormViewMetaData?.data?.solidView?.model?.internationalisation) {
+            setDefaultTabViewOptionIndex(0)
             const matchedLocale = solidFormViewMetaData?.data?.applicableLocales?.find((x: any) => x.isDefault === 'yes');
             //this is to attach default locale when adding data in popup view where relations exists
-            if (matchedLocale && searchParams.get("activeTab")) {
+            if (!selectedLocale && matchedLocale && !searchParams.get('locale')) {
                 setSelectedLocale(matchedLocale.locale);
             }
         }
