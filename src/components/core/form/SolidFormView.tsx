@@ -439,10 +439,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [openLightbox, setOpenLightbox] = useState(false);
     const [lightboxUrls, setLightboxUrls] = useState([]);
     const [isShowChatter, setShowChatter] = useState(true);
-    const [chatterLocaleWidth, setChatterLocaleWidth] = useState(() => {
-        const stored = localStorage.getItem('chatter_locale_width');
-        return stored ? parseInt(stored, 10) : 380; // default width
-    });
+    const [chatterLocaleWidth, setChatterLocaleWidth] = useState(380); // default width
     const [isResizingChatterLocale, setIsResizingChatterLocale] = useState(false);
 
     const [solidWorkflowFieldValue, setSolidWorkflowFieldValue] = useState<string>("");
@@ -451,7 +448,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
     const op = useRef(null);
-
+    useEffect(() => {
+        const stored = localStorage.getItem('chatter_locale_width');
+        if (stored) {
+            setChatterLocaleWidth(parseInt(stored, 10));
+        }
+    }, []);
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
             if (!isResizingChatterLocale) return;
