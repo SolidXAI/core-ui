@@ -208,5 +208,5 @@ export interface AiInteraction {
     errorMessage?: string;
     modelUsed?: string;
     responseTimeMs?: number;
-    metadata?: Record<string, any>;
+    metadata?: string;
 }

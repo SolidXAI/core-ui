@@ -62,6 +62,41 @@ export interface JsonDisplayProps {
 export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
     console.log("Rendering JSON display for interaction:", interaction);
 
+    let aiResponseTitle = '';
+    if (interaction.metadata) {
+        const metadata = JSON.parse(interaction.metadata);
+        const toolsInvoked = metadata['tools_invoked'][0];
+
+        switch (toolsInvoked) {
+            case 'solid_create_module':
+                aiResponseTitle = 'Module Created';
+                break;
+
+            case 'solid_create_model_with_fields':
+                aiResponseTitle = 'Model Created';
+                break;
+
+            case 'solid_add_field':
+                aiResponseTitle = 'Field Added';
+                break;
+
+            case 'solid_create_dashboard':
+                aiResponseTitle = 'Dashboard Created';
+                break;
+
+            case 'solid_create_dashboard_widget':
+                aiResponseTitle = 'Chart Created';
+                break;
+
+            case 'solid_create_model_layout':
+                aiResponseTitle = 'Layout Created';
+                break;
+
+            default:
+                break;
+        }
+    }
+
     const dispatch = useDispatch();
     const [editAndApplyDialog, setEditAndApplyDialog] = useState(false);
     const [editedFormattedJson, setEditedFormattedJson] = useState<string>('{}');
@@ -208,17 +243,20 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
                 :
                 <>
                     <div>
-                        <div className="border-round-lg overflow-hidden">
+                        <div className={`p-3 ${styles.SolidXAIResponse}`}>
+                            {aiResponseTitle}
+                        </div>
+                        {/* <div className="border-round-lg overflow-hidden">
                             <CodeMirror
                                 value={formattedJson}
                                 style={{ fontSize: '10px' }}
                                 theme={oneDark}
                                 extensions={[javascript(), EditorView.lineWrapping]}
                             />
-                        </div>
+                        </div> */}
                         <div className="flex gap-2 mt-3">
                             <Button size="small" onClick={handleApply} disabled={isApplyInteractionLoading}>Apply</Button>
-                            <Button size="small" outlined onClick={handlePreview}>Edit & Apply</Button>
+                            <Button size="small" outlined onClick={handlePreview}>Preview</Button>
                         </div>
                     </div>
                 </>

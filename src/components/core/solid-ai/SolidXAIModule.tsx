@@ -74,7 +74,7 @@ export const SolidXAIModule = ({ showHeader, inListView }: any) => {
       try {
         // TODO: If you encounter SolidX AI Interactions that can go on longer than 30 X 500 ms then you can increase the frequency & duration here...
         // TODO: If we exceed timeout, show a little refresh icon or implement scroll up to refresh...
-        const completed = await fetchMqMessageStatus(30, 500, latestInteractionId);
+        const completed = await fetchMqMessageStatus(120, 500, latestInteractionId);
         console.log("MQ message completed status:", completed);
       } catch (err) {
         console.error("Failed to fetch MQ message status:", err);
