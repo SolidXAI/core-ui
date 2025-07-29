@@ -12,7 +12,7 @@ export const SolidListViewHeaderButton = ({ button, params, solidListViewMetaDat
     return (
         <Button
             type="button"
-            className={`w-full text-left gap-2 ${button?.attrs?.className ? button?.attrs?.className : ''}`}
+            className={`text-left gap-2 ${button?.attrs?.className ? button?.attrs?.className : ''}`}
             label={button.attrs.label}
             size="small"
             iconPos="left"
