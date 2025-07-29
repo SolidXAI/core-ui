@@ -17,6 +17,7 @@ type SolidXAIThreadWrapperProps = {
 export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking }: SolidXAIThreadWrapperProps) => {
     const bottomRef = useRef<HTMLDivElement | null>(null);
     const containerRef = useRef<HTMLDivElement | null>(null);
+    const hasScrolledOnceRef = useRef(false);
 
     // Create the RTK slices for this entity
     const aiInteractionApi = createSolidEntityApi('aiInteraction');
@@ -123,10 +124,13 @@ export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking 
 
     useEffect(() => {
         if (interactions.length === 0 || isPaginating) return;
-
+        const scrollOptions: ScrollIntoViewOptions = {
+            behavior: hasScrolledOnceRef.current ? 'smooth' : 'auto',
+        };
         const timeout = setTimeout(() => {
-            bottomRef.current?.scrollIntoView({ behavior: 'smooth' });
-        }, 50); // small delay to ensure DOM is ready
+            bottomRef.current?.scrollIntoView(scrollOptions);
+            hasScrolledOnceRef.current = true;
+        }, 50);
 
         return () => clearTimeout(timeout);
     }, [interactions, thinking]);
