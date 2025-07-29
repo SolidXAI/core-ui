@@ -101,6 +101,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   const router = useRouter()
   const searchParams = useSearchParams(); // Converts the query params to a string
+  const localeName = searchParams.get('locale');
   // TODO: The initial filter state will be created based on the fields which are present on this list view. 
   const [filters, setFilters] = useState<any>(params.customFilter || null);
   // const [customFilter, setCustomFilter] = useState<FilterRule[]>(initialState);
@@ -568,6 +569,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     sortOrder?: number,
     filters?: any,
     showArchived?: boolean,
+    locale?:string
   ) => {
 
     const solidFieldsMetadata = solidListViewMetaData?.data?.solidFieldsMetadata;
@@ -578,7 +580,8 @@ export const SolidListView = (params: SolidListViewParams) => {
       limit: limit ?? rows,
       filters: filters ?? filters,
       populate: toPopulate,
-      populateMedia: toPopulateMedia
+      populateMedia: toPopulateMedia,
+      locale: localeName ? localeName : 'en'
     };
 
     if (sortField) {
