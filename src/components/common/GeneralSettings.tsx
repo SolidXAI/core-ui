@@ -14,6 +14,7 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import Image from 'next/image';
 import SolidLogo from '../../resources/images/SS-Logo.png'
 import { useDropzone } from 'react-dropzone';
+import { Divider } from 'primereact/divider';
 
 
 export const GeneralSettings = () => {
@@ -60,7 +61,10 @@ export const GeneralSettings = () => {
         appPrivacyPolicy: solidSettingsData?.data?.system?.appPrivacyPolicy ?? null,
         enableDarkMode: solidSettingsData?.data?.system?.enableDarkMode ?? false,
         copyright: solidSettingsData?.data?.system?.copyright ?? null,
-        forceChangePasswordOnFirstLogin: solidSettingsData?.data?.system?.forceChangePasswordOnFirstLogin ?? false
+        forceChangePasswordOnFirstLogin: solidSettingsData?.data?.system?.forceChangePasswordOnFirstLogin ?? false,
+        contactSupportEmail: solidSettingsData?.data?.system?.contactSupportEmail ?? null,
+        contactSupportDisplayName: solidSettingsData?.data?.system?.contactSupportDisplayName ?? null,
+        contactSupportIcon: solidSettingsData?.data?.system?.contactSupportIcon ?? null,
     };
     const formik = useFormik({
         initialValues: initialValues,
@@ -788,6 +792,48 @@ export const GeneralSettings = () => {
                                                                 name="shouldQueueSms"
                                                                 checked={formik.values.shouldQueueSms}
                                                                 onChange={(e) => formik.setFieldValue("shouldQueueSms", e.value)}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <Divider />
+                                    <p className='font-bold' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Contact Support</p>
+                                    <div className='formgrid grid'>
+                                        <div className="col-8">
+                                            <div className='formgrid grid'>
+                                                <div className="col-6">
+                                                    <div className="formgrid grid align-items-center">
+                                                        <div className="col-5">
+                                                            <label className="form-field-label">Contact Support Email</label>
+                                                        </div>
+                                                        <div className="col-7">
+                                                            <InputText
+                                                                type="text"
+                                                                id="contactSupportEmail"
+                                                                name="contactSupportEmail"
+                                                                onChange={formik.handleChange}
+                                                                value={formik.values.contactSupportEmail}
+                                                                className='w-full'
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-6">
+                                                    <div className="formgrid grid align-items-center">
+                                                        <div className="col-5">
+                                                            <label className="form-field-label">Display Name</label>
+                                                        </div>
+                                                        <div className="col-7">
+                                                            <InputText
+                                                                type="text"
+                                                                id="contactSupportDisplayName"
+                                                                name="contactSupportDisplayName"
+                                                                onChange={formik.handleChange}
+                                                                value={formik.values.contactSupportDisplayName}
+                                                                className='w-full'
                                                             />
                                                         </div>
                                                     </div>

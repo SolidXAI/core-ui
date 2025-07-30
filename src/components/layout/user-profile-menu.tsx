@@ -160,6 +160,15 @@ const UserProfileMenu = () => {
               </span>
             </Button>
           </div>
+          {solidSettingsData?.data?.system?.contactSupportEmail &&
+            <div className="flex align-items-center py-1 gap-2 secondary-border-bottom">
+              <Button severity="secondary" text className="w-full flex align-items-center gap-2 px-3 ml-1" onClick={() => window.location.href = `mailto:${solidSettingsData?.data?.system?.contactSupportEmail}`} icon={solidSettingsData?.data?.system?.contactSupportIcon || 'pi pi-envelope'}>
+                <span className="p-button-label flex-none">
+                  {solidSettingsData?.data?.system?.contactSupportDisplayName || "Contact Support"}
+                </span>
+              </Button>
+            </div>
+          }
           <div className="py-1">
             <Button
               text
