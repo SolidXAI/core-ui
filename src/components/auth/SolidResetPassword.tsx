@@ -14,7 +14,7 @@ import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
-import SolidLogo from '../../resources/images/SS-Logo.png'
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
 
 const SolidResetPassword = () => {
     const searchParams = useSearchParams();

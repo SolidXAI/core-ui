@@ -411,6 +411,7 @@
   .p-calendar:not(.p-calendar-disabled).p-focus>.p-inputtext {
     outline: 0 none;
     outline-offset: 0;
+    box-shadow: none !important;
     /* box-shadow: 0 0 0 0.2rem rgba(176, 126, 255, 0.4); */
     border-color: #9B5AED;
   }

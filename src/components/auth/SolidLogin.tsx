@@ -20,7 +20,7 @@ import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { useInitateLoginMutation } from "@/redux/api/authApi";
 import { AppTitle } from "@/helpers/AppTitle";
 import Image from "next/image";
-import SolidLogo from '../../resources/images/SS-Logo.png'
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
 // import { Checkbox } from "primereact/checkbox";
 interface AuthTabsProps {
     iamPasswordRegistrationEnabled: boolean;

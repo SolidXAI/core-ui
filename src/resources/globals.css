@@ -3300,7 +3300,3 @@ padding:10px !important;
 border:2px solid rgba(216, 226, 234, 0.40);
 border-radius:8px !important;
 }
-
-.p-calendar:not(.p-calendar-disabled).p-focus > .p-inputtext{
-  box-shadow: none;
-}

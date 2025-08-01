@@ -844,6 +844,42 @@ export const SolidListView = (params: SolidListViewParams) => {
     setIsOpenSolidXAiPanel(false);
     localStorage.setItem('l_solidxai_open', 'false');
   };
+
+  const handleDeleteEntity = async () => {
+    try {
+      if (!selectedSolidViewData?.id) {
+        throw new Error("No entity selected");
+      }
+
+      const response = await deleteSolidSingleEntiry(selectedSolidViewData.id);
+
+      if (response?.error?.data?.statusCode === 200) {
+        setDeleteEntity(false);
+        toast.current?.show({
+          severity: 'success',
+          summary: 'Deleted',
+          detail: 'Entity deleted successfully',
+          life: 3000,
+        });
+      } else {
+        toast.current?.show({
+          severity: 'error',
+          summary: 'Delete Failed',
+          detail: response?.error?.data?.data?.message,
+          life: 3000,
+        });
+      }
+
+    } catch (error: any) {
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Delete Failed',
+        detail: "Something Went Wrong",
+        life: 3000,
+      });
+    }
+  };
+
   return (
     <div className="page-parent-wrapper flex">
       <div className={`h-full flex-grow-1 ${styles.ListContentWrapper}`}>
@@ -1242,7 +1278,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           </p>
           {/* <p className="" style={{ color: 'var{--solid-grey-500}' }}>{selectedSolidViewData?.singularName}</p> */}
           <div className="flex align-items-center gap-2 mt-3">
-            <Button label="Delete" size="small" onClick={() => { deleteSolidSingleEntiry(selectedSolidViewData?.id); setDeleteEntity(false); }} />
+            <Button label="Delete" size="small" onClick={handleDeleteEntity} />
             <Button label="Cancel" size="small" onClick={() => setDeleteEntity(false)} outlined className='bg-primary-reverse' />
           </div>
         </div>

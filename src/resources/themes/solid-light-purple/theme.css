@@ -426,6 +426,7 @@
   .p-calendar:not(.p-calendar-disabled).p-focus>.p-inputtext {
     outline: 0 none;
     outline-offset: 0;
+    box-shadow: none !important;
     /* box-shadow: 0 0 0 0.2rem #d3b5f5; */
     border-color: #722ED1;
   }

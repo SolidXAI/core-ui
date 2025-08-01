@@ -19,7 +19,7 @@ import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import { AppTitle } from "@/helpers/AppTitle";
 import Image from "next/image";
-import SolidLogo from '../../resources/images/SS-Logo.png'
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
 
 interface AuthTabsProps {
     iamPasswordRegistrationEnabled: boolean;
