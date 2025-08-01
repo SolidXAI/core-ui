@@ -233,7 +233,9 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             {params.embeded !== true &&
                                 <SolidCancelButton />
                             }
-                            {actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
+                            {
+                            formViewLayout?.attrs?.showCogWheelFormButton !== false &&
+                            actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
                                 actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
                                 <FormActionDropdown />
                             }
