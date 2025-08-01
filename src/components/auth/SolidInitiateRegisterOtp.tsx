@@ -13,7 +13,7 @@ import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
-import SolidLogo from '../../resources/images/SS-Logo.png'
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
 
 const SolidInitiateRegisterOtp = () => {
     const searchParams = useSearchParams();

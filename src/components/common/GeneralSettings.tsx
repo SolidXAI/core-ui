@@ -12,7 +12,7 @@ import { handleError } from '@/helpers/ToastContainer';
 import { usePathname } from 'next/navigation';
 import { InputTextarea } from 'primereact/inputtextarea';
 import Image from 'next/image';
-import SolidLogo from '../../resources/images/SS-Logo.png'
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { useDropzone } from 'react-dropzone';
 import { Divider } from 'primereact/divider';
 

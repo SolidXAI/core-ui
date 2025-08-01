@@ -12,7 +12,7 @@ import { useContext, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { LayoutContext } from "../layout/context/layoutcontext";
 import Image from "next/image";
-import SolidLogo from '../../resources/images/SS-Logo.png'
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { Divider } from "primereact/divider";
 
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {

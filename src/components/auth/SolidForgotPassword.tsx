@@ -14,9 +14,9 @@ import { LayoutContext } from "../layout/context/layoutcontext";
 import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { AppTitle } from "@/helpers/AppTitle";
 import Image from "next/image";
-import SolidLogo from '../../resources/images/SS-Logo.png'
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
 
-const SolidForgotPassword = () => {
+const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
     useEffect(() => {
         trigger("") // Fetch settings on mount
@@ -91,11 +91,11 @@ const SolidForgotPassword = () => {
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
                 <form onSubmit={formik.handleSubmit}>
                     <div className="flex flex-column gap-2">
-                        <label htmlFor="email" className="solid-auth-input-label">Username or Email</label>
+                        <label htmlFor="email" className="solid-auth-input-label">{signInValidatorLabel ? signInValidatorLabel : "Username or Email"}</label>
                         <InputText
                             id="email"
                             name="email"
-                            placeholder="Email ID"
+                            placeholder={signInValidatorPlaceholder ? signInValidatorPlaceholder : "Email ID"}
                             value={formik.values.email}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}

@@ -14,7 +14,7 @@ import { LayoutContext } from "../layout/context/layoutcontext";
 import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { AppTitle } from "@/helpers/AppTitle";
 import Image from "next/image";
-import SolidLogo from '../../resources/images/SS-Logo.png'
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
 
 
 const SolidOTPVerify = () => {
