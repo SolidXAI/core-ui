@@ -53,6 +53,7 @@ export const createSolidEntityApi = (entityName: string) => {
                     method: 'POST',
                     body: entity
                 }),
+                invalidatesTags: [{ type: entityName }]
             }),
             upsertSolidEntity: builder.mutation({
                 query: (entity) => ({
@@ -60,6 +61,7 @@ export const createSolidEntityApi = (entityName: string) => {
                     method: 'POST',
                     body: entity
                 }),
+                invalidatesTags: [{ type: entityName }]
             }),
             updateSolidEntity: builder.mutation({
                 query: ({ id, data }) => ({
