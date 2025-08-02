@@ -21,6 +21,7 @@ import { useInitateLoginMutation } from "@/redux/api/authApi";
 import { AppTitle } from "@/helpers/AppTitle";
 import Image from "next/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
+import { formatTimeLeft } from "@/helpers/resendOtpHelper";
 // import { Checkbox } from "primereact/checkbox";
 interface AuthTabsProps {
     iamPasswordRegistrationEnabled: boolean;
@@ -171,16 +172,37 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                 enableReinitialize={false}
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
                     try {
+                        const RESEND_OTP_KEY = `resendOtpLogin_${values.email}`;
+                        const RESEND_OTP_TIMER_MIN = parseFloat(process.env.NEXT_PUBLIC_RESEND_OTP_TIMER || '0.5');
+                        const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
                         const payload = {
                             type: "email",
                             identifier: values.email,
                         };
+                        const storedTimeStr = localStorage.getItem(RESEND_OTP_KEY);
+                        const now = Date.now();
+                        if (storedTimeStr) {
+                            const lastSent = parseInt(storedTimeStr, 10);
+                            const elapsed = Math.floor((now - lastSent) / 1000);
+                            const remaining = RESEND_OTP_TIMER - elapsed;
 
+                            if (remaining > 0) {
+                                const formatted = formatTimeLeft(remaining);
+                                showToast(
+                                    "error",
+                                    "Please wait",
+                                    `You can request a new OTP in ${formatted} second(s)`
+                                );
+                                setSubmitting(false);
+                                return; //  Prevent request
+                            }
+                        }
                         const response = await initiateLogin(payload).unwrap(); // Call mutation trigger
 
                         if (response?.statusCode === 200) {
                             showToast("success", "OTP sent Successfully", response?.data?.message);
                             const email = values.email;
+                            localStorage.setItem(`resendOtpLogin_${email}`, Date.now().toString());
                             router.push(`/auth/initiate-login?email=${email}`);
                         } else {
                             showToast("error", "Login Error", response.error);
