@@ -855,8 +855,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       }
 
       const response = await deleteSolidSingleEntiry(selectedSolidViewData.id);
-
-      if (response?.error?.data?.statusCode === 200) {
+      if (response?.data?.statusCode === 200) {
         setDeleteEntity(false);
         toast.current?.show({
           severity: 'success',
@@ -868,7 +867,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         toast.current?.show({
           severity: 'error',
           summary: 'Delete Failed',
-          detail: response?.error?.data?.data?.message,
+          detail: response?.error?.data?.error,
           life: 3000,
         });
       }
