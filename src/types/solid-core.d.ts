@@ -209,4 +209,5 @@ export interface AiInteraction {
     modelUsed?: string;
     responseTimeMs?: number;
     metadata?: string;
+    isApplied ?: boolean;
 }

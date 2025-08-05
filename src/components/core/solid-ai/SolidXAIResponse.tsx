@@ -254,10 +254,16 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
                                 extensions={[javascript(), EditorView.lineWrapping]}
                             />
                         </div> */}
-                        <div className="flex gap-2 mt-3">
-                            <Button size="small" onClick={handleApply} disabled={isApplyInteractionLoading}>Apply</Button>
-                            <Button size="small" outlined onClick={handlePreview}>Preview</Button>
-                        </div>
+                        {interaction?.isApplied ?
+                            <div className="mt-3 font-medium solid-primary-black-text">
+                               ✅ Applied Successfully
+                            </div>
+                            :
+                            <div className="flex gap-2 mt-3">
+                                <Button size="small" onClick={handleApply} disabled={isApplyInteractionLoading}>Apply</Button>
+                                <Button size="small" outlined onClick={handlePreview}>Preview</Button>
+                            </div>
+                        }
                     </div>
                 </>
             }
