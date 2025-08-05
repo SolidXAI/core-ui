@@ -1,7 +1,7 @@
 "use client";
 
 import { AppTitle } from "@/helpers/AppTitle";
-import { useConfirmOtpRegisterMutation } from "@/redux/api/authApi";
+import { useConfirmOtpRegisterMutation, useInitateRegisterMutation } from "@/redux/api/authApi";
 import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { Form, Formik } from "formik";
 import Image from "next/image";
@@ -11,7 +11,7 @@ import { Button } from "primereact/button";
 import { InputOtp } from "primereact/inputotp";
 import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
-import { useEffect, useRef } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 
@@ -19,14 +19,56 @@ const SolidInitiateRegisterOtp = () => {
     const searchParams = useSearchParams();
     const tempEmail = searchParams.get('email');
     const email = tempEmail ? decodeURIComponent(tempEmail) : '';
+    const RESEND_OTP_KEY = `resendOtpRegister_${email}`;
+    const RESEND_OTP_TIMER_MIN = parseFloat(process.env.NEXT_PUBLIC_RESEND_OTP_TIMER || '0.5');
+    const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
+    const username = searchParams.get('username') || '';
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
-    useEffect(() => {
-        trigger("")
-    }, [trigger])
+    const [initiateResendOTP] = useInitateRegisterMutation();
     const [initiateOtpRegister] = useConfirmOtpRegisterMutation();
-
     const toast = useRef<Toast>(null);
     const router = useRouter();
+    const [timeLeft, setTimeLeft] = useState(RESEND_OTP_TIMER);
+    const [resendEnabled, setResendEnabled] = useState(false);
+
+    useEffect(() => {
+        trigger("");
+
+        // Set timer if not already set (e.g., after login)
+        const storedTime = localStorage.getItem(RESEND_OTP_KEY);
+        if (!storedTime) {
+            localStorage.setItem(RESEND_OTP_KEY, Date.now().toString());
+        }
+
+        const lastSent = storedTime ? parseInt(storedTime, 10) : Date.now();
+        const elapsed = Math.floor((Date.now() - lastSent) / 1000);
+        const remaining = RESEND_OTP_TIMER - elapsed;
+
+        if (remaining > 0) {
+            setTimeLeft(remaining);
+            setResendEnabled(false);
+        } else {
+            setTimeLeft(0);
+            setResendEnabled(true);
+        }
+    }, [trigger, email]);
+
+    useEffect(() => {
+        if (resendEnabled || timeLeft <= 0) return;
+
+        const interval = setInterval(() => {
+            setTimeLeft((prev) => {
+                if (prev <= 1) {
+                    clearInterval(interval);
+                    setResendEnabled(true);
+                    return 0;
+                }
+                return prev - 1;
+            });
+        }, 1000);
+
+        return () => clearInterval(interval);
+    }, [resendEnabled, timeLeft]);
 
     const validationSchema = Yup.object({
         otp: Yup.string()
@@ -45,6 +87,29 @@ const SolidInitiateRegisterOtp = () => {
 
     const isFormFieldValid = (formik: any, fieldName: string) =>
         formik.touched[fieldName] && formik.errors[fieldName];
+
+    const handleResendOtp = async () => {
+        try {
+            const payload = {
+                username: username,
+                email: email,
+                validationSources: ["email"]
+            };
+
+            const response = await initiateResendOTP(payload).unwrap();
+
+            if (response?.statusCode === 200) {
+                showToast("success", "OTP Resent Successfully", response?.data?.message);
+                localStorage.setItem(RESEND_OTP_KEY, Date.now().toString());
+                setTimeLeft(RESEND_OTP_TIMER);
+                setResendEnabled(false);
+            } else {
+                showToast("error", "Login Error", response.error);
+            }
+        } catch (err: any) {
+            showToast("error", "Login Error", err?.data?.message || "Something Went Wrong");
+        }
+    };
 
     return (
         <>
@@ -83,6 +148,7 @@ const SolidInitiateRegisterOtp = () => {
                                 const response = await initiateOtpRegister(payload).unwrap(); // Call mutation trigger
 
                                 if (response?.statusCode === 200) {
+                                    localStorage.removeItem(`resendOtpRegister_${email}`);
                                     showToast("success", "Login Successfully", "Login");
                                     router.push(`/auth/login`);
                                 } else {
@@ -113,9 +179,16 @@ const SolidInitiateRegisterOtp = () => {
                                         <Message className="text-red-500 text-sm" severity="error" text={formik.errors.otp?.toString()} />
                                     )}
                                     <div className="flex align-items-center justify-content-between">
-                                        <Button type="button" icon='pi pi-refresh' iconPos="left" link label="Resend Code" className="px-0 text-sm font-normal" />
+                                        <Button type="button" icon='pi pi-refresh' iconPos="left" link label="Resend Code" className="px-0 text-sm font-normal"
+                                            onClick={handleResendOtp}
+                                            disabled={!resendEnabled}
+                                        />
                                         <p className="m-0 text-sm text-color">
-                                            Time left: 00:28
+                                            {resendEnabled
+                                                ? "You can resend now"
+                                                : `Time left: ${Math.floor(timeLeft / 60)
+                                                    .toString()
+                                                    .padStart(2, "0")}:${(timeLeft % 60).toString().padStart(2, "0")}`}
                                         </p>
                                     </div>
                                 </div>
