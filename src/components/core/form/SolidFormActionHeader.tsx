@@ -11,6 +11,8 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { useEffect, useRef, useState } from "react";
 import { SolidFormViewNormalHeaderButton } from "./SolidFormViewNormalHeaderButton";
 import { SolidFormViewContextMenuHeaderButton } from "./SolidFormViewContextMenuHeaderButton";
+import { hasAnyRole } from "@/helpers/rolesHelper";
+import { useSelector } from "react-redux";
 
 export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled }: any) => {
     const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
@@ -23,17 +25,36 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     const createHeaderTitle = `Create ${solidView.model.displayName}`;
     const editHeaderTitle = `Edit ${solidView.model.displayName}`;
 
+    const { user } = useSelector((state: any) => state.auth);
+
     useEffect(() => {
         if (solidView) {
             let contextMenuHeaderButtonsData: any = [];
             let normalHeaderButtonsData: any = [];
             const formHeaderButtons = formViewLayout?.attrs?.formButtons;
             if (formHeaderButtons && formHeaderButtons.length > 0) {
+
+                // Process normal header buttons
                 contextMenuHeaderButtonsData = formHeaderButtons.filter((button: any) => {
+                    const visibleToRole = button.attrs?.roles || [];
+                    if (visibleToRole.length > 0) {
+                        if (!hasAnyRole(user?.user?.roles, visibleToRole)) {
+                            return false;
+                        }
+                    }
                     return button.attrs && button.attrs.actionInContextMenu && button.attrs.actionInContextMenu === true;
                 });
                 setContextMenuHeaderButtons(contextMenuHeaderButtonsData)
+
+                // Process normal header buttons
                 normalHeaderButtonsData = formHeaderButtons.filter((button: any) => {
+                    const visibleToRole = button.attrs?.roles || [];
+                    if (visibleToRole.length > 0) {
+                        if (!hasAnyRole(user?.user?.roles, visibleToRole)) {
+                            return false;
+                        }
+                    }
+
                     return !button.attrs || !button.attrs.actionInContextMenu || button.attrs.actionInContextMenu === false;
                 });
                 setNormalHeaderButtons(normalHeaderButtonsData);
@@ -234,8 +255,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 <SolidCancelButton />
                             }
                             {
-                            formViewLayout?.attrs?.showCogWheelFormButton !== false &&
-                            actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
+                                formViewLayout?.attrs?.showCogWheelFormButton !== false &&
+                                actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
                                 actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
                                 <FormActionDropdown />
                             }
@@ -307,7 +328,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
                                 !formViewLayout.attrs.readonly &&
                                 formik.dirty &&
-                                
+
                                 <div>
                                     <Button label="Save" size="small" type="submit" />
                                 </div>
@@ -328,19 +349,19 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 params.embeded == true &&
                                 actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
                                 !formViewLayout.attrs.readonly &&
-                                
+
                                 <div>
                                     <Button size="small" type="button" label="Delete" severity="danger" onClick={() => setDeleteDialogVisible(true)} />
                                 </div>
                             }
                             {
                                 params.embeded == true &&
-                                
+
                                 <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' style={{ minWidth: 66 }} />
                             }
                             {
                                 params.embeded !== true &&
-                                
+
                                 <SolidCancelButton />
                             }
                             {
