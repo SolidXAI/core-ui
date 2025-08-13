@@ -418,21 +418,23 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                         data.map((row, idx) => (
                             <div
                                 key={idx}
-                                className="flex gap-3 align-items-center border-1 border-round p-2"
-                            >
-                                {Object.keys(fieldJsonSchema).map((key) => (
-                                    <div key={key} className="flex flex-column gap-1">
-                                        <label>{key}</label>
-                                        {
-                                            // @ts-ignore
-                                            renderInput(row[key], key, idx)
-                                        }
-                                    </div>
-                                ))}
+                                className="flex gap-3 justify-content-between align-items-center border-1 border-round p-2"
+                            >  
+                                <div className="flex gap-3 align-items-center">    
+                                    {Object.keys(fieldJsonSchema).map((key) => (
+                                        <div key={key} className="flex flex-column gap-1">
+                                            <label>{key}</label>
+                                            {
+                                                // @ts-ignore
+                                                renderInput(row[key], key, idx)
+                                            }
+                                        </div>
+                                    ))}
+                                </div>
                                 <Button
                                     type="button"
                                     icon="pi pi-minus"
-                                    className="p-button-danger ml-2"
+                                    className="ml-2 h-2rem w-2rem rounded-circle"
                                     onClick={() => handleRemove(idx)}
                                 />
                             </div>

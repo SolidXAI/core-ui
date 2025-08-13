@@ -79,8 +79,8 @@ export class SolidRelationManyToOneField implements ISolidField {
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
 
-        const isVisible = this.fieldContext.parentData 
-            ? fieldLayoutInfo.attrs?.visible === true 
+        const isVisible = this.fieldContext.parentData
+            ? fieldLayoutInfo.attrs?.visible === true
             : fieldLayoutInfo.attrs?.visible !== false;
 
         if (!isVisible) {
@@ -181,7 +181,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
         };
         let fixedFilterToBeApplied = false;
         let fixedFilterParsed = false;
-        if (solidFormViewMetaData?.data?.solidView?.model?.singularName === "listOfValues") {
+        if (solidFormViewMetaData?.data?.solidView?.model?.singularName === "listOfValues" && fieldContext.fieldMetadata.relationCoModelSingularName !== "moduleMetadata") {
             fixedFilterToBeApplied = true;
         }
         if (fieldMetadata?.relationFieldFixedFilter || fieldLayoutInfo?.attrs?.fixedFilter) {

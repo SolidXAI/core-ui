@@ -162,18 +162,27 @@ export const DefaultRichTextFormViewWidget = ({ formik, fieldContext }: SolidFor
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const [isText, setIsText] = useState(false)
     return (
-        <div>
-            <Editor
-                readOnly={true}
-                key={fieldLabel}  // React will re-render the component whenever this value changes
-                id={fieldLabel}
-                value={formik.values[fieldLayoutInfo.attrs.name]}
-                style={{ height: "320px" }}
-                className="solid-custom-editor"
-            />
+        <div className="relative">
+            <div className="flex flex-column gap-2 mt-4">
+                {showFieldLabel != false &&
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        <SolidFieldTooltip fieldContext={fieldContext} />
+                        {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
+                    </label>
+                }
+                <Editor
+                    readOnly={true}
+                    key={fieldLabel}  // React will re-render the component whenever this value changes
+                    id={fieldLabel}
+                    value={formik.values[fieldLayoutInfo.attrs.name]}
+                    style={{ height: "320px" }}
+                    className="solid-custom-editor"
+                />
+            </div>
         </div>
     );
 }
