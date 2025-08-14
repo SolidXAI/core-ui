@@ -18,7 +18,7 @@ export class SolidEmailField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        if (value) {
+        if (value !== undefined && value !== null) {
             formData.append(fieldLayoutInfo.attrs.name, value);
         }
     }
