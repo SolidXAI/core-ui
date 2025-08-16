@@ -470,14 +470,33 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         return result;
     }
 
-
-
     useEffect(() => {
         if (viewData?.data?.solidFieldsMetadata) {
             let fieldsData = viewData?.data?.solidFieldsMetadata;
-            const fieldsList = Object.entries(fieldsData).map(([key, value]: any) => ({ name: value.displayName, value: key, type: value.type }));
+            console.log(`fiels data while rendering solid global search element: `);
+            console.log(fieldsData);
+
+            const fieldsList = Object.entries(fieldsData).map(([key, value]: any) => ({ name: value.displayName, value: key, type: value.type, ormType: value.ormType }));
             setFields(fieldsList);
-            const searchableFieldsList = fieldsList.filter((field: any) => field.type === "longText" || field.type === "shortText");
+            const searchableFieldsList = fieldsList.filter((field: any) => {
+                switch (field.type) {
+                    case "longText":
+                    case "shortText":
+                        return true;
+                    case "selectionStatic":
+                        if (field.ormType === 'varchar') {
+                            return true;
+                        }
+                    case "computed":
+                        if (field.ormType === 'varchar') {
+                            return true;
+                        }
+                    default:
+                        break;
+                }
+
+                return false;
+            });
             let finalsearchableFieldsList: any = [];
             if (typeof window !== "undefined" && window.location.href.includes("list")) {
                 finalsearchableFieldsList = searchableFieldsList.filter((field: any) => field.value && viewData?.data?.solidView?.layout?.children?.some((child: any) => child?.attrs?.name === field.value && child?.attrs?.isSearchable)).map((field: any) => field.value);
