@@ -211,12 +211,16 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
         const meta: any = fieldJsonSchema[key];
         if (!meta) return null;
 
-        if (meta.type === "string") {
+        if (meta.type === "string" || meta.type === "shortText") {
             return (
                 <InputText value={value} readOnly disabled />
             );
         }
-
+        if (meta.type === "longText") {
+            return(
+                <InputTextarea value={value} rows={10} cols={100}  readOnly />
+            );   
+        }
         if (meta.type === "date" || meta.type === "datetime") {
             return (
                 <Calendar
@@ -263,11 +267,11 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
                         data.map((row, idx) => (
                             <div
                                 key={idx}
-                                className="flex gap-3 align-items-center border-1 border-round p-2"
+                                className="flex gap-3 border-1 border-round p-3"
                             >
                                 {Object.keys(fieldJsonSchema).map((key) => (
                                     <div key={key} className="flex flex-column gap-1">
-                                        <label>{key}</label>
+                                        <label>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
                                         {
                                             // @ts-ignore
                                             renderInput(row[key], key, idx)
@@ -357,11 +361,22 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
         const meta: any = fieldJsonSchema[key];
         if (!meta) return null;
 
-        if (meta.type === "string") {
+        if (meta.type === "string" || meta.type === "shortText") {
             return (
                 <InputText
                     value={value}
                     onChange={(e) => handleChange(index, key, e.target.value)}
+                />
+            );
+        }
+
+        if (meta.type === "longText") {
+            return (
+                <InputTextarea
+                    onChange={(e) => handleChange(index, key, e.target.value)}
+                    value={value}
+                    rows={10}
+                    cols={100}
                 />
             );
         }
@@ -418,21 +433,26 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                         data.map((row, idx) => (
                             <div
                                 key={idx}
-                                className="flex gap-3 align-items-center border-1 border-round p-2"
+                                className="flex border-1 border-round p-3 gap-2"
                             >
                                 {Object.keys(fieldJsonSchema).map((key) => (
+                                    <>
                                     <div key={key} className="flex flex-column gap-1">
-                                        <label>{key}</label>
+                                      <label>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
                                         {
                                             // @ts-ignore
                                             renderInput(row[key], key, idx)
                                         }
                                     </div>
+                                    <br/>
+                                    </>
+                                 
                                 ))}
                                 <Button
                                     type="button"
                                     icon="pi pi-minus"
-                                    className="p-button-danger ml-2"
+                                    style={{height:'40px'}}
+                                    className="p-button-danger mt-4"
                                     onClick={() => handleRemove(idx)}
                                 />
                             </div>
