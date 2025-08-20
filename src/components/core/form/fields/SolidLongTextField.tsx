@@ -267,7 +267,7 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
                         data.map((row, idx) => (
                             <div
                                 key={idx}
-                                className="flex gap-3 border-1 border-round p-3"
+                                className={`flex ${fieldLayoutInfo.attrs?.className ? `flex-${fieldLayoutInfo.attrs?.className}` : 'flex-row'} border-1 border-round p-3 gap-2`}
                             >
                                 {Object.keys(fieldJsonSchema).map((key) => (
                                     <div key={key} className="flex flex-column gap-1">
@@ -433,7 +433,7 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                         data.map((row, idx) => (
                             <div
                                 key={idx}
-                                className="flex border-1 border-round p-3 gap-2"
+                                className={`flex ${fieldLayoutInfo.attrs?.className ? `flex-${fieldLayoutInfo.attrs?.className}` : 'flex-row'} border-1 border-round p-3 gap-2`}
                             >
                                 {Object.keys(fieldJsonSchema).map((key) => (
                                     <>
@@ -452,7 +452,7 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                                     type="button"
                                     icon="pi pi-minus"
                                     style={{height:'40px'}}
-                                    className="p-button-danger mt-4"
+                                    className={`p-button-danger ${fieldLayoutInfo.attrs?.className === 'column' ? 'mt-0':'mt-4'}`}
                                     onClick={() => handleRemove(idx)}
                                 />
                             </div>
