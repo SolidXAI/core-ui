@@ -287,12 +287,18 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
     }
 
     const handleFileView = (url: any) => {
-        if (url?.type.includes('image/')) {
-            setLightboxUrls?.([
-                { src: url.fileUrl, downloadUrl: url.fileUrl },
-            ]);
-            setOpenLightbox?.(true);
-        } else {
+        const downloadOnlyExt = [
+            "txt", "zip", "rar",
+            "doc", "docx",
+            "xls", "xlsx",
+            "ppt", "pptx"
+        ];
+
+        const fileUrl = url?.fileUrl || "";
+        const cleanUrl = fileUrl.split("?")[0];
+        const ext = cleanUrl.split(".").pop()?.toLowerCase();
+
+        if (ext && downloadOnlyExt.includes(ext)) {
             const link = document.createElement('a');
             link.href = url.fileUrl;
             link.download = ''; // or specify a file name like 'file.pdf'
@@ -300,6 +306,12 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+
+        } else {
+            setLightboxUrls?.([
+                { src: url.fileUrl, downloadUrl: url.fileUrl },
+            ]);
+            setOpenLightbox?.(true);
         }
     }
 
@@ -310,7 +322,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                        <SolidFieldTooltip fieldContext={fieldContext}/>
+                        <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
@@ -523,12 +535,18 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 
     const handleFileView = (url: any) => {
-        if (url?.type.includes('image/')) {
-            setLightboxUrls?.([
-                { src: url.fileUrl, downloadUrl: url.fileUrl },
-            ]);
-            setOpenLightbox?.(true);
-        } else {
+        const downloadOnlyExt = [
+            "txt", "zip", "rar",
+            "doc", "docx",
+            "xls", "xlsx",
+            "ppt", "pptx"
+        ];
+
+        const fileUrl = url?.fileUrl || "";
+        const cleanUrl = fileUrl.split("?")[0];
+        const ext = cleanUrl.split(".").pop()?.toLowerCase();
+
+        if (ext && downloadOnlyExt.includes(ext)) {
             const link = document.createElement('a');
             link.href = url.fileUrl;
             link.download = ''; // or specify a file name like 'file.pdf'
@@ -536,6 +554,12 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+
+        } else {
+            setLightboxUrls?.([
+                { src: url.fileUrl, downloadUrl: url.fileUrl },
+            ]);
+            setOpenLightbox?.(true);
         }
     }
 
@@ -543,7 +567,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
         <div>
             {showFieldLabel != false &&
                 <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label mt-4 font-medium">{fieldLabel}
-                <SolidFieldTooltip fieldContext={fieldContext}/>
+                    <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
             }
             {fileDetails.length > 0 &&
