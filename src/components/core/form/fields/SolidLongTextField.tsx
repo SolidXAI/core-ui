@@ -27,7 +27,7 @@ export class SolidLongTextField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-         if (value !== undefined && value !== null) {
+        if (value !== undefined && value !== null) {
             formData.append(fieldLayoutInfo.attrs.name, value);
         }
     }
@@ -211,12 +211,16 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
         const meta: any = fieldJsonSchema[key];
         if (!meta) return null;
 
-        if (meta.type === "string") {
+        if (meta.type === "string" || meta.type === "shortText") {
             return (
                 <InputText value={value} readOnly disabled />
             );
         }
-
+        if (meta.type === "longText") {
+            return (
+                <InputTextarea value={value} rows={10} cols={100} readOnly />
+            );
+        }
         if (meta.type === "date" || meta.type === "datetime") {
             return (
                 <Calendar
@@ -263,11 +267,11 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
                         data.map((row, idx) => (
                             <div
                                 key={idx}
-                                className="flex gap-3 align-items-center border-1 border-round p-2"
+                                className={`flex ${fieldLayoutInfo.attrs?.className ? `flex-${fieldLayoutInfo.attrs?.className}` : 'flex-row'} border-1 border-round p-3 gap-2`}
                             >
                                 {Object.keys(fieldJsonSchema).map((key) => (
                                     <div key={key} className="flex flex-column gap-1">
-                                        <label>{key}</label>
+                                        <label>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
                                         {
                                             // @ts-ignore
                                             renderInput(row[key], key, idx)
@@ -357,11 +361,24 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
         const meta: any = fieldJsonSchema[key];
         if (!meta) return null;
 
-        if (meta.type === "string") {
+        if (meta.type === "string" || meta.type === "shortText") {
             return (
                 <InputText
                     value={value}
                     onChange={(e) => handleChange(index, key, e.target.value)}
+                    disabled={!!disabled}
+                    readOnly={!!readOnly}
+                />
+            );
+        }
+
+        if (meta.type === "longText") {
+            return (
+                <InputTextarea
+                    onChange={(e) => handleChange(index, key, e.target.value)}
+                    value={value}
+                    rows={10}
+                    cols={100}
                 />
             );
         }
@@ -373,6 +390,8 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                     onChange={(e) => handleChange(index, key, e.value)}
                     showTime={meta.type === "datetime"}
                     dateFormat="yy-mm-dd"
+                    disabled={!!disabled}
+                    readOnlyInput={!!readOnly}
                 />
             );
         }
@@ -385,6 +404,8 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                     options={meta.allowedValues.map((v) => ({ label: v, value: v }))}
                     onChange={(e) => handleChange(index, key, e.value)}
                     placeholder="Select..."
+                    disabled={!!disabled}
+                    readOnly={!!readOnly}
                 />
             );
         }
@@ -404,12 +425,14 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
 
             <div className="p-4 border-round surface-card shadow-1">
                 <div className="flex justify-content-between align-items-center mb-3">
-                    <Button
-                        type="button"
-                        label="Add"
-                        icon="pi pi-plus"
-                        onClick={handleAdd}
-                    />
+                    {!disabled && !readOnly ? (
+                        <Button
+                            type="button"
+                            label="Add"
+                            icon="pi pi-plus"
+                            onClick={handleAdd}
+                        />
+                    ) : null}
                 </div>
 
                 <div className="flex flex-column gap-2">
@@ -418,12 +441,12 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                         data.map((row, idx) => (
                             <div
                                 key={idx}
-                                className="flex gap-3 justify-content-between align-items-center border-1 border-round p-2"
-                            >  
-                                <div className="flex gap-3 align-items-center">    
+                                className={`flex ${fieldLayoutInfo.attrs?.className ? `flex-${fieldLayoutInfo.attrs?.className}` : 'flex-row'} border-1 border-round p-3 gap-2`}
+                            >
+                                <div className="flex gap-3 align-items-center">
                                     {Object.keys(fieldJsonSchema).map((key) => (
                                         <div key={key} className="flex flex-column gap-1">
-                                            <label>{key}</label>
+                                            <label>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
                                             {
                                                 // @ts-ignore
                                                 renderInput(row[key], key, idx)
@@ -431,12 +454,14 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                                         </div>
                                     ))}
                                 </div>
-                                <Button
-                                    type="button"
-                                    icon="pi pi-minus"
-                                    className="ml-2 h-2rem w-2rem rounded-circle"
-                                    onClick={() => handleRemove(idx)}
-                                />
+                                {!disabled && !readOnly ? (
+                                    <Button
+                                        type="button"
+                                        icon="pi pi-minus"
+                                        className="ml-2 h-2rem w-2rem rounded-circle"
+                                        onClick={() => handleRemove(idx)}
+                                    />
+                                ) : null}
                             </div>
                         ))
                     }
