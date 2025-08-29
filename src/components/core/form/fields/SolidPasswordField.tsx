@@ -64,7 +64,7 @@ export class SolidPasswordField implements ISolidField {
             schema = schema.max(fieldMetadata.max, `${fieldLabel} should not be more than ${fieldMetadata.max} characters long.`);
         }
         // 3. regular expression
-        if (fieldMetadata.regexPattern && fieldMetadata.required) {
+        if (fieldMetadata.regexPattern) {
             const regexPatternNotMatchingErrorMsg = fieldMetadata.regexPatternNotMatchingErrorMsg ?? `${fieldLabel} has invalid data.`
             schema = schema.matches(fieldMetadata.regexPattern, regexPatternNotMatchingErrorMsg);
         }
