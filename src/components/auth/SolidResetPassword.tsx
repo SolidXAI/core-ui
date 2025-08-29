@@ -19,8 +19,8 @@ import SolidLogo from '../../resources/images/SolidXLogo.svg'
 const SolidResetPassword = () => {
     const searchParams = useSearchParams();
     const verificationToken = searchParams.get('token');
-    const decodedUsername = searchParams.get('username');
-    const username = decodedUsername ? decodeURIComponent(decodedUsername) : '';
+    // const decodedUsername = searchParams.get('username');
+    // const username = decodedUsername ? decodeURIComponent(decodedUsername) : '';
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
     useEffect(() => {
         trigger("")
@@ -38,14 +38,33 @@ const SolidResetPassword = () => {
         });
     };
 
+    const envPasswordRegex = process.env.NEXT_PUBLIC_PASSWORD_REGEX;
+    const envPasswordHelperText = process.env.NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC;
+    let passwordRegex: RegExp | null = null;
+    try {
+        if (envPasswordRegex) {
+            const unescaped = JSON.parse(`"${envPasswordRegex}"`);
+            passwordRegex = new RegExp(unescaped);
+        }
+    } catch (error) {
+        console.error("Invalid password regex in .env:", error);
+    }
+
+    const newPasswordValidation = passwordRegex
+        ? Yup.string()
+            .matches(passwordRegex, 'Password does not meet complexity requirements')
+            .required('New password is required')
+        : Yup.string().min(6, 'Password must be at least 6 characters')
+            .required('New password is required');
+
     const validationSchema = Yup.object({
-        password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
+        password: newPasswordValidation,
         confirmPassword: Yup.string().oneOf([Yup.ref('password')], 'Passwords must match').required('Confirm password is required'),
     });
 
     const formik = useFormik({
         initialValues: {
-            username: username,
+            // username: username,
             password: "",
             confirmPassword: "",
             verificationToken: verificationToken,
@@ -54,7 +73,7 @@ const SolidResetPassword = () => {
         onSubmit: async (values) => {
             try {
                 const payload = {
-                    username: values.username,
+                    // username: values.username,
                     password: values.password,
                     verificationToken: values.verificationToken,
                 };
@@ -66,7 +85,7 @@ const SolidResetPassword = () => {
                     showToast("error", "Error", response.error)
                 )
             } catch (err: any) {
-                showToast("error", "Error", err?.data ? err?.data?.message : "Something Went Wrong");
+                showToast("error", err?.data?.message, err?.data?.data?.message? err?.data?.data?.message : err?.data?.message);
             }
         },
     });
@@ -137,6 +156,19 @@ const SolidResetPassword = () => {
                             text={formik?.errors?.confirmPassword?.toString()}
                         />}
                     </div>
+                    {envPasswordHelperText && (
+                        <div className="mt-4 text-sm">
+                            <div className="grid">
+                                {envPasswordHelperText
+                                    .split('\\n')
+                                    .map((text, idx) => (
+                                        <div key={idx} className="col-6 pt-0">
+                                            <div className='flex gap-2'><span>•</span><span>{text}</span></div>
+                                        </div>
+                                    ))}
+                            </div>
+                        </div>
+                    )}
                     {/* <div className="flex align-items-center mt-4">
                                         <Checkbox inputId="remember" onChange={(e: any) => setChecked(e.checked)} checked={checked} />
                                         <label htmlFor="remember" className="ml-2">Remember me</label>
