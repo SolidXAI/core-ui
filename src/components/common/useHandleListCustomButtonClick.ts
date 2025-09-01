@@ -6,6 +6,7 @@ import { openPopup } from "@/redux/features/popupSlice";
 import React, { ComponentType } from "react";
 
 type CustomButtonData = {
+    icon?: string,
     className?: string,
     label: string,
     action: string,

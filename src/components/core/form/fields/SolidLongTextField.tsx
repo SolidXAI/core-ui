@@ -4,11 +4,18 @@ import { Message } from "primereact/message";
 import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { Editor } from "primereact/editor";
+// import { Editor } from "primereact/editor";
 import { useState } from "react";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
+import { useEffect, useRef } from 'react';
+import Editor from '@monaco-editor/react';
+import { Calendar } from "primereact/calendar";
+import { Dropdown } from "primereact/dropdown";
+import { InputText } from "primereact/inputtext";
+import { Button } from "primereact/button";
+
 
 export class SolidLongTextField implements ISolidField {
 
@@ -20,7 +27,7 @@ export class SolidLongTextField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        if (value) {
+         if (value !== undefined && value !== null) {
             formData.append(fieldLayoutInfo.attrs.name, value);
         }
     }
@@ -160,7 +167,357 @@ export const DefaultLongTextFormEditWidget = ({ formik, fieldContext }: SolidFor
     );
 }
 
+export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
 
+    const readOnly = fieldLayoutInfo.attrs?.readonly || fieldContext.readOnly;
+    const disabled = fieldLayoutInfo.attrs?.disabled;
 
+    // Default to SQL
+    const language = fieldLayoutInfo.attrs.editorLanguage || 'ts';
 
+    const value = formik.values[fieldLayoutInfo.attrs.name] || '';
 
+    const isFormFieldValid = (formik: any, fieldName: string) =>
+        formik.touched[fieldName] && formik.errors[fieldName];
+
+    // Sample schema, this comes from the metadata...
+    // {
+    //     key1: {
+    //         required: true,
+    //         type: "string",
+    //     },
+    //     key2: {
+    //         required: true,
+    //         type: "selectionStatic",
+    //         allowedValues: [
+    //             "selection static val 1",
+    //             "selection static val 2",
+    //             "selection static val 3",
+    //             "selection static val 4",
+    //         ],
+    //     },
+    // };
+    const fieldJsonSchema = fieldLayoutInfo.attrs?.jsonSchema;
+    if (!fieldJsonSchema) {
+        return <Message severity="error" text="Field Layout Attributes are missing jsonSchema, cannot render with widget jsonEditor without specifying the schema." />
+    }
+    const [data, setData] = useState(JSON.parse(value || '[]'));
+
+    const renderInput = (value: any, key: string, index: number) => {
+        // @ts-ignore
+        const meta: any = fieldJsonSchema[key];
+        if (!meta) return null;
+
+        if (meta.type === "string" || meta.type === "shortText") {
+            return (
+                <InputText value={value} readOnly disabled />
+            );
+        }
+        if (meta.type === "longText") {
+            return(
+                <InputTextarea value={value} rows={10} cols={100}  readOnly />
+            );   
+        }
+        if (meta.type === "date" || meta.type === "datetime") {
+            return (
+                <Calendar
+                    value={value ? new Date(value) : null}
+                    showTime={meta.type === "datetime"}
+                    dateFormat="yy-mm-dd"
+                    readOnlyInput
+                    disabled
+                />
+            );
+        }
+
+        if (meta.type === "selectionStatic") {
+            return (
+                <Dropdown
+                    value={value}
+                    // @ts-ignore
+                    options={meta.allowedValues.map((v) => ({ label: v, value: v }))}
+                    placeholder="Select..."
+                    readOnly
+                    disabled
+                />
+            );
+        }
+
+        return null;
+    };
+
+    return (
+        <div className="mt-4">
+            {fieldLayoutInfo?.attrs?.showLabel !== false && (
+                <label className="form-field-label mb-10">
+                    {fieldLabel}
+                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                    <SolidFieldTooltip fieldContext={fieldContext} />
+                </label>
+            )}
+
+            <div className="p-4 border-round surface-card shadow-1">
+
+                <div className="flex flex-column gap-2">
+                    {
+                        // @ts-ignore
+                        data.map((row, idx) => (
+                            <div
+                                key={idx}
+                                className={`flex ${fieldLayoutInfo.attrs?.className ? `flex-${fieldLayoutInfo.attrs?.className}` : 'flex-row'} border-1 border-round p-3 gap-2`}
+                            >
+                                {Object.keys(fieldJsonSchema).map((key) => (
+                                    <div key={key} className="flex flex-column gap-1">
+                                        <label>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
+                                        {
+                                            // @ts-ignore
+                                            renderInput(row[key], key, idx)
+                                        }
+                                    </div>
+                                ))}
+
+                            </div>
+                        ))
+                    }
+                </div>
+
+            </div>
+        </div>
+    );
+}
+
+export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+
+    const readOnly = fieldLayoutInfo.attrs?.readonly || fieldContext.readOnly;
+    const disabled = fieldLayoutInfo.attrs?.disabled;
+
+    // Default to SQL
+    const language = fieldLayoutInfo.attrs.editorLanguage || 'ts';
+
+    const value = formik.values[fieldLayoutInfo.attrs.name] || '';
+
+    const isFormFieldValid = (formik: any, fieldName: string) =>
+        formik.touched[fieldName] && formik.errors[fieldName];
+
+    // Sample schema, this comes from the metadata...
+    // {
+    //     key1: {
+    //         required: true,
+    //         type: "string",
+    //     },
+    //     key2: {
+    //         required: true,
+    //         type: "selectionStatic",
+    //         allowedValues: [
+    //             "selection static val 1",
+    //             "selection static val 2",
+    //             "selection static val 3",
+    //             "selection static val 4",
+    //         ],
+    //     },
+    // };
+    const fieldJsonSchema = fieldLayoutInfo.attrs?.jsonSchema;
+    if (!fieldJsonSchema) {
+        return <Message severity="error" text="Field Layout Attributes are missing jsonSchema, cannot render with widget jsonEditor without specifying the schema." />
+    }
+    const [data, setData] = useState(JSON.parse(value || '[]'));
+
+    const handleAllChange = (updated: any) => {
+        setData(updated);
+        formik.setFieldValue(fieldLayoutInfo.attrs.name, JSON.stringify(updated));
+    }
+
+    const handleChange = (index: number, key: string, value: any) => {
+        const updated = [...data];
+        // @ts-ignore
+        updated[index][key] = value;
+        handleAllChange(updated);
+    };
+
+    const handleAdd = () => {
+        const newItem = {};
+        Object.keys(fieldJsonSchema).forEach((key) => {
+            // @ts-ignore
+            newItem[key] = "";
+        });
+        // @ts-ignore
+        handleAllChange([...data, newItem]);
+    };
+
+    const handleRemove = (index: number) => {
+        const updated = [...data];
+        updated.splice(index, 1);
+        handleAllChange(updated);
+    };
+
+    const renderInput = (value: any, key: string, index: number) => {
+        // @ts-ignore
+        const meta: any = fieldJsonSchema[key];
+        if (!meta) return null;
+
+        if (meta.type === "string" || meta.type === "shortText") {
+            return (
+                <InputText
+                    value={value}
+                    onChange={(e) => handleChange(index, key, e.target.value)}
+                />
+            );
+        }
+
+        if (meta.type === "longText") {
+            return (
+                <InputTextarea
+                    onChange={(e) => handleChange(index, key, e.target.value)}
+                    value={value}
+                    rows={10}
+                    cols={100}
+                />
+            );
+        }
+
+        if (meta.type === "date" || meta.type === "datetime") {
+            return (
+                <Calendar
+                    value={value ? new Date(value) : null}
+                    onChange={(e) => handleChange(index, key, e.value)}
+                    showTime={meta.type === "datetime"}
+                    dateFormat="yy-mm-dd"
+                />
+            );
+        }
+
+        if (meta.type === "selectionStatic") {
+            return (
+                <Dropdown
+                    value={value}
+                    // @ts-ignore
+                    options={meta.allowedValues.map((v) => ({ label: v, value: v }))}
+                    onChange={(e) => handleChange(index, key, e.value)}
+                    placeholder="Select..."
+                />
+            );
+        }
+
+        return null;
+    };
+
+    return (
+        <div className="mt-4">
+            {fieldLayoutInfo?.attrs?.showLabel !== false && (
+                <label className="form-field-label mb-10">
+                    {fieldLabel}
+                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                    <SolidFieldTooltip fieldContext={fieldContext} />
+                </label>
+            )}
+
+            <div className="p-4 border-round surface-card shadow-1">
+                <div className="flex justify-content-between align-items-center mb-3">
+                    <Button
+                        type="button"
+                        label="Add"
+                        icon="pi pi-plus"
+                        onClick={handleAdd}
+                    />
+                </div>
+
+                <div className="flex flex-column gap-2">
+                    {
+                        // @ts-ignore
+                        data.map((row, idx) => (
+                            <div
+                                key={idx}
+                                className={`flex ${fieldLayoutInfo.attrs?.className ? `flex-${fieldLayoutInfo.attrs?.className}` : 'flex-row'} border-1 border-round p-3 gap-2`}
+                            >
+                                {Object.keys(fieldJsonSchema).map((key) => (
+                                    <>
+                                    <div key={key} className="flex flex-column gap-1">
+                                      <label>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
+                                        {
+                                            // @ts-ignore
+                                            renderInput(row[key], key, idx)
+                                        }
+                                    </div>
+                                    <br/>
+                                    </>
+                                 
+                                ))}
+                                <Button
+                                    type="button"
+                                    icon="pi pi-minus"
+                                    style={{height:'40px'}}
+                                    className={`p-button-danger ${fieldLayoutInfo.attrs?.className === 'column' ? 'mt-0':'mt-4'}`}
+                                    onClick={() => handleRemove(idx)}
+                                />
+                            </div>
+                        ))
+                    }
+                </div>
+
+                {
+                    fieldLayoutInfo.attrs?.jsonSchemaShowPreview &&
+                    <pre className="mt-4 bg-gray-100 p-3 border-round overflow-auto">
+                        {JSON.stringify(data, null, 2)}
+                    </pre>
+                }
+            </div>
+        </div>
+    );
+};
+
+export const CodeEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+
+    const readOnly = fieldLayoutInfo.attrs?.readonly || fieldContext.readOnly;
+    const disabled = fieldLayoutInfo.attrs?.disabled;
+
+    // Default to SQL
+    const language = fieldLayoutInfo.attrs.editorLanguage || 'ts';
+
+    const value = formik.values[fieldLayoutInfo.attrs.name] || '';
+
+    const isFormFieldValid = (formik: any, fieldName: string) =>
+        formik.touched[fieldName] && formik.errors[fieldName];
+
+    return (
+        <div className="mt-4">
+            {fieldLayoutInfo?.attrs?.showLabel !== false && (
+                <label className="form-field-label mb-10">
+                    {fieldLabel}
+                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                    <SolidFieldTooltip fieldContext={fieldContext} />
+                </label>
+            )}
+
+            <div className="border border-gray-300 rounded overflow-hidden">
+                <Editor
+                    height="200px"
+                    defaultLanguage={language}
+                    value={value}
+                    onChange={(val) => formik.setFieldValue(fieldLayoutInfo.attrs.name, val)}
+                    options={{
+                        readOnly,
+                        minimap: { enabled: false },
+                        lineNumbers: 'on',
+                        fontSize: 14,
+                        scrollBeyondLastLine: false,
+                    }}
+                />
+            </div>
+
+            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                <div className="mt-1">
+                    <Message text={formik.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                </div>
+            )}
+        </div>
+    );
+};

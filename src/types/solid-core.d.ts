@@ -77,6 +77,8 @@ export type LayoutAttribute = {
     inlineCreateLayout?: any;
     formButtons?: any;
     whereClause?: string;
+    disabled?: boolean;
+    readonly?: boolean;
 };
 
 // Generic representation of any node in our layout 
@@ -110,18 +112,48 @@ export type SolidLoadForm = {
     formViewLayout: LayoutNode;
 }
 
+export enum SqlExpressionOperator {
+    EQUALS = '$equals',
+    NOT_EQUALS = '$notEquals',
+    CONTAINS = '$contains',
+    NOT_CONTAINS = '$notContains',
+    STARTS_WITH = '$startsWith',
+    ENDS_WITH = '$endsWith',
+    IN = '$in',
+    NOT_IN = '$notIn',
+    BETWEEN = '$between',
+    LT = '$lt',
+    LTE = '$lte',
+    GT = '$gt',
+    GTE = '$gte'
+}
+
+export interface SqlExpression {
+    variableName: string;
+    operator: SqlExpressionOperator;
+    value: string[];
+}
+
+export type SolidChartRendererProps = {
+    question: any;
+    filters: SqlExpression[];
+    isPreview: boolean;
+};
+
 export type SolidFormWidgetProps = {
     field: any;
     // This comes from Formik...
     formData: Record<string, any>;
     viewMetadata: SolidView;
     fieldsMetadata: FieldsMetadata;
+    formViewData: any;
 };
 
 export type SolidFormFieldWidgetProps = {
     formik: any;
     fieldContext?: SolidFieldProps;
 }
+
 export type SolidListFieldWidgetProps = {
     rowData: any;
     solidListViewMetaData: any
@@ -143,7 +175,6 @@ export type SolidShortTextImageRenderModeWidgetProps = {
     data: string;
 }
 
-
 export type SolidFormDynamicFunctionProps = {
     action: string,
     params: any,
@@ -158,7 +189,6 @@ export type SolidListHeaderDynamicFunctionProps = {
     solidListViewMetaData: any
 }
 
-
 export type SolidListRowdataDynamicFunctionProps = {
     action: string,
     params: any,
@@ -167,3 +197,18 @@ export type SolidListRowdataDynamicFunctionProps = {
 }
 
 export type RootState = ReturnType<ReturnType<typeof initializeStore>['getState']>;
+
+
+export interface AiInteraction {
+    id: number;
+    threadId: string;
+    role: 'human' | 'gen-ai' | string;
+    message: string;
+    contentType?: string;
+    status?: string;
+    errorMessage?: string;
+    modelUsed?: string;
+    responseTimeMs?: number;
+    metadata?: string;
+    isApplied ?: boolean;
+}

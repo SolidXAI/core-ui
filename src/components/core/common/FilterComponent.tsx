@@ -11,6 +11,7 @@ import { SolidFilterFields } from '../filter/SolidFilterFields';
 import { Button } from 'primereact/button';
 import { Fieldset } from 'primereact/fieldset';
 import { OverlayPanel } from 'primereact/overlaypanel';
+import { AutoComplete } from 'primereact/autocomplete';
 export enum FilterRuleType {
   RULE = 'rule',
   RULE_GROUP = 'rule_group'
@@ -90,6 +91,17 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
   const [fieldName, setFieldName] = useState({ name: rule.fieldName });
   const [matchMode, setMatchMode] = useState({ name: rule.matchMode });
 
+  const [filteredFields, setFilteredFields] = useState<any[]>([]);
+
+    const searchFields = (event: any) => {
+        const query = event.query.toLowerCase();
+        const filtered = !query
+            ? fields
+            : fields.filter((item: any) =>
+                item.name.toLowerCase().startsWith(query)
+            );
+        setFilteredFields(filtered);
+    };
   return (
     // <div style={{ marginLeft: (level - 1) * 10 + 'px' }} className="filter-rule">
 
@@ -97,19 +109,24 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
       <div className='flex align-items-center gap-3'>
         <div className='formgrid grid w-full'>
           <div className='col-4'>
-            <Dropdown
-              key={rule.id}
-              value={fieldName.name}
-              onChange={e => {
-                setFieldName({ name: e.value })
-                onChange(rule.id, 'fieldName', e.value)
-              }}
-              options={fields}
-              optionLabel='name'
-              optionValue='value'
-              placeholder="Select Field"
-              className='w-full p-inputtext-sm'
-            />
+             <AutoComplete
+                            value={fieldName.name}
+                            suggestions={filteredFields}
+                            completeMethod={searchFields}
+                            field="name"
+                            dropdown
+                            forceSelection // only values from list
+                            placeholder="Select Field"
+                            className="w-full p-inputtext-sm"
+                            onChange={(e) => {
+                                setFieldName({name:e.value}); // e.value will be an object or null
+                                if (e.value) {
+                                    onChange(rule.id, 'fieldName', e.value.value); // send value to parent
+                                } else {
+                                    onChange(rule.id, 'fieldName', '');
+                                }
+                            }}
+                        />
           </div>
           <div className='col-8'>
             <div className='formgrid grid w-full'>

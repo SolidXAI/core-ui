@@ -14,13 +14,13 @@ import { DefaultDecimalFormEditWidget } from "@/components/core/form/fields/Soli
 import { DefaultEmailFormEditWidget } from "@/components/core/form/fields/SolidEmailField";
 import { DefaultIntegerFormEditWidget, SolidIntegerSliderStyleFormEditWidget } from "@/components/core/form/fields/SolidIntegerField";
 import { DefaultJsonFormEditWidget, DefaultJsonFormViewWidget } from "@/components/core/form/fields/SolidJsonField";
-import { DefaultLongTextFormEditWidget } from "@/components/core/form/fields/SolidLongTextField";
+import { DefaultLongTextFormEditWidget, CodeEditorFormEditWidget, DynamicJsonEditorFormEditWidget, DynamicJsonEditorFormViewWidget } from "@/components/core/form/fields/SolidLongTextField";
 import { DefaultMediaMultipleFormEditWidget, DefaultMediaMultipleFormViewWidget } from "@/components/core/form/fields/SolidMediaMultipleField";
 import { DefaultMediaSingleFormEditWidget, DefaultMediaSingleFormViewWidget } from "@/components/core/form/fields/SolidMediaSingleField";
 import { DefaultPasswordFormCreateWidget, DefaultPasswordFormEditWidget, DefaultPasswordFormViewWidget } from "@/components/core/form/fields/SolidPasswordField";
 import { DefaultRichTextFormEditWidget, DefaultRichTextFormViewWidget } from "@/components/core/form/fields/SolidRichTextField";
 import { DefaultSelectionStaticAutocompleteFormEditWidget, DefaultSelectionStaticFormViewWidget, SolidSelectionStaticRadioFormEditWidget } from "@/components/core/form/fields/SolidSelectionStaticField";
-import { DefaultShortTextFormEditWidget, DefaultShortTextFormViewWidget } from "@/components/core/form/fields/SolidShortTextField";
+import { DefaultShortTextFormEditWidget, DefaultShortTextFormViewWidget,MaskedShortTextFormViewWidget,MaskedShortTextFormEditWidget,MaskedShortTextListViewWidget } from "@/components/core/form/fields/SolidShortTextField";
 import { DefaultRelationManyToOneFormEditWidget, DefaultRelationManyToOneFormViewWidget } from "@/components/core/form/fields/relations/SolidRelationManyToOneField";
 import { DefaultRelationOneToManyFormEditWidget, DefaultRelationOneToManyFormViewWidget } from "@/components/core/form/fields/relations/SolidRelationOneToManyField";
 import { DefaultRelationManyToManyAutoCompleteFormEditWidget, DefaultRelationManyToManyCheckBoxFormEditWidget } from "@/components/core/form/fields/relations/SolidRelationManyToManyField";
@@ -39,6 +39,8 @@ import { SolidManyToManyRelationAvatarListWidget } from "@/components/core/list/
 import { SolidManyToOneRelationAvatarListWidget } from "@/components/core/list/widgets/SolidManyToOneRelationAvatarListWidget";
 import { SolidShortTextFieldAvatarWidget } from "@/components/core/form/fields/widgets/SolidShortTextFieldAvatarWidget";
 import DeleteModelRowAction from "@/components/core/extension/solid-core/modelMetadata/list/DeleteModelRowAction";
+import ChartFormPreviewWidget from "@/components/core/extension/solid-core/dashboardQuestion/ChartFormPreviewWidget";
+import { DefaultTimeFormEditWidget } from "@/components/core/form/fields/SolidTimeField";
 
 type ExtensionRegistry = {
     components: Record<string, React.ComponentType<any>>;
@@ -99,14 +101,15 @@ registerExtensionComponent("CustomHtml", CustomHtml, []);
 registerExtensionComponent("GenerateModelCodeRowAction", GenerateModelCodeRowAction, []);
 registerExtensionComponent("GenerateModuleCodeRowAction", GenerateModuleCodeRowAction, []);
 registerExtensionComponent("DeleteModelRowAction", DeleteModelRowAction, []);
-
+registerExtensionComponent("ChartFormPreviewWidget", ChartFormPreviewWidget, ["chart"]);
 
 
 // Formview Default Edit widgets
 registerExtensionComponent("DefaultDateFormEditWidget", DefaultDateFormEditWidget, []);
+registerExtensionComponent("DefaultTimeFormEditWidget", DefaultTimeFormEditWidget, []);
 registerExtensionComponent("DefaultBooleanFormEditWidget", DefaultBooleanFormEditWidget, ["booleanSelectbox"]);
 registerExtensionComponent("SolidBooleanCheckboxStyleFormEditWidget", SolidBooleanCheckboxStyleFormEditWidget, ["booleanCheckbox"]);
-registerExtensionComponent("SolidBooleanSwitchStyleFormEditWidget", SolidBooleanSwitchStyleFormEditWidget,[]);
+registerExtensionComponent("SolidBooleanSwitchStyleFormEditWidget", SolidBooleanSwitchStyleFormEditWidget, []);
 
 
 registerExtensionComponent("DefaultDateTimeFormEditWidget", DefaultDateTimeFormEditWidget, []);
@@ -115,7 +118,11 @@ registerExtensionComponent("DefaultEmailFormEditWidget", DefaultEmailFormEditWid
 registerExtensionComponent("DefaultIntegerFormEditWidget", DefaultIntegerFormEditWidget, []);
 registerExtensionComponent("SolidIntegerSliderStyleFormEditWidget", SolidIntegerSliderStyleFormEditWidget, ["integerSlider"]);
 registerExtensionComponent("DefaultJsonFormEditWidget", DefaultJsonFormEditWidget, []);
+
 registerExtensionComponent("DefaultLongTextFormEditWidget", DefaultLongTextFormEditWidget, []);
+registerExtensionComponent("CodeEditorFormEditWidget", CodeEditorFormEditWidget, ["codeEditor"]);
+registerExtensionComponent("DynamicJsonEditorFormEditWidget", DynamicJsonEditorFormEditWidget, ["jsonEditor"]);
+
 registerExtensionComponent("DefaultMediaMultipleFormEditWidget", DefaultMediaMultipleFormEditWidget, []);
 registerExtensionComponent("DefaultMediaSingleFormEditWidget", DefaultMediaSingleFormEditWidget, []);
 registerExtensionComponent("DefaultPasswordFormEditWidget", DefaultPasswordFormEditWidget, []);
@@ -140,6 +147,12 @@ registerExtensionComponent("DefaultMediaSingleFormViewWidget", DefaultMediaSingl
 registerExtensionComponent("DefaultPasswordFormViewWidget", DefaultPasswordFormViewWidget, []);
 registerExtensionComponent("DefaultRichTextFormViewWidget", DefaultRichTextFormViewWidget, []);
 registerExtensionComponent("DefaultShortTextFormViewWidget", DefaultShortTextFormViewWidget, []);
+registerExtensionComponent("MaskedShortTextFormViewWidget", MaskedShortTextFormViewWidget, ["maskedShortTextForm"]);
+registerExtensionComponent("MaskedShortTextFormEditWidget", MaskedShortTextFormEditWidget, ["maskedShortTextEdit"]);
+registerExtensionComponent("MaskedShortTextListViewWidget", MaskedShortTextListViewWidget, ["maskedShortTextList"]);
+
+// longText field
+registerExtensionComponent("DynamicJsonEditorFormViewWidget", DynamicJsonEditorFormViewWidget, ["jsonViewer"]);
 registerExtensionComponent("DefaultRelationOneToManyFormViewWidget", DefaultRelationOneToManyFormViewWidget, []);
 registerExtensionComponent("DefaultJsonFormViewWidget", DefaultJsonFormViewWidget, []);
 registerExtensionComponent("DefaultRelationManyToOneFormViewWidget", DefaultRelationManyToOneFormViewWidget, []);

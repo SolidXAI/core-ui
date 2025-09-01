@@ -14,7 +14,7 @@ import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
-import SolidLogo from '../../resources/images/SS-Logo.png'
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
 
 const SolidResetPassword = () => {
     const searchParams = useSearchParams();
@@ -60,13 +60,13 @@ const SolidResetPassword = () => {
                 };
                 const response = await confirmForgotPassword(payload).unwrap();
                 if (response?.statusCode === 200) {
-                    showToast("success", "Login Successfull", "Password Updated Successfully")
+                    showToast("success", "Password Updated", "Password Updated Successfully")
                     router.push('/auth/login');
                 } else (
-                    showToast("error", "Login Error", response.error)
+                    showToast("error", "Error", response.error)
                 )
             } catch (err: any) {
-                showToast("error", "Login Error", err?.data ? err?.data?.message : "Something Went Wrong");
+                showToast("error", "Error", err?.data ? err?.data?.message : "Something Went Wrong");
             }
         },
     });

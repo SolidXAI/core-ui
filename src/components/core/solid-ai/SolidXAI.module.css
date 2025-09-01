@@ -1,0 +1,94 @@
+/* .SolidXAIHeader {} */
+
+.SolidXAIThreadWrapper {
+    height: calc(100vh - 65px);
+    padding-bottom: 200px;
+}
+
+.SolidXAIInputWrapper {
+    position: absolute;
+    bottom: 0;
+    left: 0;
+    right: 0;
+    margin: 0 16px 16px 16px;
+    background-color: var(--surface-c);
+    border-radius: 8px;
+    overflow: hidden;
+}
+
+.SolidAIInput {
+    border: none;
+    width: 100%;
+    resize: none;
+    background-color: transparent;
+}
+
+.SolidXAIEmptyPlaceholder {
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+}
+
+.SolidXAIEmptyPlaceholderBg {
+    height: 100px;
+    background: #DBC4F5;
+    background: radial-gradient(circle, rgba(219, 196, 245, 1) 0%, rgba(255, 255, 255, 0) 100%);
+}
+
+.SolidXAIThinkingAnimation {
+    width: 36px;
+    aspect-ratio: 2;
+    --_g: no-repeat radial-gradient(circle closest-side, var(--primary-color) 90%, #0000);
+    background:
+        var(--_g) 0% 50%,
+        var(--_g) 50% 50%,
+        var(--_g) 100% 50%;
+    background-size: calc(100%/3) 50%;
+    animation: solid-x-ai-thinking 1s infinite linear;
+}
+
+@keyframes solid-x-ai-thinking {
+    20% {
+        background-position: 0% 0%, 50% 50%, 100% 50%
+    }
+
+    40% {
+        background-position: 0% 100%, 50% 0%, 100% 50%
+    }
+
+    60% {
+        background-position: 0% 50%, 50% 100%, 100% 0%
+    }
+
+    80% {
+        background-position: 0% 50%, 50% 50%, 100% 100%
+    }
+}
+
+.SolidXUserPromptWrapper {
+    max-width: 90%;
+    margin-left: auto;
+}
+
+.SolidXUserPrompt {
+    border-radius: 8px;
+}
+
+.SolidXUserPrompt div {
+    color: var(--solid-dark-title);
+}
+
+.SolidXAIResponseWrapper {
+    max-width: 90%;
+    margin-right: auto;
+}
+
+.SolidXAIResponse {
+    border-radius: 8px;
+    background-color: var(--primary-50);
+}
+
+.SolidXAIResponse div {
+    color: var(--solid-dark-title);
+}

@@ -12,9 +12,11 @@ import { useContext, useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { LayoutContext } from "../layout/context/layoutcontext";
 import Image from "next/image";
-import SolidLogo from '../../resources/images/SS-Logo.png'
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { Divider } from "primereact/divider";
-
+import AuthScreenRightBackgroundImage from '../../resources/images/auth/solid-left-layout-bg.png';
+import AuthScreenLeftBackgroundImage from '../../resources/images/auth/solid-right-layout-bg.png';
+import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
     const [allowRegistration, setAllowRegistration] = useState<boolean | null>(null);
@@ -67,8 +69,40 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         router.push("/auth/login");
         setIsRestricted(false);
     }
+
+    const solidSideBanner = () => {
+        const layout = solidSettingsData?.data?.authPagesLayout;
+
+        let src = null;
+
+        if (layout === 'left') {
+            src = solidSettingsData?.data?.authScreenLeftBackgroundImage || (AuthScreenLeftBackgroundImage as any).src || AuthScreenLeftBackgroundImage;
+        } else if (layout === 'right') {
+            src = solidSettingsData?.data?.authScreenRightBackgroundImage || (AuthScreenRightBackgroundImage as any).src || AuthScreenRightBackgroundImage;
+        }
+
+        // Normalize image path if coming from API
+        const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
+        if (!isBlobOrAbsolute && !src?.startsWith("/")) {
+            src = `${process.env.API_URL}/${src}`;
+        }
+
+        return src;
+    };
+
     return (
-        <div className={`solid-auth-theme-wrapper ${solidSettingsData?.data?.authPagesLayout || 'center'}`}>
+        <div className={`solid-auth-theme-wrapper ${solidSettingsData?.data?.authPagesLayout || 'center'}`}
+            style={
+                solidSettingsData?.data?.authPagesLayout === 'center'
+                    ? {
+                        backgroundImage: `url(${solidSettingsData?.data?.authScreenCenterBackgroundImage ||
+                            (AuthScreenCenterBackgroundImage as any)?.src ||
+                            AuthScreenCenterBackgroundImage
+                            })`
+                    }
+                    : {}
+            }
+        >
             <div className={`${solidSettingsData?.data?.authPagesLayout !== 'center' ? 'grid w-full h-full m-0' : ''}`}>
                 {solidSettingsData?.data?.authPagesLayout === 'left' &&
                     <div className='col-6 flex align-items-center justify-content-center solid-login-dark-bg'>
@@ -94,6 +128,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                     className={`${solidSettingsData?.data?.authPagesLayout !== 'center' ? 'col-6 position-relative' : ''} 
                                 ${solidSettingsData?.data?.authPagesLayout === 'left' ? 'solid-left-layout' : ''} 
                                 ${solidSettingsData?.data?.authPagesLayout === 'right' ? 'solid-right-layout' : ''}`.trim()}
+                    style={{ backgroundImage: `url(${solidSideBanner()})` }}
                 >
                     {solidSettingsData?.data?.appLogoPosition === "in_image_view" && solidSettingsData?.data?.authPagesLayout !== 'center' &&
                         <div className={`solid-logo flex align-items-center gap-3 ${solidSettingsData?.data?.appLogoPosition}`}>

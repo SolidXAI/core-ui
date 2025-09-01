@@ -24,7 +24,6 @@ const toTitleCase = (str: string) => {
 
 export const SolidBreadcrumb = (props: Props) => {
   const { solidFormViewMetaData, initialEntityData } = props;
-  console.log("solidFormViewMetaData",solidFormViewMetaData);
   
   const modelMetadata = solidFormViewMetaData?.data?.solidView?.model;
   const pathname = usePathname();

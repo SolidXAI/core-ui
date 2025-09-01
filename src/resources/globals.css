@@ -1747,11 +1747,12 @@ li.header-li-px {
 
 .chatter-section {
   position: relative;
-  width: 380px;
+  /* width: 380px; */
   flex-shrink: 0;
   transition: width 0.3s ease, padding 0.3s ease;
   /* overflow: hidden; */
   min-height: 100%;
+  height: 100%;
 }
 
 .chatter-section.collapsed {
@@ -1770,6 +1771,7 @@ li.header-li-px {
   writing-mode: vertical-rl;
   transform: rotate(180deg);
   width: 30px;
+  cursor: pointer;
 }
 
 .solid-form-header {
@@ -2419,7 +2421,7 @@ li.header-li-px {
 }
 
 .solid-left-layout {
-  background-image: url(../resources/images/auth/solid-left-layout-bg.png);
+  /* background-image: url(../resources/images/auth/solid-left-layout-bg.png); */
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -2433,7 +2435,7 @@ li.header-li-px {
 }
 
 .solid-right-layout {
-  background-image: url(../resources/images/auth/solid-right-layout-bg.png);
+  /* background-image: url(../resources/images/auth/solid-right-layout-bg.png); */
   background-repeat: no-repeat;
   background-size: cover;
   background-position: center;
@@ -2939,9 +2941,9 @@ li.header-li-px {
     top: 17% !important;
   }
 
-  .chatter-section {
+  /* .chatter-section {
     width: 360px;
-  }
+  } */
 }
 
 /* 1500px - 1599px */
@@ -2964,10 +2966,10 @@ li.header-li-px {
     left: 69% !important;
     top: 17.3% !important;
   }
-
+/* 
   .chatter-section {
     width: 345px;
-  }
+  } */
 }
 
 /* 1400px - 1499px */
@@ -2992,9 +2994,9 @@ li.header-li-px {
   }
 
 
-  .chatter-section {
+  /* .chatter-section {
     width: 330px;
-  }
+  } */
 }
 
 /* 1300px - 1399px */
@@ -3018,9 +3020,9 @@ li.header-li-px {
     top: 15% !important;
   }
 
-  .chatter-section {
+  /* .chatter-section {
     width: 310px;
-  }
+  } */
 }
 
 /* 1200px - 1299px */
@@ -3043,10 +3045,10 @@ li.header-li-px {
     left: 61% !important;
     top: 15% !important;
   }
-
+/* 
   .chatter-section {
     width: 300px;
-  }
+  } */
 }
 
 /* 1024px - 1199px */
@@ -3293,4 +3295,9 @@ flex-shrink: 0; */
 
 .warning-header-popup {
   padding: 0.75rem;
+}
+.password-field-component {
+padding:10px !important;
+border:2px solid rgba(216, 226, 234, 0.40);
+border-radius:8px !important;
 }

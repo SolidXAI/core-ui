@@ -26,7 +26,8 @@ import {
     LayoutNodeType,
     SolidUiEvents,
     SolidUiEvent,
-    SolidFormWidgetProps
+    SolidFormWidgetProps,
+    SolidChartRendererProps
 } from './solid-core';
 
 type ChildContainerProps = {
@@ -56,5 +57,6 @@ export type {
     LayoutNodeType,
     SolidUiEvents,
     SolidUiEvent,
-    SolidFormWidgetProps
+    SolidFormWidgetProps,
+    SolidChartRendererProps
 };

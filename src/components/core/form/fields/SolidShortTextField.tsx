@@ -5,8 +5,11 @@ import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "@/helpers/registry";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { SolidFormFieldWidgetProps, SolidListFieldWidgetProps } from "@/types/solid-core";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
+import { Button } from "primereact/button";
+import { useState } from "react";
+import { Password } from "primereact/password";
 
 export class SolidShortTextField implements ISolidField {
 
@@ -18,7 +21,7 @@ export class SolidShortTextField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        if (value) {
+        if (value !== undefined && value !== null) {
             formData.append(fieldLayoutInfo.attrs.name, value);
         }
     }
@@ -199,4 +202,107 @@ export const DefaultShortTextFormViewWidget = ({ formik, fieldContext }: SolidFo
     );
 }
 
+// Masked ShortText - LIST
+export const MaskedShortTextListViewWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column  }: SolidListFieldWidgetProps) => {
+    const colVal = rowData[column.attrs.name];
+    // Mask it (show same number of * as characters, or fixed length if you want)
+    const maskedValue = colVal ? '*'.repeat(colVal.length) : '';
+    return (
+        <span>{maskedValue}</span>
+    );
+};
 
+// Masked ShortText - VIEW
+export const MaskedShortTextFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+
+    // Get actual value
+    const rawValue: string = formik.values[fieldLayoutInfo.attrs.name] || '';
+
+    // Mask it (show same number of * as characters, or fixed length if you want)
+    const maskedValue = rawValue ? '*'.repeat(rawValue.length) : '';
+
+    return (
+        <div className="mt-2 flex-column gap-2">
+            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            <p className="m-0">{maskedValue}</p>
+        </div>
+    );
+};
+
+// Masked ShortText - EDIT
+export const MaskedShortTextFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const includeWrapper = fieldLayoutInfo.attrs?.includeWrapper || 'yes';
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+    const readOnlyPermission = fieldContext.readOnly;
+
+    const isFormFieldValid = (formik: any, fieldName: string) =>
+        formik.touched[fieldName] && formik.errors[fieldName];
+
+    const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
+    const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
+    const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
+    const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+
+    const passwordField = (
+        <Password
+            toggleMask
+            feedback={false}
+            readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+            disabled={formDisabled || fieldDisabled}
+            id={fieldLayoutInfo.attrs.name}
+            name={fieldMetadata.name}
+            aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
+            onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
+            onBlur={(e) => fieldContext.onBlur(e, 'onFieldBlur')}
+            value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+            className="w-full"
+        />
+    );
+
+    return (
+        <>
+            {includeWrapper === 'yes' && (
+                <div className="relative">
+                    <div className="flex flex-column gap-2 mt-4">
+                        {showFieldLabel !== false && (
+                            <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
+                                {fieldLabel}
+                                {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                                <SolidFieldTooltip fieldContext={fieldContext} />
+                            </label>
+                        )}
+                        {passwordField}
+                    </div>
+                    {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                        <div className="absolute mt-1">
+                            <Message
+                                severity="error"
+                                text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}
+                            />
+                        </div>
+                    )}
+                </div>
+            )}
+
+            {includeWrapper === 'no' && (
+                <>
+                    {showFieldLabel !== false && (
+                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
+                            {fieldLabel}
+                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                            <SolidFieldTooltip fieldContext={fieldContext} />
+                        </label>
+                    )}
+                    {passwordField}
+                </>
+            )}
+        </>
+    );
+};

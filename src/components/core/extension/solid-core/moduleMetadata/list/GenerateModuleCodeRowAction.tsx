@@ -1,7 +1,6 @@
 'use client';
 import { SolidCircularLoader } from "@/components/core/common/SolidLoaders/SolidCircularLoader";
 import { useGenerateCodeFormoduleMutation } from "@/redux/api/moduleApi";
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { useSeederMutation } from "@/redux/api/solidServiceApi";
 import { closePopup } from "@/redux/features/popupSlice";
 import { SolidListRowdataDynamicFunctionProps } from "@/types/solid-core";
@@ -9,16 +8,77 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import qs from "qs";
 
 
 const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     const dispatch = useDispatch()
-    const [
-        generateCode,
-        { isLoading: isGenerateCodeUpdating, isSuccess: isGenerateCodeSuceess, isError: isGenerateCodeError, error: generateCodeError, data: generateCodeData },
-    ] = useGenerateCodeFormoduleMutation();
-    const [triggerSeeder, { data, isLoading, isSuccess: isSeederSuccess, isError: isSeederError }] = useSeederMutation();
+    const [generateCode, {
+        isLoading: isGenerateCodeUpdating,
+        isSuccess: isGenerateCodeSuceess,
+        isError: isGenerateCodeError,
+        error: generateCodeError,
+        data: generateCodeData
+    }] = useGenerateCodeFormoduleMutation();
+
+    // const mqMessageApi = createSolidEntityApi("mqMessage");
+    // const {
+    //     useGetSolidEntitiesQuery: useGetMqMessageQuery,
+    //     useLazyGetSolidEntitiesQuery: useLazyGetMqMessageQuery,
+    // } = mqMessageApi;
+    // const [getMqMessageStatus, {
+    //     data: solidListViewMetaData,
+    //     error: solidListViewMetaDataError,
+    //     isLoading: solidListViewMetaDataIsLoading,
+    //     isError: solidListViewMetaDataIsError
+    // }] = useLazyGetMqMessageQuery();
+    // const fetchMqMessageStatus = async (retries = 30, delay = 500, generateCodeData: any): Promise<boolean> => {
+    //     for (let i = 0; i < retries; i++) {
+    //         try {
+    //             const query = {
+    //                 filters: {
+    //                     messageId: {
+    //                         $eq: generateCodeData?.data?.messageId
+    //                     }
+    //                 }
+    //             };
+    //             const queryString = qs.stringify(query, {
+    //                 encodeValuesOnly: true,
+    //             });
+    //             const res = await getMqMessageStatus(queryString)
+    //             if (res.isSuccess === true) {
+    //                 if (res.data.records.length > 0) {
+    //                     const messageStage = res.data.records[0].stage;
+    //                     console.log("messageStatus", messageStage);
+    //                     if (messageStage === "succeeded") {
+    //                         return true
+    //                     }
+    //                     if (messageStage === "failed") {
+    //                         return false
+    //                     }
+    //                 }
+    //             }
+    //         } catch (e) {
+    //             // ignore and retry
+    //         }
+    //         await new Promise((resolve) => setTimeout(resolve, delay));
+    //     }
+    //     return false;
+    // };
+
+    const generateCodeHandler = async () => {
+        const response = await generateCode({ id: event?.rowData?.id });
+        console.log("response generate code handler", response);
+        setIsGenerating(true);
+        // showToast("error", "Login Error", response.error);
+    }
+
+    // TODO: START REFACTORING - reusable code alert
+    const [triggerSeeder, {
+        data,
+        isLoading,
+        isSuccess: isSeederSuccess,
+        isError: isSeederError
+    }] = useSeederMutation();
 
     // Utitlity to track if solid-api is up
     const [isPinging, setIsPinging] = useState(false);
@@ -39,56 +99,6 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
         return false;
     };
 
-
-    const mqMessageApi = createSolidEntityApi("mqMessage");
-    const {
-
-        useGetSolidEntitiesQuery: useGetMqMessageQuery,
-        useLazyGetSolidEntitiesQuery: useLazyGetMqMessageQuery,
-    } = mqMessageApi;
-
-
-    const [getMqMessageStatus, {
-        data: solidListViewMetaData,
-        error: solidListViewMetaDataError,
-        isLoading: solidListViewMetaDataIsLoading,
-        isError: solidListViewMetaDataIsError
-    }] = useLazyGetMqMessageQuery();
-    const fetchMqMessageStatus = async (retries = 30, delay = 500, generateCodeData: any): Promise<boolean> => {
-        for (let i = 0; i < retries; i++) {
-            try {
-                const query = {
-
-                    filters: {
-                        messageId: {
-                            $eq: generateCodeData?.data?.messageId
-                        }
-                    }
-                };
-                const queryString = qs.stringify(query, {
-                    encodeValuesOnly: true,
-                });
-                const res = await getMqMessageStatus(queryString)
-                if (res.isSuccess === true) {
-                    if (res.data.records.length > 0) {
-                        const messageStage = res.data.records[0].stage;
-                        console.log("messageStatus", messageStage);
-                        if (messageStage === "succeeded") {
-                            return true
-                        }
-                        if (messageStage === "failed") {
-                            return false
-                        }
-                    }
-                }
-            } catch (e) {
-                // ignore and retry
-            }
-            await new Promise((resolve) => setTimeout(resolve, delay));
-        }
-        return false;
-    };
-
     const toast = useRef<Toast>(null);
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
         toast.current?.show({
@@ -99,24 +109,18 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
         });
     };
 
-    const generateCodeHandler = async () => {
-        const response = await generateCode({ id: event?.rowData?.id });
-        console.log("response generate code handler", response);
-        setIsGenerating(true);
-        // showToast("error", "Login Error", response.error);
-    }
-
     useEffect(() => {
         const runSeederIfBackendAlive = async () => {
             if (isGenerateCodeSuceess) {
                 console.log("isGenerateCodeSuceess", isGenerateCodeSuceess);
                 setIsPinging(true);
-                const hasMqMessageCompleted = await fetchMqMessageStatus(30, 500, generateCodeData);
+                // const hasMqMessageCompleted = await fetchMqMessageStatus(30, 500, generateCodeData);
                 const isAlive = await pingBackendWithRetry(30, 500);
 
                 setIsPinging(false);
 
-                if (hasMqMessageCompleted && isAlive) {
+                // if (hasMqMessageCompleted && isAlive) {
+                if (isAlive) {
                     await triggerSeeder("ModuleMetadataSeederService");
                 } else {
                     dispatch(closePopup());
@@ -144,6 +148,7 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
             setIsGenerating(false);
         }
     }, [isSeederSuccess])
+    // TODO: END REFACTORING - reusable code alert
 
     return (
         <>

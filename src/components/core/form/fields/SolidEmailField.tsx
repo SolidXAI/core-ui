@@ -18,7 +18,7 @@ export class SolidEmailField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        if (value) {
+        if (value !== undefined && value !== null) {
             formData.append(fieldLayoutInfo.attrs.name, value);
         }
     }
@@ -56,7 +56,18 @@ export class SolidEmailField implements ISolidField {
         }
         // 3. regular expression
         if (fieldMetadata.regexPattern) {
-            const regexPatternNotMatchingErrorMsg = fieldMetadata.regexPatternNotMatchingErrorMsg ?? `${fieldLabel} has invalid data.`
+            let regexPatternNotMatchingErrorMsg = fieldMetadata.regexPatternNotMatchingErrorMsg;
+
+            // Fallback to a user-friendly default for common fields
+            if (!regexPatternNotMatchingErrorMsg) {
+                const fieldName = fieldMetadata.name?.toLowerCase();
+                if (fieldName?.includes("email")) {
+                    regexPatternNotMatchingErrorMsg = "Please enter a valid email address.";
+                } else {
+                    regexPatternNotMatchingErrorMsg = `${fieldLabel} format is invalid.`;
+                }
+            }
+            
             schema = schema.matches(new RegExp(fieldMetadata.regexPattern), regexPatternNotMatchingErrorMsg);
         }
 

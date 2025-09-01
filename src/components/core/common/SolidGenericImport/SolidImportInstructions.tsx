@@ -85,12 +85,16 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
                                                             {count}. {titleCaseKey}:
                                                         </p>
                                                         <div className='flex flex-wrap'>
-                                                            {values.map((item, i) => (
-                                                                <span key={i}>
-                                                                    {item}{i < values.length - 1 ? ', ' : ''}
+                                                            {values.map((item:any, i) => (
+                                                                <span key={i} className='mr-2'>
+                                                                    {typeof item === 'string'
+                                                                        ? item
+                                                                        : item?.fieldName
+                                                                            ? `${item.fieldName} (Regex: ${item.regexPattern})`
+                                                                            : JSON.stringify(item)}
+                                                                    {i < values.length - 1 ? ', ' : ''}
                                                                 </span>
                                                             ))}
-
                                                         </div>
                                                     </li>
                                                 );

@@ -11,14 +11,23 @@ import { RadioButton } from 'primereact/radiobutton';
 import { handleError } from '@/helpers/ToastContainer';
 import { usePathname } from 'next/navigation';
 import { InputTextarea } from 'primereact/inputtextarea';
-import Image from 'next/image';
-import SolidLogo from '../../resources/images/SS-Logo.png'
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
+import AuthScreenRightBackgroundImage from '../../resources/images/auth/solid-left-layout-bg.png';
+import AuthScreenLeftBackgroundImage from '../../resources/images/auth/solid-right-layout-bg.png';
+import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
 import { useDropzone } from 'react-dropzone';
+import { Divider } from 'primereact/divider';
+import { SettingDropzoneActivePlaceholder } from './SolidSettings/SettingDropzoneActivePlaceholder';
+import { SolidUploadedImage } from './SolidSettings/SolidUploadedImage';
+import { SettingsImageRemoveButton } from './SolidSettings/SettingsImageRemoveButton';
 
 
 export const GeneralSettings = () => {
     const [appLogoPreview, setAppLogoPreview] = useState<string | null>(null);
     const [companyLogoPreview, setCompanyLogoPreview] = useState<string | null>(null);
+    const [authScreenRightBackgroundImagePreview, setAuthScreenRightBackgroundImagePreview] = useState<string | null>(null);
+    const [authScreenLeftBackgroundImagePreview, setAuthScreenLeftBackgroundImagePreview] = useState<string | null>(null);
+    const [authScreenCenterBackgroundImagePreview, setAuthScreenCenterBackgroundImagePreview] = useState<string | null>(null);
 
     const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery()
     useEffect(() => {
@@ -60,7 +69,13 @@ export const GeneralSettings = () => {
         appPrivacyPolicy: solidSettingsData?.data?.system?.appPrivacyPolicy ?? null,
         enableDarkMode: solidSettingsData?.data?.system?.enableDarkMode ?? false,
         copyright: solidSettingsData?.data?.system?.copyright ?? null,
-        forceChangePasswordOnFirstLogin: solidSettingsData?.data?.system?.forceChangePasswordOnFirstLogin ?? false
+        forceChangePasswordOnFirstLogin: solidSettingsData?.data?.system?.forceChangePasswordOnFirstLogin ?? false,
+        contactSupportEmail: solidSettingsData?.data?.system?.contactSupportEmail ?? null,
+        contactSupportDisplayName: solidSettingsData?.data?.system?.contactSupportDisplayName ?? null,
+        contactSupportIcon: solidSettingsData?.data?.system?.contactSupportIcon ?? null,
+        authScreenRightBackgroundImage: solidSettingsData?.data?.system?.authScreenRightBackgroundImage ?? null,
+        authScreenLeftBackgroundImage: solidSettingsData?.data?.system?.authScreenLeftBackgroundImage ?? null,
+        authScreenCenterBackgroundImage: solidSettingsData?.data?.system?.authScreenCenterBackgroundImage ?? null,
     };
     const formik = useFormik({
         initialValues: initialValues,
@@ -220,6 +235,130 @@ export const GeneralSettings = () => {
         }
     };
 
+
+    const onAuthScreenRightBackgroundImageDrop = useCallback(
+        (acceptedFiles: File[]) => {
+            const file = acceptedFiles[0];
+            if (file) {
+                if (file.size > 2 * 1024 * 1024) {
+                    toast.current?.show({
+                        severity: "error",
+                        summary: "File too large",
+                        detail: "Maximum file size is 2MB",
+                        life: 3000,
+                    });
+                    return;
+                }
+                formik.setFieldValue("authScreenRightBackgroundImage", file);
+                setAuthScreenRightBackgroundImagePreview(URL.createObjectURL(file));
+            }
+        },
+        [formik]
+    );
+
+    const onAuthScreenLeftBackgroundImageDrop = useCallback((acceptedFiles: File[]) => {
+        const file = acceptedFiles[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+                toast.current?.show({
+                    severity: "error",
+                    summary: "File too large",
+                    detail: "Maximum file size is 2MB",
+                    life: 3000,
+                });
+                return;
+            }
+            formik.setFieldValue("authScreenLeftBackgroundImage", file);
+            setAuthScreenLeftBackgroundImagePreview(URL.createObjectURL(file));
+        }
+    }, [formik]);
+
+    const onAuthScreenCenterBackgroundImageDrop = useCallback((acceptedFiles: File[]) => {
+        const file = acceptedFiles[0];
+        if (file) {
+            if (file.size > 2 * 1024 * 1024) {
+                toast.current?.show({
+                    severity: "error",
+                    summary: "File too large",
+                    detail: "Maximum file size is 2MB",
+                    life: 3000,
+                });
+                return;
+            }
+            formik.setFieldValue("authScreenCenterBackgroundImage", file);
+            setAuthScreenCenterBackgroundImagePreview(URL.createObjectURL(file));
+        }
+    }, [formik]);
+
+    const {
+        getRootProps: getAuthScreenRightBackgroundImageRootProps,
+        getInputProps: getAuthScreenRightBackgroundImageInputProps,
+        isDragActive: isAuthScreenRightBackgroundImageDragActive
+    } = useDropzone({
+        accept: {
+            'image/png': ['.png'],
+            'image/jpeg': ['.jpeg', '.jpg'],
+            'image/svg+xml': ['.svg'],
+            'image/webp': ['.webp']
+        },
+        multiple: false,
+        onDrop: onAuthScreenRightBackgroundImageDrop
+    });
+
+    const {
+        getRootProps: getAuthScreenLeftBackgroundImageRootProps,
+        getInputProps: getAuthScreenLeftBackgroundImageInputProps,
+        isDragActive: isAuthScreenLeftBackgroundImageDragActive
+    } = useDropzone({
+        accept: {
+            'image/png': ['.png'],
+            'image/jpeg': ['.jpeg', '.jpg'],
+            'image/svg+xml': ['.svg'],
+            'image/webp': ['.webp']
+        },
+        multiple: false,
+        onDrop: onAuthScreenLeftBackgroundImageDrop
+    });
+
+    const {
+        getRootProps: getAuthScreenCenterBackgroundImageRootProps,
+        getInputProps: getAuthScreenCenterBackgroundImageInputProps,
+        isDragActive: isAuthScreenCenterBackgroundImageDragActive
+    } = useDropzone({
+        accept: {
+            'image/png': ['.png'],
+            'image/jpeg': ['.jpeg', '.jpg'],
+            'image/svg+xml': ['.svg'],
+            'image/webp': ['.webp']
+        },
+        multiple: false,
+        onDrop: onAuthScreenCenterBackgroundImageDrop
+    });
+
+    const removeAuthScreenRightBackgroundImage = () => {
+        formik.setFieldValue("authScreenRightBackgroundImage", null);
+        if (authScreenRightBackgroundImagePreview) {
+            URL.revokeObjectURL(authScreenRightBackgroundImagePreview);
+            setAuthScreenRightBackgroundImagePreview(null);
+        }
+    };
+
+    const removeAuthScreenLeftBackgroundImage = () => {
+        formik.setFieldValue("authScreenLeftBackgroundImage", null);
+        if (authScreenLeftBackgroundImagePreview) {
+            URL.revokeObjectURL(authScreenLeftBackgroundImagePreview);
+            setAuthScreenLeftBackgroundImagePreview(null);
+        }
+    };
+
+    const removeAuthScreenCenterBackgroundImage = () => {
+        formik.setFieldValue("authScreenCenterBackgroundImage", null);
+        if (authScreenCenterBackgroundImagePreview) {
+            URL.revokeObjectURL(authScreenCenterBackgroundImagePreview);
+            setAuthScreenCenterBackgroundImagePreview(null);
+        }
+    };
+
     return (
         <div className="page-parent-wrapper">
             <Toast ref={toast} />
@@ -246,35 +385,9 @@ export const GeneralSettings = () => {
                                                     <div>
                                                         <div {...getAppLogoRootProps()} className="solid-dropzone-wrapper" style={{ borderRadius: 8 }}>
                                                             <input {...getAppLogoInputProps()} />
-                                                            {isAppLogoDragActive ?
-                                                                <div className='solid-dropzone'>
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                                                        <path d="M11 16V7.85L8.4 10.45L7 9L12 4L17 9L15.6 10.45L13 7.85V16H11ZM6 20C5.45 20 4.97917 19.8042 4.5875 19.4125C4.19583 19.0208 4 18.55 4 18V15H6V18H18V15H20V18C20 18.55 19.8042 19.0208 19.4125 19.4125C19.0208 19.8042 18.55 20 18 20H6Z" fill="#666666" />
-                                                                    </svg>
-                                                                    <div className='font-bold mt-2'>
-                                                                        Drag and Drop or <span className='text-primary'> Logo</span> to upload
-                                                                    </div>
-                                                                    <p>Supported format:PNG, JPG, JPEG, SVG, WEBP | Max size: 2 MB</p>
-                                                                    <small className='mb-2'>Note: 200px image width is ideal.</small>
-                                                                    <div>
-                                                                        <Button outlined size='small' severity='secondary' label='Click to Browse' type="button" />
-                                                                    </div>
-                                                                </div>
-                                                                :
-                                                                <div className='solid-dropzone'>
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                                                        <path d="M11 16V7.85L8.4 10.45L7 9L12 4L17 9L15.6 10.45L13 7.85V16H11ZM6 20C5.45 20 4.97917 19.8042 4.5875 19.4125C4.19583 19.0208 4 18.55 4 18V15H6V18H18V15H20V18C20 18.55 19.8042 19.0208 19.4125 19.4125C19.0208 19.8042 18.55 20 18 20H6Z" fill="#666666" />
-                                                                    </svg>
-                                                                    <div className='font-bold mt-2'>
-                                                                        Drag and Drop or <span className='text-primary'> Logo</span> to upload
-                                                                    </div>
-                                                                    <p>Supported format:PNG, JPG, JPEG, SVG, WEBP | Max size: 2 MB</p>
-                                                                    <small className='mb-2'>Note: 200px image width is ideal.</small>
-                                                                    <div>
-                                                                        <Button outlined size='small' severity='secondary' label='Click to Browse' type="button" />
-                                                                    </div>
-                                                                </div>
-                                                            }
+                                                            {/* {isAppLogoDragActive && */}
+                                                            <SettingDropzoneActivePlaceholder />
+                                                            {/* } */}
                                                         </div>
                                                         <div className="mt-2">
                                                             {(() => {
@@ -292,26 +405,12 @@ export const GeneralSettings = () => {
                                                                     src = `${process.env.API_URL}/${src}`;
                                                                 }
                                                                 return (
-                                                                    <Image
-                                                                        src={src}
-                                                                        alt="App Logo"
-                                                                        width={200}
-                                                                        height={120}
-                                                                        style={{ objectFit: "contain", maxHeight: 150 }}
-                                                                        unoptimized
-                                                                    />
+                                                                    <SolidUploadedImage src={src} />
                                                                 );
                                                             })()}
                                                         </div>
                                                         {formik.values.appLogo && (
-                                                            <Button
-                                                                label="Remove"
-                                                                severity="danger"
-                                                                icon="pi pi-times"
-                                                                size="small"
-                                                                className="mt-2"
-                                                                onClick={removeAppLogo}
-                                                            />
+                                                            <SettingsImageRemoveButton onClick={removeAppLogo} />
                                                         )}
                                                     </div>
                                                 </div>
@@ -320,35 +419,9 @@ export const GeneralSettings = () => {
                                                     <div>
                                                         <div {...getCompanyLogoRootProps()} className="solid-dropzone-wrapper" style={{ borderRadius: 8 }}>
                                                             <input {...getCompanyLogoInputProps()} />
-                                                            {isCompanyLogoDragActive ?
-                                                                <div className='solid-dropzone'>
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                                                        <path d="M11 16V7.85L8.4 10.45L7 9L12 4L17 9L15.6 10.45L13 7.85V16H11ZM6 20C5.45 20 4.97917 19.8042 4.5875 19.4125C4.19583 19.0208 4 18.55 4 18V15H6V18H18V15H20V18C20 18.55 19.8042 19.0208 19.4125 19.4125C19.0208 19.8042 18.55 20 18 20H6Z" fill="#666666" />
-                                                                    </svg>
-                                                                    <div className='font-bold mt-2'>
-                                                                        Drag and Drop or <span className='text-primary'> Company Logo</span> to upload
-                                                                    </div>
-                                                                    <p>Supported format:PNG, JPG, JPEG, SVG, WEBP | Max size: 2 MB</p>
-                                                                    <small className='mb-2'>Note: 200px image width is ideal.</small>
-                                                                    <div>
-                                                                        <Button outlined size='small' severity='secondary' label='Click to Browse' type="button" />
-                                                                    </div>
-                                                                </div>
-                                                                :
-                                                                <div className='solid-dropzone'>
-                                                                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                                                                        <path d="M11 16V7.85L8.4 10.45L7 9L12 4L17 9L15.6 10.45L13 7.85V16H11ZM6 20C5.45 20 4.97917 19.8042 4.5875 19.4125C4.19583 19.0208 4 18.55 4 18V15H6V18H18V15H20V18C20 18.55 19.8042 19.0208 19.4125 19.4125C19.0208 19.8042 18.55 20 18 20H6Z" fill="#666666" />
-                                                                    </svg>
-                                                                    <div className='font-bold mt-2'>
-                                                                        Drag and Drop or <span className='text-primary'> Company Logo</span> to upload
-                                                                    </div>
-                                                                    <p>Supported format:PNG, JPG, JPEG, SVG, WEBP | Max size: 2 MB</p>
-                                                                    <small className='mb-2'>Note: 200px image width is ideal.</small>
-                                                                    <div>
-                                                                        <Button outlined size='small' severity='secondary' label='Click to Browse' type="button" />
-                                                                    </div>
-                                                                </div>
-                                                            }
+                                                            {/* {isCompanyLogoDragActive && */}
+                                                            <SettingDropzoneActivePlaceholder />
+                                                            {/* } */}
                                                         </div>
                                                         <div className="mt-2">
                                                             {(() => {
@@ -367,26 +440,12 @@ export const GeneralSettings = () => {
                                                                 }
 
                                                                 return (
-                                                                    <Image
-                                                                        src={src}
-                                                                        alt="Company Logo"
-                                                                        width={200}
-                                                                        height={120}
-                                                                        style={{ objectFit: "contain", maxHeight: 150 }}
-                                                                        unoptimized
-                                                                    />
+                                                                    <SolidUploadedImage src={src} />
                                                                 );
                                                             })()}
                                                         </div>
                                                         {formik.values.companylogo && (
-                                                            <Button
-                                                                label="Remove"
-                                                                severity="danger"
-                                                                icon="pi pi-times"
-                                                                size="small"
-                                                                className="mt-2"
-                                                                onClick={removeCompanyLogo}
-                                                            />
+                                                            <SettingsImageRemoveButton onClick={removeCompanyLogo} />
                                                         )}
                                                     </div>
                                                 </div>
@@ -723,6 +782,113 @@ export const GeneralSettings = () => {
                                             <p className="mt-3 text-sm font-bold">Note : {positionMap[formik.values.authPagesLayout as 'left' | 'center' | 'right']}</p>
                                         </div>
                                     </div>
+                                    {formik.values.authPagesLayout === "center" && <></>}
+                                    <div className='formgrid grid'>
+                                        <div className='col-8'>
+                                            <div className="formgrid grid">
+                                                <div className="col-6">
+                                                    <p className='font-bold ' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>{formik.values.authPagesLayout === "center" ? "Background" : "Banner"} Image</p>
+                                                    {formik.values.authPagesLayout === "left" &&
+                                                        <div>
+                                                            <div {...getAuthScreenLeftBackgroundImageRootProps()} className="solid-dropzone-wrapper" style={{ borderRadius: 8 }}>
+                                                                <input {...getAuthScreenLeftBackgroundImageInputProps()} />
+                                                                {/* {isAuthScreenLeftBackgroundImageDragActive && */}
+                                                                <SettingDropzoneActivePlaceholder note={"Recommended: 724×724px | Aspect ratio: 1:1"} />
+                                                                {/* } */}
+                                                            </div>
+                                                            <div className="mt-2">
+                                                                {(() => {
+                                                                    const logoSrc = (AuthScreenLeftBackgroundImage as any).src || AuthScreenLeftBackgroundImage;
+
+                                                                    let src = authScreenLeftBackgroundImagePreview
+                                                                        ? authScreenLeftBackgroundImagePreview
+                                                                        : formik.values.authScreenLeftBackgroundImage
+                                                                            ? formik.values.authScreenLeftBackgroundImage
+                                                                            : logoSrc
+
+                                                                    const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
+
+                                                                    if (!isBlobOrAbsolute && !src.startsWith("/")) {
+                                                                        src = `${process.env.API_URL}/${src}`;
+                                                                    }
+                                                                    return (
+                                                                        <SolidUploadedImage src={src} height={400} width={400} maxHeight={400} />
+                                                                    );
+                                                                })()}
+                                                            </div>
+                                                            {formik.values.authScreenLeftBackgroundImage && (
+                                                                <SettingsImageRemoveButton onClick={removeAuthScreenLeftBackgroundImage} />
+                                                            )}
+                                                        </div>
+                                                    }
+                                                    {formik.values.authPagesLayout === "right" &&
+                                                        <div>
+                                                            <div {...getAuthScreenRightBackgroundImageRootProps()} className="solid-dropzone-wrapper" style={{ borderRadius: 8 }}>
+                                                                <input {...getAuthScreenRightBackgroundImageInputProps()} />
+                                                                {/* {isAuthScreenRightBackgroundImageDragActive && */}
+                                                                <SettingDropzoneActivePlaceholder note={"Recommended: 724×724px | Aspect ratio: 1:1"} />
+                                                                {/* } */}
+                                                            </div>
+                                                            <div className="mt-2">
+                                                                {(() => {
+                                                                    const logoSrc = (AuthScreenRightBackgroundImage as any).src || AuthScreenRightBackgroundImage;
+
+                                                                    let src = authScreenRightBackgroundImagePreview
+                                                                        ? authScreenRightBackgroundImagePreview
+                                                                        : formik.values.authScreenRightBackgroundImage
+                                                                            ? formik.values.authScreenRightBackgroundImage
+                                                                            : logoSrc
+
+                                                                    const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
+
+                                                                    if (!isBlobOrAbsolute && !src.startsWith("/")) {
+                                                                        src = `${process.env.API_URL}/${src}`;
+                                                                    }
+                                                                    return (
+                                                                        <SolidUploadedImage src={src} height={400} width={400} maxHeight={400} />
+                                                                    );
+                                                                })()}
+                                                            </div>
+                                                            {formik.values.authScreenRightBackgroundImage && (
+                                                                <SettingsImageRemoveButton onClick={removeAuthScreenRightBackgroundImage} />
+                                                            )}
+                                                        </div>
+                                                    }
+                                                    {formik.values.authPagesLayout === "center" &&
+                                                        <div>
+                                                            <div {...getAuthScreenCenterBackgroundImageRootProps()} className="solid-dropzone-wrapper" style={{ borderRadius: 8 }}>
+                                                                <input {...getAuthScreenCenterBackgroundImageInputProps()} />
+                                                                <SettingDropzoneActivePlaceholder note={"Recommended: 1440px × 724px | Aspect ratio: 2:1"} />
+                                                            </div>
+                                                            <div className="mt-2">
+                                                                {(() => {
+                                                                    const logoSrc = (AuthScreenCenterBackgroundImage as any).src || AuthScreenCenterBackgroundImage;
+
+                                                                    let src = authScreenCenterBackgroundImagePreview
+                                                                        ? authScreenCenterBackgroundImagePreview
+                                                                        : formik.values.authScreenCenterBackgroundImage
+                                                                            ? formik.values.authScreenCenterBackgroundImage
+                                                                            : logoSrc
+
+                                                                    const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
+
+                                                                    if (!isBlobOrAbsolute && !src.startsWith("/")) {
+                                                                        src = `${process.env.API_URL}/${src}`;
+                                                                    }
+                                                                    return (
+                                                                        <SolidUploadedImage src={src} height={300} width={600} maxHeight={300} />
+                                                                    );
+                                                                })()}
+                                                            </div>
+                                                            {formik.values.authScreenCenterBackgroundImage && (
+                                                                <SettingsImageRemoveButton onClick={removeAuthScreenCenterBackgroundImage} />
+                                                            )}
+                                                        </div>
+                                                    }
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
                                     <div className='mt-4' style={{ borderBottom: '1px dashed #D8E2EA' }}></div>
                                     {solidSettingsData?.data?.system?.enableDarkMode === true &&
                                         <>
@@ -788,6 +954,48 @@ export const GeneralSettings = () => {
                                                                 name="shouldQueueSms"
                                                                 checked={formik.values.shouldQueueSms}
                                                                 onChange={(e) => formik.setFieldValue("shouldQueueSms", e.value)}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <Divider />
+                                    <p className='font-bold' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Contact Support</p>
+                                    <div className='formgrid grid'>
+                                        <div className="col-8">
+                                            <div className='formgrid grid'>
+                                                <div className="col-6">
+                                                    <div className="formgrid grid align-items-center">
+                                                        <div className="col-5">
+                                                            <label className="form-field-label">Contact Support Email</label>
+                                                        </div>
+                                                        <div className="col-7">
+                                                            <InputText
+                                                                type="text"
+                                                                id="contactSupportEmail"
+                                                                name="contactSupportEmail"
+                                                                onChange={formik.handleChange}
+                                                                value={formik.values.contactSupportEmail}
+                                                                className='w-full'
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-6">
+                                                    <div className="formgrid grid align-items-center">
+                                                        <div className="col-5">
+                                                            <label className="form-field-label">Display Name</label>
+                                                        </div>
+                                                        <div className="col-7">
+                                                            <InputText
+                                                                type="text"
+                                                                id="contactSupportDisplayName"
+                                                                name="contactSupportDisplayName"
+                                                                onChange={formik.handleChange}
+                                                                value={formik.values.contactSupportDisplayName}
+                                                                className='w-full'
                                                             />
                                                         </div>
                                                     </div>

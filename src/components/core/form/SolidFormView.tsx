@@ -57,6 +57,8 @@ import { hasAnyRole } from "@/helpers/rolesHelper";
 import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import { SolidGenericErrorComponent } from "@/components/ErrorBoundries/SolidGenericErrorComponent";
+import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
+import { SolidXAIModule } from "../solid-ai/SolidXAIModule";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -292,26 +294,33 @@ const SolidSheet = ({ children }: any) => (
     </div>
 );
 
-const SolidNotebook = ({ children, activeTab }: any) => {
+const SolidNotebook = ({ children, activeTab, embeded }: any) => {
     const childrenArray = children;
     const router = useRouter();
 
+    // Local state to manage active tab in embedded context
+    const [localActiveTab, setLocalActiveTab] = useState(activeTab);
+
     const activeIndex = useMemo(() => {
         return childrenArray.findIndex((child: any) => {
-            return child.key === activeTab;
+            return child.key === (embeded ? localActiveTab : activeTab);
         });
-    }, [childrenArray, activeTab]);
-
+    }, [childrenArray, activeTab, localActiveTab, embeded]);
 
     const handleTabChange = (e: any) => {
         const selectedChild = childrenArray[e.index] as any;
         const newTabLabel = selectedChild?.key;
 
         if (newTabLabel) {
-            const currentUrl = new URL(window.location.href);
-            currentUrl.searchParams.set('activeTab', newTabLabel);
-            const updatedPath = currentUrl.toString();
-            router.push(updatedPath);
+            if (!embeded) {
+                const currentUrl = new URL(window.location.href);
+                currentUrl.searchParams.set('activeTab', newTabLabel);
+                const updatedPath = currentUrl.toString();
+                router.push(updatedPath);
+            } else {
+                // Update the active tab state locally for embedded view
+                setLocalActiveTab(newTabLabel);
+            }
         }
     };
 
@@ -325,7 +334,7 @@ const SolidNotebook = ({ children, activeTab }: any) => {
     )
 };
 
-const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData }: any) => {
+const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData, solidFormViewData }: any) => {
     const solidView = solidFormViewMetaData.data.solidView;
     const solidFieldsMetadata = solidFormViewMetaData.data.solidFieldsMetadata;
 
@@ -335,7 +344,8 @@ const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData }
         formData: formik.values,
         field: field,
         fieldsMetadata: solidFieldsMetadata,
-        viewMetadata: solidView
+        viewMetadata: solidView,
+        formViewData: solidFormViewData
     }
 
     return (
@@ -430,12 +440,45 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [openLightbox, setOpenLightbox] = useState(false);
     const [lightboxUrls, setLightboxUrls] = useState([]);
     const [isShowChatter, setShowChatter] = useState(true);
+    const [chatterLocaleWidth, setChatterLocaleWidth] = useState(380); // default width
+    const [isResizingChatterLocale, setIsResizingChatterLocale] = useState(false);
+
     const [solidWorkflowFieldValue, setSolidWorkflowFieldValue] = useState<string>("");
-    const [defaultTabViewOptionIndex, setDefaultTabViewOptionIndex] = useState<number>(0);
+    const [defaultTabViewOptionIndex, setDefaultTabViewOptionIndex] = useState<number>(1);
     const errorFields: string[] = [];
 
     const [triggerCheckIfPermissionExists, { isError: isCheckPermissionError, error: permissionError }] = useLazyCheckIfPermissionExistsQuery();
     const op = useRef(null);
+    useEffect(() => {
+        const stored = localStorage.getItem('chatter_locale_width');
+        if (stored) {
+            setChatterLocaleWidth(parseInt(stored, 10));
+        }
+    }, []);
+    useEffect(() => {
+        const handleMouseMove = (e: MouseEvent) => {
+            if (!isResizingChatterLocale) return;
+            const newWidth = window.innerWidth - e.clientX;
+            const clampedWidth = Math.max(280, Math.min(newWidth, 700));
+            setChatterLocaleWidth(clampedWidth);
+            localStorage.setItem('chatter_locale_width', clampedWidth.toString());
+        };
+
+        const handleMouseUp = () => {
+            setIsResizingChatterLocale(false);
+        };
+
+        if (isResizingChatterLocale) {
+            window.addEventListener('mousemove', handleMouseMove);
+            window.addEventListener('mouseup', handleMouseUp);
+        }
+
+        return () => {
+            window.removeEventListener('mousemove', handleMouseMove);
+            window.removeEventListener('mouseup', handleMouseUp);
+        };
+    }, [isResizingChatterLocale]);
+
 
     useEffect(() => {
         const mode = searchParams.get('viewMode');
@@ -568,9 +611,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
     useEffect(() => {
 
         if (solidFormViewMetaData?.data?.solidView?.model?.internationalisation) {
+            setDefaultTabViewOptionIndex(0)
             const matchedLocale = solidFormViewMetaData?.data?.applicableLocales?.find((x: any) => x.isDefault === 'yes');
             //this is to attach default locale when adding data in popup view where relations exists
-            if (matchedLocale && searchParams.get("activeTab")) {
+            if (!selectedLocale && matchedLocale && !searchParams.get('locale')) {
                 setSelectedLocale(matchedLocale.locale);
             }
         }
@@ -861,42 +905,42 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
             }
         };
-
-        handleDynamicLayout();
-    }, [solidFormViewMetaData, solidFormViewData]);
-
-    useEffect(() => {
         const handleDynamicFunction = async () => {
-            if (solidFormViewData) {
-                const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormDataLoad;
+            const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormDataLoad;
+            let DynamicFunctionComponent = null;
+            let formViewData = solidFormViewData?.data;
 
-                let DynamicFunctionComponent = null;
-                let formViewData = solidFormViewData?.data;
+            const event: SolidLoadForm = {
+                fieldsMetadata: solidFormViewMetaData,
+                formData: solidFormViewData?.data,
+                type: "onFormDataLoad",
+                viewMetadata: solidFormViewMetaData?.data?.solidView,
+                formViewLayout: formViewLayout
+            };
 
-                const event: SolidLoadForm = {
-                    fieldsMetadata: solidFormViewMetaData,
-                    formData: solidFormViewData?.data,
-                    type: dynamicHeader,
-                    viewMetadata: solidFormViewMetaData?.data?.solidView,
-                    formViewLayout: formViewLayout
-                };
+            if (dynamicHeader) {
+                DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
+                if (DynamicFunctionComponent) {
+                    const updatedFormData = await DynamicFunctionComponent(event);
 
-                if (dynamicHeader) {
-                    DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
-
-                    if (DynamicFunctionComponent) {
-                        const updatedFormData = await DynamicFunctionComponent(event);
-
-                        if (updatedFormData && updatedFormData?.dataChanged && updatedFormData?.newFormData) {
-                            formViewData = updatedFormData.newFormData;
-                        }
+                    if (updatedFormData && updatedFormData?.dataChanged && updatedFormData?.newFormData) {
+                        formViewData = updatedFormData.newFormData;
                     }
                 }
-                setInitialEntityData(formViewData);
+                if (formViewData) {
+                    setInitialEntityData(formViewData);
+                }
             }
         };
 
         handleDynamicFunction();
+        handleDynamicLayout();
+    }, [solidFormViewMetaData, solidFormViewData]);
+
+    useEffect(() => {
+        if (solidFormViewData) {
+            setInitialEntityData(solidFormViewData.data);
+        }
     }, [solidFormViewData]);
 
     let formik: FormikObject;
@@ -981,7 +1025,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
             const { name: fieldName, value, type, checked } = event.target;
 
             // TODO: check if there is a change handler registered with this form view, load it and fire it.
-            const changeHandler = solidView.layout[eventType];
+            let changeHandler = solidView.layout.attrs[eventType];
+            if (!changeHandler) {
+                changeHandler = solidView.layout[eventType];
+            }
 
             if (changeHandler) {
                 // Get hold of the dynamic module...
@@ -1134,7 +1181,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
                 case "notebook":
                     if (visible === true) {
-                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</SolidNotebook>;
+                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</SolidNotebook>;
                     }
                 case "page":
                     if (visible === true) {
@@ -1156,6 +1203,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 formik={formik}
                                 fieldMetadata={fieldMetadata}
                                 solidFormViewMetaData={solidFormViewMetaData}
+                                solidFormViewData={solidFormViewData}
                             />
                         }
                     }
@@ -1224,13 +1272,16 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         const handleChatterExpandClick = (option?: string) => {
             setShowChatter(true);
-            if (option === 'chatter') {
-                setDefaultTabViewOptionIndex(1);
-                setRefreshChatterMessage(true)
-            } else {
+            if (option === 'locale') {
                 setDefaultTabViewOptionIndex(0);
+            } else if (option === 'chatter') {
+                setDefaultTabViewOptionIndex(1);
+                setRefreshChatterMessage(true);
+            } else {
+                setDefaultTabViewOptionIndex(2);
             }
-        }
+        };
+
         //en 4 null
         const handleLocaleChangeRedirect = (
             locale: string,
@@ -1298,7 +1349,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         return (
             <div className="solid-form-wrapper">
                 <Toast ref={toast} />
-                <div className="solid-form-section" style={{ borderRight: params.embeded !== true ? '1px solid var(--primary-light-color' : '' }} >
+                <div className="solid-form-section" style={{ borderRight: params.embeded !== true ? '1px solid var(--primary-light-color)' : '' }} >
                     <form style={{ width: '100%' }} onSubmit={formik.handleSubmit}>
                         <SolidFormActionHeader
                             formik={formik}
@@ -1333,7 +1384,21 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     </form>
                 </div>
                 {params.embeded !== true &&
-                    <div className={`chatter-section ${isShowChatter === false ? 'collapsed' : ''}`}>
+                    <div className={`chatter-section ${isShowChatter === false ? 'collapsed' : ''}`} style={{ width: chatterLocaleWidth }}>
+                        {isShowChatter && (
+                            <div
+                                style={{
+                                    width: 5,
+                                    cursor: 'col-resize',
+                                    position: 'absolute',
+                                    left: 0,
+                                    top: 0,
+                                    bottom: 0,
+                                    zIndex: 9,
+                                }}
+                                onMouseDown={() => setIsResizingChatterLocale(true)}
+                            />
+                        )}
                         {isShowChatter === true &&
                             <Button
                                 icon="pi pi-angle-double-right"
@@ -1354,6 +1419,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('chatter')}>
                                     Audit Trail
                                 </div>
+                                {
+                                    process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' &&
+                                    (
+                                        <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('solidx-ai')}>
+                                            <div className="flex gap-2"> <SolidXAIIcon /> SolidX AI </div>
+                                        </div>
+                                    )
+                                }
                                 <Button
                                     icon="pi pi-chevron-left"
                                     size="small"
@@ -1362,30 +1435,22 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     onClick={() => handleChatterExpandClick('default')}
                                 />
                             </div>
-                            : solidFormViewMetaData?.data?.solidView?.model?.internationalisation ?
-
-                                <SolidChatterLocaleTabView
-                                    createMode={createMode}
-                                    setSelectedLocale={setSelectedLocale}
-                                    selectedLocale={selectedLocale}
-                                    solidFormViewMetaData={solidFormViewMetaData}
-                                    id={params.id}
-                                    refreshChatterMessage={refreshChatterMessage}
-                                    setRefreshChatterMessage={setRefreshChatterMessage}
-                                    activeTab={defaultTabViewOptionIndex}
-                                    internationalisation={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}
-                                    viewMode={viewMode}
-                                    defaultEntityLocaleId={defaultEntityLocaleId}
-                                    handleLocaleChangeRedirect={handleLocaleChangeRedirect}
-                                    applicableLocales={solidFormViewMetaData?.data?.applicableLocales}
-                                    solidFormViewData={solidFormViewData}
-                                    published={published}
-                                /> :
-                                <SolidChatter
-                                    modelSingularName={solidFormViewMetaData?.data?.solidView?.model?.singularName}
-                                    id={params.id}
-                                    refreshChatterMessage={refreshChatterMessage}
-                                    setRefreshChatterMessage={setRefreshChatterMessage} />
+                            :
+                            <SolidChatterLocaleTabView
+                                createMode={createMode}
+                                setSelectedLocale={setSelectedLocale}
+                                selectedLocale={selectedLocale}
+                                solidFormViewMetaData={solidFormViewMetaData}
+                                id={params.id}
+                                refreshChatterMessage={refreshChatterMessage}
+                                setRefreshChatterMessage={setRefreshChatterMessage}
+                                activeTab={defaultTabViewOptionIndex}
+                                viewMode={viewMode}
+                                defaultEntityLocaleId={defaultEntityLocaleId}
+                                handleLocaleChangeRedirect={handleLocaleChangeRedirect}
+                                solidFormViewData={solidFormViewData}
+                                published={published}
+                            />
                         }
                     </div>
                 }
