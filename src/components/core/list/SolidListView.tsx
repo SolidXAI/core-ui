@@ -50,6 +50,8 @@ import { hasAnyRole, useHasAnyRole } from "@/helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { SolidListViewRowButtonContextMenu } from "./SolidListViewRowButtonContextMenu";
 import { useSelector } from "react-redux";
+import { SolidGenericErrorComponent } from "@/components/ErrorBoundries/SolidGenericErrorComponent";
+
 import styles from './SolidListViewWrapper.module.css';
 import { SolidXAIModule } from "../solid-ai/SolidXAIModule";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
@@ -110,6 +112,8 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [toPopulate, setToPopulate] = useState<string[]>([]);
   const [toPopulateMedia, setToPopulateMedia] = useState<string[]>([]);
   const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
+
+  const [triggerCheckIfPermissionExists, { isError: isCheckPermissionError, error: permissionError }] = useLazyCheckIfPermissionExistsQuery();
   const [isOpenSolidXAiPanel, setIsOpenSolidXAiPanel] = useState(false);
   const [chatterWidth, setChatterWidth] = useState(380);
   const [isResizing, setIsResizing] = useState(false);
@@ -210,7 +214,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     data: solidListViewMetaData,
     error: solidListViewMetaDataError,
     isLoading: solidListViewMetaDataIsLoading,
-    isError: solidListViewMetaDataIsError,
+    isError: isErrorSolidListViewMetaData,
     refetch
   } = useGetSolidViewLayoutQuery(listViewMetaDataQs);
 
@@ -353,7 +357,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const toast = useRef<Toast>(null);
 
   // Get the list view data.
-  const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading, error }] = useLazyGetSolidEntitiesQuery();
+  const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading, isError: isErrorInGetSolidEntitiesQuery, error: getSolidEntityError }] = useLazyGetSolidEntitiesQuery();
 
   const [triggerRecoverSolidEntitiesById, { data: recoverByIdData, isLoading: recoverByIdIsLoading, error: recoverByIdError, isError: recoverByIdIsError, isSuccess: recoverByIdIsSuccess }] = useLazyRecoverSolidEntityByIdQuery();
 
@@ -816,6 +820,18 @@ export const SolidListView = (params: SolidListViewParams) => {
   // }
 
   const viewMode = searchParams.get('viewMode');
+
+  if (isCheckPermissionError && permissionError) {
+    return <SolidGenericErrorComponent error={permissionError} />
+  }
+
+  if (isErrorSolidListViewMetaData && solidListViewMetaDataError) {
+    return <SolidGenericErrorComponent error={solidListViewMetaDataError} />
+  }
+
+  if (isErrorInGetSolidEntitiesQuery && getSolidEntityError) {
+    return <SolidGenericErrorComponent error={getSolidEntityError} />
+  }
 
   if ((loading || isLoading) && params.embeded == false && viewMode !== 'view') {
     return <SolidListViewShimmerLoading />;

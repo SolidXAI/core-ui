@@ -6,7 +6,7 @@ import { usePathname, useSearchParams } from 'next/navigation';
 import { PrimeReactContext } from 'primereact/api';
 import { useEventListener, useUnmountEffect } from 'primereact/hooks';
 import { classNames } from 'primereact/utils';
-import React, { useContext, useEffect, useRef } from 'react';
+import React, { useContext, useEffect, useRef, useState } from 'react';
 import { useSelector } from 'react-redux';
 import { CustomFooter } from '../CustomFooter/CustomFooter';
 import { CustomHeader } from '../CustomHeader/CustomHeader';
@@ -14,8 +14,10 @@ import AppConfig from './AppConfig';
 import { LayoutContext } from './context/layoutcontext';
 import AppSidebar from './AppSidebar';
 import SolidPopupContainer from '../common/SolidPopupContainer';
+import { SolidGenericErrorComponent } from '../ErrorBoundries/SolidGenericErrorComponent';
 
 export const Layout = ({ children }: ChildContainerProps) => {
+    const [menuItemError, setMenuItemError] = useState<any>(null);
     const { layoutConfig, layoutState, setLayoutState } = useContext(LayoutContext);
     const { setRipple } = useContext(PrimeReactContext);
     // const topbarRef = useRef<AppTopbarRef>(null);
@@ -118,13 +120,15 @@ export const Layout = ({ children }: ChildContainerProps) => {
         'layout-mobile-active': layoutState.staticMenuMobileActive,
         'p-input-filled': layoutConfig.inputStyle === 'filled',
     });
-    const { visibleNavbar } = useSelector((state:any) => state.navbarState); // Get the visibility state of sidebar-two
-
+    const { visibleNavbar } = useSelector((state: any) => state.navbarState); // Get the visibility state of sidebar-two
+    if (menuItemError) {
+        return <SolidGenericErrorComponent error={menuItemError} height='100vh'/>
+    }
     return (
         <React.Fragment>
             <div className={containerClass}>
                 {process.env.NEXT_PUBLIC_ENABLE_CUSTOM_HEADER_FOOTER == "true" && <CustomHeader />}
-                <AppSidebar />
+                <AppSidebar setMenuItemError={setMenuItemError} />
                 <SolidPopupContainer></SolidPopupContainer>
                 <div className={`main-content ${visibleNavbar ? "shifted" : ""}`}>
                     {children}
