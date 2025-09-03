@@ -158,7 +158,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
-    const readOnlyPermission = fieldContext.readOnly ?? fieldLayoutInfo.attrs.readonly;
+    const readOnlyPermission = fieldContext.readOnly ? fieldContext.readOnly : fieldLayoutInfo.attrs.readonly;
 
     const [isDeleteImageDialogVisible, setDeleteImageDialogVisible] = useState(false);
     const [imageToBeDeletedData, setImageToBeDeletedData] = useState<any>();

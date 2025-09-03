@@ -147,7 +147,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
-    const readOnlyPermission = fieldContext.readOnly ?? fieldLayoutInfo.attrs.readonly;
+    const readOnlyPermission = fieldContext.readOnly ? fieldContext.readOnly : fieldLayoutInfo.attrs.readonly;
     const viewMode: string = fieldContext.viewMode;
 
     const [isDeleteImageDialogVisible, setDeleteImageDialogVisible] = useState(false);

@@ -294,7 +294,8 @@ const SolidSheet = ({ children }: any) => (
 );
 
 const SolidNotebook = ({ children, activeTab, embeded }: any) => {
-    const childrenArray = children;
+    // const childrenArray = children;
+    const childrenArray = React.Children.toArray(children).filter(Boolean);
     const router = useRouter();
 
     // Local state to manage active tab in embedded context
