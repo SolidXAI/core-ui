@@ -375,10 +375,12 @@ export const DefaultRelationManyToOneFormViewWidget = ({ formik, fieldContext }:
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const value = formik.values[fieldLayoutInfo.attrs.name];
+    const userKeyField = fieldLayoutInfo?.attrs?.coModelFieldToDisplay ? fieldLayoutInfo?.attrs?.coModelFieldToDisplay:fieldMetadata?.relationModel?.userKeyField?.name;
+    const displayValue = value?.[userKeyField];
     return (
         <div className="mt-2 flex-column gap-2">
             <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
-            <p className="m-0">{value && value.solidManyToOneLabel}</p>
+            <p className="m-0">{displayValue}</p>
         </div>
     );
 }
