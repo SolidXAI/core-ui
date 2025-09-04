@@ -27,7 +27,7 @@ export class SolidLongTextField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-         if (value !== undefined && value !== null) {
+        if (value !== undefined && value !== null) {
             formData.append(fieldLayoutInfo.attrs.name, value);
         }
     }
@@ -217,9 +217,9 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
             );
         }
         if (meta.type === "longText") {
-            return(
-                <InputTextarea value={value} rows={10} cols={100}  readOnly />
-            );   
+            return (
+                <InputTextarea value={value} rows={10} cols={100} readOnly />
+            );
         }
         if (meta.type === "date" || meta.type === "datetime") {
             return (
@@ -366,6 +366,8 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                 <InputText
                     value={value}
                     onChange={(e) => handleChange(index, key, e.target.value)}
+                    disabled={!!disabled}
+                    readOnly={!!readOnly}
                 />
             );
         }
@@ -388,6 +390,8 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                     onChange={(e) => handleChange(index, key, e.value)}
                     showTime={meta.type === "datetime"}
                     dateFormat="yy-mm-dd"
+                    disabled={!!disabled}
+                    readOnlyInput={!!readOnly}
                 />
             );
         }
@@ -400,6 +404,8 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                     options={meta.allowedValues.map((v) => ({ label: v, value: v }))}
                     onChange={(e) => handleChange(index, key, e.value)}
                     placeholder="Select..."
+                    disabled={!!disabled}
+                    readOnly={!!readOnly}
                 />
             );
         }
@@ -419,12 +425,14 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
 
             <div className="p-4 border-round surface-card shadow-1">
                 <div className="flex justify-content-between align-items-center mb-3">
-                    <Button
-                        type="button"
-                        label="Add"
-                        icon="pi pi-plus"
-                        onClick={handleAdd}
-                    />
+                    {!disabled && !readOnly ? (
+                        <Button
+                            type="button"
+                            label="Add"
+                            icon="pi pi-plus"
+                            onClick={handleAdd}
+                        />
+                    ) : null}
                 </div>
 
                 <div className="flex flex-column gap-2">
@@ -435,26 +443,25 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                                 key={idx}
                                 className={`flex ${fieldLayoutInfo.attrs?.className ? `flex-${fieldLayoutInfo.attrs?.className}` : 'flex-row'} border-1 border-round p-3 gap-2`}
                             >
-                                {Object.keys(fieldJsonSchema).map((key) => (
-                                    <>
-                                    <div key={key} className="flex flex-column gap-1">
-                                      <label>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
-                                        {
-                                            // @ts-ignore
-                                            renderInput(row[key], key, idx)
-                                        }
-                                    </div>
-                                    <br/>
-                                    </>
-                                 
-                                ))}
-                                <Button
-                                    type="button"
-                                    icon="pi pi-minus"
-                                    style={{height:'40px'}}
-                                    className={`p-button-danger ${fieldLayoutInfo.attrs?.className === 'column' ? 'mt-0':'mt-4'}`}
-                                    onClick={() => handleRemove(idx)}
-                                />
+                                <div className="flex gap-3 align-items-center">
+                                    {Object.keys(fieldJsonSchema).map((key) => (
+                                        <div key={key} className="flex flex-column gap-1">
+                                            <label>{key.charAt(0).toUpperCase() + key.slice(1)}</label>
+                                            {
+                                                // @ts-ignore
+                                                renderInput(row[key], key, idx)
+                                            }
+                                        </div>
+                                    ))}
+                                </div>
+                                {!disabled && !readOnly ? (
+                                    <Button
+                                        type="button"
+                                        icon="pi pi-minus"
+                                        className="ml-2 h-2rem w-2rem rounded-circle"
+                                        onClick={() => handleRemove(idx)}
+                                    />
+                                ) : null}
                             </div>
                         ))
                     }

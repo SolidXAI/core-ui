@@ -158,7 +158,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
-    const readOnlyPermission = fieldContext.readOnly;
+    const readOnlyPermission = fieldContext.readOnly ? fieldContext.readOnly : fieldLayoutInfo.attrs.readonly;
 
     const [isDeleteImageDialogVisible, setDeleteImageDialogVisible] = useState(false);
     const [imageToBeDeletedData, setImageToBeDeletedData] = useState<any>();
@@ -310,7 +310,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                        <SolidFieldTooltip fieldContext={fieldContext}/>
+                        <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
@@ -543,7 +543,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
         <div>
             {showFieldLabel != false &&
                 <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label mt-4 font-medium">{fieldLabel}
-                <SolidFieldTooltip fieldContext={fieldContext}/>
+                    <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
             }
             {fileDetails.length > 0 &&

@@ -37,6 +37,10 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                 // Process normal header buttons
                 contextMenuHeaderButtonsData = formHeaderButtons.filter((button: any) => {
                     const visibleToRole = button.attrs?.roles || [];
+                    const defaultVisible = button.attrs?.visible;
+                    if (defaultVisible === false) {
+                        return false;
+                    }
                     if (visibleToRole.length > 0) {
                         if (!hasAnyRole(user?.user?.roles, visibleToRole)) {
                             return false;
