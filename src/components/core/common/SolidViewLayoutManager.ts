@@ -20,6 +20,15 @@ export class SolidViewLayoutManager {
                 if (found) return found;
             }
         }
+
+        // search in formButtons
+        if (node.attrs?.formButtons) {
+            for (const btn of node.attrs.formButtons) {
+                const found = this.findNode(btn, name);
+                if (found) return found;
+            }
+        }
+
         return null;
     }
 

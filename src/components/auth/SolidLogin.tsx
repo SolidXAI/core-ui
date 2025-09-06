@@ -79,11 +79,11 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                             password: values.password,
                         });
 
-                        if (response?.error) {
+                        if (response?.error) {                            
                             showToast("error", "Login Error", response.error);
                             setErrors({
-                                email: "Invalid email or password",
-                                password: "Invalid email or password",
+                                email: "Invalid Credentials",
+                                password: "Invalid Credentials",
                             });
                         } else {
                             showToast("success", "Login Success", "Redirecting to dashboard...");
@@ -210,7 +210,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                     } catch (err: any) {
                         showToast("error", "Login Error", err?.data ? err?.data?.message : "Something Went Wrong");
                         setErrors({
-                            email: "Invalid email",
+                            email: "Invalid Credentials",
                         });
                     } finally {
                         setSubmitting(false);
