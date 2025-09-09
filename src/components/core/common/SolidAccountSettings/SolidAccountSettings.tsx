@@ -14,11 +14,11 @@ export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfile
             key: "personal_info",
             icon: "pi pi-user-edit"
         },
-        {
-            label: "Notification",
-            key: "notifications",
-            icon: "pi pi-bell"
-        },
+        // {
+        //     label: "Notification",
+        //     key: "notifications",
+        //     icon: "pi pi-bell"
+        // },
         {
             label: "Change Password",
             key: "change_password",
@@ -30,8 +30,8 @@ export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfile
         switch (setting.key) {
             case "personal_info":
                 return <SolidPersonalInfo />;
-            case "notifications":
-                return <SolidNotifications />;
+            // case "notifications":
+            //     return <SolidNotifications />;
             case "change_password":
                 return <SolidChangePassword />;
             default:
