@@ -147,7 +147,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
-    const readOnlyPermission = fieldContext.readOnly;
+    const readOnlyPermission = fieldContext.readOnly ? fieldContext.readOnly : fieldLayoutInfo.attrs.readonly;
     const viewMode: string = fieldContext.viewMode;
 
     const [isDeleteImageDialogVisible, setDeleteImageDialogVisible] = useState(false);
@@ -320,7 +320,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                        <SolidFieldTooltip fieldContext={fieldContext}/>
+                        <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
@@ -504,7 +504,7 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
         <div className="flex flex-column gap-2 mt-4 relative">
             {showFieldLabel != false &&
                 <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label font-medium">{fieldLabel}
-                <SolidFieldTooltip fieldContext={fieldContext}/>
+                    <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
             }
 

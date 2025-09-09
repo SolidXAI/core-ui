@@ -23,13 +23,13 @@ export class SolidPasswordField implements ISolidField {
         this.fieldContext = fieldContext;
     }
 
-    updateFormData(value: any, formData: FormData): any {
-        const fieldLayoutInfo = this.fieldContext?.field;
+   updateFormData(value: any, formData: FormData): void {
         const fieldName = this.fieldContext?.field?.attrs?.name;
-        if (value !== undefined && value !== null) {
-             formData.append(fieldLayoutInfo.attrs.name, value);
+        if (value !== undefined && value !== null && value !== '') {
+            formData.append(fieldName, value);
         }
     }
+
 
     initialValue(): any {
         const fieldName = this.fieldContext.field.attrs.name;
@@ -68,8 +68,17 @@ export class SolidPasswordField implements ISolidField {
             const regexPatternNotMatchingErrorMsg = fieldMetadata.regexPatternNotMatchingErrorMsg ?? `${fieldLabel} has invalid data.`
             schema = schema.matches(fieldMetadata.regexPattern, regexPatternNotMatchingErrorMsg);
         }
-
-         return schema;
+        //check password and confirm password match if password have value
+        schema = schema.test('passwords-match', `${fieldLabel}s must match.`, function (value) {
+            const { path, parent } = this;
+            if (value) {
+                return value === parent[confirmFieldName];
+            }else if(!value && parent[confirmFieldName]){
+                return false; // If password is empty but confirm password has value, show error    
+            }
+            return true; // If password is empty, don't validate match
+        });
+        return schema;
     }
 
     render(formik: FormikObject) {
@@ -204,9 +213,7 @@ export const DefaultPasswordFormCreateWidget = ({ formik, fieldContext }: SolidF
                     />
                 </div>
                 {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                    <div className="absolute mt-1">
-                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                    </div>
+                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 )}
 
                 <div className="flex flex-column gap-2 mt-4">
@@ -230,9 +237,7 @@ export const DefaultPasswordFormCreateWidget = ({ formik, fieldContext }: SolidF
                         autoComplete="new-password"
                     />
                     {isFormFieldValid(formik, `${fieldLayoutInfo.attrs.name}Confirm`) && (
-                        <div className="absolute mt-1">
                             <Message severity="error" text={formik?.errors[`${fieldLayoutInfo.attrs.name}Confirm`]?.toString()} />
-                        </div>
                     )}
                 </div>
             </div>

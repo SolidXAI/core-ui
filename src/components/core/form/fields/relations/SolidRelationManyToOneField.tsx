@@ -79,8 +79,8 @@ export class SolidRelationManyToOneField implements ISolidField {
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
 
-        const isVisible = this.fieldContext.parentData 
-            ? fieldLayoutInfo.attrs?.visible === true 
+        const isVisible = this.fieldContext.parentData
+            ? fieldLayoutInfo.attrs?.visible === true
             : fieldLayoutInfo.attrs?.visible !== false;
 
         if (!isVisible) {
@@ -181,7 +181,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
         };
         let fixedFilterToBeApplied = false;
         let fixedFilterParsed = false;
-        if (solidFormViewMetaData?.data?.solidView?.model?.singularName === "listOfValues") {
+        if (solidFormViewMetaData?.data?.solidView?.model?.singularName === "listOfValues" && fieldContext.fieldMetadata.relationCoModelSingularName !== "moduleMetadata") {
             fixedFilterToBeApplied = true;
         }
         if (fieldMetadata?.relationFieldFixedFilter || fieldLayoutInfo?.attrs?.fixedFilter) {
@@ -375,10 +375,12 @@ export const DefaultRelationManyToOneFormViewWidget = ({ formik, fieldContext }:
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const value = formik.values[fieldLayoutInfo.attrs.name];
+    const userKeyField = fieldLayoutInfo?.attrs?.coModelFieldToDisplay ? fieldLayoutInfo?.attrs?.coModelFieldToDisplay:fieldMetadata?.relationModel?.userKeyField?.name;
+    const displayValue = value?.[userKeyField];
     return (
         <div className="mt-2 flex-column gap-2">
             <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
-            <p className="m-0">{value && value.solidManyToOneLabel}</p>
+            <p className="m-0">{displayValue}</p>
         </div>
     );
 }

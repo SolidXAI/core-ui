@@ -84,8 +84,8 @@ export const SolidChangePassword = () => {
                     handleLogout(toast)
                     resetForm();
                 }
-            } catch (err: any) {
-                showToast("error", "Failed", err?.data?.message);
+            } catch (err: any) {                
+                showToast("error", err?.data?.message, err?.data?.data?.message? err?.data?.data?.message : err?.data?.message);
             }
         },
     });

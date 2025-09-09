@@ -295,7 +295,10 @@ const SolidSheet = ({ children }: any) => (
 );
 
 const SolidNotebook = ({ children, activeTab, embeded }: any) => {
-    const childrenArray = children;
+    // const childrenArray = children;
+    // const childrenArray = React.Children.toArray(children).filter(Boolean);
+    const childrenArray = React.Children.toArray(children).filter(child => !!child);
+
     const router = useRouter();
 
     // Local state to manage active tab in embedded context
@@ -328,7 +331,8 @@ const SolidNotebook = ({ children, activeTab, embeded }: any) => {
     return (
         <div className="solid-tab-view w-full">
             <TabView activeIndex={activeIndex >= 0 ? activeIndex : 0} onTabChange={handleTabChange}>
-                {children}
+                {/* {children} */}
+                {childrenArray}
             </TabView>
         </div>
     )
@@ -439,7 +443,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [createMode, setCreateMode] = useState<boolean>(false);
     const [openLightbox, setOpenLightbox] = useState(false);
     const [lightboxUrls, setLightboxUrls] = useState([]);
-    const [isShowChatter, setShowChatter] = useState(true);
+    const [isShowChatter, setShowChatter] = useState(false);
     const [chatterLocaleWidth, setChatterLocaleWidth] = useState(380); // default width
     const [isResizingChatterLocale, setIsResizingChatterLocale] = useState(false);
 
