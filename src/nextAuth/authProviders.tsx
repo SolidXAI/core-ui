@@ -171,7 +171,7 @@ const authProviders: NextAuthOptions = {
                         }
                     }
                 } catch (error: any) {
-                    throw new Error(error.message ? error.message : error?.response?.data?.message);
+                    throw new Error(error?.response?.data?.message);
                 }
             },
         }),
