@@ -4,6 +4,7 @@ import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { SolidRelationManyToManyField } from "./relations/SolidRelationManyToManyField";
 import { SolidRelationManyToOneField } from "./relations/SolidRelationManyToOneField";
 import { SolidRelationOneToManyField } from "./relations/SolidRelationOneToManyField";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
 export class SolidRelationField implements ISolidField {
@@ -29,7 +30,13 @@ export class SolidRelationField implements ISolidField {
         }
 
         if (!relationField) {
-            throw new Error(`Invalid relationType ${fieldMetadata.relationType} on field ${this.fieldContext.field.attrs.name}`)
+            throw new Error(
+                ERROR_MESSAGES.INVALID_RELATION_TYPE(
+                  fieldMetadata.relationType,
+                  this.fieldContext.field.attrs.name
+                )
+              );
+              
         }
 
         return relationField;

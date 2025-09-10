@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { getSession } from "next-auth/react";
 
 export async function downloadFileWithProgress(
@@ -31,7 +32,7 @@ export async function downloadFileWithProgress(
       body: JSON.stringify(requestBody)
     }); 
     if (!response.ok || !response.body) {
-      throw new Error("Failed to fetch file");
+      throw new Error(ERROR_MESSAGES.FAILED_TO_FETCH_FILE);
     }
     const contentDisposition = response.headers.get("Content-Disposition");
     const fileNameMatch = contentDisposition?.match(/filename="?([^"]+)"?/);

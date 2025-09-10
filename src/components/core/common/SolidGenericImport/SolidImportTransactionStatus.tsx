@@ -1,5 +1,6 @@
 "use client"
 
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 import { getSession } from 'next-auth/react';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
@@ -27,7 +28,7 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
         }
       );
 
-      if (!response.ok) throw new Error('Failed to download');
+      if (!response.ok) throw new Error(ERROR_MESSAGES.FAILED_TO_DOWNLOAD);
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
