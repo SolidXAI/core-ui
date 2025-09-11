@@ -156,22 +156,35 @@ const transformRulesToFilters = (input: any) => {
 
 }
 
+type GroupedType = {
+    values: string[];
+    searchField: any;
+    matchMode: string;
+}
+
+// Build nested condition for relation fields
+function buildNestedCondition(path: string, operatorKey: string, value: any) {
+    const keys = path.split(".").filter(Boolean);
+    const leaf = { [operatorKey]: value };
+    return keys.reduceRight((acc, key) => ({ [key]: acc }), leaf);
+}
+
 const tranformSearchToFilters = (input: any) => {
     if (!input || !input.$and) return input;
 
-    const grouped: Record<string, string[]> = {};
+    const grouped: Record<string, GroupedType> = {};
 
-    input.$and.forEach(({ fieldName, value }: any) => {
+    input.$and.forEach(({ fieldName, value, searchField, matchMode }: any) => {
         const val = Array.isArray(value) && value.length === 1 ? value[0] : value;
 
         if (!grouped[fieldName]) {
-            grouped[fieldName] = [];
+            grouped[fieldName] = { values: [], searchField: searchField || "", matchMode: matchMode || "$containsi" };
         }
 
         if (Array.isArray(val)) {
-            grouped[fieldName].push(...val);
+            grouped[fieldName]?.values.push(...val);
         } else {
-            grouped[fieldName].push(val);
+            grouped[fieldName]?.values.push(val);
         }
     });
 
@@ -185,19 +198,35 @@ const tranformSearchToFilters = (input: any) => {
 
     const andFilters: any[] = [];
 
-    Object.entries(grouped).forEach(([fieldName, values]) => {
-        if (values.length === 1) {
-            andFilters.push({
-                [fieldName]: {
-                    $containsi: values[0]
-                }
-            });
+    Object.entries(grouped).forEach(([fieldName, value]) => {
+
+        const isNested = value.searchField ? value.searchField.includes(".") : false;
+
+        if (isNested) {
+
+            // NESTED: use $eq and expand dot-notation into nested objects
+            if (value.values.length === 1) {
+                andFilters.push(buildNestedCondition(value.searchField, value.matchMode, value.values[0]));
+            } else {
+                andFilters.push({
+                    $or: value.values.map(v => buildNestedCondition(value.searchField, value.matchMode, v)),
+                });
+            }
         } else {
-            andFilters.push({
-                $or: values.map((v) => ({
-                    [fieldName]: { $containsi: v }
-                }))
-            });
+
+            if (value.values.length === 1) {
+                andFilters.push({
+                    [fieldName]: {
+                        $containsi: value.values[0]
+                    }
+                });
+            } else {
+                andFilters.push({
+                    $or: value.values.map((v) => ({
+                        [fieldName]: { $containsi: v }
+                    }))
+                });
+            }
         }
     });
 
@@ -430,85 +459,64 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         }
     }, [searchParams, savedFilters])
 
-    function findSearchableField(node: any, targetName: string): boolean {
-        if (
-            node?.type === 'field' &&
-            node?.attrs?.name === targetName &&
-            node?.attrs?.isSearchable
-        ) {
-            return true;
-        }
-
-        if (Array.isArray(node?.children)) {
-            return node.children.some((child: any) => findSearchableField(child, targetName));
-        }
-
-        return false;
-    }
-
-
-    function collectLeafFieldTypes(layoutArray: any) {
-        const result: any = [];
-
-        function recurse(node: any) {
-            if (!node || typeof node !== 'object') return;
-
-            // If it's a field and has no children (leaf field node)
-            if (node.type === 'field' && !node.children) {
-                result.push(node);
-            }
-
-            // If it has children, recurse into them
-            if (Array.isArray(node.children)) {
-                node.children.forEach(recurse);
-            }
-        }
-
-        // Input is an array of nodes
-        layoutArray.forEach(recurse);
-
-        return result;
-    }
-
     useEffect(() => {
         if (viewData?.data?.solidFieldsMetadata) {
             let fieldsData = viewData?.data?.solidFieldsMetadata;
             console.log(`fiels data while rendering solid global search element: `);
             console.log(fieldsData);
 
-            const fieldsList = Object.entries(fieldsData).map(([key, value]: any) => ({ name: value.displayName, value: key, type: value.type, ormType: value.ormType }));
+            const children = viewData?.data?.solidView?.layout?.children ?? [];
+
+            const fieldsList = Object.entries(fieldsData ?? {}).map(([key, value]: any) => {
+                const viewFieldElement = children.find((f: any) => f?.attrs?.name === key);
+
+                return {
+                    name: value.displayName,
+                    value: key,
+                    type: value.type,
+                    ormType: value.ormType,
+                    matchMode: viewFieldElement?.attrs?.searchMatchMode,
+                    searchField: viewFieldElement?.attrs?.searchField ?? null,
+                    isSearchable: viewFieldElement?.attrs?.isSearchable ?? false,
+                };
+            });
+
             setFields(fieldsList);
+
             const searchableFieldsList = fieldsList.filter((field: any) => {
+                if (!field.isSearchable) return false;
+
                 switch (field.type) {
+                    case "relation":
+                        // Only include relation if searchField is present
+                        return !!field.searchField;
                     case "longText":
                     case "shortText":
-                        return true;
                     case "selectionStatic":
-                        if (field.ormType === 'varchar') {
-                            return true;
-                        }
+                    case "selectionDynamic":
+                        return true;
+                    // case "selectionStatic":
                     case "computed":
-                        if (field.ormType === 'varchar') {
-                            return true;
-                        }
+                        return field.ormType === "varchar";
                     default:
-                        break;
+                        return false;
                 }
-
-                return false;
             });
-            let finalsearchableFieldsList: any = [];
-            if (typeof window !== "undefined" && window.location.href.includes("list")) {
-                finalsearchableFieldsList = searchableFieldsList.filter((field: any) => field.value && viewData?.data?.solidView?.layout?.children?.some((child: any) => child?.attrs?.name === field.value && child?.attrs?.isSearchable)).map((field: any) => field.value);
-            }
 
-            if (typeof window !== "undefined" && window.location.href.includes("kanban")) {
-                const result = collectLeafFieldTypes(viewData?.data?.solidView?.layout?.children);
-                finalsearchableFieldsList = searchableFieldsList.filter((field: any) => field.value && result?.some((child: any) => child?.attrs?.name === field.value && child?.attrs?.isSearchable)).map((field: any) => field.value);
+            console.log("searchableFieldsList", searchableFieldsList);
+            
 
-            }
+            // Optionally map to a minimal structure if needed for UI
+            let finalSearchableFieldsList: any = searchableFieldsList.map((field: any) => ({
+                fieldName: field.value,
+                displayName: field.name,
+                searchField: field.searchField ?? "",
+                matchMode: field.matchMode
+            }));
 
-            setSearchableFields(finalsearchableFieldsList);
+            console.log("finalSearchableFieldsList", finalSearchableFieldsList);
+
+            setSearchableFields(finalSearchableFieldsList);
         }
     }, [])
 
@@ -533,13 +541,16 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     //     }
     // }, [filters]);
 
-    const firstFilterableFieldName = searchableFields[0]; // First searchable field
-
     const handleAddChip = (columnName?: string) => {
         if (inputValue?.trim()) {
+            const fallbackField = searchableFields[0]; // guaranteed object
+            if (!fallbackField) return;
             const newChip = {
-                columnName: columnName || firstFilterableFieldName,
+                columnName: columnName || fallbackField.fieldName,
                 value: inputValue.trim(),
+                columnDisplayName: fallbackField.displayName,
+                searchField: fallbackField.searchField,
+                matchMode: fallbackField.matchMode
             };
             setSearchChips((prev) => [...prev, newChip]);
             setInputValue("");
@@ -602,14 +613,19 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     useEffect(() => {
         if (hasSearched === true) {
+            console.log("searchChips", searchChips);
 
             const formattedChips = {
-                $and: searchChips.map((chip) => ({
+                $and: searchChips.map((chip: any) => ({
                     fieldName: chip.columnName,
-                    matchMode: "$containsi",
-                    value: [chip.value]
+                    matchMode: chip.matchMode,
+                    value: [chip.value],
+                    searchField: chip.searchField ?? "",
                 }))
             };
+
+            console.log("formattedChips", formattedChips);
+            
             // if (formattedChips.$and.length > 0) {
             const transformedFilter = tranformSearchToFilters(formattedChips);
             setSearchFilter(transformedFilter);
@@ -681,14 +697,18 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     }
 
 
-    const groupedSearchChips = searchChips.reduce((acc, chip) => {
-        const key = chip.columnName || firstFilterableFieldName;
+    const groupedSearchChips = searchChips.reduce((acc: Record<string, string[]>, chip) => {
+        const key = chip.columnName;
+        if (!key) return acc; // skip if undefined
+
         if (!acc[key]) {
             acc[key] = [];
         }
         acc[key].push(chip.value);
         return acc;
-    }, {} as Record<string, string[]>);
+    }, {});
+
+
 
     const handleRemoveChipGroup = (columnName: string) => {
         const updatedChips = searchChips.filter(chip => chip.columnName !== columnName);
@@ -723,28 +743,34 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     const SearchChip = () => (
         <>
-            {Object.entries(groupedSearchChips).map(([column, values]) => (
-                <li key={column}>
-                    <div className="search-filter-chip-type">
-                        <div>{column}</div>
-                        {values.map((value, index) => (
-                            <React.Fragment>
-                                <span key={index} className="custom-chip-value">{value}
-                                </span>
-                                {index < values.length - 1 &&
-                                    <span className="custom-chip-or">or</span>
-                                }
-                            </React.Fragment>
-                        ))}
-                        {/* button to clear filter */}
-                        <i className="pi pi-times ml-1"
-                            style={{ cursor: "pointer" }}
-                            onClick={() => handleRemoveChipGroup(column)}
-                        >
-                        </i>
-                    </div>
-                </li>
-            ))}
+            {Object.entries(groupedSearchChips).map(([column, values]) => {
+                const fieldMeta = searchableFields.find(f => f.fieldName === column);
+                const columnDisplayName = fieldMeta?.displayName || column;
+
+                return (
+                    <li key={column}>
+                        <div className="search-filter-chip-type">
+                            <div>{columnDisplayName}</div>
+                            {values.map((value, index) => (
+                                <React.Fragment>
+                                    {/* displayname */}
+                                    <span key={index} className="custom-chip-value">{value}
+                                    </span>
+                                    {index < values.length - 1 &&
+                                        <span className="custom-chip-or">or</span>
+                                    }
+                                </React.Fragment>
+                            ))}
+                            {/* button to clear filter */}
+                            <i className="pi pi-times ml-1"
+                                style={{ cursor: "pointer" }}
+                                onClick={() => handleRemoveChipGroup(column)}
+                            >
+                            </i>
+                        </div>
+                    </li>
+                )
+            })}
         </>
     );
 
@@ -796,32 +822,39 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                             <>
                                 <div className="custom-filter-search-options px-2 py-2 flex flex-column">
                                     {
-                                        searchableFields.map((value: any, index: any) => (
-                                            <Button
-                                                key={index}
-                                                className="p-2 flex gap-1 text-color"
-                                                // onClick={() => handleAddChip(value)}
-                                                onMouseDown={(e) => {
-                                                    e.preventDefault(); // Prevent focus loss from input
-                                                    const currentValue = inputValue?.trim();
-                                                    if (currentValue) {
-                                                        setSearchChips((prev) => [...prev, {
-                                                            columnName: value,
-                                                            value: currentValue,
-                                                        }]);
-                                                        setInputValue("");
-                                                        setHasSearched(true);
-                                                        setShowOverlay(false);
-                                                    }
-                                                }}
-                                                text
-                                                severity="secondary"
-                                                size="small"
-                                            >
-                                                Search <strong>{value}</strong> for :
-                                                <span className="font-bold text-color">{inputValue}</span>
-                                            </Button>
-                                        ))
+                                        searchableFields.map((value: any, index: any) => {
+                                            console.log("value", value);
+
+                                            return (
+                                                <Button
+                                                    key={index}
+                                                    className="p-2 flex gap-1 text-color"
+                                                    // onClick={() => handleAddChip(value)}
+                                                    onMouseDown={(e) => {
+                                                        e.preventDefault(); // Prevent focus loss from input
+                                                        const currentValue = inputValue?.trim();
+                                                        if (currentValue) {
+                                                            setSearchChips((prev) => [...prev, {
+                                                                columnName: value.fieldName,
+                                                                value: currentValue,
+                                                                columnDisplayName: value.displayName,
+                                                                searchField: value.searchField,
+                                                                matchMode: value.matchMode
+                                                            }]);
+                                                            setInputValue("");
+                                                            setHasSearched(true);
+                                                            setShowOverlay(false);
+                                                        }
+                                                    }}
+                                                    text
+                                                    severity="secondary"
+                                                    size="small"
+                                                >
+                                                    Search <strong>{value.displayName}</strong> for :
+                                                    <span className="font-bold text-color">{inputValue}</span>
+                                                </Button>
+                                            )
+                                        })
                                     }
                                 </div>
                                 <Divider className="m-0" />
