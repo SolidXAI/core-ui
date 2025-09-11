@@ -476,39 +476,49 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             console.log(`fiels data while rendering solid global search element: `);
             console.log(fieldsData);
 
-            const fieldsList = Object.entries(fieldsData).map(([key, value]: any) => ({ name: value.displayName, value: key, type: value.type, ormType: value.ormType }));
+            const children = viewData?.data?.solidView?.layout?.children ?? [];
+
+            const fieldsList = Object.entries(fieldsData ?? {}).map(([key, value]: any) => {
+                const viewFieldElement = children.find((f: any) => f?.attrs?.name === key);
+
+                return {
+                    name: value.displayName,
+                    value: key,
+                    type: value.type,
+                    ormType: value.ormType,
+                    searchPredicate: viewFieldElement?.attrs?.searchPredicate ?? null,
+                    isSearchable: viewFieldElement?.attrs?.isSearchable ?? false,
+                };
+            });
+
             setFields(fieldsList);
+
             const searchableFieldsList = fieldsList.filter((field: any) => {
+                if (!field.isSearchable) return false;
+
                 switch (field.type) {
+                    case "relation":
+                        // Only include relation if searchPredicate is present
+                        return !!field.searchPredicate;
                     case "longText":
                     case "shortText":
                         return true;
                     case "selectionStatic":
-                        if (field.ormType === 'varchar') {
-                            return true;
-                        }
                     case "computed":
-                        if (field.ormType === 'varchar') {
-                            return true;
-                        }
+                        return field.ormType === "varchar";
                     default:
-                        break;
+                        return false;
                 }
-
-                return false;
             });
-            let finalsearchableFieldsList: any = [];
-            if (typeof window !== "undefined" && window.location.href.includes("list")) {
-                finalsearchableFieldsList = searchableFieldsList.filter((field: any) => field.value && viewData?.data?.solidView?.layout?.children?.some((child: any) => child?.attrs?.name === field.value && child?.attrs?.isSearchable)).map((field: any) => field.value);
-            }
 
-            if (typeof window !== "undefined" && window.location.href.includes("kanban")) {
-                const result = collectLeafFieldTypes(viewData?.data?.solidView?.layout?.children);
-                finalsearchableFieldsList = searchableFieldsList.filter((field: any) => field.value && result?.some((child: any) => child?.attrs?.name === field.value && child?.attrs?.isSearchable)).map((field: any) => field.value);
+            // Optionally map to a minimal structure if needed for UI
+            let finalSearchableFieldsList: any = searchableFieldsList.map((field: any) => ({
+                fieldName: field.value,
+                displayName: field.name,
+                searchPredicate: field.searchPredicate ?? "",
+            }));
 
-            }
-
-            setSearchableFields(finalsearchableFieldsList);
+            setSearchableFields(finalSearchableFieldsList);
         }
     }, [])
 
@@ -806,8 +816,11 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                                                     const currentValue = inputValue?.trim();
                                                     if (currentValue) {
                                                         setSearchChips((prev) => [...prev, {
-                                                            columnName: value,
+                                                            columnName: value.fieldName,
                                                             value: currentValue,
+                                                            columnDisplayName: value.displayName,
+                                                            searchPredicate:value.searchPredicate
+
                                                         }]);
                                                         setInputValue("");
                                                         setHasSearched(true);
@@ -818,7 +831,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                                                 severity="secondary"
                                                 size="small"
                                             >
-                                                Search <strong>{value}</strong> for :
+                                                Search <strong>{value.displayName}</strong> for :
                                                 <span className="font-bold text-color">{inputValue}</span>
                                             </Button>
                                         ))
