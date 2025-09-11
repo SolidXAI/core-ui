@@ -41,7 +41,7 @@ export class SolidRelationOneToManyField implements ISolidField {
         const fieldLayoutInfo = this.fieldContext.field;
         // if(!value || value.length === 0) {
         //     formData.append(`${fieldLayoutInfo.attrs.name}Command`, "clear");
-            
+
         // }
         if (value) {
             formData.append(`${fieldLayoutInfo.attrs.name}Id`, value.value);
@@ -281,7 +281,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
             <Dialog showHeader={false} headerClassName="py-2" contentClassName="px-0 pb-0" contentStyle={{ borderRadius: 6 }} visible={showSaveParentEntityConfirmationPopup} style={{ width: '20vw' }} onHide={() => { if (!showSaveParentEntityConfirmationPopup) return; setShowSaveParentEntityConfirmationPopup(false); }}>
                 <div className="p-4">
                     <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
-                        Before Creating {fieldLabel} you need to save {capitalize(fieldContext.modelName)}.
+                        Before Creating {fieldLabel} you need to save {solidFormViewMetaData?.data?.solidView?.model?.displayName ? solidFormViewMetaData?.data?.solidView?.model?.displayName : capitalize(fieldContext.modelName)}.
                         Please click save if you wish to proceed ?
                     </p>
                     <div className="flex align-items-center justify-content-start gap-2 mt-3">
