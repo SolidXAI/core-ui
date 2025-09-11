@@ -6,6 +6,8 @@ import { SolidManyToOneFilterElement } from "./SolidManyToOneFilterElement";
 import { SolidSelectionDynamicFilterElement } from "./SolidSelectionDynamicFilterElement";
 import { SolidSelectionStaticFilterElement } from "./SolidSelectionStaticFilterElement";
 import { Button } from "primereact/button";
+import { SolidOneToManyFilterElement } from "./SolidOneToManyFilterElement";
+import { SolidManyToManyFilterElement } from "./SolidManyToManyFilterElement";
 
 export enum InputTypes {
     Date = 'Date',
@@ -15,6 +17,8 @@ export enum InputTypes {
     Text = 'Text',
     SelectionStatic = 'SelectionStatic',
     RelationManyToOne = 'RelationManyToOne',
+    RelationOneToMany = 'RelationOneToMany',
+    RelationManyToMany = 'RelationManyToMany',
     SelectionDynamic = 'SelectionDynamic'
 }
 
@@ -131,6 +135,22 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                             updateInputs={updateInputs}
                             fieldMetadata={fieldMetadata}
                         ></SolidManyToOneFilterElement>
+                    }
+                    {inputType === InputTypes.RelationOneToMany &&
+                        <SolidOneToManyFilterElement
+                            value={value}
+                            index={index}
+                            updateInputs={updateInputs}
+                            fieldMetadata={fieldMetadata}
+                        ></SolidOneToManyFilterElement>
+                    }
+                    {inputType === InputTypes.RelationManyToMany &&
+                        <SolidManyToManyFilterElement
+                            value={value}
+                            index={index}
+                            updateInputs={updateInputs}
+                            fieldMetadata={fieldMetadata}
+                        ></SolidManyToManyFilterElement>
                     }
                     {inputType === InputTypes.SelectionDynamic &&
                         <SolidSelectionDynamicFilterElement

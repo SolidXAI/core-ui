@@ -69,7 +69,7 @@ let idCounter = 1;
 const generateId = () => Date.now() + Math.floor(Math.random() * 1000);
 
 
-const transformRulesToFilters = (input: any) => {
+const transformRulesToFilters = (input: any, fieldMetadata: any) => {
 
     // Helper function to process individual rules
     const processRule = (rule: any) => {
@@ -87,6 +87,14 @@ const transformRulesToFilters = (input: any) => {
                 }
             };
 
+            if (fieldMetadata[rule.fieldName].type && fieldMetadata[rule.fieldName].type == "relation" && fieldMetadata[rule.fieldName].relationType == "one-to-many") {
+                transformedRule = {
+                    [`${rule.fieldName}.id`]: {
+                        [rule.matchMode]: values    // Assuming `value` is always an array with `value` and `label`
+                    }
+                };
+            }
+
             // If the rule has children (which means it's a rule group), process them
             let processedFields;
             if (rule.children && rule.children.length > 0) {
@@ -97,7 +105,6 @@ const transformRulesToFilters = (input: any) => {
             }
             return { ...transformedRule }
         }
-
     };
 
     // Helper function to process rule groups
@@ -175,13 +182,7 @@ const tranformSearchToFilters = (input: any) => {
         }
     });
 
-    // return {
-    //     $and: Object.entries(grouped).map(([fieldName, values]) => ({
-    //         [fieldName]: {
-    //             $containsi: values.length === 1 ? values[0] : values
-    //         }
-    //     }))
-    // };
+    
 
     const andFilters: any[] = [];
 
@@ -476,7 +477,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             console.log(`fiels data while rendering solid global search element: `);
             console.log(fieldsData);
 
-            const fieldsList = Object.entries(fieldsData).map(([key, value]: any) => ({ name: value.displayName, value: key, type: value.type, ormType: value.ormType }));
+            const fieldsList = Object.entries(fieldsData).map(([key, value]: any) => ({ name: value.displayName, value: key, type: value.type, ormType: value.ormType, type }));
             setFields(fieldsList);
             const searchableFieldsList = fieldsList.filter((field: any) => {
                 switch (field.type) {
@@ -504,9 +505,11 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
             if (typeof window !== "undefined" && window.location.href.includes("kanban")) {
                 const result = collectLeafFieldTypes(viewData?.data?.solidView?.layout?.children);
-                finalsearchableFieldsList = searchableFieldsList.filter((field: any) => field.value && result?.some((child: any) => child?.attrs?.name === field.value && child?.attrs?.isSearchable)).map((field: any) => field.value);
+                finalsearchableFieldsList = searchableFieldsList.filter((field: any) => field.value && result?.some((child: any) => child?.attrs?.name === field.value && child?.attrs?.isSearchable)).map((field: any) => {field.value});
 
             }
+         
+
 
             setSearchableFields(finalsearchableFieldsList);
         }
@@ -591,7 +594,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
 
     const transformFilterRules = (filterRules: any) => {
-        const transformedFilter = transformRulesToFilters(filterRules[0]);
+        const fieldMetadata = viewData?.data?.solidFieldsMetadata;
+        const transformedFilter = transformRulesToFilters(filterRules[0], fieldMetadata);
         setCustomFilter(transformedFilter);
         if (transformedFilter) {
             const finalFilter = mergeSearchAndCustomFilters(transformedFilter, searchFilter, "c_filter", "s_filter");
@@ -607,7 +611,11 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 $and: searchChips.map((chip) => ({
                     fieldName: chip.columnName,
                     matchMode: "$containsi",
-                    value: [chip.value]
+                    value: [chip.value],
+                                                            displayName:"",
+                                                            type:"",
+                                                            searchFilter: ""
+
                 }))
             };
             // if (formattedChips.$and.length > 0) {
@@ -808,6 +816,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                                                         setSearchChips((prev) => [...prev, {
                                                             columnName: value,
                                                             value: currentValue,
+                                                            displayName:"",
+                                                            type:"",
+                                                            searchFilter: ""
+
                                                         }]);
                                                         setInputValue("");
                                                         setHasSearched(true);

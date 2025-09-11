@@ -3,7 +3,7 @@ import { InputTypes, SolidVarInputsFilterElement } from '@/components/core/filte
 import { Dropdown } from 'primereact/dropdown';
 import { getNumberOfInputs, SolidFilterFieldsParams } from '../../SolidFilterFields';
 
-const SolidRelationManyToOneField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
+const SolidRelationOneToManyField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
     // const filterable = column.attrs.filterable;
     const showFilterOperator = false;
     const filterMatchModeOptions = [
@@ -67,7 +67,7 @@ const SolidRelationManyToOneField = ({ fieldMetadata, onChange, index, rule }: S
                         onChange(index, 'value', e)
                     }}
                     numberOfInputs={numberOfInputs}
-                    inputType={InputTypes.RelationOneToMany}
+                    inputType={InputTypes.RelationManyToOne}
                     fieldMetadata={fieldMetadata}
                 >
                 </SolidVarInputsFilterElement>
@@ -77,4 +77,4 @@ const SolidRelationManyToOneField = ({ fieldMetadata, onChange, index, rule }: S
 
 };
 
-export default SolidRelationManyToOneField;
+export default SolidRelationOneToManyField;
