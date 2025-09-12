@@ -125,12 +125,11 @@ const SolidRegister = () => {
 
                         const response = await register(userData).unwrap();
                         if (response?.statusCode === 200) {
-                            console.log("registered , redirecting in 10s")
                             showToast("success", "User Registered", response?.data?.message);
                             setShowOverlay(true);
                             setTimeout(() => {
                                router.push(`/auth/login`);
-                            }, 5000);
+                            }, 3000);
                         } else {
                             showToast("error", "Login Error", response.error);
                             // setErrors({
