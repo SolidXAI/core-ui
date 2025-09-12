@@ -114,7 +114,7 @@ export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: a
                     if (existingChild) return existingChild;
                 
                     const fieldType = allFieldMeta[key]?.type;
-                    const isTextType = fieldType === "shortText" || fieldType === "longText";
+                    const isTextType = fieldType === "shortText" || fieldType === "longText" || fieldType ==="selectionStatic" || fieldType ==="selectionDynamic";
                 
                     return {
                         type: 'field',

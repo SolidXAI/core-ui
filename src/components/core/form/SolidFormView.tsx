@@ -442,7 +442,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [createMode, setCreateMode] = useState<boolean>(false);
     const [openLightbox, setOpenLightbox] = useState(false);
     const [lightboxUrls, setLightboxUrls] = useState([]);
-    const [isShowChatter, setShowChatter] = useState(true);
+    const [isShowChatter, setShowChatter] = useState(false);
     const [chatterLocaleWidth, setChatterLocaleWidth] = useState(380); // default width
     const [isResizingChatterLocale, setIsResizingChatterLocale] = useState(false);
 
