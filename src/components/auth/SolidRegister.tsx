@@ -21,6 +21,8 @@ import { AppTitle } from "@/helpers/AppTitle";
 import Image from "next/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "@/helpers/resendOtpHelper";
+import { ProgressSpinner } from "primereact/progressspinner";
+import { SolidPasswordHelperText } from "../core/common/SolidPasswordHelperText";
 
 interface AuthTabsProps {
     iamPasswordRegistrationEnabled: boolean;
@@ -28,8 +30,10 @@ interface AuthTabsProps {
 }
 
 const SolidRegister = () => {
+    const envPasswordHelperText = process.env.NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC;
     const [activeIndex, setActiveIndex] = useState(0);
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    const [showOverlay, setShowOverlay] = useState(false); 
     useEffect(() => {
         trigger("")
     }, [trigger])
@@ -76,11 +80,11 @@ const SolidRegister = () => {
         }
     }, [error]);
 
-    useEffect(() => {
-        if (isSuccess) {
-            router.replace("/auth/login");
-        }
-    }, [isSuccess])
+    // useEffect(() => {
+    //     if (isSuccess) {
+    //             router.replace("/auth/login");
+    //     }
+    // }, [isSuccess])
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
         toast.current?.show({
             severity,
@@ -122,8 +126,9 @@ const SolidRegister = () => {
                         const response = await register(userData).unwrap();
                         if (response?.statusCode === 200) {
                             showToast("success", "User Registered", response?.data?.message);
+                            setShowOverlay(true);
                             setTimeout(() => {
-                                router.push(`/auth/login`);
+                               router.push(`/auth/login`);
                             }, 3000);
                         } else {
                             showToast("error", "Login Error", response.error);
@@ -134,7 +139,7 @@ const SolidRegister = () => {
                             // });
                         }
                     } catch (err: any) {
-                        showToast("error", "Login Conflict", err?.data ? err?.data?.message : "Something Went Wrong");
+                        showToast("error", "Email is already taken, ", err?.data ? err?.data?.message : "Something Went Wrong");
                     } finally {
                         setSubmitting(false);
                     }
@@ -198,6 +203,7 @@ const SolidRegister = () => {
                                 text={formik?.errors?.password?.toString()}
                             />}
                         </div>
+                        <SolidPasswordHelperText text={envPasswordHelperText}/>
                         <div className="mt-4">
                             <Button className="w-full font-light auth-submit-button" label="Sign Up" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
                         </div>
@@ -334,7 +340,18 @@ const SolidRegister = () => {
     return (
         <div className="">
             <Toast ref={toast} />
-            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
+              {/* 🔹 Overlay UI */}
+            <div className={`auth-container position-relative ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
+            {showOverlay && (
+            <div className="absolute top-0 left-0 w-full h-full flex align-items-center justify-content-center register-success-popup">
+            <div className="inline-flex flex-column align-items-center justify-content-center text-center">
+                <ProgressSpinner style={{ width: '50px', height: '50px' }} strokeWidth="4" />
+                <p className="mt-3 text-lg font-medium text-700">
+                Registration successful,<br />you will be redirected...
+                </p>
+            </div>
+            </div>
+            )}
                 {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
                         <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>

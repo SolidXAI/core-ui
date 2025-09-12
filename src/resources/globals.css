@@ -3301,3 +3301,8 @@ padding:10px !important;
 border:2px solid rgba(216, 226, 234, 0.40);
 border-radius:8px !important;
 }
+.register-success-popup{
+  border-radius: 1.25rem !important;
+  background: #fff !important;
+  z-index: 1000 !important;
+}
