@@ -9,6 +9,7 @@ import { Password } from 'primereact/password';
 import { Toast } from 'primereact/toast';
 import { useRef } from 'react';
 import * as Yup from 'yup';
+import { SolidPasswordHelperText } from '../SolidPasswordHelperText';
 
 export const SolidChangePassword = () => {
     const toast = useRef<Toast>(null);
@@ -157,21 +158,7 @@ export const SolidChangePassword = () => {
                         </div>
                     </div>
                 </div>
-                {envPasswordHelperText && (
-                    <div className="mt-4 text-sm grid">
-                        <div className='col-9'>
-                            <div className="grid">
-                                {envPasswordHelperText
-                                    .split('\\n')
-                                    .map((text, idx) => (
-                                        <div key={idx} className="col-6 pt-0">
-                                            <div className='flex gap-2'><span>•</span><span>{text}</span></div>
-                                        </div>
-                                    ))}
-                            </div>
-                        </div>
-                    </div>
-                )}
+                <SolidPasswordHelperText text={envPasswordHelperText}/>
             </div>
             <div>
                 <Button type='submit' size='small' label="Change Password" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
