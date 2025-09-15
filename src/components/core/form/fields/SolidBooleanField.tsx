@@ -243,8 +243,9 @@ export const SolidBooleanCheckboxStyleFormEditWidget = ({ formik, fieldContext }
                     <div className="flex align-items-center">
                         <Checkbox
                             id={fieldLayoutInfo.attrs.name}
-                            checked={formik.values[fieldLayoutInfo.attrs.name] === 'true' || formik.initialValues[fieldLayoutInfo.attrs.name] === 'true'}
-                            onChange={handleChange}
+                            checked={formik.values[fieldLayoutInfo.attrs.name] === true}
+                            // onChange={handleChange}
+                            onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
                             disabled={formDisabled || fieldDisabled}
                             readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                             className={classNames("", {
@@ -317,8 +318,10 @@ export const SolidBooleanSwitchStyleFormEditWidget = ({ formik, fieldContext }: 
                     <div className="flex align-items-center">
                         <InputSwitch
                             id={fieldLayoutInfo.attrs.name}
-                            checked={formik.values[fieldLayoutInfo.attrs.name] === true || formik.values[fieldLayoutInfo.attrs.name] === "true"}
-                            onChange={handleChange}
+                            name={fieldMetadata.name}
+                            checked={formik.values[fieldLayoutInfo.attrs.name] === true}
+                            // onChange={handleChange}
+                            onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
                             disabled={formDisabled || fieldDisabled}
                             readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                             className={classNames("", {
