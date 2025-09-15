@@ -173,7 +173,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                 $and: [
                     {
                         [fieldMetadata?.relationModel?.userKeyField?.name]: {
-                            '$containsi': event.query
+                            [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']: event.query
                         }
                     }
                 ]

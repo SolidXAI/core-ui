@@ -176,7 +176,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                 $and: [
                     {
                         [fieldMetadata?.relationModel?.userKeyField?.name]: {
-                            '$containsi': event.query
+                            [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']: event.query
                         }
                     }
                 ]
