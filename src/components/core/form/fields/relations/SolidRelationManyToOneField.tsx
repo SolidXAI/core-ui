@@ -184,8 +184,8 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
         if (solidFormViewMetaData?.data?.solidView?.model?.singularName === "listOfValues" && fieldContext.fieldMetadata.relationCoModelSingularName !== "moduleMetadata") {
             fixedFilterToBeApplied = true;
         }
-        if (fieldMetadata?.relationFieldFixedFilter || fieldLayoutInfo?.attrs?.fixedFilter) {
-            const convertedFixedFilter = fieldLayoutInfo?.attrs?.fixedFilter ? fieldLayoutInfo?.attrs?.fixedFilter : fieldMetadata?.relationFieldFixedFilter;
+        if (fieldMetadata?.relationFieldFixedFilter || fieldLayoutInfo?.attrs?.whereClause) {
+            const convertedFixedFilter = fieldLayoutInfo?.attrs?.whereClause ? fieldLayoutInfo?.attrs?.whereClause : fieldMetadata?.relationFieldFixedFilter;
             fixedFilterToBeApplied = true;
             const fixedFilterTemplate = Handlebars.compile(convertedFixedFilter);
             const renderedFilter = fixedFilterTemplate(formik.values);
@@ -225,9 +225,9 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
         let autocompleteQs = qs.stringify(queryData, {
             encodeValuesOnly: true,
         });
-        if (whereClause) {
-            autocompleteQs = `${autocompleteQs}&${whereClause}`;
-        }
+        // if (whereClause) {
+        //     autocompleteQs = `${autocompleteQs}&${whereClause}`;
+        // }
 
 
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
