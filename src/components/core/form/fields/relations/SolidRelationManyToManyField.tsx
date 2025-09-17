@@ -215,7 +215,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                     console.warn("Skipping invalid/empty fixed filter:", parsedFilter);
                 }
             } catch (e) {
-                console.error("Invalid fixedFilter JSON:", renderedFilter);
+                console.error("Invalid whereClause JSON:", renderedFilter);
                 parsedFilter = {};
             }
 
@@ -323,8 +323,8 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
         let fixedFilterToBeApplied = false;
         let fixedFilterParsed = false;
 
-        if (fieldMetadata?.relationFieldFixedFilter || fieldLayoutInfo?.attrs?.fixedFilter) {
-            const convertedFixedFilter = fieldLayoutInfo?.attrs?.fixedFilter ? fieldLayoutInfo?.attrs?.fixedFilter : fieldMetadata?.relationFieldFixedFilter;
+        if (fieldMetadata?.relationFieldFixedFilter || fieldLayoutInfo?.attrs?.whereClause) {
+            const convertedFixedFilter = fieldLayoutInfo?.attrs?.whereClause ? fieldLayoutInfo?.attrs?.whereClause : fieldMetadata?.relationFieldFixedFilter;
             fixedFilterToBeApplied = true;
             const fixedFilterTemplate = Handlebars.compile(convertedFixedFilter);
             const renderedFilter = fixedFilterTemplate(formik.values);
@@ -353,7 +353,7 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
                     console.warn("Skipping invalid/empty fixed filter:", parsedFilter);
                 }
             } catch (e) {
-                console.error("Invalid fixedFilter JSON:", renderedFilter);
+                console.error("Invalid whereClause JSON:", renderedFilter);
                 parsedFilter = {};
             }
 

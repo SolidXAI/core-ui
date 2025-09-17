@@ -216,7 +216,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                     console.warn("Skipping invalid/empty fixed filter:", parsedFilter);
                 }
             } catch (e) {
-                console.error("Invalid fixedFilter JSON:", renderedFilter);
+                console.error("Invalid whereClause JSON:", renderedFilter);
                 parsedFilter = {}; // fallback or throw error as needed
             }
 
