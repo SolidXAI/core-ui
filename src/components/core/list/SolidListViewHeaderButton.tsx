@@ -2,7 +2,7 @@
 import { useHasAnyRole } from "@/helpers/rolesHelper";
 import { Button } from "primereact/button";
 
-export const SolidListViewHeaderButton = ({ button, params, solidListViewMetaData, handleCustomButtonClick, selectedRecords }: any) => {
+export const SolidListViewHeaderButton = ({ button, params, solidListViewMetaData, handleCustomButtonClick, selectedRecords,filters }: any) => {
     const hasRole = !button?.attrs?.roles || button?.attrs?.roles.length === 0
         ? true
         : useHasAnyRole(button?.attrs?.roles);
@@ -21,7 +21,8 @@ export const SolidListViewHeaderButton = ({ button, params, solidListViewMetaDat
                 const event = {
                     params,
                     solidListViewMetaData: solidListViewMetaData.data,
-                    selectedRecords: selectedRecords
+                    selectedRecords: selectedRecords,
+                    filters
                 };
                 handleCustomButtonClick(button.attrs, event);
             }}

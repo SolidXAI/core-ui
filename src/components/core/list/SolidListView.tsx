@@ -905,6 +905,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                   solidListViewMetaData={solidListViewMetaData}
                   handleCustomButtonClick={handleCustomButtonClick}
                   selectedRecords={selectedRecords}
+                  filters={filters}
                 />
               ))}
 
