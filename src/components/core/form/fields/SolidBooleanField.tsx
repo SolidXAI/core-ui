@@ -36,14 +36,19 @@ export class SolidBooleanField implements ISolidField {
         // return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
 
         // Ensure the value is always a string "true" or "false"
-        const result = existingValue
-            ? (existingValue === true || existingValue === "true" ? "true" : "false")
-            : (fieldDefaultValue === true || fieldDefaultValue === "true" ? "true" : "false");
-        return result;
+        // const result = existingValue
+        //     ? (existingValue === true || existingValue === "true" ? "true" : "false")
+        //     : (fieldDefaultValue === true || fieldDefaultValue === "true" ? "true" : "false");
+        // return result;
+
+        if (existingValue !== undefined && existingValue !== null) {
+            return existingValue === true || existingValue === "true";
+        }
+        return fieldDefaultValue === true || fieldDefaultValue === "true";
     }
 
     validationSchema(): Schema {
-        let schema: Yup.StringSchema<string | null | undefined> = Yup.string();
+        let schema: Yup.BooleanSchema<boolean | null | undefined> = Yup.boolean();
 
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
@@ -63,10 +68,11 @@ export class SolidBooleanField implements ISolidField {
         //     schema = schema.max(fieldMetadata.max, `${fieldLabel} should not be more than ${fieldMetadata.max} characters long.`);
         // }
         // 3. regular expression
-        if (fieldMetadata.regexPattern) {
-            const regexPatternNotMatchingErrorMsg = fieldMetadata.regexPatternNotMatchingErrorMsg ?? `${fieldLabel} has invalid data.`
-            schema = schema.matches(fieldMetadata.regexPattern, regexPatternNotMatchingErrorMsg);
-        }
+        //*********Regex doesnt make sense in boolean right? */
+        // if (fieldMetadata.regexPattern) {
+        //     const regexPatternNotMatchingErrorMsg = fieldMetadata.regexPatternNotMatchingErrorMsg ?? `${fieldLabel} has invalid data.`
+        //     schema = schema.matches(fieldMetadata.regexPattern, regexPatternNotMatchingErrorMsg);
+        // }
 
         return schema;
     }
@@ -283,16 +289,33 @@ export const SolidBooleanSwitchStyleFormEditWidget = ({ formik, fieldContext }: 
         }
     }, []);
 
-    const handleChange = (e: CheckboxChangeEvent) => {
-        const newValue = e.value; // This returns `true` or `false`
-        console.log(`${fieldLayoutInfo.attrs.name}, new value:`, newValue);
+    const handleChange = (e: any) => {
+        const newValue = e.value;
+        console.log(`${fieldLayoutInfo.attrs.name} switch clicked, new value:`, newValue);
 
-        formik.setFieldValue(fieldLayoutInfo.attrs.name, newValue === true ? true : false);
-        formik.setTouched({ ...formik.touched, [fieldLayoutInfo.attrs.name]: true }); // Ensure Formik registers the change
-        // ✅ Check if Formik updated the value correctly
-        setTimeout(() => {
-            console.log("Formik values after update:", formik.values);
-        }, 0);
+        // formik.setFieldValue(fieldLayoutInfo.attrs.name, newValue === true ? true : false);
+        // formik.setTouched({ ...formik.touched, [fieldLayoutInfo.attrs.name]: true }); // Ensure Formik registers the change
+        // // ✅ Check if Formik updated the value correctly
+        // setTimeout(() => {
+        //     console.log("Formik values after update:", formik.values);
+        // }, 0);
+
+        // 1: BYPASS Formik's validation by directly mutating the values object
+        // This is necessary because the validation schema was rejecting boolean values
+        // Direct assignment skips all validation logic that was causing the issue
+        formik.values[fieldLayoutInfo.attrs.name] = newValue;
+
+        // 2: Force Formik to recognize the change and trigger re-renders
+        // setValues() with the second parameter as 'false' means:
+        // - false = skip validation (avoid the schema conflict)
+        // - This triggers Formik's internal change detection and component re-renders
+        formik.setValues({ ...formik.values }, false);
+
+        // 3: Mark the field as "touched" to indicate user interaction
+        // This is important for validation state and form submission logic
+        // The 'false' parameter means don't validate immediately
+        formik.setTouched({ ...formik.touched, [fieldLayoutInfo.attrs.name]: true }, false);
+        fieldContext.onChange(e, 'onFieldChange');
     };
 
     const isFormFieldValid = (formik: any, fieldName: any) =>
@@ -318,10 +341,10 @@ export const SolidBooleanSwitchStyleFormEditWidget = ({ formik, fieldContext }: 
                     <div className="flex align-items-center">
                         <InputSwitch
                             id={fieldLayoutInfo.attrs.name}
-                            name={fieldMetadata.name}
-                            checked={formik.values[fieldLayoutInfo.attrs.name] === true}
-                            // onChange={handleChange}
-                            onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
+                            name={fieldLayoutInfo.attrs.name}
+                            checked={formik.values[fieldLayoutInfo.attrs.name] === true || formik.values[fieldLayoutInfo.attrs.name] === "true"}
+                            onChange={handleChange}
+                            // onChange={(e) => {fieldContext.onChange(e, 'onFieldChange')}
                             disabled={formDisabled || fieldDisabled}
                             readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                             className={classNames("", {
