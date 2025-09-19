@@ -434,7 +434,6 @@ export const DefaultSelectionStaticFormViewWidget = ({ formik, fieldContext }: S
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const value = formik.values[fieldLayoutInfo.attrs.name];
     const isMultiSelect = fieldMetadata?.isMultiSelect;
-
     return (
         // <div className="mt-2 flex-column gap-2">
         //     <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
@@ -445,9 +444,9 @@ export const DefaultSelectionStaticFormViewWidget = ({ formik, fieldContext }: S
             <p className="m-0">
                 {isMultiSelect
                     ? Array.isArray(value)
-                        ? value.map(v => v?.label).filter(Boolean).join(', ')
+                        ? value.map(v => v?.value).filter(Boolean).join(', ')
                         : ''
-                    : value?.label || ''}
+                    : value?.value || ''}
             </p>
         </div>
     );
