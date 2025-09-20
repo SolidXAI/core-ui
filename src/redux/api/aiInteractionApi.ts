@@ -9,7 +9,7 @@ interface TriggerMcpClientJobResponse {
     statusCode: number;
     message: string[];
     error: string;
-    data: string; // UUID
+    data: any;
 }
 
 interface ApplySolidAiInteractionRequest {

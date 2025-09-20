@@ -14,6 +14,7 @@ import { Dialog } from "primereact/dialog";
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct import
+import MarkdownViewer from "@/components/common/MarkdownViewer";
 
 export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }) => {
     const renderContent = () => {
@@ -22,6 +23,10 @@ export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }
             case 'json':
                 return (
                     <JsonDisplay interaction={interaction} />
+                )
+            case 'markdown':
+                return (
+                    <MarkdownDisplay interaction={interaction} />
                 )
             case 'plain_text':
             default:
@@ -51,6 +56,20 @@ export const PlainTextDisplay: React.FC<PlainTextDisplayProps> = ({ interaction 
     return (
         <div className={`p-3 ${styles.SolidXAIResponse}`}>
             {interaction.message}
+        </div>
+    )
+}
+
+export interface MarkdownDisplayProps {
+    interaction: AiInteraction
+}
+
+export const MarkdownDisplay: React.FC<MarkdownDisplayProps> = ({ interaction }) => {
+    const jsonMsg = JSON.parse(interaction.message);
+    const markdown = jsonMsg.data;
+    return (
+        <div className={`p-3 ${styles.SolidXAIResponse}`}>
+            <MarkdownViewer data={markdown} />
         </div>
     )
 }
@@ -256,7 +275,7 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
                         </div> */}
                         {interaction?.isApplied ?
                             <div className="mt-3 font-medium solid-primary-black-text">
-                               ✅ Applied Successfully
+                                ✅ Applied Successfully
                             </div>
                             :
                             <div className="flex gap-2 mt-3">
