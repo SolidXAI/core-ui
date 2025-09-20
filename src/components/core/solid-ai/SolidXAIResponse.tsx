@@ -40,7 +40,7 @@ export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }
                 <div>
                     <Button icon={<SolidXAIIcon />} size="small" raised text rounded />
                 </div>
-                <div className={`mt-3`}>
+                <div className={`mt-3`} style={{width: '100%'}}>
                     {renderContent()}
                 </div>
             </div>
@@ -68,7 +68,7 @@ export const MarkdownDisplay: React.FC<MarkdownDisplayProps> = ({ interaction })
     const jsonMsg = JSON.parse(interaction.message);
     const markdown = jsonMsg.data;
     return (
-        <div className={`p-3 ${styles.SolidXAIResponse}`}>
+        <div className={`p-3 ${styles.SolidXAIResponse}`} style={{width: '100%'}}>
             <MarkdownViewer data={markdown} />
         </div>
     )
