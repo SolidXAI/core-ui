@@ -75,9 +75,6 @@ export const SolidListViewConfigure = (
 
         return () => document.removeEventListener("click", handleClickOutside);
     }, [isOverlayOpen])
-    
-    //its a hook and called as unconditionally at the top of component
-    const hasAnyRole = useHasAnyRole(solidListViewLayout?.attrs?.configureViewActionsRoles ?? []);
 
     const handleViewChange = (newView: string) => {
         if (view === newView) return; // Prevent unnecessary updates
@@ -87,21 +84,40 @@ export const SolidListViewConfigure = (
         router.push(newPath);
     };
 
+   //Build a map of actionKey → boolean at the top level
+    const headerActions = solidListViewLayout?.attrs?.configureViewActions ?? {};
+
+    const actionRoleMap: Record<string, boolean> = {};
+
+    // Call the hook for each action with roles (hooks still top-level)
+    Object.entries(headerActions).forEach(([key, action]: [string, any]) => {
+        if (Array.isArray(action.roles) && action.roles.length > 0) {
+            // useHasAnyRole is called unconditionally for each action
+            actionRoleMap[key] = useHasAnyRole(action.roles);
+        }
+    });
+
+    //Safe helper to check if action is enabled
     const isHeaderActionEnabled = (actionKey: string) => {
-        const headerActions = solidListViewLayout?.attrs?.configureViewActions;
+        const action = headerActions[actionKey];
 
-        if (headerActions && !headerActions[actionKey]) return true;
-        const action = headerActions?.[actionKey];
+        // If the action isn't defined, default to true
+        if (!action) return true;
 
-        if (Array.isArray(action?.roles) && action.roles.length > 0) {
-            return hasAnyRole; // already resolved
+        // Check roles first if defined
+        if (Array.isArray(action.roles) && action.roles.length > 0) {
+            return actionRoleMap[actionKey] ?? false;
         }
 
-        if (typeof action?.enabled === "boolean") {
+        // Fallback to enabled boolean
+        if (typeof action.enabled === "boolean") {
             return action.enabled;
         }
+
+        // Default to true
         return true;
     };
+
 
     return (
         <div className="position-relative">
