@@ -47,14 +47,7 @@ export const SolidListViewConfigure = (
     const router = useRouter();
     const [view, setView] = useState<string>("");
     const [exportView, setExportView] = useState<boolean>(false);
-
-    const handleViewChange = (newView: string) => {
-        if (view === newView) return; // Prevent unnecessary updates
-        const pathSegments = pathname.split('/').filter(Boolean);
-        pathSegments[pathSegments.length - 1] = newView; // Replace the last part with new view
-        const newPath = '/' + pathSegments.join('/');
-        router.push(newPath);
-    };
+    const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
     useEffect(() => {
         if (typeof pathname === 'string') {
@@ -64,9 +57,6 @@ export const SolidListViewConfigure = (
             }
         }
     }, [])
-
-
-    const [isOverlayOpen, setIsOverlayOpen] = useState(false);
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
@@ -85,26 +75,31 @@ export const SolidListViewConfigure = (
 
         return () => document.removeEventListener("click", handleClickOutside);
     }, [isOverlayOpen])
+    
+    //its a hook and called as unconditionally at the top of component
+    const hasAnyRole = useHasAnyRole(solidListViewLayout?.attrs?.configureViewActionsRoles ?? []);
+
+    const handleViewChange = (newView: string) => {
+        if (view === newView) return; // Prevent unnecessary updates
+        const pathSegments = pathname.split('/').filter(Boolean);
+        pathSegments[pathSegments.length - 1] = newView; // Replace the last part with new view
+        const newPath = '/' + pathSegments.join('/');
+        router.push(newPath);
+    };
 
     const isHeaderActionEnabled = (actionKey: string) => {
         const headerActions = solidListViewLayout?.attrs?.configureViewActions;
 
-        // If configureViewActions is defined but this action isn't listed, treat as true
         if (headerActions && !headerActions[actionKey]) return true;
-
         const action = headerActions?.[actionKey];
 
-        // ✅ Check roles first if defined
         if (Array.isArray(action?.roles) && action.roles.length > 0) {
-            return useHasAnyRole(action.roles);
+            return hasAnyRole; // already resolved
         }
 
-        // ✅ Then fallback to `enabled` boolean if defined
         if (typeof action?.enabled === "boolean") {
             return action.enabled;
         }
-
-        // ✅ Default to true if nothing is defined
         return true;
     };
 
@@ -263,7 +258,7 @@ export const SolidListViewConfigure = (
                                     </div>
                                 </AccordionTab>
                                 <AccordionTab header="Column Selector" headerClassName="pb-0">
-                                    <SolidListColumnSelector listViewMetaData={listViewMetaData} customizeLayout={customizeLayout}/>
+                                    <SolidListColumnSelector listViewMetaData={listViewMetaData} customizeLayout={customizeLayout} />
                                 </AccordionTab>
                             </Accordion>
                         </div>
