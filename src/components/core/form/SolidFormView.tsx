@@ -627,13 +627,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
     }
 
     useEffect(() => {
-        const handleError = (errorToast: any) => {
+        const handleError = (errorToast: any) => {            
             let errorMessage: any = ['An error occurred'];
 
-            if (isFetchBaseQueryErrorWithErrorResponse(errorToast)) {
+            if (errorToast?.data?.errorCode && errorToast?.data?.error) {                
+                // backend provided a structured error
+                errorMessage = errorToast?.data?.error;
+            } else if (isFetchBaseQueryErrorWithErrorResponse(errorToast)) {
+                // RTK Query-style error with data.message
                 errorMessage = errorToast.data.message;
             } else {
-                errorMessage = ['Something went wrong'];
+                errorMessage = "Something went wrong";
             }
 
             toast.current?.show({
