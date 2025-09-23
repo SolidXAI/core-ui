@@ -47,6 +47,7 @@ export const SolidListViewConfigure = (
     const router = useRouter();
     const [view, setView] = useState<string>("");
     const [exportView, setExportView] = useState<boolean>(false);
+    const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
     const handleViewChange = (newView: string) => {
         if (view === newView) return; // Prevent unnecessary updates
@@ -65,8 +66,6 @@ export const SolidListViewConfigure = (
         }
     }, [])
 
-
-    const [isOverlayOpen, setIsOverlayOpen] = useState(false);
     useEffect(() => {
         const handleClickOutside = (event: MouseEvent) => {
             if (
@@ -86,25 +85,38 @@ export const SolidListViewConfigure = (
         return () => document.removeEventListener("click", handleClickOutside);
     }, [isOverlayOpen])
 
+
+   //Build a map of actionKey → boolean at the top level
+    const headerActions = solidListViewLayout?.attrs?.configureViewActions ?? {};
+
+    const actionRoleMap: Record<string, boolean> = {};
+
+    // Call the hook for each action with roles (hooks still top-level)
+    Object.entries(headerActions).forEach(([key, action]: [string, any]) => {
+        if (Array.isArray(action.roles) && action.roles.length > 0) {
+            // useHasAnyRole is called unconditionally for each action
+            actionRoleMap[key] = useHasAnyRole(action.roles);
+        }
+    });
+
+    //Safe helper to check if action is enabled
     const isHeaderActionEnabled = (actionKey: string) => {
-        const headerActions = solidListViewLayout?.attrs?.configureViewActions;
+        const action = headerActions[actionKey];
 
-        // If configureViewActions is defined but this action isn't listed, treat as true
-        if (headerActions && !headerActions[actionKey]) return true;
+        // If the action isn't defined, default to true
+        if (!action) return true;
 
-        const action = headerActions?.[actionKey];
-
-        // ✅ Check roles first if defined
-        if (Array.isArray(action?.roles) && action.roles.length > 0) {
-            return useHasAnyRole(action.roles);
+        // Check roles first if defined
+        if (Array.isArray(action.roles) && action.roles.length > 0) {
+            return actionRoleMap[actionKey] ?? false;
         }
 
-        // ✅ Then fallback to `enabled` boolean if defined
-        if (typeof action?.enabled === "boolean") {
+        // Fallback to enabled boolean
+        if (typeof action.enabled === "boolean") {
             return action.enabled;
         }
 
-        // ✅ Default to true if nothing is defined
+        // Default to true
         return true;
     };
 

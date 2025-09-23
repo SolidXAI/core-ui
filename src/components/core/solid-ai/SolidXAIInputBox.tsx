@@ -23,8 +23,8 @@ export const SolidXAIInputBox = ({ onTriggerComplete }: SolidXAIInputBoxProps) =
         try {
             const response = await triggerMcpClientJob({ prompt }).unwrap();
             if (response?.data && onTriggerComplete) {
-                console.log(`Invoking onTriggerComplete with data ${response.data}`);
-                onTriggerComplete(response.data);
+                console.log(`Invoking onTriggerComplete with data ${response.data.queueMessageId}`);
+                onTriggerComplete(response.data.queueMessageId);
             }
             setPrompt('');
         } catch (err) {
