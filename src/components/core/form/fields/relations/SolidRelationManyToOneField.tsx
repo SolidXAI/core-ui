@@ -58,17 +58,61 @@ export class SolidRelationManyToOneField implements ISolidField {
     }
 
     validationSchema(): Schema {
-        let schema = Yup.object();
-
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-
-        // 1. required 
+    
+        let schema = Yup.mixed();
+    
+        // Custom validation for relation field
         if (fieldMetadata.required) {
-            schema = schema.required(`${fieldLabel} is required.`);
+            schema = schema.test(
+                'required-relation',
+                `${fieldLabel} is required.`,
+                function(value: any) {
+                    // Handle empty values
+                    if (!value) return false;
+                    
+                    // If it's an object with solidManyToOneValue, check if it's valid
+                    if (typeof value === 'object' && value !== null && (value as any).solidManyToOneValue) {
+                        return true;
+                    }
+                    
+                    // If it's a string (user typed but didn't select), it's invalid for required field
+                    if (typeof value === 'string') {
+                        return false;
+                    }
+                    
+                    return false;
+                }
+            );
         }
-
+    
+        // Add validation to ensure valid selection
+        schema = schema.test(
+            'valid-selection',
+            `Please select a valid ${fieldLabel} from the dropdown.`,
+            function(value: any) {
+                // If not required and empty, it's valid
+                if (!fieldMetadata.required && (!value || value === '')) {
+                    return true;
+                }
+                
+                // If it's an object with solidManyToOneValue, it's a valid selection
+                if (typeof value === 'object' && value !== null && (value as any).solidManyToOneValue) {
+                    return true;
+                }
+                
+                // If it's a string (user typed but didn't select), it's invalid
+                if (typeof value === 'string' && value.trim() !== '') {
+                    return false;
+                }
+                
+                // Empty value for non-required field
+                return !fieldMetadata.required;
+            }
+        );
+    
         return schema;
     }
 
