@@ -758,6 +758,12 @@ export const SolidListView = (params: SolidListViewParams) => {
       deleteList.push(element.id);
     });
     deleteManySolidEntities(deleteList);
+    toast.current?.show({
+      severity: 'success',
+      summary: 'Deleted',
+      detail: 'Records deleted successfully',
+      life: 3000,
+    });
     setDialogVisible(false);
   };
 
@@ -1238,18 +1244,20 @@ export const SolidListView = (params: SolidListViewParams) => {
       <Dialog
         visible={isDialogVisible}
         header="Confirm Delete"
-        modal
-        footer={() => (
-          <div className="flex justify-content-center">
-            <Button label="Yes" icon="pi pi-check" severity="danger" autoFocus onClick={deleteBulk} />
-            <Button label="No" icon="pi pi-times" onClick={onDeleteClose} />
-          </div>
-        )}
         onHide={() => setDialogVisible(false)}
+        headerClassName="py-2"
+        contentClassName="px-0 pb-0"
+        style={{ width: '20vw' }}
       >
-        <p>Are you sure you want to delete the selected records?</p>
+        <Divider className="m-0" />
+        <div className="p-4">
+          <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>Are you sure you want to delete the selected records?</p>
+          <div className="flex align-items-center gap-2 mt-3">
+            <Button label="Delete" severity="danger" size="small" onClick={handleDeleteEntity} autoFocus onClick={deleteBulk} />
+            <Button label="Cancel" size="small" onClick={onDeleteClose} outlined className='bg-primary-reverse' />
+          </div>
+        </div>
       </Dialog>
-
       <Dialog
         visible={isRecoverDialogVisible}
         header="Confirm Recover"
@@ -1283,7 +1291,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           </p>
           {/* <p className="" style={{ color: 'var{--solid-grey-500}' }}>{selectedSolidViewData?.singularName}</p> */}
           <div className="flex align-items-center gap-2 mt-3">
-            <Button label="Delete" size="small" onClick={handleDeleteEntity} />
+            <Button label="Delete" severity="danger" size="small" onClick={handleDeleteEntity} />
             <Button label="Cancel" size="small" onClick={() => setDeleteEntity(false)} outlined className='bg-primary-reverse' />
           </div>
         </div>
