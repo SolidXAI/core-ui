@@ -1,13 +1,77 @@
 'use client';
-import React from 'react';
+import React, { useState } from 'react';
 import { Column } from "primereact/column";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { Button } from 'primereact/button';
 import { SolidMediaListFieldWidgetProps } from '@/types/solid-core';
 import { getExtensionComponent } from '@/helpers/registry';
+import { classNames } from 'primereact/utils';
 
+// Helpers
+const isImageFile = (url: string) => /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
+const isVideoFile = (url: string) => /\.(mp4|webm|ogg)$/i.test(url);
+const isAudioFile = (url: string) => /\.(mp3|wav|ogg)$/i.test(url);
+
+// Thumbnail preview component
+const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.MouseEvent) => void }) => {
+    const [isBroken, setIsBroken] = useState(false);
+
+    if (!isBroken) {
+        if (isImageFile(src)) {
+            return (
+                <img
+                    src={src}
+                    alt="media"
+                    className="shadow-2 border-round"
+                    width={40}
+                    height={40}
+                    style={{ objectFit: "cover" }}
+                    onError={() => setIsBroken(true)}
+                    onClick={onClick}
+                />
+            );
+        }
+
+        if (isVideoFile(src)) {
+            return (
+                <video
+                    src={src}
+                    width={40}
+                    height={40}
+                    className="shadow-2 border-round"
+                    style={{ objectFit: "cover" }}
+                    onError={() => setIsBroken(true)}
+                    onClick={onClick}
+                    muted
+                />
+            );
+        }
+
+        if (isAudioFile(src)) {
+            return (
+                <div
+                    className="shadow-2 border-round flex align-items-center justify-content-center bg-gray-100"
+                    style={{ width: 40, height: 40 }}
+                    onClick={onClick}
+                >
+                    <i className="pi pi-volume-up text-xl text-gray-600"></i>
+                </div>
+            );
+        }
+    }
+
+    // fallback icon
+    return (
+        <div
+            style={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center" }}
+        >
+            <i className={classNames("pi pi-file", "text-3xl text-gray-400")}></i>
+        </div>
+    );
+};
+
+// Column Component
 const SolidMediaMultipleColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidListViewColumnParams) => {
-    // const filterable = column.attrs.filterable;
     const filterable = false;
     const showFilterOperator = false;
     const columnDataType = undefined;
@@ -37,42 +101,37 @@ const SolidMediaMultipleColumn = ({ solidListViewMetaData, fieldMetadata, column
                         {DynamicWidget && <DynamicWidget {...widgetProps} />}
                     </>
                 )
-            }
-            }            // className="text-sm"
+            }}
             sortable={column.attrs.sortable}
-            // filter={filterable}
             dataType={columnDataType}
             showFilterOperator={showFilterOperator}
             filterPlaceholder={`Search by ${fieldMetadata.displayName}`}
             style={{ minWidth: "12rem" }}
             headerClassName="table-header-fs"
-        ></Column>
+        />
     );
-
 };
 
 export default SolidMediaMultipleColumn;
 
-
-
+// Default multiple widget
 export const DefaultMediaMultipleListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidMediaListFieldWidgetProps) => {
     if (!rowData?._media?.[fieldMetadata.name]) return null;
 
-    const imageUrls = rowData._media[fieldMetadata.name].map((i: any) => i._full_url);
+    const mediaUrls = rowData._media[fieldMetadata.name].map((i: any) => i._full_url);
 
     return (
-        imageUrls.length > 0 ?
+        mediaUrls.length > 0 ?
             <div className='flex gap-2 align-items-end'>
-                <img
-                    src={imageUrls[0]}
-                    alt={`image-multiple`}
-                    className="shadow-2 border-round"
-                    width={40}
-                    height={40}
-                    style={{ objectFit: "cover" }}
+                <MediaPreview
+                    src={mediaUrls[0]}
                     onClick={(event) => {
                         event.stopPropagation();
-                        setLightboxUrls(imageUrls.map((img: string) => ({ src: img, downloadUrl: img })));
+                        const urlsWithType = mediaUrls.map((src: string) => {
+                            return { src, downloadUrl: src };
+                        });
+
+                        setLightboxUrls(urlsWithType);
                         setOpenLightbox(true);
                     }}
                 />
@@ -84,15 +143,17 @@ export const DefaultMediaMultipleListWidget = ({ rowData, solidListViewMetaData,
                     className='view-media-button'
                     onClick={(event) => {
                         event.stopPropagation();
-                        setLightboxUrls(imageUrls.map((img: string) => ({ src: img })));
+
+                        const urlsWithType = mediaUrls.map((src: string) => {
+                            return { src, downloadUrl: src };
+                        });
+
+                        setLightboxUrls(urlsWithType);
                         setOpenLightbox(true);
                     }}
                 />
             </div>
             :
-            <div
-                style={{ height: 40, width: 40 }}
-            >
-            </div>
+            <div style={{ height: 40, width: 40 }} />
     );
 };

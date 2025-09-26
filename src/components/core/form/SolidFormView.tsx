@@ -47,6 +47,7 @@ import { SolidFormUserViewLayout } from "./SolidFormUserViewLayout";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import Download from "yet-another-react-lightbox/plugins/download";
+import Video from "yet-another-react-lightbox/plugins/video";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 import { SolidChatter } from "../chatter/SolidChatter";
@@ -1333,6 +1334,35 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 showToast("success", "Saved", "Marked as unpublish !");
             }
         }
+
+        const isVideoOrAudio = (url: string) => {
+            // Remove query params if present
+            const cleanUrl = url.split("?")[0];
+            const ext = cleanUrl.split(".").pop()?.toLowerCase();
+
+            // Combined list of supported media extensions
+            const mediaExt = ["mp4", "webm", "ogg", "mov", "mp3", "wav", "m4a", "aac"];
+
+            return ext ? mediaExt.includes(ext) : false;
+        };
+
+        const controlsList = ["nodownload", "nofullscreen", "noremoteplayback"];
+        const slides = lightboxUrls.map((item:any) => {
+            const url = item.src || item.downloadUrl || "";
+            if (isVideoOrAudio(url)) {
+              return {
+                type: "video" as const,
+                sources: [{ src: url,  type: "video/mp4", }],
+              };
+            }
+            return { src: url };
+          });
+        
+          const hasMedia = slides.some((s) => s.type === "video");
+
+
+          console.log("lightbox urls", slides);
+
         return (
             <div className="solid-form-wrapper">
                 <Toast ref={toast} />
@@ -1470,9 +1500,27 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 {openLightbox &&
                     <Lightbox
                         open={openLightbox}
-                        plugins={[Counter, Download]}
+                        plugins={
+                            hasMedia
+                                ? [Counter, Download, Video] // add Video plugin if needed
+                                : [Counter, Download]
+                        }
                         close={() => setOpenLightbox(false)}
-                        slides={lightboxUrls}
+                        slides={[...slides]}
+                        {...(hasMedia && {
+                            video: {
+                                controls: true,
+                                playsInline: true,
+                                autoPlay: false,
+                                loop: false,
+                                muted: false,
+                                disablePictureInPicture: false,
+                                disableRemotePlayback: false,
+                                controlsList: controlsList.join(" "),
+                                crossOrigin: "anonymous",
+                                preload: "auto",
+                            },
+                        })}
                     />
                 }
 

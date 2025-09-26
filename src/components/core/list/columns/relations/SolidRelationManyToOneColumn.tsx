@@ -6,6 +6,9 @@ import { SolidListViewColumnParams } from '../../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../../SolidVarInputsFilterElement";
 import { getExtensionComponent } from '@/helpers/registry';
 import { SolidListFieldWidgetProps } from '@/types/solid-core';
+import { Button } from 'primereact/button';
+import { useRouter } from 'next/navigation';
+import { kebabCase } from 'change-case';
 
 const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
@@ -78,6 +81,7 @@ export default SolidRelationManyToOneColumn;
 
 
 export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
+    const router = useRouter();
     const manyToOneFieldData = rowData[column.attrs.name];
 
     // This is the userkey that will be present within the rowData.
@@ -87,7 +91,25 @@ export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaD
 
         const manyToOneColVal = manyToOneFieldData[userKeyField];
 
-        return <span>{manyToOneColVal}</span>;
+        return (
+            <Button
+                label={manyToOneColVal}
+                link
+                onClick={() => {
+                    // Get current path from browser
+                    const pathSegments = window.location.pathname.split('/').filter(Boolean);
+
+                    // The modelName is the second-last segment before "list"
+                    const listIndex = pathSegments.lastIndexOf('list');
+                    if (listIndex > 0) {
+                        pathSegments[listIndex - 1] = kebabCase(fieldMetadata?.relationModel?.singularName);
+                        pathSegments[listIndex] = `form/${manyToOneFieldData?.id}`;
+                    }
+                    const newPath = `/${pathSegments.join('/')}?viewMode=view`;
+                    router.push(newPath);
+                }}
+            />
+        );
     }
     else {
         return <span></span>
