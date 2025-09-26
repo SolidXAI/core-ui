@@ -6194,9 +6194,14 @@
   }
 
 
-  .solid-standard-autocomplete .p-inputtext:focus+.p-button {
+  .solid-standard-autocomplete .p-inputtext:focus  {
     border-color: #d1d5db !important;
   }
+
+  .solid-standard-autocomplete.p-inputwrapper-focus .p-autocomplete-dropdown.p-button {
+    border-color: var(--primary-color) !important;
+  }
+
 
   .solid-custom-editor .ql-toolbar.ql-snow {
     border: 1px solid #d1d5db;

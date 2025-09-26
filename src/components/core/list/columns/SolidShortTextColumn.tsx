@@ -92,12 +92,28 @@ const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column, se
 export default SolidShortTextColumn;
 
 
-export const DefaultTextListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
-    const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter
+export const DefaultTextListWidget = ({rowData, solidListViewMetaData, fieldMetadata, column}: SolidListFieldWidgetProps) => {
+    const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter;
+
+    let displayValue = rowData[fieldMetadata.name];
+
+    if (fieldMetadata?.selectionStaticValues && displayValue) {
+        const mapping: Record<string, string> = {};
+
+        fieldMetadata.selectionStaticValues.forEach((entry: string) => {
+            const [val, label] = entry.split(":");
+            mapping[val] = label;
+        });
+        
+        const values = displayValue.split(",").map((v: string) => v.trim());
+
+        displayValue = values.map((v: string) => mapping[v] || v).join(", ");
+    }
+
     return (
         <SolidTableRowCell
-            value={rowData[fieldMetadata.name]}
+            value={displayValue}
             truncateAfter={truncateAfter}
         />
-    )
+    );
 };

@@ -9,6 +9,26 @@ import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 
+
+// Converts a HH:mm:ss string into a JavaScript Date object
+function parseTimeStringToDate(timeStr: string): Date | null {
+    if (!timeStr) return null;
+    if (typeof timeStr === "string" && timeStr.match(/^\d{2}:\d{2}:\d{2}$/)) {
+        const [h, m, s] = timeStr.split(":").map(Number);
+        const d = new Date();
+        d.setHours(h, m, s, 0);
+        return d;
+    }
+    return null;
+}
+
+// Formats a Date object to a HH:mm:ss string for display
+function formatTime(date: Date | null): string {
+    if (!date) return "";
+    return date.toTimeString().split(" ")[0]; 
+}
+
+
 export class SolidTimeField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
@@ -19,7 +39,20 @@ export class SolidTimeField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        if (value) {
+         if (value instanceof Date) {
+            // Use local date with selected time
+            const now = new Date();
+            const localDate = new Date(
+                now.getFullYear(),
+                now.getMonth(),
+                now.getDate(),
+                value.getHours(),
+                value.getMinutes(),
+                value.getSeconds()
+            );
+    
+            formData.append(fieldLayoutInfo.attrs.name, localDate.toISOString());
+        } else if (value) {
             formData.append(fieldLayoutInfo.attrs.name, value);
         }
     }
@@ -28,7 +61,18 @@ export class SolidTimeField implements ISolidField {
         const fieldName = this.fieldContext.field.attrs.name;
         const fieldDefaultValue = this.fieldContext?.fieldMetadata?.defaultValue;
         const existingValue = this.fieldContext.data[fieldName];
-        return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
+
+        if (existingValue) {
+            if (existingValue instanceof Date) {
+                return existingValue;
+            }
+            if (typeof existingValue === "string") {
+                const parsed = parseTimeStringToDate(existingValue);
+                if (parsed) return parsed;
+            }
+        }
+
+        return fieldDefaultValue ? new Date(fieldDefaultValue) : null;
     }
 
     validationSchema(): Schema {
@@ -57,7 +101,7 @@ export class SolidTimeField implements ISolidField {
             editWidget = 'DefaultTimeFormEditWidget';
         }
         if (!viewWidget) {
-            viewWidget = 'DefaultShortTextFormViewWidget';
+            viewWidget = 'DefaultTimeFormViewWidget';
         }
         const viewMode: string = this.fieldContext.viewMode;
 
@@ -111,6 +155,9 @@ export const DefaultTimeFormEditWidget = ({ formik, fieldContext }: SolidFormFie
     const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
 
+    const fieldValue =formik.values[fieldLayoutInfo.attrs.name];
+
+    
 
     return (
         <div className="relative">
@@ -127,9 +174,12 @@ export const DefaultTimeFormEditWidget = ({ formik, fieldContext }: SolidFormFie
                     ref={calendarRef} // Attach ref to Calendar
                     id={fieldLayoutInfo.attrs.name}
                     aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                    onChange={formik.handleChange}
+                    // onChange={formik.handleChange}
+                    onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
+
                     //@ts-ignore
-                    value={formik.values[fieldLayoutInfo.attrs.name] ? formik.values[fieldLayoutInfo.attrs.name] : Date()}
+                    // value={formik.values[fieldLayoutInfo.attrs.name] ? formik.values[fieldLayoutInfo.attrs.name] : Date()}
+                    value={fieldValue instanceof Date ? fieldValue : typeof fieldValue === "string" ? parseTimeStringToDate(fieldValue) : null}
                     // dateFormat="mm/dd/yy"
                     // placeholder="mm/dd/yyyy hh:mm"
                     hideOnDateTimeSelect
@@ -147,3 +197,24 @@ export const DefaultTimeFormEditWidget = ({ formik, fieldContext }: SolidFormFie
         </div>
     );
 }
+
+export const DefaultTimeFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const fieldValue = formik.values[fieldLayoutInfo.attrs.name];
+
+    let displayValue = "";
+    if (fieldValue instanceof Date) {
+        displayValue = formatTime(fieldValue);
+    } else if (typeof fieldValue === "string") {
+        displayValue = formatTime(parseTimeStringToDate(fieldValue));
+    }
+
+    return (
+        <div className="mt-2 flex-column gap-2">
+            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            <p className="m-0">{displayValue || "-"}</p>
+        </div>
+    );
+};

@@ -147,13 +147,12 @@ export const DefaultDateTimeFormEditWidget = ({ formik, fieldContext }: SolidFor
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
-                <div onClick={handleInputClick}>
+                <div onClick={handleInputClick} id={fieldLayoutInfo.attrs.name}>
                     <Calendar
                         disabled={formDisabled || fieldDisabled || readOnlyPermission}
                         ref={calendarRef} // Attach ref to Calendar
                         id={fieldLayoutInfo.attrs.name}
                         aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                        name={fieldMetadata.name}
                         // onChange={formik.handleChange}
                         onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
                         //@ts-ignore
@@ -161,10 +160,11 @@ export const DefaultDateTimeFormEditWidget = ({ formik, fieldContext }: SolidFor
                         // dateFormat="mm/dd/yy"
                         // placeholder="mm/dd/yyyy hh:mm"
                         mask="99/99/9999 99:99"
+                        appendTo="self"          
                         showTime
                         hourFormat="24"
                         hideOnDateTimeSelect
-                        showOnFocus={false}            
+                        onFocus={() => setOverlayVisible(true)}
                         visible={overlayVisible}    
                         onVisibleChange={(e) => {
                             console.log("Overlay visibility changed:", e.visible);
