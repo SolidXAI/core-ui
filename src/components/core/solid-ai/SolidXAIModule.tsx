@@ -43,6 +43,8 @@ export const SolidXAIModule = ({ showHeader, inListView }: any) => {
         const queryString = qs.stringify(query, {
           encodeValuesOnly: true,
         });
+        console.log(`Attempting to fetch mq message status with query string: ${queryString}`);
+        
         const res = await getMqMessageStatus(queryString)
         if (res.isSuccess === true) {
           if (res.data.records.length > 0) {
