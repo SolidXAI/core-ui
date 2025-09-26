@@ -6142,8 +6142,13 @@
     color: #FFF;
   }
 
-  .solid-standard-autocomplete .p-inputtext:focus+.p-button {
+  .solid-standard-autocomplete .p-inputtext:focus {
     border-color: var(--primary-light-color) !important;
+  }
+
+
+  .solid-standard-autocomplete.p-inputwrapper-focus .p-autocomplete-dropdown.p-button {
+    border-color: var(--primary-color) !important;
   }
 
   .solid-custom-editor .ql-toolbar.ql-snow {

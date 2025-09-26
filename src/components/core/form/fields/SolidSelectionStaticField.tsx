@@ -444,9 +444,9 @@ export const DefaultSelectionStaticFormViewWidget = ({ formik, fieldContext }: S
             <p className="m-0">
                 {isMultiSelect
                     ? Array.isArray(value)
-                        ? value.map(v => v?.value).filter(Boolean).join(', ')
+                        ? value.map(v => v?.label).filter(Boolean).join(', ')
                         : ''
-                    : value?.value || ''}
+                    : value?.label || ''}
             </p>
         </div>
     );

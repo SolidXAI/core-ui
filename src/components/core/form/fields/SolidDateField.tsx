@@ -1,7 +1,7 @@
 'use client';
 import { Calendar } from "primereact/calendar";
 import { Message } from "primereact/message";
-import { useRef } from "react";
+import { useEffect, useRef,useState } from "react";
 import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
@@ -109,6 +109,7 @@ export class SolidDateField implements ISolidField {
 
 export const DefaultDateFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
 
+    const [overlayVisible, setOverlayVisible] = useState(false);
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const className = fieldLayoutInfo.attrs?.className || 'field col-12';
@@ -124,6 +125,28 @@ export const DefaultDateFormEditWidget = ({ formik, fieldContext }: SolidFormFie
     // const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
 
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
+
+    useEffect(() => {
+        const handleDocumentClick = (event: MouseEvent) => {
+            const inputElement = calendarRef.current?.getInput();
+            const overlayElement = calendarRef.current?.getOverlay();
+
+            if (overlayVisible && inputElement && !inputElement.contains(event.target as Node) &&  overlayElement && !overlayElement.contains(event.target as Node)) {
+                setOverlayVisible(false);
+            }
+        };
+
+        document.addEventListener('mousedown', handleDocumentClick);
+        return () => {
+            document.removeEventListener('mousedown', handleDocumentClick);
+        };
+    }, [overlayVisible]);
+
+    const handleInputClick = () => {
+        setOverlayVisible(true);
+    };
+
+
     return (
         <div className="relative">
             <div className="flex flex-column gap-2 mt-4">
@@ -134,22 +157,42 @@ export const DefaultDateFormEditWidget = ({ formik, fieldContext }: SolidFormFie
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
-                <Calendar
-                    disabled={formDisabled || fieldDisabled || readOnlyPermission}
-                    ref={calendarRef} // Attach ref to Calendar
-                    id={fieldLayoutInfo.attrs.name}
-                    aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                    name={fieldMetadata.name}
-                    // onChange={formik.handleChange}
-                    onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-                    //@ts-ignore
-                    value={formik.values[fieldLayoutInfo.attrs.name] ? new Date(formik.values[fieldLayoutInfo.attrs.name]) : Date()}
-                    // dateFormat="mm/dd/yy"
-                    // placeholder="mm/dd/yyyy hh:mm"
-                    mask="99/99/9999"
-                    hideOnDateTimeSelect
-                    className=""
-                />
+                <div onClick={handleInputClick} id={fieldLayoutInfo.attrs.name}>
+                    <Calendar
+                        disabled={formDisabled || fieldDisabled || readOnlyPermission}
+                        ref={calendarRef} // Attach ref to Calendar
+                        aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
+                        name={fieldMetadata.name}
+                        // onChange={formik.handleChange}
+                        onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
+                        //@ts-ignore
+                        value={formik.values[fieldLayoutInfo.attrs.name] ? new Date(formik.values[fieldLayoutInfo.attrs.name]) : Date()}
+                        // dateFormat="mm/dd/yy"
+                        // placeholder="mm/dd/yyyy hh:mm"
+                        mask="99/99/9999"
+                        hideOnDateTimeSelect
+                        appendTo="self"          
+                        className=""
+                        onFocus={() => setOverlayVisible(true)}
+                        visible={overlayVisible}    
+                        onVisibleChange={(e) => {
+                            console.log("Overlay visibility changed:", e.visible);
+                            setOverlayVisible(e.visible);
+                        }}
+                        onBlur={(e: React.FocusEvent) => {                                                                              
+                            if (calendarRef.current?.getOverlay()?.contains(e.relatedTarget as Node)) {                                            
+                                return;                                                                                                            
+                                }   
+                            setOverlayVisible(false);
+                        }}
+                        onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
+                                if (e.key === "Tab") {
+                                    setOverlayVisible(false);
+                                }
+                            }
+                        }
+                    />
+                </div>
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <div className="absolute mt-1">
