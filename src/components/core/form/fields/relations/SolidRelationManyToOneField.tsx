@@ -58,17 +58,61 @@ export class SolidRelationManyToOneField implements ISolidField {
     }
 
     validationSchema(): Schema {
-        let schema = Yup.object();
-
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-
-        // 1. required 
+    
+        let schema = Yup.mixed();
+    
+        // Custom validation for relation field
         if (fieldMetadata.required) {
-            schema = schema.required(`${fieldLabel} is required.`);
+            schema = schema.test(
+                'required-relation',
+                `${fieldLabel} is required.`,
+                function(value: any) {
+                    // Handle empty values
+                    if (!value) return false;
+                    
+                    // If it's an object with solidManyToOneValue, check if it's valid
+                    if (typeof value === 'object' && value !== null && (value as any).solidManyToOneValue) {
+                        return true;
+                    }
+                    
+                    // If it's a string (user typed but didn't select), it's invalid for required field
+                    if (typeof value === 'string') {
+                        return false;
+                    }
+                    
+                    return false;
+                }
+            );
         }
-
+    
+        // Add validation to ensure valid selection
+        schema = schema.test(
+            'valid-selection',
+            `Please select a valid ${fieldLabel} from the dropdown.`,
+            function(value: any) {
+                // If not required and empty, it's valid
+                if (!fieldMetadata.required && (!value || value === '')) {
+                    return true;
+                }
+                
+                // If it's an object with solidManyToOneValue, it's a valid selection
+                if (typeof value === 'object' && value !== null && (value as any).solidManyToOneValue) {
+                    return true;
+                }
+                
+                // If it's a string (user typed but didn't select), it's invalid
+                if (typeof value === 'string' && value.trim() !== '') {
+                    return false;
+                }
+                
+                // Empty value for non-required field
+                return !fieldMetadata.required;
+            }
+        );
+    
         return schema;
     }
 
@@ -162,13 +206,21 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
     const whereClause = fieldLayoutInfo.attrs.whereClause;
 
-    const [autoCompleteItems, setAutoCompleteItems] = useState([]);
-    const autoCompleteSearch = async (event: AutoCompleteCompleteEvent) => {
+    const [autoCompleteItems, setAutoCompleteItems] = useState<any[]>([]);
+    const [offset, setOffset] = useState(0);
+    const [hasMore, setHasMore] = useState(true);
+    const [currentQuery, setCurrentQuery] = useState("");
+    const LIMIT = 50;
+    const [loading, setLoading] = useState(false);
 
+    const autoCompleteSearch = async (event: AutoCompleteCompleteEvent) => {
+        setOffset(0);
+        setCurrentQuery(event.query || "");
+        setHasMore(true);
         // Get the list view layout & metadata first. 
         const queryData = {
             offset: 0,
-            limit: 10,
+            limit: LIMIT,
             filters: {
                 $and: [
                     {
@@ -234,26 +286,117 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
             showToast("error", "Please select relevant fields used in fixed filter", "Fields Not selected!");
 
         } else {
-            // TODO: do error handling here, possible errors like modelname is incorrect etc...
-            const autocompleteResponse = await triggerGetSolidEntities(autocompleteQs);
+            try {
+                setLoading(true);
+                // TODO: do error handling here, possible errors like modelname is incorrect etc...
+                const autocompleteResponse = await triggerGetSolidEntities(autocompleteQs);
 
-            // TODO: if no data found then can we show no matching "entities", where entities can be replaced with the model plural name,
-            const autocompleteData = autocompleteResponse.data;
+                // TODO: if no data found then can we show no matching "entities", where entities can be replaced with the model plural name,
+                const autocompleteData = autocompleteResponse.data;
 
-            if (autocompleteData) {
-                const autoCompleteItems = autocompleteData.records.map((item: any) => {
-                    return {
-                        solidManyToOneLabel: item[fieldMetadata?.relationModel?.userKeyField?.name],
-                        solidManyToOneValue: item['id'],
-                        ...item,
-                    }
-                });
-                setAutoCompleteItems(autoCompleteItems);
+                if (autocompleteData) {
+                    const autoCompleteItems = autocompleteData.records.map((item: any) => {
+                        return {
+                            solidManyToOneLabel: item[fieldMetadata?.relationModel?.userKeyField?.name],
+                            solidManyToOneValue: item['id'],
+                            ...item,
+                        }
+                    });
+                    setAutoCompleteItems(autoCompleteItems);
+                    setOffset(autocompleteData.records.length);
+                    setHasMore(autocompleteData.records.length === LIMIT);
+                }
+            }
+            finally {
+                setLoading(false);
             }
         }
 
 
     }
+
+    const onLazyLoad = async (event: { first: number; last: number }) => {
+        if (!hasMore || loading) return;
+        if (event.last < autoCompleteItems.length - 1) return; // Only load if user reaches bottom
+
+        const queryData = {
+            offset: offset,
+            limit: LIMIT,
+            filters: {
+                $and: [
+                    {
+                        [fieldMetadata?.relationModel?.userKeyField?.name]: {
+                            [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']: currentQuery
+                        }
+                    }
+                ]
+            }
+        };
+
+        let fixedFilterToBeApplied = false;
+        let fixedFilterParsed = false;
+        if (solidFormViewMetaData?.data?.solidView?.model?.singularName === "listOfValues" && fieldContext.fieldMetadata.relationCoModelSingularName !== "moduleMetadata") {
+            fixedFilterToBeApplied = true;
+        }
+        if (fieldMetadata?.relationFieldFixedFilter || fieldLayoutInfo?.attrs?.whereClause) {
+            const convertedFixedFilter = fieldLayoutInfo?.attrs?.whereClause ? fieldLayoutInfo?.attrs?.whereClause : fieldMetadata?.relationFieldFixedFilter;
+            fixedFilterToBeApplied = true;
+            const fixedFilterTemplate = Handlebars.compile(convertedFixedFilter);
+            const renderedFilter = fixedFilterTemplate(formik.values);
+
+            // Parse the result into a JS object
+            let parsedFilter;
+            try {
+                parsedFilter = JSON.parse(renderedFilter);
+                const isValid = (obj: any): boolean => {
+                    if (!obj || typeof obj !== 'object') return false;
+
+                    // Recursively check all nested values
+                    const hasValidValue = (val: any): boolean => {
+                        if (val === null || val === undefined || val === '') return false;
+                        if (typeof val === 'object') {
+                            return Object.values(val).some(hasValidValue);
+                        }
+                        return true;
+                    };
+
+                    return hasValidValue(obj);
+                };
+
+                if (isValid(parsedFilter)) {
+                    queryData.filters.$and.push(parsedFilter);
+                    fixedFilterParsed = true;
+                } else {
+                    console.warn("Skipping invalid/empty fixed filter:", parsedFilter);
+                }
+            } catch (e) {
+                console.error("Invalid whereClause JSON:", renderedFilter);
+                parsedFilter = {}; // fallback or throw error as needed
+            }
+
+        }
+
+        const autocompleteQs = qs.stringify(queryData, { encodeValuesOnly: true });
+        if (fixedFilterToBeApplied && !fixedFilterParsed) {
+            showToast("error", "Please select relevant fields used in fixed filter", "Fields Not selected!");
+
+        } else {
+            try {
+                setLoading(true);
+                const response = await triggerGetSolidEntities(autocompleteQs);
+                const records = response.data?.records || [];
+                if (records.length < LIMIT) setHasMore(false);
+                setAutoCompleteItems(prev => [...prev, ...records.map((item: any) => ({
+                    solidManyToOneLabel: item[fieldMetadata?.relationModel?.userKeyField?.name],
+                    solidManyToOneValue: item.id,
+                    ...item
+                }))]);
+                setOffset(prev => prev + records.length);
+            } finally {
+                setLoading(false);
+            }
+        }
+    };
 
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
@@ -297,6 +440,11 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                         onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
                         onFocus={(e) => e.target.select()}
                         className="w-full solid-standard-autocomplete"
+                        virtualScrollerOptions={{
+                            itemSize: 38,
+                            lazy: true,
+                            onLazyLoad
+                        }}
                     />
                     {fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false &&
                         <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} customCreateHandler={customCreateHandler} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity}></RenderSolidFormEmbededView>
@@ -375,7 +523,7 @@ export const DefaultRelationManyToOneFormViewWidget = ({ formik, fieldContext }:
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const value = formik.values[fieldLayoutInfo.attrs.name];
-    const userKeyField = fieldLayoutInfo?.attrs?.coModelFieldToDisplay ? fieldLayoutInfo?.attrs?.coModelFieldToDisplay:fieldMetadata?.relationModel?.userKeyField?.name;
+    const userKeyField = fieldLayoutInfo?.attrs?.coModelFieldToDisplay ? fieldLayoutInfo?.attrs?.coModelFieldToDisplay : fieldMetadata?.relationModel?.userKeyField?.name;
     const displayValue = value?.[userKeyField];
     return (
         <div className="mt-2 flex-column gap-2">
