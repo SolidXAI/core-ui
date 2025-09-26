@@ -1626,14 +1626,8 @@ export const SolidListView = (params: SolidListViewParams) => {
           </p>
           {/* <p className="" style={{ color: 'var{--solid-grey-500}' }}>{selectedSolidViewData?.singularName}</p> */}
           <div className="flex align-items-center gap-2 mt-3">
-            <Button label="Delete" size="small" onClick={handleDeleteEntity} />
-            <Button
-              label="Cancel"
-              size="small"
-              onClick={() => setDeleteEntity(false)}
-              outlined
-              className="bg-primary-reverse"
-            />
+            <Button label="Delete" severity="danger" size="small" onClick={handleDeleteEntity} />
+            <Button label="Cancel" size="small" onClick={() => setDeleteEntity(false)} outlined className='bg-primary-reverse' />
           </div>
         </div>
       </Dialog>
