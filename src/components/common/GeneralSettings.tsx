@@ -20,6 +20,9 @@ import { Divider } from 'primereact/divider';
 import { SettingDropzoneActivePlaceholder } from './SolidSettings/SettingDropzoneActivePlaceholder';
 import { SolidUploadedImage } from './SolidSettings/SolidUploadedImage';
 import { SettingsImageRemoveButton } from './SolidSettings/SettingsImageRemoveButton';
+import { Dropdown } from 'primereact/dropdown';
+import { OpenAiProviderComponent } from './SolidSettings/LlmSettings/OpenAiProviderComponent';
+import { AnthropicProviderComponent } from './SolidSettings/LlmSettings/AnthropicProviderComponent';
 
 
 export const GeneralSettings = () => {
@@ -76,12 +79,31 @@ export const GeneralSettings = () => {
         authScreenRightBackgroundImage: solidSettingsData?.data?.system?.authScreenRightBackgroundImage ?? null,
         authScreenLeftBackgroundImage: solidSettingsData?.data?.system?.authScreenLeftBackgroundImage ?? null,
         authScreenCenterBackgroundImage: solidSettingsData?.data?.system?.authScreenCenterBackgroundImage ?? null,
+        solidXGenAiCodeBuilderConfig: solidSettingsData?.data?.system?.solidXGenAiCodeBuilderConfig ?? {
+            defaultProvider: "",
+            availableProviders: []
+        }
+        // llmProvider: solidSettingsData?.data?.system?.llmProvider ?? null,
+        // llModelName: solidSettingsData?.data?.system?.llModelName ?? null,
+        // llmProviderApiKey: solidSettingsData?.data?.system?.llmProviderApiKey ?? null,
+        // llmProviderBaseURL: solidSettingsData?.data?.system?.llmProviderBaseURL ?? null,
+        // llmModelIdentifier: solidSettingsData?.data?.system?.llmModelIdentifier ?? null
+
+
     };
     const formik = useFormik({
         initialValues: initialValues,
         enableReinitialize: true,
         onSubmit: async (values) => {
             try {
+
+                const profiles = values.solidXGenAiCodeBuilderConfig.availableProviders;
+
+                // ✅ Only set defaultProvider if it's empty AND there is at least one profile
+                if (!values.solidXGenAiCodeBuilderConfig.defaultProvider && profiles.length > 0) {
+                    values.solidXGenAiCodeBuilderConfig.defaultProvider = profiles[0].provider;
+                }
+
                 const updatedSettingsArray: Array<{ key: string; value: string; type: string }> = [];
                 const currentSettings = solidSettingsData?.data?.system || {};
 
@@ -358,6 +380,71 @@ export const GeneralSettings = () => {
             setAuthScreenCenterBackgroundImagePreview(null);
         }
     };
+
+
+
+    // const [currentProfile, setcurrentProfile] = useState<string>("");
+
+    const handleProviderSelect = (value: string) => {
+        // 🔄 Add profile if doesn't exist
+        const profiles = formik.values.solidXGenAiCodeBuilderConfig.availableProviders;
+        const exists = profiles.some((p: any) => p.provider === value);
+
+        const newProfiles = exists
+            ? profiles
+            : [
+                ...profiles,
+                {
+                    id: Date.now().toString(),
+                    provider: ""
+                },
+            ];
+
+
+        formik.setFieldValue("solidXGenAiCodeBuilderConfig.defaultProvider", value);
+        formik.setFieldValue("solidXGenAiCodeBuilderConfig.availableProviders", newProfiles);
+    };
+
+    const handleProfileUpdate = (key: string, value: string) => {
+        const config = formik.values.solidXGenAiCodeBuilderConfig ?? {
+            availableProviders: [],
+            defaultProvider: "",
+        };
+
+        const profiles = config.availableProviders ?? [];
+        const defaultProvider = config.defaultProvider;
+
+        let updatedProfiles: any[];
+
+        // ✅ If profile exists → update it immutably
+        if (profiles.some((p: any) => p.provider === defaultProvider)) {
+            updatedProfiles = profiles.map((p: any) =>
+                p.provider === defaultProvider ? { ...p, [key]: value } : p
+            );
+        } else {
+            // ✅ If profile doesn't exist → create it and set this key
+            updatedProfiles = [
+                ...profiles,
+                {
+                    id: Date.now().toString(),
+                    provider: defaultProvider,
+                    [key]: value,
+                },
+            ];
+        }
+
+        // ✅ New array reference → Formik dirty check will pass
+        formik.setFieldValue(
+            "solidXGenAiCodeBuilderConfig.availableProviders",
+            updatedProfiles
+        );
+    };
+
+    const currentProfile =
+        (formik.values.solidXGenAiCodeBuilderConfig.availableProviders ?? []).find(
+            (p: any) => p.provider === formik.values.solidXGenAiCodeBuilderConfig.defaultProvider
+        ) || null;
+
 
     return (
         <div className="page-parent-wrapper">
@@ -1001,6 +1088,74 @@ export const GeneralSettings = () => {
                                                     </div>
                                                 </div>
                                             </div>
+                                        </div>
+                                    </div>
+                                </>
+                            }
+                            {pathname.includes("ai-settings") &&
+                                <>
+                                    <p className='font-bold' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Ai Details</p>
+                                    <div className='formgrid grid'>
+                                        <div className='col-8'>
+                                            <div className="formgrid grid">
+                                                <div className="col-6 mt-4">
+                                                    <div className="formgrid grid align-items-center">
+                                                        <div className="col-3">
+                                                            <label className="form-field-label">Default Provider</label>
+                                                        </div>
+                                                        <div className="col-9">
+                                                            <Dropdown
+                                                                className='w-full'
+                                                                value={formik.values.solidXGenAiCodeBuilderConfig.defaultProvider}
+                                                                options={[
+                                                                    { label: "OpenAI", value: "openai" },
+                                                                    { label: "Anthropic", value: "anthropic" },
+                                                                ]}
+                                                                onChange={(e) => handleProviderSelect(e.value)}
+                                                                placeholder="Select Provider"
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                {/* <div className="col-6 mt-4">
+                                                    <div className="formgrid grid align-items-center">
+                                                        <div className="col-5">
+                                                            <label className="form-field-label">Model Name</label>
+                                                        </div>
+                                                        <div className="col-7">
+                                                            <InputText
+                                                                type="text"
+                                                                id="llModelName"
+                                                                name="llModelName"
+                                                                onChange={formik.handleChange}
+                                                                value={formik.values.llModelName}
+                                                                className='w-full'
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>  */}
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <Divider />
+                                    <div className='grid'>
+                                        <div className='col-6'>
+                                            {formik.values.solidXGenAiCodeBuilderConfig.defaultProvider && (
+                                                <>
+                                                    {formik.values.solidXGenAiCodeBuilderConfig.defaultProvider === "openai" && (
+                                                        <OpenAiProviderComponent
+                                                            profile={currentProfile}
+                                                            onUpdate={handleProfileUpdate}
+                                                        />
+                                                    )}
+                                                    {formik.values.solidXGenAiCodeBuilderConfig.defaultProvider === "anthropic" && (
+                                                        <AnthropicProviderComponent
+                                                            profile={currentProfile}
+                                                            onUpdate={handleProfileUpdate}
+                                                        />
+                                                    )}
+                                                </>
+                                            )}
                                         </div>
                                     </div>
                                 </>
