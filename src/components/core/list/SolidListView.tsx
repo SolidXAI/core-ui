@@ -54,7 +54,7 @@ import { useSelector } from "react-redux";
 import styles from "./SolidListViewWrapper.module.css";
 import { SolidXAIModule } from "../solid-ai/SolidXAIModule";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+// import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -993,7 +993,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const handleDeleteEntity = async () => {
     try {
       if (!selectedSolidViewData?.id) {
-        throw new Error(ERROR_MESSAGES.NO_ENTITY_SELECTED);
+        throw new Error("No entity selected");
       }
 
       const response = await deleteSolidSingleEntiry(selectedSolidViewData.id);
