@@ -15,6 +15,7 @@ import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct import
 import MarkdownViewer from "@/components/common/MarkdownViewer";
+import { useRouter } from "next/navigation";
 
 export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }) => {
     const renderContent = () => {
@@ -38,7 +39,7 @@ export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }
         <div className={`${styles.SolidXAIResponseWrapper}`}>
             <div className='flex align-items-start gap-3'>
                 <div>
-                    <Button icon={<SolidXAIIcon />} size="small" raised text rounded />
+                    <Button icon={<SolidXAIIcon />} size="small" raised text rounded onClick={()=> window.open(`/admin/core/solid-core/ai-interaction/form/${interaction.id}?viewMode=view`, '_blank')} />
                 </div>
                 <div className={`mt-3`} style={{ width: '100%' }}>
                     {renderContent()}
