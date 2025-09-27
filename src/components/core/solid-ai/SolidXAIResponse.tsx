@@ -15,7 +15,6 @@ import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct import
 import MarkdownViewer from "@/components/common/MarkdownViewer";
-import { useRouter } from "next/navigation";
 
 export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }) => {
     const renderContent = () => {
