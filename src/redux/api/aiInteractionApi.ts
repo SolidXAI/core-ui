@@ -3,6 +3,7 @@ import { baseQueryWithAuth } from "./fetchBaseQuery";
 
 interface TriggerMcpClientJobRequest {
     prompt: string;
+    moduleName?:string;
 }
 
 interface TriggerMcpClientJobResponse {

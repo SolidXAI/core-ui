@@ -4,12 +4,14 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import styles from './SolidXAI.module.css';
 import { useState } from 'react';
 import { useTriggerMcpClientJobMutation } from '@/redux/api/aiInteractionApi';
+import { usePathname } from 'next/navigation';
 
 interface SolidXAIInputBoxProps {
     onTriggerComplete?: (uuid: string) => void;
 }
 
 export const SolidXAIInputBox = ({ onTriggerComplete }: SolidXAIInputBoxProps) => {
+    const pathName = usePathname()
     const [prompt, setPrompt] = useState('');
     const [sending, setSending] = useState(false);
     const [triggerMcpClientJob, { isLoading }] = useTriggerMcpClientJobMutation();
@@ -21,7 +23,14 @@ export const SolidXAIInputBox = ({ onTriggerComplete }: SolidXAIInputBoxProps) =
         if (sending || !prompt.trim()) return;
         setSending(true);
         try {
-            const response = await triggerMcpClientJob({ prompt }).unwrap();
+
+            // split by "/" and filter out empty strings
+            const segments = pathName.split("/").filter(Boolean);
+
+            // pick the 3rd segment (index 2, since it's 0-based)
+            const moduleName = segments[2];
+
+            const response = await triggerMcpClientJob({ prompt,moduleName }).unwrap();
             if (response?.data && onTriggerComplete) {
                 console.log(`Invoking onTriggerComplete with data ${response.data.queueMessageId}`);
                 onTriggerComplete(response.data.queueMessageId);

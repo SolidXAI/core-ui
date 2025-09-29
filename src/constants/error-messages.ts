@@ -10,9 +10,7 @@ export const ERROR_MESSAGES = {
 
   NO_ENTITY_SELECTED: 'No entity selected.',
   FAILED_TO_UPDATE_PASSWORD: 'Failed to update password.',
-  
+
   INVALID_RELATION_TYPE: (relationType: string, fieldName: string) =>
     `Invalid relationType ${relationType} on field ${fieldName}`,
-
-  
 };
