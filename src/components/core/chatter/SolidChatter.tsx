@@ -3,7 +3,7 @@ import React, { useState, useEffect } from 'react'
 import { SolidChatterHeader } from './SolidChatterHeader'
 import { SolidChatterDateDivider } from './SolidChatterDateDivider'
 import { SolidChatterMessageBox } from './SolidChatterMessageBox'
-import { useLazyGetchatterMessageQuery, useLazyGetchatterMessageDetailQuery } from '@/redux/api/solidChatterMessageApi'
+import { useLazyGetchatterMessageQuery } from '@/redux/api/solidChatterMessageApi'
 import qs from "qs";
 
 interface FilterState {
@@ -23,43 +23,14 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
     });
 
     const queryDataChatterMessage = {
-        filters: {
-            messageType: {
-                $eqi: 'custom'
-            },
-            coModelName: {
-                $eq: modelSingularName
-            },
-            coModelEntityId: {
-                $eq: id
-            }
-        }
+        populate: ['user', 'chatterMessageDetails']
     };
 
     const queryStringChatterMessage = qs.stringify(queryDataChatterMessage, {
         encodeValuesOnly: true,
     });
 
-    const queryDataChatterMessageDetail = {
-        populate: ['chatterMessage.user'],
-        filters: {
-            chatterMessage: {
-                coModelName: {
-                    $eq: modelSingularName
-                },
-                coModelEntityId: {
-                    $eq: id
-                }
-            }
-        }
-    };
-
-    const queryStringChatterMessageDetail = qs.stringify(queryDataChatterMessageDetail, {
-        encodeValuesOnly: true,
-    });
-
-    const [getchatterMessage, { data: chatterMessageData, isLoading: isCustomLoading, isError: isCustomError }] = useLazyGetchatterMessageQuery();
-    const [getchatterMessageDetail, { data: auditMessageData, isLoading: isAuditLoading, isError: isAuditError }] = useLazyGetchatterMessageDetailQuery();
+    const [getchatterMessage, { isLoading: isChatterLoading }] = useLazyGetchatterMessageQuery();
 
     useEffect(() => {
         if (refreshChatterMessage) {
@@ -100,91 +71,46 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
         }
     };
 
-    const groupAuditMessages = (messages: any[]) => {
-        const groupedMessages: any[] = [];
-        const timeMap = new Map();
-
-        messages.forEach((msg) => {
-            if (msg.auditType === 'audit') {
-                const timeKey = msg.time;
-                if (timeMap.has(timeKey)) {
-                    const existingMsg = timeMap.get(timeKey);
-                    existingMsg.auditRecord.push(...msg.auditRecord);
-                } else {
-                    timeMap.set(timeKey, { ...msg });
-                    groupedMessages.push(timeMap.get(timeKey));
-                }
-            } else {
-                groupedMessages.push(msg);
-            }
-        });
-
-        return groupedMessages;
-    };
-
-    const filterMessages = (messages: any[]) => {
-        console.log("Current filters:", filters);
-        return messages.filter(msg => {
-            if (filters.name && !msg.user.toLowerCase().includes(filters.name.toLowerCase())) {
-                return false;
-            }
-
-            const messageDate = new Date(msg.createdAt);
-            if (filters.startDate) {
-                const startDate = new Date(filters.startDate);
-                startDate.setHours(0, 0, 0, 0);
-                if (messageDate < startDate) {
-                    return false;
-                }
-            }
-            if (filters.endDate) {
-                const endDate = new Date(filters.endDate);
-                endDate.setHours(23, 59, 59, 999);
-                if (messageDate > endDate) {
-                    return false;
-                }
-            }
-
-            return true;
-        });
-    };
-
     const fetchData = async () => {
         try {
-            const customResponse = await getchatterMessage(queryStringChatterMessage).unwrap();
-            const customMessages = customResponse.data.records.map((msg: any) => ({
-                id: msg.id,
-                user: msg.user?.fullName || "System",
-                auditType: "custom",
-                message: msg.messageBody,
-                time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                createdAt: msg.createdAt,
-                date: formatDate(msg.createdAt),
-                media: msg._media
-            }));
+            const response = await getchatterMessage({
+                entityId: id,
+                entityName: modelSingularName,
+                qs: queryStringChatterMessage
+            }).unwrap();
+            const processedMessages = response.data.records.map((msg: any) => {
+                if (msg.messageType === 'custom') {
+                    // Custom message
+                    return {
+                        id: msg.id,
+                        user: msg.user?.fullName || "System",
+                        auditType: "custom",
+                        message: msg.messageBody,
+                        time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        createdAt: msg.createdAt,
+                        date: formatDate(msg.createdAt),
+                        media: msg._media
+                    };
+                } else {
+                    // Audit message
+                    const auditRecord = msg.chatterMessageDetails?.map((detail: any) => ({
+                        field: detail.fieldName,
+                        previous: detail.oldValueDisplay || detail.oldValue || 'None',
+                        current: detail.newValueDisplay || detail.newValue
+                    })) || [];
 
-            const auditResponse = await getchatterMessageDetail(queryStringChatterMessageDetail).unwrap();
-            const auditMessages = auditResponse.data.records.map((msg: any) => ({
-                id: msg.id,
-                user: msg.chatterMessage.user?.fullName || "System",
-                auditType: "audit",
-                time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
-                auditRecord: [{
-                    field: msg.fieldName,
-                    previous: msg.oldValueDisplay || msg.oldValue || 'None',
-                    current: msg.newValueDisplay || msg.newValue
-                }],
-                createdAt: msg.createdAt,
-                date: formatDate(msg.createdAt)
-            }));
-
-            const allMessages = [...customMessages, ...auditMessages].sort((a, b) => 
-                new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
-            );
-
-            const groupedMessages = groupAuditMessages(allMessages);
-            const filteredMessages = filterMessages(groupedMessages);
-            setMessages(filteredMessages);
+                    return {
+                        id: msg.id,
+                        user: msg.user?.fullName || "System",
+                        auditType: "audit",
+                        time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
+                        auditRecord: auditRecord,
+                        createdAt: msg.createdAt,
+                        date: formatDate(msg.createdAt)
+                    };
+                }
+            });
+            setMessages(processedMessages);
         } catch (error) {
             console.error('Error fetching messages:', error);
         }
@@ -224,7 +150,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                             ? 'calc(100vh - 172px)'
                             : 'calc(100vh - 65px)',
             }}>
-                {(isCustomLoading || isAuditLoading) ? (
+                {isChatterLoading ? (
                     <div className='flex align-items-center justify-content-center h-full font-medium'>
                         Loading...
                     </div>
