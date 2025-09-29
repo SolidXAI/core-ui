@@ -56,14 +56,14 @@ const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder 
                 };
                 const response = await initiateChangePassword(payload).unwrap();
                 if (response?.statusCode === 200) {
-                    const email = response?.data?.data?.user?.email;
+                    const email = values?.email;
                     const maskedEmail = maskEmail(email);
                     router.push(`/auth/initiate-forgot-password-thank-you?email=${maskedEmail}`)
                 } else (
-                    showToast("error", "Login Error", response.error)
+                    showToast("error", "Error", response.error)
                 )
             } catch (err: any) {
-                showToast("error", "Login Error", err?.data ? err?.data?.message : "Something Went Wrong");
+                showToast("error", "Error", err?.data ? err?.data?.message : "Something Went Wrong");
             }
         },
     });

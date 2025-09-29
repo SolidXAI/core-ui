@@ -14,6 +14,7 @@ import { Dialog } from "primereact/dialog";
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct import
+import MarkdownViewer from "@/components/common/MarkdownViewer";
 
 export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }) => {
     const renderContent = () => {
@@ -22,6 +23,10 @@ export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }
             case 'json':
                 return (
                     <JsonDisplay interaction={interaction} />
+                )
+            case 'markdown':
+                return (
+                    <MarkdownDisplay interaction={interaction} />
                 )
             case 'plain_text':
             default:
@@ -33,9 +38,9 @@ export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }
         <div className={`${styles.SolidXAIResponseWrapper}`}>
             <div className='flex align-items-start gap-3'>
                 <div>
-                    <Button icon={<SolidXAIIcon />} size="small" raised text rounded />
+                    <Button icon={<SolidXAIIcon />} size="small" raised text rounded onClick={()=> window.open(`/admin/core/solid-core/ai-interaction/form/${interaction.id}?viewMode=view`, '_blank')} />
                 </div>
-                <div className={`mt-3`}>
+                <div className={`mt-3`} style={{ width: '100%' }}>
                     {renderContent()}
                 </div>
             </div>
@@ -51,6 +56,45 @@ export const PlainTextDisplay: React.FC<PlainTextDisplayProps> = ({ interaction 
     return (
         <div className={`p-3 ${styles.SolidXAIResponse}`}>
             {interaction.message}
+        </div>
+    )
+}
+
+export interface MarkdownDisplayProps {
+    interaction: AiInteraction
+}
+
+export const MarkdownDisplay: React.FC<MarkdownDisplayProps> = ({ interaction }) => {
+    // const jsonMsg = JSON.parse(interaction.message);
+    // const markdown = jsonMsg.data;
+    let jsonMsg: any;
+    let markdown: string;
+
+    try {
+        if (typeof interaction.message === "string") {
+            try {
+                jsonMsg = JSON.parse(interaction.message.trim());
+                markdown = jsonMsg?.data ?? "";
+            } catch (jsonErr) {
+                // Not valid JSON → treat the raw string as markdown
+                markdown = interaction.message.trim();
+            }
+        } else if (typeof interaction.message === "object" && interaction.message !== null) {
+            // Already an object
+            jsonMsg = interaction.message;
+            markdown = jsonMsg?.data ?? "";
+        } else {
+            // Fallback for other types
+            markdown = String(interaction.message ?? "");
+        }
+    } catch (err: any) {
+        // Worst-case fallback: put the error string in markdown
+        markdown = `Error handling interaction.message: ${err?.message || String(err)}`;
+    }
+
+    return (
+        <div className={`p-3 ${styles.SolidXAIResponse}`} style={{ width: '100%' }}>
+            <MarkdownViewer data={markdown} />
         </div>
     )
 }
@@ -256,7 +300,7 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
                         </div> */}
                         {interaction?.isApplied ?
                             <div className="mt-3 font-medium solid-primary-black-text">
-                               ✅ Applied Successfully
+                                ✅ Applied Successfully
                             </div>
                             :
                             <div className="flex gap-2 mt-3">

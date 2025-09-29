@@ -285,12 +285,18 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
     }
 
     const handleFileView = (url: any) => {
-        if (url?.type.includes('image/')) {
-            setLightboxUrls?.([
-                { src: url.fileUrl, downloadUrl: url.fileUrl },
-            ]);
-            setOpenLightbox?.(true);
-        } else {
+        const downloadOnlyExt = [
+            "txt", "zip", "rar",
+            "doc", "docx",
+            "xls", "xlsx",
+            "ppt", "pptx"
+        ];
+
+        const fileUrl = url?.fileUrl || "";
+        const cleanUrl = fileUrl.split("?")[0];
+        const ext = cleanUrl.split(".").pop()?.toLowerCase();
+
+        if (ext && downloadOnlyExt.includes(ext)) {
             const link = document.createElement('a');
             link.href = url.fileUrl;
             link.download = ''; // or specify a file name like 'file.pdf'
@@ -298,6 +304,12 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+
+        } else {
+            setLightboxUrls?.([
+                { src: url.fileUrl, downloadUrl: url.fileUrl },
+            ]);
+            setOpenLightbox?.(true);
         }
     }
 
@@ -460,12 +472,18 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
     }, [formik.values, fieldLayoutInfo.attrs.name]);
 
     const handleFileView = (url: any) => {
-        if (url?.type.includes('image/')) {
-            setLightboxUrls?.([
-                { src: url.fileUrl, downloadUrl: url.fileUrl },
-            ]);
-            setOpenLightbox?.(true);
-        } else {
+        const downloadOnlyExt = [
+            "txt", "zip", "rar",
+            "doc", "docx",
+            "xls", "xlsx",
+            "ppt", "pptx"
+        ];
+
+        const fileUrl = url?.fileUrl || "";
+        const cleanUrl = fileUrl.split("?")[0];
+        const ext = cleanUrl.split(".").pop()?.toLowerCase();
+
+        if (ext && downloadOnlyExt.includes(ext)) {
             const link = document.createElement('a');
             link.href = url.fileUrl;
             link.download = ''; // or specify a file name like 'file.pdf'
@@ -473,6 +491,12 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
             document.body.appendChild(link);
             link.click();
             document.body.removeChild(link);
+
+        } else {
+            setLightboxUrls?.([
+                { src: url.fileUrl, downloadUrl: url.fileUrl },
+            ]);
+            setOpenLightbox?.(true);
         }
     }
 

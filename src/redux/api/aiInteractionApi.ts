@@ -3,13 +3,14 @@ import { baseQueryWithAuth } from "./fetchBaseQuery";
 
 interface TriggerMcpClientJobRequest {
     prompt: string;
+    moduleName?:string;
 }
 
 interface TriggerMcpClientJobResponse {
     statusCode: number;
     message: string[];
     error: string;
-    data: string; // UUID
+    data: any;
 }
 
 interface ApplySolidAiInteractionRequest {

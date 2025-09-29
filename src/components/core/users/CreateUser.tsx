@@ -108,8 +108,16 @@ const CreateUser = ({ data, params }: any) => {
       .string()
       .email("Invalid email address")
       .required("Email is required."),
-    password: Yup.string().min(6, 'Password must be at least 6 characters').required('Password is required'),
-    confirmPassword: Yup.string().oneOf([Yup.ref('password')], 'Passwords must match').required('Confirm password is required'),
+    password: Yup.string().min(6, 'Password must be at least 6 characters').nullable(),
+    confirmPassword: Yup.string()
+    .when('password', {
+      is: (val:any) => !!val, // only validate if password is filled
+      then: (schema) =>
+        schema
+          .oneOf([Yup.ref('password')], 'Passwords must match')
+          .nullable(),
+      otherwise: (schema) => schema.notRequired().nullable(),
+    }),
     mobile: Yup.number().required("Mobile is required."),
   });
 
@@ -375,54 +383,56 @@ const CreateUser = ({ data, params }: any) => {
                         />
                       )}
                     </div>
-                    <div className="field col-6 flex flex-column gap-2 my-4">
-                      <label htmlFor="Password" className="form-field-label">
-                        Password
-                      </label>
-                      <Password
-                        id="password"
-                        name="password"
-                        autoComplete="off"
-                        aria-autocomplete="none"
-                        value={formik.values.password}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        toggleMask
-                        invalid={isFormFieldValid(formik, "password")}
-                        inputClassName="w-full"
-                        feedback={false}
-                      />
-                      {isFormFieldValid(formik, "password") && (
-                        <Message
-                          severity="error"
-                          text={formik?.errors?.password?.toString()}
+                    {params.id === "new" && <>
+                      <div className="field col-6 flex flex-column gap-2 my-4">
+                        <label htmlFor="Password" className="form-field-label">
+                          Password
+                        </label>
+                        <Password
+                          id="password"
+                          name="password"
+                          autoComplete="off"
+                          aria-autocomplete="none"
+                          value={formik.values.password}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          toggleMask
+                          invalid={isFormFieldValid(formik, "password")}
+                          inputClassName="w-full"
+                          feedback={false}
                         />
-                      )}
-                    </div>
-                    <div className="field col-6 flex flex-column gap-2 my-4">
-                      <label htmlFor="Confirm Password" className="form-field-label">
-                        Confirm Password
-                      </label>
-                      <Password
-                        id="confirmPassword"
-                        name="confirmPassword"
-                        autoComplete="off"
-                        aria-autocomplete="none"
-                        value={formik.values.confirmPassword}
-                        onChange={formik.handleChange}
-                        onBlur={formik.handleBlur}
-                        toggleMask
-                        invalid={isFormFieldValid(formik, "confirmPassword")}
-                        inputClassName="w-full"
-                        feedback={false}
-                      />
-                      {isFormFieldValid(formik, "confirmPassword") && (
-                        <Message
-                          severity="error"
-                          text={formik?.errors?.confirmPassword?.toString()}
+                        {isFormFieldValid(formik, "password") && (
+                          <Message
+                            severity="error"
+                            text={formik?.errors?.password?.toString()}
+                          />
+                        )}
+                      </div>
+                      <div className="field col-6 flex flex-column gap-2 my-4">
+                        <label htmlFor="Confirm Password" className="form-field-label">
+                          Confirm Password
+                        </label>
+                        <Password
+                          id="confirmPassword"
+                          name="confirmPassword"
+                          autoComplete="off"
+                          aria-autocomplete="none"
+                          value={formik.values.confirmPassword}
+                          onChange={formik.handleChange}
+                          onBlur={formik.handleBlur}
+                          toggleMask
+                          invalid={isFormFieldValid(formik, "confirmPassword")}
+                          inputClassName="w-full"
+                          feedback={false}
                         />
-                      )}
-                    </div>
+                        {isFormFieldValid(formik, "confirmPassword") && (
+                          <Message
+                            severity="error"
+                            text={formik?.errors?.confirmPassword?.toString()}
+                          />
+                        )}
+                      </div>
+                    </>}
                   </div>
                 </Panel>
 
