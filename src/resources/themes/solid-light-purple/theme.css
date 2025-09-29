@@ -6195,7 +6195,9 @@
 
 
   .solid-standard-autocomplete .p-inputtext:focus  {
-    border-color: #d1d5db !important;
+    /* border-color: #d1d5db !important; */
+    border-color: var(--primary-color) !important;
+
   }
 
   .solid-standard-autocomplete.p-inputwrapper-focus .p-autocomplete-dropdown.p-button {

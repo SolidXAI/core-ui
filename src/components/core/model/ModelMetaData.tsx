@@ -65,15 +65,20 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
 
   const [showTableName, setShowTableName] = useState<any>(false);
   const [showParentModel, setShowParentModel] = useState<any>(false);
+  const [selectedModule, setSelectedModule] = useState<any>(null);
 
-  // useEffect(() => {
-  //   if (modelMetaData && modelMetaData.tableName) {
-  //     setShowTableName(true)
-  //   }
-  //   if (modelMetaData && modelMetaData.isChild) {
-  //     setShowParentModel(true)
-  //   }
-  // }, [modelMetaData])
+
+  useEffect(() => {
+    if (modelMetaData && modelMetaData.tableName) {
+      setShowTableName(true)
+    }
+    if (modelMetaData && modelMetaData.isChild) {
+      setShowParentModel(true)
+    }
+    else if (modelMetaData && !modelMetaData.isChild){
+      setShowParentModel(false)
+    }
+  }, [modelMetaData])
 
   const validationSchema = Yup.object({
     singularName: Yup.string()
@@ -245,6 +250,14 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
         },
       };
 
+    // Add module filter dynamically
+    if (selectedModule?.name) {
+      (queryData.filters as any)["module"] = {
+        name: { $containsi: selectedModule.name },
+      };
+    }
+
+
       const queryString = qs.stringify(queryData, {
         encodeValuesOnly: true,
       });
@@ -356,6 +369,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     searchData={searchModule}
                     existingData={formik.values.module}
                     formErrors={formErrors}
+                    additionalAction={(e:any) => setSelectedModule(e.value)} 
                   />
                   {(isFormFieldValid(formik, "module") || (formErrors["module"])) && (
                     <Message severity="error" text={formik?.errors?.moduleId?.toString()} />
