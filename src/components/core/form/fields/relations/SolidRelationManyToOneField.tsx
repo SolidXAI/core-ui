@@ -123,7 +123,7 @@ export class SolidRelationManyToOneField implements ISolidField {
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
 
-        const isVisible = this.fieldContext.parentData
+        const isVisible = this.fieldContext.parentData && this.fieldContext.parentData.modelName === this.fieldContext.fieldMetadata.relationCoModelSingularName
             ? fieldLayoutInfo.attrs?.visible === true
             : fieldLayoutInfo.attrs?.visible !== false;
 
