@@ -11,8 +11,11 @@ export const SolidXUserPrompt = ({ interaction }: { interaction: AiInteraction }
           {/* <div>
             Generate a clean, efficient Python machine learning model for predicting house prices using linear regression with sample data.
           </div> */}
-          <div>
-            {interaction.message}
+          <div> 
+            <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
+              {interaction.message}
+            </div>
+            { }
           </div>
         </div>
         <div>
