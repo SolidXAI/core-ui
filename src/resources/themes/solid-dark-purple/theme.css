@@ -6143,7 +6143,7 @@
   }
 
   .solid-standard-autocomplete .p-inputtext:focus {
-    border-color: var(--primary-light-color) !important;
+    border-color: var(--primary-color) !important;
   }
 
 
