@@ -1,7 +1,7 @@
 import { authenticationReducer, dataViewReducer, navbarReducer, popupReducer, themeReducer, userReducer } from "@/index";
 import {
     authApi, aiInteractionApi, dashboardApi, dashboardQuestionApi, exportTemplateApi, fieldsApi,
-    importTransactionApi, mediaApi, mediaStorageProviderApi, modulesApi, roleApi,
+    importTransactionApi, mediaApi, mediaStorageProviderApi, modulesApi, modelsApi, roleApi,
     solidActionsApi, solidChatterMessageApi, solidMenusApi, solidServiceApi, solidSettingsApi,
     solidViewsApi, userApi
 } from "@/index";
@@ -11,6 +11,7 @@ export const solidApiSlices = [
     authApi,
     userApi,
     modulesApi,
+    modelsApi,
     fieldsApi,
     mediaStorageProviderApi,
     mediaApi,
