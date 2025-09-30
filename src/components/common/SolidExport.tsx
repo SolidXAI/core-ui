@@ -208,16 +208,16 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
     }
   }, [templatesData]);
 
-  const handleAddTemplate = async () => {
+  const handleAddTemplate = async () => {    
     setIsDialogVisible(false);
-    // const tname = newTemplateName.trim();
-    if (selectedTemplate?.name && selectedFormat) {
+    const tname = newTemplateName.trim();
+    if ((selectedTemplate?.name || tname)  && selectedFormat) {
       setNewTemplateName(""); 
       setIsDialogVisible(false); 
       let customSelectedFields = selectedColumns.map((col) => col.key);
       const fieldsData = JSON.stringify(customSelectedFields)
       const exportData = {
-        templateName: selectedTemplate?.name || "",
+        templateName: tname || selectedTemplate?.name || "",
         templateFormat: selectedFormat?.code || "",
         notifyOnEmail: true,  
         fields:fieldsData,
@@ -225,7 +225,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
       };
 
       try {
-        const response = await createExportTemplate(exportData).unwrap();
+        const response = await createExportTemplate(exportData).unwrap();        
         toast?.current?.show({
           severity: "success",
           summary: "Template Added",
@@ -304,7 +304,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
     }
   };
 
-  const handleTemplateChange = (e: any) => {
+  const handleTemplateChange = (e: any) => {    
     const selected = templateOptions.find((option) => option.code === e.value.code);
     setSelectedTemplate(selected || null);
     if (selected) {
