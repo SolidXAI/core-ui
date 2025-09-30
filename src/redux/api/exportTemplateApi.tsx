@@ -12,6 +12,7 @@ export const exportTemplateApi = createApi({
                 method: 'POST',
                 body: templateData
             }),
+            invalidatesTags: ['ExportTemplates'],
         }),
         getExportTemplates: builder.query({
             query: () => {
