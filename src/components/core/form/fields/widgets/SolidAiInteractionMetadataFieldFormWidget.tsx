@@ -30,7 +30,7 @@ export const SolidAiInteractionMetadataFieldFormWidget = ({ formik, fieldContext
                     {value && value?.chunks?.map((c: any) => {
                         let processedText = c.text;
                         if (processedText) {
-                            processedText = processedText.replace("Document Title:", "#", 1);
+                            processedText = processedText.replace("Document Title:", "", 1);
                             processedText = processedText.replace("Text:", "", 1);
                         }
                         return (
