@@ -4,6 +4,7 @@ import React from 'react';
 import ReactMarkdown from 'react-markdown';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
+import rehypeRaw from 'rehype-raw';
 
 type MarkdownViewerProps = {
   data: string;
@@ -54,6 +55,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ data }) => {
   return (
     <ReactMarkdown
       className="markdown-view space-y-4"
+        // rehypePlugins={[rehypeRaw]}
       components={{
         code: CodeBlock,
       }}

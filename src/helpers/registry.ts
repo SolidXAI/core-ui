@@ -41,6 +41,7 @@ import { SolidShortTextFieldAvatarWidget } from "@/components/core/form/fields/w
 import DeleteModelRowAction from "@/components/core/extension/solid-core/modelMetadata/list/DeleteModelRowAction";
 import ChartFormPreviewWidget from "@/components/core/extension/solid-core/dashboardQuestion/ChartFormPreviewWidget";
 import { DefaultTimeFormEditWidget,DefaultTimeFormViewWidget } from "@/components/core/form/fields/SolidTimeField";
+import { SolidAiInteractionMetadataFieldFormWidget } from "@/components/core/form/fields/widgets/SolidAiInteractionMetadataFieldFormWidget";
 
 type ExtensionRegistry = {
     components: Record<string, React.ComponentType<any>>;
@@ -168,6 +169,8 @@ registerExtensionComponent("DefaultDateTimeFormViewWidget", DefaultDateTimeFormV
 // Formview Custom view widgets
 registerExtensionComponent("SolidRelationFieldAvatarFormWidget", SolidRelationFieldAvatarFormWidget, []);
 registerExtensionComponent("SolidShortTextFieldAvatarWidget", SolidShortTextFieldAvatarWidget, []);
+registerExtensionComponent("SolidAiInteractionMetadataFieldFormWidget", SolidAiInteractionMetadataFieldFormWidget, []);
+
 
 
 // Listview default widgets
