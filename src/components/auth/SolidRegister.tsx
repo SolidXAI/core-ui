@@ -203,7 +203,7 @@ const SolidRegister = () => {
                                 text={formik?.errors?.password?.toString()}
                             />}
                         </div>
-                        <SolidPasswordHelperText text={envPasswordHelperText}/>
+                        <SolidPasswordHelperText text={solidSettingsData?.data?.authenticationPasswordComplexityDescription}/>
                         <div className="mt-4">
                             <Button className="w-full font-light auth-submit-button" label="Sign Up" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
                         </div>
