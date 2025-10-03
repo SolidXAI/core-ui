@@ -20,7 +20,7 @@ import { DefaultMediaSingleFormEditWidget, DefaultMediaSingleFormViewWidget } fr
 import { DefaultPasswordFormCreateWidget, DefaultPasswordFormEditWidget, DefaultPasswordFormViewWidget } from "@/components/core/form/fields/SolidPasswordField";
 import { DefaultRichTextFormEditWidget, DefaultRichTextFormViewWidget } from "@/components/core/form/fields/SolidRichTextField";
 import { DefaultSelectionStaticAutocompleteFormEditWidget, DefaultSelectionStaticFormViewWidget, SolidSelectionStaticRadioFormEditWidget, SolidSelectionStaticSelectButtonFormEditWidget } from "@/components/core/form/fields/SolidSelectionStaticField";
-import { DefaultShortTextFormEditWidget, DefaultShortTextFormViewWidget,MaskedShortTextFormViewWidget,MaskedShortTextFormEditWidget,MaskedShortTextListViewWidget } from "@/components/core/form/fields/SolidShortTextField";
+import { DefaultShortTextFormEditWidget, DefaultShortTextFormViewWidget, MaskedShortTextFormViewWidget, MaskedShortTextFormEditWidget, MaskedShortTextListViewWidget } from "@/components/core/form/fields/SolidShortTextField";
 import { DefaultRelationManyToOneFormEditWidget, DefaultRelationManyToOneFormViewWidget } from "@/components/core/form/fields/relations/SolidRelationManyToOneField";
 import { DefaultRelationOneToManyFormEditWidget, DefaultRelationOneToManyFormViewWidget } from "@/components/core/form/fields/relations/SolidRelationOneToManyField";
 import { DefaultRelationManyToManyAutoCompleteFormEditWidget, DefaultRelationManyToManyCheckBoxFormEditWidget } from "@/components/core/form/fields/relations/SolidRelationManyToManyField";
@@ -40,11 +40,20 @@ import { SolidManyToOneRelationAvatarListWidget } from "@/components/core/list/w
 import { SolidShortTextFieldAvatarWidget } from "@/components/core/form/fields/widgets/SolidShortTextFieldAvatarWidget";
 import DeleteModelRowAction from "@/components/core/extension/solid-core/modelMetadata/list/DeleteModelRowAction";
 import ChartFormPreviewWidget from "@/components/core/extension/solid-core/dashboardQuestion/ChartFormPreviewWidget";
-import { DefaultTimeFormEditWidget,DefaultTimeFormViewWidget } from "@/components/core/form/fields/SolidTimeField";
+import { DefaultTimeFormEditWidget, DefaultTimeFormViewWidget } from "@/components/core/form/fields/SolidTimeField";
 import { SolidAiInteractionMetadataFieldFormWidget } from "@/components/core/form/fields/widgets/SolidAiInteractionMetadataFieldFormWidget";
 
+type ExtensionComponentType = null | 'list_field_widget' | 'form_field_view_widget' | 'form_field_edit_widget' | 'list_row_action ' | 'list_header_action' | 'form_action' | 'form_widget';
+
+type ExtensionComponentMetadata = {
+    component: React.ComponentType<any>;
+    type: ExtensionComponentType;
+    fieldType: string;
+}
+
+
 type ExtensionRegistry = {
-    components: Record<string, React.ComponentType<any>>;
+    components: Record<string, ExtensionComponentMetadata>;
     functions: Record<string, (...args: any[]) => any>;
 };
 
@@ -53,11 +62,11 @@ const extensionRegistry: ExtensionRegistry = {
     functions: {},
 };
 
-export const registerExtensionComponent = (name: string, component: React.ComponentType<any>, aliases: string[] = []) => {
-    extensionRegistry.components[name] = component;
+export const registerExtensionComponent = (name: string, component: React.ComponentType<any>, aliases: string[] = [], type: ExtensionComponentType = null, fieldType: string = '') => {
+    extensionRegistry.components[name] = { 'component': component, 'type': type, 'fieldType': fieldType };
     for (let i = 0; i < aliases.length; i++) {
         const alias = aliases[i];
-        extensionRegistry.components[alias] = component;
+        extensionRegistry.components[alias] = { 'component': component, 'type': type, 'fieldType': fieldType };
     }
 };
 
@@ -67,43 +76,75 @@ export const registerExtensionFunction = (name: string, fn: (...args: any[]) => 
 
 export const getExtensionComponent = (name: string): React.ComponentType<any> | null => {
     if (extensionRegistry.components[name]) {
-        return extensionRegistry.components[name];
+        return extensionRegistry.components[name].component;
     }
 
     return null;
+};
 
-    // const extensionsPath = process.env.NEXT_PUBLIC_SOLID_EXTENSIONS_PATH || "";
-
-    // // Ensure the environment variable is set
-    // if (!extensionsPath) {
-    //     console.warn(`No overrides path found. Using default components.`);
-    //     return () => React.createElement("div", { className: "error-message" }, "Loading dynamic component failed (extensions path not found)");
+export const getExtensionComponents = (type: ExtensionComponentType, fieldType: string = ''): string[] | [] => {
+    // TODO: iterate over all registered extensionComponents to fetch a list of componnents matching the type & fieldType (optional)
+    // if (extensionRegistry.components[name]) {
+    //     return extensionRegistry.components[name].component;
     // }
 
-    // try {
-    //     // return dynamic(() => import(`@solid-extensions/${name}`).then((mod) => mod.default));
-    //     return dynamic(() => import(`${extensionsPath}/${name}`).then((mod) => mod.default));
-    // } catch (error) {
-    //     console.warn(`Component ${name} not found, returning fallback.`);
-    // }
+    // return null;
 
-    // // Return an empty component
-    // return () => React.createElement("div", { className: "error-message" }, "Loading dynamic component failed (component not found)");
+    return [];
 };
 
 export const getExtensionFunction = (name: string) => {
     return extensionRegistry.functions[name];
 };
 
+// # Extension components 
+// 1. list field widget 
+// - shortText
+// - longText
+// - relation.many2one
+// - relation.many2many
+// - relation.one2many
+// ...
 
-// Register all the dynamic widget & functions from inside solid-core-ui
-// Common
-registerExtensionComponent("CustomHtml", CustomHtml, []);
+// 2. form field view widget 
+// - shortText
+// - longText
+// - relation.many2one
+// - relation.many2many
+// - relation.one2many
+// ...
+
+// 3. form field edit widget 
+// - shortText
+// - longText
+// - relation.many2one
+// - relation.many2many
+// - relation.one2many
+// ...
+
+// 4. list row action 
 registerExtensionComponent("GenerateModelCodeRowAction", GenerateModelCodeRowAction, []);
 registerExtensionComponent("GenerateModuleCodeRowAction", GenerateModuleCodeRowAction, []);
 registerExtensionComponent("DeleteModelRowAction", DeleteModelRowAction, []);
-registerExtensionComponent("ChartFormPreviewWidget", ChartFormPreviewWidget, ["chart"]);
 
+// 5. list header action 
+
+// 6. form action 
+
+// 7. form widget 
+registerExtensionComponent("CustomHtml", CustomHtml, []);
+
+
+// # Extension functions 
+// 1. 
+// 2. 
+// 3. 
+// 4. 
+// 5. 
+
+// Register all the dynamic widget & functions from inside solid-core-ui
+// Common
+registerExtensionComponent("ChartFormPreviewWidget", ChartFormPreviewWidget, ["chart"]);
 
 // Formview Default Edit widgets
 registerExtensionComponent("DefaultDateFormEditWidget", DefaultDateFormEditWidget, []);
@@ -112,7 +153,6 @@ registerExtensionComponent("DefaultTimeFormViewWidget", DefaultTimeFormViewWidge
 registerExtensionComponent("DefaultBooleanFormEditWidget", DefaultBooleanFormEditWidget, ["booleanSelectbox"]);
 registerExtensionComponent("SolidBooleanCheckboxStyleFormEditWidget", SolidBooleanCheckboxStyleFormEditWidget, ["booleanCheckbox"]);
 registerExtensionComponent("SolidBooleanSwitchStyleFormEditWidget", SolidBooleanSwitchStyleFormEditWidget, []);
-
 
 registerExtensionComponent("DefaultDateTimeFormEditWidget", DefaultDateTimeFormEditWidget, []);
 registerExtensionComponent("DefaultDecimalFormEditWidget", DefaultDecimalFormEditWidget, []);
@@ -165,13 +205,10 @@ registerExtensionComponent("DefaultBooleanFormViewWidget", DefaultBooleanFormVie
 registerExtensionComponent("DefaultDateFormViewWidget", DefaultDateFormViewWidget, []);
 registerExtensionComponent("DefaultDateTimeFormViewWidget", DefaultDateTimeFormViewWidget, []);
 
-
 // Formview Custom view widgets
 registerExtensionComponent("SolidRelationFieldAvatarFormWidget", SolidRelationFieldAvatarFormWidget, []);
 registerExtensionComponent("SolidShortTextFieldAvatarWidget", SolidShortTextFieldAvatarWidget, []);
 registerExtensionComponent("SolidAiInteractionMetadataFieldFormWidget", SolidAiInteractionMetadataFieldFormWidget, []);
-
-
 
 // Listview default widgets
 registerExtensionComponent("DefaultTextListWidget", DefaultTextListWidget, []);
@@ -182,7 +219,6 @@ registerExtensionComponent("DefaultRelationManyToOneListWidget", DefaultRelation
 registerExtensionComponent("DefaultRelationManyToManyListWidget", DefaultRelationManyToManyListWidget, []);
 registerExtensionComponent("DefaultRelationOneToManyListWidget", DefaultRelationOneToManyListWidget, []);
 registerExtensionComponent("SolidShortTextFieldImageListWidget", SolidShortTextFieldImageListWidget, []);
-
 
 // Listview custom widgets
 registerExtensionComponent("SolidShortTextAvatarWidget", SolidShortTextAvatarWidget, []);
