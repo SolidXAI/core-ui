@@ -1,18 +1,21 @@
 "use client"
-import { RightArrowSvg } from '@/components/Svg/RightArrowSvg'
 import { getTextColor, stringToColor } from '@/helpers/getRandomColors'
 import Image from 'next/image'
 import { Avatar } from 'primereact/avatar'
 import { Dialog } from 'primereact/dialog'
 import { useMemo, useState } from 'react'
 import styles from './chatter.module.css'
+import { SolidChatterCustomMessage } from './SolidChatterCustomMessage'
+import { SolidChatterAuditMessage } from './SolidChatterAuditMessage'
 
 interface Props {
     user: string,
-    auditType?: string,
+    messageType?: string,
     message?: any,
     time?: string,
     auditRecord?: any,
+    messageSubType?: string,
+    modelDisplayName?: string, 
     media?: {
         messageAttachments?: Array<{
             id: number;
@@ -45,7 +48,7 @@ const getFileIcon = (mimeType: string) => {
 };
 
 export const SolidChatterMessageBox = (props: Props) => {
-    const { user, auditType, message, time, auditRecord, media } = props;
+    const { user, messageType, message, time, auditRecord, media, messageSubType, modelDisplayName } = props;
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [isImageDialogVisible, setIsImageDialogVisible] = useState(false);
 
@@ -60,6 +63,16 @@ export const SolidChatterMessageBox = (props: Props) => {
         setIsImageDialogVisible(true);
     };
 
+    const renderMessageContent = () => {
+        switch (messageType) {
+            case 'audit':
+                return <SolidChatterAuditMessage auditRecord={auditRecord} />;
+            case 'custom':
+            default:
+                return <SolidChatterCustomMessage message={message} />;
+        }
+    };
+
     return (
         <div className={styles.solidChatterMessageBox}>
             <div className='flex align-items-center'>
@@ -70,10 +83,16 @@ export const SolidChatterMessageBox = (props: Props) => {
                     <div className='text-sm'>
                         <span className='font-bold'>{user}</span>
                         <span className='ml-2' style={{ color: '#949494' }}>
-                            {auditType === "audit" ? 'Audit change' : 'Sent message'}
+                            {messageType === "audit"
+                                ? messageSubType === "audit_update"
+                                    ? "Updated"
+                                    : messageSubType === "audit_insert"
+                                        ? "Inserted"
+                                        : "Custom"
+                                : 'Sent message'}
                         </span>
                     </div>
-                    {/* <i className='pi pi-ellipsis-v text-xs' /> */}
+                    {modelDisplayName && <span style={{fontStyle: 'italic', fontWeight: '600'}}>{modelDisplayName}</span>}
                 </div>
             </div>
             <div className='flex align-items-center mt-1'>
@@ -84,28 +103,7 @@ export const SolidChatterMessageBox = (props: Props) => {
                         {time}
                     </p>
                     <div className={styles.solidMessageWrapper}>
-                        {auditType === "audit" ? (
-                            <div className='flex flex-column gap-2'>
-                                {auditRecord.map((item: any, index: number) => (
-                                    <div key={index} className='flex gap-2'>
-                                        <span className='m-0 text-sm'>
-                                            {"(" + item.field + ")"}
-                                        </span>
-                                        <span className='m-0 text-sm font-bold'>
-                                            {item.previous}
-                                        </span>
-                                        <RightArrowSvg />
-                                        <span className='m-0 text-sm font-bold text-primary'>
-                                            {item.current}
-                                        </span>
-                                    </div>
-                                ))}
-                            </div>
-                        ) : (
-                            <p className='m-0 text-sm'>
-                                {message}
-                            </p>
-                        )}
+                        {renderMessageContent()}
                     </div>
                     {media?.messageAttachments && media.messageAttachments.length > 0 && (
                         <div className='flex flex-wrap gap-2 mt-2'>

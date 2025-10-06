@@ -84,17 +84,20 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                     return {
                         id: msg.id,
                         user: msg.user?.fullName || "System",
-                        auditType: "custom",
+                        messageType: "custom",
                         message: msg.messageBody,
                         time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                         createdAt: msg.createdAt,
                         date: formatDate(msg.createdAt),
-                        media: msg._media
+                        media: msg._media,
+                        messageSubType: msg.messageSubType,
+                        modelDisplayName: msg.modelDisplayName
                     };
                 } else {
                     // Audit message
                     const auditRecord = msg.chatterMessageDetails?.map((detail: any) => ({
                         field: detail.fieldName,
+                        fieldDisplayName: detail.fieldDisplayName,
                         previous: detail.oldValueDisplay || detail.oldValue || 'None',
                         current: detail.newValueDisplay || detail.newValue
                     })) || [];
@@ -102,11 +105,13 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                     return {
                         id: msg.id,
                         user: msg.user?.fullName || "System",
-                        auditType: "audit",
+                        messageType: "audit",
                         time: new Date(msg.createdAt).toLocaleTimeString([], { hour: '2-digit', minute: '2-digit' }),
                         auditRecord: auditRecord,
                         createdAt: msg.createdAt,
-                        date: formatDate(msg.createdAt)
+                        date: formatDate(msg.createdAt),
+                        messageSubType: msg.messageSubType,
+                        modelDisplayName: msg.modelDisplayName
                     };
                 }
             });
@@ -117,15 +122,12 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
     }
 
     const handleFilterChange = (newFilters: FilterState) => {
-        console.log("New filters received:", newFilters);
         setFilters(prev => {
-            console.log("Previous filters:", prev);
             const updatedFilters = {
                 name: newFilters.name,
                 startDate: newFilters.startDate,
                 endDate: newFilters.endDate
             };
-            console.log("Updated filters:", updatedFilters);
             return updatedFilters;
         });
     };
@@ -166,11 +168,13 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                                 {showDateDivider && <SolidChatterDateDivider date={message.date} />}
                                 <SolidChatterMessageBox
                                     user={message.user}
-                                    auditType={message.auditType}
+                                    messageType={message.messageType}
                                     message={message.message}
                                     time={message.time}
                                     auditRecord={message.auditRecord}
                                     media={message.media}
+                                    messageSubType={message.messageSubType}
+                                    modelDisplayName={message.modelDisplayName}
                                 />
                             </div>
                         );
