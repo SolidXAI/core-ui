@@ -15,7 +15,8 @@ interface Props {
     time?: string,
     auditRecord?: any,
     messageSubType?: string,
-    modelDisplayName?: string, 
+    modelDisplayName?: string,
+    modelUserKey?: string,
     media?: {
         messageAttachments?: Array<{
             id: number;
@@ -48,7 +49,7 @@ const getFileIcon = (mimeType: string) => {
 };
 
 export const SolidChatterMessageBox = (props: Props) => {
-    const { user, messageType, message, time, auditRecord, media, messageSubType, modelDisplayName } = props;
+    const { user, messageType, message, time, auditRecord, media, messageSubType, modelDisplayName, modelUserKey } = props;
     const [selectedImage, setSelectedImage] = useState<string | null>(null);
     const [isImageDialogVisible, setIsImageDialogVisible] = useState(false);
 
@@ -83,13 +84,11 @@ export const SolidChatterMessageBox = (props: Props) => {
                     <div className='text-sm'>
                         <span className='font-bold'>{user}</span>
                         <span className='ml-2' style={{ color: '#949494' }}>
-                            {messageType === "audit"
-                                ? messageSubType === "audit_update"
-                                    ? "Updated"
+                            {messageType === 'audit' ? messageSubType === "audit_update"
+                                    ? <>Updated {modelUserKey && <span style={{fontStyle: 'italic', fontWeight: '600'}}>({modelUserKey})</span>}</>
                                     : messageSubType === "audit_insert"
-                                        ? "Inserted"
-                                        : "Custom"
-                                : 'Sent message'}
+                                        ? <>Inserted {modelUserKey && <span style={{fontStyle: 'italic', fontWeight: '600'}}>({modelUserKey})</span>}</>
+                                        : "Custom" : "Custom"}
                         </span>
                     </div>
                     {modelDisplayName && <span style={{fontStyle: 'italic', fontWeight: '600'}}>{modelDisplayName}</span>}

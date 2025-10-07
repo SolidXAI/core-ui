@@ -91,7 +91,8 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                         date: formatDate(msg.createdAt),
                         media: msg._media,
                         messageSubType: msg.messageSubType,
-                        modelDisplayName: msg.modelDisplayName
+                        modelDisplayName: msg.modelDisplayName,
+                        modelUserKey: msg.modelUserKey
                     };
                 } else {
                     // Audit message
@@ -111,7 +112,8 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                         createdAt: msg.createdAt,
                         date: formatDate(msg.createdAt),
                         messageSubType: msg.messageSubType,
-                        modelDisplayName: msg.modelDisplayName
+                        modelDisplayName: msg.modelDisplayName,
+                        modelUserKey: msg.modelUserKey
                     };
                 }
             });
@@ -175,6 +177,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                                     media={message.media}
                                     messageSubType={message.messageSubType}
                                     modelDisplayName={message.modelDisplayName}
+                                    modelUserKey={message.modelUserKey}
                                 />
                             </div>
                         );
