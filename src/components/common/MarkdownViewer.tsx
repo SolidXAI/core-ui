@@ -2,6 +2,8 @@
 
 import React from 'react';
 import ReactMarkdown from 'react-markdown';
+import rehypeRaw from 'rehype-raw';
+import rehypeSanitize from 'rehype-sanitize';
 import { Prism as SyntaxHighlighter } from 'react-syntax-highlighter';
 import { oneDark } from 'react-syntax-highlighter/dist/esm/styles/prism';
 
@@ -9,7 +11,6 @@ type MarkdownViewerProps = {
   data: string;
 };
 
-// Properly typed code renderer
 const CodeBlock: any = ({ inline, className, children, ...props }:any) => {
   const match = /language-(\w+)/.exec(className || '');
   const language = match?.[1] ?? '';
@@ -54,6 +55,7 @@ const MarkdownViewer: React.FC<MarkdownViewerProps> = ({ data }) => {
   return (
     <ReactMarkdown
       className="markdown-view space-y-4"
+      rehypePlugins={[rehypeRaw, rehypeSanitize]}
       components={{
         code: CodeBlock,
       }}
