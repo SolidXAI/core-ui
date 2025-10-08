@@ -436,7 +436,8 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
         inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
         handlePopupClose: handlePopupClose,
         modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
-        parentData: userKeyField ? { [userKeyField]: { solidManyToOneLabel: fieldContext.data[userKeyField], solidManyToOneValue: fieldContext.data['id'] } } : {}
+        parentData: userKeyField ? { [userKeyField]: { solidManyToOneLabel: fieldContext.data[userKeyField], solidManyToOneValue: fieldContext.data['id'] } } : {},
+        onEmbeddedFormSave: fieldContext.onEmbeddedFormSave
     }
 
     return (
