@@ -113,7 +113,8 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                         date: formatDate(msg.createdAt),
                         messageSubType: msg.messageSubType,
                         modelDisplayName: msg.modelDisplayName,
-                        modelUserKey: msg.modelUserKey
+                        modelUserKey: msg.modelUserKey,
+                        message: msg.messageBody,
                     };
                 }
             });

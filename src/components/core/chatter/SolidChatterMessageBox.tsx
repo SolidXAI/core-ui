@@ -101,9 +101,9 @@ export const SolidChatterMessageBox = (props: Props) => {
                     <p className='mb-1 text-sm font-bold' style={{ color: '#949494' }}>
                         {time}
                     </p>
-                    <div className={styles.solidMessageWrapper}>
+                    {message && <div className={styles.solidMessageWrapper}>
                         {renderMessageContent()}
-                    </div>
+                    </div>}
                     {media?.messageAttachments && media.messageAttachments.length > 0 && (
                         <div className='flex flex-wrap gap-2 mt-2'>
                             {media.messageAttachments.map((attachment) => {
