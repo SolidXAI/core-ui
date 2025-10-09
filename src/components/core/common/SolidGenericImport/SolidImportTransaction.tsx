@@ -118,71 +118,79 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
                     <div className={`col-6 font-bold p-3 ${styles.ImportTableHeader}`}>
                         SolidX Field
                     </div>
-                    {sampleRecords.length > 0 ? (
-                        sampleRecords
-                            ?.filter((sample: any) => visibleHeaders.includes(sample.cellHeader))
-                            .map((sample: any) => {
-                                const fieldMeta = mappingInfo.data.importableFields.find(
-                                    (f: any) => f.name === fieldMapping[sample.cellHeader]
-                                );
-                                const isRequired = fieldMeta?.required;
-                                // {sampleRecords.length > 0 ? (
-                                //    sampleRecords    
-                                //     ?.filter((sample: any) => visibleHeaders.includes(sample.cellHeader))
-                                //     ?.sort((a: any, b: any) => {
-                                //         const aRequired = mappingInfo.data.importableFields.find((f: any) => f.name === fieldMapping[a.cellHeader])?.required;
-                                //         const bRequired = mappingInfo.data.importableFields.find((f: any) => f.name === fieldMapping[b.cellHeader])?.required;
-                                //         return (bRequired ? 1 : 0) - (aRequired ? 1 : 0); // true comes before false
-                                //     })
-                                //     .map((sample: any) => {
-                                //         const fieldMeta = mappingInfo.data.importableFields.find(
-                                //             (f: any) => f.name === fieldMapping[sample.cellHeader]
-                                //         );
-                                //         const isRequired = fieldMeta?.required;
-                                return (
-                                    <React.Fragment key={sample.cellHeader}>
-                                        <div
-                                            className="col-6 py-2 px-3 flex flex-column justify-content-center"
-                                            style={{ borderBottom: "1px solid var(--gray-100)" }}
-                                        >
-                                            <div className="font-medium text-primary">{sample.cellHeader}</div>
-                                            <div className="text-sm" style={{ color: "var(--solid-grey-500)" }}>
-                                                {sample.cellValue || ""}
-                                            </div>
-                                        </div>
-                                        <div className="col-6 py-2 px-3 flex align-items-center gap-2" style={{ borderBottom: "1px solid var(--gray-100)" }}>
-                                            <Dropdown
-                                                value={fieldMapping[sample.cellHeader]}
-                                                options={dropdownOptions}
-                                                onChange={(e) => handleChange(sample.cellHeader, e.value)}
-                                                className="w-full p-inputtext-sm"
-                                                placeholder="Select field"
-                                            />
-                                            {!isRequired ? (
-                                                <span
-                                                    onClick={() => handleRemoveRow(sample.cellHeader)}
-                                                    title="Remove this row"
-                                                    style={{ cursor: 'pointer' }}
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                                        <rect width="16" height="16" rx="8" fill="#F0F0F0" />
-                                                        <path d="M5.6 11L5 10.4L7.4 8L5 5.6L5.6 5L8 7.4L10.4 5L11 5.6L8.6 8L11 10.4L10.4 11L8 8.6L5.6 11Z" fill="#4B4D52" />
-                                                    </svg>
-                                                </span>
-                                            )
-                                                :
-                                                <span style={{ height: 16, width: 16 }}></span>
-                                            }
-                                        </div>
-                                    </React.Fragment>
-                                );
-                            })
-                    ) : (
+                    {isLoading ?
                         <div className='col-12 flex flex-column align-items-center'>
-                            <h4>No Sample Imported Record Info Found</h4>
-                            <p>Please Add Records</p>
+                            <h4>Loading...</h4>
                         </div>
-                    )}
+                        :
+                        <>
+                            {sampleRecords.length > 0 ? (
+                                sampleRecords
+                                    ?.filter((sample: any) => visibleHeaders.includes(sample.cellHeader))
+                                    .map((sample: any) => {
+                                        const fieldMeta = mappingInfo.data.importableFields.find(
+                                            (f: any) => f.name === fieldMapping[sample.cellHeader]
+                                        );
+                                        const isRequired = fieldMeta?.required;
+                                        // {sampleRecords.length > 0 ? (
+                                        //    sampleRecords    
+                                        //     ?.filter((sample: any) => visibleHeaders.includes(sample.cellHeader))
+                                        //     ?.sort((a: any, b: any) => {
+                                        //         const aRequired = mappingInfo.data.importableFields.find((f: any) => f.name === fieldMapping[a.cellHeader])?.required;
+                                        //         const bRequired = mappingInfo.data.importableFields.find((f: any) => f.name === fieldMapping[b.cellHeader])?.required;
+                                        //         return (bRequired ? 1 : 0) - (aRequired ? 1 : 0); // true comes before false
+                                        //     })
+                                        //     .map((sample: any) => {
+                                        //         const fieldMeta = mappingInfo.data.importableFields.find(
+                                        //             (f: any) => f.name === fieldMapping[sample.cellHeader]
+                                        //         );
+                                        //         const isRequired = fieldMeta?.required;
+                                        return (
+                                            <React.Fragment key={sample.cellHeader}>
+                                                <div
+                                                    className="col-6 py-2 px-3 flex flex-column justify-content-center"
+                                                    style={{ borderBottom: "1px solid var(--gray-100)" }}
+                                                >
+                                                    <div className="font-medium text-primary">{sample.cellHeader}</div>
+                                                    <div className="text-sm" style={{ color: "var(--solid-grey-500)" }}>
+                                                        {sample.cellValue || ""}
+                                                    </div>
+                                                </div>
+                                                <div className="col-6 py-2 px-3 flex align-items-center gap-2" style={{ borderBottom: "1px solid var(--gray-100)" }}>
+                                                    <Dropdown
+                                                        value={fieldMapping[sample.cellHeader]}
+                                                        options={dropdownOptions}
+                                                        onChange={(e) => handleChange(sample.cellHeader, e.value)}
+                                                        className="w-full p-inputtext-sm"
+                                                        placeholder="Select field"
+                                                    />
+                                                    {!isRequired ? (
+                                                        <span
+                                                            onClick={() => handleRemoveRow(sample.cellHeader)}
+                                                            title="Remove this row"
+                                                            style={{ cursor: 'pointer' }}
+                                                        >
+                                                            <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                                                <rect width="16" height="16" rx="8" fill="#F0F0F0" />
+                                                                <path d="M5.6 11L5 10.4L7.4 8L5 5.6L5.6 5L8 7.4L10.4 5L11 5.6L8.6 8L11 10.4L10.4 11L8 8.6L5.6 11Z" fill="#4B4D52" />
+                                                            </svg>
+                                                        </span>
+                                                    )
+                                                        :
+                                                        <span style={{ height: 16, width: 16 }}></span>
+                                                    }
+                                                </div>
+                                            </React.Fragment>
+                                        );
+                                    })
+                            ) : (
+                                <div className='col-12 flex flex-column align-items-center'>
+                                    <h4>No Sample Imported Record Info Found</h4>
+                                    <p>Please Add Records</p>
+                                </div>
+                            )}
+                        </>
+                    }
                 </div>
             </div>
             <div className='mt-3 flex align-items-center gap-3'>
