@@ -91,6 +91,16 @@ export const MarkdownDisplay: React.FC<MarkdownDisplayProps> = ({ interaction })
         // Worst-case fallback: put the error string in markdown
         markdown = `Error handling interaction.message: ${err?.message || String(err)}`;
     }
+// 🔧 Normalize escaped newlines, tabs, and quotes
+if (markdown.includes("\\n")) {
+  markdown = markdown
+    .replace(/\\n/g, "\n")
+    .replace(/\\t/g, "\t")
+    .replace(/\\r/g, "")
+    .replace(/\\"/g, '"');
+}
+
+// ✅ markdown is now clean and render-ready
 
     return (
         <div className={`p-3 ${styles.SolidXAIResponse}`} style={{ width: '100%' }}>
