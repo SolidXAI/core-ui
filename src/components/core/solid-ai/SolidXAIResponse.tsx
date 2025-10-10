@@ -36,14 +36,16 @@ export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }
 
     return (
         <div className={`${styles.SolidXAIResponseWrapper}`}>
-            <div className='flex align-items-start gap-3'>
-                <div>
-                    <Button icon={<SolidXAIIcon />} size="small" raised text rounded onClick={()=> window.open(`/admin/core/solid-core/ai-interaction/form/${interaction.id}?viewMode=view`, '_blank')} />
+            {interaction.status !== "pending" &&
+                <div className='flex align-items-start gap-3'>
+                    <div>
+                        <Button icon={<SolidXAIIcon />} size="small" raised text rounded onClick={() => window.open(`/admin/core/solid-core/ai-interaction/form/${interaction.id}?viewMode=view`, '_blank')} />
+                    </div>
+                    <div className={`mt-3`} style={{ width: '100%' }}>
+                        {renderContent()}
+                    </div>
                 </div>
-                <div className={`mt-3`} style={{ width: '100%' }}>
-                    {renderContent()}
-                </div>
-            </div>
+            }
         </div>
     )
 }
@@ -91,16 +93,16 @@ export const MarkdownDisplay: React.FC<MarkdownDisplayProps> = ({ interaction })
         // Worst-case fallback: put the error string in markdown
         markdown = `Error handling interaction.message: ${err?.message || String(err)}`;
     }
-// 🔧 Normalize escaped newlines, tabs, and quotes
-if (markdown.includes("\\n")) {
-  markdown = markdown
-    .replace(/\\n/g, "\n")
-    .replace(/\\t/g, "\t")
-    .replace(/\\r/g, "")
-    .replace(/\\"/g, '"');
-}
+    // 🔧 Normalize escaped newlines, tabs, and quotes
+    if (markdown.includes("\\n")) {
+        markdown = markdown
+            .replace(/\\n/g, "\n")
+            .replace(/\\t/g, "\t")
+            .replace(/\\r/g, "")
+            .replace(/\\"/g, '"');
+    }
 
-// ✅ markdown is now clean and render-ready
+    // ✅ markdown is now clean and render-ready
 
     return (
         <div className={`p-3 ${styles.SolidXAIResponse}`} style={{ width: '100%' }}>
