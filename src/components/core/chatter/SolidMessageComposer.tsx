@@ -37,7 +37,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id }: {
         try {
             const formData = new FormData();
             formData.append('messageType', "custom");
-            formData.append('messageSubType', "audit_insert");
+            formData.append('messageSubType', "custom");
             formData.append('messageBody', message);
             formData.append('coModelEntityId', id);
             formData.append('coModelName', modelSingularName);

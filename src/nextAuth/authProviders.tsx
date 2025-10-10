@@ -92,7 +92,7 @@ const authProviders: NextAuthOptions = {
                             let accessTokenExpires = base64decoded.exp && base64decoded.exp * 1000;
 
                             return {
-                                accessToken: loginResponse.data.data.accessToken,
+                                accessToken: accessToken,
                                 refreshToken: loginResponse.data.data.refreshToken,
                                 accessTokenExpires: accessTokenExpires,
                                 ...loginResponse.data.data,

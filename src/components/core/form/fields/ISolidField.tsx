@@ -13,6 +13,7 @@ export type SolidFieldProps = {
     onChange?: any,
     onBlur?: any,
     parentData?: any,
+    onEmbeddedFormSave?: () => void,
 };
 
 export type FormikObject = {

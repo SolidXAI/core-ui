@@ -71,6 +71,7 @@ export type SolidFormViewProps = {
     customLayout?: any,
     parentData?: any,
     redirectToPath?: string,
+    onEmbeddedFormSave?: () => void,
 };
 
 
@@ -177,13 +178,13 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps, setLightboxUr
 }
 
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
-const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, parentData, setLightboxUrls, setOpenLightbox }: any) => {
+const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, parentData, setLightboxUrls, setOpenLightbox, onEmbeddedFormSave }: any) => {
     const fieldContext: SolidFieldProps = {
         // field metadata - coming from the field-metadata table.
         fieldMetadata: fieldMetadata,
         // field layout - coming from view.layout
         field: field,
-        // initial data 
+        // initial data
         data: initialEntityData,
         // complete form view metadata - this includes layout of the whole form & metadata about all fields in the corresponding model.
         solidFormViewMetaData: solidFormViewMetaData,
@@ -195,6 +196,9 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
     }
     if (parentData) {
         fieldContext.parentData = parentData;
+    }
+    if (onEmbeddedFormSave) {
+        fieldContext.onEmbeddedFormSave = onEmbeddedFormSave;
     }
     const solidField = fieldFactory(fieldMetadata?.type, fieldContext, setLightboxUrls, setOpenLightbox);
 
@@ -593,6 +597,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
             isEntityDeleteSuceess == true
         ) {
             setRefreshChatterMessage(true);
+            if (params.embeded == true && params.onEmbeddedFormSave) {
+                params.onEmbeddedFormSave();
+            }
             // Close The pop in case the form is used in embeded form
             if (params.embeded == true) {
                 params.handlePopupClose()
@@ -1164,6 +1171,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             setLightboxUrls={setLightboxUrls}
                             setOpenLightbox={setOpenLightbox}
                             parentData={params.parentData}
+                            onEmbeddedFormSave={() => setRefreshChatterMessage(true)}
                         />;
                     }
                 }
