@@ -120,31 +120,34 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
 
     let aiResponseTitle = '';
     if (interaction.metadata) {
-        const metadata = JSON.parse(interaction.metadata);
-        const toolsInvoked = metadata['tools_invoked'][0];
-
-        switch (toolsInvoked) {
-            case 'solid_create_module':
+        const metadata: any = interaction.metadata;
+        const relevantConcerns = metadata.relevantConcerns
+        let relevantConcern = "";
+        if (relevantConcerns.length > 0) {
+            relevantConcern = relevantConcerns[0]
+        }
+        switch (relevantConcern) {
+            case 'create_module':
                 aiResponseTitle = 'Module Created';
                 break;
 
-            case 'solid_create_model_with_fields':
+            case 'create_model_with_fields':
                 aiResponseTitle = 'Model Created';
                 break;
 
-            case 'solid_add_field':
+            case 'add_field':
                 aiResponseTitle = 'Field Added';
                 break;
 
-            case 'solid_create_dashboard':
+            case 'create_dashboard':
                 aiResponseTitle = 'Dashboard Created';
                 break;
 
-            case 'solid_create_dashboard_widget':
+            case 'create_dashboard_widget':
                 aiResponseTitle = 'Chart Created';
                 break;
 
-            case 'solid_create_model_layout':
+            case 'create_model_layout':
                 aiResponseTitle = 'Layout Created';
                 break;
 
