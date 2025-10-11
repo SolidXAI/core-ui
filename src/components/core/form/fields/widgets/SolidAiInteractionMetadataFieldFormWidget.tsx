@@ -19,7 +19,7 @@ export const SolidAiInteractionMetadataFieldFormWidget = ({ formik, fieldContext
 
             <TabView>
                 {/* -------------------- Tab 1: Metadata & Prompts -------------------- */}
-                <TabPanel header="📝 Metadata & Prompts">
+                <TabPanel header="Metadata & Prompts">
                     <div className="solid-layout-accordion">
                         <Accordion multiple expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up" activeIndex={[0]}>
                             {value?.chunks?.map((c: any) => {
@@ -64,11 +64,11 @@ export const SolidAiInteractionMetadataFieldFormWidget = ({ formik, fieldContext
                                 // 🏷️ Header label
                                 let headerTitle = "Unknown";
                                 if (isModule) {
-                                    headerTitle = `🧩 Module: ${meta.moduleName} (${meta.modelCount} models)`;
+                                    headerTitle = `Module: ${meta.moduleName} (${meta.modelCount} models)`;
                                 } else if (isModel) {
-                                    headerTitle = `📄 Model: ${meta.modelName} (${meta.fieldCount} fields)`;
+                                    headerTitle = `Model: ${meta.modelName} (${meta.fieldCount} fields)`;
                                 } else if (isDoc) {
-                                    headerTitle = `📘 Doc: ${meta.title || meta.doc_title || meta.path}`;
+                                    headerTitle = `Doc: ${meta.title || meta.doc_title || meta.path}`;
                                 }
 
                                 // 🌐 External link (docs only)
