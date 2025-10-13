@@ -128,7 +128,7 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
         }
         switch (relevantConcern) {
             case 'create_module':
-                aiResponseTitle = 'Module Created';
+                aiResponseTitle = 'Module metadata available, you can review and apply, or if you want to modify click on the "Edit" button.';
                 break;
 
             case 'create_model_with_fields':
@@ -302,17 +302,18 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
                 :
                 <>
                     <div>
-                        <div className={`p-3 ${styles.SolidXAIResponse}`}>
+                        <div className={`p-3 mb-3 ${styles.SolidXAIResponse}`}>
                             {aiResponseTitle}
                         </div>
-                        {/* <div className="border-round-lg overflow-hidden">
+                        <div className="border-round-lg overflow-hidden">
                             <CodeMirror
                                 value={formattedJson}
                                 style={{ fontSize: '10px' }}
                                 theme={oneDark}
+                                readOnly={true}
                                 extensions={[javascript(), EditorView.lineWrapping]}
                             />
-                        </div> */}
+                        </div>
                         {interaction?.isApplied ?
                             <div className="mt-3 font-medium solid-primary-black-text">
                                 ✅ Applied Successfully
@@ -320,7 +321,7 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
                             :
                             <div className="flex gap-2 mt-3">
                                 <Button size="small" onClick={handleApply} disabled={isApplyInteractionLoading}>Apply</Button>
-                                <Button size="small" outlined onClick={handlePreview}>Preview</Button>
+                                <Button size="small" outlined onClick={handlePreview}>Edit</Button>
                             </div>
                         }
                     </div>
