@@ -15,7 +15,7 @@ export const SolidAiInteractionMetadataFieldFormWidget = ({ formik, fieldContext
 
     return (
         <div className="mt-2 flex-column">
-            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            {/* <p className="m-0 form-field-label font-medium">{fieldLabel}</p> */}
 
             <TabView>
                 {/* -------------------- Tab 1: Metadata & Prompts -------------------- */}
