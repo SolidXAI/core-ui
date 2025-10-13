@@ -7,10 +7,12 @@ import { SolidXAIInputBox } from "./SolidXAIInputBox";
 import { SolidXAIThreadWrapper } from "./SolidXAIThreadWrapper";
 import { useEffect, useState } from 'react';
 import { SolidXAIModuleHeader } from "./SolidXAIModuleHeader";
+import { useSelector } from "react-redux";
 
 export const SolidXAIModule = ({ showHeader, inListView }: any) => {
   const [latestInteractionId, setLatestInteractionId] = useState<string | null>(null);
   const [thinking, setThinking] = useState(false);
+  const userId = useSelector((state: any) => state.auth?.user?.user?.id);
 
   // TODO: START REFACTORING - reusable code alert
   // TODO: This method can be refactored out into a separate file... 
@@ -93,7 +95,7 @@ export const SolidXAIModule = ({ showHeader, inListView }: any) => {
         <SolidXAIModuleHeader />
       }
       <SolidXAIThreadWrapper
-        threadId="thread-1"
+        threadId={`thread-${userId}`}
         latestInteractionId={latestInteractionId}
         thinking={thinking}
       />
