@@ -15,11 +15,11 @@ export const SolidAiInteractionMetadataFieldFormWidget = ({ formik, fieldContext
 
     return (
         <div className="mt-2 flex-column">
-            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            {/* <p className="m-0 form-field-label font-medium">{fieldLabel}</p> */}
 
             <TabView>
                 {/* -------------------- Tab 1: Metadata & Prompts -------------------- */}
-                <TabPanel header="Metadata & Prompts">
+                <TabPanel header="Chunks">
                     <div className="solid-layout-accordion">
                         <Accordion multiple expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up" activeIndex={[0]}>
                             {value?.chunks?.map((c: any) => {
@@ -112,7 +112,6 @@ export const SolidAiInteractionMetadataFieldFormWidget = ({ formik, fieldContext
                 <TabPanel header="System Prompt">
                     {value?.system_prompt && (
                         <div>
-                            <h4 className="font-semibold mb-2 mt-3">System Prompt</h4>
                             <MarkdownViewer data={value.system_prompt} />
                         </div>
                     )}
@@ -120,7 +119,6 @@ export const SolidAiInteractionMetadataFieldFormWidget = ({ formik, fieldContext
                 <TabPanel header="User Prompt">
                     {value?.user_prompt && (
                         <div>
-                            <h4 className="font-semibold mb-2 mt-3">User Prompt</h4>
                             <MarkdownViewer data={value.user_prompt} />
                         </div>
                     )}

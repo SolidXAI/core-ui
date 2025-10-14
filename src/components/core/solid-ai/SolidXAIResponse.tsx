@@ -157,8 +157,18 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
     }
 
     const dispatch = useDispatch();
+    const toast = useRef<Toast>(null);
     const [editAndApplyDialog, setEditAndApplyDialog] = useState(false);
     const [editedFormattedJson, setEditedFormattedJson] = useState<string>('{}');
+
+    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
+        toast.current?.show({
+            severity,
+            summary,
+            detail,
+            life: 3000,
+        });
+    };
 
     const [applyInteraction, {
         isLoading: isApplyInteractionLoading,
@@ -176,10 +186,10 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
     const handleApply = async () => {
         try {
             const response = await applyInteraction({ id: interaction.id }).unwrap()
-
             setIsGenerating(true);
             console.log('Apply successful:', response)
-        } catch (err) {
+        } catch (err:any) {
+            showToast("error", "Apply Failed", `Failed to apply interaction - ${err?.data?.error}`);
             console.error('Failed to apply interaction:', err)
         }
     }
@@ -286,6 +296,8 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
 
     return (
         <>
+            <Toast ref={toast} />
+
             {isGenerating ?
                 <>
                     {/* <div className="flex flex-column align-items-center justify-content-center">
