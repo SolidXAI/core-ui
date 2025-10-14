@@ -22,14 +22,6 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
         endDate: null
     });
 
-    const queryDataChatterMessage = {
-        populate: ['user', 'chatterMessageDetails']
-    };
-
-    const queryStringChatterMessage = qs.stringify(queryDataChatterMessage, {
-        encodeValuesOnly: true,
-    });
-
     const [getchatterMessage, { isLoading: isChatterLoading }] = useLazyGetchatterMessageQuery();
 
     useEffect(() => {
@@ -73,10 +65,32 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
 
     const fetchData = async () => {
         try {
+            const queryData: any = {
+                populate: ['user', 'chatterMessageDetails']
+            };
+
+            if (filters.name) {
+                queryData.filters = queryData.filters || {};
+                queryData.filters['user'] = { fullName: { $containsi: filters.name }};
+            }
+            if (filters.startDate) {
+                queryData.filters = queryData.filters || {};
+                queryData.filters.createdAt = queryData.filters.createdAt || {};
+                queryData.filters.createdAt.$gte = filters.startDate.toISOString();
+            }
+            if (filters.endDate) {
+                queryData.filters = queryData.filters || {};
+                queryData.filters.createdAt = queryData.filters.createdAt || {};
+                queryData.filters.createdAt.$lte = filters.endDate.toISOString();
+            }
+
+            const queryString = qs.stringify(queryData, {
+                encodeValuesOnly: true,
+            });
             const response = await getchatterMessage({
                 entityId: id,
                 entityName: modelSingularName,
-                qs: queryStringChatterMessage
+                qs: queryString
             }).unwrap();
             const processedMessages = response.data.records.map((msg: any) => {
                 if (msg.messageType === 'custom') {
