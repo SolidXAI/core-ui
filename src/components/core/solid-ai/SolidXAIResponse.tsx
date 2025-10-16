@@ -1,20 +1,20 @@
 "use client"
-import { useSeederMutation } from "@/redux/api/solidServiceApi";
-import { Button } from 'primereact/button'
-import styles from './SolidXAI.module.css'
-import { SolidXAIIcon } from './SolidXAIIcon'
-import { AiInteraction } from '@/types/solid-core'
-import { useApplySolidAiInteractionMutation } from '@/redux/api/aiInteractionApi'
-import { useEffect, useRef, useState } from "react";
-import { useDispatch } from "react-redux";
+import MarkdownViewer from "@/components/common/MarkdownViewer";
+import { useApplySolidAiInteractionMutation } from '@/redux/api/aiInteractionApi';
+import { useCodeGenerationPostProcessMutation } from "@/redux/api/solidServiceApi";
 import { closePopup } from "@/redux/features/popupSlice";
-import { Toast } from "primereact/toast";
-import { SolidCircularLoader } from "../common/SolidLoaders/SolidCircularLoader";
-import { Dialog } from "primereact/dialog";
+import { AiInteraction } from '@/types/solid-core';
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct import
-import MarkdownViewer from "@/components/common/MarkdownViewer";
+import { Button } from 'primereact/button';
+import { Dialog } from "primereact/dialog";
+import { Toast } from "primereact/toast";
+import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import { SolidCircularLoader } from "../common/SolidLoaders/SolidCircularLoader";
+import styles from './SolidXAI.module.css';
+import { SolidXAIIcon } from './SolidXAIIcon';
 
 export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }) => {
     const renderContent = () => {
@@ -208,22 +208,12 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
     // TODO: This method can be refactored out into a separate file... 
     // TODO: The if condition below isGenerating in the JSX part can also be refactored out... 
 
-    // const toast = useRef<Toast>(null);
-    // const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-    //     toast.current?.show({
-    //         severity,
-    //         summary,
-    //         detail,
-    //         life: 3000,
-    //     });
-    // };
-
-    const [triggerSeeder, {
-        data,
-        isLoading,
-        isSuccess: isSeederSuccess,
-        isError: isSeederError
-    }] = useSeederMutation();
+    const [triggerCodeGenerationPostProcess, {
+        data: codeGenerationPostProcessData,
+        isLoading: isCodeGenerationPostProcessLoading,
+        isSuccess: isCodeGenerationPostProcessSuccess,
+        isError: isCodeGenerationPostProcessError
+    }] = useCodeGenerationPostProcessMutation();
 
     // Utitlity to track if solid-api is up
     const [isPinging, setIsPinging] = useState(false);
@@ -255,7 +245,7 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
                 setIsPinging(false);
 
                 if (isAlive) {
-                    await triggerSeeder("ModuleMetadataSeederService");
+                    await triggerCodeGenerationPostProcess();
                 } else {
                     dispatch(closePopup());
                     console.log("Backend is not alive, cannot run seeder");
@@ -271,19 +261,19 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
     }, [isApplyInteractionSuceess]);
 
     useEffect(() => {
-        if (isSeederSuccess) {
-            console.log("isSeederSuccess", data);
+        if (isCodeGenerationPostProcessSuccess) {
+            console.log("isSeederSuccess", isCodeGenerationPostProcessSuccess);
             // showToast("success", "Code Generated Successfully", "Code Generated Successfully");
             setIsGenerating(false);
             dispatch(closePopup());
             window.location.reload();
         }
-        if (isSeederError) {
-            console.log("isSeederError", isSeederError);
+        if (isCodeGenerationPostProcessError) {
+            console.log("isSeederError", isCodeGenerationPostProcessError);
             // showToast("error", "Seeder Error", "Could not run seeder. Please try again.");
             setIsGenerating(false);
         }
-    }, [isSeederSuccess])
+    }, [isCodeGenerationPostProcessSuccess, isCodeGenerationPostProcessError]);
     // TODO: END REFACTORING - reusable code alert
 
     let formattedJson = ''
