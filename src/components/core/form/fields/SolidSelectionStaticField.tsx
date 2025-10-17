@@ -312,9 +312,13 @@ export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }
                                     checked={formik.values[fieldName]?.value === option.value}
                                     // onChange={(e) => formik.setFieldValue(fieldName, e.value)} 
                                     // onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-                                    onChange={(e) =>
-                                        formik.setFieldValue(fieldName, { label: option.label, value: option.value })
-                                    }
+                                    // onChange={(e) =>
+                                    //     formik.setFieldValue(fieldName, { label: option.label, value: option.value })
+                                    // }
+                                    onChange={(e) => {
+                                        formik.setFieldValue(fieldName, { label: option.label, value: option.value });
+                                        fieldContext.onChange(e, 'onFieldChange');
+                                      }}
                                     disabled={formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled}
                                     className="mr-2"
                                 />
