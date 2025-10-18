@@ -3,7 +3,7 @@ import {
     authApi, aiInteractionApi, dashboardApi, dashboardQuestionApi, exportTemplateApi, fieldsApi,
     importTransactionApi, mediaApi, mediaStorageProviderApi, modelsApi, modulesApi, roleApi,
     solidActionsApi, solidChatterMessageApi, solidMenusApi, solidServiceApi, solidSettingsApi,
-    solidViewsApi, userApi
+    solidViewsApi, userApi, createSolidEntityApi
 } from "@/index";
 
 // 1. Export all APIs in one array
@@ -27,6 +27,7 @@ export const solidApiSlices = [
     dashboardApi,
     dashboardQuestionApi,
     aiInteractionApi,
+    createSolidEntityApi
 ];
 
 // 2. Export default reducers
