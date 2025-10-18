@@ -42,6 +42,7 @@ import DeleteModelRowAction from "@/components/core/extension/solid-core/modelMe
 import ChartFormPreviewWidget from "@/components/core/extension/solid-core/dashboardQuestion/ChartFormPreviewWidget";
 import { DefaultTimeFormEditWidget, DefaultTimeFormViewWidget } from "@/components/core/form/fields/SolidTimeField";
 import { SolidAiInteractionMetadataFieldFormWidget } from "@/components/core/form/fields/widgets/SolidAiInteractionMetadataFieldFormWidget";
+import { SolidAiInteractionMessageFieldFormWidget } from "@/components/core/form/fields/widgets/SolidAiInteractionMessageFieldFormWidget";
 
 type ExtensionComponentType = null | 'list_field_widget' | 'form_field_view_widget' | 'form_field_edit_widget' | 'list_row_action ' | 'list_header_action' | 'form_action' | 'form_widget';
 
@@ -209,6 +210,7 @@ registerExtensionComponent("DefaultDateTimeFormViewWidget", DefaultDateTimeFormV
 registerExtensionComponent("SolidRelationFieldAvatarFormWidget", SolidRelationFieldAvatarFormWidget, []);
 registerExtensionComponent("SolidShortTextFieldAvatarWidget", SolidShortTextFieldAvatarWidget, []);
 registerExtensionComponent("SolidAiInteractionMetadataFieldFormWidget", SolidAiInteractionMetadataFieldFormWidget, []);
+registerExtensionComponent("SolidAiInteractionMessageFieldFormWidget", SolidAiInteractionMessageFieldFormWidget, []);
 
 // Listview default widgets
 registerExtensionComponent("DefaultTextListWidget", DefaultTextListWidget, []);
