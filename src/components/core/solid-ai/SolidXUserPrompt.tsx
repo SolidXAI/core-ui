@@ -8,7 +8,7 @@ export const SolidXUserPrompt = ({ interaction }: { interaction: AiInteraction }
   const timestamp = moment(interaction.createdAt).format('HH:mm')
 
   return (
-    <div className={`${styles.SolidXUserPromptWrapper}`}>
+    <div className={`${styles.SolidXUserPromptWrapper} flex justify-content-end`}>
       <div className='flex align-items-start gap-3'>
         <div className={`mt-3 p-3 shadow-1 bg-bluegray-50  ${styles.SolidXUserPrompt} relative`}>
           <div style={{ whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}>
