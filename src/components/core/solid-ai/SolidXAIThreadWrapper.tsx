@@ -30,7 +30,7 @@ export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking 
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [isPaginating, setIsPaginating] = useState(false);
-    const limit = 100;
+    const limit = 10;
 
     // Trigger a call to fetch all aiInteractions. 
     useEffect(() => {
@@ -151,6 +151,11 @@ export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking 
             ref={containerRef}
             className={`px-3 pt-3 flex flex-column gap-3 overflow-y-auto overflow-x-hidden ${styles.SolidXAIThreadWrapper}`}
         >
+            {isPaginating && (
+                <div className="text-center py-2 text-sm text-gray-500">
+                    Loading older messages…
+                </div>
+            )}
             {interactions.map((interaction) => {
                 const { role } = interaction;
 
