@@ -308,7 +308,7 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
     let parsed: any = {}
     try {
         parsed = JSON.parse(interaction.message)
-        formattedCode = parsed.response ? JSON.stringify(parsed.response, null, 2) : '';
+        formattedCode = parsed.data ? JSON.stringify(parsed.data, null, 2) : '';
         formattedGeneratedStatus = parsed.generation_status;
 
     } catch (e) {
