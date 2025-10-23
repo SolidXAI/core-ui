@@ -60,9 +60,19 @@ export interface PlainTextDisplayProps {
 }
 
 export const PlainTextDisplay: React.FC<PlainTextDisplayProps> = ({ interaction }) => {
+
+    let response = '';
+    let parsed: any = {}
+    try {
+        parsed = JSON.parse(interaction.message)
+        response = parsed.response ? parsed.response : '';
+    } catch (e) {
+        response = 'Invalid JSON'
+    }
+
     return (
         <div className={`p-3 ${styles.SolidXAIResponse}`}>
-            {interaction.message}
+            {response}
         </div>
     )
 }
@@ -77,26 +87,36 @@ export const MarkdownDisplay: React.FC<MarkdownDisplayProps> = ({ interaction })
     let jsonMsg: any;
     let markdown: string;
 
+    let responseMessage = '';
+    let parsed: any = {}
     try {
-        if (typeof interaction.message === "string") {
+        parsed = JSON.parse(interaction.message)
+        responseMessage = parsed.response ? parsed.response : '';
+    } catch (e) {
+        responseMessage = 'Invalid JSON'
+    }
+
+
+    try {
+        if (typeof responseMessage === "string") {
             try {
-                jsonMsg = JSON.parse(interaction.message.trim());
+                jsonMsg = JSON.parse(responseMessage.trim());
                 markdown = jsonMsg?.data ?? "";
             } catch (jsonErr) {
                 // Not valid JSON → treat the raw string as markdown
-                markdown = interaction.message.trim();
+                markdown = responseMessage.trim();
             }
-        } else if (typeof interaction.message === "object" && interaction.message !== null) {
+        } else if (typeof responseMessage === "object" && responseMessage !== null) {
             // Already an object
-            jsonMsg = interaction.message;
+            jsonMsg = responseMessage;
             markdown = jsonMsg?.data ?? "";
         } else {
             // Fallback for other types
-            markdown = String(interaction.message ?? "");
+            markdown = String(responseMessage ?? "");
         }
     } catch (err: any) {
         // Worst-case fallback: put the error string in markdown
-        markdown = `Error handling interaction.message: ${err?.message || String(err)}`;
+        markdown = `Error handling responseMessage: ${err?.message || String(err)}`;
     }
     // 🔧 Normalize escaped newlines, tabs, and quotes
     if (markdown.includes("\\n")) {
@@ -120,6 +140,7 @@ export interface JsonDisplayProps {
     interaction: AiInteraction
 }
 
+// SolidXConcernDisplay
 export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
     console.log("Rendering JSON display for interaction:", interaction);
 
@@ -281,12 +302,17 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
     }, [isCodeGenerationPostProcessSuccess, isCodeGenerationPostProcessError]);
     // TODO: END REFACTORING - reusable code alert
 
-    let formattedJson = ''
+    let formattedJson = '';
+    let formattedCode = '';
+    let formattedGeneratedStatus = '';
+    let parsed: any = {}
     try {
-        const parsed = JSON.parse(interaction.message)
-        formattedJson = JSON.stringify(parsed, null, 2)
+        parsed = JSON.parse(interaction.message)
+        formattedCode = parsed.response ? JSON.stringify(parsed.response, null, 2) : '';
+        formattedGeneratedStatus = parsed.generation_status;
+
     } catch (e) {
-        formattedJson = 'Invalid JSON'
+        formattedCode = 'Invalid JSON'
     }
 
     return (
@@ -308,35 +334,48 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ interaction }) => {
                 </>
                 :
                 <>
-                    <div>
-                        <div className={`p-3 mb-3 ${styles.SolidXAIResponse}`}>
-                            {aiResponseTitle}
-                        </div>
-                        <div className="border-round-lg overflow-hidden">
-                            <CodeMirror
-                                value={formattedJson}
-                                style={{ fontSize: '10px' }}
-                                theme={oneDark}
-                                readOnly={true}
-                                extensions={[javascript(), EditorView.lineWrapping]}
-                            />
-                        </div>
-                        {interaction?.isApplied ?
-                            <div className="mt-3 font-medium solid-primary-black-text">
-                                ✅ Applied Successfully
+                    {formattedGeneratedStatus === "success" &&
+                        <div>
+                            <div className={`p-3 mb-3 ${styles.SolidXAIResponse}`}>
+                                <p>{parsed?.instructions}</p>
                             </div>
-                            :
-                            <div className="flex gap-2 mt-3">
-                                <Button size="small" onClick={handleApply} disabled={isApplyInteractionLoading}>Apply</Button>
-                                <Button size="small" outlined onClick={handlePreview}>Edit</Button>
+                            <div className="border-round-lg overflow-hidden">
+                                <CodeMirror
+                                    value={formattedCode}
+                                    style={{ fontSize: '10px' }}
+                                    theme={oneDark}
+                                    readOnly={true}
+                                    extensions={[javascript(), EditorView.lineWrapping]}
+                                />
                             </div>
-                        }
-                    </div>
+                            {interaction?.isApplied ?
+                                <div className="mt-3 font-medium solid-primary-black-text">
+                                    ✅ Applied Successfully
+                                </div>
+                                :
+                                <div className="flex gap-2 mt-3">
+                                    <Button size="small" onClick={handleApply} disabled={isApplyInteractionLoading}>Apply</Button>
+                                    <Button size="small" outlined onClick={handlePreview}>Edit</Button>
+                                </div>
+                            }
+                        </div>
+                    }
+                    {formattedGeneratedStatus === "error" &&
+                        <div>
+                            {/* <div className={`p-3 mb-3 ${styles.SolidXAIResponse}`}>
+                                {aiResponseTitle}
+                            </div> */}
+                            <div className="border-round-lg overflow-hidden">
+                                <p>{parsed?.instructions}</p>
+                                {parsed?.errors.map((e: any) => <p>{e}</p>)}
+                            </div>
+                        </div>
+                    }
                 </>
             }
             {editAndApplyDialog && <Dialog header="Edit And Apply" visible={editAndApplyDialog} style={{ width: '50vw' }} onHide={() => { if (!editAndApplyDialog) return; setEditAndApplyDialog(false); }}>
                 <CodeMirror
-                    value={formattedJson}
+                    value={formattedCode}
                     style={{ fontSize: '10px' }}
                     theme={oneDark}
                     extensions={[javascript(), EditorView.lineWrapping]}
