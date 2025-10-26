@@ -93,9 +93,9 @@ export const MarkdownDisplay: React.FC<MarkdownDisplayProps> = ({ interaction })
         parsed = JSON.parse(interaction.message)
         responseMessage = parsed.response ? parsed.response : '';
     } catch (e) {
-        responseMessage = 'Invalid JSON'
+        // responseMessage = 'Invalid JSON'
+        responseMessage = interaction.message;
     }
-
 
     try {
         if (typeof responseMessage === "string") {
