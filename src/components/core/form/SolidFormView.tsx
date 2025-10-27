@@ -447,7 +447,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [isResizingChatterLocale, setIsResizingChatterLocale] = useState(false);
 
     const [solidWorkflowFieldValue, setSolidWorkflowFieldValue] = useState<string>("");
-    const [defaultTabViewOptionIndex, setDefaultTabViewOptionIndex] = useState<number>(1);
+    const [defaultTabViewOptionIndex, setDefaultTabViewOptionIndex] = useState<number>(0);
     const errorFields: string[] = [];
 
     const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
@@ -617,6 +617,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
             //this is to attach default locale when adding data in popup view where relations exists
             if (!selectedLocale && matchedLocale && !searchParams.get('locale')) {
                 setSelectedLocale(matchedLocale.locale);
+            }else{
+                setSelectedLocale('en');
             }
         }
 
@@ -1259,6 +1261,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         const handleChatterExpandClick = (option?: string) => {
             setShowChatter(true);
+            setDefaultTabViewOptionIndex(0);
             if (option === 'locale') {
                 setDefaultTabViewOptionIndex(0);
             } else if (option === 'chatter') {
@@ -1320,7 +1323,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const handleDraftPublishWorkFlow = async (type: string) => {
             const userChoice = await confirmDialogWithPromise();
             if (!userChoice) return; // Optional: handle cancel
-            let finalPublishedValue = type === 'publish' ? new Date().toISOString() : '';
+            let finalPublishedValue = type === 'publish' ? new Date().toISOString() : 'null';
             setPublished(finalPublishedValue);
             let formdata = new FormData();
             formdata.append('publishedAt', finalPublishedValue)

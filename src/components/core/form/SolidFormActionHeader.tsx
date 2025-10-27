@@ -126,7 +126,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             icon={'pi pi-objects-column'}
                             onClick={() => setLayoutDialogVisible(true)}
                         />
-                        {draftEnabled && internationalisationEnabled && params.id !== 'new' &&
+                        {draftEnabled &&
                             (publish !== null ?
                                 <Button
                                     text
