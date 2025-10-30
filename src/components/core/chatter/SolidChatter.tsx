@@ -16,18 +16,12 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
     const [activeTab, setActiveTab] = useState<'email-message' | 'log' | null>('email-message');
     const [visibleBox, setVisibleBox] = useState<'email-message' | 'log' | null>(null);
     const [messages, setMessages] = useState<any[]>([]);
+    const [limit, setLimit] = useState<number>(25);
+    const [totalRecords, setTotalRecords] = useState<number>(0);
     const [filters, setFilters] = useState<FilterState>({
         name: '',
         startDate: null,
         endDate: null
-    });
-
-    const queryDataChatterMessage = {
-        populate: ['user', 'chatterMessageDetails']
-    };
-
-    const queryStringChatterMessage = qs.stringify(queryDataChatterMessage, {
-        encodeValuesOnly: true,
     });
 
     const [getchatterMessage, { isLoading: isChatterLoading }] = useLazyGetchatterMessageQuery();
@@ -45,7 +39,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
         if (id !== 'new') {
             fetchData();
         }
-    }, [filters]);
+    }, [filters, limit]);
 
     const handleTabClick = (tab: 'email-message' | 'log') => {
         setActiveTab(tab);
@@ -73,10 +67,33 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
 
     const fetchData = async () => {
         try {
+            const queryData: any = {
+                populate: ['user', 'chatterMessageDetails'],
+                limit: limit
+            };
+
+            if (filters.name) {
+                queryData.filters = queryData.filters || {};
+                queryData.filters['user'] = { fullName: { $containsi: filters.name }};
+            }
+            if (filters.startDate) {
+                queryData.filters = queryData.filters || {};
+                queryData.filters.createdAt = queryData.filters.createdAt || {};
+                queryData.filters.createdAt.$gte = filters.startDate.toISOString();
+            }
+            if (filters.endDate) {
+                queryData.filters = queryData.filters || {};
+                queryData.filters.createdAt = queryData.filters.createdAt || {};
+                queryData.filters.createdAt.$lte = filters.endDate.toISOString();
+            }
+
+            const queryString = qs.stringify(queryData, {
+                encodeValuesOnly: true,
+            });
             const response = await getchatterMessage({
                 entityId: id,
                 entityName: modelSingularName,
-                qs: queryStringChatterMessage
+                qs: queryString
             }).unwrap();
             const processedMessages = response.data.records.map((msg: any) => {
                 if (msg.messageType === 'custom') {
@@ -119,20 +136,23 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                 }
             });
             setMessages(processedMessages);
+            setTotalRecords(response?.data?.meta?.totalRecords || 0);
         } catch (error) {
             console.error('Error fetching messages:', error);
         }
     }
 
     const handleFilterChange = (newFilters: FilterState) => {
-        setFilters(prev => {
-            const updatedFilters = {
-                name: newFilters.name,
-                startDate: newFilters.startDate,
-                endDate: newFilters.endDate
-            };
-            return updatedFilters;
+        setFilters({
+            name: newFilters.name,
+            startDate: newFilters.startDate,
+            endDate: newFilters.endDate
         });
+        setLimit(25);
+    };
+
+    const handleLoadMore = () => {
+        setLimit(prevLimit => prevLimit + 25);
     };
 
     return (
@@ -164,25 +184,51 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                         No Data Available
                     </div>
                 ) : (
-                    messages.map((message, index) => {
-                        const showDateDivider = index === 0 || message.date !== messages[index - 1].date;
-                        return (
-                            <div key={message.id}>
-                                {showDateDivider && <SolidChatterDateDivider date={message.date} />}
-                                <SolidChatterMessageBox
-                                    user={message.user}
-                                    messageType={message.messageType}
-                                    message={message.message}
-                                    time={message.time}
-                                    auditRecord={message.auditRecord}
-                                    media={message.media}
-                                    messageSubType={message.messageSubType}
-                                    modelDisplayName={message.modelDisplayName}
-                                    modelUserKey={message.modelUserKey}
-                                />
+                    <>
+                        {messages.map((message, index) => {
+                            const showDateDivider = index === 0 || message.date !== messages[index - 1].date;
+                            return (
+                                <div key={message.id}>
+                                    {showDateDivider && <SolidChatterDateDivider date={message.date} />}
+                                    <SolidChatterMessageBox
+                                        user={message.user}
+                                        messageType={message.messageType}
+                                        message={message.message}
+                                        time={message.time}
+                                        auditRecord={message.auditRecord}
+                                        media={message.media}
+                                        messageSubType={message.messageSubType}
+                                        modelDisplayName={message.modelDisplayName}
+                                        modelUserKey={message.modelUserKey}
+                                    />
+                                </div>
+                            );
+                        })}
+                        {totalRecords > messages.length && (
+                            <div className='flex justify-content-center mt-3 mb-3'>
+                                <span
+                                    onClick={handleLoadMore}
+                                    className='cursor-pointer text-primary font-medium px-4 py-2'
+                                    style={{
+                                        userSelect: 'none',
+                                        borderRadius: '6px',
+                                        transition: 'all 0.2s ease',
+                                        display: 'inline-block'
+                                    }}
+                                    onMouseEnter={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
+                                        e.currentTarget.style.transform = 'translateY(-1px)';
+                                    }}
+                                    onMouseLeave={(e) => {
+                                        e.currentTarget.style.backgroundColor = 'transparent';
+                                        e.currentTarget.style.transform = 'translateY(0)';
+                                    }}
+                                >
+                                    Load More...
+                                </span>
                             </div>
-                        );
-                    })
+                        )}
+                    </>
                 )}
             </div>
         </div>
