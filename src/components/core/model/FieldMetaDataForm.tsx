@@ -1261,7 +1261,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
         setVisiblePopup(false);
 
       } catch (err) {
-        console.error("Failed to create Radix Model:", err);
+        console.error("Failed to create Model:", err);
       }
     },
     validateOnBlur: false // Disable validation on blur

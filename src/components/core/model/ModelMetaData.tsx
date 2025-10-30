@@ -168,7 +168,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
         nextTab()
 
       } catch (err) {
-        console.error("Failed to create Radix Model:", err);
+        console.error("Failed to create Model:", err);
       }
     },
   });
