@@ -9,41 +9,21 @@ export interface SolidXAiMarkdownDisplayProps {
 export const SolidXAiMarkdownDisplay: React.FC<SolidXAiMarkdownDisplayProps> = ({ interaction }) => {
     // const jsonMsg = JSON.parse(interaction.message);
     // const markdown = jsonMsg.data;
-    let jsonMsg: any;
-    let markdown: string;
-
-    let responseMessage = '';
+    let markdown = '';
+    let generation_status = '';
+    let instructions = '';
     let parsed: any = {}
+    let errors = []
     try {
         parsed = JSON.parse(interaction.message)
-        responseMessage = parsed.response ? parsed.response : '';
+        markdown = parsed.data ? parsed.data : '';
+        generation_status = parsed.generation_status;
+        instructions = parsed?.instructions;
+        instructions = parsed?.instructions;
+        errors = parsed?.errors
     } catch (e) {
-        responseMessage = 'Invalid JSON'
+        markdown = 'Invalid JSON'
     }
-
-
-    try {
-        if (typeof responseMessage === "string") {
-            try {
-                jsonMsg = JSON.parse(responseMessage.trim());
-                markdown = jsonMsg?.data ?? "";
-            } catch (jsonErr) {
-                // Not valid JSON → treat the raw string as markdown
-                markdown = responseMessage.trim();
-            }
-        } else if (typeof responseMessage === "object" && responseMessage !== null) {
-            // Already an object
-            jsonMsg = responseMessage;
-            markdown = jsonMsg?.data ?? "";
-        } else {
-            // Fallback for other types
-            markdown = String(responseMessage ?? "");
-        }
-    } catch (err: any) {
-        // Worst-case fallback: put the error string in markdown
-        markdown = `Error handling responseMessage: ${err?.message || String(err)}`;
-    }
-    // 🔧 Normalize escaped newlines, tabs, and quotes
     if (markdown.includes("\\n")) {
         markdown = markdown
             .replace(/\\n/g, "\n")
@@ -51,12 +31,26 @@ export const SolidXAiMarkdownDisplay: React.FC<SolidXAiMarkdownDisplayProps> = (
             .replace(/\\r/g, "")
             .replace(/\\"/g, '"');
     }
-
-    // ✅ markdown is now clean and render-ready
-
     return (
         <div className={`p-3 ${styles.SolidXAIResponse}`} style={{ width: '100%' }}>
-            <MarkdownViewer data={markdown} />
+
+            {generation_status === "success" &&
+                <MarkdownViewer data={markdown} />
+            }
+            {generation_status === "error" &&
+                <div>
+                    {/* <div className={`p-3 mb-3 ${styles.SolidXAIResponse}`}>
+                                            {aiResponseTitle}
+                                        </div> */}
+                    <div className={`border-round-lg overflow-hidden ${styles.SolidXAiResponseError} border border-red-200 shadow-sm`}>
+                        <div className="mb-3 flex align-items-center gap-2 text-red-600">
+                            <i className="pi pi-exclamation-triangle text-red-500 text-base"></i>
+                            <p className="font-semibold">{instructions}</p>
+                        </div>
+                        {errors.map((e: any) => <p>{e}</p>)}
+                    </div>
+                </div>
+            }
         </div>
     )
 }
