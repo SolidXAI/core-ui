@@ -164,9 +164,9 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
     const { autoCompleteItems, fetchRelationEntities, addNewRelation } = useRelationEntityHandler({ fieldContext, formik });
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
-    const onChange = (e: any) => {
-        formik.setFieldValue(fieldContext.field.attrs.name, e.value);
-    };
+    // const onChange = (e: any) => {
+    //     formik.setFieldValue(fieldContext.field.attrs.name, e.value);
+    // };
 
     const autoCompleteSearch = async (event: AutoCompleteCompleteEvent) => {
         const queryData: any = {
@@ -262,7 +262,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                         dropdown={!readOnlyPermission}
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}
-                        onChange={onChange}
+                        onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
                         className="solid-standard-autocomplete w-full"
                     />
                     {fieldContext.field.attrs.inlineCreate && (

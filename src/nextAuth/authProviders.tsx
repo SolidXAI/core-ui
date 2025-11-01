@@ -86,8 +86,8 @@ const authProviders: NextAuthOptions = {
                             if (loginResponse.status == 401) {
                                 throw new Error(loginResponse.data.message);
                             }
-
-                            let base64decoded = jwtDecode(loginResponse.data.data.accessToken);
+                            
+                            let base64decoded = jwtDecode(accessToken);
                             // let accessTokenExpires = base64decoded.exp;
                             let accessTokenExpires = base64decoded.exp && base64decoded.exp * 1000;
 

@@ -336,17 +336,17 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (solidListViewMetaData) {
       const createActionUrl =
         solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction &&
-        solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction
-          ?.type === "custom"
+          solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction
+            ?.type === "custom"
           ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction
-              ?.customComponent
+            ?.customComponent
           : "form/new";
       const editActionUrl =
         solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction &&
-        solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction
-          ?.type === "custom"
+          solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction
+            ?.type === "custom"
           ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction
-              ?.customComponent
+            ?.customComponent
           : "form";
       const viewModes =
         solidListViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews &&
@@ -507,9 +507,9 @@ export const SolidListView = (params: SolidListViewParams) => {
           populateMedia: queryObject.populateMedia,
           sort: queryObject.sort
             ? queryObject.sort?.map((sortItem: string) => {
-                const [field, order] = sortItem.split(":");
-                return { field, order };
-              })
+              const [field, order] = sortItem.split(":");
+              return { field, order };
+            })
             : [`id:desc`],
           filters: queryObject.filters,
         };
@@ -752,7 +752,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   };
 
   const [selectedSolidViewData, setSelectedSolidViewData] = useState<any>();
-
+  const selectedDataRef = useRef<any>();
   const op = useRef(null);
   const [deleteEntity, setDeleteEntity] = useState(false);
 
@@ -766,12 +766,13 @@ export const SolidListView = (params: SolidListViewParams) => {
           size="small"
           className=""
           onClick={(e) =>
-            // @ts-ignore
-            {
-              e.stopPropagation();
-              op.current.toggle(e);
-              setSelectedSolidViewData(solidViewData);
-            }
+          // @ts-ignore
+          {
+            e.stopPropagation();
+            selectedDataRef.current = solidViewData;
+            setSelectedSolidViewData(solidViewData);
+            op.current.toggle(e)
+          }
           }
         >
           <svg
@@ -1038,15 +1039,15 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   const slides = Array.isArray(lightboxUrls)
     ? lightboxUrls.map((item: any) => {
-        const url = item?.src || item?.downloadUrl || "";
-        if (isVideoOrAudio(url)) {
-          return {
-            type: "video" as const,
-            sources: [{ src: url, type: "video/mp4" }],
-          };
-        }
-        return { src: url };
-      })
+      const url = item?.src || item?.downloadUrl || "";
+      if (isVideoOrAudio(url)) {
+        return {
+          type: "video" as const,
+          sources: [{ src: url, type: "video/mp4" }],
+        };
+      }
+      return { src: url };
+    })
     : [];
 
   const hasMedia = slides.some((s) => (s as any).type === "video");
@@ -1294,7 +1295,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                 button?.attrs?.className
                                   ? button?.attrs?.className
                                   : ""
-                              }`}
+                                }`}
                               label={
                                 button.attrs.showLabel !== false
                                   ? button.attrs.label
@@ -1323,7 +1324,7 @@ export const SolidListView = (params: SolidListViewParams) => {
               ) &&
                 solidListViewLayout?.attrs?.edit !== false &&
                 solidListViewLayout?.attrs?.showRowEditInContextMenu ===
-                  false && (
+                false && (
                   <Column
                     header="Edit"
                     body={(rowData) => {
@@ -1357,7 +1358,7 @@ export const SolidListView = (params: SolidListViewParams) => {
               ) &&
                 solidListViewLayout?.attrs?.delete !== false &&
                 solidListViewLayout?.attrs?.showRowDeleteInContextMenu ===
-                  false && (
+                false && (
                   <Column
                     header="Delete"
                     body={(rowData) => {
@@ -1405,83 +1406,83 @@ export const SolidListView = (params: SolidListViewParams) => {
                         <>
                           {solidListViewLayout?.attrs?.showRowContextMenu !==
                             false && (
-                            <>
-                              {detailsBodyTemplate(rowData)}
-                              <OverlayPanel
-                                ref={op}
-                                className="solid-custom-overlay"
-                                style={{ top: 10, minWidth: 120 }}
-                              >
-                                <div className="flex flex-column gap-1 p-1">
-                                  {solidListViewLayout?.attrs
-                                    .showDefaultEditButton !== false &&
-                                    solidListViewLayout?.attrs
-                                      .showRowEditInContextMenu !== false && (
-                                      <Button
-                                        type="button"
-                                        className="w-full text-left gap-1"
-                                        label="Edit"
-                                        size="small"
-                                        iconPos="left"
-                                        icon={"pi pi-pencil"}
-                                        onClick={() => {
-                                          if (params.embeded == true) {
-                                            params.handlePopUpOpen(
-                                              selectedSolidViewData?.id
-                                            );
-                                          } else {
-                                            router.push(
-                                              `${editButtonUrl}/${selectedSolidViewData?.id}?viewMode=edit`
-                                            );
-                                          }
-                                        }}
-                                      />
-                                    )}
+                              <>
+                                {detailsBodyTemplate(rowData)}
+                                <OverlayPanel
+                                  key={selectedSolidViewData?.id || 'default'}
+                                  ref={op}
+                                  className="solid-custom-overlay"
+                                  style={{ top: 10, minWidth: 120 }}
+                                >
+                                  <div className="flex flex-column gap-1 p-1">
+                                    {solidListViewLayout?.attrs
+                                      .showDefaultEditButton !== false &&
+                                      solidListViewLayout?.attrs
+                                        .showRowEditInContextMenu !== false && (
+                                        <Button
+                                          type="button"
+                                          className="w-full text-left gap-1"
+                                          label="Edit"
+                                          size="small"
+                                          iconPos="left"
+                                          icon={"pi pi-pencil"}
+                                          onClick={() => {
+                                            if (params.embeded == true) {
+                                              params.handlePopUpOpen(
+                                                selectedSolidViewData?.id
+                                              );
+                                            } else {
+                                              router.push(
+                                                `${editButtonUrl}/${selectedSolidViewData?.id}?viewMode=edit`
+                                              );
+                                            }
+                                          }}
+                                        />
+                                      )}
 
-                                  {actionsAllowed.includes(
-                                    `${deletePermission(params.modelName)}`
-                                  ) &&
-                                    solidListViewLayout?.attrs?.delete !==
+                                    {actionsAllowed.includes(
+                                      `${deletePermission(params.modelName)}`
+                                    ) &&
+                                      solidListViewLayout?.attrs?.delete !==
                                       false &&
-                                    solidListViewLayout?.attrs
-                                      .showRowDeleteInContextMenu !== false && (
-                                      <Button
-                                        text
-                                        type="button"
-                                        className="w-full text-left gap-1"
-                                        label="Delete"
-                                        size="small"
-                                        iconPos="left"
-                                        severity="danger"
-                                        icon={"pi pi-trash"}
-                                        onClick={() => setDeleteEntity(true)}
-                                      />
-                                    )}
-                                  {solidListViewLayout?.attrs?.rowButtons
-                                    ?.filter(
-                                      (rb) =>
-                                        rb.attrs.actionInContextMenu === true
-                                    )
-                                    .map((button: any, index: number) => (
-                                      <SolidListViewRowButtonContextMenu
-                                        key={index}
-                                        button={button}
-                                        params={params}
-                                        selectedSolidViewData={
-                                          selectedSolidViewData
-                                        }
-                                        solidListViewMetaData={
-                                          solidListViewMetaData
-                                        }
-                                        handleCustomButtonClick={
-                                          handleCustomButtonClick
-                                        }
-                                      />
-                                    ))}
-                                </div>
-                              </OverlayPanel>
-                            </>
-                          )}
+                                      solidListViewLayout?.attrs
+                                        .showRowDeleteInContextMenu !== false && (
+                                        <Button
+                                          text
+                                          type="button"
+                                          className="w-full text-left gap-1"
+                                          label="Delete"
+                                          size="small"
+                                          iconPos="left"
+                                          severity="danger"
+                                          icon={"pi pi-trash"}
+                                          onClick={() => setDeleteEntity(true)}
+                                        />
+                                      )}
+                                    {solidListViewLayout?.attrs?.rowButtons
+                                      ?.filter(
+                                        (rb) =>
+                                          rb.attrs.actionInContextMenu === true
+                                      )
+                                      .map((button: any, index: number) =>(
+                                          <SolidListViewRowButtonContextMenu
+                                            key={`${index}-${selectedDataRef.current?.id || ''}`}
+                                            button={button}
+                                            params={params}
+                                            getSelectedSolidViewData={() => selectedDataRef.current}
+                                            // selectedSolidViewData={selectedSolidViewData}
+                                            solidListViewMetaData={
+                                              solidListViewMetaData
+                                            }
+                                            handleCustomButtonClick={
+                                              handleCustomButtonClick
+                                            }
+                                          />
+                                        ))}
+                                  </div>
+                                </OverlayPanel>
+                              </>
+                            )}
                         </>
                       )
                     }
@@ -1496,7 +1497,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           <div
             className={`chatter-section ${
               isOpenSolidXAiPanel === false ? "collapsed" : ""
-            }`}
+              }`}
             style={{ width: chatterWidth }}
           >
             {isOpenSolidXAiPanel && (
@@ -1607,7 +1608,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           solidListViewMetaData?.data?.solidView?.model?.displayName
             ? solidListViewMetaData?.data?.solidView?.model?.displayName
             : params?.modelName
-        }`}
+          }`}
         headerClassName="py-2"
         contentClassName="px-0 pb-0"
         visible={deleteEntity}
@@ -1624,7 +1625,7 @@ export const SolidListView = (params: SolidListViewParams) => {
               solidListViewMetaData?.data?.solidView?.model?.displayName
                 ? solidListViewMetaData?.data?.solidView?.model?.displayName
                 : params?.modelName
-            }?`}
+              }?`}
           </p>
           {/* <p className="" style={{ color: 'var{--solid-grey-500}' }}>{selectedSolidViewData?.singularName}</p> */}
           <div className="flex align-items-center gap-2 mt-3">
