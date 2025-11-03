@@ -7,68 +7,13 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import styles from './SolidDashboard.module.css';
 import { useGetDashboardVariableSelectionDynamicValuesQuery } from "@/redux/api/dashboardApi";
 import { ProgressSpinner } from "primereact/progressspinner";
-export interface SolidDashboardVariablesFilterDialogProps {
-  dashboardVariables: any
-  setFilters: Dispatch<SetStateAction<SqlExpression[]>>;
-}
 
-const SolidDashboardVariableFilterDialog: React.FC<SolidDashboardVariablesFilterDialogProps> = ({ dashboardVariables, setFilters }) => {
-
-  // Selection Static Values
-  const [selectionStaticValues, setSelectionStaticValues] = useState<string[]>([]);
-  const [filteredStaticItems, setFilteredStaticItems] = useState<string[]>([]);
-  const staticItems = ["Value 1", "Value 2", "Value 3"];
-
-  // Static search
-  const searchStatic = (event: AutoCompleteCompleteEvent) => {
-    const query = event.query.toLowerCase();
-    const filtered = staticItems.filter(item =>
-      item.toLowerCase().includes(query)
-    );
-    setFilteredStaticItems(filtered);
-  };
-
-
-  const dashboardVariableComponents = dashboardVariables.map((dashboardVariable: any, index: number) => {
-    switch (dashboardVariable.variableType) {
-      case 'date':
-        return <DateVariableFilterComponent key={index} setFilters={setFilters} dashboardVariable={dashboardVariable} />;
-      // Add more cases for different variable types as needed
-      case 'selectionStatic':
-        return (
-          <AutoComplete
-            value={selectionStaticValues}
-            suggestions={filteredStaticItems}
-            completeMethod={searchStatic}
-            onChange={(e: AutoCompleteChangeEvent) => setSelectionStaticValues(e.value)}
-            multiple
-            dropdown
-            placeholder="Selection Static Field"
-            className="solid-standard-autocomplete"
-            style={{ minHeight: 38 }}
-          />
-        );
-      case 'selectionDynamic':
-        return <SelectionDynamicVariableFilterComponent key={index} setFilters={setFilters} dashboardVariable={dashboardVariable} />;
-      default:
-        return null;
-    }
-  });
-
-  // TODO [HP]: Currently this is static, we need this to be dynamic how we are invoking setFilters below has to be fully dynamic...
-  return (
-    <div className="flex align-items-center gap-3">
-      {dashboardVariableComponents}
-    </div>
-  );
-}
-
-export default SolidDashboardVariableFilterDialog;
 
 export interface DashboardVariableFilterProps {
   setFilters: Dispatch<SetStateAction<SqlExpression[]>>;
   dashboardVariable: any;
 }
+
 export const DateVariableFilterComponent: React.FC<DashboardVariableFilterProps> = ({ setFilters, dashboardVariable }) => {
   const [dates, setDates] = useState<Nullable<(Date | null)[]>>(null);
   return (
@@ -113,7 +58,7 @@ export const SelectionDynamicVariableFilterComponent: React.FC<DashboardVariable
   const variableId = dashboardVariable.id;
   const queryString = `variableId=${variableId}`;
   const { data: dynamicValues, isLoading, isError } = useGetDashboardVariableSelectionDynamicValuesQuery(queryString);
-  
+
   const allItems = dynamicValues ? dynamicValues : [];
 
   // Dynamic search
@@ -149,25 +94,112 @@ export const SelectionDynamicVariableFilterComponent: React.FC<DashboardVariable
 
   return (
     <>
-    { isLoading && <ProgressSpinner></ProgressSpinner> }
-    { isError && <div>Error loading values</div> }
-    {!isLoading && !isError &&
-    <AutoComplete
-      value={selectionDynamicValues}
-      suggestions={filteredItems}
-      completeMethod={searchDynamic}
-      onChange={(e: AutoCompleteChangeEvent) => {
-        console.log('AutoComplete changed values are:');
-        console.log(e);
-        setSelectionDynamicValues(e.value)
-      }}
-      multiple
-      dropdown
-      placeholder="Selection Dynamic Field"
-      className="solid-standard-autocomplete"
-      style={{ minHeight: 38 }}
-    />
-    }
+      {isLoading && <ProgressSpinner></ProgressSpinner>}
+      {isError && <div>Error loading values</div>}
+      {!isLoading && !isError &&
+        <AutoComplete
+          value={selectionDynamicValues}
+          suggestions={filteredItems}
+          completeMethod={searchDynamic}
+          onChange={(e: AutoCompleteChangeEvent) => {
+            console.log('AutoComplete changed values are:');
+            console.log(e);
+            setSelectionDynamicValues(e.value)
+          }}
+          multiple
+          dropdown
+          placeholder={dashboardVariable.variableName}
+          className="solid-standard-autocomplete"
+          style={{ minHeight: 38 }}
+        />
+      }
     </>
   );
 }
+
+export const SelectionStaticVariableFilterComponent: React.FC<DashboardVariableFilterProps> = ({ setFilters, dashboardVariable }) => {
+  // Selection Static Values
+  const [selectionStaticValues, setSelectionStaticValues] = useState<string[]>([]);
+  const [filteredStaticItems, setFilteredStaticItems] = useState<string[]>([]);
+  const staticValues = dashboardVariable.selectionStaticValues || [];
+
+  // The values are in the format val:label, we need to extract the labels
+  const staticValueItems = staticValues.map((val: any) => ({ value: val.split(':')[0], label: val.split(':')[1] }));
+
+  // Static search
+  const searchStatic = (event: AutoCompleteCompleteEvent) => {
+    const query = event.query.toLowerCase();
+    const filtered = staticValueItems.map(
+      (item: { label: any; }) => item.label
+    ).filter((item: string) =>
+      item.toLowerCase().includes(query)
+    );
+    setFilteredStaticItems(filtered);
+  };
+
+  // Set the filters whenever selectionStaticValues change
+  useEffect(() => {
+    // console.log(`Selection Static Values changed:`, selectionStaticValues);
+    if (selectionStaticValues.length > 0) {
+      const filter: SqlExpression = {
+        variableName: dashboardVariable.variableName,
+        // @ts-ignore
+        operator: '$in',
+        value: selectionStaticValues
+      };
+      setFilters(prev => {
+        // Remove any existing filter for this variable and replace with the new one
+        const filtered = prev.filter(f => f.variableName !== dashboardVariable.variableName);
+        return [...filtered, filter];
+      });
+    }
+    // else {
+    //   // If no values selected, remove the filter for this variable
+    //   setFilters(prev => prev.filter(f => f.variableName !== dashboardVariable.variableName));
+    // }
+  }, [selectionStaticValues]);
+
+  return (
+    <AutoComplete
+      value={selectionStaticValues}
+      suggestions={filteredStaticItems}
+      completeMethod={searchStatic}
+      onChange={(e: AutoCompleteChangeEvent) => setSelectionStaticValues(e.value)}
+      multiple
+      dropdown
+      placeholder={dashboardVariable.variableName}
+      className="solid-standard-autocomplete"
+      style={{ minHeight: 38 }}
+    />
+  );
+}
+
+export interface SolidDashboardVariableProps {
+  dashboardVariables: any
+  setFilters: Dispatch<SetStateAction<SqlExpression[]>>;
+}
+
+const SolidDashboardVariable: React.FC<SolidDashboardVariableProps> = ({ dashboardVariables, setFilters }) => {
+  const dashboardVariableComponents = dashboardVariables.map((dashboardVariable: any, index: number) => {
+    switch (dashboardVariable.variableType) {
+      case 'date':
+        return <DateVariableFilterComponent key={index} setFilters={setFilters} dashboardVariable={dashboardVariable} />;
+      case 'selectionStatic':
+        return <SelectionStaticVariableFilterComponent key={index} setFilters={setFilters} dashboardVariable={dashboardVariable} />;
+      case 'selectionDynamic':
+        return <SelectionDynamicVariableFilterComponent key={index} setFilters={setFilters} dashboardVariable={dashboardVariable} />;
+      default:
+        return null;
+    }
+  });
+
+  // TODO [HP]: Currently this is static, we need this to be dynamic how we are invoking setFilters below has to be fully dynamic...
+  return (
+    <div className="flex align-items-center gap-3">
+      {dashboardVariableComponents}
+    </div>
+  );
+}
+
+export default SolidDashboardVariable;
+

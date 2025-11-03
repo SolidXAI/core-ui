@@ -4,7 +4,7 @@ import moment from 'moment';
 import qs from 'qs';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import SolidDashboardBody, { SolidDashboardBodyProps } from './SolidDashboardBody';
-import SolidDashboardVariableFilterDialog from './SolidDashboardVariableFilterWrapper';
+import SolidDashboardVariable from './SolidDashboardVariable';
 import { SqlExpression } from '@/types/solid-core';
 import styles from './SolidDashboard.module.css';
 import { SolidXAIIcon } from '../solid-ai/SolidXAIIcon';
@@ -266,7 +266,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
                 </>
               }
             </p>
-            <SolidDashboardVariableFilterDialog
+            <SolidDashboardVariable
               dashboardVariables={data?.records[0]?.dashboardVariables || []}
               setFilters={setFilters}
             />
