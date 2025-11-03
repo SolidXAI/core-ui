@@ -29,7 +29,7 @@ export const dashboardApi = createApi({
     getDashboard: builder.query<DashboardResponse, string>({
       query: (qs) => `/dashboard?${qs}`,
       transformResponse: (response: any) => {
-        console.log(`Dashboard Response:`, response);
+        // console.log(`Dashboard Response:`, response);
         if (response.error) {
           throw new Error(response.error);
         }
@@ -42,7 +42,7 @@ export const dashboardApi = createApi({
     getDashboardVariableSelectionDynamicValues: builder.query<SelectionDynamicOption[], string>({
       query: (qs) => `/dashboard/selection-dynamic-values?${qs}`,
       transformResponse: (response: any) => {
-        console.log(`Dashboard Variable Selection Dynamic Values Response:`, response);
+        // console.log(`Dashboard Variable Selection Dynamic Values Response:`, response);
         if (response.error) {
           throw new Error(response.error);
         }
