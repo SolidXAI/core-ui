@@ -297,9 +297,19 @@ export const SolidXAiJsonDisplay: React.FC<SolidXAiJsonDisplayProps> = ({ intera
         return <p>Unrecognized data structure</p>;
     };
 
+
+    const renderDataForCodeMirror = () => {
+        if (!parsed.data) return '';
+        if (parsed?.data?.schemaPatch) return parsed.data.schemaPatch;
+        if (parsed?.data?.plan) return parsed.data.plan;
+        if (parsed?.data?.schema) return parsed.data.schema;
+        return 'Unrecognized data structure';
+    };
+
+
     return (
         <>
-            <Toast ref={toast} className="custom-toast"  />
+            <Toast ref={toast} className="custom-toast" />
 
             {isGenerating ?
                 <>
@@ -351,7 +361,7 @@ export const SolidXAiJsonDisplay: React.FC<SolidXAiJsonDisplayProps> = ({ intera
             }
             {editAndApplyDialog && <Dialog header="Edit And Apply" visible={editAndApplyDialog} style={{ width: '50vw' }} onHide={() => { if (!editAndApplyDialog) return; setEditAndApplyDialog(false); }}>
                 <CodeMirror
-                    value={formattedCode}
+                    value={renderDataForCodeMirror()}
                     style={{ fontSize: '10px' }}
                     theme={oneDark}
                     extensions={[javascript(), EditorView.lineWrapping]}

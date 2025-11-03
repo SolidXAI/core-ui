@@ -3324,6 +3324,10 @@ flex-shrink: 0; */
   border: 0;
 }
 
+.p-toast .p-toast-message.p-toast-message-error .p-toast-message-icon, .p-toast .p-toast-message.p-toast-message-error .p-toast-icon-close{
+  color: #fff;
+}
+
 .p-toast .p-toast-message.p-toast-message-success {
   background-color: #41b776 !important;
 }
@@ -3341,6 +3345,7 @@ flex-shrink: 0; */
   flex-direction: row !important;
   align-items: center !important;
   justify-content: space-between !important;
+  padding: 5px;
   /* text-wrap: nowrap; */
 }
 
