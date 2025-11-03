@@ -38,7 +38,7 @@ export const SolidQuestionRenderer = ({ question, filters = [], isPreview = fals
             </>
         )
     }
-    console.log(`Rendering BarChartRenderer using question id: ${question.id}`);
+    // console.log(`Rendering BarChartRenderer using question id: ${question.id}`);
 
     // load the question data.
     const queryParams = qs.stringify(
@@ -52,9 +52,9 @@ export const SolidQuestionRenderer = ({ question, filters = [], isPreview = fals
     const { data: questionData, isLoading: questionDataIsLoading, error: questionDataError } = useGetDashboardQuestionDataByIdQuery({ id: question.id, qs: queryParams });
 
 
-    console.log(`Question data: `); console.log(questionData);
-    console.log(`Question data is loading: `); console.log(questionDataIsLoading);
-    console.log(`Question data error: `); console.log(questionDataError);
+    // console.log(`Question data: `); console.log(questionData);
+    // console.log(`Question data is loading: `); console.log(questionDataIsLoading);
+    // console.log(`Question data error: `); console.log(questionDataError);
     const options = JSON.parse(question?.chartOptions);
     // const kpi = questionData.data.kpi;
     // const visualizationData = questionData.data.visualizationData;

@@ -10,6 +10,8 @@ import styles from './SolidDashboard.module.css';
 import { SolidXAIIcon } from '../solid-ai/SolidXAIIcon';
 import { SolidXAIModule } from '../solid-ai/SolidXAIModule';
 import { Button } from 'primereact/button';
+import { Tooltip } from "primereact/tooltip";
+
 export enum SolidDashboardVariableType {
   DATE = 'date',
   SELECTION_STATIC = 'selectionStatic',
@@ -251,13 +253,24 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
         {error && <p className="text-red-600">Failed to load dashboard.</p>}
         {!isLoading && !error && (
           <>
+            <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
+            <p className={`view-title flex align-items-center gap-1 ${styles.SolidDashboardTitle}`}>
+              {data?.records[0]?.displayName ? data?.records[0]?.displayName : data?.records[0]?.name}
+              {data?.records[0]?.description &&
+                <>
+                  <Tooltip className='solid-field-tooltip' target=".solid-field-tooltip-icon" />
+                  <i className="pi pi-info-circle solid-field-tooltip-icon"
+                    data-pr-tooltip={data?.records[0]?.description}
+                    data-pr-position={'right'}
+                  />
+                </>
+              }
+            </p>
             <SolidDashboardVariableFilterDialog
-              dashboardVariableFilterRules={dashboardVariableFilterRules}
-              setDashboardVariableFilterRules={setDashboardVariableFilterRules}
+              dashboardVariables={data?.records[0]?.dashboardVariables || []}
               setFilters={setFilters}
-              data={data}
             />
-
+            </div>
             <SolidDashboardBody questions={questions} filters={filters} />
 
             {/* <SolidDashboardBody
