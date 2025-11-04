@@ -407,7 +407,7 @@ const CreateModel = ({ data, params }: any) => {
         {/* <div className="solid-form-stepper">
           <SolidFormStepper />
         </div> */}
-        <div className="p-4 solid-form-content">
+        <div className="p-3 md:p-4 solid-form-content">
           <TabView
             activeIndex={activeIndex}
             onTabChange={(e) => {
