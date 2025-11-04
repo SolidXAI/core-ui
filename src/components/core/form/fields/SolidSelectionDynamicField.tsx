@@ -237,7 +237,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
 
     return (
         <div className="relative">
-            <div className="flex flex-column gap-2 mt-4">
+            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
