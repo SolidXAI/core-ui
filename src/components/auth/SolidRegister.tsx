@@ -27,6 +27,7 @@ import { SolidPasswordHelperText } from "../core/common/SolidPasswordHelperText"
 interface AuthTabsProps {
     iamPasswordRegistrationEnabled: boolean;
     passwordlessRegistration: boolean;
+    showNameFieldsForRegistration?: boolean;
 }
 
 const SolidRegister = () => {
@@ -94,124 +95,193 @@ const SolidRegister = () => {
         });
     };
 
-    const PasswordSignup = () => {
-        return (
-            <Formik
-                initialValues={{
-                    username: "",
-                    email: "",
-                    password: "",
-                }}
-                validationSchema={Yup.object({
-                    username: Yup.string().required("User Name is required"),
-                    email: Yup.string()
-                        .email("Invalid email address")
-                        .required("Email is required"),
-                    password: Yup.string()
-                        .required("Password is required")
-                        .min(8, "Password must be at least 8 characters")
-                        .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-                        .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-                        .matches(/\d/, "Password must contain at least one number")
-                        .matches(/[@$!%*?&#^(){}[\]|\\/~`+=<>:;'"_,.-]/, "Password must contain at least one special character"),
-                })}
-                onSubmit={async (values, { setSubmitting, setErrors }) => {
-                    try {
-                        const userData = {
-                            username: values.username,
-                            email: values.email,
-                            password: values.password,
-                        };
+    const PasswordSignup = ({ showNameFieldsForRegistration }: { showNameFieldsForRegistration?: boolean }) => {
+    console.log("showNameFieldsForRegistration", showNameFieldsForRegistration);
+    return (
+        <Formik
+            initialValues={{
+                username: "",
+                email: "",
+                password: "",
+                firstName: "",
+                lastName: ""
+            }}
 
-                        const response = await register(userData).unwrap();
-                        if (response?.statusCode === 200) {
-                            showToast("success", "User Registered", response?.data?.message);
-                            setShowOverlay(true);
-                            setTimeout(() => {
-                               router.push(`/auth/login`);
-                            }, 3000);
-                        } else {
-                            showToast("error", "Login Error", response.error);
-                            // setErrors({
-                            //     username: 'Invalid email or password',
-                            //     email: "Invalid email or password",
-                            //     password: "Invalid email or password",
-                            // });
-                        }
-                    } catch (err: any) {
-                        showToast("error", "Email is already taken, ", err?.data ? err?.data?.message : "Something Went Wrong");
-                    } finally {
-                        setSubmitting(false);
+            validationSchema={Yup.object({
+                username: showNameFieldsForRegistration
+                    ? Yup.string().notRequired()
+                    : Yup.string().required("User Name is required"),
+
+                firstName: showNameFieldsForRegistration
+                    ? Yup.string().required("First Name is required")
+                    : Yup.string().notRequired(),
+
+                lastName: showNameFieldsForRegistration
+                    ? Yup.string().required("Last Name is required")
+                    : Yup.string().notRequired(),
+
+                email: Yup.string()
+                    .email("Invalid email address")
+                    .required("Email is required"),
+                password: Yup.string()
+                    .required("Password is required")
+                    .min(8, "Password must be at least 8 characters")
+                    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+                    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+                    .matches(/\d/, "Password must contain at least one number")
+                    .matches(/[@$!%*?&#^(){}[\]|\\/~`+=<>:;'"_,.-]/, "Password must contain at least one special character"),
+            })}
+
+            onSubmit={async (values, { setSubmitting }) => {
+                try {
+                    let userData: any = {
+                        email: values.email,
+                        password: values.password,
+                    };
+                    if (showNameFieldsForRegistration) {
+                        const fullName = `${values.firstName || ""} ${values.lastName || ""}`.trim();
+                        const username = `${values.firstName || ""}${values.lastName || ""}`.trim().toLowerCase();
+                        console.log("fullName, username", fullName, username);
+                        userData = {
+                            ...userData,
+                            fullName,
+                            username
+                        };
+                    } else {
+                        userData = {
+                            ...userData,
+                            username: values.username,
+                        };
                     }
-                }}
-            >
-                {(formik) => (
-                    <Form>
-                        <div>
-                            <div className="flex flex-column gap-2 mt-3">
-                                <label htmlFor="email" className="solid-auth-input-label">Username</label>
-                                <InputText
-                                    id="username"
-                                    name="username"
-                                    placeholder="username"
-                                    onChange={formik.handleChange}
-                                    value={formik.values.username}
-                                    invalid={!!formik.errors.username}
-                                />
+                    const response = await register(userData).unwrap();
+
+                    if (response?.statusCode === 200) {
+                        showToast("success", "User Registered", response?.data?.message);
+                        setShowOverlay(true);
+                        setTimeout(() => {
+                            router.push(`/auth/login`);
+                        }, 3000);
+                    } else {
+                        showToast("error", "Login Error", response.error);
+                    }
+                } catch (err: any) {
+                    showToast("error", "Email is already taken, ", err?.data ? err?.data?.message : "Something Went Wrong");
+                } finally {
+                    setSubmitting(false);
+                }
+            }}
+        >
+            {(formik) => (
+                <Form>
+                    {showNameFieldsForRegistration ? (
+                        <>
+                            {/* first + last name inline */}
+                            <div className="flex gap-2 mt-3">
+                                <div className="flex flex-column w-full gap-2">
+                                    <label className="solid-auth-input-label">First Name</label>
+                                    <InputText
+                                        id="firstName"
+                                        name="firstName"
+                                        placeholder="First Name"
+                                        onChange={formik.handleChange}
+                                        value={formik.values.firstName}
+                                        invalid={!!formik.errors.firstName}
+                                    />
+                                    {isFormFieldValid(formik, "firstName") && (
+                                        <Message severity="error" text={formik.errors.firstName?.toString()} />
+                                    )}
+                                </div>
+
+                                <div className="flex flex-column w-full gap-2">
+                                    <label className="solid-auth-input-label">Last Name</label>
+                                    <InputText
+                                        id="lastName"
+                                        name="lastName"
+                                        placeholder="Last Name"
+                                        onChange={formik.handleChange}
+                                        value={formik.values.lastName}
+                                        invalid={!!formik.errors.lastName}
+                                    />
+                                    {isFormFieldValid(formik, "lastName") && (
+                                        <Message severity="error" text={formik.errors.lastName?.toString()} />
+                                    )}
+                                </div>
                             </div>
-                            {isFormFieldValid(formik, "username") && <Message
-                                className="text-red-500 text-sm mt-1 py-0"
-                                severity="error"
-                                text={formik?.errors?.username?.toString()}
-                            />}
-                        </div>
-                        <div>
-                            <div className="flex flex-column gap-2 mt-3">
-                                <label htmlFor="email" className="solid-auth-input-label">Email</label>
-                                <InputText
-                                    id="email"
-                                    name="email"
-                                    placeholder="Yourgmail@123.com"
-                                    onChange={formik.handleChange}
-                                    value={formik.values.email}
-                                    invalid={!!formik.errors.email}
-                                />
+                        </>
+                    ) : (
+                        <>
+                            {/* username (only if name fields not shown) */}
+                            <div>
+                                <div className="flex flex-column gap-2 mt-3">
+                                    <label className="solid-auth-input-label">Username</label>
+                                    <InputText
+                                        id="username"
+                                        name="username"
+                                        placeholder="username"
+                                        onChange={formik.handleChange}
+                                        value={formik.values.username}
+                                        invalid={!!formik.errors.username}
+                                    />
+                                </div>
+                                {isFormFieldValid(formik, "username") &&
+                                    <Message severity="error" text={formik.errors.username?.toString()} />}
                             </div>
-                            {isFormFieldValid(formik, "email") && <Message
-                                className="text-red-500 text-sm mt-1 py-0"
-                                severity="error"
-                                text={formik?.errors?.email?.toString()}
-                            />}
+                        </>
+                    )}
+
+                    {/* Email */}
+                    <div>
+                        <div className="flex flex-column gap-2 mt-3">
+                            <label className="solid-auth-input-label">Email</label>
+                            <InputText
+                                id="email"
+                                name="email"
+                                placeholder="Yourgmail@123.com"
+                                onChange={formik.handleChange}
+                                value={formik.values.email}
+                                invalid={!!formik.errors.email}
+                            />
                         </div>
-                        <div>
-                            <div className="flex flex-column gap-2 mt-3">
-                                <label htmlFor="password" className="solid-auth-input-label">Password</label>
-                                <Password
-                                    id="password"
-                                    name="password"
-                                    value={formik.values.password}
-                                    onChange={formik.handleChange}
-                                    toggleMask
-                                    inputClassName="w-full"
-                                    feedback={false}
-                                    invalid={!!formik.errors.password}
-                                />
-                            </div>
-                            {isFormFieldValid(formik, "password") && <Message
-                                className="text-red-500 text-sm mt-1 py-0"
-                                severity="error"
-                                text={formik?.errors?.password?.toString()}
-                            />}
+                        {isFormFieldValid(formik, "email") &&
+                            <Message severity="error" text={formik.errors.email?.toString()} />}
+                    </div>
+
+                    {/* Password */}
+                    <div>
+                        <div className="flex flex-column gap-2 mt-3">
+                            <label className="solid-auth-input-label">Password</label>
+                            <Password
+                                id="password"
+                                name="password"
+                                value={formik.values.password}
+                                onChange={formik.handleChange}
+                                toggleMask
+                                inputClassName="w-full"
+                                feedback={false}
+                                invalid={!!formik.errors.password}
+                            />
                         </div>
-                        <SolidPasswordHelperText text={envPasswordHelperText}/>
-                        <div className="mt-4">
-                            <Button className="w-full font-light auth-submit-button" label="Sign Up" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
-                        </div>
-                    </Form>
-                )}
-            </Formik>
-        )
-    }
+                        {isFormFieldValid(formik, "password") &&
+                            <Message severity="error" text={formik.errors.password?.toString()} />}
+                    </div>
+
+                    <SolidPasswordHelperText text={envPasswordHelperText} />
+
+                    {/* Submit */}
+                    <div className="mt-4">
+                        <Button
+                            className="w-full font-light auth-submit-button"
+                            label="Sign Up"
+                            disabled={formik.isSubmitting}
+                            loading={formik.isSubmitting}
+                        />
+                    </div>
+                </Form>
+            )}
+        </Formik>
+    );
+    };
+
 
     const PasswordLessSignup = () => {
         return (
@@ -314,7 +384,7 @@ const SolidRegister = () => {
         )
     }
 
-    const AuthTabs: React.FC<AuthTabsProps> = ({ iamPasswordRegistrationEnabled, passwordlessRegistration }) => {
+    const AuthTabs: React.FC<AuthTabsProps> = ({ iamPasswordRegistrationEnabled, passwordlessRegistration, showNameFieldsForRegistration}) => {
         if (iamPasswordRegistrationEnabled && passwordlessRegistration) {
             return (
                 <TabView className="solid-auth-tabview"
@@ -322,7 +392,7 @@ const SolidRegister = () => {
                     onTabChange={(e) => setActiveIndex(e.index)}
                 >
                     <TabPanel header="With Password">
-                        <PasswordSignup />
+                        <PasswordSignup showNameFieldsForRegistration={showNameFieldsForRegistration}/>
                     </TabPanel>
                     <TabPanel header="Without Password">
                         <PasswordLessSignup />
@@ -330,7 +400,7 @@ const SolidRegister = () => {
                 </TabView>
             );
         } else if (iamPasswordRegistrationEnabled) {
-            return <PasswordSignup />;
+            return <PasswordSignup showNameFieldsForRegistration={showNameFieldsForRegistration}/>;
         } else if (passwordlessRegistration) {
             return <PasswordLessSignup />;
         } else {
@@ -366,7 +436,7 @@ const SolidRegister = () => {
                 }
                 <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-4' : 'text-left'}`}>Sign Up</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
-                <AuthTabs iamPasswordRegistrationEnabled={solidSettingsData?.data?.iamPasswordRegistrationEnabled} passwordlessRegistration={solidSettingsData?.data?.passwordlessRegistration} />
+                <AuthTabs iamPasswordRegistrationEnabled={solidSettingsData?.data?.iamPasswordRegistrationEnabled} passwordlessRegistration={solidSettingsData?.data?.passwordlessRegistration} showNameFieldsForRegistration={solidSettingsData?.data?.showNameFieldsForRegistration} />
                 {solidSettingsData?.data?.iamGoogleOAuthEnabled &&
                     <>
                         <Divider align="center">
