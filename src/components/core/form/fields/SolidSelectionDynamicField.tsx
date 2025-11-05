@@ -10,6 +10,7 @@ import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
+import { formikValuestoQueryString } from "@/helpers/helpers";
 
 
 export class SolidSelectionDynamicField implements ISolidField {
@@ -207,6 +208,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                 limit: 10,
                 query: event.query,
                 fieldId: fieldMetadata.id,
+                formValues: formikValuestoQueryString(formik.values),
             };
             if (whereClause) {
                 queryData.query = whereClause;

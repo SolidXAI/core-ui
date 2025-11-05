@@ -2,6 +2,7 @@
 import { camelCase, kebabCase, snakeCase } from "lodash";
 import moment from "moment";
 import pluralize from "pluralize";
+import qs from "qs";
 
 export const calculateDaysOfStay = (checkInDate: Date, checkOutDate: Date) => {
   const startDate = moment(checkInDate);
@@ -38,3 +39,23 @@ export const getSingularAndPlural = (displayName: any) => {
 
   return { toKebabCase, toSnakeCase, toPluralKebabCase, toPluralCamelCase,toCamelCase };
 };
+
+function cleanForQuery(values: any) {
+  // remove files, blobs, data: URIs, null/undefined
+  return JSON.parse(JSON.stringify(values, (k, v) => {
+    if (v === null || v === undefined) return undefined;
+    if (v instanceof File || v instanceof Blob) return undefined;
+    if (typeof v === "string" && v.startsWith("data:")) return undefined;
+    return v;
+  }));
+}
+
+export function formikValuestoQueryString(values: any) {
+  const filtered = cleanForQuery(values);
+  return qs.stringify(filtered, {
+    encode: true,
+    arrayFormat: "brackets",
+    allowDots: true,
+    skipNulls: true,
+  });
+}
