@@ -370,7 +370,11 @@ export const SolidXAiJsonDisplay: React.FC<SolidXAiJsonDisplayProps> = ({ intera
                                     <i className="pi pi-exclamation-triangle text-red-500 text-base"></i>
                                     <p className="font-semibold">{parsed?.instructions}</p>
                                 </div>
-                                {parsed?.errors.map((e: any) => <p>{e}</p>)}
+                                {parsed?.errors?.map((e: any, i: number) => (
+                                <p key={i}>
+                                    {typeof e === "string" ? e : JSON.stringify(e)}
+                                </p>
+                                ))}
                             </div>
                         </div>
                     }
