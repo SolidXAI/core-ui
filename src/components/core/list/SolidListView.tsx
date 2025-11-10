@@ -1495,7 +1495,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         params.embeded !== true && (
           <div
             className={`chatter-section ${
-              isOpenSolidXAiPanel === false ? "collapsed" : ""
+              isOpenSolidXAiPanel === false ? "collapsed" : "open"
             }`}
             style={{ width: chatterWidth }}
           >

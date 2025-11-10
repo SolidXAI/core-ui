@@ -4,7 +4,7 @@ import { Password } from "primereact/password";
 export const OpenAiProviderComponent = ({ profile, onUpdate }: any) => {
   return (
     <div className="grid">
-      <div className="field col-6 pl-3">
+      <div className="field col-12 md:col-6 pl-3">
         <div className="flex flex-column gap-2 mt-3">
           <label htmlFor="displayName" className="form-field-label">
             Base URL

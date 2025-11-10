@@ -141,6 +141,7 @@ export const SolidChatterHeader = (props: Props) => {
                 visible={showFilterDialog} 
                 style={{ width: 500 }} 
                 onHide={() => setShowFilterDialog(false)}
+                className='solid-chatter-filter-main'
             >
                 <div className="p-fluid">
                     <div className="flex flex-column gap-2">

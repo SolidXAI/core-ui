@@ -268,7 +268,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
         )}
       </div>
       {process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' && (
-        <div className={`chatter-section ${isOpenSolidXAiPanel === false ? 'collapsed' : ''}`} style={{ width: chatterWidth }}>
+        <div className={`chatter-section ${isOpenSolidXAiPanel === false ? 'collapsed' : 'open'}`} style={{ width: chatterWidth }}>
           {isOpenSolidXAiPanel &&(
             <div
               style={{

@@ -1,0 +1,150 @@
+@media (max-width: 1199px) {
+
+    /* ===================== Layout  ============================= */
+
+    .sidebar-right {
+        z-index: 99 !important;
+    }
+
+    .main-content.shifted {
+        margin-left: 70px !important;
+        backdrop-filter: blur(20px);
+        background-color: rgba(0, 0, 0, 0.2);
+        transition: backdrop-filter 0.3s ease, background-color 0.3s ease;
+    }
+
+
+    /* ================================= Menu ============================= */
+
+    .navbar-menu {
+        gap: 12px !important;
+        margin-top: 8px !important;
+    }
+
+
+    /* ===================== Chatter Section ===================== */
+
+    .chatter-section {
+        flex: 0 0 auto;
+        width: 45px;
+        transition: all 0.3s ease;
+        z-index: 5;
+    }
+
+    .chatter-section.open {
+        position: absolute;
+        right: 0;
+        top: 0;
+        width: 380px;
+        height: 100%;
+        z-index: 99;
+        background-color: #fff;
+        border-left: 1px solid var(--primary-light-color);
+        max-width: calc(100% - 100px);
+    }
+
+
+    /* ===================== Solid Account Setting ===================== */
+    .solid-account-setting-main {
+        width: 80vw !important;
+    }
+
+}
+
+
+@media (max-width: 991px) {
+
+    /* ===================== Layout  ============================= */
+
+    .sidebar-right.open {
+        width: 230px !important;
+    }
+
+    .sidebar-toggle-button {
+        left: 285px !important;
+    }
+
+
+    .sidebar-toggle-button.s-collapsed {
+        left: 60px !important;
+    }
+
+    /* ==================== solid auth ======================== */
+
+    .auth-container.side {
+        width: 525px;
+        max-width: 96%;
+    }
+
+    .auth-container {
+        min-width: auto;
+        padding: 25px;
+        border-radius: 1rem;
+        margin: auto;
+    }
+
+
+    .solid-auth-input-label.right {
+        color: #000 !important;
+    }
+
+    /* ===================== Solid Account Setting ===================== */
+
+    .solid-account-setting-main {
+        width: 90vw !important;
+    }
+
+    /* ===================== Chatter Section ===================== */
+
+    .chatter-section.open {
+        width: 330px;
+    }
+
+
+}
+
+
+@media(max-width:591px) {
+
+    /* ==================== solid auth ======================== */
+
+    .solid-auth-title {
+        font-size: 1.2rem;
+    }
+
+    .p-tabview-title {
+        font-size: 0.85rem;
+    }
+
+    /* =========================  Drop Zone ===========================*/
+    .solid-dropzone {
+        padding: 15px !important;
+    }
+
+
+    /* ===================== Solid Account Setting ===================== */
+    .solid-account-setting-main {
+        width: 95vw !important;
+    }
+
+    /* ===================== Chatter Section ===================== */
+    .solid-chatter-filter-main {
+        max-width: 90vw !important;
+    }
+
+
+
+}
+
+@media(max-width:491px) {
+
+    /* ===================== Solid Kanban ==================== */
+
+    .kanban-column {
+        min-width: 80% !important;
+        max-width: 80% !important;
+        width: 80% !important;
+    }
+
+
+}

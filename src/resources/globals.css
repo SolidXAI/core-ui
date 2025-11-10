@@ -3052,13 +3052,17 @@ li.header-li-px {
 }
 
 /* 1024px - 1199px */
-@media (min-width: 1024px) and (max-width: 1199px) {
+@media (min-width: 991px) and (max-width: 1199px) {
   html {
     font-size: 70% !important;
   }
 
+  .auth-container.side{
+    width: 75%;
+  }
+
   .auth-container {
-    padding: 24px;
+    padding: 24px 32px;
   }
 
   .solid-left-layout .solid-logo,

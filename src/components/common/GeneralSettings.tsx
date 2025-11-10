@@ -465,9 +465,9 @@ export const GeneralSettings = () => {
                             {pathname.includes("app-settings") &&
                                 <>
                                     <div className='formgrid grid'>
-                                        <div className='col-8'>
+                                        <div className='col-12 lg:col-10 xl:col-8'>
                                             <div className="formgrid grid">
-                                                <div className="col-6">
+                                                <div className="col-12 md:col-6">
                                                     <p className='font-bold ' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>App Logo </p>
                                                     <div>
                                                         <div {...getAppLogoRootProps()} className="solid-dropzone-wrapper" style={{ borderRadius: 8 }}>
@@ -501,7 +501,7 @@ export const GeneralSettings = () => {
                                                         )}
                                                     </div>
                                                 </div>
-                                                <div className="col-6">
+                                                <div className="col-12 md:col-6">
                                                     <p className='font-bold ' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Company Logo </p>
                                                     <div>
                                                         <div {...getCompanyLogoRootProps()} className="solid-dropzone-wrapper" style={{ borderRadius: 8 }}>
@@ -541,7 +541,7 @@ export const GeneralSettings = () => {
                                     </div>
                                     <p className='font-bold mt-4' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>App Logo Position</p>
                                     <div className='formgrid grid'>
-                                        <div className='col-8'>
+                                        <div className='col-12 lg:col-10 xl:col-8'>
                                             <div className="flex align-items-center gap-3">
                                                 <div className="flex align-items-center">
                                                     <RadioButton
@@ -569,14 +569,14 @@ export const GeneralSettings = () => {
                                     <div className='mt-4' style={{ borderBottom: '1px dashed #D8E2EA' }}></div>
                                     <p className='font-bold mt-4' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Title & Description Details </p>
                                     <div className='formgrid grid'>
-                                        <div className='col-8'>
+                                        <div className='col-12 lg:col-10 xl:col-8'>
                                             <div className="formgrid grid">
-                                                <div className="col-6">
+                                                <div className="col-12 md:col-6">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
+                                                        <div className="col-10 sm:col-9 lg:col-5 pb-2 md:pb-0">
                                                             <label className="form-field-label">Show Details on Authentication Screen</label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-2 sm:col-3 lg:col-7">
                                                             <InputSwitch
                                                                 name="showAuthContent"
                                                                 checked={formik.values.showAuthContent}
@@ -585,12 +585,12 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-6">
+                                                <div className="col-12 md:col-6">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
+                                                        <div className="col-12 md:col-5 pb-2 md:pb-0">
                                                             <label className="form-field-label">App Title</label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-12 md:col-7">
                                                             <InputText
                                                                 type="text"
                                                                 id="appTitle"
@@ -602,12 +602,12 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-6 mt-4">
+                                                <div className="col-12 md:col-6 mt-4">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
+                                                        <div className="col-12 md:col-5 pb-2 md:pb-0">
                                                             <label className="form-field-label">App Subtitle</label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-12 md:col-7">
                                                             <InputText
                                                                 type="text"
                                                                 id="appSubtitle"
@@ -619,12 +619,12 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-6 mt-4">
+                                                <div className="col-12 md:col-6 mt-4">
                                                     <div className="formgrid grid align-items-start">
-                                                        <div className="col-5">
+                                                        <div className="col-12 md:col-5 pb-2 md:pb-0">
                                                             <label className="form-field-label">Description</label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-12 md:col-7">
                                                             <InputTextarea
                                                                 rows={3}
                                                                 id="appDescription"
@@ -636,12 +636,12 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-6 mt-4">
+                                                <div className="col-12 md:col-6 mt-4">
                                                     <div className="formgrid grid align-items-start">
-                                                        <div className="col-5">
+                                                        <div className="col-12 md:col-5 pb-2 md:pb-0">
                                                             <label className="form-field-label">Copyright</label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-12 md:col-7">
                                                             <InputTextarea
                                                                 rows={3}
                                                                 id="copyright"
@@ -660,14 +660,14 @@ export const GeneralSettings = () => {
 
                                     <p className='font-bold mt-4' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Legal Links</p>
                                     <div className='formgrid grid'>
-                                        <div className='col-8'>
+                                        <div className='col-12 lg:col-10 xl:col-8'>
                                             <div className="formgrid grid">
-                                                <div className="col-6">
+                                                <div className="col-12 md:col-6">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
+                                                        <div className="col-10 sm:col-9 lg:col-5">
                                                             <label className="form-field-label">Show Legal Links</label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-2 sm:col-3 lg:col-7">
                                                             <InputSwitch
                                                                 name="showLegalLinks"
                                                                 checked={formik.values.showLegalLinks}
@@ -676,12 +676,12 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-6">
+                                                <div className="col-12 md:col-6">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
+                                                        <div className="col-12 md:col-5 py-2 md:py-0">
                                                             <label className="form-field-label">Terms and Conditions Link</label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-12 md:col-7">
                                                             <InputText
                                                                 type="text"
                                                                 id="appTnc"
@@ -693,12 +693,12 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-6 mt-3">
+                                                <div className="col-12 md:col-6 mt-3">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
+                                                        <div className="col-12 md:col-5 pb-2 md:pb-0">
                                                             <label className="form-field-label">Privacy Policy Link</label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-12 md:col-7">
                                                             <InputText
                                                                 type="text"
                                                                 id="appPrivacyPolicy"
@@ -716,14 +716,14 @@ export const GeneralSettings = () => {
                                     <div className='mt-4' style={{ borderBottom: '1px dashed #D8E2EA' }}></div>
                                     <p className='font-bold mt-4' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Theme</p>
                                     <div className='formgrid grid'>
-                                        <div className='col-8'>
+                                        <div className='col-12 lg:col-10 xl:col-8'>
                                             <div className="formgrid grid">
-                                                <div className="col-6">
+                                                <div className="col-12 md:col-6">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
+                                                        <div className="col-10 sm:col-10 lg:col-5">
                                                             <label className="form-field-label">Enable Dark Mode</label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-3 2 sm:col-2 lg:col-7">
                                                             <InputSwitch
                                                                 name="enableDarkMode"
                                                                 checked={formik.values.enableDarkMode}
@@ -741,14 +741,14 @@ export const GeneralSettings = () => {
                                 <>
                                     <p className='font-bold' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>User Authentication  </p>
                                     <div className='formgrid grid'>
-                                        <div className='col-8'>
+                                        <div className='col-12 lg:col-10 xl:col-8'>
                                             <div className="formgrid grid">
-                                                <div className="col-6">
+                                                <div className="col-12 md:col-6">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
+                                                        <div className="col-10 sm:col-9 lg:col-5">
                                                             <label className="form-field-label">Public Registration</label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-2 sm:col-3 lg:col-7">
                                                             <InputSwitch
                                                                 name="allowPublicRegistration"
                                                                 checked={formik.values.allowPublicRegistration}
@@ -757,12 +757,12 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-6">
+                                                <div className="col-12 md:col-6 mt-3 md:mt-0">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
+                                                        <div className="col-10 sm:col-9 lg:col-5">
                                                             <label className="form-field-label">Signup with Password</label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-2 sm:col-3 lg:col-7">
                                                             <InputSwitch
                                                                 name="iamPasswordRegistrationEnabled"
                                                                 checked={formik.values.iamPasswordRegistrationEnabled}
@@ -771,12 +771,12 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-6 mt-3">
+                                                <div className="col-12 md:col-6 mt-3">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
+                                                        <div className="col-10 sm:col-9 lg:col-5">
                                                             <label className="form-field-label">Signup without Password</label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-2 sm:col-3 lg:col-7">
                                                             <InputSwitch
                                                                 name="passwordlessRegistration"
                                                                 checked={formik.values.passwordlessRegistration}
@@ -785,12 +785,12 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-6 mt-3">
+                                                <div className="col-12 md:col-6 mt-3">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
+                                                        <div className="col-10 sm:col-9 lg:col-5">
                                                             <label className="form-field-label">Auto Activate User on Registration </label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-2 sm:col-3 lg:col-7">
                                                             <InputSwitch
                                                                 name="activateUserOnRegistration"
                                                                 checked={formik.values.activateUserOnRegistration}
@@ -799,12 +799,12 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-6 mt-3">
+                                                <div className="col-12 md:col-6 mt-3">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
+                                                        <div className="col-10 sm:col-9 lg:col-5">
                                                             <label className="form-field-label">Allow Login/ Signup with Google </label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-2 sm:col-3 lg:col-7">
                                                             <InputSwitch
                                                                 name="iamGoogleOAuthEnabled"
                                                                 checked={formik.values.iamGoogleOAuthEnabled}
@@ -813,12 +813,12 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-6 mt-3">
+                                                <div className="col-12 md:col-6 mt-3">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
+                                                        <div className="col-10 sm:col-9 lg:col-5">
                                                             <label className="form-field-label">Force Password change on first Login </label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-2 sm:col-3 lg:col-7">
                                                             <InputSwitch
                                                                 name="forceChangePasswordOnFirstLogin"
                                                                 checked={formik.values.forceChangePasswordOnFirstLogin}
@@ -833,7 +833,7 @@ export const GeneralSettings = () => {
                                     <div className='mt-4' style={{ borderBottom: '1px dashed #D8E2EA' }}></div>
                                     <p className='font-bold mt-4' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Authentication Screen Layout</p>
                                     <div className='formgrid grid'>
-                                        <div className='col-8'>
+                                        <div className='col-12 lg:col-10 xl:col-8'>
                                             <div className="flex align-items-center gap-3">
                                                 <div className="flex align-items-center">
                                                     <RadioButton
@@ -871,9 +871,9 @@ export const GeneralSettings = () => {
                                     </div>
                                     {formik.values.authPagesLayout === "center" && <></>}
                                     <div className='formgrid grid'>
-                                        <div className='col-8'>
+                                        <div className='col-12 lg:col-10 xl:col-8'>
                                             <div className="formgrid grid">
-                                                <div className="col-6">
+                                                <div className="col-12 md:col-8 lg:col-6">
                                                     <p className='font-bold ' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>{formik.values.authPagesLayout === "center" ? "Background" : "Banner"} Image</p>
                                                     {formik.values.authPagesLayout === "left" &&
                                                         <div>
@@ -981,7 +981,7 @@ export const GeneralSettings = () => {
                                         <>
                                             <p className='font-bold mt-4' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Authentication Screen Theme</p>
                                             <div className='formgrid grid'>
-                                                <div className='col-8'>
+                                                <div className='col-12 lg:col-10 xl:col-8'>
                                                     <div className="flex align-items-center gap-3">
                                                         <div className="flex align-items-center">
                                                             <RadioButton
@@ -1015,14 +1015,14 @@ export const GeneralSettings = () => {
                                 <>
                                     <p className='font-bold' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Misc Details</p>
                                     <div className='formgrid grid'>
-                                        <div className='col-8'>
+                                        <div className='col-12 lg:col-10 xl:col-8'>
                                             <div className="formgrid grid">
-                                                <div className="col-6">
+                                                <div className="col-12 md:col-6 pb-3 md:pb-0">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
+                                                        <div className="col-10 sm:col-9 lg:col-5 ">
                                                             <label className="form-field-label">Use queue for sending emails</label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-2 sm:col-3 lg:col-7">
                                                             <InputSwitch
                                                                 name="shouldQueueEmails"
                                                                 checked={formik.values.shouldQueueEmails}
@@ -1031,12 +1031,12 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-6">
+                                                <div className="col-12 md:col-5 pb-2">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
+                                                        <div className="col-10 sm:col-9 lg:col-5">
                                                             <label className="form-field-label">Use queue for sending SMS</label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-2 sm:col-3 lg:col-7">
                                                             <InputSwitch
                                                                 name="shouldQueueSms"
                                                                 checked={formik.values.shouldQueueSms}
@@ -1051,14 +1051,14 @@ export const GeneralSettings = () => {
                                     <Divider />
                                     <p className='font-bold' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Contact Support</p>
                                     <div className='formgrid grid'>
-                                        <div className="col-8">
+                                        <div className="col-12 lg:col-10 xl:col-8">
                                             <div className='formgrid grid'>
-                                                <div className="col-6">
+                                                <div className="col-12 md:col-6 pb-3 md:pb-0">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
+                                                        <div className="col-12 md:col-5 pb-2 md:pb-0">
                                                             <label className="form-field-label">Contact Support Email</label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-12 md:col-7">
                                                             <InputText
                                                                 type="text"
                                                                 id="contactSupportEmail"
@@ -1070,12 +1070,12 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-6">
+                                                <div className="col-12 md:col-6">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-5">
+                                                        <div className="col-12 md:col-5 pb-2 md:pb-0">
                                                             <label className="form-field-label">Display Name</label>
                                                         </div>
-                                                        <div className="col-7">
+                                                        <div className="col-12 md:col-7">
                                                             <InputText
                                                                 type="text"
                                                                 id="contactSupportDisplayName"
@@ -1096,14 +1096,14 @@ export const GeneralSettings = () => {
                                 <>
                                     <p className='font-bold' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Ai Details</p>
                                     <div className='formgrid grid'>
-                                        <div className='col-8'>
+                                        <div className='col-12 lg:col-10 xl:col-8'>
                                             <div className="formgrid grid">
-                                                <div className="col-6 mt-4">
+                                                <div className="col-12 md:col-10 lg:col-6 mt-3 md:mt-4">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-3">
+                                                        <div className="col-12 md:col-3 pb-2 md:pb-0">
                                                             <label className="form-field-label">Default Provider</label>
                                                         </div>
-                                                        <div className="col-9">
+                                                        <div className="col-12 md:col-9">
                                                             <Dropdown
                                                                 className='w-full'
                                                                 value={formik.values.solidXGenAiCodeBuilderConfig.defaultProvider}
@@ -1139,7 +1139,7 @@ export const GeneralSettings = () => {
                                     </div>
                                     <Divider />
                                     <div className='grid'>
-                                        <div className='col-6'>
+                                        <div className='col-12 md:col-6'>
                                             {formik.values.solidXGenAiCodeBuilderConfig.defaultProvider && (
                                                 <>
                                                     {formik.values.solidXGenAiCodeBuilderConfig.defaultProvider === "openai" && (
