@@ -15,11 +15,11 @@ export const solidServiceApi = createApi({
             }),
         }),
         // Add a mutation for calling /code-generation/post-process, which takes an empty body
-        codeGenerationPostProcess: builder.mutation<any, void>({
-            query: () => ({
+        codeGenerationPostProcess: builder.mutation<any, { "runModuleMetadataSeeder": boolean, "runSolidIngestion": boolean }>({
+            query: (payload) => ({
                 url: '/code-generation/post-process',
                 method: 'POST',
-                body: {}
+                body: payload
             }),
         }),
     }),

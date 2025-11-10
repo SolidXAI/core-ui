@@ -2966,7 +2966,8 @@ li.header-li-px {
     left: 69% !important;
     top: 17.3% !important;
   }
-/* 
+
+  /* 
   .chatter-section {
     width: 345px;
   } */
@@ -3045,7 +3046,8 @@ li.header-li-px {
     left: 61% !important;
     top: 15% !important;
   }
-/* 
+
+  /* 
   .chatter-section {
     width: 300px;
   } */
@@ -3300,13 +3302,66 @@ flex-shrink: 0; */
 .warning-header-popup {
   padding: 0.75rem;
 }
+
 .password-field-component {
-padding:10px !important;
-border:2px solid rgba(216, 226, 234, 0.40);
-border-radius:8px !important;
+  padding: 10px !important;
+  border: 2px solid rgba(216, 226, 234, 0.40);
+  border-radius: 8px !important;
 }
-.register-success-popup{
+
+.register-success-popup {
   border-radius: 1.25rem !important;
   background: #fff !important;
   z-index: 1000 !important;
+}
+
+/* ========================= Taost =================================== */
+
+.p-toast .p-toast-message {
+  align-items: center;
+  padding: 0.5rem 0.5rem;
+  color: white;
+  width: fit-content;
+}
+
+.p-toast .p-toast-message.p-toast-message-info{
+  border: 0;
+}
+
+.p-toast .p-toast-message.p-toast-message-error .p-toast-message-icon, .p-toast .p-toast-message.p-toast-message-error .p-toast-icon-close{
+  color: #fff;
+}
+
+.p-toast .p-toast-message.p-toast-message-success {
+  background-color: #41b776 !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-warn {
+  background-color: #a46b00 !important;
+}
+
+.p-toast .p-toast-message.p-toast-message-error {
+  background-color: #d32f2f !important;
+}
+
+.p-toast-message-content {
+  display: flex !important;
+  flex-direction: row !important;
+  align-items: center !important;
+  justify-content: space-between !important;
+  padding: 5px;
+  /* text-wrap: nowrap; */
+}
+
+.p-toast-message-text {
+  margin: 0px 10px !important;
+  font-size: 1rem;
+  color: var(--text-color-1);
+  font-style: normal;
+  font-weight: 500;
+  line-height: 20px;
+}
+
+.p-toast-icon-close {
+  border-radius: 50px;
 }

@@ -1,31 +1,3 @@
-export { CustomFooter } from '@/components/CustomFooter/CustomFooter';
-export { FooterForm } from '@/components/CustomFooter/FooterForm';
-
-
-export { CallIcon } from '@/components/CustomHeader/CallIcon';
-export { CustomHeader } from '@/components/CustomHeader/CustomHeader';
-
-export { PrimaryCustomDropdown } from '@/components/CustomHeader/CustomDropdown';
-export type { PrimaryDataProps, RootProps, SecondaryProps, TertiaryProps } from '@/components/CustomHeader/CustomDropdown';
-
-export { EmailIcon } from '@/components/CustomHeader/EmailIcon';
-export { HeaderCart } from '@/components/CustomHeader/HeaderCart';
-export { ProductNavData } from '@/components/CustomHeader/productNavData';
-
-
-export { DetailsViews } from '@/components/FormView/DetailsViews';
-export { OrderAddressDetails } from '@/components/FormView/OrderAddressDetails';
-export { OrderPaymentDetails } from '@/components/FormView/OrderPaymentDetails';
-export { OrderTableDetails } from '@/components/FormView/OrderTableDetails';
-export { OrderedProductDetail } from '@/components/FormView/OrderedProductDetail';
-
-export { CustomTag } from '@/components/Tag/CustomTag';
-
-
-// export * from '@/components/auth/Login';
-// export * from '@/components/auth/Register';
-
-
 // export * from '@/components/common/AuthBanner';
 export { AutoCompleteField } from '@/components/common/AutoCompleteField';
 export { CancelButton, SolidCancelButton } from '@/components/common/CancelButton';
@@ -183,8 +155,6 @@ export { FilterIcon } from '@/components/modelsComponents/filterIcon';
 
 export { DemoService } from '@/components/tables/DemoData';
 export { DynamicTable } from '@/components/tables/DynamicTable';
-export { ListViewTable } from '@/components/tables/ListViewTable';
-export type { Product } from '@/components/tables/ListViewTable';
 // Excluded folders
 // dashboard
 // automationComponents
@@ -201,19 +171,11 @@ export { revalidateTag } from '@/helpers/revalidate';
 export { useHasAllRoles, useHasAnyRole, hasAnyRole } from '@/helpers/rolesHelper';
 export { registerExtensionComponent, registerExtensionFunction } from '@/helpers/registry';
 
-// export * from '@/redux/api/articleApi';
 export { authApi, useForgotPasswordMutation, useRegisterMutation, useRegisterPrivateMutation, useResetPasswordMutation, useUpdateUserMutation, useInitateLoginMutation, useConfirmOtpLoginMutation, useInitateRegisterMutation, useConfirmOtpRegisterMutation, } from '@/redux/api/authApi';
-// export * from '@/redux/api/automationApi';
-// export * from '@/redux/api/categoryApi';
-// export * from '@/redux/api/cityApi';
-// export * from '@/redux/api/cmsBannerImageApi';
-// export * from '@/redux/api/countryApi';
 export { baseQueryWithAuth } from '@/redux/api/fetchBaseQuery';
 export { fieldsApi, useCreatefieldMutation, useDeletefieldMutation, useGetFieldDefaultMetaDataQuery, useGetSelectionDynamicValueQuery, useGetSelectionDynamicValuesQuery, useGetfieldByIdQuery, useGetfieldsQuery, useLazyGetFieldDefaultMetaDataQuery, useLazyGetSelectionDynamicValueQuery, useLazyGetSelectionDynamicValuesQuery, useLazyGetfieldByIdQuery, useLazyGetfieldsQuery } from '@/redux/api/fieldApi';
 export { mediaApi, useCreateMediaMutation, useDeleteMediaMutation, useDeleteMultipleMediasMutation, useGetMediaByIdQuery, useGetMediasQuery, useLazyGetMediaByIdQuery, useLazyGetMediasQuery, useUpdateMediaMutation } from '@/redux/api/mediaApi';
 export { mediaStorageProviderApi, useCreateMediaStorageProivderMutation, useDeleteMediaStorageProivderMutation, useDeleteMultipleMediaStorageProvidersMutation, useGetMediaStorageProivderByIdQuery, useGetMediaStorageProvidersQuery, useLazyGetMediaStorageProivderByIdQuery, useLazyGetMediaStorageProvidersQuery, useUpdateMediaStorageProivderMutation } from '@/redux/api/mediaStorageProviderApi';
-// export * from '@/redux/api/menuApi';
-// export * from '@/redux/api/menuItemsApi';
 // export * from '@/redux/api/modelApi';
 export { modelsApi, useCreatemodelMutation, useDeleteMultipleModelsMutation, useDeletemodelMutation, useGenerateCodeForModelMutation, useGetModelsQuery, useGetmodelByIdQuery, useLazyGetModelsQuery, useLazyGetmodelByIdQuery, useUpdatemodelMutation } from '@/redux/api/modelApi';
 export { modulesApi, useCreatemoduleMutation, useDeleteMultiplemodulesMutation, useDeletemoduleMutation, useGenerateCodeFormoduleMutation, useGetDefaultDataSourceQuery, useGetmoduleByIdQuery, useGetmodulesQuery, useLazyGetDefaultDataSourceQuery, useLazyGetmoduleByIdQuery, useLazyGetmodulesQuery, useRefreshPermissionsMutation, useUpdatemoduleMutation } from '@/redux/api/moduleApi';
@@ -222,12 +184,6 @@ export { solidChatterMessageApi, useGetchatterMessageQuery, useLazyGetchatterMes
 // export * from '@/redux/api/orderAttributeApi';
 // export * from '@/redux/api/permissionApi';
 // export * from '@/redux/api/pincodeApi';
-// export * from '@/redux/api/productData';
-// export * from '@/redux/api/radixExtraModelAttributeApi';
-// export * from '@/redux/api/radixModelMetadataApi';
-// export * from '@/redux/api/radixModelsApi';
-// export * from '@/redux/api/ratingApi';
-// export * from '@/redux/api/reviewApi';
 // export * from '@/redux/api/roleApi';
 export {
     roleApi, useGetrolesQuery, useGetroleByIdQuery, useCreateroleMutation, useLazyGetrolesQuery, useUpdateroleMutation, useDeleteroleMutation
@@ -244,8 +200,6 @@ export { dashboardApi} from '@/redux/api/dashboardApi';
 export { dashboardQuestionApi } from '@/redux/api/dashboardQuestionApi';
 export { aiInteractionApi } from '@/redux/api/aiInteractionApi';
 // export * from '@/redux/api/stateApi';
-// export * from '@/redux/api/tagApi';
-// export * from '@/redux/api/tagGroupApi';
 export { useCreateuserroleMutation, useCreateuserrolebulkMutation, useDeleteMultipleUsersMutation, useDeleteUserMutation, useGetusersByIdQuery, useGetusersQuery, useLazyCheckIfPermissionExistsQuery, useLazyGetusersByIdQuery, useLazyGetusersQuery, useLazyUpdateSessionQuery, useRegisterUserMutation, useUpdatePasswordMutation, useUpdateProfileMutation, useUpdateSessionQuery, useUploadAvatarMutation, userApi } from '@/redux/api/userApi';
 export { solidSettingsApi, useCreateSolidSettingsMutation, useGetSolidSettingsByIdQuery, useGetSolidSettingsQuery, useGetAuthSettingsQuery, useLazyGetAuthSettingsQuery, useLazyGetSolidSettingsQuery, useLazyGetSolidSettingsByIdQuery, useUpdateSolidSettingsMutation, } from '@/redux/api/solidSettingsApi';
 export { logout, setToken } from '@/redux/features/authSlice';
@@ -263,10 +217,7 @@ export { AdminLayout } from '@/components/layout/AdminLayout';
 export { SolidAdmin } from '@/components/common/SolidAdmin';
 
 // Re-export default exports
-//Login.tsx
-export { default as Login } from '@/components/auth/Login';
 //Register.tsx
-export { default as Register } from '@/components/auth/Register';
 export { default as AuthBanner } from '@/components/common/AuthBanner';
 //CodeEditor.tsx
 export { default as CodeEditor } from '@/components/common/CodeEditor';
@@ -375,8 +326,6 @@ export { default as UserProfileMenu } from '@/components/layout/user-profile-men
 export { default as UserProfile } from '@/components/layout/user-profile';
 //UserSidebar.tsx
 export { default as UserSidebar } from '@/components/layout/UserSidebar';
-//menu.tsx
-export { default as menu } from '@/helpers/menu';
 //SolidPopupContainer.tsx
 export { default as SolidPopupContainer } from '@/components/common/SolidPopupContainer';
 

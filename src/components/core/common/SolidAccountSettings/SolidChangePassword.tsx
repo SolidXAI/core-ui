@@ -118,7 +118,7 @@ export const SolidChangePassword = () => {
                                 text={formik?.errors?.currentPassword?.toString()}
                             />}
                         </div>
-                        <div className="flex flex-column gap-2 mt-4">
+                        <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                             <label htmlFor="password" className="solid-auth-input-label">New Password</label>
                             <Password
                                 id="newPassword"
@@ -137,7 +137,7 @@ export const SolidChangePassword = () => {
                                 text={formik?.errors?.newPassword?.toString()}
                             />}
                         </div>
-                        <div className="flex flex-column gap-2 mt-4">
+                        <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                             <label htmlFor="password" className="solid-auth-input-label">Confirm New Password</label>
                             <Password
                                 id="confirmPassword"

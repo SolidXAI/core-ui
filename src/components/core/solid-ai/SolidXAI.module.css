@@ -92,3 +92,9 @@
 .SolidXAIResponse div {
     color: var(--solid-dark-title);
 }
+
+.SolidXAiResponseError{
+    background-color: #ffecec;
+    padding: 10px;
+    border: 1px solid #f5aca6;
+}

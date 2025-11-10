@@ -10,6 +10,7 @@ import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
+import { formikValuestoQueryString } from "@/helpers/helpers";
 
 
 export class SolidSelectionDynamicField implements ISolidField {
@@ -207,6 +208,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                 limit: 10,
                 query: event.query,
                 fieldId: fieldMetadata.id,
+                formValues: formikValuestoQueryString(formik.values),
             };
             if (whereClause) {
                 queryData.query = whereClause;
@@ -237,7 +239,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
 
     return (
         <div className="relative">
-            <div className="flex flex-column gap-2 mt-4">
+            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
