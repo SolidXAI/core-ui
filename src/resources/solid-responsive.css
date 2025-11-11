@@ -1,0 +1,20 @@
+@media (max-width: 480px) {
+    .p-panel .p-panel-header {
+        padding: 0.75rem;
+    }
+
+    .solid-column-panel.p-panel .p-panel-content {
+        padding: 1px 0.75rem 0.75rem 0.75rem;
+    }
+}
+
+/* For tablets (between 481px and 768px) */
+@media (min-width: 481px) and (max-width: 768px) {
+    .p-panel .p-panel-header {
+        padding: 1rem;
+    }
+
+    .solid-column-panel.p-panel .p-panel-content {
+        padding: 1px 1rem 1rem 1rem;
+    }
+}

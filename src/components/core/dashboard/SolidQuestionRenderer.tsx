@@ -47,7 +47,7 @@ export const SolidQuestionRenderer = ({ question, filters = [], isPreview = fals
             filters,
         },
         // ensures proper handling of arrays
-        { arrayFormat: 'brackets' }
+        // { arrayFormat: 'indices' }
     );
     const { data: questionData, isLoading: questionDataIsLoading, error: questionDataError } = useGetDashboardQuestionDataByIdQuery({ id: question.id, qs: queryParams });
 

@@ -138,7 +138,7 @@ export const SolidXAiJsonDisplay: React.FC<SolidXAiJsonDisplayProps> = ({ intera
 
     const [applyInteraction, {
         isLoading: isApplyInteractionLoading,
-        isSuccess: isApplyInteractionSuceess,
+        isSuccess: isApplyInteractionSuccess,
         isError: isApplyInteractionError,
         error: applyInteractionError,
         data: applyInteractionData
@@ -201,9 +201,12 @@ export const SolidXAiJsonDisplay: React.FC<SolidXAiJsonDisplayProps> = ({ intera
     };
 
     useEffect(() => {
-        const runSeederIfBackendAlive = async () => {
-            if (isApplyInteractionSuceess) {
-                console.log("isApplyInteractionSuceess", isApplyInteractionSuceess);
+        // Async interaction success handler
+        const interactionSuccessHandler = async () => {
+            if (!isApplyInteractionSuccess) return;
+
+            // Async function to ping backend and then run post-process
+            const runPostProcessIfBackendAlive = async (postProcessFlags: { "runModuleMetadataSeeder": boolean, "runSolidIngestion": boolean }) => {
                 setIsPinging(true);
 
                 const isAlive = await pingBackendWithRetry(30, 500);
@@ -211,20 +214,34 @@ export const SolidXAiJsonDisplay: React.FC<SolidXAiJsonDisplayProps> = ({ intera
                 setIsPinging(false);
 
                 if (isAlive) {
-                    await triggerCodeGenerationPostProcess();
+                    await triggerCodeGenerationPostProcess(postProcessFlags);
                 } else {
                     dispatch(closePopup());
                     console.log("Backend is not alive, cannot run seeder");
                     // showToast("error", "Backend Unavailable", "Seeder not triggered. Could not reach backend.");
                 }
+            };
+
+            // Determine flags based on interaction response
+            const interactionResponseFlags: { seedingRequired: boolean, serverRebooting: boolean } = applyInteractionData?.data
+            const postProcessFlags: { "runModuleMetadataSeeder": boolean, "runSolidIngestion": boolean } = {
+                "runModuleMetadataSeeder": interactionResponseFlags?.seedingRequired || false,
+                "runSolidIngestion": false
+            };
+
+            // If server reboot is not required, run post-process immediately
+            if (!interactionResponseFlags?.serverRebooting) {
+                // console.log("Running post-process immediately", postProcessFlags);
+                await triggerCodeGenerationPostProcess(postProcessFlags)
+            } else {
+                setTimeout(() => {
+                    // console.log("Running post-process after delay", postProcessFlags);
+                    runPostProcessIfBackendAlive(postProcessFlags);
+                }, 5000);
             }
         };
-        setTimeout(() => {
-            // TODO: Do we want to check if the "apply" mutation response contains a flag indicating that the last aiReponse application will lead to a server reboot?
-            // TODO: Do we want to check if the "apply" mutation response contains a flag indicating that the last aiReponse application will need "seed" to be run?
-            runSeederIfBackendAlive();
-        }, 5000);
-    }, [isApplyInteractionSuceess]);
+        interactionSuccessHandler();
+    }, [isApplyInteractionSuccess]);
 
     useEffect(() => {
         if (isCodeGenerationPostProcessSuccess) {
@@ -349,7 +366,11 @@ export const SolidXAiJsonDisplay: React.FC<SolidXAiJsonDisplayProps> = ({ intera
                                     <i className="pi pi-exclamation-triangle text-red-500 text-base"></i>
                                     <p className="font-semibold">{parsed?.instructions}</p>
                                 </div>
-                                {parsed?.errors.map((e: any) => <p>{e}</p>)}
+                                {parsed?.errors?.map((e: any, i: number) => (
+                                <p key={i}>
+                                    {typeof e === "string" ? e : JSON.stringify(e)}
+                                </p>
+                                ))}
                             </div>
                         </div>
                     }

@@ -7,15 +7,26 @@ import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import styles from './SolidDashboard.module.css';
 import { useGetDashboardVariableSelectionDynamicValuesQuery } from "@/redux/api/dashboardApi";
 import { ProgressSpinner } from "primereact/progressspinner";
+import { DashboardVariableRecord } from "./SolidDashboard";
 
 
 export interface DashboardVariableFilterProps {
   setFilters: Dispatch<SetStateAction<SqlExpression[]>>;
-  dashboardVariable: any;
+  dashboardVariable: DashboardVariableRecord;
 }
 
 export const DateVariableFilterComponent: React.FC<DashboardVariableFilterProps> = ({ setFilters, dashboardVariable }) => {
-  const [dates, setDates] = useState<Nullable<(Date | null)[]>>(null);
+  // Initialize the default dates state
+  // If the dashboardVariable has a defaultOperator as Between and a defaultValue as two dates, we can set those as the initial values, otherwise null
+  const defaultDatesString = dashboardVariable.defaultOperator === '$between' && dashboardVariable.defaultValue
+  const defaultDatesArray = JSON.parse(defaultDatesString || '[]');
+  // Map the defaultDatesArray to Date objects
+  const defaultDates: Nullable<(Date | null)[]> = defaultDatesArray.length === 2 ? [
+    new Date(defaultDatesArray[0]),
+    new Date(defaultDatesArray[1])
+  ] : null;
+  const [dates, setDates] = useState<Nullable<(Date | null)[]>>(defaultDates);
+
   return (
     <div className={`flex align-items-center ${styles.SolidDashboardDateRangeFilterWrapper}`}>
       <Calendar value={dates} onChange={(e) => {
@@ -50,8 +61,13 @@ export const DateVariableFilterComponent: React.FC<DashboardVariableFilterProps>
 }
 
 export const SelectionDynamicVariableFilterComponent: React.FC<DashboardVariableFilterProps> = ({ setFilters, dashboardVariable }) => {
+  // Initialize the selection dynamic values state
+  // Pick the values from defaultValue if present, for default operator $in
+  const defaultDynamicValuesString = dashboardVariable.defaultOperator === '$in' && dashboardVariable.defaultValue;
+  const defaultDynamicValues = JSON.parse(defaultDynamicValuesString || '[]');
+
   // Selection Dynamic Values
-  const [selectionDynamicValues, setSelectionDynamicValues] = useState<string[]>([]);
+  const [selectionDynamicValues, setSelectionDynamicValues] = useState<string[]>(defaultDynamicValues);
   const [filteredItems, setFilteredItems] = useState<string[]>([]);
 
   // Using rtk query to fetch dynamic values based on variableId
@@ -118,8 +134,13 @@ export const SelectionDynamicVariableFilterComponent: React.FC<DashboardVariable
 }
 
 export const SelectionStaticVariableFilterComponent: React.FC<DashboardVariableFilterProps> = ({ setFilters, dashboardVariable }) => {
+  // Initialize the selection static values state
+  // Pick the values from defaultValue if present, for default operator $in
+  const defaultStaticValuesString = dashboardVariable.defaultOperator === '$in' && dashboardVariable.defaultValue;
+  const defaultStaticValues = JSON.parse(defaultStaticValuesString || '[]');
+
   // Selection Static Values
-  const [selectionStaticValues, setSelectionStaticValues] = useState<string[]>([]);
+  const [selectionStaticValues, setSelectionStaticValues] = useState<string[]>(defaultStaticValues);
   const [filteredStaticItems, setFilteredStaticItems] = useState<string[]>([]);
   const staticValues = dashboardVariable.selectionStaticValues || [];
 
