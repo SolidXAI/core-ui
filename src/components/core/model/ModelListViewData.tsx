@@ -368,7 +368,7 @@ export const ModelListViewData = () => {
         )}
         onHide={() => setGenerateCodeVisible(false)}
       >
-        <p className="">Click Ok to proceed with model code generation, please note that if the file already exists and <br></br>you have made custom changes to this file we will create a .bkp file as a backup of the existing file.</p>
+        <p className="">Proceed with model code generation? Existing files will be overwritten.</p>
         <p>Below is the list of files that will be created </p>
         <ul>
           <li>Model Entity File</li>
