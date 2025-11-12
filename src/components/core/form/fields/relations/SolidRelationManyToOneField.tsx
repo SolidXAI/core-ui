@@ -418,7 +418,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
     return (
         <div className="relative">
             <Toast ref={toast} />
-            <div className="flex flex-column gap-2 mt-4">
+            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
                         {fieldLabel}
@@ -463,7 +463,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity }: any) => {
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-4';
+    const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
 
     const params = {

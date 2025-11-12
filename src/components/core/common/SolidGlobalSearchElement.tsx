@@ -462,8 +462,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     useEffect(() => {
         if (viewData?.data?.solidFieldsMetadata) {
             let fieldsData = viewData?.data?.solidFieldsMetadata;
-            console.log(`fiels data while rendering solid global search element: `);
-            console.log(fieldsData);
+            // console.log(`fiels data while rendering solid global search element: `);
+            // console.log(fieldsData);
 
             const children = viewData?.data?.solidView?.layout?.children ?? [];
 
@@ -503,8 +503,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 }
             });
 
-            console.log("searchableFieldsList", searchableFieldsList);
-            
+            // console.log("searchableFieldsList", searchableFieldsList);
+
 
             // Optionally map to a minimal structure if needed for UI
             let finalSearchableFieldsList: any = searchableFieldsList.map((field: any) => ({
@@ -514,7 +514,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 matchMode: field.matchMode
             }));
 
-            console.log("finalSearchableFieldsList", finalSearchableFieldsList);
+            // console.log("finalSearchableFieldsList", finalSearchableFieldsList);
 
             setSearchableFields(finalSearchableFieldsList);
         }
@@ -613,7 +613,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     useEffect(() => {
         if (hasSearched === true) {
-            console.log("searchChips", searchChips);
+            // console.log("searchChips", searchChips);
 
             const formattedChips = {
                 $and: searchChips.map((chip: any) => ({
@@ -624,8 +624,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 }))
             };
 
-            console.log("formattedChips", formattedChips);
-            
+            // console.log("formattedChips", formattedChips);
+
             // if (formattedChips.$and.length > 0) {
             const transformedFilter = tranformSearchToFilters(formattedChips);
             setSearchFilter(transformedFilter);
@@ -823,7 +823,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                                 <div className="custom-filter-search-options px-2 py-2 flex flex-column">
                                     {
                                         searchableFields.map((value: any, index: any) => {
-                                            console.log("value", value);
+                                            // console.log("value", value);
 
                                             return (
                                                 <Button
@@ -831,7 +831,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                                                     className="p-2 flex gap-1 text-color"
                                                     // onClick={() => handleAddChip(value)}
                                                     onMouseDown={(e) => {
-                                                        e.preventDefault(); // Prevent focus loss from input
+                                                        // Prevent focus loss from input
+                                                        e.preventDefault();
                                                         const currentValue = inputValue?.trim();
                                                         if (currentValue) {
                                                             setSearchChips((prev) => [...prev, {
@@ -850,8 +851,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                                                     severity="secondary"
                                                     size="small"
                                                 >
-                                                    Search <strong>{value.displayName}</strong> for :
-                                                    <span className="font-bold text-color">{inputValue}</span>
+                                                    Search <strong>{value.displayName}</strong> for: <span className="font-bold text-color">{inputValue}</span>
                                                 </Button>
                                             )
                                         })

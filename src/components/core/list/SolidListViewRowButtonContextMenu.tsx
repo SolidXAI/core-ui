@@ -3,7 +3,9 @@
 import { useHasAnyRole } from "@/helpers/rolesHelper";
 import { Button } from "primereact/button";
 
-export const SolidListViewRowButtonContextMenu = ({ button, params, selectedSolidViewData, solidListViewMetaData, handleCustomButtonClick }: any) => {
+export const SolidListViewRowButtonContextMenu = ({ button, params, getSelectedSolidViewData, solidListViewMetaData, handleCustomButtonClick }: any) => {
+    const selectedSolidViewData = getSelectedSolidViewData?.();
+    
     const hasRole =
         !button?.attrs?.roles || button?.attrs?.roles.length === 0
             ? true

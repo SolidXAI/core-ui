@@ -21,8 +21,16 @@ interface ApplySolidAiInteractionResponse {
     statusCode: number;
     message: string[];
     error: string;
-    data: string; // UUID
+    data: any; 
 }
+
+
+export type {
+    ApplySolidAiInteractionRequest,
+    ApplySolidAiInteractionResponse,
+    TriggerMcpClientJobRequest,
+    TriggerMcpClientJobResponse
+  };
 
 export const aiInteractionApi = createApi({
     reducerPath: "aiInteractionApi",
@@ -49,10 +57,3 @@ export const {
     useTriggerMcpClientJobMutation,
     useApplySolidAiInteractionMutation,
 } = aiInteractionApi;
-
-export type {
-    ApplySolidAiInteractionRequest,
-    ApplySolidAiInteractionResponse,
-    TriggerMcpClientJobRequest,
-    TriggerMcpClientJobResponse
-  };

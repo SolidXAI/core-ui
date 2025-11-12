@@ -86,13 +86,13 @@ const authProviders: NextAuthOptions = {
                             if (loginResponse.status == 401) {
                                 throw new Error(loginResponse.data.message);
                             }
-
-                            let base64decoded = jwtDecode(loginResponse.data.data.accessToken);
+                            
+                            let base64decoded = jwtDecode(accessToken);
                             // let accessTokenExpires = base64decoded.exp;
                             let accessTokenExpires = base64decoded.exp && base64decoded.exp * 1000;
 
                             return {
-                                accessToken: loginResponse.data.data.accessToken,
+                                accessToken: accessToken,
                                 refreshToken: loginResponse.data.data.refreshToken,
                                 accessTokenExpires: accessTokenExpires,
                                 ...loginResponse.data.data,
@@ -179,7 +179,7 @@ const authProviders: NextAuthOptions = {
     callbacks: {
         // @ts-ignore
         jwt: async ({ token, user }) => {
-            console.log("JWT callback called");
+            // console.log("JWT callback called");
             const bufferTime = 60000;
             if (Date.now() >= (token.accessTokenExpires as number - bufferTime)) {
                 // Call the refresh token function
@@ -205,7 +205,7 @@ const authProviders: NextAuthOptions = {
         },
         // @ts-ignore
         session: async ({ session, token }) => {
-            console.log("Session callback called");
+            // console.log("Session callback called");
 
             const user = token.user || {};  // Default to an empty object if user is undefined or null
             session.error = token.error ? token.error : null;

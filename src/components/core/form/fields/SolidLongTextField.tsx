@@ -139,7 +139,7 @@ export const DefaultLongTextFormEditWidget = ({ formik, fieldContext }: SolidFor
 
     return (
         <div className="relative">
-            <div className="flex flex-column gap-2 mt-4">
+            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
@@ -152,7 +152,8 @@ export const DefaultLongTextFormEditWidget = ({ formik, fieldContext }: SolidFor
                     disabled={formDisabled || fieldDisabled}
                     id={fieldLayoutInfo.attrs.name}
                     aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                    onChange={formik.handleChange}
+                    // onChange={formik.handleChange}
+                    onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
                     value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                     rows={5}
                     cols={30}
@@ -528,3 +529,92 @@ export const CodeEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFiel
         </div>
     );
 };
+
+export const DynamicSelectionStaticEditWidget = ({
+    formik,
+    fieldContext,
+}: SolidFormFieldWidgetProps) => {
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldJsonSchema = fieldLayoutInfo.attrs.jsonSchema;
+    const name = fieldLayoutInfo.attrs.name;
+    const readOnly = fieldLayoutInfo.attrs?.readonly || fieldContext.readOnly;
+    const disabled = fieldLayoutInfo.attrs?.disabled;
+
+    const value = formik.values[name] || "{}";
+    const [data, setData] = useState(JSON.parse(value || "{}"));
+
+    const handleChange = (key: string, value: any) => {
+        const updated = { ...data, [key]: value };
+        setData(updated);
+        formik.setFieldValue(name, JSON.stringify(updated));
+    };
+
+    const renderInput = (key: string) => {
+        const meta: any = fieldJsonSchema[key];
+        const val = data[key];
+
+        if (meta?.type === "selectionStatic") {
+            return (
+                <Dropdown
+                    value={val}
+                    options={meta.allowedValues.map((v:any) => ({
+                        label: v,
+                        value: v,
+                    }))}
+                    onChange={(e) => handleChange(key, e.value)}
+                    placeholder={meta.placeHolder || "Select..."}
+                    disabled={!!disabled}
+                    readOnly={!!readOnly}
+                    className="w-full"
+                />
+            );
+        }
+
+        return null;
+    };
+    const shouldShowField = (key: string) => {
+        const meta = fieldJsonSchema[key];
+
+        if (!meta?.visibility) return true; // default show
+
+        if (meta.visibility === "parent") {
+            const parentKey = Object.keys(fieldJsonSchema)[0]; // assume first field is parent
+            return !!data[parentKey]; // show only if parent has value
+        }
+
+        return true;
+    };
+
+    return (
+      <div className="flex gap-3 align-items-center">
+        {Object.keys(fieldJsonSchema).map((key) => {
+          const meta: any = fieldJsonSchema[key];
+           if (!shouldShowField(key)) return null;
+          return (
+            <div key={key} className={"flex flex-column gap-2 " + (meta.className || '')}>
+              {/*load prime header icon and headerText */}
+              {(meta.headerText || meta.headerIcon) && (
+                <div className="flex align-items-center gap-2">
+                  {meta.headerIcon && <i className={meta.headerIcon}></i>}
+                  <span className="font-semibold form-field-label font-medium">
+                    {meta.headerText ?? key}
+                  </span>
+                </div>
+              )}
+              {/* Notes below input */}
+                {meta.noteText && (
+                    <small className="text-secondary mt-2">{meta.noteText}</small>
+                )}
+              {/*load note here */}
+              <label className="form-field-label font-medium">{key.charAt(0).toUpperCase() + key.slice(1)} {meta.required && <span className="text-red-500">*</span>}</label>
+              <div className="w-full mt-1 flex flex-row gap-2">
+              {renderInput(key)}
+              </div>
+            </div>
+          );
+        })}
+      </div>
+    );
+};
+
+

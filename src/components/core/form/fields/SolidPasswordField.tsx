@@ -192,7 +192,7 @@ export const DefaultPasswordFormCreateWidget = ({ formik, fieldContext }: SolidF
     return (
         <div className="relative ">
             <div className="password-field-component">
-                <div className="flex flex-column gap-2 mt-4">
+                <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                     {showFieldLabel != false &&
                         <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
                             {fieldLabel}
@@ -216,7 +216,7 @@ export const DefaultPasswordFormCreateWidget = ({ formik, fieldContext }: SolidF
                     <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 )}
 
-                <div className="flex flex-column gap-2 mt-4">
+                <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                     <label htmlFor={`${fieldLayoutInfo.attrs.name}Confirm`} className="form-field-label">
                         Confirm {fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}

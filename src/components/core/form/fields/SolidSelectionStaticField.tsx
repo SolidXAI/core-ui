@@ -212,7 +212,7 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
 
     return (
         <div className="relative">
-            <div className="flex flex-column gap-2 mt-4">
+            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label font-medium">{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
@@ -293,7 +293,7 @@ export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }
     return (
         <div className={className}>
             <div className="relative">
-                <div className="flex flex-column gap-2 mt-4">
+                <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                     {showFieldLabel !== false && (
                         <label htmlFor={fieldName} className="form-field-label font-medium">
                             {fieldLabel}
@@ -312,9 +312,13 @@ export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }
                                     checked={formik.values[fieldName]?.value === option.value}
                                     // onChange={(e) => formik.setFieldValue(fieldName, e.value)} 
                                     // onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-                                    onChange={(e) =>
-                                        formik.setFieldValue(fieldName, { label: option.label, value: option.value })
-                                    }
+                                    // onChange={(e) =>
+                                    //     formik.setFieldValue(fieldName, { label: option.label, value: option.value })
+                                    // }
+                                    onChange={(e) => {
+                                        formik.setFieldValue(fieldName, { label: option.label, value: option.value });
+                                        fieldContext.onChange(e, 'onFieldChange');
+                                      }}
                                     disabled={formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled}
                                     className="mr-2"
                                 />
@@ -384,7 +388,7 @@ export const SolidSelectionStaticSelectButtonFormEditWidget = ({ formik, fieldCo
     return (
         <div className={className}>
             <div className="relative">
-                <div className="flex flex-column gap-2 mt-4">
+                <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                     {showFieldLabel !== false && (
                         <label htmlFor={fieldName} className="form-field-label font-medium">
                             {fieldLabel}

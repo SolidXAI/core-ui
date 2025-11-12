@@ -7,6 +7,7 @@ import styles from './SolidXAI.module.css'
 import { useEffect, useRef, useState } from 'react'
 import { createSolidEntityApi } from '@/redux/api/solidEntityApi'
 import { AiInteraction } from '@/types/solid-core'
+import moment from "moment";
 
 type SolidXAIThreadWrapperProps = {
     threadId: string;
@@ -30,7 +31,7 @@ export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking 
     const [offset, setOffset] = useState(0);
     const [hasMore, setHasMore] = useState(true);
     const [isPaginating, setIsPaginating] = useState(false);
-    const limit = 100;
+    const limit = 10;
 
     // Trigger a call to fetch all aiInteractions. 
     useEffect(() => {
@@ -151,17 +152,36 @@ export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking 
             ref={containerRef}
             className={`px-3 pt-3 flex flex-column gap-3 overflow-y-auto overflow-x-hidden ${styles.SolidXAIThreadWrapper}`}
         >
-            {interactions.map((interaction) => {
-                const { role } = interaction;
+            {isPaginating && (
+                <div className="text-center py-2 text-sm text-gray-500">
+                    Loading older messages…
+                </div>
+            )}
+            {interactions.map((interaction, index) => {
+                const { role, createdAt } = interaction;
+                const prev = interactions[index - 1];
 
-                switch (role) {
-                    case 'human':
-                        return <SolidXUserPrompt key={interaction.id} interaction={interaction} />;
-                    case 'gen-ai':
-                        return <SolidXAIResponse key={interaction.id} interaction={interaction} />;
-                    default:
-                        return null;
-                }
+                const showDateSeparator =
+                    !prev || !moment(prev.createdAt).isSame(createdAt, 'day');
+
+                const timestamp = moment(createdAt).format('HH:mm');
+
+                return (
+                    <div key={interaction.id} className="relative">
+                        {showDateSeparator && (
+                            <div className="text-center my-2 text-black-400 text-sm">
+                                {moment(createdAt).format('ddd, MMM D')}
+                            </div>
+                        )}
+
+                        {role === 'human' && (
+                                <SolidXUserPrompt interaction={interaction} />
+                        )}
+                        {role === 'gen-ai' && (
+                                <SolidXAIResponse interaction={interaction} />
+                        )}
+                    </div>
+                );
             })}
 
             {thinking && <SolidXAIThinking />}

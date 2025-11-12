@@ -211,4 +211,5 @@ export interface AiInteraction {
     responseTimeMs?: number;
     metadata?: string;
     isApplied ?: boolean;
+    createdAt? :Date
 }
