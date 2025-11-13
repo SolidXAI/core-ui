@@ -1185,7 +1185,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     length: fieldMetaData ? fieldMetaData?.length : null,
     defaultValue: fieldMetaData ? fieldMetaData?.defaultValue : null,
     regexPattern: fieldMetaData ? fieldMetaData?.regexPattern : null,
-    regexPatternNotMatchingErrorMsg: fieldMetaData ? fieldMetaData?.regexPatternNotMatchingErrorMsg : "",
+    regexPatternNotMatchingErrorMsg: fieldMetaData ? fieldMetaData?.regexPatternNotMatchingErrorMsg : "Invalid regex pattern",
     required: fieldMetaData ? fieldMetaData?.required : false,
     unique: fieldMetaData ? fieldMetaData?.unique : false,
     encrypt: fieldMetaData ? fieldMetaData?.encrypt : false,
