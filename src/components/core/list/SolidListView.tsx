@@ -555,6 +555,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onListLoad;
         let DynamicFunctionComponent = null;
         let listViewRecords = listViewData;
+        let listLayout = listViewData;
 
         const event: SolidLoadList = {
           fieldsMetadata: solidListViewMetaData?.data?.solidFieldsMetadata,
@@ -573,9 +574,15 @@ export const SolidListView = (params: SolidListViewParams) => {
             if (updatedListData && updatedListData?.dataChanged && updatedListData?.newListData) {
               listViewRecords = updatedListData.newListData;
             }
+            if (updatedListData && updatedListData?.layoutChanged && updatedListData?.newLayout) {
+              listLayout = updatedListData.newLayout;
+            }
           }
           if (listViewRecords) {
             setListViewData(listViewRecords);
+          }
+          if (listLayout) {
+            setSolidListViewLayout(listViewRecords);
           }
         }
       };
