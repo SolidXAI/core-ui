@@ -582,7 +582,7 @@ export const SolidListView = (params: SolidListViewParams) => {
             setListViewData(listViewRecords);
           }
           if (listLayout) {
-            setSolidListViewLayout(listViewRecords);
+            setSolidListViewLayout(listLayout);
           }
         }
       };
