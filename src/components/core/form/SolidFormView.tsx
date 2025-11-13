@@ -940,8 +940,62 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
         };
 
-        handleDynamicFunction();
+        const handleOnFormLoad = async () => {
+            const onFormLoadHandler = solidFormViewMetaData?.data?.solidView?.layout?.onFormLoad;
+            let DynamicFunctionComponent = null;
+            let formLayout = solidFormViewMetaData;
+            let customLayout = params?.customLayout;
+            let formViewData = solidFormViewData?.data;
+
+            const event: SolidLoadForm = {
+                parentData: params?.parentData,
+                fieldsMetadata: solidFormViewMetaData,
+                formData: solidFormViewData?.data,
+                type: 'onFormLoad',
+                viewMetadata: solidFormViewMetaData?.data?.solidView,
+                formViewLayout: formViewLayout
+            };
+
+            if (onFormLoadHandler) {
+                DynamicFunctionComponent = getExtensionFunction(onFormLoadHandler);
+                if (DynamicFunctionComponent) {
+                    try {
+                        const result = await DynamicFunctionComponent(event);
+                        if (result && result?.layoutChanged && result?.newLayout) {
+                            const newFormLayout = {
+                                ...formLayout,
+                                data: {
+                                    ...formLayout.data,
+                                    solidView: {
+                                        ...formLayout.data.solidView,
+                                        layout: result.newLayout
+                                    }
+                                }
+                            };
+                            formLayout = newFormLayout;
+                            customLayout = result.newLayout;
+                            setFormViewMetaData(formLayout);
+
+                            if (params.customLayout) {
+                                setFormViewLayout(customLayout);
+                            } else {
+                                setFormViewLayout(formLayout.data.solidView.layout);
+                            }
+                        }
+                        if (result && result?.dataChanged && result?.newFormData) {
+                            formViewData = result.newFormData;
+                            setInitialEntityData(formViewData);
+                        }
+                    } catch (error) {
+                        console.error('Error in onFormLoad handler:', error);
+                    }
+                }
+            }
+        };
+
         handleDynamicLayout();
+        handleDynamicFunction();
+        handleOnFormLoad();
     }, [solidFormViewMetaData, solidFormViewData]);
 
     useEffect(() => {
