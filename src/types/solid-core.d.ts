@@ -91,7 +91,7 @@ export type LayoutNode = {
 };
 
 // Event type
-export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender" | "onFormDataLoad" | "onFormLayoutLoad";
+export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender" | "onFormDataLoad" | "onFormLayoutLoad" | "onFormLoad";
 export type SolidUiEvent = {
     type: SolidUiEvents;
     modifiedField?: string;
