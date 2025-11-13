@@ -52,34 +52,6 @@ const SolidXSchemaPatchDisplay = ({
 const SolidXPlanDisplay = ({ plan }: any) => {
     return (
         <div>
-            {/* Provider Info */}
-            {/* <div className="mb-4 p-3 border rounded-lg bg-gray-50">
-                <p className="text-sm font-medium mb-1">Provider:</p>
-                <div className="text-xs text-gray-700 space-y-1">
-                    <p>Name: {provider.name}</p>
-                    <p>Type: {provider.type}</p>
-                    <p>Trigger Model: {provider.triggerModelSingularName}</p>
-                    <p>Target Model: {provider.targetModelSingularName}</p>
-                    {provider.triggerOperations && (
-                        <p>Trigger Ops: {provider.triggerOperations.join(", ")}</p>
-                    )}
-                    {provider.targetFieldName && <p>Target Field: {provider.targetFieldName}</p>}
-
-                    {provider.contextSchema && (
-                        <div className="mt-2 border rounded p-2 bg-gray-100">
-                            <p className="text-xs font-medium mb-1">Context Schema:</p>
-                            <CodeMirror
-                                value={JSON.stringify(provider.contextSchema, null, 2)}
-                                style={{ fontSize: "10px" }}
-                                theme={oneDark}
-                                readOnly
-                                extensions={[javascript(), EditorView.lineWrapping]}
-                            />
-                        </div>
-                    )}
-                </div>
-            </div> */}
-
             {/* Plan Steps */}
             <div className="space-y-3">
                 {plan.map((step: any, idx: any) => (
@@ -87,13 +59,6 @@ const SolidXPlanDisplay = ({ plan }: any) => {
                         <p className="text-lg mb-1 font-semibold">
                             Step {idx + 1}: {step.type}
                         </p>
-
-                        {/* {step.path && <p className="text-gray-600 mb-1">Path: {step.path}</p>} */}
-                        {/* {step.modulePath && <p className="text-gray-600 mb-1">Module Path: {step.modulePath}</p>} */}
-                        {/* {step.providerClassName && <p className="text-gray-600 mb-1">Provider Class: {step.providerClassName}</p>} */}
-                        {/* {step.importFrom && <p className="text-gray-600 mb-1">Import From: {step.importFrom}</p>} */}
-                        {/* {step.registerIn && <p className="text-gray-600 mb-1">Register In: {step.registerIn.join(", ")}</p>} */}
-                        {/* {step.uniqueGuard !== undefined && <p className="text-gray-600 mb-1">Unique Guard: {step.uniqueGuard ? "true" : "false"}</p>} */}
                         {step.rationale && <p className="text-gray-500 mb-2">{step.rationale}</p>}
 
                         {step.content && (
@@ -294,34 +259,65 @@ export const SolidXAiJsonDisplay: React.FC<SolidXAiJsonDisplayProps> = ({ intera
     }, [isCodeGenerationPostProcessSuccess, isCodeGenerationPostProcessError]);
     // TODO: END REFACTORING - reusable code alert
 
-    let formattedCode = '';
     let formattedGeneratedStatus = '';
     let parsed: any = {}
     try {
         parsed = JSON.parse(interaction.message)
-        formattedCode = parsed.response ? JSON.stringify(parsed.response, null, 2) : '';
         formattedGeneratedStatus = parsed.generation_status;
 
     } catch (e) {
-        formattedCode = 'Invalid JSON'
+
     }
 
     const renderDataComponent = () => {
-        if (!parsed.data) return <p>No data found</p>;
-        if (parsed?.data?.schemaPatch) return <SolidXSchemaPatchDisplay schemaPatch={parsed.data.schemaPatch} />;
-        if (parsed?.data?.plan) return <SolidXPlanDisplay plan={parsed.data.plan} />;
-        if (parsed?.data?.schema) return <SolidXSchemaDisplay schema={parsed.data.schema} />;
+        if (!parsed?.data) return <p>No data found</p>;
+
+        const safeRender = (data: any, Component: any, label: string) => {
+            try {
+                // Validate JSON serializability
+                JSON.stringify(data);
+                return <Component {...{ [label]: data }} />;
+            } catch (e) {
+                return (
+                    <div className="p-2 text-red-600 text-sm bg-red-50 border border-red-200 rounded">
+                        Invalid JSON structure in {label}
+                    </div>
+                );
+            }
+        };
+
+        if (parsed?.data?.schemaPatch)
+            return safeRender(parsed.data.schemaPatch, SolidXSchemaPatchDisplay, 'schemaPatch');
+        if (parsed?.data?.plan)
+            return <SolidXPlanDisplay plan={parsed.data.plan} />;
+        if (parsed?.data?.schema)
+            return safeRender(parsed.data.schema, SolidXSchemaDisplay, 'schema');
+
         return <p>Unrecognized data structure</p>;
     };
 
 
     const renderDataForCodeMirror = () => {
-        if (!parsed.data) return '';
-        if (parsed?.data?.schemaPatch) return parsed.data.schemaPatch;
-        if (parsed?.data?.plan) return parsed.data.plan;
-        if (parsed?.data?.schema) return parsed.data.schema;
+        if (!parsed?.data) return '';
+
+        const safeStringify = (data: any): string => {
+            try {
+                return JSON.stringify(data, null, 2);
+            } catch (e) {
+                return 'Invalid JSON';
+            }
+        };
+
+        if (parsed?.data?.schemaPatch)
+            return safeStringify(parsed.data.schemaPatch);
+        if (parsed?.data?.plan)
+            return safeStringify(parsed.data.plan);
+        if (parsed?.data?.schema)
+            return safeStringify(parsed.data.schema);
+
         return 'Unrecognized data structure';
     };
+
 
 
     return (
