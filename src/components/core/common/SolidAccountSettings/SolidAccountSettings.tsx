@@ -1,13 +1,19 @@
 "use client"
 
 import { Dialog } from "primereact/dialog";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SolidPersonalInfo } from "./SolidPersonalInfo";
 import { SolidNotifications } from "./SolidNotifications";
 import { SolidChangePassword } from "./SolidChangePassword";
 import styles from './SolidAccountSettings.module.css'
+import { useLazyGetSolidSettingsQuery } from "@/redux/api/solidSettingsApi";
 export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfileSettingsDialog }: any) => {
     const [setting, setSetting] = useState({ key: "personal_info", label: "Persnoal Info" });
+
+    const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
+    useEffect(() => {
+        trigger("") // Fetch settings on mount
+    }, [])
     const settings = [
         {
             label: "Persnoal Info",
@@ -26,18 +32,16 @@ export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfile
         },
     ]
 
-    const renderSettingComponent = () => {
+    const renderSettingComponent = useMemo(() => {
         switch (setting.key) {
             case "personal_info":
                 return <SolidPersonalInfo />;
-            // case "notifications":
-            //     return <SolidNotifications />;
             case "change_password":
-                return <SolidChangePassword />;
+                return <SolidChangePassword solidSettingsData={solidSettingsData} />;
             default:
                 return null;
         }
-    };
+    }, [setting.key, solidSettingsData]);
 
     return (
         <Dialog
@@ -67,7 +71,7 @@ export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfile
                     </div>
                 </div>
                 <div className={`col-9 py-3 px-4 ${styles.SolidAccountSettingFormWrapper}`}>
-                    {renderSettingComponent()}
+                    {renderSettingComponent}
                     {/* <div className="p-3 secondary-border-bottom">
                         <h5 className="m-0"></h5>
                     </div>
