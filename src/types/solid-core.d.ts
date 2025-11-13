@@ -97,7 +97,7 @@ export type ListLayoutType = {
 };
 
 // Event type
-export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender" | "onFormDataLoad" | "onFormLayoutLoad" | "onListLoad" | "afterLogin" | "beforeLogout";
+export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender" | "onFormDataLoad" | "onFormLayoutLoad" | "onFormLoad" | "onListLoad" | "afterLogin" | "beforeLogout";
 export type SolidUiEvent = {
     type: SolidUiEvents;
     modifiedField?: string;
