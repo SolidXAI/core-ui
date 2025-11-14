@@ -15,7 +15,7 @@ import { Checkbox } from "primereact/checkbox";
 import { Panel } from "primereact/panel";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 import qs from 'qs';
-import Handlebars from 'handlebars';
+import Handlebars from "handlebars/dist/handlebars";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 

@@ -54,6 +54,8 @@ import { useSelector } from "react-redux";
 import styles from "./SolidListViewWrapper.module.css";
 import { SolidXAIModule } from "../solid-ai/SolidXAIModule";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
+import { SolidLoadList } from "@/types/solid-core";
+import { getExtensionFunction } from "@/helpers/registry";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
 // import { ERROR_MESSAGES } from "@/constants/error-messages";
 
@@ -218,10 +220,11 @@ export const SolidListView = (params: SolidListViewParams) => {
       encodeValuesOnly: true,
     }
   );
-  const [listViewMetaData, setListViewMetaData] = useState({});
+
+  const [solidListViewMetaData, setSolidListViewMetaData] = useState({});
   const [solidListViewLayout, setSolidListViewLayout] = useState({});
   const {
-    data: solidListViewMetaData,
+    data: solidListViewInitialMetaData,
     error: solidListViewMetaDataError,
     isLoading: solidListViewMetaDataIsLoading,
     isError: solidListViewMetaDataIsError,
@@ -320,16 +323,16 @@ export const SolidListView = (params: SolidListViewParams) => {
   useEffect(() => {
     console.log("useEffect: [solidListViewMetaData] line no 227");
     // refetch();
-    if (solidListViewMetaData) {
+    if (solidListViewInitialMetaData) {
       if (params.customLayout) {
         setSolidListViewLayout(params.customLayout);
       } else {
-        setSolidListViewLayout(solidListViewMetaData?.data.solidView.layout);
+        setSolidListViewLayout(solidListViewInitialMetaData?.data.solidView.layout);
       }
-      setListViewMetaData(solidListViewMetaData);
+      setSolidListViewMetaData(solidListViewInitialMetaData);
       // initialFilterMethod()
     }
-  }, [solidListViewMetaData]);
+  }, [solidListViewInitialMetaData]);
 
   // set layout and actions for create and edit buttons and view modes
   useEffect(() => {
@@ -546,6 +549,50 @@ export const SolidListView = (params: SolidListViewParams) => {
     solidListViewMetaData,
   ]);
 
+
+  useEffect(() => {
+    if (solidListViewMetaData?.data && !loading) {
+      const handleDynamicFunction = async () => {
+        const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onListLoad;
+        let DynamicFunctionComponent = null;
+        let listViewRecords = listViewData;
+        let listLayout = listViewData;
+
+        const event: SolidLoadList = {
+          fieldsMetadata: solidListViewMetaData?.data?.solidFieldsMetadata,
+          listData: listViewData,
+          totalRecords: totalRecords,
+          type: "onListLoad",
+          viewMetadata: solidListViewMetaData?.data?.solidView,
+          listViewLayout: solidListViewLayout
+        };
+
+        if (dynamicHeader) {
+          DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
+          if (DynamicFunctionComponent) {
+            const updatedListData = await DynamicFunctionComponent(event);
+
+            if (updatedListData && updatedListData?.dataChanged && updatedListData?.newListData) {
+              listViewRecords = updatedListData.newListData;
+            }
+            if (updatedListData && updatedListData?.layoutChanged && updatedListData?.newLayout) {
+              listLayout = updatedListData.newLayout;
+            }
+          }
+          if (listViewRecords) {
+            setListViewData(listViewRecords);
+          }
+          if (listLayout) {
+            setSolidListViewLayout(listLayout);
+          }
+        }
+      };
+      handleDynamicFunction();
+    }
+  }, [solidListViewMetaData, listViewData]);
+
+
+
   useEffect(() => {
     console.log(
       "useEffect: [first, rows, sortField, sortOrder, showArchived, toPopulate, toPopulateMedia, customFilter, queryDataLoaded]"
@@ -698,8 +745,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         sortField = `${sortField}.${sortFieldMetadata?.relationModel?.userKeyField?.name}`;
       }
       queryData.sort = [
-        `${sortField}:${
-          sortOrder == 0 ? null : sortOrder == 1 ? "asc" : "desc"
+        `${sortField}:${sortOrder == 0 ? null : sortOrder == 1 ? "asc" : "desc"
         }`,
       ];
     } else {
@@ -828,7 +874,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (errorMessages.length > 0) {
       toast?.current?.show({
         severity: "error",
-        summary: "Can you send me the report?",
+        summary: ERROR_MESSAGES.SEND_REPORT,
         // sticky: true,
         life: 3000,
         //@ts-ignore
@@ -1157,7 +1203,7 @@ export const SolidListView = (params: SolidListViewParams) => {
             {params.embeded === false &&
               solidListViewLayout?.attrs?.configureView !== false && (
                 <SolidListViewConfigure
-                  listViewMetaData={listViewMetaData}
+                  listViewMetaData={solidListViewMetaData}
                   solidListViewLayout={solidListViewLayout}
                   setShowArchived={setShowArchived}
                   showArchived={showArchived}
@@ -1260,7 +1306,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                   headerStyle={{ width: "3em" }}
                 />
               )}
-              {renderColumnsDynamically(listViewMetaData)}
+              {renderColumnsDynamically(solidListViewMetaData)}
               {solidListViewLayout?.attrs?.rowButtons &&
                 solidListViewLayout?.attrs?.rowButtons
                   .filter((rb: any) => {
@@ -1292,10 +1338,9 @@ export const SolidListView = (params: SolidListViewParams) => {
                                   ? button?.attrs?.icon
                                   : "pi pi-pencil"
                               }
-                              className={`w-full text-left gap-2 ${
-                                button?.attrs?.className
-                                  ? button?.attrs?.className
-                                  : ""
+                              className={`w-full text-left gap-2 ${button?.attrs?.className
+                                ? button?.attrs?.className
+                                : ""
                                 }`}
                               label={
                                 button.attrs.showLabel !== false
@@ -1465,21 +1510,21 @@ export const SolidListView = (params: SolidListViewParams) => {
                                         (rb) =>
                                           rb.attrs.actionInContextMenu === true
                                       )
-                                      .map((button: any, index: number) =>(
-                                          <SolidListViewRowButtonContextMenu
-                                            key={`${index}-${selectedDataRef.current?.id || ''}`}
-                                            button={button}
-                                            params={params}
-                                            getSelectedSolidViewData={() => selectedDataRef.current}
-                                            // selectedSolidViewData={selectedSolidViewData}
-                                            solidListViewMetaData={
-                                              solidListViewMetaData
-                                            }
-                                            handleCustomButtonClick={
-                                              handleCustomButtonClick
-                                            }
-                                          />
-                                        ))}
+                                      .map((button: any, index: number) => (
+                                        <SolidListViewRowButtonContextMenu
+                                          key={`${index}-${selectedDataRef.current?.id || ''}`}
+                                          button={button}
+                                          params={params}
+                                          getSelectedSolidViewData={() => selectedDataRef.current}
+                                          // selectedSolidViewData={selectedSolidViewData}
+                                          solidListViewMetaData={
+                                            solidListViewMetaData
+                                          }
+                                          handleCustomButtonClick={
+                                            handleCustomButtonClick
+                                          }
+                                        />
+                                      ))}
                                   </div>
                                 </OverlayPanel>
                               </>
@@ -1496,8 +1541,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       {process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === "true" &&
         params.embeded !== true && (
           <div
-            className={`chatter-section ${
-              isOpenSolidXAiPanel === false ? "collapsed" : ""
+            className={`chatter-section ${isOpenSolidXAiPanel === false ? "collapsed" : ""
               }`}
             style={{ width: chatterWidth }}
           >
@@ -1605,10 +1649,9 @@ export const SolidListView = (params: SolidListViewParams) => {
         </Dialog>
       )}
       <Dialog
-        header={`Delete ${
-          solidListViewMetaData?.data?.solidView?.model?.displayName
-            ? solidListViewMetaData?.data?.solidView?.model?.displayName
-            : params?.modelName
+        header={`Delete ${solidListViewMetaData?.data?.solidView?.model?.displayName
+          ? solidListViewMetaData?.data?.solidView?.model?.displayName
+          : params?.modelName
           }`}
         headerClassName="py-2"
         contentClassName="px-0 pb-0"
@@ -1622,10 +1665,9 @@ export const SolidListView = (params: SolidListViewParams) => {
         <Divider className="m-0" />
         <div className="p-4">
           <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
-            {`Are you sure you want to delete this ${
-              solidListViewMetaData?.data?.solidView?.model?.displayName
-                ? solidListViewMetaData?.data?.solidView?.model?.displayName
-                : params?.modelName
+            {`Are you sure you want to delete this ${solidListViewMetaData?.data?.solidView?.model?.displayName
+              ? solidListViewMetaData?.data?.solidView?.model?.displayName
+              : params?.modelName
               }?`}
           </p>
           {/* <p className="" style={{ color: 'var{--solid-grey-500}' }}>{selectedSolidViewData?.singularName}</p> */}

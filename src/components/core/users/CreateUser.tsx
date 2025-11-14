@@ -94,17 +94,17 @@ const CreateUser = ({ data, params }: any) => {
   const validationSchema = Yup.object({
     fullName: Yup.string().required(),
     username: Yup.string()
-      .required('Username is required.') // Must be provided
-      .min(3, 'Username must be at least 3 characters long.') // Minimum length
-      .max(20, 'Username cannot be longer than 20 characters.') // Maximum length
-      .matches(
-        /^[a-zA-Z0-9_.-]*$/,
-        'Username can only contain letters, numbers, underscores, periods, and hyphens.'
-      ) // Allowed characters
-      .matches(
-        /^[a-zA-Z]/,
-        'Username must start with a letter.'
-      ),
+      .required('Username is required.'), // Must be provided
+      // .min(3, 'Username must be at least 3 characters long.') // Minimum length
+      // .max(20, 'Username cannot be longer than 20 characters.') // Maximum length
+      // .matches(
+      //   /^[a-zA-Z0-9_.-]*$/,
+      //   'Username can only contain letters, numbers, underscores, periods, and hyphens.'
+      // ) // Allowed characters
+      // .matches(
+      //   /^[a-zA-Z]/,
+      //   'Username must start with a letter.'
+      // ),
     email: Yup
       .string()
       .email("Invalid email address")

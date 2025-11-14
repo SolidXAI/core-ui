@@ -370,6 +370,7 @@ export type {
     LayoutNodeType,
     SolidUiEvents,
     SolidUiEvent,
+    SolidListUiEvent,
     SolidFormWidgetProps,
     SolidChartRendererProps
 } from '@/types';

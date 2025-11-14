@@ -107,6 +107,9 @@ export const ERROR_MESSAGES = {
   FETCHING_USER: 'Error fetching users:',
   FETCHING_ITEMS: 'Error fetching items',
   LOAD_MORE_DATA: 'Failed to load more data:',
+  NETWORK_ERROR : 'Network error occurred. Please try again.',
+  NETWORK_OR_SERVER_ERROR : 'Network or server error occurred.',
+  DELETE_ERROR : 'Delete error',
 
   /* ----------------------------- IMPORT / EXPORT ----------------------------- */
   IMPORT_ERROR: 'Import Error',
