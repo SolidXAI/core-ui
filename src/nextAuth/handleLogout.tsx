@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 import axios, { AxiosError } from 'axios';
 import { getSession, signOut } from 'next-auth/react';
 
@@ -18,7 +19,7 @@ export async function handleLogout({ toast }: any) {
         } else {
             toast?.current?.show({
                 severity: 'error',
-                summary: 'Logout Failed',
+                summary: ERROR_MESSAGES.LOGOUT_FAILED,
                 detail: `${response?.data?.data?.status}`,
                 life: 3000,
             });
@@ -26,11 +27,11 @@ export async function handleLogout({ toast }: any) {
     } catch (error) {
         const err = error as any;
         const message =
-            err.response?.data?.data?.message || err.message || 'Logout failed';
+            err.response?.data?.data?.message || err.message || ERROR_MESSAGES.LOGOUT_FAILED;
 
         toast?.current?.show({
             severity: 'error',
-            summary: 'Logout Failed',
+            summary: ERROR_MESSAGES.LOGOUT_FAILED,
             detail: message,
             life: 3000,
         });

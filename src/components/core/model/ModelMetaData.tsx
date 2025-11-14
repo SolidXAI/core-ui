@@ -1,5 +1,6 @@
 'use client';
 import { SingleSelectAutoCompleteField } from "@/components/common/SingleSelectAutoCompleteField";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { getSingularAndPlural } from "@/helpers/helpers";
 import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
 import { useLazyGetModelsQuery } from "@/redux/api/modelApi";
@@ -168,7 +169,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
         nextTab()
 
       } catch (err) {
-        console.error("Failed to create Model:", err);
+        console.error(ERROR_MESSAGES.CREATE_MODEL, err);
       }
     },
   });
@@ -185,7 +186,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     if (errorMessages.length > 0) {
       toast?.current?.show({
         severity: "error",
-        summary: "Can you send me the report?",
+        summary: ERROR_MESSAGES.SEND_REPORT,
         // sticky: true,
         life: 3000,
         //@ts-ignore
@@ -283,7 +284,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
       const transformedData = filterredData.map((e: any) => ({ label: e.name, value: e.name, type: e.type }));
       return transformedData
     } catch (error) {
-      console.error("Error fetching items:", error);
+      console.error(ERROR_MESSAGES.FETCHING_ITEMS, error);
       return []
     }
   };
@@ -297,7 +298,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
       const transformedData = filterredData.map((e: any) => ({ label: e.type, value: e.type }))
       return transformedData;
     } catch (error) {
-      console.error("Error fetching items:", error);
+      console.error(ERROR_MESSAGES.FETCHING_ITEMS, error);
       return [];
 
     }

@@ -1,11 +1,11 @@
 "use client"
 
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 import { getSession } from 'next-auth/react';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Divider } from 'primereact/divider';
 import { useState } from 'react';
-
 export const SolidImportTransactionStatus = ({ importStatusResult, transactionId, setOpenImportDialog, handleFetchUpdatedRecords }: any) => {
 
   const [showPartialDialog, setShowPartialDialog] = useState(false);
@@ -15,7 +15,7 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
       const session: any = await getSession();
       const token = session?.user?.accessToken || "";
       if (!token) {
-        throw new Error('No auth token found');
+        throw new Error(ERROR_MESSAGES.NO_AUTH_TOKEN_FOUND);
       }
       const response = await fetch(
         `${process.env.API_URL}/api/import-transaction/${transactionId}/export-failed-import-records`,
@@ -27,7 +27,7 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
         }
       );
 
-      if (!response.ok) throw new Error('Failed to download');
+      if (!response.ok) throw new Error(ERROR_MESSAGES.FAILED_TO_DOWNLOAD);
 
       const blob = await response.blob();
       const url = window.URL.createObjectURL(blob);
@@ -44,7 +44,7 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
       a.remove();
       window.URL.revokeObjectURL(url);
     } catch (error) {
-      console.error("Download failed:", error);
+      console.error(ERROR_MESSAGES.DOWNLOAD_FAILED, error);
     }
   };
 

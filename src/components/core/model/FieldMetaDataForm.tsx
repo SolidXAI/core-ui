@@ -29,6 +29,7 @@ import qs from "qs";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as Yup from "yup";
 import FieldSelector from "./FieldSelector";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
 
@@ -805,7 +806,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
       const suggestionData: any = fieldDefaultMetaData.data.mediaTypes.filter((t: any) => t.label.toLowerCase().startsWith(query.toLowerCase()));
       return suggestionData;
     } catch (error) {
-      console.error("Error fetching items:", error);
+      console.error(ERROR_MESSAGES.FETCHING_ITEMS, error);
       return []
     }
   };
@@ -892,7 +893,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
       const suggestionData: any = _filteredOrmType.filter((t: any) => t.label.toLowerCase().startsWith(query.toLowerCase()));
       return suggestionData
     } catch (error) {
-      console.error("Error fetching items:", error);
+      console.error(ERROR_MESSAGES.FETCHING_ITEMS, error);
       return []
     }
   };
@@ -1042,7 +1043,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
 
       setFilteredComputedFieldValueTypes(_filteredTypes);
     } catch (error) {
-      console.error("Error fetching items:", error);
+      console.error(ERROR_MESSAGES.FETCHING_ITEMS, error);
       setFilteredComputedFieldValueTypes([]);
     }
   };
@@ -1056,7 +1057,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
       const transformedData = filterredData.map((e: any) => ({ label: e.provider, value: e.provider, help: e.help }));
       return transformedData
     } catch (error) {
-      console.error("Error fetching items:", error);
+      console.error(ERROR_MESSAGES.FETCHING_ITEMS, error);
       return []
     }
   };
@@ -1070,7 +1071,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
       const transformedData = filterredData.map((e: any) => ({ label: e.provider, value: e.provider, help: e.help }));
       return transformedData
     } catch (error) {
-      console.error("Error fetching items:", error);
+      console.error(ERROR_MESSAGES.FETCHING_ITEMS, error);
       return []
     }
   };
@@ -1082,7 +1083,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
       const transformedData = filterredData.map((e: any) => ({ label: e.provider, value: e.provider, help: e.help }));
       return transformedData
     } catch (error) {
-      console.error("Error fetching items:", error);
+      console.error(ERROR_MESSAGES.FETCHING_ITEMS, error);
       return []
     }
   };
@@ -1098,7 +1099,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
       setFilteredSelectionEncryptionType(_filteredTypes);
       return _filteredTypes
     } catch (error) {
-      console.error("Error fetching items:", error);
+      console.error(ERROR_MESSAGES.FETCHING_ITEMS, error);
       setFilteredSelectionEncryptionType([]);
       return []
     }
@@ -1113,7 +1114,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
       setFilteredSelectionDecryptWhen(_filteredTypes);
       return _filteredTypes
     } catch (error) {
-      console.error("Error fetching items:", error);
+      console.error(ERROR_MESSAGES.FETCHING_ITEMS, error);
       setFilteredSelectionDecryptWhen([]);
       return []
     }
@@ -1278,7 +1279,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     if (errorMessages.length > 0) {
       toast?.current?.show({
         severity: "error",
-        summary: "Can you send me the report?",
+        summary: ERROR_MESSAGES.SEND_REPORT,
         // sticky: true,
         life: 3000,
         //@ts-ignore

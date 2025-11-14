@@ -1,4 +1,5 @@
 "use client"
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 import { useChangePasswordMutation } from '@/redux/api/authApi';
 import { useFormik } from 'formik';
 import { signOut, useSession } from 'next-auth/react';
@@ -33,7 +34,7 @@ const SolidChangeForcePassword = () => {
             passwordRegex = new RegExp(unescaped);
         }
     } catch (error) {
-        console.error("Invalid password regex in .env:", error);
+        console.error(ERROR_MESSAGES.INVALID_PASSWORD_REGX, error);
     }
 
     const newPasswordValidation = passwordRegex
@@ -74,18 +75,18 @@ const SolidChangeForcePassword = () => {
                 // Call the mutation and handle the response
                 const response = await changePassword(payload).unwrap(); // Await the API call and unwrap to handle errors.
                 if (response?.error) {
-                    showToast("error", "Error", response.error)
+                    showToast("error", ERROR_MESSAGES.ERROR, response.error)
                     setErrors({
-                        currentPassword: "Incorrect Current Password",
-                        newPassword: "Passwords must match",
-                        confirmPassword: "Passwords must match",
+                        currentPassword: ERROR_MESSAGES.INCORRECT_CURRENT,
+                        newPassword: ERROR_MESSAGES.MUST_MATCH,
+                        confirmPassword: ERROR_MESSAGES.MUST_MATCH,
                     })
                 } else {
-                    showToast("success", "Force Password Change Success", "Password Change Successfully");
+                    showToast("success", ERROR_MESSAGES.FORCE_PASSWORD_CHANGE, ERROR_MESSAGES.PASSWORD_CHANGE);
                     signOut({ callbackUrl: "/auth/login" })
                 }
             } catch (err: any) {
-                showToast("error", "Login Failed", err?.data?.message);
+                showToast("error",ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message);
                 // setErrors({
                 //     currentPassword: "Incorrect Current Password",
                 // })

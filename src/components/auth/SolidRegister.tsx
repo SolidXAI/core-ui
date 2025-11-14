@@ -23,6 +23,7 @@ import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "@/helpers/resendOtpHelper";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { SolidPasswordHelperText } from "../core/common/SolidPasswordHelperText";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 interface AuthTabsProps {
     iamPasswordRegistrationEnabled: boolean;
@@ -68,7 +69,7 @@ const SolidRegister = () => {
                 toast.current?.show({
                     severity: "error",
                     summary: "Error",
-                    detail: serializedError.message || "An error occurred",
+                    detail: serializedError.message || ERROR_MESSAGES.ERROR_OCCURED,
                     life: 3000,
                 });
             }
@@ -141,7 +142,7 @@ const SolidRegister = () => {
                     if (showNameFieldsForRegistration) {
                         const fullName = `${values.firstName || ""} ${values.lastName || ""}`.trim();
                         const username = `${values.firstName || ""}${values.lastName || ""}`.trim().toLowerCase();
-                        console.log("fullName, username", fullName, username);
+                        // console.log("fullName, username", fullName, username);
                         userData = {
                             ...userData,
                             fullName,
@@ -162,10 +163,10 @@ const SolidRegister = () => {
                             router.push(`/auth/login`);
                         }, 3000);
                     } else {
-                        showToast("error", "Login Error", response.error);
+                        showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                     }
                 } catch (err: any) {
-                    showToast("error", "Email is already taken, ", err?.data ? err?.data?.message : "Something Went Wrong");
+                    showToast("error", ERROR_MESSAGES.EMAIL_ALREADY_TAKEN, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                 } finally {
                     setSubmitting(false);
                 }
@@ -317,8 +318,8 @@ const SolidRegister = () => {
                                 const formatted = formatTimeLeft(remaining);
                                 showToast(
                                     "error",
-                                    "Please wait",
-                                    `You can request a new OTP in ${formatted} second(s)`
+                                    ERROR_MESSAGES.PLEASE_WAIT,
+                                    ERROR_MESSAGES.OPT_FORMAT(formatted)
                                 );
                                 setSubmitting(false);
                                 return; //  Prevent request
@@ -332,10 +333,10 @@ const SolidRegister = () => {
                             localStorage.setItem(`resendOtpRegister_${email}`, Date.now().toString());
                             router.push(`/auth/initiate-register?email=${email}&username=${values.username}`);
                         } else {
-                            showToast("error", "Login Error", response.error);
+                            showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                         }
                     } catch (err: any) {
-                        showToast("error", "Login Error", err?.data ? err?.data?.message : "Something Went Wrong");
+                        showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                     } finally {
                         setSubmitting(false);
                     }

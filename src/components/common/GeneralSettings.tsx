@@ -23,6 +23,7 @@ import { SettingsImageRemoveButton } from './SolidSettings/SettingsImageRemoveBu
 import { Dropdown } from 'primereact/dropdown';
 import { OpenAiProviderComponent } from './SolidSettings/LlmSettings/OpenAiProviderComponent';
 import { AnthropicProviderComponent } from './SolidSettings/LlmSettings/AnthropicProviderComponent';
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 
 
 export const GeneralSettings = () => {
@@ -147,11 +148,11 @@ export const GeneralSettings = () => {
                 const response = await bulkUpdateSolidSettings({ data: formData }).unwrap();
 
                 if (response.statusCode === 200) {
-                    showToast("success", "Updated", "Settings updated");
+                    showToast("success", ERROR_MESSAGES.UPDATED, ERROR_MESSAGES.SETTING_UPDATED);
                 }
 
             } catch (error) {
-                showToast("error", "Failed", "Something went wrong");
+                showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
             }
         },
     });
@@ -265,8 +266,8 @@ export const GeneralSettings = () => {
                 if (file.size > 2 * 1024 * 1024) {
                     toast.current?.show({
                         severity: "error",
-                        summary: "File too large",
-                        detail: "Maximum file size is 2MB",
+                        summary: ERROR_MESSAGES.FILE_LARGE,
+                        detail: ERROR_MESSAGES.MAX_FILE_SIZE,
                         life: 3000,
                     });
                     return;
@@ -284,8 +285,8 @@ export const GeneralSettings = () => {
             if (file.size > 2 * 1024 * 1024) {
                 toast.current?.show({
                     severity: "error",
-                    summary: "File too large",
-                    detail: "Maximum file size is 2MB",
+                    summary: ERROR_MESSAGES.FILE_LARGE,
+                    detail: ERROR_MESSAGES.MAX_FILE_SIZE,
                     life: 3000,
                 });
                 return;
@@ -301,8 +302,8 @@ export const GeneralSettings = () => {
             if (file.size > 2 * 1024 * 1024) {
                 toast.current?.show({
                     severity: "error",
-                    summary: "File too large",
-                    detail: "Maximum file size is 2MB",
+                    summary: ERROR_MESSAGES.FILE_LARGE,
+                    detail: ERROR_MESSAGES.MAX_FILE_SIZE,
                     life: 3000,
                 });
                 return;

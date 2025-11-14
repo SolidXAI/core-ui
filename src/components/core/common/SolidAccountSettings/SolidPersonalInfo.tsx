@@ -12,7 +12,7 @@ import { Toast } from "primereact/toast";
 import { useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import styles from './SolidAccountSettings.module.css'
-
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 export const SolidPersonalInfo = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -71,10 +71,10 @@ export const SolidPersonalInfo = () => {
                     formik.resetForm();
                     setPreviewImage(null);
                 } else {
-                    showToast("error", "Failed", "Failed to update profile");
+                    showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_UPDATED_PROFILE);
                 }
             } catch (error) {
-                showToast("error", "Error", "Something went wrong");
+                showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
             }
         },
     });
@@ -135,7 +135,7 @@ export const SolidPersonalInfo = () => {
             }
 
         } catch (error) {
-            showToast("error", "Error", "Failed to delete image.");
+            showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_DELETED_IMAGE);
         }
 
         setReplaceDialogVisible(false);
@@ -147,10 +147,10 @@ export const SolidPersonalInfo = () => {
         if (existing?.id) {
             try {
                 await deleteMedia(existing.id).unwrap();
-                showToast("success", "Deleted", "Profile picture removed.");
+                showToast("success", ERROR_MESSAGES.DELETED, ERROR_MESSAGES.PROFILE_PICTURE_REMOVE);
                 refetch();
             } catch {
-                showToast("error", "Error", "Failed to delete image.");
+                showToast("error", ERROR_MESSAGES.ERROR, ERROR_MESSAGES.FAILED_DELETED_IMAGE);
             }
         }
 

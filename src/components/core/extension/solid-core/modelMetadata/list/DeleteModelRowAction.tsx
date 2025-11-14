@@ -11,6 +11,7 @@ import { Column } from "primereact/column";
 import { Checkbox } from "primereact/checkbox";
 import { kebabCase } from "lodash";
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
 const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
@@ -37,7 +38,8 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
         const res :any= await deleteSolidSingleEntiry(event.rowData.id)
         if(!isSolidEntitiesDeleteError && res && res.data){
             dispatch(closePopup());
-            showToast('success', 'Model Deleted', `Model ${event.rowData.singularName} has been deleted successfully.`);
+            showToast('success', ERROR_MESSAGES.MODEL_DELETE, ERROR_MESSAGES.MODEL_DELETE_SUCCESSFULLY(event.rowData.singularName));
+            
         }
     }
 

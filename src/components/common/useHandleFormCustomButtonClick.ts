@@ -3,7 +3,7 @@ import { useDispatch } from "react-redux";
 import { getExtensionComponent, getExtensionFunction } from "@/helpers/registry";
 import { openPopup } from "@/redux/features/popupSlice";
 import React, { ComponentType } from "react";
-
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 type CustomButtonData = {
     icon?: string,
     className?: string,
@@ -30,7 +30,7 @@ export const useHandleFormCustomButtonClickaction = () => {
             const eventData = { ...event, action: action, closable: closable};
             const dynamicFunction = getExtensionFunction(action);
             if (!dynamicFunction) {
-                console.error(`Action function "${action}" not found.`);
+                console.error(ERROR_MESSAGES.ACTION_FUNCTION(action));
                 return;
             }
             dynamicFunction(eventData);

@@ -22,6 +22,7 @@ import { AppTitle } from "@/helpers/AppTitle";
 import Image from "next/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "@/helpers/resendOtpHelper";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 // import { Checkbox } from "primereact/checkbox";
 interface AuthTabsProps {
     iamPasswordRegistrationEnabled: boolean;
@@ -80,17 +81,17 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         });
 
                         if (response?.error) {                            
-                            showToast("error", "Login Error", response.error);
+                            showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                             setErrors({
-                                email: "Invalid Credentials",
-                                password: "Invalid Credentials",
+                                email: ERROR_MESSAGES.INVALID_CREDENTIALS,
+                                password: ERROR_MESSAGES.INVALID_CREDENTIALS,
                             });
                         } else {
-                            showToast("success", "Login Success", "Redirecting to dashboard...");
+                            showToast("success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
                             router.push(`${process.env.NEXT_PUBLIC_LOGIN_REDIRECT_URL}`);
                         }
                     } catch (error: any) {
-                        showToast("error", "Login Error", error?.data ? error?.data?.message : "Something Went Wrong");
+                        showToast("error", ERROR_MESSAGES.LOGIN_ERROR, error?.data ? error?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                     } finally {
                         setSubmitting(false); // Re-enable the button after submission
                     }
@@ -190,8 +191,8 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 const formatted = formatTimeLeft(remaining);
                                 showToast(
                                     "error",
-                                    "Please wait",
-                                    `You can request a new OTP in ${formatted} second(s)`
+                                    ERROR_MESSAGES.PLEASE_WAIT,
+                                    ERROR_MESSAGES.OPT_FORMAT(formatted)
                                 );
                                 setSubmitting(false);
                                 return; //  Prevent request
@@ -205,10 +206,10 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                             localStorage.setItem(`resendOtpLogin_${email}`, Date.now().toString());
                             router.push(`/auth/initiate-login?email=${email}`);
                         } else {
-                            showToast("error", "Login Error", response.error);
+                            showToast("error",ERROR_MESSAGES.LOGIN_ERROR, response.error);
                         }
                     } catch (err: any) {
-                        showToast("error", "Login Error", err?.data ? err?.data?.message : "Something Went Wrong");
+                        showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                         setErrors({
                             email: "Invalid Credentials",
                         });

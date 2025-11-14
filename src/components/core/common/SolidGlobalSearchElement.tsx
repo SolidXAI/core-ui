@@ -13,7 +13,7 @@ import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import qs from "qs";
 import { useSelector } from "react-redux";
 import { SolidSaveCustomFilterForm } from "./SolidSaveCustomFilterForm";
-
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 const getRandomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -59,7 +59,7 @@ const transformFiltersToRules = (filter: any, parentRule: number | null = null):
         }
     }
 
-    throw new Error("Invalid filter structure");
+    throw new Error(ERROR_MESSAGES.INVALID_FILTER_STRUCTURE);
 }
 
 
@@ -643,7 +643,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         if (savedfilter?.id) {
             router.push(`?savedQuery=${savedfilter.id}`);
         } else {
-            console.error("Saved filter ID is undefined or null.");
+            console.error(ERROR_MESSAGES.SAVE_FILTER_UNDEFINED_NULL);
         }
 
     }

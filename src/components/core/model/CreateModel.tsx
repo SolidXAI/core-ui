@@ -20,6 +20,7 @@ import { Divider } from "primereact/divider";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
 import { SolidFormHeader } from "@/components/common/SolidFormHeader";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 interface ErrorResponseData {
   message: string;
@@ -154,7 +155,7 @@ const CreateModel = ({ data, params }: any) => {
         }
 
         if (fieldMetaData.length === 0) {
-          handleError(["Please add at least one field"]);
+          handleError([ERROR_MESSAGES.ADD_ATLEAST_ONE_FIELD]);
           firstErrorTab = firstErrorTab ?? 1; // If no prior error, set to Field tab
         }
 
@@ -217,7 +218,7 @@ const CreateModel = ({ data, params }: any) => {
     if (errorMessages.length > 0) {
       toast?.current?.show({
         severity: "error",
-        summary: "Can you send me the report?",
+        summary: ERROR_MESSAGES.SEND_REPORT,
         // sticky: true,
         life: 3000,
         //@ts-ignore

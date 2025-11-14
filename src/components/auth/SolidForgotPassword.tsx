@@ -15,6 +15,7 @@ import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { AppTitle } from "@/helpers/AppTitle";
 import Image from "next/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
@@ -60,10 +61,10 @@ const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder 
                     const maskedEmail = maskEmail(email);
                     router.push(`/auth/initiate-forgot-password-thank-you?email=${maskedEmail}`)
                 } else (
-                    showToast("error", "Error", response.error)
+                    showToast("error", ERROR_MESSAGES.ERROR, response.error)
                 )
             } catch (err: any) {
-                showToast("error", "Error", err?.data ? err?.data?.message : "Something Went Wrong");
+                showToast("error", ERROR_MESSAGES.ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
             }
         },
     });

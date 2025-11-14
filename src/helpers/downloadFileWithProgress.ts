@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { getSession } from "next-auth/react";
 
 export async function downloadFileWithProgress(
@@ -31,7 +32,7 @@ export async function downloadFileWithProgress(
       body: JSON.stringify(requestBody)
     }); 
     if (!response.ok || !response.body) {
-      throw new Error("Failed to fetch file");
+      throw new Error(ERROR_MESSAGES.FAILED_TO_FETCH_FILE);
     }
     const contentDisposition = response.headers.get("Content-Disposition");
     const fileNameMatch = contentDisposition?.match(/filename="?([^"]+)"?/);
@@ -80,11 +81,11 @@ export async function downloadFileWithProgress(
       : `${fileName}${extension}`;
     link.click();
     URL.revokeObjectURL(link.href);
-    handlers.onStatusChange?.("success", `${fileName}`, `File Exported Successfully.`);
+    handlers.onStatusChange?.("success", `${fileName}`, ERROR_MESSAGES.EXPORT_SUCCESSFULLY);
     return { fileName, blob };
 
   } catch (error) {
-    handlers.onStatusChange?.("error", "Download Failed", 'Please try again later');
+    handlers.onStatusChange?.("error", ERROR_MESSAGES.DOWNLOAD_FAILED, ERROR_MESSAGES.TRY_AGAIN);
     throw error;
   }
 }

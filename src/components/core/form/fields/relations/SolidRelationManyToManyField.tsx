@@ -16,6 +16,7 @@ import { Panel } from "primereact/panel";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 import qs from 'qs';
 import Handlebars from 'handlebars';
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
 
@@ -212,10 +213,10 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                     queryData.filters.$and.push(parsedFilter);
                     fixedFilterParsed = true;
                 } else {
-                    console.warn("Skipping invalid/empty fixed filter:", parsedFilter);
+                    console.warn(ERROR_MESSAGES.SKIPPING_EMPTY_FIXED_FILTER, parsedFilter);
                 }
             } catch (e) {
-                console.error("Invalid whereClause JSON:", renderedFilter);
+                console.error(ERROR_MESSAGES.INVALID_JSON_WHERECLAUSE, renderedFilter);
                 parsedFilter = {};
             }
 
@@ -229,7 +230,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
         // }
 
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
-            console.error("Fixed filter not applied due to parsing issues or invalid data.");
+            console.error(ERROR_MESSAGES.FIXED_FILTER_NOT_APPLIED);
 
         } else {
             //  const autocompleteQs = qs.stringify(queryData, {
@@ -350,17 +351,17 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
                     queryData.filters.$and.push(parsedFilter);
                     fixedFilterParsed = true;
                 } else {
-                    console.warn("Skipping invalid/empty fixed filter:", parsedFilter);
+                    console.warn(ERROR_MESSAGES.SKIPPING_EMPTY_FIXED_FILTER, parsedFilter);
                 }
             } catch (e) {
-                console.error("Invalid whereClause JSON:", renderedFilter);
+                console.error(ERROR_MESSAGES.INVALID_JSON_WHERECLAUSE, renderedFilter);
                 parsedFilter = {};
             }
 
         }
 
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
-            console.error("Fixed filter not applied due to parsing issues or invalid data.");
+            console.error(ERROR_MESSAGES.FIXED_FILTER_NOT_APPLIED);
 
         } else {
              const autocompleteQs = qs.stringify(queryData, {

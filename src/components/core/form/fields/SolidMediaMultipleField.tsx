@@ -18,6 +18,7 @@ import { downloadMediaFile } from "@/helpers/downloadMediaFile";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps, SolidMediaFormFieldWidgetProps } from "@/types/solid-core";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 export class SolidMediaMultipleField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
@@ -247,7 +248,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                     );
                 })
                 .catch((error) => {
-                    console.error("Error deleting file:", error);
+                    console.error(ERROR_MESSAGES.ERROR_DELETING_FILE, error);
                 });
 
             setDeleteImageDialogVisible(false);
@@ -266,9 +267,10 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
             const rejection = fileRejections[0];
             const sizeError = rejection.errors.find(err => err.code === 'file-too-large');
             if (sizeError) {
-                setFileSizeError(`File is too large. Max size is ${fieldMetadata.mediaMaxSizeKb} KB.`);
+                setFileSizeError(ERROR_MESSAGES.FILE_TOO_LAREG(fieldMetadata.mediaMaxSizeKb));
+                ERROR_MESSAGES.FILE_TOO_LAREG(fieldMetadata.mediaMaxSizeKb)
             } else {
-                setFileSizeError(rejection.errors[0]?.message || "File not accepted.");
+                setFileSizeError(rejection.errors[0]?.message || ERROR_MESSAGES.FILE_NOT_ACCEPT);
             }
         },
         accept: getAcceptedFileTypes(fieldMetadata.mediaTypes),

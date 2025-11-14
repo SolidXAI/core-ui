@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { signIn } from "next-auth/react";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
 const SolidInitialLoginOtp = () => {
@@ -104,10 +105,10 @@ const SolidInitialLoginOtp = () => {
                 setTimeLeft(RESEND_OTP_TIMER);
                 setResendEnabled(false);
             } else {
-                showToast("error", "Login Error", response.error);
+                showToast("error",ERROR_MESSAGES.LOGIN_ERROR , response.error);
             }
         } catch (err: any) {
-            showToast("error", "Login Error", err?.data?.message || "Something Went Wrong");
+            showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
         }
     };
 
@@ -155,20 +156,20 @@ const SolidInitialLoginOtp = () => {
                                     });
 
                                     if (otpResponse?.error) {
-                                        showToast("error", "Login Error", otpResponse.error);
+                                        showToast("error", ERROR_MESSAGES.LOGIN_ERROR, otpResponse.error);
                                     } else {
                                         localStorage.removeItem(`resendOtpLogin_${email}`);
-                                        showToast("success", "Login Success", "Redirecting to dashboard...");
+                                        showToast("success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
                                         router.push(`${process.env.NEXT_PUBLIC_LOGIN_REDIRECT_URL}`);
                                     }
                                 } else {
-                                    showToast("error", "Invalid OTP", response.error);
+                                    showToast("error", ERROR_MESSAGES.INAVLID_OTP, response.error);
                                     setErrors({
-                                        otp: "Invalid OTP",
+                                        otp: ERROR_MESSAGES.INAVLID_OTP,
                                     });
                                 }
                             } catch (err: any) {
-                                showToast("error", "Login Error", err?.data ? err?.data?.message : "Something Went Wrong");
+                                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                             } finally {
                                 setSubmitting(false);
                             }
