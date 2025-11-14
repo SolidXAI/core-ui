@@ -21,3 +21,7 @@ export const deleteManyPermission = (modelName: string) => {
 export const findPermission = (modelName: string) => {
     return `${pascalCase(modelName)}Controller.findOne`
 };
+
+export const findManyPermission = (modelName: string) => {
+    return `${pascalCase(modelName)}Controller.findMany`
+};

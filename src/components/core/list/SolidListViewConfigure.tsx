@@ -1,5 +1,5 @@
 "use client"
-import { deleteManyPermission } from "@/helpers/permissions";
+import { createPermission, deleteManyPermission, findManyPermission, findPermission } from "@/helpers/permissions";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Accordion, AccordionTab } from "primereact/accordion";
@@ -86,37 +86,35 @@ export const SolidListViewConfigure = (
     }, [isOverlayOpen])
 
 
-   //Build a map of actionKey → boolean at the top level
-    const headerActions = solidListViewLayout?.attrs?.configureViewActions ?? {};
+    //Build a map of actionKey → boolean at the top level
+    const headerActions = solidListViewLayout?.attrs ?? {};
 
-    const actionRoleMap: Record<string, boolean> = {};
+    const hasImportRole = useHasAnyRole(headerActions.importAllowedForRoles ?? []);
+    const hasExportRole = useHasAnyRole(headerActions.exportAllowedForRoles ?? []);
+    const hasCustomizeLayoutRole = useHasAnyRole(headerActions.customizeLayoutAllowedForRoles ?? []);
+    const hasSaveFiltersRole = useHasAnyRole(headerActions.saveFiltersAllowedForRoles ?? []);
 
-    // Call the hook for each action with roles (hooks still top-level)
-    Object.entries(headerActions).forEach(([key, action]: [string, any]) => {
-        if (Array.isArray(action.roles) && action.roles.length > 0) {
-            // useHasAnyRole is called unconditionally for each action
-            actionRoleMap[key] = useHasAnyRole(action.roles);
-        }
-    });
+    // Map to reuse inside the function
+    const roleCheckMap: Record<string, boolean> = {
+        import: hasImportRole,
+        export: hasExportRole,
+        customizeLayout: hasCustomizeLayoutRole,
+        saveFilters: hasSaveFiltersRole,
+    };
 
-    //Safe helper to check if action is enabled
-    const isHeaderActionEnabled = (actionKey: string) => {
-        const action = headerActions[actionKey];
+    const isHeaderActionEnabled = (action: string) => {
+        const baseFlag = headerActions[action]; // true | false | undefined
+        const allowedRoles = headerActions[`${action}AllowedForRoles`] ?? [];
 
-        // If the action isn't defined, default to true
-        if (!action) return true;
+        // 1. Layout explicitly disables action
+        if (baseFlag === false) return false;
 
-        // Check roles first if defined
-        if (Array.isArray(action.roles) && action.roles.length > 0) {
-            return actionRoleMap[actionKey] ?? false;
-        }
-
-        // Fallback to enabled boolean
-        if (typeof action.enabled === "boolean") {
-            return action.enabled;
+        // 2. If roles are listed, user must have at least one
+        if (allowedRoles.length > 0) {
+            return roleCheckMap[action] === true;
         }
 
-        // Default to true
+        // 3. No role restrictions → enabled
         return true;
     };
 
@@ -142,8 +140,10 @@ export const SolidListViewConfigure = (
                     (actionsAllowed.includes(`${deleteManyPermission(params.modelName)}`) &&
                         viewData?.data?.solidView?.layout?.attrs?.delete !== false &&
                         selectedRecords.length > 0) ||
-                    isHeaderActionEnabled('import') ||
-                    isHeaderActionEnabled('export') ||
+                    isHeaderActionEnabled('import') &&  actionsAllowed.includes(`${createPermission(params.modelName)}`) && createPermission('ImportTransaction')||
+                    isHeaderActionEnabled('export') && actionsAllowed.includes(`${findManyPermission(params.modelName)}`) && createPermission("ExportTemplate") ||
+                    isHeaderActionEnabled('customizeLayout') && createPermission('userViewMetadata')||
+                    isHeaderActionEnabled('saveFilters') && createPermission('savedFilters') ||
                     (solidListViewLayout?.attrs?.headerButtons
                         ?.some((rb: any) => rb.attrs.actionInContextMenu === true)) ||
                     viewData?.data?.solidView?.model?.enableSoftDelete
@@ -163,12 +163,12 @@ export const SolidListViewConfigure = (
                                             icon={'pi pi-trash'}
                                             onClick={() => setDialogVisible(true)}
                                         />}
-                                    {isHeaderActionEnabled('import') && (
+                                    {isHeaderActionEnabled("import") &&  actionsAllowed.includes(`${createPermission(params.modelName)}`) && createPermission('ImportTransaction') && (
                                         <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2 text-base"
                                             onClick={() => setOpenImportDialog(true)}
                                         />
                                     )}
-                                    {isHeaderActionEnabled('export') && (
+                                    {isHeaderActionEnabled("export") && actionsAllowed.includes(`${findManyPermission(params.modelName)}`) && findPermission("ExportTemplate") && (
                                         <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base"
                                             // @ts-ignore
                                             onClick={() => { setExportView((exportView) => !exportView); }} />
@@ -202,7 +202,7 @@ export const SolidListViewConfigure = (
                         </>
                     )}
                 <div className="p-2 relative flex flex-column gap-1">
-                    {isHeaderActionEnabled('customizeLayout') && (<Button
+                    {isHeaderActionEnabled('customizeLayout') && createPermission('userViewMetadata') && (<Button
                         icon='pi pi-sliders-h'
                         label="Customize Layout"
                         severity={isOverlayOpen ? undefined : "secondary"}
@@ -218,9 +218,9 @@ export const SolidListViewConfigure = (
                         <i className="pi pi-chevron-right text-sm"></i>
                     </Button>
                     )}
-                    {isHeaderActionEnabled('saveCustomFilter') &&
+                    {isHeaderActionEnabled('saveFilters') && createPermission('savedFilters') && (
                         <Button text icon='pi pi-save' label="Save Custom Filter" size="small" severity="secondary" className="text-left gap-2 text-base" onClick={() => setShowSaveFilterPopup(true)} />
-                    }
+                    )}
                     <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}
                         onShow={() => setIsOverlayOpen(true)}
                         onHide={() => {
@@ -275,7 +275,7 @@ export const SolidListViewConfigure = (
                                     </div>
                                 </AccordionTab>
                                 <AccordionTab header="Column Selector" headerClassName="pb-0">
-                                    <SolidListColumnSelector listViewMetaData={listViewMetaData} customizeLayout={customizeLayout}/>
+                                    <SolidListColumnSelector listViewMetaData={listViewMetaData} customizeLayout={customizeLayout} />
                                 </AccordionTab>
                             </Accordion>
                         </div>
