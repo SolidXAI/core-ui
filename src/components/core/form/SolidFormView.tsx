@@ -1483,6 +1483,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 <Dialog
                     visible={isDeleteDialogVisible}
                     header="Confirm Delete"
+                    className="solid-confirm-dialog"
                     modal
                     footer={() => (
                         <div className="flex justify-content-center">

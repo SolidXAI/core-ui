@@ -330,7 +330,7 @@ export const SolidXAiJsonDisplay: React.FC<SolidXAiJsonDisplayProps> = ({ intera
 
             {isGenerating ?
                 <>
-                    <Dialog header={false} closable={false} draggable={false} visible={true} onHide={() => { }} style={{ width: '20vw' }}>
+                    <Dialog header={false} closable={false} draggable={false} visible={true} onHide={() => { }} style={{ width: '20vw' }} className='solid-confirm-dialog'>
                         <div className="flex flex-column align-items-center justify-content-center py-5">
                             <SolidCircularLoader />
                             <p className="mt-4 font-medium">Generating...</p>

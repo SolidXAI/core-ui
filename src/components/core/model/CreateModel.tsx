@@ -455,7 +455,7 @@ const CreateModel = ({ data, params }: any) => {
         </div>
       </div>
       {/* <div style={{ width: '22.5%' }}></div> */}
-      <Dialog header="Delete Field" headerClassName="py-2" contentClassName="px-0 pb-0" visible={deleteEntity} style={{ width: '20vw' }} onHide={() => { if (!deleteEntity) return; setDeleteEntity(false); }}>
+      <Dialog header="Delete Field" headerClassName="py-2" className="solid-confirm-dialog" contentClassName="px-0 pb-0" visible={deleteEntity} style={{ width: '20vw' }} onHide={() => { if (!deleteEntity) return; setDeleteEntity(false); }}>
         <Divider className="m-0" />
         <div className="p-4">
           <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>

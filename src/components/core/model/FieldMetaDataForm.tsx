@@ -199,7 +199,7 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
   };
 
   return (
-    <div className="flex align-items-start gap-3 mt-2">
+    <div className="flex align-items-start gap-3 mt-2 flex-wrap md:flex-nowrap">
 
       <div className="">
         <label
@@ -1528,7 +1528,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                     >
                       <div className="formgrid grid">
                         {currentFields.includes("displayName") && (
-                          <div className="field col-6 flex-flex-column gap-2 mt-2">
+                          <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2">
                             <label htmlFor="displayName" className="form-field-label">
                               Display Name
                             </label>
@@ -1565,7 +1565,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
 
 
                         {currentFields.includes("name") && (
-                          <div className="field col-6 flex-flex-column gap-2">
+                          <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3 md:mt-0">
                             <label htmlFor="name" className="form-field-label">
                               Name
                             </label>
@@ -1589,7 +1589,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           </div>
                         )}
                         {currentFields.includes("description") && (
-                          <div className="field col-6 flex-flex-column gap-2 mt-4">
+                          <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3 md:mt-4">
                             <label htmlFor="description" className="form-field-label">
                               Description
                             </label>
@@ -1618,7 +1618,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                         )}
 
                         {currentFields.includes("columnName") && (
-                          <div className="field col-6 mt-4">
+                          <div className="field col-12 md:col-6 mt-4">
                             <div className="flex align-items-center gap-2">
                               <Checkbox onChange={e => {
                                 setShowColumnName(e.checked);
@@ -1747,7 +1747,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
                           {currentFields.includes("defaultValue") && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="field col-12  md:col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="defaultValue"
                                 className="form-field-label"
@@ -1841,7 +1841,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           )}
 
                           {currentFields.includes("mediaTypes") && (
-                            <div className="field col-6 flex-flex-column gap-2">
+                            <div className="field col-12 md:col-6 flex-flex-column gap-2">
                               <label
                                 htmlFor="mediaTypes"
                                 className="form-field-label"
@@ -1906,7 +1906,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
                           {currentFields.includes("mediaMaxSizeKb") && (
-                            <div className="field col-6 flex-flex-column gap-2">
+                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3 md:mt-3">
                               <label
                                 htmlFor="mediaMaxSizeKb"
                                 className="form-field-label"
@@ -1935,7 +1935,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
                           {currentFields.includes("mediaStorageProviderId") && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="mediaStorageProviderId"
                                 className="form-field-label"
@@ -2084,7 +2084,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
                           {currentFields.includes("relationType") && (formik.values.relationType === "many-to-one" || formik.values.relationType === "one-to-many") && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="relationCascade"
                                 className="form-field-label"
@@ -2120,7 +2120,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           )}
 
                           {currentFields.includes("relationModelModuleName") && (
-                            <div className="field col-6 flex-flex-column gap-2  mt-3">
+                            <div className="field col-12 md:col-6 flex-flex-column gap-2  mt-3">
                               <label
                                 htmlFor="relationModelModuleName"
                                 className="form-field-label"
@@ -2181,7 +2181,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           {currentFields.includes(
                             "relationCoModelSingularName"
                           ) && (
-                              <div className="field col-6 flex-flex-column gap-2 mt-3">
+                              <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
                                 <label
                                   htmlFor="relationCoModelSingularName"
                                   className="form-field-label"
@@ -2213,7 +2213,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               </div>
                             )}
                           {currentFields.includes("relationCoModelColumnName") && (formik.values.relationType === "many-to-many" || formik.values.relationType === "many-to-one") && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="relationCoModelColumnName"
                                 className="form-field-label"
@@ -2330,7 +2330,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             )}
 
                           {currentFields.includes("relationCreateInverse") && (
-                            <div className="field col-6 flex flex-column gap-2 mt-3">
+                            <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
                               <label htmlFor="relationCreateInverse" className="form-field-label">
                                 Relation Create Inverse
                               </label>
@@ -2351,7 +2351,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           )}
 
                           {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="relationCoModelFieldName"
                                 className="form-field-label"
@@ -2449,7 +2449,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           )}
 
                           {currentFields.includes("selectionDynamicProvider") && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="selectionDynamicProvider"
                                 className="form-field-label"
@@ -2505,7 +2505,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
                           {currentFields.includes("selectionValueType") && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="selectionValueType"
                                 className="form-field-label"
@@ -2544,7 +2544,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           )}
 
                           {currentFields.includes("selectionStaticValues") && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="selectionStaticValues"
                                 className="form-field-label"
@@ -2591,7 +2591,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           )}
 
                           {currentFields.includes("computedFieldValueType") && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="computedFieldValueType"
                                 className="form-field-label"
@@ -2642,7 +2642,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           {currentFields.includes(
                             "computedFieldValueProvider"
                           ) && (
-                              <div className="field col-6 flex-flex-column gap-2 mt-3">
+                              <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
                                 <label
                                   htmlFor="computedFieldValueProvider"
                                   className="form-field-label"
@@ -2870,7 +2870,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           <div className="formgrid grid">
                             {(currentFields.includes("regexPattern") && selectedType.value === "password") &&
                               <>
-                                <div className="field col-6 flex-flex-column gap-2 mt-3">
+                                <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
                                   <label
                                     htmlFor="regexPattern"
                                     className="form-field-label"
@@ -2893,7 +2893,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             }
                             {currentFields.includes("regexPattern") && (
                               <>
-                                <div className="field col-6 flex-flex-column gap-2 mt-3">
+                                <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
                                   <label
                                     htmlFor="regexPattern"
                                     className="form-field-label"
@@ -2921,7 +2921,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   )}
                                 </div>
                                 {currentFields.includes("regexPattern") && (
-                                  <div className="field col-6 flex-flex-column gap-2 mt-3">
+                                  <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3 mb-3 md:mb-3">
                                     <label
                                       htmlFor="regexPatternNotMatchingErrorMsg"
                                       className="form-field-label"
@@ -2955,7 +2955,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             {(currentFields.includes("min") || currentFields.includes("max")) &&
                               <>
                                 {currentFields.includes("min") && (
-                                  <div className="field col-6 flex-flex-column gap-2 mt-3">
+                                  <div className="field col-6 flex-flex-column gap-2 mt-2 md:mt-3">
                                     <label htmlFor="min" className="form-field-label">
                                       Min {(selectedType.value !== "int" && selectedType.value !== "decimal") && `(Characters Allowed)`}
 
@@ -3003,7 +3003,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   </div>
                                 )}
                                 {currentFields.includes("max") && (
-                                  <div className="field col-6 flex-flex-column gap-2 mt-3">
+                                  <div className="field col-6 flex-flex-column gap-2 mt-2  md:mt-3">
                                     <label htmlFor="max" className="form-field-label">
                                       Max {(selectedType.value !== "int" &&
                                         selectedType.value !== "decimal") && `(Characters allowed)`}
@@ -3106,7 +3106,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                       }
 
                       {(formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && <p className="form-wrapper-heading text-base mt-3">Settings</p>}
-                      <div className="formgrid grid">
+                      <div className="formgrid grid mt-3 md:mt-0">
                         {currentFields.includes("required") && (formik.values.relationType !== "many-to-many" && formik.values.relationType !== "one-to-many") && (
                           <div className="field col-6 flex-flex-column gap-2 mt-3">
                             <div className="flex align-items-center">

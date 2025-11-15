@@ -1555,6 +1555,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         header="Confirm Delete"
         onHide={() => setDialogVisible(false)}
         headerClassName="py-2"
+        className="solid-confirm-dialog"
         contentClassName="px-0 pb-0"
         style={{ width: '20vw' }}
       >
@@ -1611,6 +1612,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           }`}
         headerClassName="py-2"
         contentClassName="px-0 pb-0"
+        className="solid-confirm-dialog"
         visible={deleteEntity}
         style={{ width: "20vw" }}
         onHide={() => {

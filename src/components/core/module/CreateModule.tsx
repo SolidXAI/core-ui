@@ -420,7 +420,7 @@ const CreateModule = ({ data }: any) => {
           {/* <p className="form-wrapper-heading text-base">Basic Info</p> */}
           <Panel header={"Basic Info"} className="solid-column-panel">
             <div className="formgrid grid mt-3">
-              <div className="field col-6 flex flex-column gap-2">
+              <div className="field col-12 pb-3 lg:pb-0 lg:col-6 flex flex-column gap-2">
                 <label htmlFor="displayName" className="form-field-label">
                   Display Name <span style={{ color: 'red' }}>*</span>
                 </label>
@@ -450,7 +450,7 @@ const CreateModule = ({ data }: any) => {
                   />
                 )}
               </div>
-              <div className="field col-6 flex flex-column gap-2">
+              <div className="field col-12  lg:col-6 flex flex-column gap-2">
                 <label htmlFor="name" className="form-field-label">
                   Name <span style={{ color: 'red' }}>*</span>
                 </label>
@@ -471,7 +471,7 @@ const CreateModule = ({ data }: any) => {
               </div>
             </div>
             <div className="formgrid grid mt-4">
-              <div className="field col-6 flex flex-column gap-2">
+              <div className="field col-12 pb-3 ld:pb-0 lg:col-6 flex flex-column gap-2"> 
                 <label htmlFor="description" className="form-field-label">
                   Menu Sequence Number
                 </label>
@@ -492,7 +492,7 @@ const CreateModule = ({ data }: any) => {
                   />
                 )}
               </div>
-              <div className="field col-6 flex flex-column gap-2">
+              <div className="field col-12 lg:col-6 flex flex-column gap-2">
                 <label htmlFor="description" className="form-field-label">
                   Description <span style={{ color: 'red' }}>*</span>
                 </label>
@@ -520,7 +520,7 @@ const CreateModule = ({ data }: any) => {
           {/* <p className="form-wrapper-heading text-base" style={{ fontSize: 16 }}>Configurations</p> */}
           <Panel header={"Configurations"} className="solid-column-panel mt-4">
             <div className="formgrid grid mt-3">
-              <div className="field col-6 flex flex-column gap-2">
+              <div className="field col-12 pb-3 lg:pb-0 lg:col-6 flex flex-column gap-2">
                 <label htmlFor="defaultDataSource" className="form-field-label">
                   Default Data Source
                 </label>
@@ -544,7 +544,7 @@ const CreateModule = ({ data }: any) => {
                   />
                 )}
               </div>
-              <div className="field col-6 flex flex-column gap-2">
+              <div className="field col-12 lg:col-6 flex flex-column gap-2">
                 <label htmlFor="menuIconUrl" className="form-label form-field-label">
                   Menu Icon <small className="text-red-500 helper-text">(only svg, png and jpeg are allowed)</small>
                 </label>

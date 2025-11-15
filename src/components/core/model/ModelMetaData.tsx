@@ -349,7 +349,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
         {/* <div className="form-wrapper-subtitle">Name</div> */}
         <div className="">
           <div className="grid formgrid">
-            <div className="field col-6 pr-3">
+            <div className="field col-12 lg:col-6 lg:pr-3">
               {/* <p className="form-wrapper-heading text-base">Basic Info</p> */}
               <Panel header={"Basic Info"} className="solid-column-panel">
                 <div className="flex flex-column gap-2 mt-3">
@@ -376,7 +376,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   )}
                 </div>
 
-                <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
+                <div className="flex flex-column gap-2 mt-3 lg:mt-4">
                   <label htmlFor="dataSource" className="form-field-label">
                     Data Source
                   </label>
@@ -438,7 +438,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
               </Panel>
               {/* <Divider /> */}
               {/* <p className="form-wrapper-heading text-base">Configurations</p> */}
-              <Panel header={"Configurations"} className="solid-column-panel mt-5">
+              <Panel header={"Configurations"} className="solid-column-panel mt-3 mb-3 lg:mt-5">
                 {/* {params.id === 'new' &&
 
                   <div className="field col-6">
@@ -674,7 +674,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
               </Panel>
 
             </div>
-            <div className="field col-6 pl-3">
+            <div className="field col-12 lg:col-6 lg:pl-3">
 
               {/* <p className="form-wrapper-heading text-base">Basic Settings</p> */}
               <Panel header={"Basic Settings"} className="solid-column-panel">

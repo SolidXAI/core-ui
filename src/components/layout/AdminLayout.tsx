@@ -52,7 +52,7 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             {/* </div> */}
             {/* </div> */}
             {isForcePasswordChange &&
-                <Dialog header="Change Default Password" visible={isForcePasswordChange} closable={false} draggable={false} style={{ width: '25vw' }} onHide={() => setIsForcePasswordChange(false)}>
+                <Dialog header="Change Default Password" className="solid-change-dialog" visible={isForcePasswordChange} closable={false} draggable={false} style={{ width: '25vw' }} onHide={() => setIsForcePasswordChange(false)}>
                     <Divider className="mt-0" />
                     <SolidChangeForcePassword />
                 </Dialog>

@@ -13,6 +13,10 @@
         transition: backdrop-filter 0.3s ease, background-color 0.3s ease;
     }
 
+    .main-content.main-content.shifted .page-parent-wrapper{
+        backdrop-filter: blur(10px) !important;
+    }
+
 
     /* ================================= Menu ============================= */
 
@@ -35,7 +39,7 @@
         position: absolute;
         right: 0;
         top: 0;
-        width: 380px;
+        width: 380px !important;
         height: 100%;
         z-index: 99;
         background-color: #fff;
@@ -49,6 +53,18 @@
         width: 80vw !important;
     }
 
+    .solid-field-dialog {
+        width: 45rem !important;
+        max-width: 90%;
+    }
+
+    .solid-confirm-dialog {
+        width: 26rem !important;
+    }
+
+    .solid-change-dialog {
+        width: 32rem !important;
+    }
 }
 
 
@@ -71,21 +87,30 @@
 
     /* ==================== solid auth ======================== */
 
+    .solid-center-layout {
+        width: 100vw;
+
+    }
+
+
     .auth-container.side {
         width: 525px;
         max-width: 96%;
     }
+
 
     .auth-container {
         min-width: auto;
         padding: 25px;
         border-radius: 1rem;
         margin: auto;
+        width: 525px;
+        max-width: 96%;
     }
 
 
     .solid-auth-input-label.right {
-        color: #000 !important;
+        color: #000;
     }
 
     /* ===================== Solid Account Setting ===================== */
@@ -100,6 +125,64 @@
         width: 330px;
     }
 
+
+}
+
+@media(max-width:767px) {
+    /* ===================== Layout  ============================= */
+
+
+    .sidebar-left {
+        width: 60px !important;
+    }
+
+
+    .sidebar-right {
+        left: 60px !important;
+    }
+
+    .main-content {
+        margin-left: 60px !important;
+        width: calc(100vw - 65px) !important;
+    }
+
+    .main-content.shifted {
+        margin-left: 60px !important;
+    }
+
+    .sidebar-toggle-button.s-collapsed {
+        left: 52px !important;
+    }
+
+    .chatter-section.collapsed {
+        width: 40px !important;
+    }
+
+    .sidebar-toggle-button {
+        left: 280px !important;
+    }
+
+
+    .p-avatar.p-avatar-lg {
+        width: 2.5rem;
+        height: 2.5rem;
+    }
+
+    .solid-confirm-dialog {
+        width: 22rem !important;
+        max-width: 85% !important;
+    }
+
+    .solid-change-dialog {
+        width: 25rem !important;
+        max-width: 90% !important;
+    }
+
+
+    .solid-custom-filter-dialog{
+        width: 32rem !important;
+        max-width: 90% ;
+    }
 
 }
 
@@ -132,6 +215,21 @@
         max-width: 90vw !important;
     }
 
+    /* ========================== BreadCrum ===================== */
+    .solid-breadcrumb.p-breadcrumb .p-menuitem a p {
+        font-weight: 500 !important;
+    }
+
+    .p-component {
+        font-size: 0.9rem !important;
+    }
+
+    .text-base {
+        font-size: 0.9rem !important;
+    }
+
+
+
 }
 
 @media(max-width:480px) {
@@ -153,6 +251,22 @@
     .solid-column-panel.p-panel .p-panel-content {
         padding: 1px 0.75rem 0.75rem 0.75rem;
     }
+
+    
+    /* ===================== Pagination ============================  */
+    .p-paginator .p-paginator-next {
+        min-width: 2.5rem !important;
+    }
+
+    .solid-paginator div.p-dropdown::before{
+        content: "" !important;
+    }
+
+    .solid-paginator div.p-dropdown{
+        margin-left: 0 !important;
+    }
+
+    
 
 }
 

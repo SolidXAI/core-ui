@@ -210,6 +210,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 onHide={handleRegistration}
                 header="Access Restricted"
                 headerClassName="py-2" contentClassName="px-0 pb-0"
+                className="solid-confirm-dialog "
                 footer={
                     <div className="flex align-items-center justify-content-start">
                         <Button label="Close" onClick={handleRegistration} size="small" />

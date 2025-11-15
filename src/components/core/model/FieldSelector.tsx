@@ -41,7 +41,7 @@ const FieldSelector = ({ handleTypeSelect, modelMetaData }: any) => {
             <p className="form-wrapper-heading text-base m-0">Select Field Type</p>
             <div className='formgrid grid'>
                 {solidFieldOptions.map((field, index) => (
-                    <div className="field col-6 mt-3" key={index}>
+                    <div className="field col-12  md:col-6 mt-3" key={index}>
                         <div
                             className={`flex align-items-center gap-3 type-field-card ${selectedField === field.value ? 'selected' : ''}`}
                             onClick={() => handleTypeSelect(field.value, field.label)}
