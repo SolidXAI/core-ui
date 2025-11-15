@@ -1,7 +1,7 @@
 "use client";
 import { pascalCase } from "change-case";
 
-
+//Dynamic permission generators
 export const createPermission = (modelName: string) => {
     return `${pascalCase(modelName)}Controller.create`
 };
@@ -28,4 +28,9 @@ export const findPermission = (modelName: string) => {
 
 export const findManyPermission = (modelName: string) => {
     return `${pascalCase(modelName)}Controller.findMany`
+};
+
+//Dynamic permission expression
+export const permissionExpression = (modelName: string, permissionName : string) => {
+    return `${pascalCase(modelName)}Controller.${permissionName}`
 };
