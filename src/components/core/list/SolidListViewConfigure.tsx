@@ -1,5 +1,5 @@
 "use client"
-import { createPermission, deleteManyPermission, findManyPermission, findPermission } from "@/helpers/permissions";
+import { createPermission, deleteManyPermission, findManyPermission, findPermission, insertManyPermission } from "@/helpers/permissions";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Accordion, AccordionTab } from "primereact/accordion";
@@ -89,32 +89,43 @@ export const SolidListViewConfigure = (
     //Build a map of actionKey → boolean at the top level
     const headerActions = solidListViewLayout?.attrs ?? {};
 
-    const hasImportRole = useHasAnyRole(headerActions.importAllowedForRoles ?? []);
-    const hasExportRole = useHasAnyRole(headerActions.exportAllowedForRoles ?? []);
-    const hasCustomizeLayoutRole = useHasAnyRole(headerActions.customizeLayoutAllowedForRoles ?? []);
-    const hasSaveFiltersRole = useHasAnyRole(headerActions.saveFiltersAllowedForRoles ?? []);
-
-    // Map to reuse inside the function
-    const roleCheckMap: Record<string, boolean> = {
-        import: hasImportRole,
-        export: hasExportRole,
-        customizeLayout: hasCustomizeLayoutRole,
-        saveFilters: hasSaveFiltersRole,
+    const normalizeAction = (value: boolean | string[]) => {
+        if (value === true) return { enabled: true, roles: [] };
+        if (value === false) return { enabled: false, roles: [] };
+        if (Array.isArray(value)) return { enabled: true, roles: value };
+        return { enabled: true, roles: [] }; // default
     };
-
-    const isHeaderActionEnabled = (action: string) => {
-        const baseFlag = headerActions[action]; // true | false | undefined
-        const allowedRoles = headerActions[`${action}AllowedForRoles`] ?? [];
-
-        // 1. Layout explicitly disables action
-        if (baseFlag === false) return false;
-
-        // 2. If roles are listed, user must have at least one
-        if (allowedRoles.length > 0) {
+    
+    const normalized = {
+        import: normalizeAction(headerActions.import),
+        export: normalizeAction(headerActions.export),
+        customizeLayout: normalizeAction(headerActions.customizeLayout),
+        savedFilters: normalizeAction(headerActions.savedFilters),
+    };
+    
+    // Role checks
+    const useRoleCheck = (roles: string[]) => useHasAnyRole(roles ?? []);
+    
+    // Map of action → roleCheck
+    const roleCheckMap = {
+        import: useRoleCheck(normalized.import.roles),
+        export: useRoleCheck(normalized.export.roles),
+        customizeLayout: useRoleCheck(normalized.customizeLayout.roles),
+        savedFilters: useRoleCheck(normalized.savedFilters.roles),
+    };
+    
+    const isHeaderActionEnabled = (action: keyof typeof normalized) => {
+        const { enabled, roles } = normalized[action];
+    
+        // 1. If explicitly disabled
+        if (!enabled) return false;
+    
+        // 2. If roles list exists → must have at least one
+        if (roles.length > 0) {
             return roleCheckMap[action] === true;
         }
-
-        // 3. No role restrictions → enabled
+    
+        // 3. No restrictions → enabled
         return true;
     };
 
@@ -140,10 +151,10 @@ export const SolidListViewConfigure = (
                     (actionsAllowed.includes(`${deleteManyPermission(params.modelName)}`) &&
                         viewData?.data?.solidView?.layout?.attrs?.delete !== false &&
                         selectedRecords.length > 0) ||
-                    isHeaderActionEnabled('import') &&  actionsAllowed.includes(`${createPermission(params.modelName)}`) && createPermission('ImportTransaction')||
+                    isHeaderActionEnabled('import') &&  actionsAllowed.includes(`${createPermission(params.modelName)}`) && actionsAllowed.includes(`${insertManyPermission(params.modelName)}`) && createPermission('ImportTransaction') && createPermission('ImportTransaction')||
                     isHeaderActionEnabled('export') && actionsAllowed.includes(`${findManyPermission(params.modelName)}`) && createPermission("ExportTemplate") ||
                     isHeaderActionEnabled('customizeLayout') && createPermission('userViewMetadata')||
-                    isHeaderActionEnabled('saveFilters') && createPermission('savedFilters') ||
+                    isHeaderActionEnabled('savedFilters') && createPermission('savedFilters') ||
                     (solidListViewLayout?.attrs?.headerButtons
                         ?.some((rb: any) => rb.attrs.actionInContextMenu === true)) ||
                     viewData?.data?.solidView?.model?.enableSoftDelete
@@ -163,7 +174,7 @@ export const SolidListViewConfigure = (
                                             icon={'pi pi-trash'}
                                             onClick={() => setDialogVisible(true)}
                                         />}
-                                    {isHeaderActionEnabled("import") &&  actionsAllowed.includes(`${createPermission(params.modelName)}`) && createPermission('ImportTransaction') && (
+                                    {isHeaderActionEnabled("import") && actionsAllowed.includes(`${createPermission(params.modelName)}`) && actionsAllowed.includes(`${insertManyPermission(params.modelName)}`) && createPermission('ImportTransaction') && (
                                         <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2 text-base"
                                             onClick={() => setOpenImportDialog(true)}
                                         />
@@ -218,7 +229,7 @@ export const SolidListViewConfigure = (
                         <i className="pi pi-chevron-right text-sm"></i>
                     </Button>
                     )}
-                    {isHeaderActionEnabled('saveFilters') && createPermission('savedFilters') && (
+                    {isHeaderActionEnabled('savedFilters') && createPermission('savedFilters') && (
                         <Button text icon='pi pi-save' label="Save Custom Filter" size="small" severity="secondary" className="text-left gap-2 text-base" onClick={() => setShowSaveFilterPopup(true)} />
                     )}
                     <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}

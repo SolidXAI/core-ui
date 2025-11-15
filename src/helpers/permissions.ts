@@ -6,6 +6,10 @@ export const createPermission = (modelName: string) => {
     return `${pascalCase(modelName)}Controller.create`
 };
 
+export const insertManyPermission = (modelName: string) => {
+    return `${pascalCase(modelName)}Controller.insertMany`
+};
+
 export const updatePermission = (modelName: string) => {
     return `${pascalCase(modelName)}Controller.update`
 };
