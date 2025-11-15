@@ -1,7 +1,7 @@
 "use client";
 
 import { SolidCancelButton } from "@/components/common/CancelButton";
-import { createPermission, deletePermission, findPermission, updatePermission } from "@/helpers/permissions";
+import { permissionExpression } from "@/helpers/permissions";
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
@@ -527,10 +527,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const fetchPermissions = async () => {
             if (params.modelName) {
                 const permissionNames = [
-                    createPermission(params.modelName),
-                    deletePermission(params.modelName),
-                    updatePermission(params.modelName),
-                    findPermission(params.modelName)
+                    permissionExpression(params.modelName, 'create'),
+                    permissionExpression(params.modelName, 'delete'),
+                    permissionExpression(params.modelName, 'update'),
+                    permissionExpression(params.modelName, 'find')
                 ]
                 const queryData = {
                     permissionNames: permissionNames
@@ -1210,7 +1210,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         // const fieldMetadata = solidFieldsMetadata[attrs.name];
                         const fieldMetadata = solidFormViewMetaData.data.solidFieldsMetadata[attrs.name];
                         // Read only permission if there is no update permission on model and router doesnt contains new
-                        const readOnlyPermission = !actionsAllowed.includes(`${updatePermission(params.modelName)}`) && params.id !== "new";
+                        const readOnlyPermission = !actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) && params.id !== "new";
                         return <SolidField
                             key={attrs.name}
                             field={element}

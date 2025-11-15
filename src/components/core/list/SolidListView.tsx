@@ -171,11 +171,11 @@ export const SolidListView = (params: SolidListViewParams) => {
     const fetchPermissions = async () => {
       if (params.modelName) {
         const permissionNames = [
-          createPermission(params.modelName),
-          deletePermission(params.modelName),
-          updatePermission(params.modelName),
-          deleteManyPermission(params.modelName),
-          findPermission(params.modelName),
+          permissionExpression(params.modelName, 'create'),
+          permissionExpression(params.modelName, 'delete'),
+          permissionExpression(params.modelName, 'update'),
+          permissionExpression(params.modelName, 'deleteMany'),
+          permissionExpression(params.modelName, 'find'),
         ];
         const queryData = {
           permissionNames: permissionNames,
@@ -1136,7 +1136,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                 />
               ))}
 
-            {actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
+            {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
               solidListViewLayout?.attrs?.create !== false &&
               params.embeded !== true &&
               solidListViewMetaData?.data?.solidView?.layout?.attrs
@@ -1146,7 +1146,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                   solidListViewLayout={solidListViewLayout}
                 />
               )}
-            {actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
+            {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
               solidListViewLayout?.attrs?.create !== false &&
               params.embeded == true &&
               params.inlineCreate == true &&
@@ -1282,10 +1282,10 @@ export const SolidListView = (params: SolidListViewParams) => {
                 if (solidListViewLayout?.attrs.disableRowClick === true) return;
 
                 const hasFindPermission = actionsAllowed.includes(
-                  findPermission(params.modelName)
+                  permissionExpression(params.modelName, 'find')
                 );
                 const hasUpdatePermission =
-                  actionsAllowed.includes(updatePermission(params.modelName)) &&
+                  actionsAllowed.includes(permissionExpression(params.modelName, 'update')) &&
                   solidListViewLayout?.attrs?.edit !== false;
 
                 if (!(hasFindPermission || hasUpdatePermission)) return;
@@ -1366,7 +1366,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                   })}
 
               {actionsAllowed.includes(
-                `${updatePermission(params.modelName)}`
+                `${permissionExpression(params.modelName, 'update')}`
               ) &&
                 solidListViewLayout?.attrs?.edit !== false &&
                 solidListViewLayout?.attrs?.showRowEditInContextMenu ===
@@ -1400,7 +1400,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                 )}
 
               {actionsAllowed.includes(
-                `${deletePermission(params.modelName)}`
+                `${permissionExpression(params.modelName, 'delete')}`
               ) &&
                 solidListViewLayout?.attrs?.delete !== false &&
                 solidListViewLayout?.attrs?.showRowDeleteInContextMenu ===
@@ -1428,7 +1428,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                 )}
 
               {actionsAllowed.includes(
-                `${updatePermission(params.modelName)}`
+                `${permissionExpression(params.modelName, 'update')}`
               ) &&
                 solidListViewLayout?.attrs?.edit !== false && (
                   <Column
@@ -1487,7 +1487,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                       )}
 
                                     {actionsAllowed.includes(
-                                      `${deletePermission(params.modelName)}`
+                                      `${permissionExpression(params.modelName, 'delete')}`
                                     ) &&
                                       solidListViewLayout?.attrs?.delete !==
                                       false &&
