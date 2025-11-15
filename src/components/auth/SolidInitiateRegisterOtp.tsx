@@ -14,6 +14,7 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 const SolidInitiateRegisterOtp = () => {
     const searchParams = useSearchParams();
@@ -104,10 +105,10 @@ const SolidInitiateRegisterOtp = () => {
                 setTimeLeft(RESEND_OTP_TIMER);
                 setResendEnabled(false);
             } else {
-                showToast("error", "Login Error", response.error);
+                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
             }
         } catch (err: any) {
-            showToast("error", "Login Error", err?.data?.message || "Something Went Wrong");
+            showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
         }
     };
 
@@ -152,13 +153,13 @@ const SolidInitiateRegisterOtp = () => {
                                     showToast("success", "Login Successfully", "Login");
                                     router.push(`/auth/login`);
                                 } else {
-                                    showToast("error", "Invalid OTP", response.error);
+                                    showToast("error", ERROR_MESSAGES.INAVLID_OTP, response.error);
                                     setErrors({
-                                        otp: "Invalid OTP",
+                                        otp: ERROR_MESSAGES.INAVLID_OTP,
                                     });
                                 }
                             } catch (err: any) {
-                                showToast("error", "Login Error", err?.data ? err?.data?.message : "Something Went Wrong");
+                                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                             } finally {
                                 setSubmitting(false);
                             }

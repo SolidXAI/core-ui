@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { getSession } from "next-auth/react";
 
 export async function updatePasswordField({
@@ -35,6 +36,6 @@ export async function updatePasswordField({
   });
 
   if (!response.ok) {
-    throw new Error("Failed to update password");
+    throw new Error(ERROR_MESSAGES.FAILED_TO_UPDATE_PASSWORD);
   }
 }

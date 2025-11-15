@@ -1,4 +1,5 @@
 "use client";
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query';
 import { Toast } from 'primereact/toast';
 import React, { useRef } from 'react';
@@ -28,7 +29,7 @@ const extractErrorMessages = (errorObj: Record<string, string>): string[] => {
 
 
 export const handleError = (errorToast: any) => {
-    let errorMessage: any = errorToast ? errorToast : ['An error occurred'];
+    let errorMessage: any = errorToast ? errorToast : [ERROR_MESSAGES.ERROR_OCCURED];
 
 
     if (typeof errorMessage == 'object') {
@@ -44,7 +45,7 @@ export const handleError = (errorToast: any) => {
 
     toastRef?.current?.show({
         severity: 'error',
-        summary: 'Error',
+        summary: ERROR_MESSAGES.ERROR,
         detail: errorMessage,
         life: 3000,
         //@ts-ignore
@@ -70,7 +71,7 @@ export const handleSuccess = (successMessage: any) => {
 
     toastRef?.current?.show({
         severity: 'error',
-        summary: 'Success',
+        summary: ERROR_MESSAGES.IS_SUCCESS,
         detail: successMessage,
         life: 3000,
         //@ts-ignore

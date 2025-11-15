@@ -56,6 +56,7 @@ import { SolidXAIModule } from "../solid-ai/SolidXAIModule";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
 import { SolidLoadList } from "@/types/solid-core";
 import { getExtensionFunction } from "@/helpers/registry";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 // import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -73,7 +74,7 @@ export const queryStringToQueryObject = () => {
       return parsedParams;
     } catch (error) {
       console.error(
-        "Error decoding or parsing query string from local storage:",
+        ERROR_MESSAGES.ERROR_DECODING,
         error
       );
     }
@@ -245,7 +246,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       const column = currentLayout?.children[i];
       const fieldMetadata = solidFieldsMetadata?.[column.attrs.name];
       if (!fieldMetadata?.type) {
-        showFieldError(`${column.attrs.label} is not present in metadata`);
+        showFieldError(ERROR_MESSAGES.FIELD_NOT_IN_METADATA(column.attrs.label));
         // return;
       }
       if (fieldMetadata) {
@@ -873,7 +874,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (errorMessages.length > 0) {
       toast?.current?.show({
         severity: "error",
-        summary: "Can you send me the report?",
+        summary: ERROR_MESSAGES.SEND_REPORT,
         // sticky: true,
         life: 3000,
         //@ts-ignore
@@ -897,7 +898,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (error) {
       toast?.current?.show({
         severity: "error",
-        summary: "Can you send me the report?",
+        summary: ERROR_MESSAGES.SEND_REPORT,
         // sticky: true,
         life: 3000,
         //@ts-ignore
@@ -925,7 +926,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     toast.current?.show({
       severity: 'success',
       summary: 'Deleted',
-      detail: 'Records deleted successfully',
+      detail: ERROR_MESSAGES.RECORD_DELETE,
       life: 3000,
     });
     setDialogVisible(false);
@@ -1040,7 +1041,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const handleDeleteEntity = async () => {
     try {
       if (!selectedSolidViewData?.id) {
-        throw new Error("No entity selected");
+        throw new Error(ERROR_MESSAGES.NO_ENTITY_SELECTED);
       }
 
       const response = await deleteSolidSingleEntiry(selectedSolidViewData.id);
@@ -1049,14 +1050,14 @@ export const SolidListView = (params: SolidListViewParams) => {
         setDeleteEntity(false);
         toast.current?.show({
           severity: "success",
-          summary: "Deleted",
-          detail: "Entity deleted successfully",
+          summary: ERROR_MESSAGES.DELETED,
+          detail: ERROR_MESSAGES.ENTITY_DELETE,
           life: 3000,
         });
       } else {
         toast.current?.show({
           severity: "error",
-          summary: "Delete Failed",
+          summary: ERROR_MESSAGES.DELETE_FAIELD,
           detail: response?.error?.data?.error,
           life: 3000,
         });
@@ -1064,8 +1065,8 @@ export const SolidListView = (params: SolidListViewParams) => {
     } catch (error: any) {
       toast.current?.show({
         severity: "error",
-        summary: "Delete Failed",
-        detail: "Something Went Wrong",
+        summary: ERROR_MESSAGES.DELETE_FAIELD,
+        detail: ERROR_MESSAGES.SOMETHING_WRONG,
         life: 3000,
       });
     }

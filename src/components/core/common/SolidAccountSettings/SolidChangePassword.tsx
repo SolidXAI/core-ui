@@ -10,6 +10,7 @@ import { Toast } from 'primereact/toast';
 import { useMemo, useRef } from 'react';
 import * as Yup from 'yup';
 import { SolidPasswordHelperText } from '../SolidPasswordHelperText';
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 
 export const SolidChangePassword = ({ solidSettingsData }: any) => {
     const toast = useRef<Toast>(null);
@@ -40,7 +41,7 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
                 return new RegExp(unescaped);
             }
         } catch (error) {
-            console.error("Invalid password regex:", error);
+            console.error(ERROR_MESSAGES.INVALID_PASSWORD_REGX, error);
         }
         return null;
     }, [solidSettingsData, envPasswordRegex]);
@@ -91,14 +92,14 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
 
                 const response = await changePassword(payload).unwrap();
                 if (response?.error) {
-                    showToast("error", "Error", response.error)
+                    showToast("error", ERROR_MESSAGES.ERROR, response.error)
                     setErrors({
-                        currentPassword: "Incorrect Current Password",
-                        newPassword: "Passwords must match",
-                        confirmPassword: "Passwords must match",
+                        currentPassword: ERROR_MESSAGES.INCORRECT_CURRENT,
+                        newPassword: ERROR_MESSAGES.MUST_MATCH,
+                        confirmPassword: ERROR_MESSAGES.MUST_MATCH,
                     })
                 } else {
-                    showToast("success", "Password Change Successfully", "Password Change Successfully");
+                    showToast("success", ERROR_MESSAGES.PASSWORD_CHANGE, ERROR_MESSAGES.PASSWORD_CHANGE);
                     handleLogout(toast)
                     resetForm();
                 }

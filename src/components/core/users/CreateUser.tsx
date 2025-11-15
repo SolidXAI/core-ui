@@ -4,6 +4,7 @@ import { CancelButton } from "@/components/common/CancelButton";
 import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
 import { SolidFormHeader } from "@/components/common/SolidFormHeader";
 import { SolidFormStepper } from "@/components/common/SolidFormStepper";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { useRegisterPrivateMutation, useUpdateUserMutation } from "@/redux/api/authApi";
 import { useGetrolesQuery } from "@/redux/api/roleApi";
 import { useDeleteUserMutation } from "@/redux/api/userApi";
@@ -134,7 +135,7 @@ const CreateUser = ({ data, params }: any) => {
     if (errorMessages.length > 0 && toast.current) {
       toast.current.show({
         severity: "error",
-        summary: "Can you send me the report?",
+        summary: ERROR_MESSAGES.SEND_REPORT,
         // sticky: true,
         life: 3000,
         //@ts-ignore
@@ -160,17 +161,17 @@ const CreateUser = ({ data, params }: any) => {
 
   useEffect(() => {
     const handleError = (errorToast: any) => {
-      let errorMessage: any = ['An error occurred'];
+      let errorMessage: any = [ERROR_MESSAGES.ERROR_OCCURED];
 
       if (isFetchBaseQueryErrorWithErrorResponse(errorToast)) {
         errorMessage = errorToast.data.message;
       } else {
-        errorMessage = ['Something went wrong'];
+        errorMessage = [ERROR_MESSAGES.SOMETHING_WRONG];
       }
 
       toast.current?.show({
         severity: 'error',
-        summary: 'Error',
+        summary: ERROR_MESSAGES.ERROR,
         detail: errorMessage,
         life: 3000,
         //@ts-ignore

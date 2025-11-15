@@ -15,7 +15,7 @@ import { classNames } from "primereact/utils";
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
-
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 const SolidResetPassword = () => {
     const searchParams = useSearchParams();
     const verificationToken = searchParams.get('token');
@@ -47,7 +47,7 @@ const SolidResetPassword = () => {
             passwordRegex = new RegExp(unescaped);
         }
     } catch (error) {
-        console.error("Invalid password regex in .env:", error);
+        console.error(ERROR_MESSAGES.INVALID_PASSWORD_REGX, error);
     }
 
     const newPasswordValidation = passwordRegex
@@ -82,7 +82,7 @@ const SolidResetPassword = () => {
                     showToast("success", "Password Updated", "Password Updated Successfully")
                     router.push('/auth/login');
                 } else (
-                    showToast("error", "Error", response.error)
+                    showToast("error", ERROR_MESSAGES.ERROR, response.error)
                 )
             } catch (err: any) {
                 showToast("error", err?.data?.message, err?.data?.data?.message? err?.data?.data?.message : err?.data?.message);

@@ -59,6 +59,7 @@ import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
 import { SolidXAIModule } from "../solid-ai/SolidXAIModule";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -636,12 +637,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     useEffect(() => {
         const handleError = (errorToast: any) => {
-            let errorMessage: any = ['An error occurred'];
+            let errorMessage: any = [ERROR_MESSAGES.ERROR_OCCURED];
 
             if (isFetchBaseQueryErrorWithErrorResponse(errorToast)) {
                 errorMessage = errorToast.data.message;
             } else {
-                errorMessage = ['Something went wrong'];
+                errorMessage = [ERROR_MESSAGES.SOMETHING_WRONG];
             }
 
             toast.current?.show({
@@ -796,7 +797,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
 
         } catch (err) {
-            console.error("Failed to create Entity: ", err);
+            console.error(ERROR_MESSAGES.ENTITY_FAILED, err);
         }
     }
 
@@ -899,7 +900,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 customLayout = updatedFormLayout.newLayout;
                             }
                         } catch (error) {
-                            console.error('Error in DynamicFunctionComponent:', error);
+                            console.error(ERROR_MESSAGES.DYNAMIC_FUNCTION_ERROR, error);
                         }
                     }
                 }
@@ -987,7 +988,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             setInitialEntityData(formViewData);
                         }
                     } catch (error) {
-                        console.error('Error in onFormLoad handler:', error);
+                        console.error(ERROR_MESSAGES.ON_FORM_LOAD, error);
                     }
                 }
             }
@@ -1141,7 +1142,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
                 else {
                     // TODO: Show an error popup and stop form rendering ideallly...
-                    console.log(`Unable to load dynamic module: `, changeHandler);
+                    console.log(ERROR_MESSAGES.UNABLE_LOAD_DYNAMIC_MODULE, changeHandler);
                 }
             }
         }

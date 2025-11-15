@@ -6,6 +6,7 @@ import styles from './SolidImport.module.css'
 import { DocumentSvg } from './DocumentSvg';
 import { useCreateImportTransactionMutation } from '@/redux/api/importTransactionApi';
 import { Toast } from 'primereact/toast';
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMetadataId }: any) => {
     const toast = useRef<Toast>(null);
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
@@ -31,14 +32,14 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
             console.log('Upload success:', response);
             if (response?.statusCode === 200) {
                 setFile(uploadFile);
-                showToast("success", "File Uploaded", "File Uploaded Successfully");
+                showToast("success", ERROR_MESSAGES.FILE_UPLOAD, ERROR_MESSAGES.FILE_UPLOAD_SUCCESSFULLY);
                 setTransactionId?.(response?.data?.id);
             } else {
-                showToast("error", "Failed", "Fail to upload file")
+                showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_UPLOAD_FILE)
             }
         } catch (error) {
-            console.error('Upload failed:', error);
-            showToast("error", "Failed", "Fail to upload file")
+            console.error(ERROR_MESSAGES.FAILED_UPLOAD_FILE, error);
+            showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_UPLOAD_FILE)
         }
     };
 
@@ -109,7 +110,7 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
                     size='small'
                     onClick={() => {
                         if (!file) {
-                            showToast("error", "Missing File", "Please upload file");
+                            showToast("error", ERROR_MESSAGES.MISSING_FILE, ERROR_MESSAGES.FAILED_UPLOAD_FILE);
                             return;
                         }
                         setImportStep(3);

@@ -1,6 +1,7 @@
 'use client';
 import { AutoCompleteField } from "@/components/common/AutoCompleteField";
 import { CancelButton } from "@/components/common/CancelButton";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { useLazyGetrolesQuery } from "@/redux/api/roleApi";
 import { useCreateuserroleMutation } from "@/redux/api/userApi";
 import { useFormik } from "formik";
@@ -59,7 +60,7 @@ const CreateUserRole = ({ data }: any) => {
         }
         createMenuItem(obj);
       } catch (err) {
-        console.error("Failed to create Invoice:", err);
+        console.error(ERROR_MESSAGES.FAILED_CREATE_INVOICE, err);
       }
     },
   });
@@ -71,7 +72,7 @@ const CreateUserRole = ({ data }: any) => {
     if (errorMessages.length > 0) {
       toast?.current?.show({
         severity: "success",
-        summary: "Can you send me the report?",
+        summary: ERROR_MESSAGES.SEND_REPORT,
         // sticky: true,
         life: 3000,
         //@ts-ignore
