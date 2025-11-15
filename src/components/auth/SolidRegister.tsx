@@ -34,7 +34,7 @@ const SolidRegister = () => {
     const envPasswordHelperText = process.env.NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC;
     const [activeIndex, setActiveIndex] = useState(0);
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
-    const [showOverlay, setShowOverlay] = useState(false); 
+    const [showOverlay, setShowOverlay] = useState(false);
     useEffect(() => {
         trigger("")
     }, [trigger])
@@ -96,192 +96,183 @@ const SolidRegister = () => {
     };
 
     const PasswordSignup = ({ showNameFieldsForRegistration }: { showNameFieldsForRegistration?: boolean }) => {
-    console.log("showNameFieldsForRegistration", showNameFieldsForRegistration);
-    return (
-        <Formik
-            initialValues={{
-                username: "",
-                email: "",
-                password: "",
-                firstName: "",
-                lastName: ""
-            }}
+        console.log("showNameFieldsForRegistration", showNameFieldsForRegistration);
+        return (
+            <Formik
+                initialValues={{
+                    username: "",
+                    email: "",
+                    password: "",
+                    firstName: "",
+                    lastName: ""
+                }}
 
-            validationSchema={Yup.object({
-                username: showNameFieldsForRegistration
-                    ? Yup.string().notRequired()
-                    : Yup.string().required("User Name is required"),
+                validationSchema={Yup.object({
+                    username: showNameFieldsForRegistration
+                        ? Yup.string().notRequired()
+                        : Yup.string().required("User Name is required"),
 
-                firstName: showNameFieldsForRegistration
-                    ? Yup.string().required("First Name is required")
-                    : Yup.string().notRequired(),
+                    firstName: showNameFieldsForRegistration
+                        ? Yup.string().required("First Name is required")
+                        : Yup.string().notRequired(),
 
-                lastName: showNameFieldsForRegistration
-                    ? Yup.string().required("Last Name is required")
-                    : Yup.string().notRequired(),
+                    lastName: showNameFieldsForRegistration
+                        ? Yup.string().required("Last Name is required")
+                        : Yup.string().notRequired(),
 
-                email: Yup.string()
-                    .email("Invalid email address")
-                    .required("Email is required"),
-                password: Yup.string()
-                    .required("Password is required")
-                    .min(8, "Password must be at least 8 characters")
-                    .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-                    .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-                    .matches(/\d/, "Password must contain at least one number")
-                    .matches(/[@$!%*?&#^(){}[\]|\\/~`+=<>:;'"_,.-]/, "Password must contain at least one special character"),
-            })}
+                    email: Yup.string()
+                        .email("Invalid email address")
+                        .required("Email is required"),
+                    password: Yup.string()
+                        .required("Password is required")
+                        .min(8, "Password must be at least 8 characters")
+                        .matches(/[a-z]/, "Password must contain at least one lowercase letter")
+                        .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
+                        .matches(/\d/, "Password must contain at least one number")
+                        .matches(/[@$!%*?&#^(){}[\]|\\/~`+=<>:;'"_,.-]/, "Password must contain at least one special character"),
+                })}
 
-            onSubmit={async (values, { setSubmitting }) => {
-                try {
-                    let userData: any = {
-                        email: values.email,
-                        password: values.password,
-                    };
-                    if (showNameFieldsForRegistration) {
-                        const fullName = `${values.firstName || ""} ${values.lastName || ""}`.trim();
-                        const username = `${values.firstName || ""}${values.lastName || ""}`.trim().toLowerCase();
-                        console.log("fullName, username", fullName, username);
-                        userData = {
-                            ...userData,
-                            fullName,
-                            username
+                onSubmit={async (values, { setSubmitting }) => {
+                    try {
+                        let userData: any = {
+                            email: values.email,
+                            password: values.password,
                         };
-                    } else {
-                        userData = {
-                            ...userData,
-                            username: values.username,
-                        };
+                        if (showNameFieldsForRegistration) {
+                            const fullName = `${values.firstName || ""} ${values.lastName || ""}`.trim();
+                            const username = `${values.firstName || ""}${values.lastName || ""}`.trim().toLowerCase();
+                            console.log("fullName, username", fullName, username);
+                            userData = {
+                                ...userData,
+                                fullName,
+                                username
+                            };
+                        } else {
+                            userData = {
+                                ...userData,
+                                username: values.username,
+                            };
+                        }
+                        const response = await register(userData).unwrap();
+
+                        if (response?.statusCode === 200) {
+                            showToast("success", "User Registered", response?.data?.message);
+                            setShowOverlay(true);
+                            setTimeout(() => {
+                                router.push(`/auth/login`);
+                            }, 3000);
+                        } else {
+                            showToast("error", "Login Error", response.error);
+                        }
+                    } catch (err: any) {
+                        showToast("error", "Email is already taken, ", err?.data ? err?.data?.message : "Something Went Wrong");
+                    } finally {
+                        setSubmitting(false);
                     }
-                    const response = await register(userData).unwrap();
+                }}
+            >
+                {(formik) => (
+                    <Form>
+                        {showNameFieldsForRegistration ? (
+                            <>
+                                {/* first + last name inline */}
+                                <div className="flex gap-2 mt-3">
+                                    <div className="flex flex-column w-full gap-2">
+                                        <label className="solid-auth-input-label">First Name</label>
+                                        <InputText
+                                            id="firstName"
+                                            name="firstName"
+                                            placeholder="First Name"
+                                            onChange={formik.handleChange}
+                                            value={formik.values.firstName}
+                                            invalid={!!formik.errors.firstName}
+                                        />
+                                        {isFormFieldValid(formik, "firstName") && (
+                                            <Message severity="error" text={formik.errors.firstName?.toString()} />
+                                        )}
+                                    </div>
 
-                    if (response?.statusCode === 200) {
-                        showToast("success", "User Registered", response?.data?.message);
-                        setShowOverlay(true);
-                        setTimeout(() => {
-                            router.push(`/auth/login`);
-                        }, 3000);
-                    } else {
-                        showToast("error", "Login Error", response.error);
-                    }
-                } catch (err: any) {
-                    showToast("error", "Email is already taken, ", err?.data ? err?.data?.message : "Something Went Wrong");
-                } finally {
-                    setSubmitting(false);
-                }
-            }}
-        >
-            {(formik) => (
-                <Form>
-                    {showNameFieldsForRegistration ? (
-                        <>
-                            {/* first + last name inline */}
-                            <div className="flex gap-2 mt-3">
-                                <div className="flex flex-column w-full gap-2">
-                                    <label className="solid-auth-input-label">First Name</label>
-                                    <InputText
-                                        id="firstName"
-                                        name="firstName"
-                                        placeholder="First Name"
-                                        onChange={formik.handleChange}
-                                        value={formik.values.firstName}
-                                        invalid={!!formik.errors.firstName}
-                                    />
-                                    {isFormFieldValid(formik, "firstName") && (
-                                        <Message severity="error" text={formik.errors.firstName?.toString()} />
-                                    )}
+                                    <div className="flex flex-column w-full gap-2">
+                                        <label className="solid-auth-input-label">Last Name</label>
+                                        <InputText
+                                            id="lastName"
+                                            name="lastName"
+                                            placeholder="Last Name"
+                                            onChange={formik.handleChange}
+                                            value={formik.values.lastName}
+                                            invalid={!!formik.errors.lastName}
+                                        />
+                                        {isFormFieldValid(formik, "lastName") && (
+                                            <Message severity="error" text={formik.errors.lastName?.toString()} />
+                                        )}
+                                    </div>
                                 </div>
+                            </>
+                        ) : (
+                            <>
+                                {/* username (only if name fields not shown) */}
+                                <div>
+                                    <div className="flex flex-column gap-2 mt-3">
+                                        <label className="solid-auth-input-label">Username</label>
+                                        <InputText
+                                            id="username"
+                                            name="username"
+                                            placeholder="username"
+                                            onChange={formik.handleChange}
+                                            value={formik.values.username}
+                                            invalid={!!formik.errors.username}
+                                        />
+                                    </div>
+                                    {isFormFieldValid(formik, "username") &&
+                                        <Message severity="error" text={formik.errors.username?.toString()} />}
+                                </div>
+                            </>
+                        )}
 
-                                <div className="flex flex-column w-full gap-2">
-                                    <label className="solid-auth-input-label">Last Name</label>
-                                    <InputText
-                                        id="lastName"
-                                        name="lastName"
-                                        placeholder="Last Name"
-                                        onChange={formik.handleChange}
-                                        value={formik.values.lastName}
-                                        invalid={!!formik.errors.lastName}
-                                    />
-                                    {isFormFieldValid(formik, "lastName") && (
-                                        <Message severity="error" text={formik.errors.lastName?.toString()} />
-                                    )}
-                                </div>
+                        {/* Email */}
+                        <div>
+                            <div className="flex flex-column gap-2 mt-3">
+                                <label className="solid-auth-input-label">Email</label>
+                                <InputText
+                                    id="email"
+                                    name="email"
+                                    placeholder="Yourgmail@123.com"
+                                    onChange={formik.handleChange}
+                                    value={formik.values.email}
+                                    invalid={!!formik.errors.email}
+                                />
                             </div>
-                        </>
-                    ) : (
-                        <>
-                            {/* username (only if name fields not shown) */}
-                            <div>
-                                <div className="flex flex-column gap-2 mt-3">
-                                    <label className="solid-auth-input-label">Username</label>
-                                    <InputText
-                                        id="username"
-                                        name="username"
-                                        placeholder="username"
-                                        onChange={formik.handleChange}
-                                        value={formik.values.username}
-                                        invalid={!!formik.errors.username}
-                                    />
-                                </div>
-                                {isFormFieldValid(formik, "username") &&
-                                    <Message severity="error" text={formik.errors.username?.toString()} />}
+                            {isFormFieldValid(formik, "email") &&
+                                <Message severity="error" text={formik.errors.email?.toString()} />}
+                        </div>
+
+                        {/* Password */}
+                        <div>
+                            <div className="flex flex-column gap-2 mt-3">
+                                <label className="solid-auth-input-label">Password</label>
+                                <Password
+                                    id="password"
+                                    name="password"
+                                    value={formik.values.password}
+                                    onChange={formik.handleChange}
+                                    toggleMask
+                                    inputClassName="w-full"
+                                    feedback={false}
+                                    invalid={!!formik.errors.password}
+                                />
                             </div>
-                        </>
-                    )}
-
-                    {/* Email */}
-                    <div>
-                        <div className="flex flex-column gap-2 mt-3">
-                            <label className="solid-auth-input-label">Email</label>
-                            <InputText
-                                id="email"
-                                name="email"
-                                placeholder="Yourgmail@123.com"
-                                onChange={formik.handleChange}
-                                value={formik.values.email}
-                                invalid={!!formik.errors.email}
-                            />
+                            {isFormFieldValid(formik, "password") &&
+                                <Message severity="error" text={formik.errors.password?.toString()} />}
                         </div>
-                        {isFormFieldValid(formik, "email") &&
-                            <Message severity="error" text={formik.errors.email?.toString()} />}
-                    </div>
-
-                    {/* Password */}
-                    <div>
-                        <div className="flex flex-column gap-2 mt-3">
-                            <label className="solid-auth-input-label">Password</label>
-                            <Password
-                                id="password"
-                                name="password"
-                                value={formik.values.password}
-                                onChange={formik.handleChange}
-                                toggleMask
-                                inputClassName="w-full"
-                                feedback={false}
-                                invalid={!!formik.errors.password}
-                            />
+                        <SolidPasswordHelperText text={solidSettingsData?.data?.authenticationPasswordComplexityDescription} />
+                        <div className="mt-4">
+                            <Button className="w-full font-light auth-submit-button" label="Sign Up" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
                         </div>
-                        {isFormFieldValid(formik, "password") &&
-                            <Message severity="error" text={formik.errors.password?.toString()} />}
-                    </div>
-
-                    <SolidPasswordHelperText text={envPasswordHelperText} />
-
-                    {/* Submit */}
-                    <div className="mt-4">
-                        <Button
-                            className="w-full font-light auth-submit-button"
-                            label="Sign Up"
-                            disabled={formik.isSubmitting}
-                            loading={formik.isSubmitting}
-                        />
-                    </div>
-                </Form>
-            )}
-        </Formik>
-    );
-    };
-
+                    </Form>
+                )}
+            </Formik>
+        )
+    }
 
     const PasswordLessSignup = () => {
         return (
@@ -384,7 +375,7 @@ const SolidRegister = () => {
         )
     }
 
-    const AuthTabs: React.FC<AuthTabsProps> = ({ iamPasswordRegistrationEnabled, passwordlessRegistration, showNameFieldsForRegistration}) => {
+    const AuthTabs: React.FC<AuthTabsProps> = ({ iamPasswordRegistrationEnabled, passwordlessRegistration, showNameFieldsForRegistration }) => {
         if (iamPasswordRegistrationEnabled && passwordlessRegistration) {
             return (
                 <TabView className="solid-auth-tabview"
@@ -392,7 +383,7 @@ const SolidRegister = () => {
                     onTabChange={(e) => setActiveIndex(e.index)}
                 >
                     <TabPanel header="With Password">
-                        <PasswordSignup showNameFieldsForRegistration={showNameFieldsForRegistration}/>
+                        <PasswordSignup showNameFieldsForRegistration={showNameFieldsForRegistration} />
                     </TabPanel>
                     <TabPanel header="Without Password">
                         <PasswordLessSignup />
@@ -400,7 +391,7 @@ const SolidRegister = () => {
                 </TabView>
             );
         } else if (iamPasswordRegistrationEnabled) {
-            return <PasswordSignup showNameFieldsForRegistration={showNameFieldsForRegistration}/>;
+            return <PasswordSignup showNameFieldsForRegistration={showNameFieldsForRegistration} />;
         } else if (passwordlessRegistration) {
             return <PasswordLessSignup />;
         } else {
@@ -410,18 +401,18 @@ const SolidRegister = () => {
     return (
         <div className="">
             <Toast ref={toast} />
-              {/* 🔹 Overlay UI */}
+            {/* 🔹 Overlay UI */}
             <div className={`auth-container position-relative ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
-            {showOverlay && (
-            <div className="absolute top-0 left-0 w-full h-full flex align-items-center justify-content-center register-success-popup">
-            <div className="inline-flex flex-column align-items-center justify-content-center text-center">
-                <ProgressSpinner style={{ width: '50px', height: '50px' }} strokeWidth="4" />
-                <p className="mt-3 text-lg font-medium text-700">
-                Registration successful,<br />you will be redirected...
-                </p>
-            </div>
-            </div>
-            )}
+                {showOverlay && (
+                    <div className="absolute top-0 left-0 w-full h-full flex align-items-center justify-content-center register-success-popup">
+                        <div className="inline-flex flex-column align-items-center justify-content-center text-center">
+                            <ProgressSpinner style={{ width: '50px', height: '50px' }} strokeWidth="4" />
+                            <p className="mt-3 text-lg font-medium text-700">
+                                Registration successful,<br />you will be redirected...
+                            </p>
+                        </div>
+                    </div>
+                )}
                 {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
                         <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>

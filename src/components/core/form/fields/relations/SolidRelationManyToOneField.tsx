@@ -15,7 +15,7 @@ import { Panel } from "primereact/panel";
 import SolidFormView from "../../SolidFormView";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
-import Handlebars from "handlebars";
+import Handlebars from "handlebars/dist/handlebars";
 import { Toast } from "primereact/toast";
 import { SolidFormFieldRender } from "../../SolidFormFieldRender";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
