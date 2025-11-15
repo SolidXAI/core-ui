@@ -68,8 +68,8 @@ export class SolidRelationManyToOneField implements ISolidField {
         // Custom validation for relation field
         if (fieldMetadata.required) {
             schema = schema.test(
-                'required-relation',
-                `${fieldLabel} is required.`,
+                ERROR_MESSAGES.REQUIRED_REALTION,
+                ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel),
                 function(value: any) {
                     // Handle empty values
                     if (!value) return false;
@@ -91,8 +91,8 @@ export class SolidRelationManyToOneField implements ISolidField {
     
         // Add validation to ensure valid selection
         schema = schema.test(
-            'valid-selection',
-            `Please select a valid ${fieldLabel} from the dropdown.`,
+            ERROR_MESSAGES.VALIDATE_SELECTION,
+            ERROR_MESSAGES.SELECT_VALID_FROM_DROPDOWN(fieldLabel),
             function(value: any) {
                 // If not required and empty, it's valid
                 if (!fieldMetadata.required && (!value || value === '')) {

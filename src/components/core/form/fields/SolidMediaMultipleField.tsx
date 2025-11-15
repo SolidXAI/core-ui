@@ -60,15 +60,15 @@ export class SolidMediaMultipleField implements ISolidField {
             schema = Yup.array()
                 .of(
                     Yup.mixed<File | object>()
-                        .required(`${fieldLabel} is required.`)
+                        .required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel))
                         .test(
-                            "file-or-object",
-                            `${fieldLabel} must be a file or an object.`,
+                            ERROR_MESSAGES.FILE_OBJECT,
+                            ERROR_MESSAGES.MUST_BE_FILE_OBJECT(fieldLabel),
                             (value) =>
                                 value instanceof File || typeof value === "object" // Validate File or object
                         )
                 )
-                .min(1, `${fieldLabel} must have at least one item.`); // Ensure array has at least one item
+                .min(1, ERROR_MESSAGES.FIELD_MUST_HAVE_ITEM(fieldLabel)); // Ensure array has at least one item
         } else {
             // For optional fields: allow null, undefined, or an empty array
             schema = Yup.array()
@@ -76,8 +76,8 @@ export class SolidMediaMultipleField implements ISolidField {
                     Yup.mixed<File | object>()
                         .nullable() // Allow null explicitly
                         .test(
-                            "file-or-object",
-                            `${fieldLabel} must be a file, an object, or empty.`,
+                            ERROR_MESSAGES.FILE_OBJECT,
+                            ERROR_MESSAGES.MUST_BE_FILE_OBJECT(fieldLabel),
                             (value) =>
                                 value === null || // Allow null
                                 value === undefined || // Allow undefined
@@ -87,8 +87,8 @@ export class SolidMediaMultipleField implements ISolidField {
                 )
                 .nullable() // Allow null array explicitly
                 .test(
-                    "is-empty-or-valid-array",
-                    `${fieldLabel} must be an empty array or contain only files/objects.`,
+                    ERROR_MESSAGES.EMPTY_VALID_ARRAY,
+                    ERROR_MESSAGES.CONTAIN_EMPTY_ARRAY_OR_FILE_OBECT(fieldLabel),
                     (value) => value === null || value === undefined || Array.isArray(value)
                 );
         }

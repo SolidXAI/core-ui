@@ -14,6 +14,7 @@ import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { usePathname, useSearchParams } from "next/navigation";
 import { updatePasswordField } from "@/helpers/updatePasswordField";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 export class SolidPasswordField implements ISolidField {
 
@@ -51,25 +52,25 @@ export class SolidPasswordField implements ISolidField {
         // 1. required 
         // 1. required
         if (fieldMetadata.required) {
-            schema = schema.required(`${fieldLabel} is required.`);
+            schema = schema.required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel));
         } else {
             schema = schema.nullable(); // Allow null when not required
         }
 
         // 2. length (min/max)
         if (fieldMetadata.min && fieldMetadata.min > 0) {
-            schema = schema.min(fieldMetadata.min, `${fieldLabel} should be at-least ${fieldMetadata.min} characters long.`);
+            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel,fieldMetadata.min));
         }
         if (fieldMetadata.max && fieldMetadata.max > 0) {
-            schema = schema.max(fieldMetadata.max, `${fieldLabel} should not be more than ${fieldMetadata.max} characters long.`);
+            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel,fieldMetadata.min));
         }
         // 3. regular expression
         if (fieldMetadata.regexPattern) {
-            const regexPatternNotMatchingErrorMsg = fieldMetadata.regexPatternNotMatchingErrorMsg ?? `${fieldLabel} has invalid data.`
+            const regexPatternNotMatchingErrorMsg = fieldMetadata.regexPatternNotMatchingErrorMsg ?? ERROR_MESSAGES.FIELD_INVALID_DATA(fieldLabel)
             schema = schema.matches(fieldMetadata.regexPattern, regexPatternNotMatchingErrorMsg);
         }
         //check password and confirm password match if password have value
-        schema = schema.test('passwords-match', `${fieldLabel}s must match.`, function (value) {
+        schema = schema.test('passwords-match', ERROR_MESSAGES.FIELD_MUST_MATCH(fieldLabel), function (value) {
             const { path, parent } = this;
             if (value) {
                 return value === parent[confirmFieldName];
@@ -283,10 +284,10 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
             [confirmFieldName]: '',
         },
         validationSchema: Yup.object({
-            [fieldName]: Yup.string().required(`${fieldLabel} is required.`),
+            [fieldName]: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel)),
             [confirmFieldName]: Yup.string()
-                .required(`Confirm ${fieldLabel} is required.`)
-                .oneOf([Yup.ref(fieldName)], `${fieldLabel}s must match.`),
+                .required(`Confirm ${ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel)}`)
+                .oneOf([Yup.ref(fieldName)], ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel)),
         }),
         onSubmit: async (values: { [x: string]: any; }, { resetForm }: any) => {
             try {

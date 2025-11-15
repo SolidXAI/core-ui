@@ -41,7 +41,7 @@ export const SolidFormUserViewLayout = ({ solidFormViewMetaData, setLayoutDialog
                         layout: JSON.stringify(parsedLayout)
                     }).unwrap();
                     if (response.statusCode === 200) {
-                        showToast("success", "Layout", "Form Layout Updated successfully!");
+                        showToast("success", ERROR_MESSAGES.LAYOUT, ERROR_MESSAGES.FORM_LAYOUT_UPDATE);
                         setLayoutDialogVisible(false);
                         window.location.reload();
                     }

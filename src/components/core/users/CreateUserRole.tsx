@@ -31,14 +31,14 @@ const CreateUserRole = ({ data }: any) => {
     roleName: data ? data.roleName : ""
   };
   const validationSchema = Yup.object({
-    username: Yup.string().required("Username is required."),
+    username: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('User Name')),
     roleName: Yup.lazy((value) => {
       if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-          return Yup.object().required("Role Name is required.");
+          return Yup.object().required(ERROR_MESSAGES.FIELD_REUQIRED('Role Name'));
       } else if (typeof value === 'string') {
-          return Yup.string().required("Role Name is required."); 
+          return Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Role Name')); 
       } else {
-          return Yup.mixed().required("Role Name is required.");
+          return Yup.mixed().required(ERROR_MESSAGES.FIELD_REUQIRED('Role Name'));
       }
     })
   });

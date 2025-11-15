@@ -10,6 +10,7 @@ import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 import { Button } from "primereact/button";
 import { useState } from "react";
 import { Password } from "primereact/password";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 export class SolidShortTextField implements ISolidField {
 
@@ -43,20 +44,20 @@ export class SolidShortTextField implements ISolidField {
         // 1. required  
         // 1. required
         if (fieldMetadata.required) {
-            schema = schema.required(`${fieldLabel} is required.`);
+            schema = schema.required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel));
         } else {
             schema = schema.nullable(); // Allow null when not required
         }
         // 2. length (min/max)
         if (fieldMetadata.min && fieldMetadata.min > 0) {
-            schema = schema.min(fieldMetadata.min, `${fieldLabel} should be at-least ${fieldMetadata.min} characters long.`);
+            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel,fieldMetadata.min));
         }
         if (fieldMetadata.max && fieldMetadata.max > 0) {
-            schema = schema.max(fieldMetadata.max, `${fieldLabel} should not be more than ${fieldMetadata.max} characters long.`);
+            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel,fieldMetadata.min));
         }
         // 3. regular expression
         if (fieldMetadata.regexPattern) {
-            const regexPatternNotMatchingErrorMsg = fieldMetadata.regexPatternNotMatchingErrorMsg ?? `${fieldLabel} has invalid data.`
+            const regexPatternNotMatchingErrorMsg = fieldMetadata.regexPatternNotMatchingErrorMsg ?? ERROR_MESSAGES.FIELD_INVALID_DATA(fieldLabel)
             schema = schema.matches(fieldMetadata.regexPattern, regexPatternNotMatchingErrorMsg);
         }
 

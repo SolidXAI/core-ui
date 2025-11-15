@@ -68,7 +68,7 @@ export const SolidNotifications = () => {
                 });
 
                 if (updatedSettingsArray.length === 0) {
-                    showToast("success", "No Changes", "No settings were updated");
+                    showToast("success", ERROR_MESSAGES.NO_CHANGE, ERROR_MESSAGES.NO_SETTING_UPDATE);
                     return;
                 }
 
