@@ -62,58 +62,58 @@ export class SolidRelationManyToOneField implements ISolidField {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-    
+
         let schema = Yup.mixed();
-    
+
         // Custom validation for relation field
         if (fieldMetadata.required) {
             schema = schema.test(
                 ERROR_MESSAGES.REQUIRED_REALTION,
                 ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel),
-                function(value: any) {
+                function (value: any) {
                     // Handle empty values
                     if (!value) return false;
-                    
+
                     // If it's an object with solidManyToOneValue, check if it's valid
                     if (typeof value === 'object' && value !== null && (value as any).solidManyToOneValue) {
                         return true;
                     }
-                    
+
                     // If it's a string (user typed but didn't select), it's invalid for required field
                     if (typeof value === 'string') {
                         return false;
                     }
-                    
+
                     return false;
                 }
             );
         }
-    
+
         // Add validation to ensure valid selection
         schema = schema.test(
             ERROR_MESSAGES.VALIDATE_SELECTION,
             ERROR_MESSAGES.SELECT_VALID_FROM_DROPDOWN(fieldLabel),
-            function(value: any) {
+            function (value: any) {
                 // If not required and empty, it's valid
                 if (!fieldMetadata.required && (!value || value === '')) {
                     return true;
                 }
-                
+
                 // If it's an object with solidManyToOneValue, it's a valid selection
                 if (typeof value === 'object' && value !== null && (value as any).solidManyToOneValue) {
                     return true;
                 }
-                
+
                 // If it's a string (user typed but didn't select), it's invalid
                 if (typeof value === 'string' && value.trim() !== '') {
                     return false;
                 }
-                
+
                 // Empty value for non-required field
                 return !fieldMetadata.required;
             }
         );
-    
+
         return schema;
     }
 
@@ -269,7 +269,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                     console.warn(ERROR_MESSAGES.SKIPPING_EMPTY_FIXED_FILTER, parsedFilter);
                 }
             } catch (e) {
-                console.error(ERROR_MESSAGES.INVALID_JSON_WHERECLAUSE , renderedFilter);
+                console.error(ERROR_MESSAGES.INVALID_JSON_WHERECLAUSE, renderedFilter);
                 parsedFilter = {}; // fallback or throw error as needed
             }
 
@@ -523,12 +523,15 @@ export const DefaultRelationManyToOneFormViewWidget = ({ formik, fieldContext }:
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const value = formik.values[fieldLayoutInfo.attrs.name];
     const userKeyField = fieldLayoutInfo?.attrs?.coModelFieldToDisplay ? fieldLayoutInfo?.attrs?.coModelFieldToDisplay : fieldMetadata?.relationModel?.userKeyField?.name;
     const displayValue = value?.[userKeyField];
     return (
         <div className="mt-2 flex-column gap-2">
-            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            {showFieldLabel !== false && (
+                <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            )}
             <p className="m-0">{displayValue}</p>
         </div>
     );

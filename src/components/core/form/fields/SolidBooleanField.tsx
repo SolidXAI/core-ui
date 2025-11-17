@@ -374,10 +374,12 @@ export const DefaultBooleanFormViewWidget = ({ formik, fieldContext }: SolidForm
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     return (
         <div className="mt-2 flex-column gap-2">
-            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            {showFieldLabel !== false && (
+                <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            )}
             <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name] === true || formik.values[fieldLayoutInfo.attrs.name] === "true" ? "true" : "false"}</p>
         </div>
     );

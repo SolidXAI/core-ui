@@ -38,7 +38,7 @@ export class SolidShortTextField implements ISolidField {
 
     validationSchema(): Schema {
         let schema: Yup.StringSchema<string | null | undefined> = Yup.string();
-        const fieldMetadata = this.fieldContext.fieldMetadata;  
+        const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         // 1. required  
@@ -50,10 +50,10 @@ export class SolidShortTextField implements ISolidField {
         }
         // 2. length (min/max)
         if (fieldMetadata.min && fieldMetadata.min > 0) {
-            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel,fieldMetadata.min));
+            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel, fieldMetadata.min));
         }
         if (fieldMetadata.max && fieldMetadata.max > 0) {
-            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel,fieldMetadata.min));
+            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel, fieldMetadata.min));
         }
         // 3. regular expression
         if (fieldMetadata.regexPattern) {
@@ -134,13 +134,13 @@ export const DefaultShortTextFormEditWidget = ({ formik, fieldContext }: SolidFo
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
     return (
         <>
-            {includeWrapper === 'yes' && 
+            {includeWrapper === 'yes' &&
                 <div className="relative">
                     <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                         {showFieldLabel != false &&
                             <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                                 {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                                <SolidFieldTooltip fieldContext={fieldContext}/>
+                                <SolidFieldTooltip fieldContext={fieldContext} />
                                 {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                             </label>
                         }
@@ -168,7 +168,7 @@ export const DefaultShortTextFormEditWidget = ({ formik, fieldContext }: SolidFo
                     {showFieldLabel != false &&
                         <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
                             {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                            <SolidFieldTooltip fieldContext={fieldContext}/>
+                            <SolidFieldTooltip fieldContext={fieldContext} />
                             {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                         </label>
                     }
@@ -194,17 +194,19 @@ export const DefaultShortTextFormViewWidget = ({ formik, fieldContext }: SolidFo
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-    
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     return (
         <div className="mt-2 flex-column gap-2">
-            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            {showFieldLabel !== false && (
+                <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            )}
             <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name]}</p>
         </div>
     );
 }
 
 // Masked ShortText - LIST
-export const MaskedShortTextListViewWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column  }: SolidListFieldWidgetProps) => {
+export const MaskedShortTextListViewWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
     const colVal = rowData[column.attrs.name];
     // Mask it (show same number of * as characters, or fixed length if you want)
     const maskedValue = colVal ? '*'.repeat(colVal.length) : '';
@@ -218,7 +220,7 @@ export const MaskedShortTextFormViewWidget = ({ formik, fieldContext }: SolidFor
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     // Get actual value
     const rawValue: string = formik.values[fieldLayoutInfo.attrs.name] || '';
 
@@ -227,7 +229,9 @@ export const MaskedShortTextFormViewWidget = ({ formik, fieldContext }: SolidFor
 
     return (
         <div className="mt-2 flex-column gap-2">
-            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            {showFieldLabel !== false && (
+                <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            )}
             <p className="m-0">{maskedValue}</p>
         </div>
     );

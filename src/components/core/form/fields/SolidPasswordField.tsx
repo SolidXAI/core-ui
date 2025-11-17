@@ -24,7 +24,7 @@ export class SolidPasswordField implements ISolidField {
         this.fieldContext = fieldContext;
     }
 
-   updateFormData(value: any, formData: FormData): void {
+    updateFormData(value: any, formData: FormData): void {
         const fieldName = this.fieldContext?.field?.attrs?.name;
         if (value !== undefined && value !== null && value !== '') {
             formData.append(fieldName, value);
@@ -59,10 +59,10 @@ export class SolidPasswordField implements ISolidField {
 
         // 2. length (min/max)
         if (fieldMetadata.min && fieldMetadata.min > 0) {
-            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel,fieldMetadata.min));
+            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel, fieldMetadata.min));
         }
         if (fieldMetadata.max && fieldMetadata.max > 0) {
-            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel,fieldMetadata.min));
+            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel, fieldMetadata.min));
         }
         // 3. regular expression
         if (fieldMetadata.regexPattern) {
@@ -74,7 +74,7 @@ export class SolidPasswordField implements ISolidField {
             const { path, parent } = this;
             if (value) {
                 return value === parent[confirmFieldName];
-            }else if(!value && parent[confirmFieldName]){
+            } else if (!value && parent[confirmFieldName]) {
                 return false; // If password is empty but confirm password has value, show error    
             }
             return true; // If password is empty, don't validate match
@@ -109,7 +109,7 @@ export class SolidPasswordField implements ISolidField {
             <>
                 <div className={className}>
                     {viewMode === "view" &&
-                    <></>
+                        <></>
                         // this.renderExtensionRenderMode(viewWidget, formik)
                     }
                     {viewMode === "edit" && (!isCreateForm && !isFieldDataEmpty) &&
@@ -150,11 +150,13 @@ export const DefaultPasswordFormViewWidget = ({ formik, fieldContext }: SolidFor
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const [isText, setIsText] = useState(false)
     return (
         <div className="mt-2 flex-column gap-2">
-            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            {showFieldLabel !== false && (
+                <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            )}
             <div className="flex align-items-center gap-4">
                 <p className="m-0">
                     {isText ? formik.values[fieldLayoutInfo.attrs.name] : "••••••••"}
@@ -238,7 +240,7 @@ export const DefaultPasswordFormCreateWidget = ({ formik, fieldContext }: SolidF
                         autoComplete="new-password"
                     />
                     {isFormFieldValid(formik, `${fieldLayoutInfo.attrs.name}Confirm`) && (
-                            <Message severity="error" text={formik?.errors[`${fieldLayoutInfo.attrs.name}Confirm`]?.toString()} />
+                        <Message severity="error" text={formik?.errors[`${fieldLayoutInfo.attrs.name}Confirm`]?.toString()} />
                     )}
                 </div>
             </div>
@@ -265,9 +267,9 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
     const url = fieldContext?.modelName
-            .replace(/([a-z0-9])([A-Z])/g, '$1-$2') 
-            .replace(/([A-Z])([A-Z][a-z])/g, '$1-$2')
-            .toLowerCase();
+        .replace(/([a-z0-9])([A-Z])/g, '$1-$2')
+        .replace(/([A-Z])([A-Z][a-z])/g, '$1-$2')
+        .toLowerCase();
     const id = fieldContext?.data?.id;
 
     const isFormFieldValid = (formik: any, fieldName: string) =>
@@ -292,21 +294,21 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
         onSubmit: async (values: { [x: string]: any; }, { resetForm }: any) => {
             try {
                 await updatePasswordField({
-                  url,
-                  id,
-                  fieldName,
-                  fieldValue: values[fieldName],
-                confirmFieldName,
-                confirmFieldValue: values[confirmFieldName],
+                    url,
+                    id,
+                    fieldName,
+                    fieldValue: values[fieldName],
+                    confirmFieldName,
+                    confirmFieldValue: values[confirmFieldName],
                 });
-            
+
                 formik.setFieldValue(fieldName, values[fieldName]);
                 resetForm();
                 setVisible(false);
-              } catch (err) {
+            } catch (err) {
                 console.error(err);
                 // TODO: show user-friendly error
-              }
+            }
         },
     });
 

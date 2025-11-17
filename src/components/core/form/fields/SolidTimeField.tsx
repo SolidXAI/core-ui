@@ -26,7 +26,7 @@ function parseTimeStringToDate(timeStr: string): Date | null {
 // Formats a Date object to a HH:mm:ss string for display
 function formatTime(date: Date | null): string {
     if (!date) return "";
-    return date.toTimeString().split(" ")[0]; 
+    return date.toTimeString().split(" ")[0];
 }
 
 
@@ -40,7 +40,7 @@ export class SolidTimeField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-         if (value instanceof Date) {
+        if (value instanceof Date) {
             // Use local date with selected time
             const now = new Date();
             const localDate = new Date(
@@ -51,7 +51,7 @@ export class SolidTimeField implements ISolidField {
                 value.getMinutes(),
                 value.getSeconds()
             );
-    
+
             formData.append(fieldLayoutInfo.attrs.name, localDate.toISOString());
         } else if (value) {
             formData.append(fieldLayoutInfo.attrs.name, value);
@@ -156,9 +156,9 @@ export const DefaultTimeFormEditWidget = ({ formik, fieldContext }: SolidFormFie
     const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
 
-    const fieldValue =formik.values[fieldLayoutInfo.attrs.name];
+    const fieldValue = formik.values[fieldLayoutInfo.attrs.name];
 
-    
+
 
     return (
         <div className="relative">
@@ -204,7 +204,7 @@ export const DefaultTimeFormViewWidget = ({ formik, fieldContext }: SolidFormFie
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const fieldValue = formik.values[fieldLayoutInfo.attrs.name];
-
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     let displayValue = "";
     if (fieldValue instanceof Date) {
         displayValue = formatTime(fieldValue);
@@ -214,7 +214,9 @@ export const DefaultTimeFormViewWidget = ({ formik, fieldContext }: SolidFormFie
 
     return (
         <div className="mt-2 flex-column gap-2">
-            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            {showFieldLabel !== false && (
+                <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            )}
             <p className="m-0">{displayValue || "-"}</p>
         </div>
     );
