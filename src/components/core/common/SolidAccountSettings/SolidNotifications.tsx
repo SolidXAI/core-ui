@@ -1,11 +1,11 @@
 "use client"
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 import { useBulkUpdateSolidUserSettingsMutation, useGetSolidSettingsQuery } from '@/redux/api/solidSettingsApi';
 import { useFormik } from 'formik';
 import { Button } from 'primereact/button';
 import { InputSwitch } from 'primereact/inputswitch';
 import { Toast } from 'primereact/toast';
 import React, { useEffect, useRef } from 'react'
-
 export const SolidNotifications = () => {
     const {
         data: solidSettingsData,
@@ -68,7 +68,7 @@ export const SolidNotifications = () => {
                 });
 
                 if (updatedSettingsArray.length === 0) {
-                    showToast("success", "No Changes", "No settings were updated");
+                    showToast("success", ERROR_MESSAGES.NO_CHANGE, ERROR_MESSAGES.NO_SETTING_UPDATE);
                     return;
                 }
 
@@ -79,11 +79,11 @@ export const SolidNotifications = () => {
                 const response = await bulkUpdateSolidSettings({ data: formData }).unwrap();
 
                 if (response.statusCode === 200) {
-                    showToast("success", "Updated", "Settings updated");
+                    showToast("success", ERROR_MESSAGES.UPDATED, ERROR_MESSAGES.SETTING_UPDATED);
                 }
 
             } catch (error) {
-                showToast("error", "Failed", "Something went wrong");
+                showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
             }
         },
     })

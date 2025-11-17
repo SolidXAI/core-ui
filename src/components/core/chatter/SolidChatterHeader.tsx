@@ -7,7 +7,7 @@ import { useEffect, useState } from 'react'
 import styles from './chatter.module.css'
 import { SolidMessageComposer } from './SolidMessageComposer'
 import { useLazyGetusersQuery } from '@/redux/api/userApi'
-
+import { ERROR_MESSAGES } from '@/constants/error-messages'
 interface FilterState {
     name: string;
     startDate: Date | null;
@@ -70,7 +70,7 @@ export const SolidChatterHeader = (props: Props) => {
             const response = await getUsers(`filters[fullName][$containsi]=${event.query}`).unwrap();
             setSuggestions(response?.data?.records || []);
         } catch (error) {
-            console.error('Error fetching users:', error);
+            console.error(ERROR_MESSAGES.FETCHING_USER, error);
             setSuggestions([]);
         }
     };

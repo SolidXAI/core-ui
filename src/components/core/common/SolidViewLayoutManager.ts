@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { LayoutAttribute, LayoutNode } from "@/types/solid-core";
 
 export class SolidViewLayoutManager {
@@ -77,7 +78,7 @@ export class SolidViewLayoutManager {
     // Remove a node and its children
     removeNode(name: string): boolean {
         if (this.layout.attrs.name === name) {
-            console.warn("Cannot remove the root node.");
+            console.warn(ERROR_MESSAGES.REMOVE_ROOT_NODE);
             return false;
         }
 

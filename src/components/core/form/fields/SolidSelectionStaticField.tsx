@@ -10,6 +10,7 @@ import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { RadioButton } from "primereact/radiobutton";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 import { SelectButton } from "primereact/selectbutton";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 export class SolidSelectionStaticField implements ISolidField {
 
@@ -106,10 +107,10 @@ export class SolidSelectionStaticField implements ISolidField {
             if (fieldMetadata.required) {
                 schema = Yup.array()
                     .of(Yup.object({
-                        value: Yup.string().required(`${fieldLabel} is required.`)
+                        value: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel))
                     }))
-                    .min(1, `${fieldLabel} is required.`)
-                    .required(`${fieldLabel} is required.`);
+                    .min(1, ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel))
+                    .required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel));
             } else {
                 schema = Yup.array()
                     .of(Yup.object({
@@ -121,8 +122,8 @@ export class SolidSelectionStaticField implements ISolidField {
             // For single select, create object schema
             if (fieldMetadata.required) {
                 schema = Yup.object({
-                    value: Yup.string().required(`${fieldLabel} is required.`)
-                }).required(`${fieldLabel} is required.`);
+                    value: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel))
+                }).required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel));
             } else {
                 schema = Yup.object({
                     value: Yup.string()

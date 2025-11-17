@@ -8,6 +8,7 @@ import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 export class SolidDateField implements ISolidField {
 
@@ -48,7 +49,7 @@ export class SolidDateField implements ISolidField {
 
         // 1. required 
         if (fieldMetadata.required) {
-            schema = schema.required(`${fieldLabel} is required.`);
+            schema = schema.required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel));
         } else {
             schema = schema.nullable();
         }

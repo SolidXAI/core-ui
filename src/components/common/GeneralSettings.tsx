@@ -23,6 +23,8 @@ import { SettingsImageRemoveButton } from './SolidSettings/SettingsImageRemoveBu
 import { Dropdown } from 'primereact/dropdown';
 import { OpenAiProviderComponent } from './SolidSettings/LlmSettings/OpenAiProviderComponent';
 import { AnthropicProviderComponent } from './SolidSettings/LlmSettings/AnthropicProviderComponent';
+import { ERROR_MESSAGES } from '@/constants/error-messages';
+import { Editor } from "primereact/editor";
 
 
 export const GeneralSettings = () => {
@@ -79,6 +81,9 @@ export const GeneralSettings = () => {
         authScreenRightBackgroundImage: solidSettingsData?.data?.system?.authScreenRightBackgroundImage ?? null,
         authScreenLeftBackgroundImage: solidSettingsData?.data?.system?.authScreenLeftBackgroundImage ?? null,
         authScreenCenterBackgroundImage: solidSettingsData?.data?.system?.authScreenCenterBackgroundImage ?? null,
+        authenticationPasswordRegex: solidSettingsData?.data?.system?.authenticationPasswordRegex ?? null,
+        authenticationPasswordRegexErrorMessage: solidSettingsData?.data?.system?.authenticationPasswordRegexErrorMessage ?? null,
+        authenticationPasswordComplexityDescription: solidSettingsData?.data?.system?.authenticationPasswordComplexityDescription ?? null,
         solidXGenAiCodeBuilderConfig: solidSettingsData?.data?.system?.solidXGenAiCodeBuilderConfig ?? {
             defaultProvider: "",
             availableProviders: []
@@ -137,7 +142,7 @@ export const GeneralSettings = () => {
                 });
 
                 if (updatedSettingsArray.length === 0) {
-                    showToast("success", "No Changes", "No settings were updated");
+                    showToast("success", ERROR_MESSAGES.NO_CHANGE, ERROR_MESSAGES.NO_SETTING_UPDATE);
                     return;
                 }
 
@@ -148,11 +153,11 @@ export const GeneralSettings = () => {
                 const response = await bulkUpdateSolidSettings({ data: formData }).unwrap();
 
                 if (response.statusCode === 200) {
-                    showToast("success", "Updated", "Settings updated");
+                    showToast("success", ERROR_MESSAGES.UPDATED, ERROR_MESSAGES.SETTING_UPDATED);
                 }
 
             } catch (error) {
-                showToast("error", "Failed", "Something went wrong");
+                showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
             }
         },
     });
@@ -266,8 +271,8 @@ export const GeneralSettings = () => {
                 if (file.size > 2 * 1024 * 1024) {
                     toast.current?.show({
                         severity: "error",
-                        summary: "File too large",
-                        detail: "Maximum file size is 2MB",
+                        summary: ERROR_MESSAGES.FILE_LARGE,
+                        detail: ERROR_MESSAGES.MAX_FILE_SIZE,
                         life: 3000,
                     });
                     return;
@@ -285,8 +290,8 @@ export const GeneralSettings = () => {
             if (file.size > 2 * 1024 * 1024) {
                 toast.current?.show({
                     severity: "error",
-                    summary: "File too large",
-                    detail: "Maximum file size is 2MB",
+                    summary: ERROR_MESSAGES.FILE_LARGE,
+                    detail: ERROR_MESSAGES.MAX_FILE_SIZE,
                     life: 3000,
                 });
                 return;
@@ -302,8 +307,8 @@ export const GeneralSettings = () => {
             if (file.size > 2 * 1024 * 1024) {
                 toast.current?.show({
                     severity: "error",
-                    summary: "File too large",
-                    detail: "Maximum file size is 2MB",
+                    summary: ERROR_MESSAGES.FILE_LARGE,
+                    detail: ERROR_MESSAGES.MAX_FILE_SIZE,
                     life: 3000,
                 });
                 return;
@@ -824,6 +829,62 @@ export const GeneralSettings = () => {
                                                                 name="forceChangePasswordOnFirstLogin"
                                                                 checked={formik.values.forceChangePasswordOnFirstLogin}
                                                                 onChange={(e) => formik.setFieldValue("forceChangePasswordOnFirstLogin", e.value)}
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-6 mt-4">
+                                                    <div className="formgrid grid align-items-center">
+                                                        <div className="col-5">
+                                                            <label className="form-field-label">Password Regex</label>
+                                                        </div>
+                                                        <div className="col-7">
+                                                            <InputTextarea
+                                                                rows={3}
+                                                                id="authenticationPasswordRegex"
+                                                                name="authenticationPasswordRegex"
+                                                                onChange={formik.handleChange}
+                                                                value={formik.values.authenticationPasswordRegex}
+                                                                className='w-full'
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-6 mt-4">
+                                                    <div className="formgrid grid align-items-start">
+                                                        <div className="col-5">
+                                                            <label className="form-field-label">Password Regex Error Message</label>
+                                                        </div>
+                                                        <div className="col-7">
+                                                            <InputTextarea
+                                                                rows={3}
+                                                                id="authenticationPasswordRegexErrorMessage"
+                                                                name="authenticationPasswordRegexErrorMessage"
+                                                                onChange={formik.handleChange}
+                                                                value={formik.values.authenticationPasswordRegexErrorMessage}
+                                                                className='w-full'
+                                                            />
+                                                        </div>
+                                                    </div>
+                                                </div>
+                                                <div className="col-12 mt-4">
+                                                    <div className="formgrid grid align-items-start">
+                                                        <div className="col-3">
+                                                            <label className="form-field-label">Password Regex Description</label>
+                                                        </div>
+                                                        <div className="col-9">
+                                                            <Editor
+                                                                key={'authenticationPasswordComplexityDescription'}
+                                                                id={'authenticationPasswordComplexityDescription'}
+                                                                value={formik.values.authenticationPasswordComplexityDescription}
+                                                                onTextChange={(e) =>
+                                                                    formik.setFieldValue(
+                                                                        "authenticationPasswordComplexityDescription", // the formik field name
+                                                                        e.htmlValue // the HTML content from the editor
+                                                                    )
+                                                                }
+                                                                style={{ height: "320px", }}
+                                                                className="solid-custom-editor bg-white"
                                                             />
                                                         </div>
                                                     </div>

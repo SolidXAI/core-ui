@@ -1,3 +1,5 @@
+import { ERROR_MESSAGES } from "@/constants/error-messages";
+
 export const downloadMediaFile = async (fileUrl: string, fileName: string) => {
     try {
         const response = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/${fileUrl}`);
@@ -14,6 +16,6 @@ export const downloadMediaFile = async (fileUrl: string, fileName: string) => {
         // Clean up the object URL
         URL.revokeObjectURL(link.href);
     } catch (error) {
-        console.error("Download failed:", error);
+        console.error(ERROR_MESSAGES.DOWNLOAD_FAILED, error);
     }
 };

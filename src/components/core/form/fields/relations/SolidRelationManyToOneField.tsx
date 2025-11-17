@@ -15,10 +15,11 @@ import { Panel } from "primereact/panel";
 import SolidFormView from "../../SolidFormView";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
-import Handlebars from "handlebars";
+import Handlebars from "handlebars/dist/handlebars";
 import { Toast } from "primereact/toast";
 import { SolidFormFieldRender } from "../../SolidFormFieldRender";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
 export class SolidRelationManyToOneField implements ISolidField {
@@ -67,8 +68,8 @@ export class SolidRelationManyToOneField implements ISolidField {
         // Custom validation for relation field
         if (fieldMetadata.required) {
             schema = schema.test(
-                'required-relation',
-                `${fieldLabel} is required.`,
+                ERROR_MESSAGES.REQUIRED_REALTION,
+                ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel),
                 function(value: any) {
                     // Handle empty values
                     if (!value) return false;
@@ -90,8 +91,8 @@ export class SolidRelationManyToOneField implements ISolidField {
     
         // Add validation to ensure valid selection
         schema = schema.test(
-            'valid-selection',
-            `Please select a valid ${fieldLabel} from the dropdown.`,
+            ERROR_MESSAGES.VALIDATE_SELECTION,
+            ERROR_MESSAGES.SELECT_VALID_FROM_DROPDOWN(fieldLabel),
             function(value: any) {
                 // If not required and empty, it's valid
                 if (!fieldMetadata.required && (!value || value === '')) {
@@ -265,10 +266,10 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                     queryData.filters.$and.push(parsedFilter);
                     fixedFilterParsed = true;
                 } else {
-                    console.warn("Skipping invalid/empty fixed filter:", parsedFilter);
+                    console.warn(ERROR_MESSAGES.SKIPPING_EMPTY_FIXED_FILTER, parsedFilter);
                 }
             } catch (e) {
-                console.error("Invalid whereClause JSON:", renderedFilter);
+                console.error(ERROR_MESSAGES.INVALID_JSON_WHERECLAUSE , renderedFilter);
                 parsedFilter = {}; // fallback or throw error as needed
             }
 
@@ -283,7 +284,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 
 
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
-            showToast("error", "Please select relevant fields used in fixed filter", "Fields Not selected!");
+            showToast("error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
 
         } else {
             try {
@@ -367,10 +368,10 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                     queryData.filters.$and.push(parsedFilter);
                     fixedFilterParsed = true;
                 } else {
-                    console.warn("Skipping invalid/empty fixed filter:", parsedFilter);
+                    console.warn(ERROR_MESSAGES.SKIPPING_EMPTY_FIXED_FILTER, parsedFilter);
                 }
             } catch (e) {
-                console.error("Invalid whereClause JSON:", renderedFilter);
+                console.error(ERROR_MESSAGES.INVALID_JSON_WHERECLAUSE, renderedFilter);
                 parsedFilter = {}; // fallback or throw error as needed
             }
 
@@ -378,7 +379,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 
         const autocompleteQs = qs.stringify(queryData, { encodeValuesOnly: true });
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
-            showToast("error", "Please select relevant fields used in fixed filter", "Fields Not selected!");
+            showToast("error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
 
         } else {
             try {

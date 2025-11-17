@@ -1,4 +1,5 @@
 "use client"
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 import { useChangePasswordMutation } from '@/redux/api/authApi';
 import { useFormik } from 'formik';
 import { signOut, useSession } from 'next-auth/react';
@@ -33,24 +34,24 @@ const SolidChangeForcePassword = () => {
             passwordRegex = new RegExp(unescaped);
         }
     } catch (error) {
-        console.error("Invalid password regex in .env:", error);
+        console.error(ERROR_MESSAGES.INVALID_PASSWORD_REGX, error);
     }
 
     const newPasswordValidation = passwordRegex
         ? Yup.string()
-            .matches(passwordRegex, 'Password does not meet complexity requirements')
-            .required('New password is required')
-        : Yup.string().min(6, 'Password must be at least 6 characters')
-            .required('New password is required');
+            .matches(passwordRegex, ERROR_MESSAGES.PASSWORD_DO_NOT_MEET)
+            .required(ERROR_MESSAGES.FIELD_REUQIRED('New password'))        
+        : Yup.string().min(6, ERROR_MESSAGES.PASSWORD_CHARACTER(6))
+            .required(ERROR_MESSAGES.FIELD_REUQIRED('New password'));
 
     const validationSchema = Yup.object({
-        email: Yup.string().email('Invalid email format').required('Email is required'),
-        currentPassword: Yup.string().min(6, 'Password must be at least 6 characters').required('Current password is required'),
+        email: Yup.string().email(ERROR_MESSAGES.FIELD_INAVLID_FORMAT('email')).required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
+        currentPassword: Yup.string().min(6, ERROR_MESSAGES.PASSWORD_CHARACTER(6)).required(ERROR_MESSAGES.FIELD_REUQIRED('Current password')),
         newPassword: newPasswordValidation,
         confirmPassword: Yup.string()
-            .oneOf([Yup.ref('newPassword')], 'Passwords must match')
-            .required('Confirm password is required'),
-        id: Yup.number().required('User ID is required'),
+            .oneOf([Yup.ref('newPassword')], ERROR_MESSAGES.MUST_MATCH)
+            .required(ERROR_MESSAGES.FIELD_REUQIRED('Confirm password')),
+        id: Yup.number().required(ERROR_MESSAGES.FIELD_REUQIRED('User ID')),
     });
 
     const formik = useFormik({
@@ -74,18 +75,18 @@ const SolidChangeForcePassword = () => {
                 // Call the mutation and handle the response
                 const response = await changePassword(payload).unwrap(); // Await the API call and unwrap to handle errors.
                 if (response?.error) {
-                    showToast("error", "Error", response.error)
+                    showToast("error", ERROR_MESSAGES.ERROR, response.error)
                     setErrors({
-                        currentPassword: "Incorrect Current Password",
-                        newPassword: "Passwords must match",
-                        confirmPassword: "Passwords must match",
+                        currentPassword: ERROR_MESSAGES.INCORRECT_CURRENT,
+                        newPassword: ERROR_MESSAGES.MUST_MATCH,
+                        confirmPassword: ERROR_MESSAGES.MUST_MATCH,
                     })
                 } else {
-                    showToast("success", "Force Password Change Success", "Password Change Successfully");
+                    showToast("success", ERROR_MESSAGES.FORCE_PASSWORD_CHANGE, ERROR_MESSAGES.PASSWORD_CHANGE);
                     signOut({ callbackUrl: "/auth/login" })
                 }
             } catch (err: any) {
-                showToast("error", "Login Failed", err?.data?.message);
+                showToast("error",ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message);
                 // setErrors({
                 //     currentPassword: "Incorrect Current Password",
                 // })

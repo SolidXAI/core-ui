@@ -1,3 +1,4 @@
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 
@@ -18,7 +19,7 @@ export async function refreshAccessToken(token: any) {
         accessTokenExpires: accessTokenExpires * 1000, // Convert seconds to milliseconds
       };
     } catch (error: any) {
-      console.error("Failed to refresh access token:", error.message || error.response?.data);
+      console.error(ERROR_MESSAGES.FAILED_REFRESH_TOKEN, error.message || error.response?.data);
       return {
         // ...token,
         error: "RefreshAccessTokenError",

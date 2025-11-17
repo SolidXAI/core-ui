@@ -1,7 +1,7 @@
 'use client';
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
-
 // Fallback component for missing components
 const FallbackComponent = ({ componentName }: any) => (
     <div style={{ color: "red" }}>
@@ -56,7 +56,7 @@ export const LoadDynamicJsxComponent = ({ context }: any) => {
         import(componentPath)
             .then((mod) => setComponent(() => mod.default || mod))
             .catch((err) => {
-            console.error(`Error loading component ${componentPath}:`, err);
+            console.error(` ${ERROR_MESSAGES.LOADING_COMPONENT} ${componentPath}:`, err);
             setComponent(() => () => <FallbackComponent componentName={componentKey} />);
             });
         }
