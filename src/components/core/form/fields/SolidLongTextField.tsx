@@ -15,6 +15,9 @@ import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
+import { Slider } from "primereact/slider";
+import { InputSwitch } from "primereact/inputswitch";
+import { InputNumber } from "primereact/inputnumber";
 
 
 export class SolidLongTextField implements ISolidField {
@@ -618,3 +621,301 @@ export const DynamicSelectionStaticEditWidget = ({
 };
 
 
+export const DynamicAdvancedSettingsWidget = ({
+    formik,
+    fieldContext,
+}: SolidFormFieldWidgetProps) => {
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldJsonSchema = fieldLayoutInfo.attrs.jsonSchema;
+    const name = fieldLayoutInfo.attrs.name;
+    const readOnly = fieldLayoutInfo.attrs?.readonly || fieldContext.readOnly;
+    const disabled = fieldLayoutInfo.attrs?.disabled;
+
+    const value = formik.values[name] || "{}";
+    const [data, setData] = useState(JSON.parse(value || "{}"));
+
+    useEffect(() => {
+        // Initialize with default values from schema if not present
+        console.log("json schema",fieldJsonSchema)
+        const initialized = { ...data };
+        Object.keys(fieldJsonSchema).forEach((key) => {
+            const meta = fieldJsonSchema[key];
+            if (initialized[key] === undefined && meta.defaultValue !== undefined) {
+                initialized[key] = meta.defaultValue;
+            }
+        });
+        console.log("advance setting widget",initialized)
+        setData(initialized);
+    }, []);
+
+    const handleChange = (key: string, value: any) => {
+        const updated = { ...data, [key]: value };
+        setData(updated);
+        formik.setFieldValue(name, JSON.stringify(updated));
+    };
+
+    const shouldShowField = (key: string) => {
+        const meta = fieldJsonSchema[key];
+
+        if (!meta?.visibility) return true;
+
+        if (meta.visibility === "conditional") {
+            const dependsOn = meta.dependsOn;
+            if (dependsOn) {
+                return !!data[dependsOn];
+            }
+        }
+
+        return true;
+    };
+
+    const renderInput = (key: string) => {
+        const meta: any = fieldJsonSchema[key];
+        const val = data[key];
+
+        switch (meta?.type) {
+            case "dropdown":
+            case "selectionStatic":
+                return (
+                    <Dropdown
+                        value={val}
+                        options={meta.allowedValues?.map((v: any) => ({
+                            label: typeof v === 'object' ? v.label : v,
+                            value: typeof v === 'object' ? v.value : v,
+                        }))}
+                        onChange={(e) => handleChange(key, e.value)}
+                        placeholder={meta.placeholder || "Select..."}
+                        disabled={!!disabled}
+                        className="w-full"
+                    />
+                );
+
+            case "toggle":
+            case "switch":
+                return (
+                    <div className="flex align-items-center gap-2">
+                        <InputSwitch
+                            checked={!!val}
+                            onChange={(e) => handleChange(key, e.value)}
+                            disabled={!!disabled || !!readOnly}
+                        />
+                        {meta.switchLabel && (
+                            <span className="text-600 text-sm">{meta.switchLabel}</span>
+                        )}
+                    </div>
+                );
+
+            case "slider":
+                return (
+                    <div className="w-full">
+                        <Slider
+                            value={val || meta.defaultValue || 0}
+                            onChange={(e) => handleChange(key, e.value)}
+                            min={meta.min || 0}
+                            max={meta.max || 100}
+                            step={meta.step || 1}
+                            disabled={!!disabled || !!readOnly}
+                            className="w-full"
+                        />
+                        {meta.showMinMaxLabels && (
+                            <div className="flex justify-content-between mt-2">
+                                <span className="text-600 text-sm">{meta.min || 0}</span>
+                                {meta.centerLabel && (
+                                    <span className="text-600 text-sm font-medium">{meta.centerLabel}</span>
+                                )}
+                                <span className="text-600 text-sm">{meta.max || 100}</span>
+                            </div>
+                        )}
+                    </div>
+                );
+
+            case "number":
+            case "inputNumber":
+                return (
+                    <div className="flex align-items-center gap-2 w-full">
+                        <InputNumber
+                            value={val}
+                            onValueChange={(e) => handleChange(key, e.value)}
+                            min={meta.min}
+                            max={meta.max}
+                            step={meta.step || 1}
+                            disabled={!!disabled}
+                            readOnly={!!readOnly}
+                            placeholder={meta.placeholder}
+                            className="flex-1"
+                            showButtons={meta.showButtons}
+                            buttonLayout={meta.buttonLayout || "stacked"}
+                        />
+                        {meta.suffix && (
+                            <span className="text-600 text-sm">{meta.suffix}</span>
+                        )}
+                    </div>
+                );
+
+            case "text":
+            case "inputText":
+                return (
+                    <InputText
+                        value={val || ""}
+                        onChange={(e) => handleChange(key, e.target.value)}
+                        placeholder={meta.placeholder}
+                        disabled={!!disabled}
+                        readOnly={!!readOnly}
+                        className="w-full"
+                    />
+                );
+
+            default:
+                return (
+                    <InputText
+                        value={val || ""}
+                        onChange={(e) => handleChange(key, e.target.value)}
+                        placeholder={meta.placeholder}
+                        disabled={!!disabled}
+                        readOnly={!!readOnly}
+                        className="w-full"
+                    />
+                );
+        }
+    };
+
+    const renderSection = (key: string) => {
+        const meta: any = fieldJsonSchema[key];
+
+        if (!shouldShowField(key)) return null;
+
+        // Section/Group rendering
+        if (meta.type === "section" || meta.type === "group") {
+            return (
+                <div key={key} className={`mb-4 ${meta.className || ''}`}>
+                    {/* Section Header */}
+                    {(meta.headerText || meta.headerIcon) && (
+                        <div className="flex align-items-center gap-2 mb-3">
+                            {meta.headerIcon && (
+                                <i className={`${meta.headerIcon} text-primary`} style={{ fontSize: '1.25rem' }}></i>
+                            )}
+                            <h3 className="text-lg font-semibold text-900 m-0">
+                                {meta.headerText || key}
+                            </h3>
+                        </div>
+                    )}
+
+                    {/* Section Description */}
+                    {meta.description && (
+                        <p className="text-600 text-sm mb-3 line-height-3">
+                            {meta.description}
+                        </p>
+                    )}
+
+                    {/* Section Fields */}
+                    {meta.fields && (
+                        <div className={meta.containerClass || 'flex flex-column gap-3'}>
+                            {meta.fields.map((fieldKey: string) => renderField(fieldKey))}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        return renderField(key);
+    };
+
+    const renderField = (key: string) => {
+        const meta: any = fieldJsonSchema[key];
+
+        if (!shouldShowField(key)) return null;
+
+        const isInlineLabel = meta.labelPosition === 'inline';
+        const wrapperClass = meta.wrapperClass || (isInlineLabel ? 'surface-50 border-1 surface-border border-round p-3' : '');
+
+        return (
+            <div key={key} className={`${wrapperClass} ${meta.className || ''}`}>
+                {/* Header Icon and Text */}
+                {(meta.headerText || meta.headerIcon) && !isInlineLabel && (
+                    <div className="flex align-items-center gap-2 mb-2">
+                        {meta.headerIcon && <i className={meta.headerIcon}></i>}
+                        <span className="font-semibold text-900">{meta.headerText}</span>
+                    </div>
+                )}
+
+                {/* Field Label */}
+                {meta.label !== false && !isInlineLabel && (
+                    <label className="block text-900 font-medium mb-2">
+                        {meta.label || key.charAt(0).toUpperCase() + key.slice(1)}
+                        {meta.required && <span className="text-red-500 ml-1">*</span>}
+                    </label>
+                )}
+
+                {/* Inline Label Layout */}
+                {isInlineLabel ? (
+                    <div>
+                        <label className="block text-900 font-medium mb-3">
+                            {meta.label || key.charAt(0).toUpperCase() + key.slice(1)}
+                            {meta.required && <span className="text-red-500 ml-1">*</span>}
+                        </label>
+                        <div className="flex align-items-center gap-2">
+                            {renderInput(key)}
+                        </div>
+                    </div>
+                ) : (
+                    <div className="w-full">
+                        {renderInput(key)}
+                    </div>
+                )}
+
+                {/* Help Text / Note */}
+                {meta.helpText && (
+                    <small className="block text-600 mt-2 line-height-3">{meta.helpText}</small>
+                )}
+
+                {/* Note Text */}
+                {meta.noteText && (
+                    <small className="block text-500 mt-2 line-height-3">{meta.noteText}</small>
+                )}
+            </div>
+        );
+    };
+    // Add this function before the return statement
+    const getFieldsInSections = () => {
+        const fieldsInSections = new Set<string>();
+        Object.keys(fieldJsonSchema).forEach((key) => {
+            const meta = fieldJsonSchema[key];
+            if ((meta.type === "section" || meta.type === "group") && meta.fields) {
+                meta.fields.forEach((fieldKey: string) => fieldsInSections.add(fieldKey));
+            }
+        });
+        return fieldsInSections;
+    };
+    return (
+        <div className="surface-card">
+            {/* Main Header */}
+            {fieldLayoutInfo.attrs.title && (
+                <div className="flex align-items-center gap-3 p-4 border-bottom-1 surface-border">
+                    {fieldLayoutInfo.attrs.titleIcon && (
+                        <i className={`${fieldLayoutInfo.attrs.titleIcon} text-primary`} style={{ fontSize: '1.25rem' }}></i>
+                    )}
+                    <h2 className="text-xl font-semibold text-900 m-0">
+                        {fieldLayoutInfo.attrs.title}
+                    </h2>
+                </div>
+            )}
+
+            {/* Form Fields */}
+            <div className="p-4">
+                <div className={fieldLayoutInfo.attrs.containerClass || 'flex flex-column gap-4'}>
+                    {Object.keys(fieldJsonSchema).map((key) => {
+                        const meta = fieldJsonSchema[key];
+                        const fieldsInSections = getFieldsInSections();
+                        
+                        // Skip if this field is part of a section (unless it IS a section)
+                        if (fieldsInSections.has(key) && meta.type !== "section" && meta.type !== "group") {
+                            return null;
+                        }
+                        
+                        return renderSection(key);
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+};
