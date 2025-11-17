@@ -107,19 +107,19 @@ const CreateUser = ({ data, params }: any) => {
       // ),
     email: Yup
       .string()
-      .email("Invalid email address")
-      .required("Email is required."),
-    password: Yup.string().min(6, 'Password must be at least 6 characters').nullable(),
+      .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
+      .required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
+    password: Yup.string().min(6, ERROR_MESSAGES.PASSWORD_CHARACTER(6)).nullable(),
     confirmPassword: Yup.string()
     .when('password', {
       is: (val:any) => !!val, // only validate if password is filled
       then: (schema) =>
         schema
-          .oneOf([Yup.ref('password')], 'Passwords must match')
+          .oneOf([Yup.ref('password')], ERROR_MESSAGES.FIELD_MUST_MATCH('Password'))
           .nullable(),
       otherwise: (schema) => schema.notRequired().nullable(),
     }),
-    mobile: Yup.number().required("Mobile is required."),
+    mobile: Yup.number().required(ERROR_MESSAGES.FIELD_REUQIRED('Mobile')),
   });
 
 

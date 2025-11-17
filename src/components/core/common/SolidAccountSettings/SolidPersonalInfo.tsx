@@ -60,13 +60,13 @@ export const SolidPersonalInfo = () => {
                 }
 
                 if (!formData.has("fullName") && !formData.has("profilePicture")) {
-                    showToast("info", "No Changes", "No updates were made.");
+                    showToast("info", ERROR_MESSAGES.NO_CHANGE, ERROR_MESSAGES.NO_UPDATE_MADE);
                     return;
                 }
 
                 const response = await updateUser({ data: formData }).unwrap();
                 if (response?.statusCode === 200) {
-                    showToast("success", "Profile Updated", "Profile updated successfully");
+                    showToast("success", ERROR_MESSAGES.PROFILE_SAVED, ERROR_MESSAGES.PROFILE_SAVED_SUCCESSFULLY);
                     refetch();
                     formik.resetForm();
                     setPreviewImage(null);

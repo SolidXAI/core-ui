@@ -11,6 +11,7 @@ import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 import { InputSwitch } from "primereact/inputswitch";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
 
@@ -56,7 +57,7 @@ export class SolidBooleanField implements ISolidField {
 
         // 1. required 
         if (fieldMetadata.required) {
-            schema = schema.required(`${fieldLabel} is required.`);
+            schema = schema.required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel));
         } else {
             schema = schema.nullable(); // Allow null when not required
         }

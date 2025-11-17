@@ -419,18 +419,18 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
   const schema = {
     name: Yup.string()
       // .matches(/^[a-z]+(-[a-z]+)*$/,"Invalid format. Use lowercase letters and hyphens only.")
-      .notOneOf(reservedNames, "Name Already in use. Please choose a different name.")
-      .required("Name is required."),
-    displayName: Yup.string().required("Display Name is required"),
+      .notOneOf(reservedNames,ERROR_MESSAGES.FIELD_ALREADY_USE('Name','name'))
+      .required(ERROR_MESSAGES.FIELD_REUQIRED('Name')),
+    displayName: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Display Name')),
     description: Yup.string().nullable(),
-    type: Yup.string().required("Type is required"),
+    type: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Type')),
     isSystem: Yup.boolean(),
     // Conditionally add validation rules based on `currentFields`
     ...(currentFields.includes("ormType") && {
-      ormType: Yup.string().required("Orm Type is required"),
+      ormType: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Orm Type')),
     }),
     ...(currentFields.includes("length") && {
-      length: Yup.number().typeError("Length must be an integer").nullable(),
+      length: Yup.number().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Length','interger')).nullable(),
     }),
     // ...(currentFields.includes("defaultValue") && {
     //   defaultValue: Yup.string().required("Default Value is required"),
@@ -441,22 +441,22 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
         switch (selectedType.value) {
           case "int":
           case "bigint":
-            return Yup.number().nullable().typeError("Default value must be an integer")
-              .integer("Default value must be an integer");
+            return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value','integer'))
+              .integer(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value','integer'));
           case "float":
           case "decimal":
-            return Yup.number().nullable().typeError("Default value must be an integer")
+            return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value','integer'))
           case "shortText":
           case "longText":
           case "richText":
           case "json":
-            return Yup.string().nullable().typeError("Default value must be an String")
+            return Yup.string().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value','boolean'))
           case "boolean":
-            return Yup.boolean().nullable().typeError("Default value must be a boolean")
+            return Yup.boolean().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value','boolean'))
           case "date":
           case "datetime":
           case "time":
-            return Yup.date().nullable().typeError("Default value must be an Date")
+            return Yup.date().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value','Date'))
           default:
             return Yup.mixed().nullable(); // Default fallback if no match
         }
@@ -480,12 +480,12 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
     }),
     ...(currentFields.includes("encryptionType") && encryptState == true && {
       encryptionType: Yup.string().required(
-        "Encryption Type Value is required"
+        ERROR_MESSAGES.FIELD_REUQIRED('Encryption Type Value')
       ),
     }),
     ...(currentFields.includes("decryptWhen") && encryptState == true && {
 
-      decryptWhen: Yup.string().required("Decrypt When Value is required"),
+      decryptWhen: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Decrypt When Value')),
     }),
     ...(currentFields.includes("index") && {
       index: Yup.boolean(),
@@ -498,14 +498,14 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
         .when("type", (type: any) => {
           switch (selectedType.value) {
             case "int":
-              return Yup.number().nullable().typeError("Min must be an integer")
-                .integer("Min must be an integer");
+              return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Min','interger'))
+                .integer(ERROR_MESSAGES.FIELD_MUST_BE_AN('Min','interger'));
             case "decimal":
             case "shortText":
             case "longText":
             case "richText":
             case "json":
-              return Yup.number().nullable().typeError("Min must be an integer");
+              return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Min','interger'));
             default:
               return Yup.mixed().nullable().nullable(); // Default fallback if no match
           }
@@ -519,11 +519,11 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
         .when("type", (type: any) => {
           switch (selectedType.value) {
             case "int":
-              return Yup.number().nullable().typeError("Max must be an integer")
-                .integer("Max must be an integer")
+              return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Max','interger'))
+                .integer(ERROR_MESSAGES.FIELD_MUST_BE_AN('Max','interger'))
                 .test(
-                  "greater-than-min",
-                  "Max must be greater than Min",
+                  ERROR_MESSAGES.GREATER_THAN_MIN,
+                  ERROR_MESSAGES.FIELD_MUST_BE_AN('Max','greater than Min'),
                   function (value) {
                     const { min } = this.parent; // Access sibling field 'min'
                     // if (min != null && value == null) {
@@ -542,10 +542,10 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
             case "longText":
             case "richText":
             case "json":
-              return Yup.number().nullable().typeError("Max must be an integer")
+              return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Max','interger'))
                 .test(
-                  "greater-than-min",
-                  "Max must be greater than Min",
+                  ERROR_MESSAGES.GREATER_THAN_MIN,
+                  ERROR_MESSAGES.FIELD_MUST_BE_AN('Max','greater than Min'),
                   function (value) {
                     const { min } = this.parent; // Access sibling field 'min'
                     // if (min != null && value == null) {
@@ -568,20 +568,20 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
       private: Yup.boolean(),
     }),
     ...(currentFields.includes("mediaTypes") && {
-      mediaTypes: Yup.mixed().required("Media Types must be an array").required("Media Types is required"),
+      mediaTypes: Yup.mixed().required( ERROR_MESSAGES.FIELD_MUST_BE_AN('Media Types','Arrays')).required(ERROR_MESSAGES.FIELD_REUQIRED('Media Types')),
     }),
 
     ...(currentFields.includes("mediaMaxSizeKb") && {
-      mediaMaxSizeKb: Yup.number().required("Media Max Size is required"),
+      mediaMaxSizeKb: Yup.number().required(ERROR_MESSAGES.FIELD_REUQIRED('Media Max Size')),
     }),
     ...(currentFields.includes("mediaStorageProviderId") && {
       mediaStorageProviderId: Yup.number().required(
-        "Media Storage Provider is required"
+        ERROR_MESSAGES.FIELD_REUQIRED('Media Storage Provider')
       ),
     }),
     ...(currentFields.includes("mediaStorageProviderId") && {
       mediaStorageProvider: Yup.object().required(
-        "Media Storage Provider is required"
+        ERROR_MESSAGES.FIELD_REUQIRED('Media Storage Provider')
       ),
     }),
 
@@ -589,11 +589,11 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
       mediaEmbedded: Yup.boolean(),
     }),
     ...(currentFields.includes("relationType") && {
-      relationType: Yup.string().required("Relation Type is required"),
+      relationType: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Relation Type ')),
     }),
     ...(currentFields.includes("relationCoModelSingularName") && {
       relationCoModelSingularName: Yup.string().required(
-        "Relation Model Singular Name is required"
+        ERROR_MESSAGES.FIELD_REUQIRED('Relation Model Singular Name')
       ),
     }),
     ...(currentFields.includes("relationCoModelFieldName") && {
@@ -608,7 +608,7 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
     ...(currentFields.includes("relationCoModelFieldName") && {
       relationCoModelFieldName: Yup.string().when("relationCreateInverse", (relationCreateInverse: any, schema) => {
         if (relationCreateInverse.length > 0 && relationCreateInverse[0] == true) {
-          return schema.required("Relation Co Model Field Name is required")
+          return schema.required(ERROR_MESSAGES.FIELD_REUQIRED('Relation Co Model Field Name'))
         } else {
           return schema.notRequired();
         }
@@ -625,7 +625,7 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
     ...(currentFields.includes("relation") && {
       relationCascade: Yup.string().when("relationType", (relationType: any, schema) => {
         return relationType === "one-to-one"
-          ? schema.required("Relation Cascade Value is required for one-to-one relationships")
+          ? schema.required(ERROR_MESSAGES.RELATION_CASCADE)
           : schema.notRequired();
       }),
     }),
@@ -633,7 +633,7 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
 
     ...(currentFields.includes("relationModelModuleName") && {
       relationModelModuleName: Yup.string().required(
-        "Relation Model Module Name Value is required"
+        ERROR_MESSAGES.FIELD_REUQIRED('Relation Model Module Name Value')
       ),
     }),
 
@@ -643,15 +643,15 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
 
     ...(currentFields.includes("selectionDynamicProvider") && {
       selectionDynamicProvider: Yup.string().required(
-        "Selection Dynamic Provider Value is required"
+        ERROR_MESSAGES.FIELD_REUQIRED('Selection Dynamic Provider Value ')
       ),
     }),
     ...(currentFields.includes("selectionDynamicProviderCtxt") && {
       selectionDynamicProviderCtxt: Yup.string().required(
-        "Selection Dynamic Provider Context Value is required"
+        ERROR_MESSAGES.FIELD_REUQIRED('Selection Dynamic Provider Context Value')
       ).test(
-        "is-valid-json",
-        "Computed Field Value Provider Context Value must be valid JSON",
+        ERROR_MESSAGES.IS_VALID_JSON,
+        ERROR_MESSAGES.COMPUTED_FIELD_VALIDATE_JSON,
         (value) => {
           if (!value) return false; // Ensure it's required
           try {
@@ -666,20 +666,20 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
 
     ...(currentFields.includes("selectionStaticValues") && {
       selectionStaticValues: Yup.array().of(
-        Yup.string().matches(/^[\w\s\d-]+:[\w\s-]+$/, "Label and Value are required.")
+        Yup.string().matches(/^[\w\s\d-]+:[\w\s-]+$/, ERROR_MESSAGES.FIELD_REUQIRED('Label and Value'))
       ),
     }),
     ...(currentFields.includes("computedFieldValueProvider") && {
       computedFieldValueProvider: Yup.string().required(
-        "Computed Field Function Value is required"
+        ERROR_MESSAGES.FIELD_REUQIRED('Computed Field Function Value')
       ),
     }),
     ...(currentFields.includes("computedFieldValueProviderCtxt") && {
       computedFieldValueProviderCtxt: Yup.string().required(
-        "Computed Field Value Provider Context Value is required"
+        ERROR_MESSAGES.FIELD_REUQIRED('"Computed Field Value Provider Context Value')
       ).test(
-        "is-valid-json",
-        "Computed Field Value Provider Context Value must be valid JSON",
+        ERROR_MESSAGES.IS_VALID_JSON,
+        ERROR_MESSAGES.COMPUTED_FIELD_VALIDATE_JSON,
         (value) => {
           if (!value) return false; // Ensure it's required
           try {
@@ -694,26 +694,26 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
     }),
     ...(currentFields.includes("computedFieldValueType") && {
       computedFieldValueType: Yup.string().required(
-        "Computed Field Value Type is required"
+        ERROR_MESSAGES.FIELD_REUQIRED('Computed Field Value Type')
       ),
     }),
     ...(currentFields.includes("computedFieldTriggerConfig") && {
       computedFieldTriggerConfig: Yup.array()
         .of(
           Yup.object().shape({
-            moduleName: Yup.string().required("Module name is required"),
-            modelName: Yup.string().required("Model name is required"),
-            operations: Yup.array().of(Yup.string()).min(1, "Select at least one operation"),
+            moduleName: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Module name')),
+            modelName: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Model name')),
+            operations: Yup.array().of(Yup.string()).min(1, ERROR_MESSAGES.SELECT_ONE_OPERATION),
           })
         )
-        .min(1, "At least one trigger config is required")
-        .required("Computed Field Trigger Config is required"),
+        .min(1, ERROR_MESSAGES.FIELD_REUQIRED('At least one trigger config'))
+        .required(ERROR_MESSAGES.FIELD_REUQIRED('Computed Field Trigger Config')),
     }),
 
     ...(currentFields.includes("columnName") && {
       columnName: Yup.string().nullable().matches(
         /^[a-z0-9_]+$/,
-        "Column name must be in snake_case (lowercase letters, numbers, and underscores only)."
+        ERROR_MESSAGES.SNAKE_CASE('column')
       ),
     }),
 
@@ -1262,7 +1262,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
         setVisiblePopup(false);
 
       } catch (err) {
-        console.error("Failed to create Model:", err);
+        console.error(ERROR_MESSAGES.CREATE_MODEL, err);
       }
     },
     validateOnBlur: false // Disable validation on blur

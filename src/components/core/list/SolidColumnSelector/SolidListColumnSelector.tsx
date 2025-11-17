@@ -8,6 +8,7 @@ import { createSolidEntityApi } from '@/redux/api/solidEntityApi';
 import { Toast } from "primereact/toast";
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import styles from './SolidListColumnSelector.module.css'
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 interface FieldMetadata {
     displayName: string;
 }
@@ -142,12 +143,12 @@ export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: a
                         layout: JSON.stringify(updatedView.layout),
                     }).unwrap();
                     if (response.statusCode === 200) {
-                        showToast("success", "Layout", "Form Layout Updated successfully!");
+                        showToast("success", ERROR_MESSAGES.LAYOUT, ERROR_MESSAGES.FORM_LAYOUT_UPDATE);
                         window.location.reload();
                     }
                 }
             } catch (error) {
-                console.error("Error updating user view:", error);
+                console.error(ERROR_MESSAGES.UPDATING_USER, error);
             }
         },
     });

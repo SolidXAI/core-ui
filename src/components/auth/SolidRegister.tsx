@@ -111,26 +111,26 @@ const SolidRegister = () => {
                 validationSchema={Yup.object({
                     username: showNameFieldsForRegistration
                         ? Yup.string().notRequired()
-                        : Yup.string().required("User Name is required"),
+                        : Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('User Name')),
 
                     firstName: showNameFieldsForRegistration
-                        ? Yup.string().required("First Name is required")
+                        ? Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('First Name'))
                         : Yup.string().notRequired(),
 
                     lastName: showNameFieldsForRegistration
-                        ? Yup.string().required("Last Name is required")
+                        ? Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Last Name '))
                         : Yup.string().notRequired(),
 
                     email: Yup.string()
-                        .email("Invalid email address")
-                        .required("Email is required"),
+                        .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
+                        .required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
                     password: Yup.string()
-                        .required("Password is required")
-                        .min(8, "Password must be at least 8 characters")
-                        .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-                        .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-                        .matches(/\d/, "Password must contain at least one number")
-                        .matches(/[@$!%*?&#^(){}[\]|\\/~`+=<>:;'"_,.-]/, "Password must contain at least one special character"),
+                        .required(ERROR_MESSAGES.FIELD_REUQIRED('Password'))
+                        .min(8, ERROR_MESSAGES.PASSWORD_CHARACTER(8))
+                        .matches(/[a-z]/, ERROR_MESSAGES.PASSWORD_CONTAIN('lowercase'))
+                        .matches(/[A-Z]/, ERROR_MESSAGES.PASSWORD_CONTAIN('uppercase'))
+                        .matches(/\d/, ERROR_MESSAGES.PASSWORD_CONTAIN('one', 'number'))
+                        .matches(/[@$!%*?&#^(){}[\]|\\/~`+=<>:;'"_,.-]/, ERROR_MESSAGES.PASSWORD_CONTAIN('special','character')),
                 })}
 
                 onSubmit={async (values, { setSubmitting }) => {
@@ -157,7 +157,7 @@ const SolidRegister = () => {
                         const response = await register(userData).unwrap();
 
                         if (response?.statusCode === 200) {
-                            showToast("success", "User Registered", response?.data?.message);
+                            showToast("success", ERROR_MESSAGES.USER_REGISTER, response?.data?.message);
                             setShowOverlay(true);
                             setTimeout(() => {
                                 router.push(`/auth/login`);
@@ -283,10 +283,10 @@ const SolidRegister = () => {
                     email: "",
                 }}
                 validationSchema={Yup.object({
-                    username: Yup.string().required("User Name is required"),
+                    username: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('"User Name')),
                     email: Yup.string()
-                        .email("Invalid email address")
-                        .required("Email is required"),
+                        .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
+                        .required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
                 })}
                 onSubmit={async (values, { setSubmitting }) => {
                     try {
@@ -319,7 +319,7 @@ const SolidRegister = () => {
                         const response = await initiateRegister(payload).unwrap(); // Call mutation trigger
 
                         if (response?.statusCode === 200) {
-                            showToast("success", "OTP sent Successfully", response?.data?.message);
+                            showToast("success", ERROR_MESSAGES.OPT_SEND, response?.data?.message);
                             const email = values.email;
                             localStorage.setItem(`resendOtpRegister_${email}`, Date.now().toString());
                             router.push(`/auth/initiate-register?email=${email}&username=${values.username}`);

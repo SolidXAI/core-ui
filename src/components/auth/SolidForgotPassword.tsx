@@ -35,8 +35,8 @@ const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder 
     const [initiateChangePassword] = useInitiateChangePasswordMutation();
     const validationSchema = Yup.object({
         email: Yup.string()
-            .email('Invalid email format')
-            .required('Email is required'),
+            .email(ERROR_MESSAGES.FIELD_INAVLID_FORMAT('email'))
+            .required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
     });
     function maskEmail(email: string) {
         const [localPart, domain] = email.split('@');

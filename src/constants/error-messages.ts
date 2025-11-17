@@ -11,6 +11,7 @@ export const ERROR_MESSAGES = {
   PLEASE_WAIT: "Please wait",
   SOMETHING_WRONG: 'Something Went Wrong !',
   LOGOUT_FAILED: 'Logout Failed !',
+  LOGIN_SUCCESSFULLY : 'Login Successfully',
 
   /* -------------------------------- PASSWORD -------------------------------- */
   FAILED_TO_UPDATE_PASSWORD: 'Failed to update password.',
@@ -59,6 +60,10 @@ export const ERROR_MESSAGES = {
   EMAIL_ALREADY_TAKEN: 'Email is already taken,',
   UPDATED: 'Updated',
   SETTING_UPDATED: 'Settings updated',
+  USER_REGISTER : 'User Registered',
+  NO_CHANGE : 'No Change',
+  NO_SETTING_UPDATE : 'No settings were updated',
+  UPDATING_USER : 'Error updating user view:',
 
   /* ---------------------------- RELATION & FILTER ---------------------------- */
   INVALID_FILTER_STRUCTURE: 'Invalid filter structure.',
@@ -80,6 +85,20 @@ export const ERROR_MESSAGES = {
   ON_FORM_LOAD: 'Error in onFormLoad handler:',
   UNABLE_LOAD_DYNAMIC_MODULE: 'Unable to load dynamic module: ',
   LOADING_COMPONENT: 'Error loading component',
+  FORM_LAYOUT_UPDATE : 'Form Layout Updated successfully!',
+  LAYOUT  : 'Layout',
+  MARK_PUBLISH : 'Marked as publish !',
+  MARK_UNPUBLISH : 'Marked as unpublish !',
+  SAVED : 'Saved',
+  FORM_UPDATE : 'Form Updated',
+  FORM_UPDATE_SUCCESSFULLY : 'Form updated successfully!',
+  FORM_SAVED : 'Form Saved',
+  FORM_SAVED_SUCCESSFULLY : 'Form saved successfully!',
+  PROFILE_SAVED : 'Profile Saved',
+  PROFILE_SAVED_SUCCESSFULLY : 'Profile saved successfully!',
+  NO_UPDATE_MADE :'No updates were made.',
+  
+
 
   /* ------------------------------ INTERACTIONS ------------------------------ */
   INTERATCTION_MESSGAE: (message: string, err: any) =>
@@ -107,9 +126,9 @@ export const ERROR_MESSAGES = {
   FETCHING_USER: 'Error fetching users:',
   FETCHING_ITEMS: 'Error fetching items',
   LOAD_MORE_DATA: 'Failed to load more data:',
-  NETWORK_ERROR : 'Network error occurred. Please try again.',
-  NETWORK_OR_SERVER_ERROR : 'Network or server error occurred.',
-  DELETE_ERROR : 'Delete error',
+  NETWORK_ERROR: 'Network error occurred. Please try again.',
+  NETWORK_OR_SERVER_ERROR: 'Network or server error occurred.',
+  DELETE_ERROR: 'Delete error',
 
   /* ----------------------------- IMPORT / EXPORT ----------------------------- */
   IMPORT_ERROR: 'Import Error',
@@ -144,5 +163,76 @@ export const ERROR_MESSAGES = {
 
   /* ----------------------------------- CRUD ---------------------------------- */
   ADD_ATLEAST_ONE_FIELD: "Please add at least one field",
+
+
+  /* ----------------------------------- Validation ---------------------------------- */
+
+  // -------------------- REQUIRED / BASIC FIELD ERRORS --------------------
+  FIELD_REUQIRED: (field: string) => `${field} is required`,
+  FIELD_INAVLID_FORMAT: (field: string) => `Invalid ${field} format`,
+  FIELD_INVALID: (field: string) => `Invalid ${field}`,
+  ENTER_VALID_FIELD: (field: string) => `Please enter a valid ${field}.`,
+  FIELD_INVALID_DATA: (field: string) => `${field}  has invalid data.`,
+  FIELD_MUST_MATCH: (field: string) => `${field}s must match.`,
+  FIELD_ALREADY_USE: (field: string, field1: string) =>
+    `${field} Already in use. Please choose a different ${field1}.`,
+  FIELD_MUST_BE_AN: (field: string, type: string) =>
+    `${field} must be an ${type}"`,
+  REQUIRED_REALTION: 'required-relation',
+  VALIDATE_SELECTION: 'valid-selection',
+
+  // -------------------- PASSWORD VALIDATION --------------------
+  PASSWORD_DO_NOT_MEET: 'Password does not meet complexity requirements',
+  PASSWORD_CHARACTER: (count: Number) =>
+    `Password must be at least ${count} characters`,
+  PASSWORD_CONTAIN: (contain: string, type = 'letter') =>
+    `Password must contain at least one ${contain} ${type}`,
+
+  // -------------------- LENGTH VALIDATION --------------------
+  FIELD_MINIMUM_CHARACTER: (field: string, characters: Number) =>
+    `${field} should be at-least ${characters} characters long.`,
+  FIELD_MAXIMUM_CHARACTER: (field: string, characters: Number) =>
+    `${field} should not be more than ${characters} characters long.`,
+
+  // -------------------- OTP --------------------
+  OTP_CHARACTER: (count: Number) =>
+    `OTP must be a ${count}-digit number`,
+  OPT_RESEND : 'OTP Resent Successfully',
+  OPT_SEND : 'OTP Sent Successfully',
+
+  // -------------------- UPDATE MESSAGES --------------------
+  FIELD_UPDATE: (field: string) => `${field} Updated`,
+  FIELD_UPDATE_SUCCESSFULLY: (field: string) =>
+    `${field} Updated Successfully`,
+
+  // -------------------- FILE / OBJECT VALIDATION --------------------
+  MUST_BE_FILE_OBJECT: (field: string) =>
+    `${field}  must be a file, an object, or empty`,
+  FILE_OBJECT: 'file-or-object',
+  EMPTY_VALID_ARRAY: 'is-empty-or-valid-array',
+  CONTAIN_EMPTY_ARRAY_OR_FILE_OBECT: (field: string) =>
+    `${field} must be an empty array or contain only files/objects.`,
+
+  // -------------------- SELECTION VALIDATION --------------------
+  FIELD_MUST_HAVE_ITEM: (field: string) =>
+    `${field} must have at least one item.`,
+  SELECT_ATLEAST_ONE: (field: string) =>
+    `You must select at least one ${field}.`,
+  SELECT_VALID_FROM_DROPDOWN: (field: string) =>
+    `Please select a valid ${field} from the dropdown.`,
+  SELECT_ONE_OPERATION: 'Select at least one operation',
+
+  // -------------------- JSON VALIDATION --------------------
+  IS_VALID_JSON: 'is-valid-json',
+  COMPUTED_FIELD_VALIDATE_JSON:
+    'Computed Field Value Provider Context Value must be valid JSON',
+
+  // -------------------- OTHER RULES --------------------
+  GREATER_THAN_MIN: 'greater-than-min',
+  RELATION_CASCADE: 'Relation Cascade Value is required for one-to-one relationships',
+  SNAKE_CASE: (name: string) =>
+    `${name} name must be in snake_case (lowercase letters, numbers, and underscores only).`,
+
+
 
 };

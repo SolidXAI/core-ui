@@ -11,6 +11,7 @@ import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 import { formikValuestoQueryString } from "@/helpers/helpers";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
 export class SolidSelectionDynamicField implements ISolidField {
@@ -113,13 +114,13 @@ export class SolidSelectionDynamicField implements ISolidField {
 
         if (isMultiSelect) {
             return Yup.array()
-                .min(1, `${fieldLabel} is required.`)
+                .min(1, ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel))
                 .of(Yup.object().shape({ label: Yup.string(), value: Yup.string() }));
         }
 
         return Yup.object().shape({
             label: Yup.string(),
-            value: Yup.string().required(`${fieldLabel} is required.`),
+            value: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel)),
         });
     }
 

@@ -52,23 +52,23 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
                 .matches(
                     effectiveRegex,
                     solidSettingsData?.data?.system?.authenticationPasswordRegexErrorMessage ||
-                    "Password does not meet complexity requirements"
+                   ERROR_MESSAGES.PASSWORD_DO_NOT_MEET
                 )
-                .required("New password is required")
+                .required(ERROR_MESSAGES.FIELD_REUQIRED('New password'))
             : Yup.string()
-                .min(6, "Password must be at least 6 characters")
-                .required("New password is required");
+                .min(6, ERROR_MESSAGES.PASSWORD_CHARACTER(6))
+                .required(ERROR_MESSAGES.FIELD_REUQIRED('New password'));
 
         return Yup.object({
-            email: Yup.string().email("Invalid email format").required("Email is required"),
+            email: Yup.string().email(ERROR_MESSAGES.FIELD_INAVLID_FORMAT('email')).required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
             currentPassword: Yup.string()
-                .min(6, "Password must be at least 6 characters")
-                .required("Current password is required"),
+                .min(6, ERROR_MESSAGES.PASSWORD_CHARACTER(6))
+                .required(ERROR_MESSAGES.FIELD_REUQIRED('Current password')),
             newPassword: newPasswordValidation,
             confirmPassword: Yup.string()
-                .oneOf([Yup.ref("newPassword")], "Passwords must match")
-                .required("Confirm password is required"),
-            id: Yup.number().required("User ID is required"),
+                .oneOf([Yup.ref("newPassword")], ERROR_MESSAGES.MUST_MATCH)
+                .required(ERROR_MESSAGES.FIELD_REUQIRED('Confirm password')),
+            id: Yup.number().required(ERROR_MESSAGES.FIELD_INAVLID_FORMAT('User ID')),
         });
     }, [effectiveRegex, solidSettingsData]);
 
