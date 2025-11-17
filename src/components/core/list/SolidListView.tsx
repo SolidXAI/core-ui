@@ -22,7 +22,7 @@ import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { pascalCase } from "change-case";
 import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
-import { createPermission, deleteManyPermission, deletePermission, findPermission, updatePermission } from "@/helpers/permissions";
+import { createPermission, deleteManyPermission, deletePermission, findPermission, permissionExpression, updatePermission } from "@/helpers/permissions";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@/components/core/common/FilterComponent";
