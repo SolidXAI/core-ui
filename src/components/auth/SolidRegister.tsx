@@ -26,8 +26,8 @@ import { SolidPasswordHelperText } from "../core/common/SolidPasswordHelperText"
 import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 interface AuthTabsProps {
-    iamPasswordRegistrationEnabled: boolean;
-    passwordlessRegistration: boolean;
+    passwordBasedAuth: boolean;
+    passwordLessAuth: boolean;
     showNameFieldsForRegistration?: boolean;
 }
 
@@ -376,8 +376,8 @@ const SolidRegister = () => {
         )
     }
 
-    const AuthTabs: React.FC<AuthTabsProps> = ({ iamPasswordRegistrationEnabled, passwordlessRegistration, showNameFieldsForRegistration }) => {
-        if (iamPasswordRegistrationEnabled && passwordlessRegistration) {
+    const AuthTabs: React.FC<AuthTabsProps> = ({ passwordBasedAuth, passwordLessAuth, showNameFieldsForRegistration }) => {
+        if (passwordBasedAuth && passwordLessAuth) {
             return (
                 <TabView className="solid-auth-tabview"
                     activeIndex={activeIndex}
@@ -391,9 +391,9 @@ const SolidRegister = () => {
                     </TabPanel>
                 </TabView>
             );
-        } else if (iamPasswordRegistrationEnabled) {
+        } else if (passwordBasedAuth) {
             return <PasswordSignup showNameFieldsForRegistration={showNameFieldsForRegistration} />;
-        } else if (passwordlessRegistration) {
+        } else if (passwordLessAuth) {
             return <PasswordLessSignup />;
         } else {
             return <p>No authentication method available</p>;
@@ -428,7 +428,7 @@ const SolidRegister = () => {
                 }
                 <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-4' : 'text-left'}`}>Sign Up</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
-                <AuthTabs iamPasswordRegistrationEnabled={solidSettingsData?.data?.iamPasswordRegistrationEnabled} passwordlessRegistration={solidSettingsData?.data?.passwordlessRegistration} showNameFieldsForRegistration={solidSettingsData?.data?.showNameFieldsForRegistration} />
+                <AuthTabs passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} showNameFieldsForRegistration={solidSettingsData?.data?.showNameFieldsForRegistration} />
                 {solidSettingsData?.data?.iamGoogleOAuthEnabled &&
                     <>
                         <Divider align="center">
