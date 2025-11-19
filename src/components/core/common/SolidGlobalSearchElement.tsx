@@ -378,7 +378,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     $and: [
                         { model: { $in: [viewData?.data?.solidView?.model?.id] } },
                         { view: { $in: [viewData?.solidView?.id] } },
-                        { isPrivate: { $eq: true } }
+                        // { isPrivate: { $eq: true } }
                     ]
                 }
 
