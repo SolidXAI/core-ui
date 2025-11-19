@@ -15,7 +15,6 @@ const isImageFile = (url: string) => /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url)
 const isVideoFile = (url: string) => /\.(mp4|webm|ogg)$/i.test(url);
 const isAudioFile = (url: string) => /\.(mp3|wav|ogg)$/i.test(url);
 
-
 const downloadOnlyExt = [
     "txt", "zip", "rar",
     "doc", "docx",
@@ -29,28 +28,24 @@ const isDocumentType = (url: string) => {
     return ext ? downloadOnlyExt.includes(ext) : false;
 };
 
+const downloadFile = (url: string, name: string = "") => {
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = name;
+    link.target = "_blank";
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+};
+
+
 
 // Thumbnail preview component
 const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.MouseEvent) => void }) => {
     const [isBroken, setIsBroken] = useState(false);
 
     const handleClick = (event: React.MouseEvent) => {
-        event.stopPropagation();
-        const cleanUrl = src.split("?")[0];
-        const ext = cleanUrl.split(".").pop()?.toLowerCase();
-
-        if (ext && downloadOnlyExt.includes(ext)) {
-            // Trigger download for docs/archives
-            const link = document.createElement("a");
-            link.href = src;
-            link.download = "";
-            link.target = "_blank";
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
-        } else {
-            onClick(event);
-        }
+        onClick(event);
     };
 
     if (!isBroken) {
@@ -97,17 +92,16 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
         }
     }
 
-    // fallback icon
     return (
         <div
             style={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center" }}
             onClick={handleClick}
-
         >
             <i className={classNames("pi pi-file", "text-3xl text-gray-400")}></i>
         </div>
     );
 };
+
 
 // Column Component
 const SolidMediaMultipleColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidListViewColumnParams) => {
@@ -122,11 +116,9 @@ const SolidMediaMultipleColumn = ({ solidListViewMetaData, fieldMetadata, column
             field={fieldMetadata.name}
             header={header}
             body={(rowData) => {
-                let viewWidget = column.attrs.viewWidget;
-                if (!viewWidget) {
-                    viewWidget = 'DefaultMediaMultipleListWidget';
-                }
+                let viewWidget = column.attrs.viewWidget || 'DefaultMediaMultipleListWidget';
                 let DynamicWidget = getExtensionComponent(viewWidget);
+
                 const widgetProps: SolidMediaListFieldWidgetProps = {
                     rowData,
                     solidListViewMetaData,
@@ -134,12 +126,9 @@ const SolidMediaMultipleColumn = ({ solidListViewMetaData, fieldMetadata, column
                     column,
                     setLightboxUrls,
                     setOpenLightbox
-                }
-                return (
-                    <>
-                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
-                    </>
-                )
+                };
+
+                return DynamicWidget ? <DynamicWidget {...widgetProps} /> : null;
             }}
             sortable={column.attrs.sortable}
             dataType={columnDataType}
@@ -153,12 +142,12 @@ const SolidMediaMultipleColumn = ({ solidListViewMetaData, fieldMetadata, column
 
 export default SolidMediaMultipleColumn;
 
+
 // Default multiple widget
-export const DefaultMediaMultipleListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidMediaListFieldWidgetProps) => {
+export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLightboxUrls, setOpenLightbox }: SolidMediaListFieldWidgetProps) => {
     const [isShowAllFiles, setShowAllFiles] = useState(false);
 
     if (!rowData?._media?.[fieldMetadata.name]) return null;
-
 
     const fullrecord = rowData._media[fieldMetadata.name]?.map((file: any) => ({
         name: file.originalFileName,
@@ -169,64 +158,60 @@ export const DefaultMediaMultipleListWidget = ({ rowData, solidListViewMetaData,
     }));
 
 
+    const formatFileSize = (size: number) =>
+        size >= 1024 * 1024 ? `${(size / (1024 * 1024)).toFixed(1)} MB` : `${(size / 1024).toFixed(1)} KB`;
 
 
-
-
-    const formatFileSize = (size: number) => {
-        return size >= 1024 * 1024
-            ? `${(size / (1024 * 1024)).toFixed(1)} MB`
-            : `${(size / 1024).toFixed(1)} KB`;
-    };
-
-    const handleFileView = (url: any) => {
-        const downloadOnlyExt = [
-            "txt", "zip", "rar",
-            "doc", "docx",
-            "xls", "xlsx",
-            "ppt", "pptx"
-        ];
-
-        const fileUrl = url?.fileUrl || "";
+    const handleFileView = (file: any) => {
+        const fileUrl = file?.fileUrl || "";
         const cleanUrl = fileUrl.split("?")[0];
         const ext = cleanUrl.split(".").pop()?.toLowerCase();
 
         if (ext && downloadOnlyExt.includes(ext)) {
-            const link = document.createElement('a');
-            link.href = url.fileUrl;
-            link.download = ''; // or specify a file name like 'file.pdf'
-            link.target = '_blank';
-            document.body.appendChild(link);
-            link.click();
-            document.body.removeChild(link);
+            downloadFile(file?.fileUrl, "")
 
-        }
-        else {
-            setLightboxUrls?.([
-                { src: url.fileUrl, downloadUrl: url.fileUrl },
-            ]);
+        } else {
+            setLightboxUrls?.([{ src: file.fileUrl, downloadUrl: file.fileUrl }]);
             setOpenLightbox?.(true);
         }
-    }
+    };
 
 
-    return (
-        fullrecord.length > 0 ?
-            <div className='flex gap-2 align-items-end'>
-                <MediaPreview
-                    src={fullrecord[0]?.fileUrl}
-                    onClick={(event) => {
 
-                        event.stopPropagation();
-                        const urlsWithType = fullrecord.map((file: any) => {
-                            const src = file?.fileUrl;
-                            return { src, downloadUrl: src };
-                        });
+    return fullrecord.length > 0 ? (
+        <div className='flex gap-2 align-items-end'>
 
-                        setLightboxUrls(urlsWithType);
-                        setOpenLightbox(true);
-                    }}
-                />
+            {/* THUMBNAIL - FIXED BEHAVIOR */}
+            <MediaPreview
+                src={fullrecord[0]?.fileUrl}
+                onClick={(event) => {
+                    event.stopPropagation();
+
+                    const cleanUrl = fullrecord[0]?.fileUrl.split("?")[0];
+                    const ext = cleanUrl.split(".").pop()?.toLowerCase();
+
+                    if (ext && downloadOnlyExt.includes(ext) && fullrecord?.length > 1) {
+                        setShowAllFiles(true)
+                        return;
+                    }
+
+                    else if (ext && downloadOnlyExt.includes(ext)) {
+                        downloadFile(fullrecord[0]?.fileUrl, "")
+                        return;
+                    }
+
+                    // FIRST FILE IS MEDIA ⇒ OPEN LIGHTBOX
+                    const urlsWithType = fullrecord.map((file: any) => ({
+                        src: file.fileUrl,
+                        downloadUrl: file.fileUrl,
+                    }));
+                    setLightboxUrls(urlsWithType);
+                    setOpenLightbox(true);
+                }}
+            />
+
+            {/* VIEW ALL BUTTON */}
+            {fullrecord?.length > 1 && (
                 <Button
                     type='button'
                     text
@@ -237,34 +222,32 @@ export const DefaultMediaMultipleListWidget = ({ rowData, solidListViewMetaData,
                         event.stopPropagation();
 
                         if (isDocumentType(fullrecord[0]?.fileUrl)) {
-                            setShowAllFiles(true)
-                        }
-                        else {
-                            const urlsWithType = fullrecord.map((file: any) => {
-                            const src = file?.fileUrl;
-                                return { src, downloadUrl: src };
-                            });
-
+                            setShowAllFiles(true);
+                        } else {
+                            const urlsWithType = fullrecord.map((file: any) => ({
+                                src: file.fileUrl,
+                                downloadUrl: file.fileUrl
+                            }));
                             setLightboxUrls(urlsWithType);
                             setOpenLightbox(true);
                         }
-
-
                     }}
                 />
-                <Dialog
-                    visible={isShowAllFiles}
-                    header="Items Uploaded"
-                    modal
-                    onHide={() => setShowAllFiles(false)}
-                    style={{ minWidth: 450 }}
-                    onClick={(event) => {
-                        event.stopPropagation();
-                    }}
-                >
-                    {fullrecord?.map((file: any) => (
-                        <div key={file.id} className="solid-file-upload-wrapper mb-3">
+            )}
 
+            {/* VIEW ALL DIALOG */}
+            <Dialog
+                visible={isShowAllFiles}
+                header="Items Uploaded"
+                modal
+                onHide={() => setShowAllFiles(false)}
+                style={{ minWidth: 450 }}
+                onClick={(event) => event.stopPropagation()}
+            >
+                {fullrecord?.map((file: any) => {
+                    const fileId = `${file.name}-${file.size}`;
+                    return (
+                        <div key={fileId} className="solid-file-upload-wrapper mb-3">
                             <div className="flex align-items-center gap-2">
 
                                 <FileReaderExt fileDetails={file} />
@@ -275,9 +258,8 @@ export const DefaultMediaMultipleListWidget = ({ rowData, solidListViewMetaData,
                                         <p
                                             className="font-normal w-11 text-primary m-0"
                                             style={{ cursor: "pointer" }}
-                                            onClick={() => {
-                                                handleFileView(file);
-                                            }} >
+                                            onClick={() => handleFileView(file)}
+                                        >
                                             {file?.name}
                                         </p>
 
@@ -287,21 +269,23 @@ export const DefaultMediaMultipleListWidget = ({ rowData, solidListViewMetaData,
                                             icon="pi pi-download"
                                             size="small"
                                             onClick={() => {
-                                                downloadMediaFile(file.fileUrl, file.name);
+                                                downloadFile(file?.fileUrl, "")
                                             }}
-
                                             style={{ height: 16, width: 16 }}
                                         />
                                     </div>
 
                                     <div className="text-sm">{formatFileSize(file.size)}</div>
                                 </div>
+
                             </div>
                         </div>
-                    ))}
-                </Dialog>
-            </div>
-            :
-            <div style={{ height: 40, width: 40 }} />
+                    )
+                }
+                )}
+            </Dialog>
+        </div>
+    ) : (
+        <div style={{ height: 40, width: 40 }} />
     );
 };
