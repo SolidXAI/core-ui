@@ -7,7 +7,6 @@ import { SolidMediaListFieldWidgetProps } from '@/types/solid-core';
 import { getExtensionComponent } from '@/helpers/registry';
 import { classNames } from 'primereact/utils';
 import { FileReaderExt } from '@/components/common/FileReaderExt';
-import { downloadMediaFile } from '@/helpers/downloadMediaFile';
 import { Dialog } from 'primereact/dialog';
 
 // Helpers
@@ -116,13 +115,11 @@ const SolidMediaMultipleColumn = ({ solidListViewMetaData, fieldMetadata, column
             field={fieldMetadata.name}
             header={header}
             body={(rowData) => {
-
                 let viewWidget = column.attrs.viewWidget;
                 if (!viewWidget) {
                     viewWidget = 'DefaultMediaMultipleListWidget';
                 }
                 let DynamicWidget = getExtensionComponent(viewWidget);
-
                 const widgetProps: SolidMediaListFieldWidgetProps = {
                     rowData,
                     solidListViewMetaData,
@@ -131,10 +128,11 @@ const SolidMediaMultipleColumn = ({ solidListViewMetaData, fieldMetadata, column
                     setLightboxUrls,
                     setOpenLightbox
                 }
-
                 return (
                     <>
-                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
+                        {
+                            DynamicWidget && <DynamicWidget {...widgetProps} />
+                        }
                     </>
                 )
             }}
@@ -149,7 +147,6 @@ const SolidMediaMultipleColumn = ({ solidListViewMetaData, fieldMetadata, column
 };
 
 export default SolidMediaMultipleColumn;
-
 
 // Default multiple widget
 export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLightboxUrls, setOpenLightbox }: SolidMediaListFieldWidgetProps) => {
