@@ -319,7 +319,7 @@ export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }
                                     onChange={(e) => {
                                         formik.setFieldValue(fieldName, { label: option.label, value: option.value });
                                         fieldContext.onChange(e, 'onFieldChange');
-                                      }}
+                                    }}
                                     disabled={formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled}
                                     className="mr-2"
                                 />
@@ -405,7 +405,7 @@ export const SolidSelectionStaticSelectButtonFormEditWidget = ({ formik, fieldCo
                         optionLabel="label"
                         onChange={(e) => {
                             // Always store object in Formik so validation works
-                            const selectedOption = options.find((opt:any) => opt.value === e.value);
+                            const selectedOption = options.find((opt: any) => opt.value === e.value);
                             formik.setFieldValue(fieldName, selectedOption);
                         }}
                         disabled={
@@ -439,13 +439,16 @@ export const DefaultSelectionStaticFormViewWidget = ({ formik, fieldContext }: S
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const value = formik.values[fieldLayoutInfo.attrs.name];
     const isMultiSelect = fieldMetadata?.isMultiSelect;
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     return (
         // <div className="mt-2 flex-column gap-2">
         //     <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
         //     <p className="m-0">{value && value.label && value.label}</p>
         // </div>
         <div className="mt-2 flex-column gap-2">
-            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            {showFieldLabel !== false && (
+                <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            )}
             <p className="m-0">
                 {isMultiSelect
                     ? Array.isArray(value)

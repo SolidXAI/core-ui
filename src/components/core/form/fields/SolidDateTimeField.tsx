@@ -1,7 +1,7 @@
 'use client';
 import { Calendar } from "primereact/calendar";
 import { Message } from "primereact/message";
-import { useEffect, useRef,useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
@@ -123,7 +123,7 @@ export const DefaultDateTimeFormEditWidget = ({ formik, fieldContext }: SolidFor
             const inputElement = calendarRef.current?.getInput();
             const overlayElement = calendarRef.current?.getOverlay();
 
-            if (overlayVisible && inputElement && !inputElement.contains(event.target as Node) &&  overlayElement && !overlayElement.contains(event.target as Node)) {
+            if (overlayVisible && inputElement && !inputElement.contains(event.target as Node) && overlayElement && !overlayElement.contains(event.target as Node)) {
                 setOverlayVisible(false);
             }
         };
@@ -137,7 +137,7 @@ export const DefaultDateTimeFormEditWidget = ({ formik, fieldContext }: SolidFor
     const handleInputClick = () => {
         setOverlayVisible(true);
     };
-    
+
     return (
         <div className="relative">
             <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
@@ -161,27 +161,27 @@ export const DefaultDateTimeFormEditWidget = ({ formik, fieldContext }: SolidFor
                         // dateFormat="mm/dd/yy"
                         // placeholder="mm/dd/yyyy hh:mm"
                         mask="99/99/9999 99:99"
-                        appendTo="self"          
+                        appendTo="self"
                         showTime
                         hourFormat="24"
                         hideOnDateTimeSelect
                         onFocus={() => setOverlayVisible(true)}
-                        visible={overlayVisible}    
+                        visible={overlayVisible}
                         onVisibleChange={(e) => {
                             console.log("Overlay visibility changed:", e.visible);
                             setOverlayVisible(e.visible);
                         }}
-                        onBlur={(e: React.FocusEvent) => {                                                                              
-                            if (calendarRef.current?.getOverlay()?.contains(e.relatedTarget as Node)) {                                            
-                                return;                                                                                                            
-                                }   
+                        onBlur={(e: React.FocusEvent) => {
+                            if (calendarRef.current?.getOverlay()?.contains(e.relatedTarget as Node)) {
+                                return;
+                            }
                             setOverlayVisible(false);
                         }}
                         onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                                if (e.key === "Tab") {
-                                    setOverlayVisible(false);
-                                }
+                            if (e.key === "Tab") {
+                                setOverlayVisible(false);
                             }
+                        }
                         }
                     />
                 </div>
@@ -199,9 +199,12 @@ export const DefaultDateTimeFormViewWidget = ({ formik, fieldContext }: SolidFor
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     return (
         <div className="mt-2 flex-column gap-2">
-            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            {showFieldLabel !== false && (
+                <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            )}
             {/* <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name]}</p> */}
             <p className="m-0">
                 {formik.values[fieldLayoutInfo.attrs.name] instanceof Date
