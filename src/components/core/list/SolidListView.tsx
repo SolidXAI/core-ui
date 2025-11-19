@@ -1455,7 +1455,6 @@ export const SolidListView = (params: SolidListViewParams) => {
                               <>
                                 {detailsBodyTemplate(rowData)}
                                 <OverlayPanel
-                                  key={selectedSolidViewData?.id || 'default'}
                                   ref={op}
                                   className="solid-custom-overlay"
                                   style={{ top: 10, minWidth: 120 }}

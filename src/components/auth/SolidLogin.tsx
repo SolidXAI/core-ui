@@ -25,8 +25,8 @@ import { formatTimeLeft } from "@/helpers/resendOtpHelper";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
 // import { Checkbox } from "primereact/checkbox";
 interface AuthTabsProps {
-    iamPasswordRegistrationEnabled: boolean;
-    passwordlessRegistration: boolean;
+    passwordBasedAuth: boolean;
+    passwordLessAuth: boolean;
 }
 const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
@@ -248,8 +248,8 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
         )
     }
 
-    const AuthTabs: React.FC<AuthTabsProps> = ({ iamPasswordRegistrationEnabled, passwordlessRegistration }) => {
-        if (iamPasswordRegistrationEnabled && passwordlessRegistration) {
+    const AuthTabs: React.FC<AuthTabsProps> = ({ passwordBasedAuth, passwordLessAuth }) => {
+        if (passwordBasedAuth && passwordLessAuth) {
             return (
                 <TabView className="solid-auth-tabview"
                     activeIndex={activeIndex}
@@ -263,9 +263,9 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                     </TabPanel>
                 </TabView>
             );
-        } else if (iamPasswordRegistrationEnabled) {
+        } else if (passwordBasedAuth) {
             return <PasswordLogin />;
-        } else if (passwordlessRegistration) {
+        } else if (passwordLessAuth) {
             return <PasswordLessLogin />;
         } else {
             return <p>No authentication method available</p>;
@@ -291,7 +291,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                 <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-4' : 'text-left'}`}>Sign In To Your Account</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
 
-                <AuthTabs iamPasswordRegistrationEnabled={solidSettingsData?.data?.iamPasswordRegistrationEnabled} passwordlessRegistration={solidSettingsData?.data?.passwordlessRegistration} />
+                <AuthTabs passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} />
                 {solidSettingsData?.data?.iamGoogleOAuthEnabled &&
                     <>
                         <Divider align="center">

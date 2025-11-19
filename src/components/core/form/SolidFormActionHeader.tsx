@@ -102,6 +102,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                         {params.embeded !== true &&
                             params.id !== "new" &&
                             actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
+                            solidView?.layout?.attrs?.showDeleteFormButton !== false &&
                             !formViewLayout.attrs.readonly &&
                             <Button
                                 text
@@ -352,6 +353,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             {
                                 params.embeded == true &&
                                 actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
+                                solidView?.layout?.attrs?.showDeleteFormButton !== false &&
                                 !formViewLayout.attrs.readonly &&
 
                                 <div>
