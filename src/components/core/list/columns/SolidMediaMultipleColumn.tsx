@@ -116,7 +116,11 @@ const SolidMediaMultipleColumn = ({ solidListViewMetaData, fieldMetadata, column
             field={fieldMetadata.name}
             header={header}
             body={(rowData) => {
-                let viewWidget = column.attrs.viewWidget || 'DefaultMediaMultipleListWidget';
+
+                let viewWidget = column.attrs.viewWidget;
+                if (!viewWidget) {
+                    viewWidget = 'DefaultMediaMultipleListWidget';
+                }
                 let DynamicWidget = getExtensionComponent(viewWidget);
 
                 const widgetProps: SolidMediaListFieldWidgetProps = {
@@ -126,9 +130,13 @@ const SolidMediaMultipleColumn = ({ solidListViewMetaData, fieldMetadata, column
                     column,
                     setLightboxUrls,
                     setOpenLightbox
-                };
+                }
 
-                return DynamicWidget ? <DynamicWidget {...widgetProps} /> : null;
+                return (
+                    <>
+                        {DynamicWidget && <DynamicWidget {...widgetProps} />}
+                    </>
+                )
             }}
             sortable={column.attrs.sortable}
             dataType={columnDataType}
