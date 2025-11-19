@@ -759,7 +759,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 if (params.id === 'new') {
                     // default locale
                     const result = await createEntity(formData).unwrap();
-                    showToast("success", "Form saved", "Form saved successfully!");
+                    showToast("success", ERROR_MESSAGES.FORM_SAVED, ERROR_MESSAGES.FORM_SAVED_SUCCESSFULLY);
                     // if (!params.embeded && result?.data?.id) {
                     //     const newPathname = pathname.replace(/new$/, result.data.id);
 
@@ -786,7 +786,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
                     // const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
                     if (!params.embeded) {
-                        showToast("success", "Form Updated", "Form updated successfully!");
+                        showToast("success", ERROR_MESSAGES.FORM_UPDATE, ERROR_MESSAGES.FORM_UPDATE_SUCCESSFULLY);
                         if (result?.statusCode === 200) {
                             updateViewMode("view")
                         }
@@ -1391,10 +1391,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
             const result = await patchEntity({ id: +params.id, data: formdata }).unwrap();
             setPublished(result?.data?.publishedAt);
             if (type === 'publish') {
-                showToast("success", "Saved", "Marked as publish !");
+                showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_PUBLISH);
                 //todo: patch request
             } else {
-                showToast("success", "Saved", "Marked as unpublish !");
+                showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_UNPUBLISH);
             }
         }
 

@@ -91,8 +91,8 @@ export class SolidRelationManyToManyField implements ISolidField {
         // 1. required 
         if (fieldMetadata.required) {
             schema = schema
-                .min(1, `You must select at least one ${fieldLabel}.`)
-                .required(`${fieldLabel} is required.`);
+                .min(1, ERROR_MESSAGES.SELECT_ATLEAST_ONE(fieldLabel))
+                .required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel));
         }
 
         return schema;

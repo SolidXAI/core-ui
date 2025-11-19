@@ -58,10 +58,10 @@ export class SolidMediaSingleField implements ISolidField {
         if (fieldMetadata.required) {
             // For required fields: disallow null and undefined
             schema = Yup.mixed<File | object>()
-                .required(`${fieldLabel} is required.`)
+                .required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel))
                 .test(
-                    "file-or-object",
-                    `${fieldLabel} must be a file or an object.`,
+                    ERROR_MESSAGES.FILE_OBJECT,
+                    ERROR_MESSAGES.MUST_BE_FILE_OBJECT(fieldLabel),
                     (value) =>
                         value instanceof File || typeof value === "object" // Validate File or object
                 );
@@ -70,8 +70,8 @@ export class SolidMediaSingleField implements ISolidField {
             schema = Yup.mixed<any>()
                 .nullable() // Allow null explicitly
                 .test(
-                    "file-or-object",
-                    `${fieldLabel} must be a file, an object, or empty.`,
+                    ERROR_MESSAGES.FILE_OBJECT,
+                    ERROR_MESSAGES.MUST_BE_FILE_OBJECT(fieldLabel),
                     (value) =>
                         value === null || // Allow null
                         value === undefined || // Allow undefined

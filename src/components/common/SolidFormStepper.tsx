@@ -85,7 +85,7 @@ export const SolidFormStepper = (props: Props) => {
         try {
             const result = await updateStepper({ id: values.id, data: { [solidWorkflowFieldKey]: values[solidWorkflowFieldKey] } }).unwrap();
             if (result?.statusCode === 200) {
-                showToast("success", `${defaultWorkflowFieldDisplayName} Update`, `${defaultWorkflowFieldDisplayName} updated successfully!`);
+                showToast("success", ERROR_MESSAGES.FIELD_UPDATE(defaultWorkflowFieldDisplayName), ERROR_MESSAGES.FIELD_UPDATE_SUCCESSFULLY(defaultWorkflowFieldDisplayName));
                 if (result?.data?.[solidWorkflowFieldKey]) {
                     setSolidWorkflowFieldValue(result.data[solidWorkflowFieldKey]);
                 }

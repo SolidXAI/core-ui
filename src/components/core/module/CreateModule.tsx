@@ -107,9 +107,9 @@ const CreateModule = ({ data }: any) => {
       //   /^[a-z]+(-[a-z]+)*$/,
       //   "Invalid format. Use lowercase letters and hyphens only."
       // )
-      .required("Name is required."),
-    displayName: Yup.string().required("Display Name is required"),
-    description: Yup.string().required("Description is required"),
+    .required(ERROR_MESSAGES.FIELD_REUQIRED('Name')),
+    displayName: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Display Name")),
+    description: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Description Name")),
     defaultDataSource: Yup.string(),
     menuIconUrl: Yup.string().nullable(),
     isSystem: Yup.boolean(),

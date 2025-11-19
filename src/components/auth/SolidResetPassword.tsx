@@ -52,14 +52,14 @@ const SolidResetPassword = () => {
 
     const newPasswordValidation = passwordRegex
         ? Yup.string()
-            .matches(passwordRegex, 'Password does not meet complexity requirements')
-            .required('New password is required')
-        : Yup.string().min(6, 'Password must be at least 6 characters')
+            .matches(passwordRegex, ERROR_MESSAGES.PASSWORD_DO_NOT_MEET)
+            .required(ERROR_MESSAGES.FIELD_REUQIRED('New password'))
+        : Yup.string().min(6, ERROR_MESSAGES.PASSWORD_CHARACTER(6))
             .required('New password is required');
 
     const validationSchema = Yup.object({
         password: newPasswordValidation,
-        confirmPassword: Yup.string().oneOf([Yup.ref('password')], 'Passwords must match').required('Confirm password is required'),
+        confirmPassword: Yup.string().oneOf([Yup.ref('password')], ERROR_MESSAGES.MUST_MATCH).required(ERROR_MESSAGES.FIELD_REUQIRED('Confirm password')),
     });
 
     const formik = useFormik({
@@ -79,7 +79,7 @@ const SolidResetPassword = () => {
                 };
                 const response = await confirmForgotPassword(payload).unwrap();
                 if (response?.statusCode === 200) {
-                    showToast("success", "Password Updated", "Password Updated Successfully")
+                    showToast("success", ERROR_MESSAGES.FIELD_UPDATE('Password'), ERROR_MESSAGES.FIELD_UPDATE_SUCCESSFULLY('Password'))
                     router.push('/auth/login');
                 } else (
                     showToast("error", ERROR_MESSAGES.ERROR, response.error)

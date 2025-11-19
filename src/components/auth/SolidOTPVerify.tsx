@@ -32,8 +32,8 @@ const SolidOTPVerify = () => {
 
     const validationSchema = Yup.object({
         email: Yup.string()
-            .email("Invalid email address")
-            .required("Email is required"),
+            .email(ERROR_MESSAGES.FIELD_INVALID(' email address'))
+            .required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
     });
 
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {

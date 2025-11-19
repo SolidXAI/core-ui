@@ -62,9 +62,9 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                 enableReinitialize={false}
                 validationSchema={Yup.object({
                     email: Yup.string()
-                        .email("Invalid email address")
-                        .required("Email is required"),
-                    password: Yup.string().required("Password is required"),
+                        .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
+                        .required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
+                    password: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Password')),
                 })}
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
                     try {
@@ -168,7 +168,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                 }}
                 validationSchema={Yup.object({
                     email: Yup.string()
-                        .email("Invalid email address")
+                        .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
                 })}
                 enableReinitialize={false}
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
@@ -201,7 +201,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         const response = await initiateLogin(payload).unwrap(); // Call mutation trigger
 
                         if (response?.statusCode === 200) {
-                            showToast("success", "OTP sent Successfully", response?.data?.message);
+                            showToast("success", ERROR_MESSAGES.OPT_RESEND, response?.data?.message);
                             const email = values.email;
                             localStorage.setItem(`resendOtpLogin_${email}`, Date.now().toString());
                             router.push(`/auth/initiate-login?email=${email}`);

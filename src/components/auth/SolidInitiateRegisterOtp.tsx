@@ -73,8 +73,8 @@ const SolidInitiateRegisterOtp = () => {
 
     const validationSchema = Yup.object({
         otp: Yup.string()
-            .matches(/^\d{6}$/, "OTP must be a 6-digit number")
-            .required("OTP is required"),
+            .matches(/^\d{6}$/, ERROR_MESSAGES.OTP_CHARACTER(6))
+            .required(ERROR_MESSAGES.FIELD_REUQIRED('OTP')),
     });
 
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
@@ -100,7 +100,7 @@ const SolidInitiateRegisterOtp = () => {
             const response = await initiateResendOTP(payload).unwrap();
 
             if (response?.statusCode === 200) {
-                showToast("success", "OTP Resent Successfully", response?.data?.message);
+                showToast("success", ERROR_MESSAGES.OPT_RESEND, response?.data?.message);
                 localStorage.setItem(RESEND_OTP_KEY, Date.now().toString());
                 setTimeLeft(RESEND_OTP_TIMER);
                 setResendEnabled(false);
@@ -150,7 +150,7 @@ const SolidInitiateRegisterOtp = () => {
 
                                 if (response?.statusCode === 200) {
                                     localStorage.removeItem(`resendOtpRegister_${email}`);
-                                    showToast("success", "Login Successfully", "Login");
+                                    showToast("success", ERROR_MESSAGES.LOGIN_SUCCESSFULLY, "Login");
                                     router.push(`/auth/login`);
                                 } else {
                                     showToast("error", ERROR_MESSAGES.INAVLID_OTP, response.error);
