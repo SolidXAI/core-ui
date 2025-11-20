@@ -176,6 +176,12 @@ export const SolidListView = (params: SolidListViewParams) => {
           permissionExpression(params.modelName, 'update'),
           permissionExpression(params.modelName, 'deleteMany'),
           permissionExpression(params.modelName, 'find'),
+          permissionExpression(params.modelName, 'findMany'),
+          permissionExpression(params.modelName, 'insertMany'),
+          permissionExpression('ImportTransaction', 'create'),
+          permissionExpression('ExportTransaction', 'create'),
+          permissionExpression('userViewMetadata', 'create'),
+          permissionExpression('savedFilters', 'create')
         ];
         const queryData = {
           permissionNames: permissionNames,
