@@ -8,6 +8,7 @@ import { SolidXAIThreadWrapper } from "./SolidXAIThreadWrapper";
 import { useEffect, useState } from 'react';
 import { SolidXAIModuleHeader } from "./SolidXAIModuleHeader";
 import { useSelector } from "react-redux";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 export const SolidXAIModule = ({ showHeader, inListView }: any) => {
   const [latestInteractionId, setLatestInteractionId] = useState<string | null>(null);
@@ -45,7 +46,7 @@ export const SolidXAIModule = ({ showHeader, inListView }: any) => {
         const queryString = qs.stringify(query, {
           encodeValuesOnly: true,
         });
-        console.log(`Attempting to fetch mq message status with query string: ${queryString}`);
+        console.log(ERROR_MESSAGES.ATTEMPT_FETCH_MESSAGE_STATUS(queryString));
 
         const res = await getMqMessageStatus(queryString)
         if (res.isSuccess === true) {
@@ -81,7 +82,7 @@ export const SolidXAIModule = ({ showHeader, inListView }: any) => {
         const completed = await fetchMqMessageStatus(120, 500, latestInteractionId);
         console.log("MQ message completed status:", completed);
       } catch (err) {
-        console.error("Failed to fetch MQ message status:", err);
+        console.error(ERROR_MESSAGES.FAILED_FETCH_MESSAGE, err);
       } finally {
         setThinking(false);
       }

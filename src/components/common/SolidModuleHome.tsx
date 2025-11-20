@@ -6,10 +6,10 @@ import { Button } from 'primereact/button';
 import { DocsSvg } from '../Svg/DocsSvg';
 import { SettingsSvg } from '../Svg/SettingsSvg';
 import { DevDocs } from '../Svg/DevDocs';
-import { FieldSvg } from '../Svg/FieldSvg';
-import { ModelSvg } from '../Svg/ModelSvg';
-import { ModuleSvg } from '../Svg/ModuleSvg';
 import { HomePageModuleSvg } from '../Svg/HomePageModuleSvg';
+import Link from 'next/link';
+import { useState } from 'react';
+import { SolidAccountSettings } from '../core/common/SolidAccountSettings/SolidAccountSettings';
 
 type SolidModuleHomeProps = {
     moduleName?: string;
@@ -19,6 +19,7 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
     const { data: session, status } = useSession();
     //@ts-ignore
     const user = session?.user?.user?.username;
+    const [showAccountSettings, setShowAccountSettings] = useState(false);
 
     return (
         <div className="h-screen surface-0">
@@ -34,12 +35,9 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
                         <h3 className={styles.solidModuleHomeTitle1}>
                             Welcome, {status === "loading" ? "..." : user}
                         </h3>
-                        <p className='m-0 w-30rem text-sm'>
-                            Lorem ipsum dolor sit amet consectetur. Rhoncus commodo ullamcorper posuere morbi vulputate vitae enim.
+                        <p className='m-0 w-35rem text-sl'>
+                            This is the home page for the {moduleName} module. You can find documentation and settings below.
                         </p>
-                        <div className='mt-2'>
-                            <Button size='small' label='View Profile' />
-                        </div>
                     </div>
                     <div className={styles.homeSvg}>
                         <HomePageModuleSvg />
@@ -51,150 +49,64 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
                     {[{
                         icon: <DocsSvg />,
                         title: 'Admin Docs',
-                        class: styles.dashboardCardOne
+                        description: 'Explore the administrator documentation to manage and configure your system.',
+                        class: styles.dashboardCardOne,
+                        url: 'https://docs.solidxai.com/docs/admin-docs/'
                     }, {
                         icon: <DevDocs />,
                         title: 'Dev Docs',
-                        class: styles.dashboardCardTwo
+                        description: 'Dive into the developer documentation to build, extend, and integrate with the platform.',
+                        class: styles.dashboardCardTwo,
+                        url: 'https://docs.solidxai.com/docs/developer-docs/'
                     }, {
                         icon: <SettingsSvg />,
                         title: 'Settings',
-                        class: styles.dashboardCardThree
-                    }].map(({ icon, title, class: cardClass }, i) => (
+                        description: 'Access and update your account settings, preferences, and profile information.',
+                        class: styles.dashboardCardThree,
+                        type: 'popup'
+                    }].map((card, i) => (
                         <div className='col' key={i}>
-                            <div className={`${styles.solidModuleHomeColorCards} ${cardClass}`}>
+                            <div className={`${styles.solidModuleHomeColorCards} ${card.class}`}>
                                 <div>
-                                    <div className={styles.solidModuleHomeCardSvgWrapper}>{icon}</div>
-                                    <h3 className={`${styles.solidModuleHomeTitle1} mt-4`}>{title}</h3>
-                                    <p className='mb-0 mt-2 text-xs'>
-                                        Lorem ipsum dolor sit amet consectetur. Rhoncus commodo ullamcorper posuere morbi vulputate vitae enim.
+                                    <div className={styles.solidModuleHomeCardSvgWrapper}>{card.icon}</div>
+                                    <h3 className={`${styles.solidModuleHomeTitle1} mt-4`}>{card.title}</h3>
+                                    <p className='mb-0 mt-2 mr-2 text-xs'>
+                                        {card.description}
                                     </p>
                                 </div>
                                 <div>
-                                    <Button outlined label='Add' size='small' icon="pi pi-plus" iconPos='right' className="font-bold" style={{ background: 'var(--solid-module-home-add-button-bg)' }} />
+                                    {card.url ? (
+                                        <Link href={card.url} target="_blank" rel="noopener noreferrer">
+                                            <Button outlined label='Explore' size='small' icon="pi pi-arrow-right" iconPos='right' className="font-bold" style={{ background: 'var(--solid-module-home-add-button-bg)' }} />
+                                        </Link>
+                                    ) : (
+                                        <Button
+                                            outlined
+                                            label='Open'
+                                            size='small'
+                                            icon="pi pi-cog"
+                                            iconPos='right'
+                                            className="font-bold"
+                                            style={{ background: 'var(--solid-module-home-add-button-bg)' }}
+                                            onClick={() => {
+                                                if (card.type === 'popup') {
+                                                    setShowAccountSettings(true);
+                                                }
+                                            }}
+                                        />
+                                    )}
                                 </div>
                             </div>
                         </div>
                     ))}
-                    {/* <div className='col'>
-                        <div className={`${styles.solidModuleHomeColorCards} ${styles.dashboardCardOne}`}>
-                            <div>
-                                <div className={styles.solidModuleHomeCardSvgWrapper}>
-                                    <DocsSvg />
-                                </div>
-                                <h3 className={`${styles.solidModuleHomeTitle1} mt-4`}>
-                                    Admin Docs
-                                </h3>
-                                <p className='mb-0 mt-2 text-xs'>
-                                    Lorem ipsum dolor sit amet consectetur. Rhoncus commodo ullamcorper posuere morbi vulputate vitae enim.
-                                </p>
-                            </div>
-                            <div>
-                                <Button outlined label='Add' size='small' icon="pi pi-plus" iconPos='right' className="font-bold" style={{ background: 'var(--solid-module-home-add-button-bg)' }} />
-                            </div>
-                        </div>
-                    </div>
-                    <div className='col'>
-                        <div className={`${styles.solidModuleHomeColorCards} ${styles.dashboardCardTwo}`}>
-                            <div>
-                                <div className={styles.solidModuleHomeCardSvgWrapper}>
-                                    <DevDocs />
-                                </div>
-                                <h3 className={`${styles.solidModuleHomeTitle1} mt-4`}>
-                                    Dev Docs
-                                </h3>
-                                <p className='mb-0 mt-2 text-xs'>
-                                    Lorem ipsum dolor sit amet consectetur. Rhoncus commodo ullamcorper posuere morbi vulputate vitae enim.
-                                </p>
-                            </div>
-                            <div>
-                                <Button outlined label='Add' size='small' icon="pi pi-plus" iconPos='right' className="font-bold" style={{ background: 'var(--solid-module-home-add-button-bg)' }} />
-                            </div>
-                        </div>
-                    </div>
-                    <div className='col'>
-                        <div className={`${styles.solidModuleHomeColorCards} ${styles.dashboardCardThree}`}>
-                            <div>
-                                <div className={styles.solidModuleHomeCardSvgWrapper}>
-                                    <SettingsSvg />
-                                </div>
-                                <h3 className={`${styles.solidModuleHomeTitle1} mt-4`}>
-                                    Settings
-                                </h3>
-                                <p className='mb-0 mt-2 text-xs'>
-                                    Lorem ipsum dolor sit amet consectetur. Rhoncus commodo ullamcorper posuere morbi vulputate vitae enim.
-                                </p>
-                            </div>
-                            <div>
-                                <Button outlined label='Add' size='small' icon="pi pi-plus" iconPos='right' className="font-bold" style={{ background: 'var(--solid-module-home-add-button-bg)' }} />
-                            </div>
-                        </div>
-                    </div> */}
-                </div>
-                <div>
-                    <h5 className='font-bold'>
-                        Action
-                    </h5>
-
-                    <div className='grid'>
-                        {[{
-                            icon: <ModuleSvg />,
-                            title: 'Add Module'
-                        }, {
-                            icon: <ModelSvg />,
-                            title: 'Add Model'
-                        }, {
-                            icon: <FieldSvg />,
-                            title: 'Add Field'
-                        }].map(({ icon, title }, i) => (
-                            <div className='col' key={i}>
-                                <div className={styles.solidModuleHomeActionCard}>
-                                    <div>
-                                        <div className={styles.solidModuleHomeActionCardSvgWrapper}>{icon}</div>
-                                        <h3 className={`${styles.solidModuleHomeTitle1} mt-4`}>{title}</h3>
-                                    </div>
-                                </div>
-                            </div>
-                        ))}
-                        {/* <div className='col'>
-                            <div className={`${styles.solidModuleHomeActionCard}`}>
-                                <div>
-                                    <div className={styles.solidModuleHomeActionCardSvgWrapper}>
-                                        <ModuleSvg />
-                                    </div>
-                                    <h3 className={`${styles.solidModuleHomeTitle1} mt-4`}>
-                                        Add Module
-                                    </h3>
-                                </div>
-                            </div>
-                        </div>
-                        <div className='col'>
-                            <div className={`${styles.solidModuleHomeActionCard}`}>
-                                <div>
-                                    <div className={styles.solidModuleHomeActionCardSvgWrapper}>
-                                        <ModelSvg />
-                                    </div>
-                                    <h3 className={`${styles.solidModuleHomeTitle1} mt-4`}>
-                                        Add Model
-                                    </h3>
-                                </div>
-                            </div>
-                        </div>
-                        <div className='col'>
-                            <div className={`${styles.solidModuleHomeActionCard}`}>
-                                <div>
-                                    <div className={styles.solidModuleHomeActionCardSvgWrapper}>
-                                        <FieldSvg />
-                                    </div>
-                                    <h3 className={`${styles.solidModuleHomeTitle1} mt-4`}>
-                                        Add Field
-                                    </h3>
-                                </div>
-                            </div>
-                        </div> */}
-                    </div>
                 </div>
             </div>
+            {showAccountSettings &&
+                <SolidAccountSettings
+                    showProfileSettingsDialog={showAccountSettings}
+                    setShowProfileSettingsDialog={setShowAccountSettings}
+                />
+            }
         </div>
     )
 }

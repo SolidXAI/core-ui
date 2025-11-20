@@ -7,7 +7,7 @@ import { useEffect, useState, useRef } from 'react'
 import { useGetSolidViewLayoutQuery } from '@/redux/api/solidViewApi'
 import { useSelector } from 'react-redux'
 import { FileUpload } from 'primereact/fileupload';
-
+import { ERROR_MESSAGES } from '@/constants/error-messages'
 export const SolidMessageComposer = ({ type, modelSingularName, refetch, id }: { type?: string, modelSingularName?: any, refetch?: any, id?: any }) => {
     const [message, setMessage] = useState('');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
@@ -51,7 +51,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id }: {
             setMessage('');
             setSelectedFiles([]);
         } catch (error) {
-            console.error('Error creating message:', error);
+            console.error(ERROR_MESSAGES.FETCHING_MESSAGE, error);
         }
     };
 

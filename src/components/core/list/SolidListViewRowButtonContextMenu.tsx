@@ -26,7 +26,15 @@ export const SolidListViewRowButtonContextMenu = ({ button, params, getSelectedS
                     rowData: selectedSolidViewData,
                     solidListViewMetaData: solidListViewMetaData.data,
                 };
-                handleCustomButtonClick(button.attrs, event);
+
+                const modifiedButtonAttrs = { ...button.attrs }; // Create a copy
+
+                // Conditionally add popupWidth for specific actions
+                if (modifiedButtonAttrs.action === 'GenerateModelCodeRowAction' || modifiedButtonAttrs.action === 'GenerateModuleCodeRowAction') {
+                    modifiedButtonAttrs.popupWidth = '30vw';
+                }
+
+                handleCustomButtonClick(modifiedButtonAttrs, event);
             }}
         />
     );

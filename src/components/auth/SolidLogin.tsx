@@ -22,10 +22,11 @@ import { AppTitle } from "@/helpers/AppTitle";
 import Image from "next/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "@/helpers/resendOtpHelper";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 // import { Checkbox } from "primereact/checkbox";
 interface AuthTabsProps {
-    passwordBasedLogin: boolean;
-    passwordLessLogin: boolean;
+    passwordBasedAuth: boolean;
+    passwordLessAuth: boolean;
 }
 const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
@@ -61,9 +62,9 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                 enableReinitialize={false}
                 validationSchema={Yup.object({
                     email: Yup.string()
-                        .email("Invalid email address")
-                        .required("Email is required"),
-                    password: Yup.string().required("Password is required"),
+                        .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
+                        .required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
+                    password: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Password')),
                 })}
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
                     try {
@@ -80,17 +81,17 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         });
 
                         if (response?.error) {                            
-                            showToast("error", "Login Error", response.error);
+                            showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                             setErrors({
-                                email: "Invalid Credentials",
-                                password: "Invalid Credentials",
+                                email: ERROR_MESSAGES.INVALID_CREDENTIALS,
+                                password: ERROR_MESSAGES.INVALID_CREDENTIALS,
                             });
                         } else {
-                            showToast("success", "Login Success", "Redirecting to dashboard...");
+                            showToast("success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
                             router.push(`${process.env.NEXT_PUBLIC_LOGIN_REDIRECT_URL}`);
                         }
                     } catch (error: any) {
-                        showToast("error", "Login Error", error?.data ? error?.data?.message : "Something Went Wrong");
+                        showToast("error", ERROR_MESSAGES.LOGIN_ERROR, error?.data ? error?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                     } finally {
                         setSubmitting(false); // Re-enable the button after submission
                     }
@@ -167,7 +168,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                 }}
                 validationSchema={Yup.object({
                     email: Yup.string()
-                        .email("Invalid email address")
+                        .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
                 })}
                 enableReinitialize={false}
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
@@ -190,8 +191,8 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 const formatted = formatTimeLeft(remaining);
                                 showToast(
                                     "error",
-                                    "Please wait",
-                                    `You can request a new OTP in ${formatted} second(s)`
+                                    ERROR_MESSAGES.PLEASE_WAIT,
+                                    ERROR_MESSAGES.OPT_FORMAT(formatted)
                                 );
                                 setSubmitting(false);
                                 return; //  Prevent request
@@ -200,15 +201,15 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         const response = await initiateLogin(payload).unwrap(); // Call mutation trigger
 
                         if (response?.statusCode === 200) {
-                            showToast("success", "OTP sent Successfully", response?.data?.message);
+                            showToast("success", ERROR_MESSAGES.OPT_RESEND, response?.data?.message);
                             const email = values.email;
                             localStorage.setItem(`resendOtpLogin_${email}`, Date.now().toString());
                             router.push(`/auth/initiate-login?email=${email}`);
                         } else {
-                            showToast("error", "Login Error", response.error);
+                            showToast("error",ERROR_MESSAGES.LOGIN_ERROR, response.error);
                         }
                     } catch (err: any) {
-                        showToast("error", "Login Error", err?.data ? err?.data?.message : "Something Went Wrong");
+                        showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                         setErrors({
                             email: "Invalid Credentials",
                         });
@@ -247,8 +248,8 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
         )
     }
 
-    const AuthTabs: React.FC<AuthTabsProps> = ({ passwordBasedLogin, passwordLessLogin }) => {
-        if (passwordBasedLogin && passwordLessLogin) {
+    const AuthTabs: React.FC<AuthTabsProps> = ({ passwordBasedAuth, passwordLessAuth }) => {
+        if (passwordBasedAuth && passwordLessAuth) {
             return (
                 <TabView className="solid-auth-tabview"
                     activeIndex={activeIndex}
@@ -262,9 +263,9 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                     </TabPanel>
                 </TabView>
             );
-        } else if (passwordBasedLogin) {
+        } else if (passwordBasedAuth) {
             return <PasswordLogin />;
-        } else if (passwordLessLogin) {
+        } else if (passwordLessAuth) {
             return <PasswordLessLogin />;
         } else {
             return <p>No authentication method available</p>;
@@ -290,7 +291,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                 <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-4' : 'text-left'}`}>Sign In To Your Account</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
 
-                <AuthTabs passwordBasedLogin={solidSettingsData?.data?.passwordBasedLogin} passwordLessLogin={solidSettingsData?.data?.passwordLessLogin} />
+                <AuthTabs passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} />
                 {solidSettingsData?.data?.iamGoogleOAuthEnabled &&
                     <>
                         <Divider align="center">

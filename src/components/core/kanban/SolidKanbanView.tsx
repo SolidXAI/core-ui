@@ -36,6 +36,7 @@ import { queryObjectToQueryString, queryStringToQueryObject } from "../list/Soli
 import { Toast } from "primereact/toast";
 import { useSelector } from "react-redux";
 import { queryObjectToQueryString, queryStringToQueryObject } from "../list/SolidListView";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
 
@@ -91,9 +92,9 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     const fetchPermissions = async () => {
       if (params.modelName) {
         const permissionNames = [
-          createPermission(params.modelName),
-          deletePermission(params.modelName),
-          updatePermission(params.modelName)
+          permissionExpression(params.modelName, 'create'),
+          permissionExpression(params.modelName, 'delete'),
+          permissionExpression(params.modelName, 'update')
         ]
         const queryData = {
           permissionNames: permissionNames
@@ -493,7 +494,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       setKanbanLoadMoreData(loadmoredata)
 
     } catch (error) {
-      console.error("Failed to load more data:", error);
+      console.error(ERROR_MESSAGES.LOAD_MORE_DATA, error);
     }
   };
 
@@ -576,16 +577,16 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       const kanbanUpdateResponse = await patchKanbanView({ id: +movedItem.id, data: formData }).unwrap();
 
       if (kanbanUpdateResponse?.statusCode === 200) {
-        showToast("success", "Success", "Kanban View Updated!");
+        showToast("success", ERROR_MESSAGES.IS_SUCCESS, ERROR_MESSAGES.KANBAN_UPDATED);
       } else {
-        showToast("error", "Duplicate Key", kanbanUpdateResponse?.error);
+        showToast("error", ERROR_MESSAGES.DUPLICATE_KEY, kanbanUpdateResponse?.error);
         // Update the kanbanViewData state
         setKanbanViewData(oldkanbanViewData);
       }
     } catch (error: any) {
       // 6. Handle 500 or network errors
-      console.error("API error:", error);
-      showToast("error", "Something went wrong", error?.data?.message || "Something went wrong");
+      console.error(ERROR_MESSAGES.API_ERROR, error);
+      showToast("error", ERROR_MESSAGES.SOMETHING_WRONG, error?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
       setKanbanViewData(oldkanbanViewData);
     }
   };
@@ -728,11 +729,11 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           }
         </div>
         <div className="flex align-items-center gap-3">
-          {actionsAllowed.includes(`${createPermission(params.modelName)}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.create !== false &&
+          {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.create !== false &&
             <SolidCreateButton url={createButtonUrl} />
           }
 
-          {actionsAllowed.includes(`${deletePermission(params.modelName)}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false && selectedRecords.length > 0 && <Button
+          {actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false && selectedRecords.length > 0 && <Button
             type="button"
             label="Delete"
             size="small"

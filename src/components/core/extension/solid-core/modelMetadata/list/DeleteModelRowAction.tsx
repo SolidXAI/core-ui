@@ -11,16 +11,18 @@ import { Column } from "primereact/column";
 import { Checkbox } from "primereact/checkbox";
 import { kebabCase } from "lodash";
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
 const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     const [isConfirmed, setIsConfirmed] = useState(false);
-
+    const [errorState, setErrorState] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const dispatch = useDispatch();
     const entityApi = createSolidEntityApi(event.params.modelName);
-    const {useDeleteSolidEntityMutation} = entityApi;
-    const [deleteSolidSingleEntiry, { 
-        isError:isSolidEntitiesDeleteError , 
+    const { useDeleteSolidEntityMutation } = entityApi;
+    const [deleteSolidSingleEntiry, {
+        isError: isSolidEntitiesDeleteError,
     }] = useDeleteSolidEntityMutation()
 
     const toast = useRef<Toast>(null);
@@ -34,10 +36,30 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     };
 
     const deleteModelHandler = async () => {
-        const res :any= await deleteSolidSingleEntiry(event.rowData.id)
-        if(!isSolidEntitiesDeleteError && res && res.data){
-            dispatch(closePopup());
-            showToast('success', 'Model Deleted', `Model ${event.rowData.singularName} has been deleted successfully.`);
+        setIsDeleting(true);
+        setErrorState(null);
+        try {
+            const res: any = await deleteSolidSingleEntiry(event.rowData.id)
+            // console.log('delete model res', res);
+            setErrorState(res.error || null);
+            if (res.error) {
+                // handle backend or RTK error object
+                const message =
+                    res.error?.data?.message ||
+                    res.error?.error ||
+                    ERROR_MESSAGES.ERROR_OCCURED;
+                setErrorState(message);
+                showToast('error', ERROR_MESSAGES.DELETE_FAIELD, message);
+            } else {
+                showToast('success', ERROR_MESSAGES.MODEL_DELETE, ERROR_MESSAGES.MODEL_DELETE_SUCCESSFULLY(event.rowData.singularName));
+                dispatch(closePopup());
+            }
+        } catch (err: any) {
+            console.error(ERROR_MESSAGES.DELETE_ERROR, err);
+            setErrorState(err.message || ERROR_MESSAGES.NETWORK_ERROR);
+            showToast('error', ERROR_MESSAGES.ERROR, ERROR_MESSAGES.NETWORK_OR_SERVER_ERROR);
+        } finally {
+            setIsDeleting(false);
         }
     }
 
@@ -63,30 +85,43 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
                 </span>
             </div>
             <div className="px-4 pb-4 pt-3">
-                <div>
-                    <p className="form-field-label font-medium">
-                        Deleting a model should be done carefully. The below files will be impacted as part of deleting a model:
-                    </p>
-                    <DataTable value={rows} size="small">
-                        <Column field="file" header="File Name" />
-                        <Column field="description" header="Description" />
-                        <Column field="intervention" header="Intervention" />
-                    </DataTable>
-                    <div className="my-4">
-                        <div className="flex align-items-center">
-                            <Checkbox
-                                inputId="confirmation"
-                                name="confirm"
-                                checked={isConfirmed}
-                                onChange={() => setIsConfirmed(!isConfirmed)} />
-                            <label htmlFor="confirmation" className="ml-2 form-field-label">
-                                I confirm that #7 &amp; #9 will be done by me manually after the automatic steps above are applied.
-                            </label>
+                {errorState && (
+                    <div className="p-3 mb-4 border-round-md" style={{ backgroundColor: '#ffe6e6', border: '1px solid #ff4d4d' }}>
+                        <p className="text-sm font-semibold text-red-700 mb-2">⚠️ Delete Failed</p>
+                        <p className="text-sm text-red-600">{errorState}</p>
+                        <div className="flex gap-2 mt-3">
+                            <Button label="Retry" icon={"pi pi-refresh"} size="small" severity="info" onClick={deleteModelHandler} loading={isDeleting} />
                         </div>
                     </div>
-                </div>
+                )}
+                {!errorState && (
+                    <div>
+                        <p className="form-field-label font-medium">
+                            Deleting a model should be done carefully. The below files will be impacted as part of deleting a model:
+                        </p>
+                        <DataTable value={rows} size="small">
+                            <Column field="file" header="File Name" />
+                            <Column field="description" header="Description" />
+                            <Column field="intervention" header="Intervention" />
+                        </DataTable>
+                        <div className="my-4">
+                            <div className="flex align-items-center">
+                                <Checkbox
+                                    inputId="confirmation"
+                                    name="confirm"
+                                    checked={isConfirmed}
+                                    onChange={() => setIsConfirmed(!isConfirmed)} />
+                                <label htmlFor="confirmation" className="ml-2 form-field-label">
+                                    I confirm that #7 &amp; #9 will be done by me manually after the automatic steps above are applied.
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                )}
                 <div className="flex gap-3 justify-content-start">
-                    <Button size="small" label="Apply" disabled={!isConfirmed} autoFocus onClick={deleteModelHandler} />
+                {!errorState && (
+                    <Button size="small" label="Apply" disabled={!isConfirmed || isDeleting} autoFocus onClick={deleteModelHandler} />
+                )}
                     <Button size="small" label="Cancel" outlined onClick={() => dispatch(closePopup())} />
                 </div>
             </div>

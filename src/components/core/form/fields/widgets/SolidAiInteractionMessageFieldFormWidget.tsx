@@ -5,7 +5,7 @@ import ReactCodeMirror from "@uiw/react-codemirror";
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct import
-
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
 export const SolidAiInteractionMessageFieldFormWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
@@ -73,7 +73,8 @@ export const MarkdownDisplay: React.FC<MarkdownDisplayProps> = ({ message }) => 
         }
     } catch (err: any) {
         // Worst-case fallback: put the error string in markdown
-        markdown = `Error handling interaction.message: ${err?.message || String(err)}`;
+        markdown = ERROR_MESSAGES.INTERATCTION_MESSGAE(err?.message,err);
+        
     }
     // 🔧 Normalize escaped newlines, tabs, and quotes
     if (markdown.includes("\\n")) {

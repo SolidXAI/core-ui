@@ -11,6 +11,7 @@ import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 import { formikValuestoQueryString } from "@/helpers/helpers";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
 export class SolidSelectionDynamicField implements ISolidField {
@@ -113,13 +114,13 @@ export class SolidSelectionDynamicField implements ISolidField {
 
         if (isMultiSelect) {
             return Yup.array()
-                .min(1, `${fieldLabel} is required.`)
+                .min(1, ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel))
                 .of(Yup.object().shape({ label: Yup.string(), value: Yup.string() }));
         }
 
         return Yup.object().shape({
             label: Yup.string(),
-            value: Yup.string().required(`${fieldLabel} is required.`),
+            value: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel)),
         });
     }
 
@@ -288,6 +289,7 @@ export const DefaultSelectionDynamicFormViewWidget = ({ formik, fieldContext }: 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const value = formik.values[fieldLayoutInfo.attrs.name];
     const isMultiSelect = fieldMetadata?.isMultiSelect;
 
@@ -314,7 +316,9 @@ export const DefaultSelectionDynamicFormViewWidget = ({ formik, fieldContext }: 
         //     <p className="m-0 solid-custom-selection-dynamic-pill">{value && value.label && value.label}</p>
         // </div>
         <div className="mt-2 flex-column gap-2">
-            <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            {showFieldLabel !== false && (
+                <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            )}
             <p className="m-0">
                 {isMultiSelect ? (
                     values.length > 0 ? (
