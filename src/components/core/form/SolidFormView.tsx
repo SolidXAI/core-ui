@@ -1554,8 +1554,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     header="Change Form Layout"
                     modal
                     onHide={() => setLayoutDialogVisible(false)}
-                    contentStyle={{
-                        width: 800
+                    style={{ width: '50vw' }}
+                    breakpoints={{
+                        '960px': '80vw',
+                        '641px': '95vw'
                     }}
                 >
                     <SolidFormUserViewLayout solidFormViewMetaData={solidFormViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />

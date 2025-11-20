@@ -1792,9 +1792,9 @@ li.header-li-px {
 }
 
 .solid-dynamic-breadcrumb-stepper {
-  height: 50px;
+  /* height: 50px; */
   border-bottom: 1px solid var(--primary-light-color);
-  padding: 0.8rem 1.5rem;
+  padding: 0.55rem 1.5rem;
 }
 
 
@@ -1818,6 +1818,13 @@ li.header-li-px {
 
 .solid-breadcrumb.p-breadcrumb .p-menuitem a p {
   font-weight: 600 !important;
+}
+
+.solid-breadcrumb.p-breadcrumb .p-menuitem .p-menuitem-link .p-menuitem-text {
+  max-width: clamp(120px, 50vw, 600px);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
 }
 
 .solid-dropzone {
@@ -2807,10 +2814,17 @@ li.header-li-px {
 }
 
 .solid-form-stepper-overlay .p-button .p-button-label {
-  color: var(--solid-title);
   font-weight: 400 !important;
   flex: none;
   font-size: 14px;
+}
+
+.solid-form-stepper-overlay .p-button-primary.p-button .p-button-label {
+  color: var(--surface-a);
+}
+
+.solid-form-stepper-overlay .p-button-text.p-button .p-button-label {
+  color: var(--solid-title);
 }
 
 .solid-form-stepper-overlay .p-button:hover .p-button-label {
