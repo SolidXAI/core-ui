@@ -16,7 +16,8 @@ import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     const [isConfirmed, setIsConfirmed] = useState(false);
-
+    const [errorState, setErrorState] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const dispatch = useDispatch();
     const entityApi = createSolidEntityApi(event.params.modelName);
     const {useDeleteSolidEntityMutation} = entityApi;
