@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Toast } from 'primereact/toast';
 import { SolidCircularLoader } from '@/components/core/common/SolidLoaders/SolidCircularLoader';
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
 const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
@@ -125,7 +126,7 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
                 } else {
                     dispatch(closePopup());
                     console.log("Backend is not alive, cannot run seeder");
-                    showToast("error", "Backend Unavailable", "Seeder not triggered. Could not reach backend.");
+                    showToast("error", ERROR_MESSAGES.BACKEND_UNAVAILABLE , ERROR_MESSAGES.SEEDER_NOT_TRIGGERED);
                 }
             }
         };
@@ -136,15 +137,15 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
 
     useEffect(() => {
         if (isSeederSuccess) {
-            console.log("isSeederSuccess", data);
-            showToast("success", "Code Generated Successfully", "Code Generated Successfully");
+            console.log(ERROR_MESSAGES.IS_SEEDER_SUCCESS, data);
+            showToast("success", ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY, ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY);
             setIsGenerating(false);
             dispatch(closePopup());
             window.location.reload();
         }
         if (isSeederError) {
-            console.log("isSeederError", isSeederError);
-            showToast("error", "Seeder Error", "Could not run seeder. Please try again.");
+            console.log(ERROR_MESSAGES.IS_SEEDER_ERROR, isSeederError);
+            showToast("error", ERROR_MESSAGES.SEEDER_ERROR, ERROR_MESSAGES.SEEDER_NOT_RUN);
             setIsGenerating(false);
         }
     }, [isSeederSuccess])

@@ -166,7 +166,7 @@ export { AppTitle } from '@/helpers/AppTitle'
 // export * from '@/helpers/countries';
 export { addCommasToAmount, calculateDaysOfStay, getSingularAndPlural } from '@/helpers/helpers';
 // export * from '@/helpers/menu';
-export { createPermission, deletePermission, updatePermission } from '@/helpers/permissions';
+export { permissionExpression } from '@/helpers/permissions';
 export { revalidateTag } from '@/helpers/revalidate';
 export { useHasAllRoles, useHasAnyRole, hasAnyRole } from '@/helpers/rolesHelper';
 export { registerExtensionComponent, registerExtensionFunction } from '@/helpers/registry';

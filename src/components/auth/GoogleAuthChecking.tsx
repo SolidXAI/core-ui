@@ -1,4 +1,5 @@
 "use client"
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProgressSpinner } from 'primereact/progressspinner';
@@ -30,14 +31,14 @@ export const GoogleAuthChecking = () => {
                 });
 
                 if (response?.error) {
-                    showToast("error", "Login Error", response.error);
-                    setError("Authentication failed.")
+                    showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                    setError(ERROR_MESSAGES.AUTHENICATION__FAILED)
                 } else {
-                    showToast("success", "Login Success", "Redirecting to dashboard...");
+                    showToast("success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
                     router.push(`${process.env.NEXT_PUBLIC_LOGIN_REDIRECT_URL}`);
                 }
             } catch (err: any) {
-                showToast("error", "Login Error", err?.data?.message || "Authentication failed.");
+                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.AUTHENICATION__FAILED);
             }
         };
 

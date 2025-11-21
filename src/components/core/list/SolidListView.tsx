@@ -22,7 +22,7 @@ import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { pascalCase } from "change-case";
 import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
-import { createPermission, deleteManyPermission, deletePermission, findPermission, updatePermission } from "@/helpers/permissions";
+import { permissionExpression } from "@/helpers/permissions";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@/components/core/common/FilterComponent";
@@ -57,6 +57,7 @@ import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
 import { SolidLoadList } from "@/types/solid-core";
 import { getExtensionFunction } from "@/helpers/registry";
 import { useSession } from "next-auth/react";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 // import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -74,7 +75,7 @@ export const queryStringToQueryObject = () => {
       return parsedParams;
     } catch (error) {
       console.error(
-        "Error decoding or parsing query string from local storage:",
+        ERROR_MESSAGES.ERROR_DECODING,
         error
       );
     }
@@ -171,11 +172,17 @@ export const SolidListView = (params: SolidListViewParams) => {
     const fetchPermissions = async () => {
       if (params.modelName) {
         const permissionNames = [
-          createPermission(params.modelName),
-          deletePermission(params.modelName),
-          updatePermission(params.modelName),
-          deleteManyPermission(params.modelName),
-          findPermission(params.modelName),
+          permissionExpression(params.modelName, 'create'),
+          permissionExpression(params.modelName, 'delete'),
+          permissionExpression(params.modelName, 'update'),
+          permissionExpression(params.modelName, 'deleteMany'),
+          permissionExpression(params.modelName, 'find'),
+          permissionExpression(params.modelName, 'findMany'),
+          permissionExpression(params.modelName, 'insertMany'),
+          permissionExpression('ImportTransaction', 'create'),
+          permissionExpression('ExportTransaction', 'create'),
+          permissionExpression('userViewMetadata', 'create'),
+          permissionExpression('savedFilters', 'create')
         ];
         const queryData = {
           permissionNames: permissionNames,
@@ -246,7 +253,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       const column = currentLayout?.children[i];
       const fieldMetadata = solidFieldsMetadata?.[column.attrs.name];
       if (!fieldMetadata?.type) {
-        showFieldError(`${column.attrs.label} is not present in metadata`);
+        showFieldError(ERROR_MESSAGES.FIELD_NOT_IN_METADATA(column.attrs.label));
         // return;
       }
       if (fieldMetadata) {
@@ -880,7 +887,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (errorMessages.length > 0) {
       toast?.current?.show({
         severity: "error",
-        summary: "Can you send me the report?",
+        summary: ERROR_MESSAGES.SEND_REPORT,
         // sticky: true,
         life: 3000,
         //@ts-ignore
@@ -904,7 +911,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (error) {
       toast?.current?.show({
         severity: "error",
-        summary: "Can you send me the report?",
+        summary: ERROR_MESSAGES.SEND_REPORT,
         // sticky: true,
         life: 3000,
         //@ts-ignore
@@ -932,7 +939,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     toast.current?.show({
       severity: 'success',
       summary: 'Deleted',
-      detail: 'Records deleted successfully',
+      detail: ERROR_MESSAGES.RECORD_DELETE,
       life: 3000,
     });
     setDialogVisible(false);
@@ -1047,7 +1054,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const handleDeleteEntity = async () => {
     try {
       if (!selectedSolidViewData?.id) {
-        throw new Error("No entity selected");
+        throw new Error(ERROR_MESSAGES.NO_ENTITY_SELECTED);
       }
 
       const response = await deleteSolidSingleEntiry(selectedSolidViewData.id);
@@ -1056,14 +1063,14 @@ export const SolidListView = (params: SolidListViewParams) => {
         setDeleteEntity(false);
         toast.current?.show({
           severity: "success",
-          summary: "Deleted",
-          detail: "Entity deleted successfully",
+          summary: ERROR_MESSAGES.DELETED,
+          detail: ERROR_MESSAGES.ENTITY_DELETE,
           life: 3000,
         });
       } else {
         toast.current?.show({
           severity: "error",
-          summary: "Delete Failed",
+          summary: ERROR_MESSAGES.DELETE_FAIELD,
           detail: response?.error?.data?.error,
           life: 3000,
         });
@@ -1071,8 +1078,8 @@ export const SolidListView = (params: SolidListViewParams) => {
     } catch (error: any) {
       toast.current?.show({
         severity: "error",
-        summary: "Delete Failed",
-        detail: "Something Went Wrong",
+        summary: ERROR_MESSAGES.DELETE_FAIELD,
+        detail: ERROR_MESSAGES.SOMETHING_WRONG,
         life: 3000,
       });
     }
@@ -1142,7 +1149,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                 />
               ))}
 
-            {actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
+            {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
               solidListViewLayout?.attrs?.create !== false &&
               params.embeded !== true &&
               solidListViewMetaData?.data?.solidView?.layout?.attrs
@@ -1152,7 +1159,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                   solidListViewLayout={solidListViewLayout}
                 />
               )}
-            {actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
+            {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
               solidListViewLayout?.attrs?.create !== false &&
               params.embeded == true &&
               params.inlineCreate == true &&
@@ -1288,10 +1295,10 @@ export const SolidListView = (params: SolidListViewParams) => {
                 if (solidListViewLayout?.attrs.disableRowClick === true) return;
 
                 const hasFindPermission = actionsAllowed.includes(
-                  findPermission(params.modelName)
+                  permissionExpression(params.modelName, 'find')
                 );
                 const hasUpdatePermission =
-                  actionsAllowed.includes(updatePermission(params.modelName)) &&
+                  actionsAllowed.includes(permissionExpression(params.modelName, 'update')) &&
                   solidListViewLayout?.attrs?.edit !== false;
 
                 if (!(hasFindPermission || hasUpdatePermission)) return;
@@ -1372,7 +1379,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                   })}
 
               {actionsAllowed.includes(
-                `${updatePermission(params.modelName)}`
+                `${permissionExpression(params.modelName, 'update')}`
               ) &&
                 solidListViewLayout?.attrs?.edit !== false &&
                 solidListViewLayout?.attrs?.showRowEditInContextMenu ===
@@ -1406,7 +1413,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                 )}
 
               {actionsAllowed.includes(
-                `${deletePermission(params.modelName)}`
+                `${permissionExpression(params.modelName, 'delete')}`
               ) &&
                 solidListViewLayout?.attrs?.delete !== false &&
                 solidListViewLayout?.attrs?.showRowDeleteInContextMenu ===
@@ -1434,7 +1441,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                 )}
 
               {actionsAllowed.includes(
-                `${updatePermission(params.modelName)}`
+                `${permissionExpression(params.modelName, 'update')}`
               ) &&
                 solidListViewLayout?.attrs?.edit !== false && (
                   <Column
@@ -1461,7 +1468,6 @@ export const SolidListView = (params: SolidListViewParams) => {
                               <>
                                 {detailsBodyTemplate(rowData)}
                                 <OverlayPanel
-                                  key={selectedSolidViewData?.id || 'default'}
                                   ref={op}
                                   className="solid-custom-overlay"
                                   style={{ top: 10, minWidth: 120 }}
@@ -1493,7 +1499,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                       )}
 
                                     {actionsAllowed.includes(
-                                      `${deletePermission(params.modelName)}`
+                                      `${permissionExpression(params.modelName, 'delete')}`
                                     ) &&
                                       solidListViewLayout?.attrs?.delete !==
                                       false &&

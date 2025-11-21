@@ -12,6 +12,7 @@ import { useDispatch } from "react-redux";
 import { SolidCircularLoader } from "../common/SolidLoaders/SolidCircularLoader";
 import { AiInteraction } from '@/types/solid-core';
 import styles from './SolidXAI.module.css';
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 
 
 export interface SolidXAiJsonDisplayProps {
@@ -145,7 +146,7 @@ export const SolidXAiJsonDisplay: React.FC<SolidXAiJsonDisplayProps> = ({ intera
     }] = useApplySolidAiInteractionMutation();
 
     const handlePreview = () => {
-        console.log('Preview clicked for interaction:', interaction.id)
+        console.log(ERROR_MESSAGES.PREVIEW_INTERACTION, interaction.id)
         setEditAndApplyDialog(true)
     }
 
@@ -153,10 +154,10 @@ export const SolidXAiJsonDisplay: React.FC<SolidXAiJsonDisplayProps> = ({ intera
         try {
             const response = await applyInteraction({ id: interaction.id }).unwrap()
             setIsGenerating(true);
-            console.log('Apply successful:', response)
+            console.log(ERROR_MESSAGES.APPLY_SUCCESS, response)
         } catch (err: any) {
-            showToast("error", "Apply Failed", `Failed to apply interaction - ${err?.data?.error}`);
-            console.error('Failed to apply interaction:', err)
+            showToast("error", ERROR_MESSAGES.APPLY_FAILED, ERROR_MESSAGES.FAILED_APPLY_INTERACTION(err?.data?.error));
+            console.error(ERROR_MESSAGES.FAILED_APPLY_INTERACTION(''), err)
         }
     }
 
@@ -164,9 +165,9 @@ export const SolidXAiJsonDisplay: React.FC<SolidXAiJsonDisplayProps> = ({ intera
         try {
             const response = await applyInteraction({ id: interaction.id }).unwrap()
             setIsGenerating(true);
-            console.log('Apply successful:', response)
+            console.log(ERROR_MESSAGES.APPLY_SUCCESS, response)
         } catch (err) {
-            console.error('Failed to apply interaction:', err)
+            console.error(ERROR_MESSAGES.FAILED_APPLY_INTERACTION(''), err)
         }
     }
 

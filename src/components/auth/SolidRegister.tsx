@@ -23,10 +23,11 @@ import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "@/helpers/resendOtpHelper";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { SolidPasswordHelperText } from "../core/common/SolidPasswordHelperText";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 interface AuthTabsProps {
-    iamPasswordRegistrationEnabled: boolean;
-    passwordlessRegistration: boolean;
+    passwordBasedAuth: boolean;
+    passwordLessAuth: boolean;
     showNameFieldsForRegistration?: boolean;
 }
 
@@ -59,7 +60,7 @@ const SolidRegister = () => {
 
                 toast.current?.show({
                     severity: "error",
-                    summary: "Error",
+                    summary: ERROR_MESSAGES.ERROR,
                     detail: errorMessages.join(", "),
                     life: 3000,
                 });
@@ -67,8 +68,8 @@ const SolidRegister = () => {
                 const serializedError = error as Error;
                 toast.current?.show({
                     severity: "error",
-                    summary: "Error",
-                    detail: serializedError.message || "An error occurred",
+                    summary: ERROR_MESSAGES.ERROR ,
+                    detail: serializedError.message || ERROR_MESSAGES.ERROR_OCCURED,
                     life: 3000,
                 });
             }
@@ -110,26 +111,26 @@ const SolidRegister = () => {
                 validationSchema={Yup.object({
                     username: showNameFieldsForRegistration
                         ? Yup.string().notRequired()
-                        : Yup.string().required("User Name is required"),
+                        : Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('User Name')),
 
                     firstName: showNameFieldsForRegistration
-                        ? Yup.string().required("First Name is required")
+                        ? Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('First Name'))
                         : Yup.string().notRequired(),
 
                     lastName: showNameFieldsForRegistration
-                        ? Yup.string().required("Last Name is required")
+                        ? Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Last Name '))
                         : Yup.string().notRequired(),
 
                     email: Yup.string()
-                        .email("Invalid email address")
-                        .required("Email is required"),
+                        .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
+                        .required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
                     password: Yup.string()
-                        .required("Password is required")
-                        .min(8, "Password must be at least 8 characters")
-                        .matches(/[a-z]/, "Password must contain at least one lowercase letter")
-                        .matches(/[A-Z]/, "Password must contain at least one uppercase letter")
-                        .matches(/\d/, "Password must contain at least one number")
-                        .matches(/[@$!%*?&#^(){}[\]|\\/~`+=<>:;'"_,.-]/, "Password must contain at least one special character"),
+                        .required(ERROR_MESSAGES.FIELD_REUQIRED('Password'))
+                        .min(8, ERROR_MESSAGES.PASSWORD_CHARACTER(8))
+                        .matches(/[a-z]/, ERROR_MESSAGES.PASSWORD_CONTAIN('lowercase'))
+                        .matches(/[A-Z]/, ERROR_MESSAGES.PASSWORD_CONTAIN('uppercase'))
+                        .matches(/\d/, ERROR_MESSAGES.PASSWORD_CONTAIN('one', 'number'))
+                        .matches(/[@$!%*?&#^(){}[\]|\\/~`+=<>:;'"_,.-]/, ERROR_MESSAGES.PASSWORD_CONTAIN('special','character')),
                 })}
 
                 onSubmit={async (values, { setSubmitting }) => {
@@ -156,16 +157,16 @@ const SolidRegister = () => {
                         const response = await register(userData).unwrap();
 
                         if (response?.statusCode === 200) {
-                            showToast("success", "User Registered", response?.data?.message);
+                            showToast("success", ERROR_MESSAGES.USER_REGISTER, response?.data?.message);
                             setShowOverlay(true);
                             setTimeout(() => {
                                 router.push(`/auth/login`);
                             }, 3000);
                         } else {
-                            showToast("error", "Login Error", response.error);
+                            showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                         }
                     } catch (err: any) {
-                        showToast("error", "Email is already taken, ", err?.data ? err?.data?.message : "Something Went Wrong");
+                        showToast("error", ERROR_MESSAGES.EMAIL_ALREADY_TAKEN , err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                     } finally {
                         setSubmitting(false);
                     }
@@ -282,10 +283,10 @@ const SolidRegister = () => {
                     email: "",
                 }}
                 validationSchema={Yup.object({
-                    username: Yup.string().required("User Name is required"),
+                    username: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('"User Name')),
                     email: Yup.string()
-                        .email("Invalid email address")
-                        .required("Email is required"),
+                        .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
+                        .required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
                 })}
                 onSubmit={async (values, { setSubmitting }) => {
                     try {
@@ -308,8 +309,8 @@ const SolidRegister = () => {
                                 const formatted = formatTimeLeft(remaining);
                                 showToast(
                                     "error",
-                                    "Please wait",
-                                    `You can request a new OTP in ${formatted} second(s)`
+                                    ERROR_MESSAGES.PLEASE_WAIT,
+                                    ERROR_MESSAGES.OPT_FORMAT(formatted)
                                 );
                                 setSubmitting(false);
                                 return; //  Prevent request
@@ -318,15 +319,15 @@ const SolidRegister = () => {
                         const response = await initiateRegister(payload).unwrap(); // Call mutation trigger
 
                         if (response?.statusCode === 200) {
-                            showToast("success", "OTP sent Successfully", response?.data?.message);
+                            showToast("success", ERROR_MESSAGES.OPT_SEND, response?.data?.message);
                             const email = values.email;
                             localStorage.setItem(`resendOtpRegister_${email}`, Date.now().toString());
                             router.push(`/auth/initiate-register?email=${email}&username=${values.username}`);
                         } else {
-                            showToast("error", "Login Error", response.error);
+                            showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                         }
                     } catch (err: any) {
-                        showToast("error", "Login Error", err?.data ? err?.data?.message : "Something Went Wrong");
+                        showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                     } finally {
                         setSubmitting(false);
                     }
@@ -375,8 +376,8 @@ const SolidRegister = () => {
         )
     }
 
-    const AuthTabs: React.FC<AuthTabsProps> = ({ iamPasswordRegistrationEnabled, passwordlessRegistration, showNameFieldsForRegistration }) => {
-        if (iamPasswordRegistrationEnabled && passwordlessRegistration) {
+    const AuthTabs: React.FC<AuthTabsProps> = ({ passwordBasedAuth, passwordLessAuth, showNameFieldsForRegistration }) => {
+        if (passwordBasedAuth && passwordLessAuth) {
             return (
                 <TabView className="solid-auth-tabview"
                     activeIndex={activeIndex}
@@ -390,9 +391,9 @@ const SolidRegister = () => {
                     </TabPanel>
                 </TabView>
             );
-        } else if (iamPasswordRegistrationEnabled) {
+        } else if (passwordBasedAuth) {
             return <PasswordSignup showNameFieldsForRegistration={showNameFieldsForRegistration} />;
-        } else if (passwordlessRegistration) {
+        } else if (passwordLessAuth) {
             return <PasswordLessSignup />;
         } else {
             return <p>No authentication method available</p>;
@@ -427,7 +428,7 @@ const SolidRegister = () => {
                 }
                 <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-4' : 'text-left'}`}>Sign Up</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
-                <AuthTabs iamPasswordRegistrationEnabled={solidSettingsData?.data?.iamPasswordRegistrationEnabled} passwordlessRegistration={solidSettingsData?.data?.passwordlessRegistration} showNameFieldsForRegistration={solidSettingsData?.data?.showNameFieldsForRegistration} />
+                <AuthTabs passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} showNameFieldsForRegistration={solidSettingsData?.data?.showNameFieldsForRegistration} />
                 {solidSettingsData?.data?.iamGoogleOAuthEnabled &&
                     <>
                         <Divider align="center">

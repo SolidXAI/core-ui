@@ -1,5 +1,6 @@
 'use client';
 import { SingleSelectAutoCompleteField } from "@/components/common/SingleSelectAutoCompleteField";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { getSingularAndPlural } from "@/helpers/helpers";
 import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
 import { useLazyGetModelsQuery } from "@/redux/api/modelApi";
@@ -86,25 +87,25 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
       //   /^[a-z]+(-[a-z]+)*$/,
       //   "Invalid format. Use lowercase letters and hyphens only."
       // )
-      .notOneOf(allModelsNames, "Name already in use. Please choose a different name.")
-      .required("Singular Name is required."),
+      .notOneOf(allModelsNames, ERROR_MESSAGES.FIELD_ALREADY_USE('Name','name'))
+      .required(ERROR_MESSAGES.FIELD_REUQIRED('Singular Name')),
     pluralName: Yup.string()
       // .matches(
       //   /^[a-z]+(-[a-z]+)*$/,
       //   "Invalid format. Use lowercase letters and hyphens only."
       // )
-      .required("Plural Name is required."),
+      .required(ERROR_MESSAGES.FIELD_REUQIRED('Plural Name')),
     tableName: Yup.string().required()
       .matches(
         /^[a-z0-9_]+$/,
-        "Table name must be in snake_case (lowercase letters, numbers, and underscores only)."
+        ERROR_MESSAGES.SNAKE_CASE('Tabale')
       ),
-    displayName: Yup.string().required("Display Name is required"),
-    description: Yup.string().required("Description Name is required"),
-    dataSource: Yup.string().required("Data Source is required"),
-    dataSourceType: Yup.string().required("Data Source Type is required"),
-    moduleId: Yup.number().required("Module Id is required"),
-    module: Yup.object().required("Module is required"),
+    displayName: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Display Name")),
+    description: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Description Name")),
+    dataSource: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Data Source")),
+    dataSourceType: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Data Source Type")),
+    moduleId: Yup.number().required(ERROR_MESSAGES.FIELD_REUQIRED("Module Id")),
+    module: Yup.object().required(ERROR_MESSAGES.FIELD_REUQIRED("Module")),
     isSystem: Yup.boolean(),
     enableSoftDelete: Yup.boolean(),
     enableAuditTracking: Yup.boolean(),
@@ -113,14 +114,14 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     isChild: Yup.boolean(),
     parentModelId: Yup.number().when("isChild", (isChild: any, schema) => {
       if (isChild.length > 0 && isChild[0] == true) {
-        return schema.required("Parent Model Id is required")
+        return schema.required(ERROR_MESSAGES.FIELD_REUQIRED('Parent Model Id'))
       } else {
         return schema.notRequired().nullable();
       }
     }),
     parentModel: Yup.object().when("isChild", (isChild: any, schema) => {
       if (isChild.length > 0 && isChild[0] == true) {
-        return schema.required("Parent Model is required")
+        return schema.required(ERROR_MESSAGES.FIELD_REUQIRED('Parent Model'))
       } else {
         return schema.notRequired().nullable();
       }
@@ -168,7 +169,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
         nextTab()
 
       } catch (err) {
-        console.error("Failed to create Model:", err);
+        console.error(ERROR_MESSAGES.CREATE_MODEL, err);
       }
     },
   });
@@ -185,7 +186,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     if (errorMessages.length > 0) {
       toast?.current?.show({
         severity: "error",
-        summary: "Can you send me the report?",
+        summary: ERROR_MESSAGES.SEND_REPORT,
         // sticky: true,
         life: 3000,
         //@ts-ignore
@@ -283,7 +284,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
       const transformedData = filterredData.map((e: any) => ({ label: e.name, value: e.name, type: e.type }));
       return transformedData
     } catch (error) {
-      console.error("Error fetching items:", error);
+      console.error(ERROR_MESSAGES.FETCHING_ITEMS, error);
       return []
     }
   };
@@ -297,7 +298,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
       const transformedData = filterredData.map((e: any) => ({ label: e.type, value: e.type }))
       return transformedData;
     } catch (error) {
-      console.error("Error fetching items:", error);
+      console.error(ERROR_MESSAGES.FETCHING_ITEMS, error);
       return [];
 
     }

@@ -1,5 +1,6 @@
 'use client';
 import { SolidCircularLoader } from "@/components/core/common/SolidLoaders/SolidCircularLoader";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { useGenerateCodeFormoduleMutation } from "@/redux/api/moduleApi";
 import { useSeederMutation } from "@/redux/api/solidServiceApi";
 import { closePopup } from "@/redux/features/popupSlice";
@@ -8,7 +9,6 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-
 
 const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     const dispatch = useDispatch()
@@ -67,7 +67,7 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
 
     const generateCodeHandler = async () => {
         const response = await generateCode({ id: event?.rowData?.id });
-        console.log("response generate code handler", response);
+        console.log(ERROR_MESSAGES.RESPONSE_GENERATE_CODE_HANDLER, response);
         setIsGenerating(true);
         // showToast("error", "Login Error", response.error);
     }
@@ -124,8 +124,8 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
                     await triggerSeeder("ModuleMetadataSeederService");
                 } else {
                     dispatch(closePopup());
-                    console.log("Backend is not alive, cannot run seeder");
-                    showToast("error", "Backend Unavailable", "Seeder not triggered. Could not reach backend.");
+                    console.log(ERROR_MESSAGES.BACKEND_NOT_ALIVE);
+                    showToast("error", ERROR_MESSAGES.BACKEND_UNAVAILABLE, ERROR_MESSAGES.SEEDER_NOT_TRIGGERED);
                 }
             }
         };
@@ -136,15 +136,15 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
 
     useEffect(() => {
         if (isSeederSuccess) {
-            console.log("isSeederSuccess", data);
-            showToast("success", "Code Generated Successfully", "Code Generated Successfully");
+            console.log(ERROR_MESSAGES.IS_SEEDER_SUCCESS, data);
+            showToast("success", ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY, ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY);
             setIsGenerating(false);
             dispatch(closePopup());
             window.location.reload();
         }
         if (isSeederError) {
-            console.log("isSeederError", isSeederError);
-            showToast("error", "Seeder Error", "Could not run seeder. Please try again.");
+            console.log(ERROR_MESSAGES.IS_SEEDER_ERROR, isSeederError);
+            showToast("error", ERROR_MESSAGES.SEEDER_ERROR, ERROR_MESSAGES.SEEDER_NOT_RUN);
             setIsGenerating(false);
         }
     }, [isSeederSuccess])

@@ -11,6 +11,7 @@ import { Column } from "primereact/column";
 import { Checkbox } from "primereact/checkbox";
 import { kebabCase } from "lodash";
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
 const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
@@ -39,24 +40,24 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
         setErrorState(null);
         try {
             const res: any = await deleteSolidSingleEntiry(event.rowData.id)
-            console.log('delete model res', res);
+            // console.log('delete model res', res);
             setErrorState(res.error || null);
             if (res.error) {
                 // handle backend or RTK error object
                 const message =
                     res.error?.data?.message ||
                     res.error?.error ||
-                    "An unexpected error occurred while deleting the model.";
+                    ERROR_MESSAGES.ERROR_OCCURED;
                 setErrorState(message);
-                showToast('error', 'Delete Failed', message);
+                showToast('error', ERROR_MESSAGES.DELETE_FAIELD, message);
             } else {
-                showToast('success', 'Model Deleted', `Model ${event.rowData.singularName} has been deleted successfully.`);
+                showToast('success', ERROR_MESSAGES.MODEL_DELETE, ERROR_MESSAGES.MODEL_DELETE_SUCCESSFULLY(event.rowData.singularName));
                 dispatch(closePopup());
             }
         } catch (err: any) {
-            console.error("Delete error", err);
-            setErrorState(err.message || "Network error occurred. Please try again.");
-            showToast('error', 'Error', "Network or server error occurred.");
+            console.error(ERROR_MESSAGES.DELETE_ERROR, err);
+            setErrorState(err.message || ERROR_MESSAGES.NETWORK_ERROR);
+            showToast('error', ERROR_MESSAGES.ERROR, ERROR_MESSAGES.NETWORK_OR_SERVER_ERROR);
         } finally {
             setIsDeleting(false);
         }

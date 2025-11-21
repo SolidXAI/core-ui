@@ -4,7 +4,7 @@ import styles from './SolidImport.module.css'
 import { useLazyGetImportInstructionsQuery } from '@/redux/api/importTransactionApi';
 import { useEffect } from 'react';
 import { getSession } from 'next-auth/react';
-
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any) => {
     const [getImportInstructions, { data: importInstructionsData, isLoading, isError }] =
         useLazyGetImportInstructionsQuery();
@@ -22,7 +22,7 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
             const session: any = await getSession();
             const token = session?.user?.accessToken || "";
             if (!token) {
-                throw new Error('No auth token found');
+                throw new Error(ERROR_MESSAGES.NO_AUTH_TOKEN_FOUND);
             }
             const response = await fetch(
                 `${process.env.API_URL}/api/import-transaction/import-template/${modelId}/${format}`,
@@ -35,7 +35,7 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
             );
 
             if (!response.ok) {
-                throw new Error('File download failed');
+                throw new Error(ERROR_MESSAGES.FILE_DOWNLOAD_FAILED);
             }
 
             const blob = await response.blob();
@@ -49,7 +49,7 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
             link.remove();
             window.URL.revokeObjectURL(url);
         } catch (error) {
-            console.error('Download error:', error);
+            console.error(ERROR_MESSAGES.DOWNLOAD_FAILED, error);
         }
     };
 

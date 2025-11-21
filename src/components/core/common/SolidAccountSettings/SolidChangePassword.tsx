@@ -10,6 +10,7 @@ import { Toast } from 'primereact/toast';
 import { useMemo, useRef } from 'react';
 import * as Yup from 'yup';
 import { SolidPasswordHelperText } from '../SolidPasswordHelperText';
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 
 export const SolidChangePassword = ({ solidSettingsData }: any) => {
     const toast = useRef<Toast>(null);
@@ -40,7 +41,7 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
                 return new RegExp(unescaped);
             }
         } catch (error) {
-            console.error("Invalid password regex:", error);
+            console.error(ERROR_MESSAGES.INVALID_PASSWORD_REGX, error);
         }
         return null;
     }, [solidSettingsData, envPasswordRegex]);
@@ -51,23 +52,23 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
                 .matches(
                     effectiveRegex,
                     solidSettingsData?.data?.system?.authenticationPasswordRegexErrorMessage ||
-                    "Password does not meet complexity requirements"
+                   ERROR_MESSAGES.PASSWORD_DO_NOT_MEET
                 )
-                .required("New password is required")
+                .required(ERROR_MESSAGES.FIELD_REUQIRED('New password'))
             : Yup.string()
-                .min(6, "Password must be at least 6 characters")
-                .required("New password is required");
+                .min(6, ERROR_MESSAGES.PASSWORD_CHARACTER(6))
+                .required(ERROR_MESSAGES.FIELD_REUQIRED('New password'));
 
         return Yup.object({
-            email: Yup.string().email("Invalid email format").required("Email is required"),
+            email: Yup.string().email(ERROR_MESSAGES.FIELD_INAVLID_FORMAT('email')).required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
             currentPassword: Yup.string()
-                .min(6, "Password must be at least 6 characters")
-                .required("Current password is required"),
+                .min(6, ERROR_MESSAGES.PASSWORD_CHARACTER(6))
+                .required(ERROR_MESSAGES.FIELD_REUQIRED('Current password')),
             newPassword: newPasswordValidation,
             confirmPassword: Yup.string()
-                .oneOf([Yup.ref("newPassword")], "Passwords must match")
-                .required("Confirm password is required"),
-            id: Yup.number().required("User ID is required"),
+                .oneOf([Yup.ref("newPassword")], ERROR_MESSAGES.MUST_MATCH)
+                .required(ERROR_MESSAGES.FIELD_REUQIRED('Confirm password')),
+            id: Yup.number().required(ERROR_MESSAGES.FIELD_INAVLID_FORMAT('User ID')),
         });
     }, [effectiveRegex, solidSettingsData]);
 
@@ -91,14 +92,14 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
 
                 const response = await changePassword(payload).unwrap();
                 if (response?.error) {
-                    showToast("error", "Error", response.error)
+                    showToast("error", ERROR_MESSAGES.ERROR, response.error)
                     setErrors({
-                        currentPassword: "Incorrect Current Password",
-                        newPassword: "Passwords must match",
-                        confirmPassword: "Passwords must match",
+                        currentPassword: ERROR_MESSAGES.INCORRECT_CURRENT,
+                        newPassword: ERROR_MESSAGES.MUST_MATCH,
+                        confirmPassword: ERROR_MESSAGES.MUST_MATCH,
                     })
                 } else {
-                    showToast("success", "Password Change Successfully", "Password Change Successfully");
+                    showToast("success", ERROR_MESSAGES.PASSWORD_CHANGE, ERROR_MESSAGES.PASSWORD_CHANGE);
                     handleLogout(toast)
                     resetForm();
                 }

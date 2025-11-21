@@ -5,6 +5,7 @@ import { SolidChatterDateDivider } from './SolidChatterDateDivider'
 import { SolidChatterMessageBox } from './SolidChatterMessageBox'
 import { useLazyGetchatterMessageQuery } from '@/redux/api/solidChatterMessageApi'
 import qs from "qs";
+import { ERROR_MESSAGES } from '@/constants/error-messages'
 
 interface FilterState {
     name: string;
@@ -138,7 +139,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
             setMessages(processedMessages);
             setTotalRecords(response?.data?.meta?.totalRecords || 0);
         } catch (error) {
-            console.error('Error fetching messages:', error);
+            console.error(ERROR_MESSAGES.FETCHING_MESSAGE, error);
         }
     }
 
