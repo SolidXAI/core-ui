@@ -138,6 +138,8 @@ export type SolidLoadList = {
     totalRecords: number;
     viewMetadata: SolidView;
     listViewLayout: ListLayoutType;
+    user:any,
+    session:any
 }
 
 export type SolidAfterLoginEvent = {

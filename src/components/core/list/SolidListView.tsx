@@ -56,6 +56,7 @@ import { SolidXAIModule } from "../solid-ai/SolidXAIModule";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
 import { SolidLoadList } from "@/types/solid-core";
 import { getExtensionFunction } from "@/helpers/registry";
+import { useSession } from "next-auth/react";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
 // import { ERROR_MESSAGES } from "@/constants/error-messages";
 
@@ -555,6 +556,10 @@ export const SolidListView = (params: SolidListViewParams) => {
     solidListViewMetaData,
   ]);
 
+  const session = useSession();
+  const { user } = useSelector((state: any) => state.auth);
+
+
 
   useEffect(() => {
     if (solidListViewMetaData?.data && !loading) {
@@ -570,7 +575,9 @@ export const SolidListView = (params: SolidListViewParams) => {
           totalRecords: totalRecords,
           type: "onListLoad",
           viewMetadata: solidListViewMetaData?.data?.solidView,
-          listViewLayout: solidListViewLayout
+          listViewLayout: solidListViewLayout,
+          user: user,
+          session: session
         };
 
         if (dynamicHeader) {
