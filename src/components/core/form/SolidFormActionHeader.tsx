@@ -166,7 +166,41 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             )
                         })
                         }
+                        <div className="lg:hidden lg:flex gap-3">
+                            {normalHeaderButtons.map((button: any, index: number) => {
+                                return (
+                                    // <Button
+                                    //     text
+                                    //     type="button"
+                                    //     className="w-full text-left gap-2"
+                                    //     label={button.attrs.label}
+                                    //     size="small"
+                                    //     iconPos="left"
+                                    //     severity="contrast"
+                                    //     icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                                    //     onClick={() => {
+                                    //         const event = {
+                                    //             action: button.attrs.action,
+                                    //             params,
+                                    //             formik,
+                                    //             solidFormViewMetaData: solidFormViewMetaData.data
+                                    //         }
+                                    //         handleCustomButtonClick(button.attrs, event)
+                                    //     }}
+                                    // />
+                                    <SolidFormViewNormalHeaderButton
+                                        key={index}
+                                        button={button}
+                                        params={params}
+                                        formik={formik}
+                                        solidFormViewMetaData={solidFormViewMetaData}
+                                        handleCustomButtonClick={handleCustomButtonClick}
+                                    />
 
+                                )
+                            })
+                            }
+                        </div>
                     </div>
                 </OverlayPanel>
             </div>
@@ -181,7 +215,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             {params.embeded !== true && <BackButton />}
                             <div className="form-wrapper-title"> {createHeaderTitle}</div>
                         </div>
-                        <div className="gap-3 flex">
+                        <div className="hidden lg:flex gap-3">
                             {normalHeaderButtons.map((button: any, index: number) => {
                                 return (
                                     // <Button
@@ -274,7 +308,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             <div className="form-wrapper-title"> {viewMode === "edit" ? editHeaderTitle : solidView.model.displayName}</div>
                         </div>
 
-                        <div className="gap-3 flex">
+                        <div className="hidden lg:flex gap-3">
                             {normalHeaderButtons.map((button: any, index: number) => {
                                 return (
                                     // <Button
