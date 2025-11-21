@@ -265,7 +265,7 @@ const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, ope
         <div className="flex align-items-center justify-content-between gap-2">
             <div>
                 <Button text size="small" className="text-base py-1 w-full" severity={Number(activeSavedFilter) == savedfilter.id ? "secondary" : "contrast"} onClick={() => applySavedFilter(savedfilter)}>{savedfilter.name}</Button>
-                {savedfilter?.description && <p className="text-xs pl-3" style={{lineHeight : 6}}>{savedfilter?.description}</p>}
+                {savedfilter?.description && <p className="text-xs pl-3" style={{lineHeight : '6px'}}>{savedfilter?.description}</p>}
             </div>
             <div className="flex align-items-center gap-2">
                 <Button
