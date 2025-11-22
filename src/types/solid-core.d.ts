@@ -109,7 +109,12 @@ export type SolidUiEvent = {
     formViewLayout: LayoutNode;
 };
 
-
+export type SolidUiEventResponse = {
+    dataChanged?: Boolean;
+    newFormData?: Record<string, any>;
+    layoutChanged?: Boolean;
+    newLayout?: LayoutNode;
+}
 
 
 export type SolidLoadForm = {
@@ -140,6 +145,13 @@ export type SolidLoadList = {
     listViewLayout: ListLayoutType;
     user:any,
     session:any
+}
+
+export type SolidListUiEventResponse = {
+    dataChanged?: Boolean;
+    newListData?: any[];
+    layoutChanged?: Boolean;
+    newLayout?: LayoutNode;
 }
 
 export type SolidAfterLoginEvent = {

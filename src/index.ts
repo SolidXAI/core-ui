@@ -370,6 +370,8 @@ export type {
     LayoutNodeType,
     SolidUiEvents,
     SolidUiEvent,
+    SolidUiEventResponse,
+    SolidListUiEventResponse,
     SolidListUiEvent,
     SolidFormWidgetProps,
     SolidChartRendererProps
