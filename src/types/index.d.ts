@@ -26,6 +26,7 @@ import {
     LayoutNodeType,
     SolidUiEvents,
     SolidUiEvent,
+    SolidListUiEvent,
     SolidFormWidgetProps,
     SolidChartRendererProps
 } from './solid-core';
@@ -57,6 +58,7 @@ export type {
     LayoutNodeType,
     SolidUiEvents,
     SolidUiEvent,
+    SolidListUiEvent,
     SolidFormWidgetProps,
     SolidChartRendererProps
 };

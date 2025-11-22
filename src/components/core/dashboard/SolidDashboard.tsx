@@ -79,6 +79,32 @@ function getQueryParams(moduleName: string, dashboardId?: number, dashboardName?
   return urlQuery;
 }
 
+// Render the dashboard body only if:
+// 1. There are dashboard questions
+// AND
+// (
+// 1. There are dashboard variables and all dashboard variable filter rules have been applied i.e (all dashboard variables have been selected)
+//. OR
+// 2. There are no dashboard variables
+// )
+// 
+function isRenderDashboardBody(questions: any[], dashboardVariables: DashboardVariableRecord[], filters: SqlExpression[]) {
+  if (questions.length === 0) {
+    return false;
+  }
+
+  if (dashboardVariables.length === 0) {
+    return true;
+  }
+
+  // Check if all dashboard variables have corresponding filters applied
+  const allVariablesFiltered = dashboardVariables.every(variable =>
+    filters.some(filter => filter.variableName === variable.variableName)
+  );
+
+  return allVariablesFiltered;
+}
+
 type SolidDashboardViewProps = {
   moduleName: string;
   dashboardId?: number;
@@ -187,7 +213,8 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
             </p>
               {dashboardVariables && dashboardVariables.length > 0 && <SolidDashboardVariable dashboardVariables={dashboardVariables} setFilters={setFilters} />}
             </div>
-            {questions && questions.length > 0 && <SolidDashboardBody questions={questions} filters={filters} />}
+            {!isRenderDashboardBody(questions, dashboardVariables, filters) && <p className="text-red-600">Almost there! Select the required filters to generate your dashboard.</p>}
+            {isRenderDashboardBody(questions, dashboardVariables, filters) && <SolidDashboardBody questions={questions} filters={filters} />}
           </>
         )}
       </div>

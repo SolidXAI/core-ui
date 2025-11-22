@@ -9,7 +9,7 @@ export const SolidImportStepper = ({ importStep, setImportStep }: any) => {
     };
 
     return (
-        <div className="py-2 px-4 secondary-border-bottom" style={{ backgroundColor: '#F6F6F6' }}>
+        <div className="py-2 px-3 px-md-4 secondary-border-bottom" style={{ backgroundColor: '#F6F6F6' }}>
             <div className="flex align-items-center" style={{ borderRadius: 6, border: '1px solid var(--primary-light-color)', overflow: 'hidden', cursor: 'pointer' }}>
                 {/* Step 1 */}
                 <div className="flex relative" style={{ flex: 1, height: 40, zIndex: 4 }} onClick={() => setImportStep(1)}>

@@ -8,6 +8,7 @@ import { Layout } from "./Layout";
 import { Dialog } from "primereact/dialog";
 import { Divider } from "primereact/divider";
 import SolidChangeForcePassword from "../auth/SolidChangeForcePassword";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     // const theme = useSelector((state: any) => state.theme.mode);
@@ -27,7 +28,7 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         const handleRouteChange = async () => {
             const session = await getSession(); // Force refetch session on navigation
             if (session?.error === "RefreshAccessTokenError") {
-                handleError(["Session Expired. Please Login Again."])
+                handleError([ERROR_MESSAGES.SESSION_EXPIRED])
                 signOut({ callbackUrl: "/auth/login" });
             }
 

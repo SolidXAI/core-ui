@@ -9,6 +9,7 @@ import { Messages } from "primereact/messages";
 import { Toast } from "primereact/toast";
 import { useRef, useState } from "react";
 import FieldMetaDataForm from "./FieldMetaDataForm";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
 const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaData, deleteModelFunction, nextTab, formikFieldsMetadataRef, params }: any) => {
@@ -105,7 +106,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
     if (errorMessages.length > 0) {
       toast?.current?.show({
         severity: severity,
-        summary: "Can you send me the report?",
+        summary: ERROR_MESSAGES.SEND_REPORT,
         life: 3000,
         //@ts-ignore
         content: (props) => (
@@ -151,8 +152,8 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
                   if (!modelMetaData?.dataSourceType) {
                     toast.current?.show({
                       severity: 'error',
-                      summary: 'Error',
-                      detail: 'Orm Type is required!',
+                      summary: ERROR_MESSAGES.ERROR,
+                      detail: ERROR_MESSAGES.ORM_TYPE_REQUIRED,
                       life: 3000,
                     });
                   } else {
@@ -200,8 +201,6 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
             headerClassName="text-center warning-header-popup"
             modal
             style={{ width: '20vw' }}
-            
-
             onHide={() => setIsRequiredPopUp(false)}
             className="solid-dialog solid-confirm-dialog"
           >

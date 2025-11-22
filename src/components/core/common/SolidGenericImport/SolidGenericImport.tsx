@@ -24,8 +24,9 @@ export const SolidGenericImport = ({
             visible={openImportDialog}
             style={{ width: '60vw' }}
             onHide={() => { if (!openImportDialog) return; setOpenImportDialog(false); }}
-            headerClassName="px-4 py-2 secondary-border-bottom"
+            headerClassName="px-4 py-2 secondary-border-bottom solid-import-dialog-header"
             contentClassName="p-0"
+            className='solid-import-dialog'
         >
             <SolidImportStepper importStep={importStep} setImportStep={setImportStep} />
             <div className='px-4 py-3'>

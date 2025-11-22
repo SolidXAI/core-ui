@@ -8,12 +8,12 @@
 
     .main-content.shifted {
         margin-left: 70px !important;
-        backdrop-filter: blur(20px);
-        background-color: rgba(0, 0, 0, 0.2);
-        transition: backdrop-filter 0.3s ease, background-color 0.3s ease;
+        /* backdrop-filter: blur(20px); */
+        /* background-color: rgba(0, 0, 0, 0.2); */
+        /* transition: backdrop-filter 0.3s ease, background-color 0.3s ease; */
     }
 
-    .main-content.main-content.shifted .page-parent-wrapper{
+    .main-content.main-content.shifted .page-parent-wrapper {
         backdrop-filter: blur(10px) !important;
     }
 
@@ -53,6 +53,8 @@
         width: 80vw !important;
     }
 
+    /* ===================== Solid Dialog  ===================== */
+
     .solid-field-dialog {
         width: 45rem !important;
         max-width: 90%;
@@ -65,7 +67,39 @@
     .solid-change-dialog {
         width: 32rem !important;
     }
+
+    .solid-common-dialog {
+        width: 55rem !important;
+    }
+
+    /* ======================= Solid Import  ================================ */
+    .solid-import-dialog {
+        width: 75rem !important;
+        max-width: 80% !important;
+    }
+
+    /* ======================= Solid Export ============================  */
+    .ExportDialog {
+        width: 75rem !important;
+        max-width: 80% !important;
+        height: auto !important;
+    }
+
+    /* ========================= Home ========================== */
+    .solidModuleWelcomeSection {
+        padding: 16px !important;
+    }
+
+    .solidModuleHomeColorCards {
+        padding: 16px !important;
+    }
+
+    .solidModuleHomeActionCard {
+        padding: 16px !important;
+    }
+
 }
+
 
 
 @media (max-width: 991px) {
@@ -91,7 +125,6 @@
         width: 100vw;
 
     }
-
 
     .auth-container.side {
         width: 525px;
@@ -125,33 +158,92 @@
         width: 330px;
     }
 
+    .solid-common-dialog {
+        width: 45rem !important;
+        max-width: 85%;
+    }
+
+
+    /* ======================= Solid Import  ================================ */
+    .solid-import-dialog {
+        max-width: 94% !important;
+    }
+
+
+    /* ======================= Solid Export ============================  */
+    .ExportDialog {
+        max-width: 94% !important;
+    }
+
+    /* =================  cog wheel ================== */
+    .customize-layout-panel.p-overlaypanel {
+        top: 12% !important;
+        left: calc(100% - 420px) !important;
+    }
+
+    .cogwheel-column-filter {
+        max-height: 250px !important;
+    }
+
+
+    /* ================== Button =================== */
+    .only-icon-lg .p-button-label {
+        display: none !important;
+    }
+
+    /* =============================== Search ================================ */
+    .page-header {
+        padding: 10px 16px 16px 20px !important;
+        gap: 16px;
+    }
+
+    .solid-custom-filter-wrapper .p-inputtext {
+        width: 100%;
+    }
+
+    .solid-global-search-element input {
+        width: 100%;
+    }
+
 
 }
 
 @media(max-width:767px) {
+
+    /* ========================= Elements  ========================= */
+
+    h5 {
+        font-size: 1.1rem !important;
+    }
+
     /* ===================== Layout  ============================= */
 
 
     .sidebar-left {
-        width: 60px !important;
+        width: 54px !important;
     }
 
 
     .sidebar-right {
-        left: 60px !important;
+        left: 54px !important;
     }
 
     .main-content {
-        margin-left: 60px !important;
-        width: calc(100vw - 65px) !important;
+        margin-left: 54px !important;
+        width: calc(100vw - 54px) !important;
+    }
+
+    .main-content .page-parent-wrapper .chatter-section.collapsed {
+        margin-right: 6px !important;
     }
 
     .main-content.shifted {
-        margin-left: 60px !important;
+        margin-left: 54px !important;
     }
 
     .sidebar-toggle-button.s-collapsed {
-        left: 52px !important;
+        left: 46px !important;
+        top: 12px !important;
     }
 
     .chatter-section.collapsed {
@@ -159,7 +251,7 @@
     }
 
     .sidebar-toggle-button {
-        left: 280px !important;
+        left: 274px !important;
     }
 
 
@@ -167,6 +259,8 @@
         width: 2.5rem;
         height: 2.5rem;
     }
+
+    /* ===================== Solid Dialog  ===================== */
 
     .solid-confirm-dialog {
         width: 22rem !important;
@@ -179,11 +273,69 @@
     }
 
 
-    .solid-custom-filter-dialog{
+    .solid-custom-filter-dialog {
         width: 32rem !important;
-        max-width: 90% ;
+        max-width: 90%;
     }
 
+    .p-dialog .p-dialog-header {
+        padding: 1rem 1.5rem !important;
+    }
+
+    /* ======================= Solid Import  ================================ */
+
+    .solid-import-dialog {
+        overflow-x: auto !important;
+    }
+
+    .solid-import-dialog .p-dialog-content,
+    .solid-import-dialog-header {
+        width: 44rem !important;
+    }
+
+
+
+    /* ======================= Solid Export  ================================ */
+
+    .ExportDialog {
+        overflow-x: auto !important;
+    }
+
+    .ExportDialog .p-dialog-content,
+    .solid-export-dialog-header {
+        width: 44rem !important;
+    }
+
+    .SolidExportControls {
+        justify-self: flex-start !important;
+    }
+
+    /* =================  cog wheel ================== */
+    .customize-layout-panel.p-overlaypanel {
+        top: 16% !important;
+        left: calc(100% - 350px) !important;
+    }
+
+    .cogwheel-column-filter {
+        max-height: 220px !important;
+    }
+
+
+    /*  ======================= Button ================================== */
+    .p-splitbutton.p-button-sm>.p-button {
+        padding: 0.5rem 0.9rem;
+    }
+
+
+    .p-splitbutton.p-button-lg>.p-button {
+        font-size: 1.25rem;
+        padding: 0.7rem 1.1rem;
+    }
+
+    .p-button.p-button-icon-only {
+        padding: 0.4rem 0.6rem;
+        width: 2.3rem;
+    }
 }
 
 
@@ -229,6 +381,9 @@
     }
 
 
+    .solid-common-dialog {
+        max-width: 90% !important;
+    }
 
 }
 
@@ -236,11 +391,19 @@
 
     /* ===================== Solid Kanban ==================== */
 
-    .kanban-column {
+    .kanban-column:not(.kanban-column-folded) {
         min-width: 80% !important;
         max-width: 80% !important;
         width: 80% !important;
     }
+
+    .kanban-column-folded {
+        min-width: fit-content !important;
+        max-width: fit-content !important;
+        width: fit-content !important;
+        flex: 0 0 auto !important;
+    }
+
 
 
     /* ====================== SOlid Pannel =========================== */
@@ -252,21 +415,21 @@
         padding: 1px 0.75rem 0.75rem 0.75rem;
     }
 
-    
+
     /* ===================== Pagination ============================  */
     .p-paginator .p-paginator-next {
         min-width: 2.5rem !important;
     }
 
-    .solid-paginator div.p-dropdown::before{
+    .solid-paginator div.p-dropdown::before {
         content: "" !important;
     }
 
-    .solid-paginator div.p-dropdown{
-        margin-left: 0 !important;
+    .solid-paginator div.p-dropdown {
+        margin-left: 0px !important;
     }
 
-    
+
 
 }
 

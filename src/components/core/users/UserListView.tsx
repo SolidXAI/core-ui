@@ -16,6 +16,7 @@ import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
 import qs from "qs";
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 
 interface Users {
     id: string;
@@ -97,19 +98,19 @@ export const UserListView = () => {
     useEffect(() => {
         if (isError || isUserDeleteError) {
             setLoading(false);
-            let errorMessage = 'An error occurred';
+            let errorMessage = ERROR_MESSAGES.ERROR_OCCURED;
 
             const errorToast = isError ? error : UserDeleteError;
 
             if (isFetchBaseQueryErrorWithErrorResponse(errorToast)) {
                 errorMessage = `${errorToast.data.message}`;
             } else {
-                errorMessage = 'Something went wrong';
+                errorMessage = ERROR_MESSAGES.SOMETHING_WRONG;
             }
 
             toast.current?.show({
                 severity: 'error',
-                summary: 'Error',
+                summary: ERROR_MESSAGES.ERROR,
                 detail: errorMessage,
                 life: 3000,
                 //@ts-ignore
@@ -359,6 +360,7 @@ export const UserListView = () => {
                 visible={isDialogVisible}
                 header="Confirm Delete"
                 modal
+                className="solid-confirm-dialog"
                 footer={() => (
                     <div className="flex justify-content-center">
                         <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteBulk} />

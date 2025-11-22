@@ -399,6 +399,7 @@ export const ModuleListViewData = () => {
         visible={isDialogVisible}
         header="Confirm Delete"
         modal
+        className="solid-confirm-dialog"
         footer={() => (
           <div className="flex justify-content-center">
             <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteBulk} />
@@ -414,6 +415,7 @@ export const ModuleListViewData = () => {
         header="Generate Code"
         headerClassName="text-center"
         modal
+        className="solid-confirm-dialog"
         footer={() => (
           <div className="flex justify-content-center">
             <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={generateCodeHandler} />
@@ -422,7 +424,7 @@ export const ModuleListViewData = () => {
         )}
         onHide={() => setGenerateCodeVisible(false)}
       >
-        <p className="text-center">Click Ok to proceed with module code generation, please note that if the file already exists and <br></br>you have made custom changes to this file we will create a .bkp file as a backup of the existing file.</p>
+        <p className="text-center">Proceed with module code generation? Existing files will be overwritten.</p>
       </Dialog>
     </div>
   );

@@ -2,7 +2,7 @@
 
 import { SolidFormWidgetProps } from "@/types";
 import parse from 'html-react-parser';
-import Handlebars from "handlebars";
+import Handlebars from "handlebars/dist/handlebars";
 
 export const CustomHtml = ({ field, formData, viewMetadata, fieldsMetadata }: SolidFormWidgetProps) => {
     let { type, attrs, body, children } = field;

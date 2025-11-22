@@ -16,6 +16,7 @@ import { Chip } from "primereact/chip";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 import { Divider } from "primereact/divider";
 import { Button } from "primereact/button";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
 export class SolidRelationOneToManyField implements ISolidField {
@@ -57,7 +58,7 @@ export class SolidRelationOneToManyField implements ISolidField {
 
         // 1. required 
         if (fieldMetadata.required) {
-            schema = schema.required(`${fieldLabel} is required.`);
+            schema = schema.required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel));
         }
         return schema;
     }

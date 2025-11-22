@@ -13,13 +13,16 @@ import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import qs from "qs";
 import { useSelector } from "react-redux";
 import { SolidSaveCustomFilterForm } from "./SolidSaveCustomFilterForm";
-
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 const getRandomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
 
 
 const transformFiltersToRules = (filter: any, parentRule: number | null = null): FilterRule => {
+    if (!filter || typeof filter !== "object") {
+        throw new Error("Invalid filter: expected a non-null object");
+    }
     const currentId = idCounter++;
     if (filter["$or"]) {
         return {
@@ -27,7 +30,9 @@ const transformFiltersToRules = (filter: any, parentRule: number | null = null):
             type: FilterRuleType.RULE_GROUP,
             matchOperator: FilterOperator.OR,
             parentRule,
-            children: filter["$or"].map((subFilter: any) => transformFiltersToRules(subFilter, currentId))
+            children: filter["$or"]
+                .filter((sub: any) => sub != null) // skip nulls
+                .map((subFilter: any) => transformFiltersToRules(subFilter, currentId))
         };
     }
 
@@ -37,14 +42,18 @@ const transformFiltersToRules = (filter: any, parentRule: number | null = null):
             type: FilterRuleType.RULE_GROUP,
             matchOperator: FilterOperator.AND,
             parentRule,
-            children: filter["$and"].map((subFilter: any) => transformFiltersToRules(subFilter, currentId))
+            children: filter["$and"]
+                .filter((sub: any) => sub != null)
+                .map((subFilter: any) => transformFiltersToRules(subFilter, currentId))
         };
     }
 
     // Handle single rule condition
     for (const key in filter) {
         const condition = filter[key];
-
+        if (!condition || typeof condition !== "object") {
+            throw new Error(`Invalid condition for field '${key}'`);
+        }
         for (const matchMode in condition) {
             return {
                 id: currentId,
@@ -59,7 +68,7 @@ const transformFiltersToRules = (filter: any, parentRule: number | null = null):
         }
     }
 
-    throw new Error("Invalid filter structure");
+    throw new Error(ERROR_MESSAGES.INVALID_FILTER_STRUCTURE);
 }
 
 
@@ -254,7 +263,10 @@ export const mergeSearchAndCustomFilters = (transformedFilter: any, newFilter: a
 const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, openSavedCustomFilter, setSavedFilterTobeDeleted, setIsDeleteSQDialogVisible }: any) => {
     return (
         <div className="flex align-items-center justify-content-between gap-2">
-            <Button text size="small" className="text-base py-1 w-full" severity={Number(activeSavedFilter) == savedfilter.id ? "secondary" : "contrast"} onClick={() => applySavedFilter(savedfilter)}>{savedfilter.name}</Button>
+            <div>
+                <Button text size="small" className="text-base py-1 w-full" severity={Number(activeSavedFilter) == savedfilter.id ? "secondary" : "contrast"} onClick={() => applySavedFilter(savedfilter)}>{savedfilter.name}</Button>
+                {savedfilter?.description && <p className="text-xs pl-3" style={{lineHeight : '6px'}}>{savedfilter?.description}</p>}
+            </div>
             <div className="flex align-items-center gap-2">
                 <Button
                     icon="pi pi-pencil"
@@ -278,6 +290,23 @@ const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, ope
         </div>
     )
 }
+
+const replacePlaceholders = (obj: any, searchValue: string): any => {
+    if (typeof obj === 'string') {
+        return obj.replace(/\{\{search\}\}/g, searchValue);
+    }
+    if (Array.isArray(obj)) {
+        return obj.map(item => replacePlaceholders(item, searchValue));
+    }
+    if (obj && typeof obj === 'object') {
+        const newObj: any = {};
+        for (const key in obj) {
+            newObj[key] = replacePlaceholders(obj[key], searchValue);
+        }
+        return newObj;
+    }
+    return obj;
+};
 
 export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCustomFilter, filters, clearFilter, showSaveFilterPopup, setShowSaveFilterPopup }: any, ref) => {
     const defaultState: FilterRule[] = [
@@ -320,9 +349,11 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     const [filterRules, setFilterRules] = useState<FilterRule[]>(initialState);
     const [fields, setFields] = useState<any[]>([]);
     const [searchableFields, setSearchableFields] = useState<any[]>([]);
+    const [predefinedSearches, setPredefinedSearches] = useState<any[]>([]);
     const [showGlobalSearchElement, setShowGlobalSearchElement] = useState<boolean>(false);
     const [customChip, setCustomChip] = useState("");
     const [searchChips, setSearchChips] = useState<{ columnName?: string; value: string }[]>([]);
+    const [predefinedSearchChip, setPredefinedSearchChip] = useState<{ name: string; value: string } | null>(null);
     const [inputValue, setInputValue] = useState<string | null>("");
     const [searchFilter, setSearchFilter] = useState<any | null>(null);
     const [customFilter, setCustomFilter] = useState<any | null>(null);
@@ -331,6 +362,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     const [savedFilterTobeDeleted, setSavedFilterTobeDeleted] = useState<any>();
     const [isDeleteSQDialogVisible, setIsDeleteSQDialogVisible] = useState<boolean>(false);
     const [savedFilterQueryString, setSavedFilterQueryString] = useState<string>();
+    const [showOverlay, setShowOverlay] = useState(false);
+    const overlayRef = useRef<HTMLDivElement | null>(null);
     const { user } = useSelector((state: any) => state.auth);
 
 
@@ -371,14 +404,15 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     $and: [
                         { model: { $in: [viewData?.data?.solidView?.model?.id] } },
                         { view: { $in: [viewData?.solidView?.id] } },
-                        { user: { $in: [user?.user?.id] } }
+                        { user: { $in: [user?.user?.id] } },
+                        { isPrivate: { $eq: true } }
                     ]
                 },
                 {
                     $and: [
                         { model: { $in: [viewData?.data?.solidView?.model?.id] } },
                         { view: { $in: [viewData?.solidView?.id] } },
-                        { isPrivate: { $eq: true } }
+                        { isPrivate: { $eq: false } }
                     ]
                 }
 
@@ -517,6 +551,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             // console.log("finalSearchableFieldsList", finalSearchableFieldsList);
 
             setSearchableFields(finalSearchableFieldsList);
+
+            const predefinedSearchesList = viewData?.data?.solidView?.layout?.attrs?.predefinedSearches || [];
+            setPredefinedSearches(predefinedSearchesList);
         }
     }, [])
 
@@ -564,7 +601,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         handleApplyCustomFilter(finalFilter)
         setFilterRules(initialState);
         setCustomFilter(null)
-
+        setPredefinedSearchChip(null)
     }
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -577,6 +614,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 // Remove last search chip only
                 setSearchChips((prev) => prev.slice(0, -1));
                 setHasSearched(true);
+            } else if (predefinedSearchChip) {
+                // Remove predefined search chip
+                setPredefinedSearchChip(null);
+                clearCustomFilter();
             } else if (customFilter) {
                 // If no search chips, remove custom filter
                 clearCustomFilter();
@@ -635,6 +676,36 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         }
     }, [searchChips, hasSearched]);
 
+    // Handle predefined search selection
+    const handlePredefinedSearch = (predefinedSearch: any) => {
+        if (!inputValue?.trim()) return;
+
+        // Replace {{search}} placeholders with actual search value
+        const processedFilter = replacePlaceholders(predefinedSearch.filters, inputValue.trim());
+
+        // Clear all existing filters and searches
+        setSearchChips([]);
+        setSearchFilter(null);
+        setFilterRules(initialState);
+
+        // Set the predefined search chip
+        setPredefinedSearchChip({
+            name: predefinedSearch.name,
+            value: inputValue.trim()
+        });
+
+        // Apply the predefined search filter as custom filter
+        setCustomFilter(processedFilter);
+
+        // Apply the filter
+        const finalFilter = mergeSearchAndCustomFilters(processedFilter, null, "c_filter", "s_filter");
+        handleApplyCustomFilter(finalFilter);
+
+        // Clear input and close overlay
+        setInputValue("");
+        setShowOverlay(false);
+        setHasSearched(true);
+    };
 
     // Saved Filter related 
 
@@ -643,7 +714,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         if (savedfilter?.id) {
             router.push(`?savedQuery=${savedfilter.id}`);
         } else {
-            console.error("Saved filter ID is undefined or null.");
+            console.error(ERROR_MESSAGES.SAVE_FILTER_UNDEFINED_NULL);
         }
 
     }
@@ -717,6 +788,23 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     };
 
 
+    useEffect(() => {
+        // Explicitly type the event as a MouseEvent
+        function handleClickOutside(event: MouseEvent) {
+            if (overlayRef.current && !overlayRef.current.contains(event.target as Node)) {
+                setShowOverlay(false);
+            }
+        }
+
+        if (showOverlay) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [showOverlay]);
+
     const CustomChip = () => (
         <li>
             <div className="custom-filter-chip-type">
@@ -774,14 +862,32 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         </>
     );
 
-
-    const [showOverlay, setShowOverlay] = useState(false);
+    const PredefinedSearchChip = () => (
+        <li>
+            <div className="search-filter-chip-type">
+                <div className="flex align-items-center gap-2">
+                    <strong>{predefinedSearchChip?.name}:</strong>
+                    <span className="custom-chip-value">{predefinedSearchChip?.value}</span>
+                </div>
+                {/* button to clear filter */}
+                <i className="pi pi-times ml-1"
+                    style={{ cursor: "pointer" }}
+                    onClick={() => {
+                        setPredefinedSearchChip(null);
+                        clearCustomFilter();
+                    }}
+                >
+                </i>
+            </div>
+        </li>
+    );
 
     return (
         <>
             <div className="flex justify-content-center solid-custom-filter-wrapper relative">
                 <div className="solid-global-search-element">
                     <ul className="">
+                        {predefinedSearchChip && <PredefinedSearchChip />}
                         {customFilter && <CustomChip />}
                         <SearchChip />
                         <li ref={chipsRef}>
@@ -817,10 +923,11 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 </div>
 
                 {showOverlay && (
-                    <div className="absolute w-full z-5 surface-0 border-round border-1 border-300 shadow-2" style={{ top: 35 }}>
+                    <div ref={overlayRef} className="absolute w-full z-5 surface-0 border-round border-1 border-300 shadow-2" style={{ top: 35 }}>
                         {inputValue ? (
                             <>
-                                <div className="custom-filter-search-options px-2 py-2 flex flex-column">
+                                <div className="custom-filter-search-options px-3 py-2 flex flex-column">
+                                    <h6 className="my-1 font-bold">Search By Fields</h6>
                                     {
                                         searchableFields.map((value: any, index: any) => {
                                             // console.log("value", value);
@@ -857,7 +964,33 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                                         })
                                     }
                                 </div>
-                                <Divider className="m-0" />
+                                {predefinedSearches.length > 0 && (
+                                    <>
+                                        <Divider className="m-0" />
+                                        <div className="custom-filter-search-options px-3 py-2 flex flex-column">
+                                            <h6 className="my-1 font-bold">Predefined Searches</h6>
+                                            {predefinedSearches.map((predefinedSearch: any, index: number) => (
+                                                <Button
+                                                    key={index}
+                                                    className="p-2 flex flex-column align-items-start gap-1 text-color"
+                                                    onMouseDown={(e) => {
+                                                        e.preventDefault();
+                                                        handlePredefinedSearch(predefinedSearch);
+                                                    }}
+                                                    text
+                                                    severity="secondary"
+                                                    size="small"
+                                                >
+                                                    <div className="flex gap-1 align-items-center">
+                                                        <strong>{predefinedSearch.name}:</strong>
+                                                        <span className="font-bold text-color">{inputValue}</span>
+                                                    </div>
+                                                    <div className="text-sm text-500">{predefinedSearch.description}</div>
+                                                </Button>
+                                            ))}
+                                        </div>
+                                    </>
+                                )}
                             </>
                         ) :
                             <>
@@ -904,6 +1037,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     visible={isDeleteSQDialogVisible}
                     header="Confirm Delete"
                     modal
+                    className="solid-confirm-dialog"
                     footer={() => (
                         <div className="flex justify-content-center">
                             <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteSavedFilter} />

@@ -12,7 +12,7 @@ import { useCreateExportTemplateMutation, useDeleteExportTemplateMutation, useGe
 import { downloadFileWithProgress } from "../../helpers/downloadFileWithProgress";
 import { DownloadProgressToast } from "./DownloadProgressToast";
 import { Checkbox } from "primereact/checkbox";
-
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 interface FieldMetadata {
   displayName: string;
   type: string;
@@ -243,13 +243,13 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
         // ✅ Re-assign the selected format from options list
         setSelectedFormat(formatOptions.find((format) => format.code === selectedFormat?.code) || null);
       } catch (err) {
-        console.error('Failed to create template:', err);
+        console.error(ERROR_MESSAGES.TEMPLATE_FAILED, err);
       }
     }else{
       toast?.current?.show({
       severity: "error",
-      summary: "Please Select Format",
-      detail: "Please Select Format",
+      summary: ERROR_MESSAGES.TEMPLATE_FAILED,
+      detail: ERROR_MESSAGES.TEMPLATE_FAILED,
     });
     }
   };
@@ -300,7 +300,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
     try {
       await downloadFileWithProgress(`/export-template/startExport/sync`, downloadHandlers, filters, checkApplyFilter, exportData);
     } catch (err) {
-      console.error("Download failed:", err);
+      console.error(ERROR_MESSAGES.DOWNLOAD_FAILED, err);
     }
   };
 
@@ -313,7 +313,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
         try {
           fields = JSON.parse(selected.fields);
         } catch (error) {
-          console.error("Failed to parse fields:", error);
+          console.error(ERROR_MESSAGES.PARSED_FIELD, error);
         }
       } else if (Array.isArray(selected.fields)) {
         fields = selected.fields;
@@ -477,6 +477,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
 
             <Dialog
               header="Save Export Template"
+              className="solid-confirm-dialog"
               visible={isDialogVisible}
               style={{ width: "20rem", right: "0" }}
               footer={dialogFooter}

@@ -73,7 +73,7 @@ export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, max
         //@ts-ignore
         <div className="solid-kanban-board-wrapper">
             <DragDropContext onDragEnd={onDragEnd}>
-                <div className="flex gap-4 px-5 py-3 md:py-4 solid-kanban-board-scroll-context">
+                <div className="flex gap-4 px-3 md:px-5 py-3 md:py-4 solid-kanban-board-scroll-context">
                     {/* {Object.entries(kanbanViewData).map(([groupVal, data]) => {
                     const group = {
                         label: groupVal,

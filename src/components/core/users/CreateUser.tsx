@@ -4,6 +4,7 @@ import { CancelButton } from "@/components/common/CancelButton";
 import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
 import { SolidFormHeader } from "@/components/common/SolidFormHeader";
 import { SolidFormStepper } from "@/components/common/SolidFormStepper";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { useRegisterPrivateMutation, useUpdateUserMutation } from "@/redux/api/authApi";
 import { useGetrolesQuery } from "@/redux/api/roleApi";
 import { useDeleteUserMutation } from "@/redux/api/userApi";
@@ -93,32 +94,32 @@ const CreateUser = ({ data, params }: any) => {
   const validationSchema = Yup.object({
     fullName: Yup.string().required(),
     username: Yup.string()
-      .required('Username is required.') // Must be provided
-      .min(3, 'Username must be at least 3 characters long.') // Minimum length
-      .max(20, 'Username cannot be longer than 20 characters.') // Maximum length
-      .matches(
-        /^[a-zA-Z0-9_.-]*$/,
-        'Username can only contain letters, numbers, underscores, periods, and hyphens.'
-      ) // Allowed characters
-      .matches(
-        /^[a-zA-Z]/,
-        'Username must start with a letter.'
-      ),
+      .required('Username is required.'), // Must be provided
+      // .min(3, 'Username must be at least 3 characters long.') // Minimum length
+      // .max(20, 'Username cannot be longer than 20 characters.') // Maximum length
+      // .matches(
+      //   /^[a-zA-Z0-9_.-]*$/,
+      //   'Username can only contain letters, numbers, underscores, periods, and hyphens.'
+      // ) // Allowed characters
+      // .matches(
+      //   /^[a-zA-Z]/,
+      //   'Username must start with a letter.'
+      // ),
     email: Yup
       .string()
-      .email("Invalid email address")
-      .required("Email is required."),
-    password: Yup.string().min(6, 'Password must be at least 6 characters').nullable(),
+      .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
+      .required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
+    password: Yup.string().min(6, ERROR_MESSAGES.PASSWORD_CHARACTER(6)).nullable(),
     confirmPassword: Yup.string()
     .when('password', {
       is: (val:any) => !!val, // only validate if password is filled
       then: (schema) =>
         schema
-          .oneOf([Yup.ref('password')], 'Passwords must match')
+          .oneOf([Yup.ref('password')], ERROR_MESSAGES.FIELD_MUST_MATCH('Password'))
           .nullable(),
       otherwise: (schema) => schema.notRequired().nullable(),
     }),
-    mobile: Yup.number().required("Mobile is required."),
+    mobile: Yup.number().required(ERROR_MESSAGES.FIELD_REUQIRED('Mobile')),
   });
 
 
@@ -134,7 +135,7 @@ const CreateUser = ({ data, params }: any) => {
     if (errorMessages.length > 0 && toast.current) {
       toast.current.show({
         severity: "error",
-        summary: "Can you send me the report?",
+        summary: ERROR_MESSAGES.SEND_REPORT,
         // sticky: true,
         life: 3000,
         //@ts-ignore
@@ -160,17 +161,17 @@ const CreateUser = ({ data, params }: any) => {
 
   useEffect(() => {
     const handleError = (errorToast: any) => {
-      let errorMessage: any = ['An error occurred'];
+      let errorMessage: any = [ERROR_MESSAGES.ERROR_OCCURED];
 
       if (isFetchBaseQueryErrorWithErrorResponse(errorToast)) {
         errorMessage = errorToast.data.message;
       } else {
-        errorMessage = ['Something went wrong'];
+        errorMessage = [ERROR_MESSAGES.SOMETHING_WRONG];
       }
 
       toast.current?.show({
         severity: 'error',
-        summary: 'Error',
+        summary: ERROR_MESSAGES.ERROR,
         detail: errorMessage,
         life: 3000,
         //@ts-ignore
@@ -289,11 +290,11 @@ const CreateUser = ({ data, params }: any) => {
         </div> */}
           <div className="p-3 md:p-4 solid-form-content">
             <div className="grid">
-              <div className="col-8 mx-auto">
+              <div className="col-12 lg:col-10 xl:col-8 mx-auto">
                 {/* <p className="form-wrapper-heading text-base">Basic Info</p> */}
                 <Panel header="Basic Info" className="solid-column-panel">
                   <div className="grid formgrid mt-3">
-                    <div className="field col-6 flex flex-column gap-2">
+                    <div className="field col-12 md:col-6 flex flex-column gap-2">
                       <label htmlFor="fullName" className="form-field-label">
                         Full Name
                       </label>
@@ -315,7 +316,7 @@ const CreateUser = ({ data, params }: any) => {
                         />
                       )}
                     </div>
-                    <div className="field col-6 flex flex-column gap-2">
+                    <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3 md:mt-3">
                       <label htmlFor="username" className="form-field-label">
                         Username
                       </label>
@@ -338,7 +339,7 @@ const CreateUser = ({ data, params }: any) => {
                         />
                       )}
                     </div>
-                    <div className="field col-6 flex flex-column gap-1 mt-4">
+                    <div className="field col-12 md:col-6 flex flex-column gap-1 mt-4">
                       <label htmlFor="email" className="form-field-label">
                         Email
                       </label>
@@ -361,7 +362,7 @@ const CreateUser = ({ data, params }: any) => {
                         />
                       )}
                     </div>
-                    <div className="field col-6 flex flex-column gap-1 mt-4">
+                    <div className="field col-12 md:col-6 flex flex-column gap-1 mt-4">
                       <label htmlFor="mobile" className="form-field-label">
                         Mobile
                       </label>
@@ -384,7 +385,7 @@ const CreateUser = ({ data, params }: any) => {
                       )}
                     </div>
                     {params.id === "new" && <>
-                      <div className="field col-6 flex flex-column gap-2 my-4">
+                      <div className="field col-12 md:col-6 flex flex-column gap-2 my-4">
                         <label htmlFor="Password" className="form-field-label">
                           Password
                         </label>
@@ -408,7 +409,7 @@ const CreateUser = ({ data, params }: any) => {
                           />
                         )}
                       </div>
-                      <div className="field col-6 flex flex-column gap-2 my-4">
+                      <div className="field col-12 md:col-6 flex flex-column gap-2 pb-4 md:pb-0 md:my-4">
                         <label htmlFor="Confirm Password" className="form-field-label">
                           Confirm Password
                         </label>

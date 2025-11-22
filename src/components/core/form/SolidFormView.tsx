@@ -1,7 +1,7 @@
 "use client";
 
 import { SolidCancelButton } from "@/components/common/CancelButton";
-import { createPermission, deletePermission, findPermission, updatePermission } from "@/helpers/permissions";
+import { permissionExpression } from "@/helpers/permissions";
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
@@ -59,6 +59,7 @@ import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
 import { SolidXAIModule } from "../solid-ai/SolidXAIModule";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -526,10 +527,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const fetchPermissions = async () => {
             if (params.modelName) {
                 const permissionNames = [
-                    createPermission(params.modelName),
-                    deletePermission(params.modelName),
-                    updatePermission(params.modelName),
-                    findPermission(params.modelName)
+                    permissionExpression(params.modelName, 'create'),
+                    permissionExpression(params.modelName, 'delete'),
+                    permissionExpression(params.modelName, 'update'),
+                    permissionExpression(params.modelName, 'find')
                 ]
                 const queryData = {
                     permissionNames: permissionNames
@@ -636,12 +637,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     useEffect(() => {
         const handleError = (errorToast: any) => {
-            let errorMessage: any = ['An error occurred'];
+            let errorMessage: any = [ERROR_MESSAGES.ERROR_OCCURED];
 
             if (isFetchBaseQueryErrorWithErrorResponse(errorToast)) {
                 errorMessage = errorToast.data.message;
             } else {
-                errorMessage = ['Something went wrong'];
+                errorMessage = [ERROR_MESSAGES.SOMETHING_WRONG];
             }
 
             toast.current?.show({
@@ -758,7 +759,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 if (params.id === 'new') {
                     // default locale
                     const result = await createEntity(formData).unwrap();
-                    showToast("success", "Form saved", "Form saved successfully!");
+                    showToast("success", ERROR_MESSAGES.FORM_SAVED, ERROR_MESSAGES.FORM_SAVED_SUCCESSFULLY);
                     // if (!params.embeded && result?.data?.id) {
                     //     const newPathname = pathname.replace(/new$/, result.data.id);
 
@@ -785,7 +786,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
                     // const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
                     if (!params.embeded) {
-                        showToast("success", "Form Updated", "Form updated successfully!");
+                        showToast("success", ERROR_MESSAGES.FORM_UPDATE, ERROR_MESSAGES.FORM_UPDATE_SUCCESSFULLY);
                         if (result?.statusCode === 200) {
                             updateViewMode("view")
                         }
@@ -796,7 +797,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
 
         } catch (err) {
-            console.error("Failed to create Entity: ", err);
+            console.error(ERROR_MESSAGES.ENTITY_FAILED, err);
         }
     }
 
@@ -899,7 +900,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 customLayout = updatedFormLayout.newLayout;
                             }
                         } catch (error) {
-                            console.error('Error in DynamicFunctionComponent:', error);
+                            console.error(ERROR_MESSAGES.DYNAMIC_FUNCTION_ERROR, error);
                         }
                     }
                 }
@@ -940,8 +941,62 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
         };
 
-        handleDynamicFunction();
+        const handleOnFormLoad = async () => {
+            const onFormLoadHandler = solidFormViewMetaData?.data?.solidView?.layout?.onFormLoad;
+            let DynamicFunctionComponent = null;
+            let formLayout = solidFormViewMetaData;
+            let customLayout = params?.customLayout;
+            let formViewData = solidFormViewData?.data;
+
+            const event: SolidLoadForm = {
+                parentData: params?.parentData,
+                fieldsMetadata: solidFormViewMetaData,
+                formData: solidFormViewData?.data,
+                type: 'onFormLoad',
+                viewMetadata: solidFormViewMetaData?.data?.solidView,
+                formViewLayout: formViewLayout
+            };
+
+            if (onFormLoadHandler) {
+                DynamicFunctionComponent = getExtensionFunction(onFormLoadHandler);
+                if (DynamicFunctionComponent) {
+                    try {
+                        const result = await DynamicFunctionComponent(event);
+                        if (result && result?.layoutChanged && result?.newLayout) {
+                            const newFormLayout = {
+                                ...formLayout,
+                                data: {
+                                    ...formLayout.data,
+                                    solidView: {
+                                        ...formLayout.data.solidView,
+                                        layout: result.newLayout
+                                    }
+                                }
+                            };
+                            formLayout = newFormLayout;
+                            customLayout = result.newLayout;
+                            setFormViewMetaData(formLayout);
+
+                            if (params.customLayout) {
+                                setFormViewLayout(customLayout);
+                            } else {
+                                setFormViewLayout(formLayout.data.solidView.layout);
+                            }
+                        }
+                        if (result && result?.dataChanged && result?.newFormData) {
+                            formViewData = result.newFormData;
+                            setInitialEntityData(formViewData);
+                        }
+                    } catch (error) {
+                        console.error(ERROR_MESSAGES.ON_FORM_LOAD, error);
+                    }
+                }
+            }
+        };
+
         handleDynamicLayout();
+        handleDynamicFunction();
+        handleOnFormLoad();
     }, [solidFormViewMetaData, solidFormViewData]);
 
     useEffect(() => {
@@ -1087,7 +1142,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
                 else {
                     // TODO: Show an error popup and stop form rendering ideallly...
-                    console.log(`Unable to load dynamic module: `, changeHandler);
+                    console.log(ERROR_MESSAGES.UNABLE_LOAD_DYNAMIC_MODULE, changeHandler);
                 }
             }
         }
@@ -1155,7 +1210,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         // const fieldMetadata = solidFieldsMetadata[attrs.name];
                         const fieldMetadata = solidFormViewMetaData.data.solidFieldsMetadata[attrs.name];
                         // Read only permission if there is no update permission on model and router doesnt contains new
-                        const readOnlyPermission = !actionsAllowed.includes(`${updatePermission(params.modelName)}`) && params.id !== "new";
+                        const readOnlyPermission = !actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) && params.id !== "new";
                         return <SolidField
                             key={attrs.name}
                             field={element}
@@ -1336,10 +1391,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
             const result = await patchEntity({ id: +params.id, data: formdata }).unwrap();
             setPublished(result?.data?.publishedAt);
             if (type === 'publish') {
-                showToast("success", "Saved", "Marked as publish !");
+                showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_PUBLISH);
                 //todo: patch request
             } else {
-                showToast("success", "Saved", "Marked as unpublish !");
+                showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_UNPUBLISH);
             }
         }
 
@@ -1500,8 +1555,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     header="Change Form Layout"
                     modal
                     onHide={() => setLayoutDialogVisible(false)}
-                    contentStyle={{
-                        width: 800
+                    style={{ width: '50vw' }}
+                    breakpoints={{
+                        '960px': '80vw',
+                        '641px': '95vw'
                     }}
                 >
                     <SolidFormUserViewLayout solidFormViewMetaData={solidFormViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />

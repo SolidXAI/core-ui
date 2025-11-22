@@ -17,6 +17,7 @@ import { downloadMediaFile } from "@/helpers/downloadMediaFile";
 import { getExtensionComponent } from "@/helpers/registry";
 import { SolidMediaFormFieldWidgetProps } from "@/types/solid-core";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 export class SolidMediaSingleField implements ISolidField {
 
@@ -57,10 +58,10 @@ export class SolidMediaSingleField implements ISolidField {
         if (fieldMetadata.required) {
             // For required fields: disallow null and undefined
             schema = Yup.mixed<File | object>()
-                .required(`${fieldLabel} is required.`)
+                .required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel))
                 .test(
-                    "file-or-object",
-                    `${fieldLabel} must be a file or an object.`,
+                    ERROR_MESSAGES.FILE_OBJECT,
+                    ERROR_MESSAGES.MUST_BE_FILE_OBJECT(fieldLabel),
                     (value) =>
                         value instanceof File || typeof value === "object" // Validate File or object
                 );
@@ -69,8 +70,8 @@ export class SolidMediaSingleField implements ISolidField {
             schema = Yup.mixed<any>()
                 .nullable() // Allow null explicitly
                 .test(
-                    "file-or-object",
-                    `${fieldLabel} must be a file, an object, or empty.`,
+                    ERROR_MESSAGES.FILE_OBJECT,
+                    ERROR_MESSAGES.MUST_BE_FILE_OBJECT(fieldLabel),
                     (value) =>
                         value === null || // Allow null
                         value === undefined || // Allow undefined
@@ -266,9 +267,9 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
             const rejection = fileRejections[0];
             const sizeError = rejection.errors.find(err => err.code === 'file-too-large');
             if (sizeError) {
-                setFileSizeError(`File is too large. Max size is ${fieldMetadata.mediaMaxSizeKb} KB.`);
+                setFileSizeError(ERROR_MESSAGES.FILE_TOO_LAREG(fieldMetadata.mediaMaxSizeKb));
             } else {
-                setFileSizeError(rejection.errors[0]?.message || "File not accepted.");
+                setFileSizeError(rejection.errors[0]?.message || ERROR_MESSAGES.FILE_NOT_ACCEPT);
             }
         },
         accept: getAcceptedFileTypes(fieldMetadata.mediaTypes),
@@ -397,6 +398,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                 visible={isDeleteImageDialogVisible}
                 header="Confirm Delete"
                 modal
+                className="solid-confirm-dialog"
                 footer={() => (
                     <div className="flex justify-content-center">
                         <Button type="button" label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={handleCancelUpload} />
@@ -411,6 +413,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                 visible={isReplaceImageDialogVisible}
                 header="Replace Image"
                 modal
+                className="solid-confirm-dialog"
                 footer={() => (
                     <div className="flex justify-content-center">
                         <Button type="button" label="Yes, Replace" icon="pi pi-check" className='small-button' severity="danger" onClick={handleReplaceFile} />

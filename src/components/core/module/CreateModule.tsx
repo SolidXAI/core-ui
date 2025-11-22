@@ -8,6 +8,7 @@ import { SingleSelectAutoCompleteField } from "@/components/common/SingleSelectA
 import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
 import { SolidFormHeader } from "@/components/common/SolidFormHeader";
 import { SolidFormStepper } from "@/components/common/SolidFormStepper";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { getSingularAndPlural } from "@/helpers/helpers";
 import { handleError } from "@/helpers/ToastContainer";
 import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
@@ -106,9 +107,9 @@ const CreateModule = ({ data }: any) => {
       //   /^[a-z]+(-[a-z]+)*$/,
       //   "Invalid format. Use lowercase letters and hyphens only."
       // )
-      .required("Name is required."),
-    displayName: Yup.string().required("Display Name is required"),
-    description: Yup.string().required("Description is required"),
+    .required(ERROR_MESSAGES.FIELD_REUQIRED('Name')),
+    displayName: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Display Name")),
+    description: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Description Name")),
     defaultDataSource: Yup.string(),
     menuIconUrl: Yup.string().nullable(),
     isSystem: Yup.boolean(),
@@ -155,7 +156,7 @@ const CreateModule = ({ data }: any) => {
           CreateModule(formData);
         }
       } catch (err) {
-        console.error("Failed to create menu:", err);
+        console.error(ERROR_MESSAGES.FAILED_CREATE_MENU, err);
       }
     },
   });
@@ -264,7 +265,7 @@ const CreateModule = ({ data }: any) => {
     if (error.length > 0 && toast.current) {
       toast.current.show({
         severity: "error",
-        summary: "Can you send me the report?",
+        summary: ERROR_MESSAGES.SEND_REPORT,
         // sticky: true,
         life: 3000,
         //@ts-ignore
@@ -299,7 +300,7 @@ const CreateModule = ({ data }: any) => {
       const transformedData = filterredData.map((e: any) => ({ label: e.name, value: e.name, type: e.type }));
       return transformedData
     } catch (error) {
-      console.error("Error fetching items:", error);
+      console.error(ERROR_MESSAGES.FETCHING_ITEMS, error);
       return []
     }
   };

@@ -8,6 +8,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Toast } from 'primereact/toast';
 import { SolidCircularLoader } from '@/components/core/common/SolidLoaders/SolidCircularLoader';
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
 const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
@@ -125,7 +126,7 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
                 } else {
                     dispatch(closePopup());
                     console.log("Backend is not alive, cannot run seeder");
-                    showToast("error", "Backend Unavailable", "Seeder not triggered. Could not reach backend.");
+                    showToast("error", ERROR_MESSAGES.BACKEND_UNAVAILABLE , ERROR_MESSAGES.SEEDER_NOT_TRIGGERED);
                 }
             }
         };
@@ -136,15 +137,15 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
 
     useEffect(() => {
         if (isSeederSuccess) {
-            console.log("isSeederSuccess", data);
-            showToast("success", "Code Generated Successfully", "Code Generated Successfully");
+            console.log(ERROR_MESSAGES.IS_SEEDER_SUCCESS, data);
+            showToast("success", ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY, ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY);
             setIsGenerating(false);
             dispatch(closePopup());
             window.location.reload();
         }
         if (isSeederError) {
-            console.log("isSeederError", isSeederError);
-            showToast("error", "Seeder Error", "Could not run seeder. Please try again.");
+            console.log(ERROR_MESSAGES.IS_SEEDER_ERROR, isSeederError);
+            showToast("error", ERROR_MESSAGES.SEEDER_ERROR, ERROR_MESSAGES.SEEDER_NOT_RUN);
             setIsGenerating(false);
         }
     }, [isSeederSuccess])
@@ -171,7 +172,7 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
                                 </span>
                             </div>
                             <div className="px-4 pb-4 pt-3">
-                                <p className="">Click Ok to proceed with model code generation, please note that if the file already exists and you have made custom changes to this file we will create a .bkp file as a backup of the existing file.</p>
+                                <p className="">Proceed with model code generation? Existing files will be overwritten.</p>
                                 <p>Below is the list of files that will be created </p>
                                 <ul>
                                     <li>Model Entity File</li>
@@ -193,9 +194,8 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
                                 </span>
                             </div>
                             <div className="px-4 pb-4 pt-3">
-                                <p className="">You cannot generate code for Solid Core models</p>
-                                <div className="flex gap-3 justify-content-start">
-                                    {/* <Button label="Ok" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={generateCodeHandler} /> */}
+                                <p className="text-center">You cannot generate code for Solid Core models</p>
+                                <div className="flex gap-3 justify-content-center">
                                     <Button size="small" label="Cancel" outlined onClick={() => dispatch(closePopup())} />
                                 </div>
                             </div>

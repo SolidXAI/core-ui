@@ -25,7 +25,7 @@
     border-radius: 0.5rem;
     padding: 24px;
     display: flex;
-    align-items: end;
+    align-items: flex-end;
     justify-content: space-between;
     height: 100%;
 }
@@ -102,4 +102,21 @@
 
 .solidModuleHomeActionCard:hover .solidModuleHomeActionCardSvgWrapper svg path {
     fill: var(--surface-a);
+}
+
+@media(max-width:991px){
+    .solidModuleWelcomeSection {
+        padding: 16px;
+    }
+    .solidModuleHomeColorCards {
+        padding: 16px;
+        flex-grow: 1 !important;
+    }
+    .solidModuleHomeActionCard {
+        padding: 16px;
+    }
+
+    .solidModuleHomeTitle1{
+        font-size: 1.4rem ;
+    }
 }

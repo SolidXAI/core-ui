@@ -1,16 +1,17 @@
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 import axios, { AxiosError } from 'axios';
 import { getSession, signOut } from 'next-auth/react';
 
 export async function handleLogout({ toast }: any) {
     const session = await getSession();
-    const token = session?.user?.accessToken;
-
+    // const token = session?.user?.accessToken;
+    const refreshToken = session?.user?.refreshToken; 
     try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/iam/logout`, null, {
-            headers: {
-                Authorization: `Bearer ${token}`,
-            },
-        });
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/iam/logout`, 
+        {
+            refreshToken: refreshToken, // Pass refresh token in body
+        }
+        );
         console.log("logout response", response);
 
         if (response?.data?.statusCode === 200) {
@@ -18,7 +19,7 @@ export async function handleLogout({ toast }: any) {
         } else {
             toast?.current?.show({
                 severity: 'error',
-                summary: 'Logout Failed',
+                summary: ERROR_MESSAGES.LOGOUT_FAILED,
                 detail: `${response?.data?.data?.status}`,
                 life: 3000,
             });
@@ -26,11 +27,11 @@ export async function handleLogout({ toast }: any) {
     } catch (error) {
         const err = error as any;
         const message =
-            err.response?.data?.data?.message || err.message || 'Logout failed';
+            err.response?.data?.data?.message || err.message || ERROR_MESSAGES.LOGOUT_FAILED;
 
         toast?.current?.show({
             severity: 'error',
-            summary: 'Logout Failed',
+            summary: ERROR_MESSAGES.LOGOUT_FAILED,
             detail: message,
             life: 3000,
         });

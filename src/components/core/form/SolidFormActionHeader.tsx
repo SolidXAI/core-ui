@@ -3,7 +3,7 @@ import { BackButton } from "@/components/common/BackButton";
 import { SolidCancelButton } from "@/components/common/CancelButton";
 import { SolidFormHeader } from "@/components/common/SolidFormHeader";
 import { useHandleFormCustomButtonClickaction } from "@/components/common/useHandleFormCustomButtonClick";
-import { createPermission, deletePermission, updatePermission } from "@/helpers/permissions";
+import { permissionExpression } from "@/helpers/permissions";
 import { getExtensionFunction } from "@/helpers/registry";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "primereact/button";
@@ -101,7 +101,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                     <div className="flex flex-column gap-1 p-1">
                         {params.embeded !== true &&
                             params.id !== "new" &&
-                            actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
+                            actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
+                            solidView?.layout?.attrs?.showDeleteFormButton !== false &&
                             !formViewLayout.attrs.readonly &&
                             <Button
                                 text
@@ -165,7 +166,41 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             )
                         })
                         }
+                        <div className="lg:hidden lg:flex gap-3">
+                            {normalHeaderButtons.map((button: any, index: number) => {
+                                return (
+                                    // <Button
+                                    //     text
+                                    //     type="button"
+                                    //     className="w-full text-left gap-2"
+                                    //     label={button.attrs.label}
+                                    //     size="small"
+                                    //     iconPos="left"
+                                    //     severity="contrast"
+                                    //     icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                                    //     onClick={() => {
+                                    //         const event = {
+                                    //             action: button.attrs.action,
+                                    //             params,
+                                    //             formik,
+                                    //             solidFormViewMetaData: solidFormViewMetaData.data
+                                    //         }
+                                    //         handleCustomButtonClick(button.attrs, event)
+                                    //     }}
+                                    // />
+                                    <SolidFormViewNormalHeaderButton
+                                        key={index}
+                                        button={button}
+                                        params={params}
+                                        formik={formik}
+                                        solidFormViewMetaData={solidFormViewMetaData}
+                                        handleCustomButtonClick={handleCustomButtonClick}
+                                    />
 
+                                )
+                            })
+                            }
+                        </div>
                     </div>
                 </OverlayPanel>
             </div>
@@ -180,7 +215,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             {params.embeded !== true && <BackButton />}
                             <div className="form-wrapper-title"> {createHeaderTitle}</div>
                         </div>
-                        <div className="gap-3 flex">
+                        <div className="hidden lg:flex gap-3">
                             {normalHeaderButtons.map((button: any, index: number) => {
                                 return (
                                     // <Button
@@ -215,7 +250,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             })
                             }
                             {params.embeded !== true &&
-                                actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
+                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
                                 !formViewLayout.attrs.readonly &&
                                 formik.dirty &&
                                 <div>
@@ -238,7 +273,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 </div>
                             }
                             {params.embeded == true &&
-                                actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
+                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
                                 !formViewLayout.attrs.readonly &&
                                 formik.dirty &&
                                 <div>
@@ -260,8 +295,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             }
                             {
                                 formViewLayout?.attrs?.showCogWheelFormButton !== false &&
-                                actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
-                                actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
+                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
+                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
                                 <FormActionDropdown />
                             }
                         </div>
@@ -273,7 +308,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             <div className="form-wrapper-title"> {viewMode === "edit" ? editHeaderTitle : solidView.model.displayName}</div>
                         </div>
 
-                        <div className="gap-3 flex">
+                        <div className="hidden lg:flex gap-3">
                             {normalHeaderButtons.map((button: any, index: number) => {
                                 return (
                                     // <Button
@@ -311,7 +346,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 solidView?.layout?.attrs?.showAddFormButton !== false &&
                                 params.embeded !== true &&
                                 viewMode === "view" &&
-                                actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
+                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
 
                                 <Button type="button" label="Add" size='small' onClick={() => router.replace('new?viewMode=edit')} />
                             }
@@ -320,7 +355,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 solidView?.layout?.attrs?.showEditFormButton !== false &&
                                 params.embeded !== true &&
                                 viewMode === "view" &&
-                                actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
+                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
 
                                 <div>
                                     <Button label="Edit" size="small" onClick={() => updateViewMode("edit")} type="button" />
@@ -329,7 +364,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
 
                             {
                                 params.embeded !== true &&
-                                actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
+                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
                                 !formViewLayout.attrs.readonly &&
                                 formik.dirty &&
 
@@ -341,7 +376,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             {/* Inline */}
                             {
                                 params.embeded == true &&
-                                actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
+                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
                                 !formViewLayout.attrs.readonly &&
                                 formik.dirty &&
 
@@ -351,7 +386,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             }
                             {
                                 params.embeded == true &&
-                                actionsAllowed.includes(`${deletePermission(params.modelName)}`) &&
+                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
+                                solidView?.layout?.attrs?.showDeleteFormButton !== false &&
                                 !formViewLayout.attrs.readonly &&
 
                                 <div>
@@ -370,8 +406,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             }
                             {
                                 formViewLayout?.attrs?.showCogWheelFormButton !== false &&
-                                actionsAllowed.includes(`${updatePermission(params.modelName)}`) &&
-                                actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
+                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
+                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
 
                                 <FormActionDropdown />
                             }
