@@ -97,7 +97,7 @@ export type ListLayoutType = {
 };
 
 // Event type
-export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender" | "onFormDataLoad" | "onFormLayoutLoad" | "onFormLoad" | "onListLoad" | "afterLogin" | "beforeLogout";
+export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender" | "onFormDataLoad" | "onFormLayoutLoad" | "onFormLoad" | "onListLoad" | "afterLogin" | "beforeLogout" | "onApplicationMount";
 export type SolidUiEvent = {
     type: SolidUiEvents;
     modifiedField?: string;
@@ -143,8 +143,8 @@ export type SolidLoadList = {
     totalRecords: number;
     viewMetadata: SolidView;
     listViewLayout: ListLayoutType;
-    user:any,
-    session:any
+    user: any,
+    session: any
 }
 
 export type SolidListUiEventResponse = {
@@ -158,6 +158,14 @@ export type SolidAfterLoginEvent = {
     type: SolidUiEvents;
     user: any
 }
+
+export type SolidOnApplicationMountEvent = {
+    type: SolidUiEvents;
+    user: any,
+    session: any
+}
+
+
 
 
 export enum SqlExpressionOperator {
