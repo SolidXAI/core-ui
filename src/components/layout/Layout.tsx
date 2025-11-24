@@ -122,15 +122,15 @@ export const Layout = ({ children }: ChildContainerProps) => {
     const { visibleNavbar } = useSelector((state: any) => state.navbarState); // Get the visibility state of sidebar-two
 
 
-    const session = useSession();
     const { user } = useSelector((state: any) => state.auth);
-
+    const session = useSession();
 const hasRunRef = useRef(false);
 
 useEffect(() => {
     // Prevent double execution caused by React Strict Mode
     if (hasRunRef.current) return;
-
+    // @ts-ignore
+    if (session == "undefined" || !user) return;
     // Detect full reload (F5, browser reload)
     const navEntry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
     const isReload = navEntry?.type === "reload";
@@ -158,7 +158,7 @@ useEffect(() => {
     };
 
     handleDynamicFunction();
-}, []);
+}, [session.status, session.data, user]);
 
 
 

@@ -9,6 +9,7 @@ import { useEffect, useState } from 'react';
 import { SolidXAIModuleHeader } from "./SolidXAIModuleHeader";
 import { useSelector } from "react-redux";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
+import axios from "axios";
 
 export const SolidXAIModule = ({ showHeader, inListView }: any) => {
   const [latestInteractionId, setLatestInteractionId] = useState<string | null>(null);
@@ -33,32 +34,28 @@ export const SolidXAIModule = ({ showHeader, inListView }: any) => {
     isError: mqMessageDataIsError
   }] = useLazyGetMqMessageQuery();
 
-  const fetchMqMessageStatus = async (retries = 50, delay = 500, messageId: string): Promise<boolean> => {
+  const fetchMqMessageStatus = async (retries = 50, delay = 500, interactionId: string): Promise<boolean> => {
     for (let i = 0; i < retries; i++) {
       try {
-        const query = {
-          filters: {
-            messageId: {
-              $eq: messageId
-            }
+        const res = await axios.get(
+          `${process.env.MCP_SERVER_URL}/ai-interactions/${interactionId}`,
+          {
+            headers: {
+              "solidx-mcp-api-key": process.env.MCP_API_KEY,
+            },
+            maxBodyLength: Infinity,
           }
-        };
-        const queryString = qs.stringify(query, {
-          encodeValuesOnly: true,
-        });
-        console.log(ERROR_MESSAGES.ATTEMPT_FETCH_MESSAGE_STATUS(queryString));
+        );
 
-        const res = await getMqMessageStatus(queryString)
-        if (res.isSuccess === true) {
-          if (res.data.records.length > 0) {
-            const messageStage = res.data.records[0].stage;
-            console.log("messageStatus: ", messageStage);
-            if (messageStage === "succeeded") {
-              return true
-            }
-            if (messageStage === "failed") {
-              return false
-            }
+        // const res = await getMqMessageStatus(queryString)
+        if (res.data.success === true) {
+          const messageStage = res.data.data.status;
+          console.log("messageStatus: ", messageStage);
+          if (messageStage === "succeeded") {
+            return true
+          }
+          if (messageStage === "failed") {
+            return false
           }
         }
       } catch (e) {
@@ -100,7 +97,7 @@ export const SolidXAIModule = ({ showHeader, inListView }: any) => {
         latestInteractionId={latestInteractionId}
         thinking={thinking}
       />
-      <SolidXAIInputBox onTriggerComplete={setLatestInteractionId} />
+      <SolidXAIInputBox onTriggerComplete={setLatestInteractionId} threadId={`thread-${userId}`} userId={userId} />
     </div>
   );
 };
