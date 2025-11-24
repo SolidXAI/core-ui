@@ -228,8 +228,8 @@ export const SolidListView = (params: SolidListViewParams) => {
     }
   );
 
-  const [solidListViewMetaData, setSolidListViewMetaData] = useState({});
-  const [solidListViewLayout, setSolidListViewLayout] = useState({});
+  const [solidListViewMetaData, setSolidListViewMetaData] = useState(null);
+  const [solidListViewLayout, setSolidListViewLayout] = useState(null);
   const {
     data: solidListViewInitialMetaData,
     error: solidListViewMetaDataError,
@@ -246,7 +246,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     const initialFilters: any = {};
     const toPopulate: string[] = [];
     const toPopulateMedia: string[] = [];
-    const currentLayout = params.customLayout
+      const currentLayout = params.customLayout
       ? params.customLayout
       : solidView?.layout;
     for (let i = 0; i < currentLayout?.children.length; i++) {
