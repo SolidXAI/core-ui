@@ -6,20 +6,17 @@ import { useState } from 'react';
 import { useTriggerMcpClientJobMutation } from '@/redux/api/aiInteractionApi';
 import { usePathname } from 'next/navigation';
 import { ERROR_MESSAGES } from '@/constants/error-messages';
-import axios from 'axios';
 
 interface SolidXAIInputBoxProps {
     onTriggerComplete?: (uuid: string) => void;
-    threadId?: string;
-    userId?: string;
 }
 
-export const SolidXAIInputBox = ({ onTriggerComplete, threadId,userId }: SolidXAIInputBoxProps) => {
+export const SolidXAIInputBox = ({ onTriggerComplete }: SolidXAIInputBoxProps) => {
     const pathName = usePathname()
     const [prompt, setPrompt] = useState('');
     const [sending, setSending] = useState(false);
-    // const [triggerMcpClientJob, { isLoading }] = useTriggerMcpClientJobMutation();
-    const [isLoading, setIsLoading] = useState(false);
+    const [triggerMcpClientJob, { isLoading }] = useTriggerMcpClientJobMutation();
+
     const handleSend = async () => {
         console.log(`handleSend invoked...`);
 
@@ -34,32 +31,10 @@ export const SolidXAIInputBox = ({ onTriggerComplete, threadId,userId }: SolidXA
             // pick the 3rd segment (index 2, since it's 0-based)
             const moduleName = segments[2];
 
-            // const response = await triggerMcpClientJob({ prompt,moduleName }).unwrap();
-            // ---- AXIOS INTEGRATION START ----
-            const payload = {
-                prompt,
-                moduleName,   // keep this if backend needs it
-            };
-            setIsLoading(true);
-
-            const response = await axios.post(
-                `${process.env.MCP_SERVER_URL}/ai-interactions`,
-                payload,
-                {
-                    headers: {
-                        "solidx-mcp-api-key": process.env.MCP_API_KEY,
-                        "solidx-user-id": userId,
-                        "solidx-mcp-thread-id": threadId,
-                        "Content-Type": "application/json",
-                    },
-                    maxBodyLength: Infinity,
-                }
-            );
-            console.log("response", response);
-            if (response?.data.success == true && onTriggerComplete) {
-                setIsLoading(false);
-                console.log(`Invoking onTriggerComplete with data ${response?.data?.data?.aiInteractionId}`);
-                onTriggerComplete(response?.data?.data?.aiInteractionId);
+            const response = await triggerMcpClientJob({ prompt,moduleName }).unwrap();
+            if (response?.data && onTriggerComplete) {
+                console.log(`Invoking onTriggerComplete with data ${response.data.queueMessageId}`);
+                onTriggerComplete(response.data.queueMessageId);
             }
             setPrompt('');
         } catch (err) {
