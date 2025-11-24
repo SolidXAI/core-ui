@@ -124,33 +124,40 @@ export const Layout = ({ children }: ChildContainerProps) => {
 
     const { user } = useSelector((state: any) => state.auth);
     const session = useSession();
-const hasRunRef = useRef(false);
+    const hasRunRef = useRef(false);
 
 useEffect(() => {
-    // Prevent double execution caused by React Strict Mode
     if (hasRunRef.current) return;
-    // @ts-ignore
-    if (session == "undefined" || !user) return;
-    // Detect full reload (F5, browser reload)
+    if (!session || !user) return;
+
     const navEntry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
     const isReload = navEntry?.type === "reload";
 
-    if (!isReload) return;
+    // Detect first mount (after login redirect)
+    const isFirstMount = !sessionStorage.getItem("app-mounted");
 
-    hasRunRef.current = true;  // Mark as executed
+    // Allow execution only for:
+    //  1. First mount
+    //  2. Reload
+    if (isFirstMount || isReload) {
+        sessionStorage.setItem("app-mounted", "true");
+    } else {
+        return;
+    }
+
+    hasRunRef.current = true;
 
     const handleDynamicFunction = async () => {
         const dynamicHeader = process.env.SOLIDX_ON_APPLICATION_MOUNT_HANDLER;
-        let DynamicFunctionComponent = null;
-
+        
         const event: SolidOnApplicationMountEvent = {
-            type: 'onApplicationMount',
-            user: user,
-            session: session
+            type: "onApplicationMount",
+            user,
+            session
         };
 
         if (dynamicHeader) {
-            DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
+            const DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
             if (DynamicFunctionComponent) {
                 await DynamicFunctionComponent(event);
             }
@@ -158,7 +165,8 @@ useEffect(() => {
     };
 
     handleDynamicFunction();
-}, [session.status, session.data, user]);
+}, [session, session?.data, user]);
+
 
 
 
