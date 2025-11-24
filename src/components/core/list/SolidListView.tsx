@@ -54,7 +54,7 @@ import { useSelector } from "react-redux";
 import styles from "./SolidListViewWrapper.module.css";
 import { SolidXAIModule } from "../solid-ai/SolidXAIModule";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
-import { SolidLoadList } from "@/types/solid-core";
+import { SolidListUiEventResponse, SolidLoadList } from "@/types/solid-core";
 import { getExtensionFunction } from "@/helpers/registry";
 import { useSession } from "next-auth/react";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
@@ -583,7 +583,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         if (dynamicHeader) {
           DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
           if (DynamicFunctionComponent) {
-            const updatedListData = await DynamicFunctionComponent(event);
+            const updatedListData: SolidListUiEventResponse = await DynamicFunctionComponent(event);
 
             if (updatedListData && updatedListData?.dataChanged && updatedListData?.newListData) {
               listViewRecords = updatedListData.newListData;
@@ -603,8 +603,6 @@ export const SolidListView = (params: SolidListViewParams) => {
       handleDynamicFunction();
     }
   }, [solidListViewMetaData, listViewData]);
-
-
 
   useEffect(() => {
     console.log(

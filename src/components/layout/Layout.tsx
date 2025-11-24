@@ -12,6 +12,9 @@ import AppConfig from './AppConfig';
 import { LayoutContext } from './context/layoutcontext';
 import AppSidebar from './AppSidebar';
 import SolidPopupContainer from '../common/SolidPopupContainer';
+import { useSession } from 'next-auth/react';
+import { getExtensionFunction } from '@/helpers/registry';
+import { SolidOnApplicationMountEvent } from '@/types/solid-core';
 
 export const Layout = ({ children }: ChildContainerProps) => {
     const { layoutConfig, layoutState, setLayoutState } = useContext(LayoutContext);
@@ -116,7 +119,49 @@ export const Layout = ({ children }: ChildContainerProps) => {
         'layout-mobile-active': layoutState.staticMenuMobileActive,
         'p-input-filled': layoutConfig.inputStyle === 'filled',
     });
-    const { visibleNavbar } = useSelector((state:any) => state.navbarState); // Get the visibility state of sidebar-two
+    const { visibleNavbar } = useSelector((state: any) => state.navbarState); // Get the visibility state of sidebar-two
+
+
+    const session = useSession();
+    const { user } = useSelector((state: any) => state.auth);
+
+const hasRunRef = useRef(false);
+
+useEffect(() => {
+    // Prevent double execution caused by React Strict Mode
+    if (hasRunRef.current) return;
+
+    // Detect full reload (F5, browser reload)
+    const navEntry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
+    const isReload = navEntry?.type === "reload";
+
+    if (!isReload) return;
+
+    hasRunRef.current = true;  // Mark as executed
+
+    const handleDynamicFunction = async () => {
+        const dynamicHeader = process.env.SOLIDX_ON_APPLICATION_MOUNT_HANDLER;
+        let DynamicFunctionComponent = null;
+
+        const event: SolidOnApplicationMountEvent = {
+            type: 'onApplicationMount',
+            user: user,
+            session: session
+        };
+
+        if (dynamicHeader) {
+            DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
+            if (DynamicFunctionComponent) {
+                await DynamicFunctionComponent(event);
+            }
+        }
+    };
+
+    handleDynamicFunction();
+}, []);
+
+
+
 
     return (
         <React.Fragment>
