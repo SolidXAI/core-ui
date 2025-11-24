@@ -747,7 +747,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       locale: localeName ? localeName : "en",
     };
 
-    if (sortField) {
+    if (sortField && solidFieldsMetadata && solidFieldsMetadata[sortField]) {
       const sortFieldMetadata = solidFieldsMetadata[sortField];
       if (
         sortFieldMetadata?.type === "relation" &&
@@ -1471,10 +1471,8 @@ export const SolidListView = (params: SolidListViewParams) => {
                                   style={{ top: 10, minWidth: 120 }}
                                 >
                                   <div className="flex flex-column gap-1 p-1">
-                                    {solidListViewLayout?.attrs
-                                      .showDefaultEditButton !== false &&
-                                      solidListViewLayout?.attrs
-                                        .showRowEditInContextMenu !== false && (
+                                    {solidListViewLayout?.attrs?.showDefaultEditButton !== false &&
+                                      solidListViewLayout?.attrs?.showRowEditInContextMenu !== false && (
                                         <Button
                                           type="button"
                                           className="w-full text-left gap-1"
@@ -1501,8 +1499,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                     ) &&
                                       solidListViewLayout?.attrs?.delete !==
                                       false &&
-                                      solidListViewLayout?.attrs
-                                        .showRowDeleteInContextMenu !== false && (
+                                      solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== false && (
                                         <Button
                                           text
                                           type="button"
@@ -1518,11 +1515,11 @@ export const SolidListView = (params: SolidListViewParams) => {
                                     {solidListViewLayout?.attrs?.rowButtons
                                       ?.filter(
                                         (rb) =>
-                                          rb.attrs.actionInContextMenu === true
+                                          rb?.attrs?.actionInContextMenu === true
                                       )
                                       .map((button: any, index: number) => (
                                         <SolidListViewRowButtonContextMenu
-                                          key={`${index}-${selectedDataRef.current?.id || ''}`}
+                                          key={`${index}-${selectedDataRef?.current?.id || ''}`}
                                           button={button}
                                           params={params}
                                           getSelectedSolidViewData={() => selectedDataRef.current}
