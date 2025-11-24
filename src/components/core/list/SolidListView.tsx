@@ -176,11 +176,11 @@ export const SolidListView = (params: SolidListViewParams) => {
           permissionExpression(params.modelName, 'delete'),
           permissionExpression(params.modelName, 'update'),
           permissionExpression(params.modelName, 'deleteMany'),
-          permissionExpression(params.modelName, 'find'),
+          permissionExpression(params.modelName, 'findOne'),
           permissionExpression(params.modelName, 'findMany'),
           permissionExpression(params.modelName, 'insertMany'),
-          permissionExpression('ImportTransaction', 'create'),
-          permissionExpression('ExportTransaction', 'create'),
+          permissionExpression('importTransaction', 'create'),
+          permissionExpression('exportTransaction', 'create'),
           permissionExpression('userViewMetadata', 'create'),
           permissionExpression('savedFilters', 'create')
         ];
@@ -1293,7 +1293,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                 if (solidListViewLayout?.attrs.disableRowClick === true) return;
 
                 const hasFindPermission = actionsAllowed.includes(
-                  permissionExpression(params.modelName, 'find')
+                  permissionExpression(params.modelName, 'findOne')
                 );
                 const hasUpdatePermission =
                   actionsAllowed.includes(permissionExpression(params.modelName, 'update')) &&
