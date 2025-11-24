@@ -530,7 +530,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     permissionExpression(params.modelName, 'create'),
                     permissionExpression(params.modelName, 'delete'),
                     permissionExpression(params.modelName, 'update'),
-                    permissionExpression(params.modelName, 'find')
+                    permissionExpression(params.modelName, 'findOne')
                 ]
                 const queryData = {
                     permissionNames: permissionNames
