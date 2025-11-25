@@ -77,7 +77,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     if (modelMetaData && modelMetaData.isChild) {
       setShowParentModel(true)
     }
-    else if (modelMetaData && !modelMetaData.isChild){
+    else if (modelMetaData && !modelMetaData.isChild) {
       setShowParentModel(false)
     }
   }, [modelMetaData])
@@ -88,7 +88,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
       //   /^[a-z]+(-[a-z]+)*$/,
       //   "Invalid format. Use lowercase letters and hyphens only."
       // )
-      .notOneOf(allModelsNames, ERROR_MESSAGES.FIELD_ALREADY_USE('Name','name'))
+      .notOneOf(allModelsNames, ERROR_MESSAGES.FIELD_ALREADY_USE('Name', 'name'))
       .required(ERROR_MESSAGES.FIELD_REUQIRED('Singular Name')),
     pluralName: Yup.string()
       // .matches(
@@ -96,11 +96,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
       //   "Invalid format. Use lowercase letters and hyphens only."
       // )
       .required(ERROR_MESSAGES.FIELD_REUQIRED('Plural Name')),
-    tableName: Yup.string().required()
-      .matches(
-        /^[a-z0-9_]+$/,
-        ERROR_MESSAGES.SNAKE_CASE('Tabale')
-      ),
+    // tableName: Yup.string().required().matches(/^[a-z0-9_]+$/, ERROR_MESSAGES.SNAKE_CASE('Tabale')),
     displayName: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Display Name")),
     description: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Description Name")),
     dataSource: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Data Source")),
@@ -253,12 +249,12 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
         },
       };
 
-    // Add module filter dynamically
-    if (selectedModule?.name) {
-      (queryData.filters as any)["module"] = {
-        name: { $containsi: selectedModule.name },
-      };
-    }
+      // Add module filter dynamically
+      if (selectedModule?.name) {
+        (queryData.filters as any)["module"] = {
+          name: { $containsi: selectedModule.name },
+        };
+      }
 
 
       const queryString = qs.stringify(queryData, {
@@ -372,7 +368,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     searchData={searchModule}
                     existingData={formik.values.module}
                     formErrors={formErrors}
-                    additionalAction={(e:any) => setSelectedModule(e.value)} 
+                    additionalAction={(e: any) => setSelectedModule(e.value)}
                   />
                   {(isFormFieldValid(formik, "module") || (formErrors["module"])) && (
                     <Message severity="error" text={formik?.errors?.moduleId?.toString()} />
