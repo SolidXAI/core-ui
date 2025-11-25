@@ -1290,7 +1290,7 @@ export const SolidListView = (params: SolidListViewParams) => {
               onRowClick={(e) => {
                 const rowData = e.data;
 
-                if (solidListViewLayout?.attrs.disableRowClick === true) return;
+                if (solidListViewLayout?.attrs?.disableRowClick === true) return;
 
                 const hasFindPermission = actionsAllowed.includes(
                   permissionExpression(params.modelName, 'findOne')
