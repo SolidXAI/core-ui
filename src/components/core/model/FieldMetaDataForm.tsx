@@ -716,6 +716,9 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
         ERROR_MESSAGES.SNAKE_CASE('column')
       ),
     }),
+    ...(currentFields.includes("isPrimaryKey") && {
+      isPrimaryKey: Yup.boolean(),
+    }),
 
 
 
@@ -1225,6 +1228,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     relationJoinTableName: fieldMetaData ? fieldMetaData?.relationJoinTableName : null,
     userKey: fieldMetaData ? fieldMetaData?.userKey : null,
     enableAuditTracking: fieldMetaData ? fieldMetaData?.enableAuditTracking : false,
+    isPrimaryKey: fieldMetaData ? fieldMetaData?.isPrimaryKey : false,
     isMultiSelect: fieldMetaData ? fieldMetaData?.isMultiSelect : false,
   };
 
@@ -3317,6 +3321,30 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               <Message
                                 severity="error"
                                 text={formik?.errors?.isUserKey?.toString()}
+                              />
+                            )}
+                          </div>
+                        )}
+                        {currentFields.includes("isPrimaryKey") && modelMetaData?.isLegacyTable && (
+                          <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="flex align-items-center gap-2">
+                              <Checkbox
+                                name="isPrimaryKey"
+                                onChange={(e) => {
+                                  formik.setFieldValue("isPrimaryKey", e.checked);
+                                }}
+                                checked={formik.values.isPrimaryKey}
+                              ></Checkbox>
+                              <label htmlFor="ingredient1" className="form-field-label">
+                                Is Primary Key
+                              </label>
+                            </div>
+                            <p className="fieldSubTitle">By selecting this option, you are setting this field as the primary key for this legacy table.</p>
+
+                            {isFormFieldValid(formik, "isPrimaryKey") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.isPrimaryKey?.toString()}
                               />
                             )}
                           </div>
