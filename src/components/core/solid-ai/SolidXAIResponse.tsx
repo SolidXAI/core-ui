@@ -8,6 +8,7 @@ import moment from "moment";
 import { SolidXAiJsonDisplay } from "./SolidXAiJsonDisplay";
 import { SolidXAiMarkdownDisplay } from "./SolidXAiMarkdownDisplay";
 import { SolidXAiPlainTextDisplay } from "./SolidXAiPlainTextDisplay";
+import { SolidXAiStatusErrorDisplay } from "./SolidXAiStatusErrorDisplay";
 
 
 
@@ -31,7 +32,7 @@ export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }
     const timestamp = moment(interaction.createdAt).format('HH:mm')
     return (
         <div className={`${styles.SolidXAIResponseWrapper}`}>
-            {interaction.status !== "pending" &&
+            {interaction.status !== "pending" && interaction.status !== "mcp_tool_generating" &&
                 <div className='flex align-items-start gap-3'>
                     <div className="text-center">
                         <Button icon={<SolidXAIIcon />} size="small" raised text rounded onClick={() => window.open(`/admin/core/solid-core/ai-interaction/form/${interaction.id}?viewMode=view`, '_blank')} />
@@ -40,7 +41,9 @@ export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }
                         </div>
                     </div>
                     <div className={`mt-3`} style={{ width: '100%' }}>
-                        {renderContent()}
+                        {interaction.status === "mcp_tool_generated" && renderContent()}
+                        {interaction.status === "mcp_tool_failed" && <SolidXAiStatusErrorDisplay interaction={interaction} />}
+                        {interaction.status === "mcp_client_failed" && <SolidXAiStatusErrorDisplay interaction={interaction} />}
                     </div>
 
                 </div>

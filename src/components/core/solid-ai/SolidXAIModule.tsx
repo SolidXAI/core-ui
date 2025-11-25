@@ -51,12 +51,13 @@ export const SolidXAIModule = ({ showHeader, inListView }: any) => {
         if (res.data.success === true) {
           const messageStage = res.data.data.status;
           console.log("messageStatus: ", messageStage);
-          if (messageStage === "succeeded") {
+          // if (messageStage === "pending" ||messageStage === "mcp_tool_generating" || messageStage === "mcp_tool_failed" || messageStage === "mcp_client_failed") {
+          //   return true
+          // }
+          if (messageStage === "mcp_tool_generated" || messageStage === "mcp_tool_failed" || messageStage === "mcp_client_failed") {
             return true
           }
-          if (messageStage === "failed") {
-            return false
-          }
+
         }
       } catch (e) {
         // ignore and retry
