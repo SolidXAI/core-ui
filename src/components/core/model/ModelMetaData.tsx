@@ -61,7 +61,6 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     isChild: modelMetaData ? modelMetaData?.isChild : "",
     parentModelId: modelMetaData ? modelMetaData?.parentModel?.id : "",
     parentModel: modelMetaData ? modelMetaData?.parentModel : "",
-    isLegacyTable: modelMetaData ? modelMetaData?.isLegacyTable : false,
 
   };
 
@@ -127,7 +126,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
         return schema.notRequired().nullable();
       }
     }),
-    isLegacyTable: Yup.boolean(),
+
   });
 
 
@@ -165,7 +164,6 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
             parentModelId: values.parentModelId,
             parentModel: values.parentModel,
           }),
-          isLegacyTable: values.isLegacyTable === true ? true : false,
         };
         setModelMetaData(modelData);
         nextTab()
@@ -573,18 +571,6 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   ></Checkbox>
                   <label htmlFor="draftPublishWorkflow" className="form-field-label">
                     Draft/Publish Workflow
-                  </label>
-                </div>
-                <div className="flex align-items-center gap-2 mt-3">
-                  <Checkbox
-                    name="isLegacyTable"
-                    onChange={(e) => {
-                      formik.setFieldValue("isLegacyTable", e.checked);
-                    }}
-                    checked={formik.values.isLegacyTable}
-                  ></Checkbox>
-                  <label htmlFor="isLegacyTable" className="form-field-label">
-                    Is Legacy Table
                   </label>
                 </div>
                 {/* <div className="field col-6">
