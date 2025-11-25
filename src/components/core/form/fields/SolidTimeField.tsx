@@ -11,22 +11,33 @@ import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 
-// Converts a HH:mm:ss string into a JavaScript Date object
+// Converts multiple time formats into a JavaScript Date object
 function parseTimeStringToDate(timeStr: string): Date | null {
     if (!timeStr) return null;
-    if (typeof timeStr === "string" && timeStr.match(/^\d{2}:\d{2}:\d{2}$/)) {
+
+    // CASE 1: HH:mm:ss
+    if (typeof timeStr === "string" && /^\d{2}:\d{2}:\d{2}$/.test(timeStr)) {
         const [h, m, s] = timeStr.split(":").map(Number);
         const d = new Date();
         d.setHours(h, m, s, 0);
         return d;
     }
+
+    // CASE 2: timestamp or timestamptz
+    try {
+        const d = new Date(timeStr); // ← AUTO UTC → LOCAL conversion
+        if (!isNaN(d.getTime())) return d;
+    } catch (e) {
+        console.error(`${ERROR_MESSAGES.FIELD_INAVLID_FORMAT('Date')}:,${e}`)
+    }
+
     return null;
 }
 
 // Formats a Date object to a HH:mm:ss string for display
 function formatTime(date: Date | null): string {
     if (!date) return "";
-    return date.toTimeString().split(" ")[0];
+    return date.toLocaleTimeString("en-GB", { hour12: false });
 }
 
 
@@ -206,10 +217,11 @@ export const DefaultTimeFormViewWidget = ({ formik, fieldContext }: SolidFormFie
     const fieldValue = formik.values[fieldLayoutInfo.attrs.name];
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     let displayValue = "";
-    if (fieldValue instanceof Date) {
+    if (typeof fieldValue === "string") {
+        const d = parseTimeStringToDate(fieldValue);
+        displayValue = d ? formatTime(d) : "-";
+    } else if (fieldValue instanceof Date) {
         displayValue = formatTime(fieldValue);
-    } else if (typeof fieldValue === "string") {
-        displayValue = formatTime(parseTimeStringToDate(fieldValue));
     }
 
     return (

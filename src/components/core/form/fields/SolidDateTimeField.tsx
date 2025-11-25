@@ -200,17 +200,32 @@ export const DefaultDateTimeFormViewWidget = ({ formik, fieldContext }: SolidFor
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+
+    const rawValue = formik.values[fieldLayoutInfo.attrs.name];
+
+    const formatDateTime = (value: any) => {
+        if (!value) return "-";
+
+        if (value instanceof Date) {
+            return value.toLocaleString("en-GB"); 
+        }
+
+        if (typeof value === "string" && value.includes("T")) {
+            const d = new Date(value);
+            if (!isNaN(d.getTime())) {
+                return d.toLocaleString("en-GB"); 
+            }
+        }
+
+        return value;
+    };
+
     return (
         <div className="mt-2 flex-column gap-2">
             {showFieldLabel !== false && (
                 <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
             )}
-            {/* <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name]}</p> */}
-            <p className="m-0">
-                {formik.values[fieldLayoutInfo.attrs.name] instanceof Date
-                    ? formik.values[fieldLayoutInfo.attrs.name].toLocaleDateString()
-                    : formik.values[fieldLayoutInfo.attrs.name]}
-            </p>
+            <p className="m-0">{formatDateTime(rawValue)}</p>
         </div>
     );
-}
+};
