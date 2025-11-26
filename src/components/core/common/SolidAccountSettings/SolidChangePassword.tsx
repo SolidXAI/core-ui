@@ -33,8 +33,8 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
         try {
             const backendRegex = solidSettingsData?.data?.system?.authenticationPasswordRegex;
             if (backendRegex) {
-                const unescaped = JSON.parse(`"${backendRegex}"`);
-                return new RegExp(unescaped);
+                // const unescaped = JSON.parse(`"${backendRegex}"`);
+                return new RegExp(backendRegex);
             }
             if (envPasswordRegex) {
                 const unescaped = JSON.parse(`"${envPasswordRegex}"`);
