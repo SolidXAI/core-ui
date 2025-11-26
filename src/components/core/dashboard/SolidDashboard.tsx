@@ -211,7 +211,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
                 </>
               }
             </p>
-              {dashboardVariables && dashboardVariables.length > 0 && <SolidDashboardVariable dashboardVariables={dashboardVariables} setFilters={setFilters} />}
+              {dashboardVariables && dashboardVariables.length > 0 && <SolidDashboardVariable dashboardVariables={dashboardVariables} filters={filters} setFilters={setFilters} />}
             </div>
             {!isRenderDashboardBody(questions, dashboardVariables, filters) && <p className="text-red-600">Almost there! Select the required filters to generate your dashboard.</p>}
             {isRenderDashboardBody(questions, dashboardVariables, filters) && <SolidDashboardBody questions={questions} filters={filters} />}
