@@ -5,6 +5,7 @@ import styles from './SolidXAI.module.css';
 import { useState } from 'react';
 import { useTriggerMcpClientJobMutation } from '@/redux/api/aiInteractionApi';
 import { usePathname } from 'next/navigation';
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 
 interface SolidXAIInputBoxProps {
     onTriggerComplete?: (uuid: string) => void;
@@ -37,7 +38,7 @@ export const SolidXAIInputBox = ({ onTriggerComplete }: SolidXAIInputBoxProps) =
             }
             setPrompt('');
         } catch (err) {
-            console.error("Failed to trigger MCP client job", err);
+            console.error(ERROR_MESSAGES.FAILED_TRIGGER_MCP_CLIENT_JOB, err);
         } finally {
             setSending(false);
         }

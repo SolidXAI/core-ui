@@ -6,7 +6,7 @@ import { createSolidEntityApi } from '@/redux/api/solidEntityApi';
 import { useFormik } from 'formik';
 import { Toast } from 'primereact/toast';
 import { useSearchParams } from 'next/navigation';
-
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 interface Props {
     solidFormViewMetaData?: any;
     modelName?: any,
@@ -85,14 +85,14 @@ export const SolidFormStepper = (props: Props) => {
         try {
             const result = await updateStepper({ id: values.id, data: { [solidWorkflowFieldKey]: values[solidWorkflowFieldKey] } }).unwrap();
             if (result?.statusCode === 200) {
-                showToast("success", `${defaultWorkflowFieldDisplayName} Update`, `${defaultWorkflowFieldDisplayName} updated successfully!`);
+                showToast("success", ERROR_MESSAGES.FIELD_UPDATE(defaultWorkflowFieldDisplayName), ERROR_MESSAGES.FIELD_UPDATE_SUCCESSFULLY(defaultWorkflowFieldDisplayName));
                 if (result?.data?.[solidWorkflowFieldKey]) {
                     setSolidWorkflowFieldValue(result.data[solidWorkflowFieldKey]);
                 }
             }
         } catch (error) {
-            console.error('Error updating stepper:', error);
-            showToast("error", "Update Failed", "Failed to update the form.");
+            console.error(ERROR_MESSAGES.UPDATING_STEPPER, error);
+            showToast("error", ERROR_MESSAGES.UPDATE_FAILED, ERROR_MESSAGES.FAILED_UPDATE_FROM);
         }
     }
 

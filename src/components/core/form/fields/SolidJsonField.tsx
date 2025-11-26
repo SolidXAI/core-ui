@@ -10,6 +10,7 @@ import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct import
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 export class SolidJsonField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
@@ -38,7 +39,7 @@ export class SolidJsonField implements ISolidField {
 
         // 1. required 
         if (fieldMetadata.required) {
-            schema = schema.required(`${fieldLabel} is required.`);
+            schema = schema.required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel));
         } else {
             schema = schema.nullable(); // Allow null when not required
         }

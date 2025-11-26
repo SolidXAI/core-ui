@@ -8,7 +8,7 @@ import { javascript } from "@codemirror/lang-javascript";
 import { oneDark } from "@codemirror/theme-one-dark";
 import CodeMirror, { EditorView } from "@uiw/react-codemirror";
 import { Toast } from "primereact/toast";
-
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 export const KanbanUserViewLayout = ({ solidKanbanViewMetaData, setLayoutDialogVisible }: any) => {
     const toast = useRef<Toast>(null);
     const entityApi = createSolidEntityApi("userViewMetadata");
@@ -41,13 +41,13 @@ export const KanbanUserViewLayout = ({ solidKanbanViewMetaData, setLayoutDialogV
                         layout: JSON.stringify(parsedLayout),
                     }).unwrap();
                     if (response.statusCode === 200) {
-                        showToast("success", "Layout", "Form Layout Updated successfully!");
+                        showToast("success", ERROR_MESSAGES.LAYOUT, ERROR_MESSAGES.FORM_LAYOUT_UPDATE);
                         setLayoutDialogVisible(false);
                         window.location.reload();
                     }
                 }
             } catch (error) {
-                console.error("Update failed:", error);
+                console.error(ERROR_MESSAGES.UPDATE_FAILED, error);
             }
         },
     });

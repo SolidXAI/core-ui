@@ -1,4 +1,4 @@
-import { createPermission } from '@/helpers/permissions'
+import { permissionExpression } from '@/helpers/permissions'
 import { SolidCreateButton } from '../common/SolidCreateButton'
 import Image from 'next/image'
 import { Button } from 'primereact/button'
@@ -71,7 +71,7 @@ export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, actionsAllowed,
                     </div>
                 }
                 {
-                    actionsAllowed.includes(`${createPermission(params.modelName)}`) &&
+                    actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
                     solidListViewMetaData?.data?.solidView?.layout?.attrs?.create !== false &&
                     params.embeded !== true &&
                     solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultAddButton !== false &&

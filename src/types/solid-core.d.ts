@@ -82,7 +82,7 @@ export type LayoutAttribute = {
 };
 
 // Generic representation of any node in our layout 
-export type LayoutNodeType = "form" | "sheet" | "notebook" | "page" | "row" | "column" | "field" | "div" | "p" | "span" | "h1" | "h2" | "h3";
+export type LayoutNodeType = "form" | "sheet" | "notebook" | "page" | "row" | "column" | "field" | "div" | "p" | "span" | "h1" | "h2" | "h3" | "list";
 export type LayoutNode = {
     body?: string;
     type: LayoutNodeType;
@@ -90,8 +90,14 @@ export type LayoutNode = {
     children?: LayoutNode[];
 };
 
+export type ListLayoutType = {
+    type: LayoutNodeType;
+    attrs: LayoutAttribute;
+    children?: any[];
+};
+
 // Event type
-export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender" | "onFormDataLoad" | "onFormLayoutLoad" | "onFormLoad";
+export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender" | "onFormDataLoad" | "onFormLayoutLoad" | "onFormLoad" | "onListLoad" | "afterLogin" | "beforeLogout" | "onApplicationMount";
 export type SolidUiEvent = {
     type: SolidUiEvents;
     modifiedField?: string;
@@ -103,6 +109,14 @@ export type SolidUiEvent = {
     formViewLayout: LayoutNode;
 };
 
+export type SolidUiEventResponse = {
+    dataChanged?: Boolean;
+    newFormData?: Record<string, any>;
+    layoutChanged?: Boolean;
+    newLayout?: LayoutNode;
+}
+
+
 export type SolidLoadForm = {
     parentData?: any,
     type: SolidUiEvents;
@@ -111,6 +125,48 @@ export type SolidLoadForm = {
     fieldsMetadata: FieldsMetadata;
     formViewLayout: LayoutNode;
 }
+
+
+export type SolidListUiEvent = {
+    type: SolidUiEvents;
+    listData: any[];
+    fieldsMetadata: FieldsMetadata;
+    totalRecords: number;
+    viewMetadata: SolidView;
+    listViewLayout: ListLayoutType;
+};
+
+export type SolidLoadList = {
+    type: SolidUiEvents;
+    listData: any[];
+    fieldsMetadata: FieldsMetadata;
+    totalRecords: number;
+    viewMetadata: SolidView;
+    listViewLayout: ListLayoutType;
+    user: any,
+    session: any
+}
+
+export type SolidListUiEventResponse = {
+    dataChanged?: Boolean;
+    newListData?: any[];
+    layoutChanged?: Boolean;
+    newLayout?: LayoutNode;
+}
+
+export type SolidAfterLoginEvent = {
+    type: SolidUiEvents;
+    user: any
+}
+
+export type SolidOnApplicationMountEvent = {
+    type: SolidUiEvents;
+    user: any,
+    session: any
+}
+
+
+
 
 export enum SqlExpressionOperator {
     EQUALS = '$equals',
@@ -210,6 +266,6 @@ export interface AiInteraction {
     modelUsed?: string;
     responseTimeMs?: number;
     metadata?: string;
-    isApplied ?: boolean;
-    createdAt? :Date
+    isApplied?: boolean;
+    createdAt?: Date
 }

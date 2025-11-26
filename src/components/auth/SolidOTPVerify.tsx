@@ -15,7 +15,7 @@ import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { AppTitle } from "@/helpers/AppTitle";
 import Image from "next/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
-
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 const SolidOTPVerify = () => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
@@ -32,8 +32,8 @@ const SolidOTPVerify = () => {
 
     const validationSchema = Yup.object({
         email: Yup.string()
-            .email("Invalid email address")
-            .required("Email is required"),
+            .email(ERROR_MESSAGES.FIELD_INVALID(' email address'))
+            .required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
     });
 
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
@@ -86,9 +86,9 @@ const SolidOTPVerify = () => {
                                 password,
                             });
                             if (response?.error) {
-                                showToast("error", "Login Error", response.error);
+                                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                             } else {
-                                showToast("success", "Login Success", "Redirecting to dashboard...");
+                                showToast("success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
                                 router.push(`${process.env.NEXT_PUBLIC_LOGIN_REDIRECT_URL}`);
                             }
 

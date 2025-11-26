@@ -3,26 +3,32 @@
 import React from "react";
 
 interface PasswordHelperTextProps {
-  text?: string; // password complexity description (from env or API)
+  text?: any;
 }
 
 export const SolidPasswordHelperText: React.FC<PasswordHelperTextProps> = ({ text }) => {
-  if (!text) return null;
+  const envPasswordHelperText = process.env.NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC ?? "";
+
+  if (!text && !envPasswordHelperText) return null;
 
   return (
     <div className="mt-4 text-sm grid">
-      <div className="col-12">
-        <div className="grid">
-          {text.split("\\n").map((line, idx) => (
-            <div key={idx} className="col-6 pt-0">
-              <div className="flex gap-2">
-                <span>•</span>
-                <span>{line}</span>
+      {text ?
+        <div dangerouslySetInnerHTML={{ __html: text }}></div>
+        :
+        <div className="col-12">
+          <div className="grid">
+            {envPasswordHelperText.split("\\n").map((line, idx) => (
+              <div key={idx} className="col-6 pt-0">
+                <div className="flex gap-2">
+                  <span>•</span>
+                  <span>{line}</span>
+                </div>
               </div>
-            </div>
-          ))}
+            ))}
+          </div>
         </div>
-      </div>
+      }
     </div>
   );
 };

@@ -1,7 +1,7 @@
 "use client";
 
 import { SolidCancelButton } from "@/components/common/CancelButton";
-import { createPermission, deletePermission, findPermission, updatePermission } from "@/helpers/permissions";
+import { permissionExpression } from "@/helpers/permissions";
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
@@ -37,7 +37,7 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
 import { SolidUiEvent } from "@/types";
 import { getExtensionComponent, getExtensionFunction } from "@/helpers/registry";
-import { SolidFormWidgetProps, SolidLoadForm } from "@/types/solid-core";
+import { SolidFormWidgetProps, SolidLoadForm, SolidUiEventResponse } from "@/types/solid-core";
 import { SolidPasswordField } from "./fields/SolidPasswordField";
 import { SolidEmailField } from "./fields/SolidEmailField";
 import { Panel } from "primereact/panel";
@@ -59,6 +59,7 @@ import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
 import { SolidXAIModule } from "../solid-ai/SolidXAIModule";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -526,10 +527,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const fetchPermissions = async () => {
             if (params.modelName) {
                 const permissionNames = [
-                    createPermission(params.modelName),
-                    deletePermission(params.modelName),
-                    updatePermission(params.modelName),
-                    findPermission(params.modelName)
+                    permissionExpression(params.modelName, 'create'),
+                    permissionExpression(params.modelName, 'delete'),
+                    permissionExpression(params.modelName, 'update'),
+                    permissionExpression(params.modelName, 'findOne')
                 ]
                 const queryData = {
                     permissionNames: permissionNames
@@ -636,12 +637,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     useEffect(() => {
         const handleError = (errorToast: any) => {
-            let errorMessage: any = ['An error occurred'];
+            let errorMessage: any = [ERROR_MESSAGES.ERROR_OCCURED];
 
             if (isFetchBaseQueryErrorWithErrorResponse(errorToast)) {
                 errorMessage = errorToast.data.message;
             } else {
-                errorMessage = ['Something went wrong'];
+                errorMessage = [ERROR_MESSAGES.SOMETHING_WRONG];
             }
 
             toast.current?.show({
@@ -758,7 +759,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 if (params.id === 'new') {
                     // default locale
                     const result = await createEntity(formData).unwrap();
-                    showToast("success", "Form saved", "Form saved successfully!");
+                    showToast("success", ERROR_MESSAGES.FORM_SAVED, ERROR_MESSAGES.FORM_SAVED_SUCCESSFULLY);
                     // if (!params.embeded && result?.data?.id) {
                     //     const newPathname = pathname.replace(/new$/, result.data.id);
 
@@ -785,7 +786,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
                     // const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
                     if (!params.embeded) {
-                        showToast("success", "Form Updated", "Form updated successfully!");
+                        showToast("success", ERROR_MESSAGES.FORM_UPDATE, ERROR_MESSAGES.FORM_UPDATE_SUCCESSFULLY);
                         if (result?.statusCode === 200) {
                             updateViewMode("view")
                         }
@@ -796,7 +797,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
 
         } catch (err) {
-            console.error("Failed to create Entity: ", err);
+            console.error(ERROR_MESSAGES.ENTITY_FAILED, err);
         }
     }
 
@@ -883,7 +884,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
                     if (DynamicFunctionComponent) {
                         try {
-                            const updatedFormLayout = await DynamicFunctionComponent(event);
+                            const updatedFormLayout: SolidUiEventResponse = await DynamicFunctionComponent(event);
                             if (updatedFormLayout && updatedFormLayout?.layoutChanged && updatedFormLayout?.newLayout) {
                                 const newFormLayout = {
                                     ...formLayout,
@@ -899,7 +900,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 customLayout = updatedFormLayout.newLayout;
                             }
                         } catch (error) {
-                            console.error('Error in DynamicFunctionComponent:', error);
+                            console.error(ERROR_MESSAGES.DYNAMIC_FUNCTION_ERROR, error);
                         }
                     }
                 }
@@ -928,7 +929,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             if (dynamicHeader) {
                 DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
                 if (DynamicFunctionComponent) {
-                    const updatedFormData = await DynamicFunctionComponent(event);
+                    const updatedFormData: SolidUiEventResponse = await DynamicFunctionComponent(event);
 
                     if (updatedFormData && updatedFormData?.dataChanged && updatedFormData?.newFormData) {
                         formViewData = updatedFormData.newFormData;
@@ -960,7 +961,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 DynamicFunctionComponent = getExtensionFunction(onFormLoadHandler);
                 if (DynamicFunctionComponent) {
                     try {
-                        const result = await DynamicFunctionComponent(event);
+                        const result: SolidUiEventResponse = await DynamicFunctionComponent(event);
                         if (result && result?.layoutChanged && result?.newLayout) {
                             const newFormLayout = {
                                 ...formLayout,
@@ -987,7 +988,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             setInitialEntityData(formViewData);
                         }
                     } catch (error) {
-                        console.error('Error in onFormLoad handler:', error);
+                        console.error(ERROR_MESSAGES.ON_FORM_LOAD, error);
                     }
                 }
             }
@@ -1100,7 +1101,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
                     // Invoke the dynamic change handler: 
                     // TODO: encapsulate in try/catch, catch the exception render in the UI as an error & stop form rendering.
-                    const updatedFormInfo = await dynamicChangeHandler(event);
+                    const updatedFormInfo: SolidUiEventResponse = await dynamicChangeHandler(event);
 
                     // If dataChanged is true, update Formik values
                     if (updatedFormInfo?.dataChanged && updatedFormInfo.newFormData) {
@@ -1141,7 +1142,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
                 else {
                     // TODO: Show an error popup and stop form rendering ideallly...
-                    console.log(`Unable to load dynamic module: `, changeHandler);
+                    console.log(ERROR_MESSAGES.UNABLE_LOAD_DYNAMIC_MODULE, changeHandler);
                 }
             }
         }
@@ -1209,7 +1210,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         // const fieldMetadata = solidFieldsMetadata[attrs.name];
                         const fieldMetadata = solidFormViewMetaData.data.solidFieldsMetadata[attrs.name];
                         // Read only permission if there is no update permission on model and router doesnt contains new
-                        const readOnlyPermission = !actionsAllowed.includes(`${updatePermission(params.modelName)}`) && params.id !== "new";
+                        const readOnlyPermission = !actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) && params.id !== "new";
                         return <SolidField
                             key={attrs.name}
                             field={element}
@@ -1390,10 +1391,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
             const result = await patchEntity({ id: +params.id, data: formdata }).unwrap();
             setPublished(result?.data?.publishedAt);
             if (type === 'publish') {
-                showToast("success", "Saved", "Marked as publish !");
+                showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_PUBLISH);
                 //todo: patch request
             } else {
-                showToast("success", "Saved", "Marked as unpublish !");
+                showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_UNPUBLISH);
             }
         }
 
@@ -1409,21 +1410,21 @@ const SolidFormView = (params: SolidFormViewProps) => {
         };
 
         const controlsList = ["nodownload", "nofullscreen", "noremoteplayback"];
-        const slides = lightboxUrls.map((item:any) => {
+        const slides = lightboxUrls.map((item: any) => {
             const url = item.src || item.downloadUrl || "";
             if (isVideoOrAudio(url)) {
-              return {
-                type: "video" as const,
-                sources: [{ src: url,  type: "video/mp4", }],
-              };
+                return {
+                    type: "video" as const,
+                    sources: [{ src: url, type: "video/mp4", }],
+                };
             }
             return { src: url };
-          });
-        
-          const hasMedia = slides.some((s) => s.type === "video");
+        });
+
+        const hasMedia = slides.some((s) => s.type === "video");
 
 
-          console.log("lightbox urls", slides);
+        console.log("lightbox urls", slides);
 
         return (
             <div className="solid-form-wrapper">
