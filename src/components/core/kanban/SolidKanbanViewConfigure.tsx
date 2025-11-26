@@ -60,6 +60,7 @@ export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllow
                 icon="pi pi-cog"
                 severity="secondary"
                 outlined
+                className='solid-icon-button'
                 // @ts-ignore
                 onClick={(e) => op.current.toggle(e)}
             />

@@ -720,7 +720,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     <div className="page-parent-wrapper">
       <Toast ref={toast} />
       <div className="page-header flex-column lg:flex-row">
-        <div className="flex justify-content-between w-full">
+        <div className="flex justify-content-between w-full  pl-5 md:pl-0 ">
 
           <div className="flex gap-3 align-items-center">
             <p className="m-0 view-title">{kanbanViewTitle}</p>
@@ -741,6 +741,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                     icon="pi pi-search"
                     severity="secondary"
                     outlined
+                    className="solid-icon-button"
                     onClick={()=>setShowGlobalSearchElement(!showGlobalSearchElement)}>
                   </Button>
               </div>
@@ -755,7 +756,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
               label="Delete"
               size="small"
               onClick={() => setDialogVisible(true)}
-              className="small-button"
+              className="small-button "
               severity="danger"
             />}
             <Button
@@ -763,6 +764,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
               size="small"
               icon="pi pi-refresh"
               severity="secondary"
+              className="solid-icon-button"
               outlined
               onClick={() => {
                 window.location.reload()
@@ -819,9 +821,13 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         header="Change Kanban Layout"
         modal
         onHide={() => setLayoutDialogVisible(false)}
-        contentStyle={{
-          width: 800
+        // contentStyle={{
+        //   width: 800
+        // }}
+        style={{width:'800px'}}
+        breakpoints={{ '1024px': '75vw','991px': '86vw','767px':'92vw', '250px': '96vw'
         }}
+      
       >
         <KanbanUserViewLayout solidKanbanViewMetaData={solidKanbanViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
       </Dialog>

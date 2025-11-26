@@ -137,6 +137,7 @@ export const SolidListViewConfigure = (
                 size="small"
                 icon="pi pi-cog"
                 severity="secondary"
+                className="solid-icon-button"
                 outlined
                 // @ts-ignore
                 onClick={(e) => op.current.toggle(e)}

@@ -1120,8 +1120,8 @@ export const SolidListView = (params: SolidListViewParams) => {
         <div className="page-header flex-column lg:flex-row">
           <Toast ref={toast} />
           {/* <div> */}
-          <div className="flex justify-content-between w-full">
-            <div className="flex gap-3 align-items-center w-full">
+          <div className="flex justify-content-between w-full pl-5 md:pl-0 ">
+            <div className="flex gap-3 align-items-center w-full ">
               <p className="m-0 view-title">
                 {solidListViewMetaData?.data?.solidView?.displayName}
               </p>
@@ -1143,102 +1143,105 @@ export const SolidListView = (params: SolidListViewParams) => {
 
             </div>
             <div className="flex align-items-center gap-3">
-            {solidListViewLayout?.attrs?.enableGlobalSearch === true &&
+              {solidListViewLayout?.attrs?.enableGlobalSearch === true &&
                 params.embeded === false && (
                   <div className="flex lg:hidden">
-                  <Button
-                    type="button"
-                    size="small"
-                    icon="pi pi-search"
-                    severity="secondary"
-                    outlined
-                    onClick={()=>setShowGlobalSearchElement(!showGlobalSearchElement)}
-                  >
-                  </Button>
+                    <Button
+                      type="button"
+                      size="small"
+                      icon="pi pi-search"
+                      severity="secondary"
+                      outlined
+                      className="solid-icon-button"
+                      onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
+                    >
+                    </Button>
                   </div>
 
                 )}
 
-            <div className="hidden lg:flex align-items-center gap-3">
-              {solidListViewLayout?.attrs?.headerButtons
-                ?.filter((rb) => rb.attrs.actionInContextMenu != true)
-                ?.map((button: any, index: number) => (
-                  <SolidListViewHeaderButton
-                    key={index}
-                    button={button}
-                    params={params}
-                    solidListViewMetaData={solidListViewMetaData}
-                    handleCustomButtonClick={handleCustomButtonClick}
-                    selectedRecords={selectedRecords}
-                    filters={filters}
-                  />
-                ))}
+              <div className="hidden lg:flex align-items-center gap-3">
+                {solidListViewLayout?.attrs?.headerButtons
+                  ?.filter((rb) => rb.attrs.actionInContextMenu != true)
+                  ?.map((button: any, index: number) => (
+                    <SolidListViewHeaderButton
+                      key={index}
+                      button={button}
+                      params={params}
+                      solidListViewMetaData={solidListViewMetaData}
+                      handleCustomButtonClick={handleCustomButtonClick}
+                      selectedRecords={selectedRecords}
+                      filters={filters}
+                    />
+                  ))}
               </div>
 
-          {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
-              solidListViewLayout?.attrs?.create !== false &&
-              params.embeded !== true &&
-              solidListViewMetaData?.data?.solidView?.layout?.attrs
-                .showDefaultAddButton !== false && (
-                <SolidCreateButton
-                  url={createButtonUrl}
-                  solidListViewLayout={solidListViewLayout}
-                  responsiveIconOnly={true}
-                />
-              )}
-            {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
-              solidListViewLayout?.attrs?.create !== false &&
-              params.embeded == true &&
-              params.inlineCreate == true &&
-              searchParams.get("viewMode") !== "view" && (
-                // < SolidCreateButton url={createButtonUrl} />
+              {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
+                solidListViewLayout?.attrs?.create !== false &&
+                params.embeded !== true &&
+                solidListViewMetaData?.data?.solidView?.layout?.attrs
+                  .showDefaultAddButton !== false && (
+                  <SolidCreateButton
+                    url={createButtonUrl}
+                    solidListViewLayout={solidListViewLayout}
+                    responsiveIconOnly={true}
+                  />
+                )}
+              {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
+                solidListViewLayout?.attrs?.create !== false &&
+                params.embeded == true &&
+                params.inlineCreate == true &&
+                searchParams.get("viewMode") !== "view" && (
+                  // < SolidCreateButton url={createButtonUrl} />
+                  <Button
+                    type="button"
+                    icon={
+                      solidListViewLayout?.attrs?.addButtonIcon
+                        ? solidListViewLayout?.attrs?.addButtonIcon
+                        : "pi pi-plus"
+                    }
+                    label={
+                      solidListViewLayout?.attrs?.addButtonTitle
+                        ? solidListViewLayout?.attrs?.addButtonTitle
+                        : "Add"
+                    }
+                    className={`${solidListViewLayout?.attrs?.addButtonClassName}`}
+                    size="small"
+                    onClick={() => params.handlePopUpOpen("new")}
+                  ></Button>
+                )}
+              {/* Button For Manual Refresh */}
+              {params.embeded !== true && (
                 <Button
                   type="button"
-                  icon={
-                    solidListViewLayout?.attrs?.addButtonIcon
-                      ? solidListViewLayout?.attrs?.addButtonIcon
-                      : "pi pi-plus"
-                  }
-                  label={
-                    solidListViewLayout?.attrs?.addButtonTitle
-                      ? solidListViewLayout?.attrs?.addButtonTitle
-                      : "Add"
-                  }
-                  className={`${solidListViewLayout?.attrs?.addButtonClassName}`}
                   size="small"
-                  onClick={() => params.handlePopUpOpen("new")}
+                  icon="pi pi-refresh"
+                  severity="secondary"
+                  className="solid-icon-button "
+                  outlined
+                  onClick={() => {
+                    setQueryString(
+                      first,
+                      rows,
+                      sortField,
+                      sortOrder,
+                      filters,
+                      showArchived
+                    );
+                  }}
+                />
+              )}
+              {showArchived && (
+                <Button
+                  type="button"
+                  icon="pi pi-refresh"
+                  label="Recover"
+                  size="small"
+                  severity="secondary"
+                  className="hidden lg:flex solid-icon-button "
+                  onClick={() => setRecoverDialogVisible(true)}
                 ></Button>
               )}
-            {/* Button For Manual Refresh */}
-            {params.embeded !== true && (
-              <Button
-                type="button"
-                size="small"
-                icon="pi pi-refresh"
-                severity="secondary"
-                outlined
-                onClick={() => {
-                  setQueryString(
-                    first,
-                    rows,
-                    sortField,
-                    sortOrder,
-                    filters,
-                    showArchived
-                  );
-                }}
-              />
-            )}
-            {showArchived && (
-              <Button
-                type="button"
-                icon="pi pi-refresh"
-                label="Recover"
-                size="small"
-                severity="secondary"
-                onClick={() => setRecoverDialogVisible(true)}
-              ></Button>
-            )}
 
               {params.embeded === false &&
                 solidListViewLayout?.attrs?.configureView !== false && (
@@ -1280,6 +1283,26 @@ export const SolidListView = (params: SolidListViewParams) => {
               </div>
 
             )}
+          {/* <Dialog
+            visible={showGlobalSearchElement}
+            // header="Confirm Delete"
+            onHide={() => setShowGlobalSearchElement(false)}
+            headerClassName="py-2"
+            contentClassName="px-0 pb-0"
+            // style={{ width: '20vw' }}
+            style={{height:'50vw'}}
+            breakpoints={{ '1199px': '20vw', '1024px': '30vw', '767px': '90vw', '250px': '80vw' }}
+          >
+            <SolidGlobalSearchElement
+              showSaveFilterPopup={showSaveFilterPopup}
+              setShowSaveFilterPopup={setShowSaveFilterPopup}
+              filters={filters}
+              clearFilter={clearFilter}
+              ref={solidGlobalSearchElementRef}
+              viewData={solidListViewMetaData}
+              handleApplyCustomFilter={handleApplyCustomFilter}>
+            </SolidGlobalSearchElement>
+          </Dialog> */}
         </div>
 
 
@@ -1292,7 +1315,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           />
 
         ) : (
-          <div className="solid-datatable-wrapper">
+          <div className="solid-datatable-wrapper flex-1 min-h-0 overflow-auto">
             <DataTable
               value={listViewData}
               rowClassName={(rowData) => {
@@ -1662,7 +1685,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         headerClassName="py-2"
         contentClassName="px-0 pb-0"
         // style={{ width: '20vw' }}
-        breakpoints={{'1199px':'20vw', '1024px': '30vw', '767px': '50vw','250px':'80vw' }}
+        breakpoints={{ '1199px': '20vw', '1024px': '30vw', '767px': '50vw', '250px': '80vw' }}
       >
         <Divider className="m-0" />
         <div className="p-4">

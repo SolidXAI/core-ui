@@ -7,11 +7,13 @@ import { PrimeReactContext } from 'primereact/api';
 import { useEventListener, useUnmountEffect } from 'primereact/hooks';
 import { classNames } from 'primereact/utils';
 import React, { useContext, useEffect, useRef } from 'react';
-import { useSelector } from 'react-redux';
+import { useSelector , useDispatch } from 'react-redux';
 import AppConfig from './AppConfig';
 import { LayoutContext } from './context/layoutcontext';
 import AppSidebar from './AppSidebar';
 import SolidPopupContainer from '../common/SolidPopupContainer';
+import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
+
 
 export const Layout = ({ children }: ChildContainerProps) => {
     const { layoutConfig, layoutState, setLayoutState } = useContext(LayoutContext);
@@ -118,11 +120,24 @@ export const Layout = ({ children }: ChildContainerProps) => {
     });
     const { visibleNavbar } = useSelector((state:any) => state.navbarState); // Get the visibility state of sidebar-two
 
+    const dispatch = useDispatch();
+
+const toggleBothSidebars = () => {
+    if (visibleNavbar) {
+        dispatch(toggleNavbar());   // close both
+    } else {
+        dispatch(showNavbar());     // open both
+    }
+};
+    
     return (
         <React.Fragment>
             <div className={containerClass}>
                 {/* {process.env.NEXT_PUBLIC_ENABLE_CUSTOM_HEADER_FOOTER == "true" && <CustomHeader />} */}
                 <AppSidebar />
+                <div className="apps-icon block md:hidden" onClick={toggleBothSidebars}>
+                    <i className="pi pi-th-large"></i>
+                </div>
                 <SolidPopupContainer></SolidPopupContainer>
                 <div className={`main-content ${visibleNavbar ? "shifted" : ""}`}>
                     {children}

@@ -128,7 +128,7 @@ const AppSidebar = () => {
             {/* commented this as this is not working properly @Jenendar to figure this out... */}
             {(visibleNavbar || currentMainMenu) && (
                 <div
-                    className={`sidebar-toggle-button ${!visibleNavbar ? "s-collapsed" : ""}`}
+                    className={`sidebar-toggle-button ${!visibleNavbar ? "s-collapsed hidden md:flex" : ""}`}
                     onClick={handleToggle}
                 // severity="secondary"
                 >
@@ -141,7 +141,7 @@ const AppSidebar = () => {
                 </div>
             )}
 
-            <div className="sidebar-left">
+            <div className={`sidebar-left ${visibleNavbar ? "open" : ""}`}>
                 <div className="navbar-menu">
                     {menu?.data.length > 0 && menu?.data.map((m: any) => {
                         const iconSrc =

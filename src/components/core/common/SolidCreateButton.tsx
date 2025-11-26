@@ -21,7 +21,7 @@ export const SolidCreateButton = ({ url, solidListViewLayout, responsiveIconOnly
                         <Button
                             type="button"
                             icon={icon}
-                            className={`${className} p-button-sm lg:hidden`}
+                            className={`${className} p-button-sm lg:hidden solid-icon-button `}
                             size='small'
                         />
 

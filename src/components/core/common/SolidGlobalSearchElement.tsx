@@ -891,7 +891,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                         {customFilter && <CustomChip />}
                         <SearchChip />
                         <li ref={chipsRef}>
-                            <div className="relative">
+                            <div className="relative solid-global-search-element-wrapper">
                                 <InputText
                                     value={inputValue || ""}
                                     placeholder="Search..."
@@ -923,7 +923,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 </div>
 
                 {showOverlay && (
-                    <div ref={overlayRef} className="absolute w-full z-5 surface-0 border-round border-1 border-300 shadow-2" style={{ top: 35 }}>
+                    <div ref={overlayRef} className="absolute w-full z-5 surface-0 border-round border-1 border-300 shadow-2 solid-search-overlay-pannel" style={{ top: 35 }}>
                         {inputValue ? (
                             <>
                                 <div className="custom-filter-search-options px-3 py-2 flex flex-column">
