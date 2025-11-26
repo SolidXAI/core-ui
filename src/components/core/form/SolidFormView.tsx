@@ -353,7 +353,11 @@ const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData, 
         field: field,
         fieldsMetadata: solidFieldsMetadata,
         viewMetadata: solidView,
-        formViewData: solidFormViewData
+        formViewData: solidFormViewData,
+        formik: formik,
+        fieldContext: {  
+            field: field   
+        }
     }
 
     return (
@@ -704,10 +708,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const layoutFieldsObj = getLayoutFieldsAsObject([formViewLayout]);
         try {
             let formData = new FormData();
-
+            const ignoredFields = ["createdAt", "updatedAt", "created_on", "updated_on"];
             // Iterate through the keys in the values object
             Object.entries(values).forEach(([key, value]) => {
-
+                // Skip backend-managed fields
+                if (ignoredFields.includes(key)) return;
                 const fieldMetadata = solidFieldsMetadata[key];
                 //  const fieldMetadata = getActualFieldMetadata(key, solidFieldsMetadata);
                 const fieldContext: SolidFieldProps = {

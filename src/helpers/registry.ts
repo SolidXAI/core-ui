@@ -14,7 +14,7 @@ import { DefaultDecimalFormEditWidget } from "@/components/core/form/fields/Soli
 import { DefaultEmailFormEditWidget } from "@/components/core/form/fields/SolidEmailField";
 import { DefaultIntegerFormEditWidget, SolidIntegerSliderStyleFormEditWidget } from "@/components/core/form/fields/SolidIntegerField";
 import { DefaultJsonFormEditWidget, DefaultJsonFormViewWidget } from "@/components/core/form/fields/SolidJsonField";
-import { DefaultLongTextFormEditWidget, CodeEditorFormEditWidget, DynamicJsonEditorFormEditWidget, DynamicJsonEditorFormViewWidget, DynamicSelectionStaticEditWidget,DynamicAdvancedSettingsWidget } from "@/components/core/form/fields/SolidLongTextField";
+import { DefaultLongTextFormEditWidget, CodeEditorFormEditWidget, DynamicJsonEditorFormEditWidget, DynamicJsonEditorFormViewWidget, DynamicSelectionStaticEditWidget, DynamicSettingsEditWidget, DynamicSettingsViewWidget, DynamicSelectionStaticViewWidget } from "@/components/core/form/fields/SolidLongTextField";
 import { DefaultMediaMultipleFormEditWidget, DefaultMediaMultipleFormViewWidget } from "@/components/core/form/fields/SolidMediaMultipleField";
 import { DefaultMediaSingleFormEditWidget, DefaultMediaSingleFormViewWidget } from "@/components/core/form/fields/SolidMediaSingleField";
 import { DefaultPasswordFormCreateWidget, DefaultPasswordFormEditWidget, DefaultPasswordFormViewWidget } from "@/components/core/form/fields/SolidPasswordField";
@@ -151,9 +151,10 @@ registerExtensionComponent("DynamicJsonEditorFormEditWidget", DynamicJsonEditorF
 
 // - longText (json viewer)
 registerExtensionComponent("DynamicJsonEditorFormViewWidget", DynamicJsonEditorFormViewWidget, ["jsonViewer"]);
-registerExtensionComponent("DynamicSelectionStaticEditWidget",DynamicSelectionStaticEditWidget,["selectionStaticWidget"]);
-registerExtensionComponent("DynamicAdvancedSettingsWidget",DynamicAdvancedSettingsWidget,["customSetting"]);
-
+registerExtensionComponent("DynamicSelectionStaticEditWidget",DynamicSelectionStaticEditWidget,["DynamicSelectionStaticEditWidget"]);
+registerExtensionComponent("DynamicSelectionStaticViewWidget",DynamicSelectionStaticViewWidget,["DynamicSelectionStaticViewWidget"]);
+registerExtensionComponent("DynamicSettingsEditWidget",DynamicSettingsEditWidget,["DynamicSettingsEditWidget"]);
+registerExtensionComponent("DynamicSettingsViewWidget",DynamicSettingsViewWidget,["DynamicSettingsViewWidget"]);
 // - longText (code editor)
 registerExtensionComponent("CodeEditorFormEditWidget", CodeEditorFormEditWidget, ["codeEditor"]);
 

@@ -147,6 +147,8 @@ export type SolidFormWidgetProps = {
     viewMetadata: SolidView;
     fieldsMetadata: FieldsMetadata;
     formViewData: any;
+    formik?:any;
+    fieldContext?: SolidFieldProps;
 };
 
 export type SolidFormFieldWidgetProps = {

@@ -29,9 +29,17 @@ export class SolidLongTextField implements ISolidField {
     }
 
     updateFormData(value: any, formData: FormData): any {
+        console.log("CORE SolidLongTextField updateFormData called with value:", value);
+        console.log("CORE formData before update:", formData);
+        console.log("CORE fieldContext:", this.fieldContext);
         const fieldLayoutInfo = this.fieldContext.field;
         if (value !== undefined && value !== null) {
-            formData.append(fieldLayoutInfo.attrs.name, value);
+            if(fieldLayoutInfo){
+                formData.append(fieldLayoutInfo.attrs.name, value);
+            }else{
+                formData.append(this.fieldContext.fieldMetadata?.name, value);
+            }
+            
         }
     }
 
@@ -546,6 +554,14 @@ export const DynamicSelectionStaticEditWidget = ({
     const value = formik.values[name] || "{}";
     const [data, setData] = useState(JSON.parse(value || "{}"));
 
+    useEffect(() => {
+        try {
+            setData(JSON.parse(formik.values[name] || "{}"));
+        } catch (e) {
+            setData({});
+        }
+    }, [formik.values[name]]);
+
     const handleChange = (key: string, value: any) => {
         const updated = { ...data, [key]: value };
         setData(updated);
@@ -556,7 +572,7 @@ export const DynamicSelectionStaticEditWidget = ({
         const meta: any = fieldJsonSchema[key];
         const val = data[key];
 
-        if (meta?.type === "selectionStatic") {
+        if (meta) {
             return (
                 <Dropdown
                     value={val}
@@ -620,8 +636,99 @@ export const DynamicSelectionStaticEditWidget = ({
     );
 };
 
+export const DynamicSelectionStaticViewWidget = ({
+    formik,
+    fieldContext,
+}: SolidFormFieldWidgetProps) => {
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldJsonSchema = fieldLayoutInfo.attrs.jsonSchema;
+    const name = fieldLayoutInfo.attrs.name;
 
-export const DynamicAdvancedSettingsWidget = ({
+    const value = formik.values[name] || "{}";
+    const [data, setData] = useState(JSON.parse(value || "{}"));
+
+    // Keep data in sync with formik
+    useEffect(() => {
+        try {
+            setData(JSON.parse(formik.values[name] || "{}"));
+        } catch {
+            setData({});
+        }
+    }, [formik.values[name]]);
+
+    const shouldShowField = (key: string) => {
+        const meta = fieldJsonSchema[key];
+
+        if (!meta?.visibility) return true;
+
+        if (meta.visibility === "parent") {
+            const parentKey = Object.keys(fieldJsonSchema)[0]; // same logic as edit widget
+            return !!data[parentKey];
+        }
+
+        return true;
+    };
+
+    const renderValue = (key: string) => {
+        const meta: any = fieldJsonSchema[key];
+        const val = data[key];
+
+        if (!val) return <span className="text-600">—</span>;
+
+        // value comes from meta.allowedValues
+        return <span className="font-medium">{val}</span>;
+    };
+
+    return (
+        <div className="flex gap-4 flex-wrap align-items-center">
+            {Object.keys(fieldJsonSchema).map((key) => {
+                const meta: any = fieldJsonSchema[key];
+                if (!shouldShowField(key)) return null;
+
+                return (
+                    <div key={key} className={"flex flex-column "}>
+
+                        {/* Header Text / Icon */}
+                        {(meta.headerText || meta.headerIcon) && (
+                            <div className="flex align-items-center gap-2 mb-1">
+                                {meta.headerIcon && (
+                                    <i className={meta.headerIcon}></i>
+                                )}
+                                <span className="font-semibold text-900 text-sm">
+                                    {meta.headerText}
+                                </span>
+                            </div>
+                        )}
+
+                        {/* Label + Value inline (compact mode) */}
+                        <div className="flex align-items-center gap-2">
+                            <span className="text-700 text-sm">
+                                {meta.label}
+                                {meta.required && (
+                                    <span className="text-red-500 ml-1">*</span>
+                                )}
+                            </span>
+
+                            {/* VALUE (light inline text) */}
+                            <div>{renderValue(key)}</div>
+                        </div>
+
+                        {/* Note text (optional) */}
+                        {meta.noteText && (
+                            <small className="text-600 mt-1">
+                                {meta.noteText}
+                            </small>
+                        )}
+                    </div>
+                );
+            })}
+        </div>
+    );
+};
+
+
+
+export const DynamicSettingsEditWidget = ({
     formik,
     fieldContext,
 }: SolidFormFieldWidgetProps) => {
@@ -635,8 +742,8 @@ export const DynamicAdvancedSettingsWidget = ({
     const [data, setData] = useState(JSON.parse(value || "{}"));
 
     useEffect(() => {
-        // Initialize with default values from schema if not present
-        console.log("json schema",fieldJsonSchema)
+        console.log("DynamicSettingsEditWidget initializing data from formik value:", formik.values[name]);
+        console.log("attached fieldJsonSchema:", fieldJsonSchema);
         const initialized = { ...data };
         Object.keys(fieldJsonSchema).forEach((key) => {
             const meta = fieldJsonSchema[key];
@@ -644,9 +751,8 @@ export const DynamicAdvancedSettingsWidget = ({
                 initialized[key] = meta.defaultValue;
             }
         });
-        console.log("advance setting widget",initialized)
         setData(initialized);
-    }, []);
+    }, [fieldJsonSchema]);
 
     const handleChange = (key: string, value: any) => {
         const updated = { ...data, [key]: value };
@@ -667,6 +773,30 @@ export const DynamicAdvancedSettingsWidget = ({
         }
 
         return true;
+    };
+
+    // Key-Value Pair Handler
+    const handleKeyValueAdd = (e:any,key: string) => {
+        e.preventDefault();
+        // @ts-ignore
+        const meta = fieldJsonSchema[key];
+        const currentData = data[key] || [];
+        const newEntry = { key: '', value: '' };
+        handleChange(key, [...currentData, newEntry]);
+    };
+
+    const handleKeyValueRemove = (e:any,key: string, index: number) => {
+        e.preventDefault();
+        const currentData = data[key] || [];
+        const updated = currentData.filter((_: any, i: number) => i !== index);
+        handleChange(key, updated);
+    };
+
+    const handleKeyValueChange = (key: string, index: number, field: 'key' | 'value', value: string) => {
+        const currentData = data[key] || [];
+        const updated = [...currentData];
+        updated[index] = { ...updated[index], [field]: value };
+        handleChange(key, updated);
     };
 
     const renderInput = (key: string) => {
@@ -752,8 +882,81 @@ export const DynamicAdvancedSettingsWidget = ({
                     </div>
                 );
 
+            case "keyValue":
+            case "keyValuePair":
+                const entries = val || [];
+                return (
+                    <div className="w-full">
+
+                       <div className="flex justify-content-between align-items-center mb-3">
+                            <span className="text-900 font-medium text-lg">
+                                {meta.innerLabel}
+                            </span>
+
+                            {!readOnly && !disabled && (
+                                <Button
+                                    icon="pi pi-plus"
+                                    className="p-button p-component p-button-sm w-auto"
+                                    label={meta.addButtonLabel || "Add"}
+                                    onClick={(e) => handleKeyValueAdd(e, key)}
+                                />
+                            )}
+                        </div>
+
+                        {/* Table Header */}
+                        {entries.length > 0 && (
+                            <div className="grid mb-2">
+                                <div className="col-5">
+                                    <span className="text-900 font-medium text-sm">Key</span>
+                                </div>
+                                <div className="col-5">
+                                    <span className="text-900 font-medium text-sm">Value</span>
+                                </div>
+                                <div className="col-2"></div>
+                            </div>
+                        )}
+
+                        {/* Key-Value Rows */}
+                        {entries.map((entry: any, index: number) => (
+                            <div key={index} className="grid mb-2 align-items-center">
+                                <div className="col-5">
+                                    <InputText
+                                        value={entry.key || ''}
+                                        onChange={(e) =>
+                                            handleKeyValueChange(key, index, 'key', e.target.value)
+                                        }
+                                        placeholder="Enter key"
+                                        className="w-full"
+                                        disabled={!!disabled}
+                                        readOnly={!!readOnly}
+                                    />
+                                </div>
+                                <div className="col-6">
+                                    <InputText
+                                        value={entry.value || ''}
+                                        onChange={(e) =>
+                                            handleKeyValueChange(key, index, 'value', e.target.value)
+                                        }
+                                        placeholder="Enter value"
+                                        className="w-full"
+                                        disabled={!!disabled}
+                                        readOnly={!!readOnly}
+                                    />
+                                </div>
+                                <div className="col-1 flex justify-content-end">
+                                    <i
+                                        className="pi pi-trash text-red-500 cursor-pointer text-lg"
+                                        onClick={(e) => handleKeyValueRemove(e, key, index)}
+                                        style={{ padding: "6px" }}
+                                    />
+                                </div>
+                            </div>
+                        ))}
+                    </div>
+                );
             case "text":
             case "inputText":
+            case "url":
                 return (
                     <InputText
                         value={val || ""}
@@ -784,30 +987,26 @@ export const DynamicAdvancedSettingsWidget = ({
 
         if (!shouldShowField(key)) return null;
 
-        // Section/Group rendering
         if (meta.type === "section" || meta.type === "group") {
             return (
                 <div key={key} className={`mb-4 ${meta.className || ''}`}>
-                    {/* Section Header */}
                     {(meta.headerText || meta.headerIcon) && (
                         <div className="flex align-items-center gap-2 mb-3">
                             {meta.headerIcon && (
                                 <i className={`${meta.headerIcon} text-primary`} style={{ fontSize: '1.25rem' }}></i>
                             )}
                             <h3 className="text-lg font-semibold text-900 m-0">
-                                {meta.headerText || key}
+                                {meta.headerText}
                             </h3>
                         </div>
                     )}
 
-                    {/* Section Description */}
                     {meta.description && (
                         <p className="text-600 text-sm mb-3 line-height-3">
                             {meta.description}
                         </p>
                     )}
 
-                    {/* Section Fields */}
                     {meta.fields && (
                         <div className={meta.containerClass || 'flex flex-column gap-3'}>
                             {meta.fields.map((fieldKey: string) => renderField(fieldKey))}
@@ -830,7 +1029,6 @@ export const DynamicAdvancedSettingsWidget = ({
 
         return (
             <div key={key} className={`${wrapperClass} ${meta.className || ''}`}>
-                {/* Header Icon and Text */}
                 {(meta.headerText || meta.headerIcon) && !isInlineLabel && (
                     <div className="flex align-items-center gap-2 mb-2">
                         {meta.headerIcon && <i className={meta.headerIcon}></i>}
@@ -838,44 +1036,42 @@ export const DynamicAdvancedSettingsWidget = ({
                     </div>
                 )}
 
-                {/* Field Label */}
-                {meta.label !== false && !isInlineLabel && (
-                    <label className="block text-900 font-medium mb-2">
-                        {meta.label || key.charAt(0).toUpperCase() + key.slice(1)}
-                        {meta.required && <span className="text-red-500 ml-1">*</span>}
-                    </label>
-                )}
+                <div className={isInlineLabel ? "flex flex-column gap-1" : "w-full flex flex-column gap-1"}>
+                    {/* Row: Label + Input */}
+                    {isInlineLabel ? (
+                        <div className="flex justify-content-between align-items-center w-full">
+                            <label className="text-900 font-medium mb-0 flex-shrink-0">
+                                {meta.label}
+                                {meta.required && <span className="text-red-500 ml-1">*</span>}
+                            </label>
 
-                {/* Inline Label Layout */}
-                {isInlineLabel ? (
-                    <div>
-                        <label className="block text-900 font-medium mb-3">
-                            {meta.label || key.charAt(0).toUpperCase() + key.slice(1)}
-                            {meta.required && <span className="text-red-500 ml-1">*</span>}
-                        </label>
-                        <div className="flex align-items-center gap-2">
-                            {renderInput(key)}
+                            <div className="flex align-items-center gap-2">
+                                {renderInput(key)}
+                            </div>
                         </div>
-                    </div>
-                ) : (
-                    <div className="w-full">
-                        {renderInput(key)}
-                    </div>
-                )}
+                    ) : (
+                        <>
+                            <label className="block text-900 font-medium mb-2">
+                                {meta.label}
+                                {meta.required && <span className="text-red-500 ml-1">*</span>}
+                            </label>
+                            <div>{renderInput(key)}</div>
+                        </>
+                    )}
 
-                {/* Help Text / Note */}
-                {meta.helpText && (
-                    <small className="block text-600 mt-2 line-height-3">{meta.helpText}</small>
-                )}
+                    {/* Help Text (always below entire block) */}
+                    {meta.helpText && (
+                        <small className="text-600 mt-1 line-height-3">{meta.helpText}</small>
+                    )}
+                </div>
 
-                {/* Note Text */}
                 {meta.noteText && (
                     <small className="block text-500 mt-2 line-height-3">{meta.noteText}</small>
                 )}
             </div>
         );
     };
-    // Add this function before the return statement
+
     const getFieldsInSections = () => {
         const fieldsInSections = new Set<string>();
         Object.keys(fieldJsonSchema).forEach((key) => {
@@ -886,9 +1082,9 @@ export const DynamicAdvancedSettingsWidget = ({
         });
         return fieldsInSections;
     };
+
     return (
         <div className="surface-card">
-            {/* Main Header */}
             {fieldLayoutInfo.attrs.title && (
                 <div className="flex align-items-center gap-3 p-4 border-bottom-1 surface-border">
                     {fieldLayoutInfo.attrs.titleIcon && (
@@ -900,18 +1096,257 @@ export const DynamicAdvancedSettingsWidget = ({
                 </div>
             )}
 
-            {/* Form Fields */}
             <div className="p-4">
                 <div className={fieldLayoutInfo.attrs.containerClass || 'flex flex-column gap-4'}>
                     {Object.keys(fieldJsonSchema).map((key) => {
                         const meta = fieldJsonSchema[key];
                         const fieldsInSections = getFieldsInSections();
                         
-                        // Skip if this field is part of a section (unless it IS a section)
                         if (fieldsInSections.has(key) && meta.type !== "section" && meta.type !== "group") {
                             return null;
                         }
                         
+                        return renderSection(key);
+                    })}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+export const DynamicSettingsViewWidget = ({
+    formik,
+    fieldContext,
+}: SolidFormFieldWidgetProps) => {
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldJsonSchema = fieldLayoutInfo.attrs.jsonSchema;
+    const name = fieldLayoutInfo.attrs.name;
+
+    const value = formik.values[name] || "{}";
+    const [data, setData] = useState(JSON.parse(value || "{}"));
+
+    // initialize defaults same as edit widget
+    useEffect(() => {
+        const initialized = { ...data };
+        Object.keys(fieldJsonSchema).forEach((key) => {
+            const meta = fieldJsonSchema[key];
+            if (initialized[key] === undefined && meta.defaultValue !== undefined) {
+                initialized[key] = meta.defaultValue;
+            }
+        });
+        setData(initialized);
+    }, [fieldJsonSchema]);
+
+    const shouldShowField = (key: string) => {
+        const meta = fieldJsonSchema[key];
+
+        if (!meta?.visibility) return true;
+
+        if (meta.visibility === "conditional") {
+            const dependsOn = meta.dependsOn;
+            if (dependsOn) {
+                return !!data[dependsOn];
+            }
+        }
+        return true;
+    };
+
+    // ============================
+    // Render Display Value
+    // ============================
+    const renderValue = (key: string) => {
+        const meta = fieldJsonSchema[key];
+        const val = data[key];
+
+        if (val === undefined || val === null || val === "")
+            return <span className="text-600">—</span>;
+
+        switch (meta.type) {
+            case "toggle":
+            case "switch":
+                return <span>{val ? "Enabled" : "Disabled"}</span>;
+
+            case "slider":
+            case "number":
+            case "inputNumber":
+                return <span>{val}</span>;
+
+            case "dropdown":
+            case "selectionStatic":
+                if (meta.allowedValues && Array.isArray(meta.allowedValues)) {
+                    const found = meta.allowedValues.find((v: any) =>
+                        typeof v === "object" ? v.value === val : v === val
+                    );
+                    return (
+                        <span>
+                            {typeof found === "object" ? found.label : found || val}
+                        </span>
+                    );
+                }
+                return <span>{val}</span>;
+
+            case "keyValue":
+            case "keyValuePair":
+                const entries = val || [];
+                if (!entries.length)
+                    return <span className="text-600">No entries</span>;
+
+                return (
+                    <table className="w-full border-1 surface-border border-round">
+                        <thead>
+                            <tr className="surface-100">
+                                <th className="p-2 text-left text-sm">Key</th>
+                                <th className="p-2 text-left text-sm">Value</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {entries.map((row: any, idx: number) => (
+                                <tr key={idx} className="border-top-1 surface-border">
+                                    <td className="p-2">{row.key || "—"}</td>
+                                    <td className="p-2">{row.value || "—"}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                );
+
+            default:
+                return <span>{val}</span>;
+        }
+    };
+
+    // ============================
+    // Render Field Wrapper
+    // ============================
+    const renderField = (key: string) => {
+        const meta = fieldJsonSchema[key];
+
+        if (!shouldShowField(key)) return null;
+
+        const isInlineLabel = meta.labelPosition === "inline";
+        const wrapperClass =
+            meta.wrapperClass ||
+            (isInlineLabel
+                ? "surface-50 border-1 surface-border border-round p-3"
+                : "");
+
+        return (
+            <div key={key} className={`${wrapperClass} ${meta.className || ""}`}>
+                {!isInlineLabel && meta.label && (
+                    <label className="block text-900 font-medium mb-2">
+                        {meta.label}
+                    </label>
+                )}
+
+                {isInlineLabel ? (
+                    <div className="flex justify-content-between align-items-center">
+                        <label className="text-900 font-medium">{meta.label}</label>
+                        <div>{renderValue(key)}</div>
+                    </div>
+                ) : (
+                    <div>{renderValue(key)}</div>
+                )}
+
+                {meta.helpText && (
+                    <small className="text-600 mt-1">{meta.helpText}</small>
+                )}
+                {meta.noteText && (
+                    <small className="block text-500 mt-2">{meta.noteText}</small>
+                )}
+            </div>
+        );
+    };
+
+    // ============================
+    // Render Section / Group
+    // ============================
+    const renderSection = (key: string) => {
+        const meta = fieldJsonSchema[key];
+
+        if (!shouldShowField(key)) return null;
+
+        if (meta.type === "section" || meta.type === "group") {
+            return (
+                <div key={key} className={`mb-4 ${meta.className || ""}`}>
+                    {(meta.headerText || meta.headerIcon) && (
+                        <div className="flex align-items-center gap-2 mb-3">
+                            {meta.headerIcon && (
+                                <i
+                                    className={`${meta.headerIcon} text-primary`}
+                                    style={{ fontSize: "1.25rem" }}
+                                ></i>
+                            )}
+                            <h3 className="text-lg font-semibold text-900 m-0">
+                                {meta.headerText}
+                            </h3>
+                        </div>
+                    )}
+
+                    {meta.description && (
+                        <p className="text-600 text-sm mb-3">{meta.description}</p>
+                    )}
+
+                    {meta.fields && (
+                        <div className={meta.containerClass || "flex flex-column gap-3"}>
+                            {meta.fields.map((fieldKey: string) =>
+                                renderField(fieldKey)
+                            )}
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        return renderField(key);
+    };
+
+    // Get fields that belong to sections
+    const getFieldsInSections = () => {
+        const set = new Set<string>();
+        Object.keys(fieldJsonSchema).forEach((key) => {
+            const meta = fieldJsonSchema[key];
+            if ((meta.type === "section" || meta.type === "group") && meta.fields) {
+                meta.fields.forEach((f: string) => set.add(f));
+            }
+        });
+        return set;
+    };
+
+    const fieldsInSections = getFieldsInSections();
+
+    return (
+        <div className="surface-card">
+            {fieldLayoutInfo.attrs.title && (
+                <div className="flex align-items-center gap-3 p-4 border-bottom-1 surface-border">
+                    {fieldLayoutInfo.attrs.titleIcon && (
+                        <i
+                            className={`${fieldLayoutInfo.attrs.titleIcon} text-primary`}
+                            style={{ fontSize: "1.25rem" }}
+                        ></i>
+                    )}
+                    <h2 className="text-xl font-semibold text-900 m-0">
+                        {fieldLayoutInfo.attrs.title}
+                    </h2>
+                </div>
+            )}
+
+            <div className="p-4">
+                <div
+                    className={
+                        fieldLayoutInfo.attrs.containerClass ||
+                        "flex flex-column gap-4"
+                    }
+                >
+                    {Object.keys(fieldJsonSchema).map((key) => {
+                        const meta = fieldJsonSchema[key];
+
+                        if (
+                            fieldsInSections.has(key) &&
+                            meta.type !== "section" &&
+                            meta.type !== "group"
+                        )
+                            return null;
+
                         return renderSection(key);
                     })}
                 </div>
