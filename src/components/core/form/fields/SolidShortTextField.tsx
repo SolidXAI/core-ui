@@ -124,6 +124,7 @@ export const DefaultShortTextFormEditWidget = ({ formik, fieldContext }: SolidFo
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const readOnlyPermission = fieldContext.readOnly;
+    const isPrimaryKey = fieldMetadata.isPrimaryKey || false;
 
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
@@ -145,8 +146,8 @@ export const DefaultShortTextFormEditWidget = ({ formik, fieldContext }: SolidFo
                             </label>
                         }
                         <InputText
-                            readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                            disabled={formDisabled || fieldDisabled}
+                            readOnly={formReadonly || fieldReadonly || readOnlyPermission || isPrimaryKey}
+                            disabled={formDisabled || fieldDisabled || isPrimaryKey}
                             id={fieldLayoutInfo.attrs.name}
                             name={fieldMetadata.name}
                             aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
@@ -246,6 +247,7 @@ export const MaskedShortTextFormEditWidget = ({ formik, fieldContext }: SolidFor
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const readOnlyPermission = fieldContext.readOnly;
+    const isPrimaryKey = fieldMetadata.isPrimaryKey || false;
 
     const isFormFieldValid = (formik: any, fieldName: string) =>
         formik.touched[fieldName] && formik.errors[fieldName];
@@ -259,8 +261,8 @@ export const MaskedShortTextFormEditWidget = ({ formik, fieldContext }: SolidFor
         <Password
             toggleMask
             feedback={false}
-            readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-            disabled={formDisabled || fieldDisabled}
+            readOnly={formReadonly || fieldReadonly || readOnlyPermission || isPrimaryKey}
+            disabled={formDisabled || fieldDisabled || isPrimaryKey}
             id={fieldLayoutInfo.attrs.name}
             name={fieldMetadata.name}
             aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
