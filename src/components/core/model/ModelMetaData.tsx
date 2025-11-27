@@ -62,7 +62,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     parentModelId: modelMetaData ? modelMetaData?.parentModel?.id : "",
     parentModel: modelMetaData ? modelMetaData?.parentModel : "",
     isLegacyTable: modelMetaData ? modelMetaData?.isLegacyTable : false,
-
+    isLegacyTableWithId: modelMetaData ? modelMetaData?.isLegacyTableWithId : false,
   };
 
   const [showTableName, setShowTableName] = useState<any>(false);
@@ -124,6 +124,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
       }
     }),
     isLegacyTable: Yup.boolean(),
+    isLegacyTableWithId: Yup.boolean(),
   });
 
 
@@ -162,6 +163,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
             parentModel: values.parentModel,
           }),
           isLegacyTable: values.isLegacyTable === true ? true : false,
+          isLegacyTableWithId: values.isLegacyTableWithId === true ? true : false,
         };
         setModelMetaData(modelData);
         nextTab()
@@ -581,6 +583,18 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   ></Checkbox>
                   <label htmlFor="isLegacyTable" className="form-field-label">
                     Is Legacy Table
+                  </label>
+                </div>
+                <div className="flex align-items-center gap-2 mt-3">
+                  <Checkbox
+                    name="isLegacyTableWithId"
+                    onChange={(e) => {
+                      formik.setFieldValue("isLegacyTableWithId", e.checked);
+                    }}
+                    checked={formik.values.isLegacyTableWithId}
+                  ></Checkbox>
+                  <label htmlFor="isLegacyTableWithId" className="form-field-label">
+                    Is Legacy Table With Id
                   </label>
                 </div>
                 {/* <div className="field col-6">
