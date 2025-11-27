@@ -15,7 +15,7 @@ import { SolidXAiStatusErrorDisplay } from "./SolidXAiStatusErrorDisplay";
 export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }) => {
     const renderContent = () => {
 
-        switch (interaction.contentType) {
+        switch (interaction.content_type) {
             case 'json':
                 return (
                     <SolidXAiJsonDisplay interaction={interaction} />
@@ -29,7 +29,8 @@ export const SolidXAIResponse = ({ interaction }: { interaction: AiInteraction }
                 return <SolidXAiPlainTextDisplay interaction={interaction} />
         }
     }
-    const timestamp = moment(interaction.createdAt).format('HH:mm')
+    const timestamp = moment(interaction.created_at).format('HH:mm')
+    
     return (
         <div className={`${styles.SolidXAIResponseWrapper}`}>
             {interaction.status !== "pending" && interaction.status !== "mcp_tool_generating" &&

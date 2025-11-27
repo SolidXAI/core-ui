@@ -1,198 +1,91 @@
-"use client"
+'use client';
 import qs from "qs";
-import { SolidXAIResponse } from './SolidXAIResponse'
-import { SolidXAIThinking } from './SolidXAIThinking'
-import { SolidXUserPrompt } from './SolidXUserPrompt'
-import styles from './SolidXAI.module.css'
-import { useEffect, useRef, useState } from 'react'
+import { SolidXAIEmptyPlaceholder } from "./SolidXAIEmptyPlaceholder";
 import { createSolidEntityApi } from '@/redux/api/solidEntityApi'
-import { AiInteraction } from '@/types/solid-core'
+import { SolidXAIInputBox } from "./SolidXAIInputBox";
+import { SolidXAIThreadWrapper } from "./SolidXAIThreadWrapper";
+import { useEffect, useState } from 'react';
+import { SolidXAIModuleHeader } from "./SolidXAIModuleHeader";
+import { useSelector } from "react-redux";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
 import axios from "axios";
-import moment from "moment";
-import { config } from "process";
-type SolidXAIThreadWrapperProps = {
-    threadId: string;
-    latestInteractionId?: string | null;
-    thinking?: boolean;
-};
-export const fetchAiInteractions = async (params: any) => {
-    const queryString = qs.stringify(params, { encodeValuesOnly: true });
-    const { data } = await axios.get(
-        `${process.env.MCP_SERVER_URL}/ai-interactions?${queryString}`,        
-        {
+export const SolidXAIModule = ({ showHeader, inListView }: any) => {
+  const [latestInteractionId, setLatestInteractionId] = useState<string | null>(null);
+  const [thinking, setThinking] = useState(false);
+  const userId = useSelector((state: any) => state.auth?.user?.user?.id);
+  // TODO: START REFACTORING - reusable code alert
+  // TODO: This method can be refactored out into a separate file... 
+  // TODO: It is present in a commented form in this file src/components/core/extension/solid-core/moduleMetadata/list/GenerateModuleCodeRowAction.tsx
+  // TODO: It is present in a commented form in this file src/components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction.tsx
+  const mqMessageApi = createSolidEntityApi("mqMessage");
+  const {
+    useGetSolidEntitiesQuery: useGetMqMessageQuery,
+    useLazyGetSolidEntitiesQuery: useLazyGetMqMessageQuery,
+  } = mqMessageApi;
+  const [getMqMessageStatus, {
+    data: mqMessageData,
+    error: mqMessageDataError,
+    isLoading: mqMessageDataIsLoading,
+    isError: mqMessageDataIsError
+  }] = useLazyGetMqMessageQuery();
+  const fetchMqMessageStatus = async (retries = 50, delay = 500, interactionId: string): Promise<boolean> => {
+    for (let i = 0; i < retries; i++) {
+      try {
+        const res = await axios.get(
+          `${process.env.MCP_SERVER_URL}/ai-interactions/${interactionId}`,
+          {
             headers: {
-                'solidx-mcp-api-key': process.env.MCP_API_KEY
-            }
+              "solidx-mcp-api-key": process.env.MCP_API_KEY,
+            },
+            maxBodyLength: Infinity,
+          }
+        );
+        // const res = await getMqMessageStatus(queryString)
+        if (res.data.success === true) {
+          const messageStage = res.data.data.status;
+          console.log("messageStatus: ", messageStage);
+          // if (messageStage === "pending" ||messageStage === "mcp_tool_generating" || messageStage === "mcp_tool_failed" || messageStage === "mcp_client_failed") {
+          //   return true
+          // }
+          if (messageStage === "mcp_tool_generated" || messageStage === "mcp_tool_failed" || messageStage === "mcp_client_failed") {
+            return true
+          }
         }
-    );
-    return data; // your FastAPI structure: {meta, records}
+      } catch (e) {
+        // ignore and retry
+      }
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+    return false;
+  };
+  // TODO: END REFACTORING - reusable code alert
+  useEffect(() => {
+    if (!latestInteractionId) return;
+    setThinking(true);
+    (async () => {
+      try {
+        // TODO: If you encounter SolidX AI Interactions that can go on longer than 30 X 500 ms then you can increase the frequency & duration here...
+        // TODO: If we exceed timeout, show a little refresh icon or implement scroll up to refresh...
+        const completed = await fetchMqMessageStatus(120, 500, latestInteractionId);
+        console.log("MQ message completed status:", completed);
+      } catch (err) {
+        console.error(ERROR_MESSAGES.FAILED_FETCH_MESSAGE, err);
+      } finally {
+        setThinking(false);
+      }
+    })();
+  }, [latestInteractionId]);
+  return (
+    <div className='relative' style={{ height: inListView ? '100%' : 'calc(100% - 45px)', backgroundColor: 'var(--surface-section)' }}>
+      {showHeader &&
+        <SolidXAIModuleHeader />
+      }
+      <SolidXAIThreadWrapper
+        threadId={`thread-${userId}`}
+        latestInteractionId={latestInteractionId}
+        thinking={thinking}
+      />
+      <SolidXAIInputBox onTriggerComplete={setLatestInteractionId} threadId={`thread-${userId}`} userId={userId} />
+    </div>
+  );
 };
-export const SolidXAIThreadWrapper = ({ threadId, latestInteractionId, thinking }: SolidXAIThreadWrapperProps) => {
-    const bottomRef = useRef<HTMLDivElement | null>(null);
-    const containerRef = useRef<HTMLDivElement | null>(null);
-    const hasScrolledOnceRef = useRef(false);
-    const isLoadingOlderRef = useRef(false);
-    const scrollRestorationRef = useRef<{ prevScrollHeight: number; prevScrollTop: number } | null>(null);
-    // Create the RTK slices for this entity
-    const aiInteractionApi = createSolidEntityApi('aiInteraction');
-    const { useLazyGetSolidEntitiesQuery } = aiInteractionApi;
-    // const [triggerGetAiInteractions, { data: aiInteractionsData }] = useLazyGetSolidEntitiesQuery();
-    const [aiInteractionsData, setAiInteractionsData] = useState<any>(null);
-    // State used to show all aiInteractions in the system.
-    // TODO: shall we create an interface to represent the aiInteraction model records from the server?
-    const [interactions, setInteractions] = useState<AiInteraction[]>([]);
-    const [offset, setOffset] = useState(0);
-    const [hasMore, setHasMore] = useState(true);
-    const [isPaginating, setIsPaginating] = useState(false);
-    const limit = 10;
-    // Trigger a call to fetch all aiInteractions. 
-    useEffect(() => {
-        if (!threadId) return;
-        const initialLoad = async () => {
-            const params: any = {
-                limit,
-                offset: 0,
-                threadId: threadId
-            };
-            const response = await fetchAiInteractions(params);
-            if (response.statusCode === 200) {
-                setAiInteractionsData(response.data);
-            }
-        }
-        initialLoad();
-    }, [threadId, latestInteractionId, thinking]);
-    useEffect(() => {
-        if (!offset || offset === 0) return; // avoid double-fetching newest data
-        const loadMore = async () => {
-            setIsPaginating(true);
-            isLoadingOlderRef.current = true;
-            const params: any = {
-                limit,
-                offset: offset,
-                threadId: threadId
-            };
-            const response = await fetchAiInteractions(params);
-            if (response.statusCode === 200) {
-                setAiInteractionsData(response.data);
-            }
-        };
-        loadMore();
-    }, [offset, threadId]);
-    useEffect(() => {
-        const container = containerRef.current;
-        if (!aiInteractionsData?.records || !container) return;
-        // Store scroll info BEFORE updating state
-        if (isPaginating && !scrollRestorationRef.current) {
-            scrollRestorationRef.current = {
-                prevScrollHeight: container.scrollHeight,
-                prevScrollTop: container.scrollTop
-            };
-        }
-        const sorted = [...aiInteractionsData.records].sort((a, b) => a.id - b.id);
-        setInteractions((prev) => {
-            const existingIds = new Set(prev.map((i) => i.id));
-            const unique = sorted.filter((i) => !existingIds.has(i.id));
-            if (offset === 0 && !isPaginating) {
-                // 🆕 This is a fresh load (or update triggered by new interaction)
-                return sorted; // replace everything
-            }
-            return isPaginating
-                ? [...unique, ...prev] // prepend older interactions
-                : [...prev, ...unique]; // append new interactions
-        });
-        if (aiInteractionsData.records.length < limit) {
-            setHasMore(false);
-        }
-    }, [aiInteractionsData])
-    // Separate effect to handle scroll restoration after DOM updates
-    useEffect(() => {
-        const container = containerRef.current;
-        if (!container || !isPaginating || !scrollRestorationRef.current) return;
-        const restore = () => {
-            if (scrollRestorationRef.current) {
-                const { prevScrollHeight, prevScrollTop } = scrollRestorationRef.current;
-                const newScrollHeight = container.scrollHeight;
-                const heightDifference = newScrollHeight - prevScrollHeight;
-                container.scrollTop = prevScrollTop + heightDifference;
-                scrollRestorationRef.current = null;
-                setIsPaginating(false);
-                setTimeout(() => {
-                    isLoadingOlderRef.current = false;
-                }, 100);
-            }
-        };
-        requestAnimationFrame(() => {
-            requestAnimationFrame(restore);
-        });
-    }, [interactions, isPaginating]);
-    useEffect(() => {
-        const container = containerRef.current;
-        if (!container) return;
-        const handleScroll = () => {
-            if (container.scrollTop === 0 && hasMore && !isPaginating) {
-                setIsPaginating(true);
-                setOffset((prev) => prev + limit);
-            }
-        };
-        container.addEventListener('scroll', handleScroll);
-        return () => container.removeEventListener('scroll', handleScroll);
-    }, [hasMore, isPaginating]);
-    useEffect(() => {
-        if (interactions.length === 0) return;
-        if (isPaginating || isLoadingOlderRef.current) return;
-        const scrollOptions: ScrollIntoViewOptions = {
-            behavior: hasScrolledOnceRef.current ? 'smooth' : 'auto',
-        };
-        const timeout = setTimeout(() => {
-            bottomRef.current?.scrollIntoView(scrollOptions);
-            hasScrolledOnceRef.current = true;
-        }, 50);
-        return () => clearTimeout(timeout);
-    }, [interactions, thinking]);
-    // return (
-    //     <div
-    //         ref={containerRef}
-    //         className={`px-3 pt-3 flex flex-column gap-3 overflow-y-auto overflow-x-hidden ${styles.SolidXAIThreadWrapper}`}
-    //     >
-    //         <SolidXUserPrompt />
-    //         <SolidXAIResponse />
-    //         <SolidXAIThinking />
-    //     </div>
-    // )
-    return (
-        <div
-            ref={containerRef}
-            className={`px-3 pt-3 flex flex-column gap-3 overflow-y-auto overflow-x-hidden ${styles.SolidXAIThreadWrapper}`}
-        >
-            {isPaginating && (
-                <div className="text-center py-2 text-sm text-gray-500">
-                    Loading older messages…
-                </div>
-            )}
-            {interactions.map((interaction, index) => {
-                const { role, createdAt } = interaction;
-                const prev = interactions[index - 1];
-                const showDateSeparator =
-                    !prev || !moment(prev.createdAt).isSame(createdAt, 'day');
-                const timestamp = moment(createdAt).format('HH:mm');
-                return (
-                    <div key={interaction.id} className="relative">
-                        {showDateSeparator && (
-                            <div className="text-center my-2 text-black-400 text-sm">
-                                {moment(createdAt).format('ddd, MMM D')}
-                            </div>
-                        )}
-                        {role === 'human' && (
-                            <SolidXUserPrompt interaction={interaction} />
-                        )}
-                        {role === 'gen-ai' && (
-                            <SolidXAIResponse interaction={interaction} />
-                        )}
-                    </div>
-                );
-            })}
-            {thinking && <SolidXAIThinking />}
-            <div ref={bottomRef} />
-        </div>
-    );
-}
