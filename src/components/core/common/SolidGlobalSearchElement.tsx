@@ -607,6 +607,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         setFilterRules(initialState);
         setCustomFilter(null)
         setPredefinedSearchChip(null)
+        setPredefinedSearchBaseFilter(null)
     }
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
@@ -619,12 +620,20 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 // Remove last search chip only
                 setSearchChips((prev) => prev.slice(0, -1));
                 setHasSearched(true);
+            } else if (customFilter && hasCustomFilterChanged()) {
+                // If there's a custom filter on top of predefined search, remove only the custom part
+                setCustomFilter(predefinedSearchBaseFilter);
+                setFilterRules(initialState);
+                const finalFilter = mergeSearchAndCustomFilters(predefinedSearchBaseFilter, searchFilter, "c_filter", "s_filter");
+                handleApplyCustomFilter(finalFilter);
             } else if (predefinedSearchChip) {
                 // Remove predefined search chip
                 setPredefinedSearchChip(null);
-                clearCustomFilter();
+                setPredefinedSearchBaseFilter(null);
+                setCustomFilter(null);
+                const finalFilter = mergeSearchAndCustomFilters(null, searchFilter, "c_filter", "s_filter");
+                handleApplyCustomFilter(finalFilter);
             } else if (customFilter) {
-                // If no search chips, remove custom filter
                 clearCustomFilter();
             }
         }
@@ -649,17 +658,21 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     const transformFilterRules = (filterRules: any) => {
         const transformedFilter = transformRulesToFilters(filterRules[0]);
-        setCustomFilter(transformedFilter);
-
-        if (predefinedSearchChip && transformedFilter) {
-            setPredefinedSearchBaseFilter(null);
+    
+        // If there's a predefined search, merge it with the new custom filter
+        let finalCustomFilter = transformedFilter;
+        if (predefinedSearchChip && predefinedSearchBaseFilter) {
+            // Combine predefined filter with new custom filter
+            finalCustomFilter = {
+                $and: [predefinedSearchBaseFilter, transformedFilter]
+            };
         }
         
-        if (transformedFilter) {
-            const finalFilter = mergeSearchAndCustomFilters(transformedFilter, searchFilter, "c_filter", "s_filter");
-            handleApplyCustomFilter(finalFilter)
-        }
-        setShowGlobalSearchElement(false)
+        setCustomFilter(finalCustomFilter);
+        
+        const finalFilter = mergeSearchAndCustomFilters(finalCustomFilter, searchFilter, "c_filter", "s_filter");
+        handleApplyCustomFilter(finalFilter);
+        setShowGlobalSearchElement(false);
     }
 
     useEffect(() => {
@@ -750,6 +763,24 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         }
 
     }
+
+    const savedQuery = searchParams?.get("savedQuery");
+    useEffect(() => {
+        if (savedQuery && savedFilters.length > 0) {
+            const currentSavedFilterData: any = savedFilters.find((f: any) => f.id === Number(savedQuery));
+            if (currentSavedFilterData) {
+                const filterJson = JSON.parse(currentSavedFilterData?.filterQueryJson);
+                const finalFilter = mergeSearchAndCustomFilters(
+                    filterJson?.c_filter, 
+                    filterJson?.s_filter, 
+                    "c_filter", 
+                    "s_filter"
+                );
+                handleApplyCustomFilter(finalFilter);
+            }
+        }
+    }, [savedQuery]);
+    
     const openSavedCustomFilter = (savedfilter: any) => {
         //Open custom filter popup 
         router.push(`?savedQuery=${savedfilter.id}`);
