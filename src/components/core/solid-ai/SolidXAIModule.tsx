@@ -9,7 +9,7 @@ import { SolidXAIModuleHeader } from "./SolidXAIModuleHeader";
 import { useSelector } from "react-redux";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
 import axios from "axios";
-export const SolidXAIModule = ({ showHeader, inListView }: any) => {
+export const SolidXAIModule = () => {
   const [latestInteractionId, setLatestInteractionId] = useState<string | null>(null);
   const [thinking, setThinking] = useState(false);
   const userId = useSelector((state: any) => state.auth?.user?.user?.id);
@@ -76,16 +76,14 @@ export const SolidXAIModule = ({ showHeader, inListView }: any) => {
     })();
   }, [latestInteractionId]);
   return (
-    <div className='relative' style={{ height: inListView ? '100%' : 'calc(100% - 45px)', backgroundColor: 'var(--surface-section)' }}>
-      {showHeader &&
-        <SolidXAIModuleHeader />
-      }
+    <>
+      <SolidXAIModuleHeader />
       <SolidXAIThreadWrapper
         threadId={`thread-${userId}`}
         latestInteractionId={latestInteractionId}
         thinking={thinking}
       />
       <SolidXAIInputBox onTriggerComplete={setLatestInteractionId} threadId={`thread-${userId}`} userId={userId} />
-    </div>
+    </>
   );
 };

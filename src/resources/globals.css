@@ -3325,7 +3325,7 @@ flex-shrink: 0; */
 }
 
 .p-toast .p-toast-message.p-toast-message-error .p-toast-message-icon, .p-toast .p-toast-message.p-toast-message-error .p-toast-icon-close{
-  color: #fff;
+  color: #fff !important;
 }
 
 .p-toast .p-toast-message.p-toast-message-success {
