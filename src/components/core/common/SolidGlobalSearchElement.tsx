@@ -23,6 +23,9 @@ const transformFiltersToRules = (filter: any, parentRule: number | null = null):
     if (!filter || typeof filter !== "object") {
         throw new Error("Invalid filter: expected a non-null object");
     }
+    if (!filter || typeof filter !== "object") {
+        throw new Error("Invalid filter: expected a non-null object");
+    }
     const currentId = idCounter++;
     if (filter["$or"]) {
         return {
@@ -1017,13 +1020,13 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     </div>
                 )
                 }
-                <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={showGlobalSearchElement} style={{ width: '65vw' }} onHide={() => { if (!showGlobalSearchElement) return; setShowGlobalSearchElement(false); }}>
+                <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={showGlobalSearchElement} style={{ width: '65vw' }} breakpoints={{ '1024px': '75vw','991px': '90vw','767px':'94w', '250px': '96vw'}} onHide={() => { if (!showGlobalSearchElement) return; setShowGlobalSearchElement(false); }}>
                     <div className="flex align-items-center justify-content-between px-3">
                         <h5 className="solid-custom-title m-0">Add Custom Filter</h5>
                         <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setShowGlobalSearchElement(false)} />
                     </div>
                     <Divider className="m-0" />
-                    <div className="p-4">
+                    <div className="p-3 lg:p-4">
                         {fields.length > 0 &&
                             <FilterComponent viewData={viewData} fields={fields} filterRules={filterRules} setFilterRules={setFilterRules} transformFilterRules={transformFilterRules} closeDialog={() => setShowGlobalSearchElement(false)}></FilterComponent>
                         }
