@@ -68,7 +68,9 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
         process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' &&
         (
           <TabPanel header="SolidX AI" className={`SolidCustomLocaleTab py-2`} contentClassName='h-full'>
-            <SolidAiMainWrapper />
+            <div style={{ height: "calc(100vh - 60px)" }}>
+              <SolidAiMainWrapper />
+            </div>
           </TabPanel>
         )
       }
