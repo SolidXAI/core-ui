@@ -42,7 +42,7 @@ export const SolidSaveCustomFilterForm: React.FC<SolidSaveCustomFilterFormProps>
                     className="p-inputtext p-inputtext-sm p-component"
                     value={formValues.name}
                     onChange={handleChange}
-                    readOnly={currentSavedFilterData}
+                    // readOnly={currentSavedFilterData}
                 />
             </div>
             <div className="mt-3 flex align-items-center ">
