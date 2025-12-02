@@ -758,6 +758,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         // push the savedQuery=1 in url 
         if (savedfilter?.id) {
             router.push(`?savedQuery=${savedfilter.id}`);
+            setShowOverlay(false);
         } else {
             console.error(ERROR_MESSAGES.SAVE_FILTER_UNDEFINED_NULL);
         }
