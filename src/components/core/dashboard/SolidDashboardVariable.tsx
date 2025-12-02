@@ -244,7 +244,7 @@ const SolidDashboardVariable: React.FC<SolidDashboardVariableProps> = ({ dashboa
           onClick={clearAllFilters}
           size="small"
           outlined
-          severity="info"
+          // severity="info"
           icon="pi pi-filter-slash"
         />
       )}
