@@ -30,7 +30,12 @@ export class SolidShortTextField implements ISolidField {
     initialValue(): any {
         const fieldName = this.fieldContext.field.attrs.name;
         const fieldDefaultValue = this.fieldContext?.fieldMetadata?.defaultValue;
-
+        if (this.fieldContext.parentData && this.fieldContext.parentData[fieldName]) {
+            const parentDataForKey = this.fieldContext.parentData[fieldName];
+            if (parentDataForKey && typeof parentDataForKey !== 'object') {
+                return this.fieldContext.parentData[fieldName]
+            }
+        }
         const existingValue = this.fieldContext.data[fieldName];
 
         return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
