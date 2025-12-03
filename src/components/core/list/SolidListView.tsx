@@ -1483,12 +1483,12 @@ export const SolidListView = (params: SolidListViewParams) => {
                                           icon={"pi pi-pencil"}
                                           onClick={() => {
                                             if (params.embeded == true) {
-                                              params.handlePopUpOpen(
-                                                selectedSolidViewData?.id
+                                                params.handlePopUpOpen(
+                                                selectedDataRef.current?.id
                                               );
                                             } else {
                                               router.push(
-                                                `${editButtonUrl}/${selectedSolidViewData?.id}?viewMode=edit`
+                                                `${editButtonUrl}/${selectedDataRef.current?.id}?viewMode=edit`
                                               );
                                             }
                                           }}
