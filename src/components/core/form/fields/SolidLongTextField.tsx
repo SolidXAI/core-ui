@@ -152,11 +152,9 @@ export const DefaultLongTextFormEditWidget = ({ formik, fieldContext }: SolidFor
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                     disabled={formDisabled || fieldDisabled}
                     id={fieldLayoutInfo.attrs.name}
-                    name={fieldMetadata.name}
                     aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
                     // onChange={formik.handleChange}
                     onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-                    onBlur={(e) => fieldContext.onBlur(e, 'onFieldBlur')}
                     value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                     rows={5}
                     cols={30}

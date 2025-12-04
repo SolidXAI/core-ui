@@ -10,6 +10,7 @@ import { SolidXAIModule } from '../solid-ai/SolidXAIModule';
 import styles from './SolidDashboard.module.css';
 import SolidDashboardBody from './SolidDashboardBody';
 import SolidDashboardVariable from './SolidDashboardVariable';
+import { SolidAiMainWrapper } from '../solid-ai/SolidAiMainWrapper';
 
 export enum DashboardVariableType {
   DATE = 'date',
@@ -260,7 +261,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
               />
             </div>
             :
-            <SolidXAIModule showHeader inListView />
+            <SolidAiMainWrapper showHeader inListView/>
           }
         </div>
       )}

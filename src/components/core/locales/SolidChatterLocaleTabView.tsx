@@ -4,6 +4,7 @@ import { SolidChatter } from '../chatter/SolidChatter';
 import SolidLocale from './SolidLocale';
 import './solid-locale.css';
 import { SolidXAIModule } from '../solid-ai/SolidXAIModule';
+import { SolidAiMainWrapper } from '../solid-ai/SolidAiMainWrapper';
 interface Props {
   solidFormViewMetaData: any;
   id: string;
@@ -67,7 +68,9 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
         process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' &&
         (
           <TabPanel header="SolidX AI" className={`SolidCustomLocaleTab py-2`} contentClassName='h-full'>
-            <SolidXAIModule />
+            <div style={{ height: "calc(100vh - 60px)" }}>
+              <SolidAiMainWrapper />
+            </div>
           </TabPanel>
         )
       }
