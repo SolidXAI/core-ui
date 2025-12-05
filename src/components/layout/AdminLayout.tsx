@@ -25,7 +25,7 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     // const pathname = usePathname();
     const router = useRouter();
     useEffect(() => {
-        // if (status === "loading") return;
+        if (status === "loading") return;
         if (!session || session?.error === "RefreshAccessTokenError") {
             handleError([ERROR_MESSAGES.SESSION_EXPIRED])
             signOut({ callbackUrl: "/auth/login" });
