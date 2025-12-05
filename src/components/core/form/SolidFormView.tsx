@@ -530,7 +530,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     permissionExpression(params.modelName, 'create'),
                     permissionExpression(params.modelName, 'delete'),
                     permissionExpression(params.modelName, 'update'),
-                    permissionExpression(params.modelName, 'findOne')
+                    permissionExpression(params.modelName, 'findOne'),
+                    permissionExpression('chatterMessage', 'findMany')
                 ]
                 const queryData = {
                     permissionNames: permissionNames
@@ -1530,6 +1531,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 handleLocaleChangeRedirect={handleLocaleChangeRedirect}
                                 solidFormViewData={solidFormViewData}
                                 published={published}
+                                actionsAllowed={actionsAllowed}
                             />
                         }
                     </div>
