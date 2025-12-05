@@ -19,6 +19,7 @@ interface Props {
   defaultEntityLocaleId: string | null;
   solidFormViewData: any;
   published: string | null;
+  actionsAllowed?: string[];
 }
 
 const SolidChatterLocaleTabView: React.FC<Props> = ({
@@ -34,7 +35,8 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
   handleLocaleChangeRedirect,
   defaultEntityLocaleId,
   solidFormViewData,
-  published
+  published,
+  actionsAllowed
 }) => {
   return (
     <TabView className="SolidCustomLocaleTabviewPanels h-full" activeIndex={activeTab}>
@@ -61,6 +63,7 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
           id={id}
           refreshChatterMessage={refreshChatterMessage}
           setRefreshChatterMessage={setRefreshChatterMessage}
+          actionsAllowed={actionsAllowed}
         />
       </TabPanel>
       {
