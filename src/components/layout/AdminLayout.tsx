@@ -22,22 +22,16 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
             setIsForcePasswordChange(false)
         }
     }, [session])
-    const pathname = usePathname();
+    // const pathname = usePathname();
     const router = useRouter();
     useEffect(() => {
-        const handleRouteChange = async () => {
-            const session = await getSession(); // Force refetch session on navigation
-            if (session?.error === "RefreshAccessTokenError") {
-                handleError([ERROR_MESSAGES.SESSION_EXPIRED])
-                signOut({ callbackUrl: "/auth/login" });
-            }
+        if (status === "loading") return;
+        if (!session || session?.error === "RefreshAccessTokenError") {
+            handleError([ERROR_MESSAGES.SESSION_EXPIRED])
+            signOut({ callbackUrl: "/auth/login" });
+        }
 
-
-        };
-        // Listen to routeChangeComplete event
-        handleRouteChange()
-
-    }, [pathname])
+    }, [session, status])
 
     return (
         <Layout>

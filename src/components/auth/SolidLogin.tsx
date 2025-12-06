@@ -34,6 +34,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
     const [activeIndex, setActiveIndex] = useState(0);
     useEffect(() => {
         trigger("") // Fetch settings on mount
+        sessionStorage.removeItem("app-mounted");
     }, [trigger])
     const toast = useRef<Toast>(null);
     const router = useRouter();

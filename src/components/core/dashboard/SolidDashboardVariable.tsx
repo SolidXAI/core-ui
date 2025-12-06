@@ -8,14 +8,16 @@ import styles from './SolidDashboard.module.css';
 import { useGetDashboardVariableSelectionDynamicValuesQuery } from "@/redux/api/dashboardApi";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { DashboardVariableRecord } from "./SolidDashboard";
+import { Button } from "primereact/button";
 
 
 export interface DashboardVariableFilterProps {
   setFilters: Dispatch<SetStateAction<SqlExpression[]>>;
+  clearSignal: number;
   dashboardVariable: DashboardVariableRecord;
 }
 
-export const DateVariableFilterComponent: React.FC<DashboardVariableFilterProps> = ({ setFilters, dashboardVariable }) => {
+export const DateVariableFilterComponent: React.FC<DashboardVariableFilterProps> = ({ setFilters, clearSignal, dashboardVariable }) => {
   // Initialize the default dates state
   // If the dashboardVariable has a defaultOperator as Between and a defaultValue as two dates, we can set those as the initial values, otherwise null
   const defaultDatesString = dashboardVariable.defaultOperator === '$between' && dashboardVariable.defaultValue
@@ -27,6 +29,10 @@ export const DateVariableFilterComponent: React.FC<DashboardVariableFilterProps>
   ] : null;
   const [dates, setDates] = useState<Nullable<(Date | null)[]>>(defaultDates);
 
+  useEffect(() => {
+    setDates(null);  // reset UI
+  }, [clearSignal]);
+  
   return (
     <div className={`flex align-items-center ${styles.SolidDashboardDateRangeFilterWrapper}`}>
       <Calendar value={dates} onChange={(e) => {
@@ -60,7 +66,7 @@ export const DateVariableFilterComponent: React.FC<DashboardVariableFilterProps>
   )
 }
 
-export const SelectionDynamicVariableFilterComponent: React.FC<DashboardVariableFilterProps> = ({ setFilters, dashboardVariable }) => {
+export const SelectionDynamicVariableFilterComponent: React.FC<DashboardVariableFilterProps> = ({ setFilters, clearSignal, dashboardVariable }) => {
   // Initialize the selection dynamic values state
   // Pick the values from defaultValue if present, for default operator $in
   const defaultDynamicValuesString = dashboardVariable.defaultOperator === '$in' && dashboardVariable.defaultValue;
@@ -108,6 +114,10 @@ export const SelectionDynamicVariableFilterComponent: React.FC<DashboardVariable
     // }
   }, [selectionDynamicValues]);
 
+  useEffect(() => {
+    setSelectionDynamicValues([]);
+  }, [clearSignal]);
+
   return (
     <>
       {isLoading && <ProgressSpinner></ProgressSpinner>}
@@ -133,7 +143,7 @@ export const SelectionDynamicVariableFilterComponent: React.FC<DashboardVariable
   );
 }
 
-export const SelectionStaticVariableFilterComponent: React.FC<DashboardVariableFilterProps> = ({ setFilters, dashboardVariable }) => {
+export const SelectionStaticVariableFilterComponent: React.FC<DashboardVariableFilterProps> = ({ setFilters, clearSignal, dashboardVariable }) => {
   // Initialize the selection static values state
   // Pick the values from defaultValue if present, for default operator $in
   const defaultStaticValuesString = dashboardVariable.defaultOperator === '$in' && dashboardVariable.defaultValue;
@@ -180,6 +190,10 @@ export const SelectionStaticVariableFilterComponent: React.FC<DashboardVariableF
     // }
   }, [selectionStaticValues]);
 
+  useEffect(() => {
+    setSelectionStaticValues([]);
+  }, [clearSignal]);
+
   return (
     <AutoComplete
       value={selectionStaticValues}
@@ -196,28 +210,44 @@ export const SelectionStaticVariableFilterComponent: React.FC<DashboardVariableF
 }
 
 export interface SolidDashboardVariableProps {
-  dashboardVariables: any
+  dashboardVariables: any;
+  filters: SqlExpression[];
   setFilters: Dispatch<SetStateAction<SqlExpression[]>>;
 }
 
-const SolidDashboardVariable: React.FC<SolidDashboardVariableProps> = ({ dashboardVariables, setFilters }) => {
+const SolidDashboardVariable: React.FC<SolidDashboardVariableProps> = ({ dashboardVariables, filters, setFilters }) => {
+  const [clearSignal, setClearSignal] = useState(0);
   const dashboardVariableComponents = dashboardVariables.map((dashboardVariable: any, index: number) => {
     switch (dashboardVariable.variableType) {
       case 'date':
-        return <DateVariableFilterComponent key={index} setFilters={setFilters} dashboardVariable={dashboardVariable} />;
+        return <DateVariableFilterComponent key={index} setFilters={setFilters} clearSignal={clearSignal} dashboardVariable={dashboardVariable} />;
       case 'selectionStatic':
-        return <SelectionStaticVariableFilterComponent key={index} setFilters={setFilters} dashboardVariable={dashboardVariable} />;
+        return <SelectionStaticVariableFilterComponent key={index} setFilters={setFilters} clearSignal={clearSignal} dashboardVariable={dashboardVariable} />;
       case 'selectionDynamic':
-        return <SelectionDynamicVariableFilterComponent key={index} setFilters={setFilters} dashboardVariable={dashboardVariable} />;
+        return <SelectionDynamicVariableFilterComponent key={index} setFilters={setFilters} clearSignal={clearSignal} dashboardVariable={dashboardVariable} />;
       default:
         return null;
     }
   });
 
+  const clearAllFilters = () => {
+    setFilters([]);
+    setClearSignal(prev => prev + 1);  // triggers children to reset
+  };
+
   // TODO [HP]: Currently this is static, we need this to be dynamic how we are invoking setFilters below has to be fully dynamic...
   return (
     <div className="flex align-items-center gap-3">
       {dashboardVariableComponents}
+      {filters.length > 0 && (
+        <Button
+          onClick={clearAllFilters}
+          size="small"
+          outlined
+          // severity="info"
+          icon="pi pi-filter-slash"
+        />
+      )}
     </div>
   );
 }

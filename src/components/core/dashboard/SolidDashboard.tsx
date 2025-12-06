@@ -10,6 +10,9 @@ import { SolidXAIModule } from '../solid-ai/SolidXAIModule';
 import styles from './SolidDashboard.module.css';
 import SolidDashboardBody from './SolidDashboardBody';
 import SolidDashboardVariable from './SolidDashboardVariable';
+import { SolidDashboardFilterRequired } from './SolidDashboardFilterRequired';
+import { SolidDashboardLoading } from './SolidDashboardLoading';
+import { SolidDashboardRenderError } from './SolidDashboardRenderError';
 
 export enum DashboardVariableType {
   DATE = 'date',
@@ -194,8 +197,8 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
   return (
     <div className={`h-screen surface-0 flex`}>
       <div className={`h-full flex-grow-1 ${styles.SolidDashboardPageContentWrapper}`}>
-        {isLoading && <p>Loading dashboard...</p>}
-        {error && <p className="text-red-600">Failed to load dashboard.</p>}
+        {isLoading && <SolidDashboardLoading />}
+        {error && <SolidDashboardRenderError />}
         {!isLoading && !error && (
           <>
             <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
@@ -211,9 +214,9 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
                 </>
               }
             </p>
-              {dashboardVariables && dashboardVariables.length > 0 && <SolidDashboardVariable dashboardVariables={dashboardVariables} setFilters={setFilters} />}
+              {dashboardVariables && dashboardVariables.length > 0 && <SolidDashboardVariable dashboardVariables={dashboardVariables} filters={filters} setFilters={setFilters} />}
             </div>
-            {!isRenderDashboardBody(questions, dashboardVariables, filters) && <p className="text-red-600">Almost there! Select the required filters to generate your dashboard.</p>}
+            {!isRenderDashboardBody(questions, dashboardVariables, filters) &&  <SolidDashboardFilterRequired />}
             {isRenderDashboardBody(questions, dashboardVariables, filters) && <SolidDashboardBody questions={questions} filters={filters} />}
           </>
         )}

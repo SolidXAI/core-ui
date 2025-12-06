@@ -54,7 +54,7 @@ import { useSelector } from "react-redux";
 import styles from "./SolidListViewWrapper.module.css";
 import { SolidXAIModule } from "../solid-ai/SolidXAIModule";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
-import { SolidLoadList } from "@/types/solid-core";
+import { SolidListUiEventResponse, SolidLoadList } from "@/types/solid-core";
 import { getExtensionFunction } from "@/helpers/registry";
 import { useSession } from "next-auth/react";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
@@ -176,11 +176,11 @@ export const SolidListView = (params: SolidListViewParams) => {
           permissionExpression(params.modelName, 'delete'),
           permissionExpression(params.modelName, 'update'),
           permissionExpression(params.modelName, 'deleteMany'),
-          permissionExpression(params.modelName, 'find'),
+          permissionExpression(params.modelName, 'findOne'),
           permissionExpression(params.modelName, 'findMany'),
           permissionExpression(params.modelName, 'insertMany'),
-          permissionExpression('ImportTransaction', 'create'),
-          permissionExpression('ExportTransaction', 'create'),
+          permissionExpression('importTransaction', 'create'),
+          permissionExpression('exportTransaction', 'create'),
           permissionExpression('userViewMetadata', 'create'),
           permissionExpression('savedFilters', 'create')
         ];
@@ -507,7 +507,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     console.log(
       "useEffect: [isDeleteSolidEntitiesSucess, isDeleteSolidSingleEntitySuccess, recoverByIdIsSuccess, recoverByIsSuccess, solidListViewMetaData]"
     );
-    if (solidListViewMetaData) {
+    if (solidListViewMetaData && solidListViewLayout) {
       const queryObject = queryStringToQueryObject();
 
       if (queryObject) {
@@ -554,6 +554,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     recoverByIdIsSuccess,
     recoverByIsSuccess,
     solidListViewMetaData,
+    solidListViewLayout
   ]);
 
   const session = useSession();
@@ -567,15 +568,17 @@ export const SolidListView = (params: SolidListViewParams) => {
         const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onListLoad;
         let DynamicFunctionComponent = null;
         let listViewRecords = listViewData;
-        let listLayout = listViewData;
-
+        let listLayout = solidListViewMetaData?.data?.solidView?.layout;
+        if (params.customLayout) {
+          listLayout = params.customLayout;
+        }
         const event: SolidLoadList = {
           fieldsMetadata: solidListViewMetaData?.data?.solidFieldsMetadata,
           listData: listViewData,
           totalRecords: totalRecords,
           type: "onListLoad",
           viewMetadata: solidListViewMetaData?.data?.solidView,
-          listViewLayout: solidListViewLayout,
+          listViewLayout: listLayout,
           user: user,
           session: session
         };
@@ -583,7 +586,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         if (dynamicHeader) {
           DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
           if (DynamicFunctionComponent) {
-            const updatedListData = await DynamicFunctionComponent(event);
+            const updatedListData: SolidListUiEventResponse = await DynamicFunctionComponent(event);
 
             if (updatedListData && updatedListData?.dataChanged && updatedListData?.newListData) {
               listViewRecords = updatedListData.newListData;
@@ -602,9 +605,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       };
       handleDynamicFunction();
     }
-  }, [solidListViewMetaData, listViewData]);
-
-
+  }, [solidListViewMetaData, loading]);
 
   useEffect(() => {
     console.log(
@@ -749,7 +750,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       locale: localeName ? localeName : "en",
     };
 
-    if (sortField) {
+    if (sortField && solidFieldsMetadata && solidFieldsMetadata[sortField]) {
       const sortFieldMetadata = solidFieldsMetadata[sortField];
       if (
         sortFieldMetadata?.type === "relation" &&
@@ -957,7 +958,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [showGlobalSearchElement, setShowGlobalSearchElement] = useState(false);
 
   // Render columns dynamically based on metadata
-  const renderColumnsDynamically = (solidListViewMetaData: any) => {
+  const renderColumnsDynamically = (solidListViewMetaData: any, solidListViewLayout: any) => {
     if (!solidListViewMetaData) {
       return;
     }
@@ -969,9 +970,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (!solidView || !solidFieldsMetadata) {
       return;
     }
-    const currentLayout = params.customLayout
-      ? params.customLayout
-      : solidView.layout;
+    const currentLayout = solidListViewLayout;
 
     return currentLayout.children?.map((column: any) => {
       const fieldMetadata = solidFieldsMetadata[column.attrs.name];
@@ -1363,10 +1362,10 @@ export const SolidListView = (params: SolidListViewParams) => {
               onRowClick={(e) => {
                 const rowData = e.data;
 
-                if (solidListViewLayout?.attrs.disableRowClick === true) return;
+                if (solidListViewLayout?.attrs?.disableRowClick === true) return;
 
                 const hasFindPermission = actionsAllowed.includes(
-                  permissionExpression(params.modelName, 'find')
+                  permissionExpression(params.modelName, 'findOne')
                 );
                 const hasUpdatePermission =
                   actionsAllowed.includes(permissionExpression(params.modelName, 'update')) &&
@@ -1390,7 +1389,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                   headerStyle={{ width: "3em" }}
                 />
               )}
-              {renderColumnsDynamically(solidListViewMetaData)}
+              {solidListViewMetaData && solidListViewLayout && renderColumnsDynamically(solidListViewMetaData, solidListViewLayout)}
               {solidListViewLayout?.attrs?.rowButtons &&
                 solidListViewLayout?.attrs?.rowButtons
                   .filter((rb: any) => {
@@ -1544,10 +1543,8 @@ export const SolidListView = (params: SolidListViewParams) => {
                                   style={{ top: 10, minWidth: 120 }}
                                 >
                                   <div className="flex flex-column gap-1 p-1">
-                                    {solidListViewLayout?.attrs
-                                      .showDefaultEditButton !== false &&
-                                      solidListViewLayout?.attrs
-                                        .showRowEditInContextMenu !== false && (
+                                    {solidListViewLayout?.attrs?.showDefaultEditButton !== false &&
+                                      solidListViewLayout?.attrs?.showRowEditInContextMenu !== false && (
                                         <Button
                                           type="button"
                                           className="w-full text-left gap-1"
@@ -1557,12 +1554,12 @@ export const SolidListView = (params: SolidListViewParams) => {
                                           icon={"pi pi-pencil"}
                                           onClick={() => {
                                             if (params.embeded == true) {
-                                              params.handlePopUpOpen(
-                                                selectedSolidViewData?.id
+                                                params.handlePopUpOpen(
+                                                selectedDataRef.current?.id
                                               );
                                             } else {
                                               router.push(
-                                                `${editButtonUrl}/${selectedSolidViewData?.id}?viewMode=edit`
+                                                `${editButtonUrl}/${selectedDataRef.current?.id}?viewMode=edit`
                                               );
                                             }
                                           }}
@@ -1574,8 +1571,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                     ) &&
                                       solidListViewLayout?.attrs?.delete !==
                                       false &&
-                                      solidListViewLayout?.attrs
-                                        .showRowDeleteInContextMenu !== false && (
+                                      solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== false && (
                                         <Button
                                           text
                                           type="button"
@@ -1591,11 +1587,11 @@ export const SolidListView = (params: SolidListViewParams) => {
                                     {solidListViewLayout?.attrs?.rowButtons
                                       ?.filter(
                                         (rb) =>
-                                          rb.attrs.actionInContextMenu === true
+                                          rb?.attrs?.actionInContextMenu === true
                                       )
                                       .map((button: any, index: number) => (
                                         <SolidListViewRowButtonContextMenu
-                                          key={`${index}-${selectedDataRef.current?.id || ''}`}
+                                          key={`${index}-${selectedDataRef?.current?.id || ''}`}
                                           button={button}
                                           params={params}
                                           getSelectedSolidViewData={() => selectedDataRef.current}

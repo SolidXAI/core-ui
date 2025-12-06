@@ -37,7 +37,7 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
 import { SolidUiEvent } from "@/types";
 import { getExtensionComponent, getExtensionFunction } from "@/helpers/registry";
-import { SolidFormWidgetProps, SolidLoadForm } from "@/types/solid-core";
+import { SolidFormWidgetProps, SolidLoadForm, SolidUiEventResponse } from "@/types/solid-core";
 import { SolidPasswordField } from "./fields/SolidPasswordField";
 import { SolidEmailField } from "./fields/SolidEmailField";
 import { Panel } from "primereact/panel";
@@ -530,7 +530,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     permissionExpression(params.modelName, 'create'),
                     permissionExpression(params.modelName, 'delete'),
                     permissionExpression(params.modelName, 'update'),
-                    permissionExpression(params.modelName, 'find')
+                    permissionExpression(params.modelName, 'findOne'),
+                    permissionExpression('chatterMessage', 'findMany')
                 ]
                 const queryData = {
                     permissionNames: permissionNames
@@ -884,7 +885,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
                     if (DynamicFunctionComponent) {
                         try {
-                            const updatedFormLayout = await DynamicFunctionComponent(event);
+                            const updatedFormLayout: SolidUiEventResponse = await DynamicFunctionComponent(event);
                             if (updatedFormLayout && updatedFormLayout?.layoutChanged && updatedFormLayout?.newLayout) {
                                 const newFormLayout = {
                                     ...formLayout,
@@ -929,7 +930,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             if (dynamicHeader) {
                 DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
                 if (DynamicFunctionComponent) {
-                    const updatedFormData = await DynamicFunctionComponent(event);
+                    const updatedFormData: SolidUiEventResponse = await DynamicFunctionComponent(event);
 
                     if (updatedFormData && updatedFormData?.dataChanged && updatedFormData?.newFormData) {
                         formViewData = updatedFormData.newFormData;
@@ -961,7 +962,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 DynamicFunctionComponent = getExtensionFunction(onFormLoadHandler);
                 if (DynamicFunctionComponent) {
                     try {
-                        const result = await DynamicFunctionComponent(event);
+                        const result: SolidUiEventResponse = await DynamicFunctionComponent(event);
                         if (result && result?.layoutChanged && result?.newLayout) {
                             const newFormLayout = {
                                 ...formLayout,
@@ -1101,7 +1102,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
                     // Invoke the dynamic change handler: 
                     // TODO: encapsulate in try/catch, catch the exception render in the UI as an error & stop form rendering.
-                    const updatedFormInfo = await dynamicChangeHandler(event);
+                    const updatedFormInfo: SolidUiEventResponse = await dynamicChangeHandler(event);
 
                     // If dataChanged is true, update Formik values
                     if (updatedFormInfo?.dataChanged && updatedFormInfo.newFormData) {
@@ -1410,21 +1411,21 @@ const SolidFormView = (params: SolidFormViewProps) => {
         };
 
         const controlsList = ["nodownload", "nofullscreen", "noremoteplayback"];
-        const slides = lightboxUrls.map((item:any) => {
+        const slides = lightboxUrls.map((item: any) => {
             const url = item.src || item.downloadUrl || "";
             if (isVideoOrAudio(url)) {
-              return {
-                type: "video" as const,
-                sources: [{ src: url,  type: "video/mp4", }],
-              };
+                return {
+                    type: "video" as const,
+                    sources: [{ src: url, type: "video/mp4", }],
+                };
             }
             return { src: url };
-          });
-        
-          const hasMedia = slides.some((s) => s.type === "video");
+        });
+
+        const hasMedia = slides.some((s) => s.type === "video");
 
 
-          console.log("lightbox urls", slides);
+        console.log("lightbox urls", slides);
 
         return (
             <div className="solid-form-wrapper">
@@ -1530,6 +1531,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 handleLocaleChangeRedirect={handleLocaleChangeRedirect}
                                 solidFormViewData={solidFormViewData}
                                 published={published}
+                                actionsAllowed={actionsAllowed}
                             />
                         }
                     </div>

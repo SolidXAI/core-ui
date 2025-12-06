@@ -97,7 +97,7 @@ export type ListLayoutType = {
 };
 
 // Event type
-export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender" | "onFormDataLoad" | "onFormLayoutLoad" | "onFormLoad" | "onListLoad" | "afterLogin" | "beforeLogout";
+export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender" | "onFormDataLoad" | "onFormLayoutLoad" | "onFormLoad" | "onListLoad" | "afterLogin" | "beforeLogout" | "onApplicationMount";
 export type SolidUiEvent = {
     type: SolidUiEvents;
     modifiedField?: string;
@@ -109,7 +109,12 @@ export type SolidUiEvent = {
     formViewLayout: LayoutNode;
 };
 
-
+export type SolidUiEventResponse = {
+    dataChanged?: Boolean;
+    newFormData?: Record<string, any>;
+    layoutChanged?: Boolean;
+    newLayout?: LayoutNode;
+}
 
 
 export type SolidLoadForm = {
@@ -129,6 +134,8 @@ export type SolidListUiEvent = {
     totalRecords: number;
     viewMetadata: SolidView;
     listViewLayout: ListLayoutType;
+    user: any;
+    session: any
 };
 
 export type SolidLoadList = {
@@ -138,14 +145,29 @@ export type SolidLoadList = {
     totalRecords: number;
     viewMetadata: SolidView;
     listViewLayout: ListLayoutType;
-    user:any,
-    session:any
+    user: any,
+    session: any
+}
+
+export type SolidListUiEventResponse = {
+    dataChanged?: Boolean;
+    newListData?: any[];
+    layoutChanged?: Boolean;
+    newLayout?: LayoutNode;
 }
 
 export type SolidAfterLoginEvent = {
     type: SolidUiEvents;
     user: any
 }
+
+export type SolidOnApplicationMountEvent = {
+    type: SolidUiEvents;
+    user: any,
+    session: any
+}
+
+
 
 
 export enum SqlExpressionOperator {
