@@ -89,14 +89,14 @@ const KanbanColumn = ({ groupedView, groupByField, solidKanbanViewMetaData, grou
                   data-p-focused="false"
                   data-p-disabled="false"
                 >
-                  <button className="p-menuitem-link w-full p-link flex align-items-center pl-2 text-color hover:surface-200 border-noround">
+                  <button className="p-menuitem-link w-full p-link flex align-items-center md:pl-2 text-color hover:surface-200 border-noround">
                     <div
-                      className="mr-2 p-avatar p-component p-avatar-image p-avatar-circle"
+                      className="mr-2 p-avatar p-component p-avatar-image p-avatar-circle hidden md:flex"
                       data-pc-name="avatar"
                       data-pc-section="root"
                     >
                     </div>
-                    <div className="flex flex-column align">
+                    <div className="flex flex-column align px-4 md:px-0 ">
 
                       <a className="flex align-items-center p-menuitem-link" onClick={e => { toggleFold(groupByField); op?.current?.toggle(e) }}>
                         <span className="">Fold</span>

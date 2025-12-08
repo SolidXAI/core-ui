@@ -370,7 +370,7 @@ const CreateModel = ({ data, params }: any) => {
             <>
               <div className="flex align-items-center gap-3">
                 <BackButton />
-                <div className="form-wrapper-title ">Create Model {modelMetaData?.displayName ? `- ${modelMetaData?.displayName}` : ""}</div>
+                <div className="form-wrapper-title solid-long-text-wrapper  ">Create Model {modelMetaData?.displayName ? `- ${modelMetaData?.displayName}` : ""}</div>
               </div>
               <div className="gap-3 flex">
                 {isDirty &&
@@ -383,7 +383,7 @@ const CreateModel = ({ data, params }: any) => {
             <>
               <div className="flex align-items-center gap-3">
                 <BackButton />
-                <div className="form-wrapper-title">Edit Model {modelMetaData?.displayName ? `- ${modelMetaData?.displayName}` : ""}</div>
+                <div className="form-wrapper-title solid-long-text-wrapper ">Edit Model {modelMetaData?.displayName ? `- ${modelMetaData?.displayName}` : ""}</div>
               </div>
               <div className="gap-3 flex">
                 {data?.isSystem !== true &&

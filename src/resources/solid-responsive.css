@@ -284,6 +284,13 @@
         text-overflow: ellipsis;
     }
 
+    .solid-long-text-wrapper {
+        max-width: clamp(130px, 40vw, 600px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
 
 }
 
@@ -299,7 +306,7 @@
 
     .apps-icon {
         position: absolute;
-        top: 16px;
+        top: 18px;
         left: 16px;
     }
 
@@ -442,7 +449,7 @@
     /*  ======================= Search ================================== */
 
     .solid-global-search-element-wrapper {
-        width: calc(100vw - 84px)
+        width: calc(100vw - 80px)
     }
 
     .solid-global-search-element {
@@ -567,6 +574,12 @@
 
 
 
+    .solid-text-wrapper {
+        max-width: clamp(80px, 25vw, 600px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 }
 
 

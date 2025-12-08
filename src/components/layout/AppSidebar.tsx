@@ -120,7 +120,6 @@ const AppSidebar = () => {
             ? [additionalMenu]
             : [];
 
-            console.log(currentMainMenu,'currentMainMenu');
             
 
     return (
