@@ -134,6 +134,8 @@ export type SolidListUiEvent = {
     totalRecords: number;
     viewMetadata: SolidView;
     listViewLayout: ListLayoutType;
+    user: any;
+    session: any
 };
 
 export type SolidLoadList = {

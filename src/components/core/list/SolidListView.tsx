@@ -508,7 +508,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     console.log(
       "useEffect: [isDeleteSolidEntitiesSucess, isDeleteSolidSingleEntitySuccess, recoverByIdIsSuccess, recoverByIsSuccess, solidListViewMetaData]"
     );
-    if (solidListViewMetaData) {
+    if (solidListViewMetaData && solidListViewLayout) {
       const queryObject = queryStringToQueryObject();
 
       if (queryObject) {
@@ -555,6 +555,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     recoverByIdIsSuccess,
     recoverByIsSuccess,
     solidListViewMetaData,
+    solidListViewLayout
   ]);
 
   const session = useSession();
@@ -568,15 +569,17 @@ export const SolidListView = (params: SolidListViewParams) => {
         const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onListLoad;
         let DynamicFunctionComponent = null;
         let listViewRecords = listViewData;
-        let listLayout = listViewData;
-
+        let listLayout = solidListViewMetaData?.data?.solidView?.layout;
+        if (params.customLayout) {
+          listLayout = params.customLayout;
+        }
         const event: SolidLoadList = {
           fieldsMetadata: solidListViewMetaData?.data?.solidFieldsMetadata,
           listData: listViewData,
           totalRecords: totalRecords,
           type: "onListLoad",
           viewMetadata: solidListViewMetaData?.data?.solidView,
-          listViewLayout: solidListViewLayout,
+          listViewLayout: listLayout,
           user: user,
           session: session
         };
@@ -603,7 +606,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       };
       handleDynamicFunction();
     }
-  }, [solidListViewMetaData, listViewData]);
+  }, [solidListViewMetaData, loading]);
 
   useEffect(() => {
     console.log(
@@ -955,7 +958,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [lightboxUrls, setLightboxUrls] = useState({});
 
   // Render columns dynamically based on metadata
-  const renderColumnsDynamically = (solidListViewMetaData: any) => {
+  const renderColumnsDynamically = (solidListViewMetaData: any, solidListViewLayout: any) => {
     if (!solidListViewMetaData) {
       return;
     }
@@ -967,9 +970,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (!solidView || !solidFieldsMetadata) {
       return;
     }
-    const currentLayout = params.customLayout
-      ? params.customLayout
-      : solidView.layout;
+    const currentLayout = solidListViewLayout;
 
     return currentLayout.children?.map((column: any) => {
       const fieldMetadata = solidFieldsMetadata[column.attrs.name];
@@ -1318,7 +1319,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                   headerStyle={{ width: "3em" }}
                 />
               )}
-              {renderColumnsDynamically(solidListViewMetaData)}
+              {solidListViewMetaData && solidListViewLayout && renderColumnsDynamically(solidListViewMetaData, solidListViewLayout)}
               {solidListViewLayout?.attrs?.rowButtons &&
                 solidListViewLayout?.attrs?.rowButtons
                   .filter((rb: any) => {
