@@ -21,8 +21,8 @@ import { DefaultPasswordFormCreateWidget, DefaultPasswordFormEditWidget, Default
 import { DefaultRichTextFormEditWidget, DefaultRichTextFormViewWidget } from "@/components/core/form/fields/SolidRichTextField";
 import { DefaultSelectionStaticAutocompleteFormEditWidget, DefaultSelectionStaticFormViewWidget, SolidSelectionStaticRadioFormEditWidget, SolidSelectionStaticSelectButtonFormEditWidget } from "@/components/core/form/fields/SolidSelectionStaticField";
 import { DefaultShortTextFormEditWidget, DefaultShortTextFormViewWidget, MaskedShortTextFormViewWidget, MaskedShortTextFormEditWidget, MaskedShortTextListViewWidget } from "@/components/core/form/fields/SolidShortTextField";
-import { DefaultRelationManyToOneFormEditWidget, DefaultRelationManyToOneFormViewWidget } from "@/components/core/form/fields/relations/SolidRelationManyToOneField";
-import { DefaultRelationOneToManyFormEditWidget, DefaultRelationOneToManyFormViewWidget } from "@/components/core/form/fields/relations/SolidRelationOneToManyField";
+import { DefaultRelationManyToOneFormEditWidget, DefaultRelationManyToOneFormViewWidget, PseudoRelationManyToOneFormWidget } from "@/components/core/form/fields/relations/SolidRelationManyToOneField";
+import { DefaultRelationOneToManyFormEditWidget, DefaultRelationOneToManyFormViewWidget, PseudoRelationOneToManyFormWidget } from "@/components/core/form/fields/relations/SolidRelationOneToManyField";
 import { DefaultRelationManyToManyAutoCompleteFormEditWidget, DefaultRelationManyToManyCheckBoxFormEditWidget } from "@/components/core/form/fields/relations/SolidRelationManyToManyField";
 import { DefaultBooleanListWidget } from "@/components/core/list/columns/SolidBooleanColumn";
 import { DefaultTextListWidget } from "@/components/core/list/columns/SolidShortTextColumn";
@@ -43,6 +43,7 @@ import ChartFormPreviewWidget from "@/components/core/extension/solid-core/dashb
 import { DefaultTimeFormEditWidget, DefaultTimeFormViewWidget } from "@/components/core/form/fields/SolidTimeField";
 import { SolidAiInteractionMetadataFieldFormWidget } from "@/components/core/form/fields/widgets/SolidAiInteractionMetadataFieldFormWidget";
 import { SolidAiInteractionMessageFieldFormWidget } from "@/components/core/form/fields/widgets/SolidAiInteractionMessageFieldFormWidget";
+import { SolidS3FileViewerWidget } from "@/components/core/form/fields/widgets/SolidS3FileViewerWidget";
 
 type ExtensionComponentType = null | 'list_field_widget' | 'form_field_view_widget' | 'form_field_edit_widget' | 'list_row_action ' | 'list_header_action' | 'form_action' | 'form_widget';
 
@@ -218,6 +219,9 @@ registerExtensionComponent("DefaultMediaMultipleFormEditWidget", DefaultMediaMul
 // - relation.many2one
 registerExtensionComponent("DefaultRelationManyToOneFormEditWidget", DefaultRelationManyToOneFormEditWidget, []);
 
+registerExtensionComponent("PseudoRelationManyToOneFormWidget", PseudoRelationManyToOneFormWidget, []);
+
+
 // - relation.many2many (autocomplete)
 registerExtensionComponent("DefaultRelationManyToManyAutoCompleteFormEditWidget", DefaultRelationManyToManyAutoCompleteFormEditWidget, []);
 
@@ -226,6 +230,7 @@ registerExtensionComponent("DefaultRelationManyToManyCheckBoxFormEditWidget", De
 
 // - relation.one2many
 registerExtensionComponent("DefaultRelationOneToManyFormEditWidget", DefaultRelationOneToManyFormEditWidget, []);
+registerExtensionComponent("PseudoRelationOneToManyFormWidget", PseudoRelationOneToManyFormWidget, []);
 
 // ...
 
@@ -302,6 +307,7 @@ registerExtensionComponent("SolidRelationFieldAvatarFormWidget", SolidRelationFi
 registerExtensionComponent("SolidShortTextFieldAvatarWidget", SolidShortTextFieldAvatarWidget, []);
 registerExtensionComponent("SolidAiInteractionMetadataFieldFormWidget", SolidAiInteractionMetadataFieldFormWidget, []);
 registerExtensionComponent("SolidAiInteractionMessageFieldFormWidget", SolidAiInteractionMessageFieldFormWidget, []);
+registerExtensionComponent("SolidS3FileViewerWidget", SolidS3FileViewerWidget, []);
 
 // RoleMetadata
 registerExtensionComponent("RolePermissionsManyToManyFieldWidget", RolePermissionsManyToManyFieldWidget, ["inputSwitch"]);

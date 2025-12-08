@@ -30,7 +30,12 @@ export class SolidShortTextField implements ISolidField {
     initialValue(): any {
         const fieldName = this.fieldContext.field.attrs.name;
         const fieldDefaultValue = this.fieldContext?.fieldMetadata?.defaultValue;
-
+        if (this.fieldContext.parentData && this.fieldContext.parentData[fieldName]) {
+            const parentDataForKey = this.fieldContext.parentData[fieldName];
+            if (parentDataForKey && typeof parentDataForKey !== 'object') {
+                return this.fieldContext.parentData[fieldName]
+            }
+        }
         const existingValue = this.fieldContext.data[fieldName];
 
         return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
@@ -53,7 +58,7 @@ export class SolidShortTextField implements ISolidField {
             schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel, fieldMetadata.min));
         }
         if (fieldMetadata.max && fieldMetadata.max > 0) {
-            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel, fieldMetadata.min));
+            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel, fieldMetadata.max));
         }
         // 3. regular expression
         if (fieldMetadata.regexPattern) {
@@ -124,6 +129,7 @@ export const DefaultShortTextFormEditWidget = ({ formik, fieldContext }: SolidFo
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const readOnlyPermission = fieldContext.readOnly;
+    const isPrimaryKey = fieldMetadata.isPrimaryKey || false;
 
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
@@ -145,8 +151,8 @@ export const DefaultShortTextFormEditWidget = ({ formik, fieldContext }: SolidFo
                             </label>
                         }
                         <InputText
-                            readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                            disabled={formDisabled || fieldDisabled}
+                            readOnly={formReadonly || fieldReadonly || readOnlyPermission || isPrimaryKey}
+                            disabled={formDisabled || fieldDisabled || isPrimaryKey}
                             id={fieldLayoutInfo.attrs.name}
                             name={fieldMetadata.name}
                             aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
@@ -246,6 +252,7 @@ export const MaskedShortTextFormEditWidget = ({ formik, fieldContext }: SolidFor
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const readOnlyPermission = fieldContext.readOnly;
+    const isPrimaryKey = fieldMetadata.isPrimaryKey || false;
 
     const isFormFieldValid = (formik: any, fieldName: string) =>
         formik.touched[fieldName] && formik.errors[fieldName];
@@ -259,8 +266,8 @@ export const MaskedShortTextFormEditWidget = ({ formik, fieldContext }: SolidFor
         <Password
             toggleMask
             feedback={false}
-            readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-            disabled={formDisabled || fieldDisabled}
+            readOnly={formReadonly || fieldReadonly || readOnlyPermission || isPrimaryKey}
+            disabled={formDisabled || fieldDisabled || isPrimaryKey}
             id={fieldLayoutInfo.attrs.name}
             name={fieldMetadata.name}
             aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}

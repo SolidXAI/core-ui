@@ -58,6 +58,7 @@ import { SolidListUiEventResponse, SolidLoadList } from "@/types/solid-core";
 import { getExtensionFunction } from "@/helpers/registry";
 import { useSession } from "next-auth/react";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
 // import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -1599,7 +1600,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                 />
               </div>
             ) : (
-              <SolidXAIModule showHeader inListView />
+              <SolidAiMainWrapper showHeader inListView />
             )}
           </div>
         )}

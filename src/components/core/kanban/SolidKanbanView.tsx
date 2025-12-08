@@ -1,7 +1,7 @@
 // @ts-nocheck
 
 "use client";
-import {  permissionExpression } from "@/helpers/permissions";
+import { permissionExpression } from "@/helpers/permissions";
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";

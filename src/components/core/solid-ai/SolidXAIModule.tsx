@@ -2,63 +2,53 @@
 import qs from "qs";
 import { SolidXAIEmptyPlaceholder } from "./SolidXAIEmptyPlaceholder";
 import { createSolidEntityApi } from '@/redux/api/solidEntityApi'
-
 import { SolidXAIInputBox } from "./SolidXAIInputBox";
 import { SolidXAIThreadWrapper } from "./SolidXAIThreadWrapper";
 import { useEffect, useState } from 'react';
 import { SolidXAIModuleHeader } from "./SolidXAIModuleHeader";
 import { useSelector } from "react-redux";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
-
-export const SolidXAIModule = ({ showHeader, inListView }: any) => {
+import axios from "axios";
+export const SolidXAIModule = () => {
   const [latestInteractionId, setLatestInteractionId] = useState<string | null>(null);
   const [thinking, setThinking] = useState(false);
   const userId = useSelector((state: any) => state.auth?.user?.user?.id);
-
   // TODO: START REFACTORING - reusable code alert
   // TODO: This method can be refactored out into a separate file... 
   // TODO: It is present in a commented form in this file src/components/core/extension/solid-core/moduleMetadata/list/GenerateModuleCodeRowAction.tsx
   // TODO: It is present in a commented form in this file src/components/core/extension/solid-core/modelMetadata/list/GenerateModelCodeRowAction.tsx
-
   const mqMessageApi = createSolidEntityApi("mqMessage");
   const {
     useGetSolidEntitiesQuery: useGetMqMessageQuery,
     useLazyGetSolidEntitiesQuery: useLazyGetMqMessageQuery,
   } = mqMessageApi;
-
   const [getMqMessageStatus, {
     data: mqMessageData,
     error: mqMessageDataError,
     isLoading: mqMessageDataIsLoading,
     isError: mqMessageDataIsError
   }] = useLazyGetMqMessageQuery();
-
-  const fetchMqMessageStatus = async (retries = 50, delay = 500, messageId: string): Promise<boolean> => {
+  const fetchMqMessageStatus = async (retries = 50, delay = 500, interactionId: string): Promise<boolean> => {
     for (let i = 0; i < retries; i++) {
       try {
-        const query = {
-          filters: {
-            messageId: {
-              $eq: messageId
-            }
+        const res = await axios.get(
+          `${process.env.MCP_SERVER_URL}/ai-interactions/${interactionId}`,
+          {
+            headers: {
+              "solidx-mcp-api-key": process.env.MCP_API_KEY,
+            },
+            maxBodyLength: Infinity,
           }
-        };
-        const queryString = qs.stringify(query, {
-          encodeValuesOnly: true,
-        });
-        console.log(ERROR_MESSAGES.ATTEMPT_FETCH_MESSAGE_STATUS(queryString));
-
-        const res = await getMqMessageStatus(queryString)
-        if (res.isSuccess === true) {
-          if (res.data.records.length > 0) {
-            const messageStage = res.data.records[0].stage;
-            console.log("messageStatus: ", messageStage);
-            if (messageStage === "succeeded") {
-              return true
-            }
-            if (messageStage === "failed") {
-              return false
-            }
+        );
+        // const res = await getMqMessageStatus(queryString)
+        if (res.data.success === true) {
+          const messageStage = res.data.data.status;
+          console.log("messageStatus: ", messageStage);
+          // if (messageStage === "pending" ||messageStage === "mcp_tool_generating" || messageStage === "mcp_tool_failed" || messageStage === "mcp_client_failed") {
+          //   return true
+          // }
+          if (messageStage === "mcp_tool_generated" || messageStage === "mcp_tool_failed" || messageStage === "mcp_client_failed") {
+            return true
           }
         }
       } catch (e) {
@@ -69,12 +59,9 @@ export const SolidXAIModule = ({ showHeader, inListView }: any) => {
     return false;
   };
   // TODO: END REFACTORING - reusable code alert
-
   useEffect(() => {
     if (!latestInteractionId) return;
-
     setThinking(true);
-
     (async () => {
       try {
         // TODO: If you encounter SolidX AI Interactions that can go on longer than 30 X 500 ms then you can increase the frequency & duration here...
@@ -87,20 +74,16 @@ export const SolidXAIModule = ({ showHeader, inListView }: any) => {
         setThinking(false);
       }
     })();
-
   }, [latestInteractionId]);
-
   return (
-    <div className='relative' style={{ height: inListView ? '100%' : 'calc(100% - 45px)', backgroundColor: 'var(--surface-section)' }}>
-      {showHeader &&
-        <SolidXAIModuleHeader />
-      }
+    <>
+      <SolidXAIModuleHeader />
       <SolidXAIThreadWrapper
         threadId={`thread-${userId}`}
         latestInteractionId={latestInteractionId}
         thinking={thinking}
       />
-      <SolidXAIInputBox onTriggerComplete={setLatestInteractionId} />
-    </div>
+      <SolidXAIInputBox onTriggerComplete={setLatestInteractionId} threadId={`thread-${userId}`} userId={userId} />
+    </>
   );
 };
