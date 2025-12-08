@@ -81,22 +81,24 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     const FormActionDropdown = () => {
         return (
             <div>
-                <Button
-                    outlined
-                    severity="secondary"
-                    type="button"
-                    icon={'pi pi-cog'}
-                    size="small"
-                    className="surface-card p-0"
-                    style={{
-                        height: 33.06,
-                        width: 33.06
-                    }}
-                    onClick={(e) =>
-                        // @ts-ignore 
-                        op.current.toggle(e)
-                    }
-                />
+                <div>
+                    <Button
+                        outlined
+                        severity="secondary"
+                        type="button"
+                        icon={'pi pi-cog'}
+                        size="small"
+                        className="surface-card"
+                        // style={{
+                        //     height: 33.06,
+                        //     width: 33.06
+                        // }}
+                        onClick={(e) =>
+                            // @ts-ignore 
+                            op.current.toggle(e)
+                        }
+                    />
+                </div>
                 <OverlayPanel ref={op} className="solid-custom-overlay">
                     <div className="flex flex-column gap-1 p-1">
                         {params.embeded !== true &&
@@ -116,41 +118,46 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 onClick={() => setDeleteDialogVisible(true)}
                             />
                         }
-                        <Button
-                            text
-                            type="button"
-                            className="w-8rem text-left gap-2 purple-200"
-                            label="Layout"
-                            size="small"
-                            iconPos="left"
-                            severity="contrast"
-                            icon={'pi pi-objects-column'}
-                            onClick={() => setLayoutDialogVisible(true)}
-                        />
+                        <div>
+                            <Button
+                                text
+                                type="button"
+                                className="w-8rem text-left gap-2 purple-200"
+                                label="Layout"
+                                size="small"
+                                iconPos="left"
+                                severity="contrast"
+                                icon={'pi pi-objects-column'}
+                                onClick={() => setLayoutDialogVisible(true)}
+                            />
+                        </div>
                         {draftEnabled && internationalisationEnabled && params.id !== 'new' &&
                             (publish !== null ?
-                                <Button
-                                    text
-                                    type="button"
-                                    className="w-8rem text-left gap-2 purple-200"
-                                    label="Unpublish"
-                                    size="small"
-                                    iconPos="left"
-                                    severity="contrast"
-                                    icon={'pi pi-cloud-download'}
-                                    onClick={() => handleDraftPublishWorkFlow('unpublish')}
-                                /> :
-                                <Button
-                                    text
-                                    type="button"
-                                    className="w-8rem text-left gap-2 purple-200"
-                                    label="Publish"
-                                    size="small"
-                                    iconPos="left"
-                                    severity="contrast"
-                                    icon={'pi pi-cloud-upload'}
-                                    onClick={() => handleDraftPublishWorkFlow('publish')}
-                                />
+                                <div>
+                                    <Button
+                                        text
+                                        type="button"
+                                        className="w-8rem text-left gap-2 purple-200"
+                                        label="Unpublish"
+                                        size="small"
+                                        iconPos="left"
+                                        severity="contrast"
+                                        icon={'pi pi-cloud-download'}
+                                        onClick={() => handleDraftPublishWorkFlow('unpublish')}
+                                    /></div> :
+                                <div>
+                                    <Button
+                                        text
+                                        type="button"
+                                        className="w-8rem text-left gap-2 purple-200"
+                                        label="Publish"
+                                        size="small"
+                                        iconPos="left"
+                                        severity="contrast"
+                                        icon={'pi pi-cloud-upload'}
+                                        onClick={() => handleDraftPublishWorkFlow('publish')}
+                                    />
+                                </div>
                             )}
                         {contextMenuHeaderButtons.map((button: any, index: number) => {
                             return (
@@ -166,28 +173,9 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             )
                         })
                         }
-                        <div className="lg:hidden lg:flex gap-3">
+                        <div className="lg:hidden flex flex-column gap-1">
                             {normalHeaderButtons.map((button: any, index: number) => {
                                 return (
-                                    // <Button
-                                    //     text
-                                    //     type="button"
-                                    //     className="w-full text-left gap-2"
-                                    //     label={button.attrs.label}
-                                    //     size="small"
-                                    //     iconPos="left"
-                                    //     severity="contrast"
-                                    //     icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
-                                    //     onClick={() => {
-                                    //         const event = {
-                                    //             action: button.attrs.action,
-                                    //             params,
-                                    //             formik,
-                                    //             solidFormViewMetaData: solidFormViewMetaData.data
-                                    //         }
-                                    //         handleCustomButtonClick(button.attrs, event)
-                                    //     }}
-                                    // />
                                     <SolidFormViewNormalHeaderButton
                                         key={index}
                                         button={button}
@@ -199,6 +187,17 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
 
                                 )
                             })
+                            }
+                            {params.embeded !== true && params.draftEnabled &&
+                                !formViewLayout.attrs.readonly && params.publish !== 'null' &&
+                                formik.dirty &&
+                                <div>
+                                    <Button
+                                        label="Draft"
+                                        size="small"
+                                        type="button"
+                                    />
+                                </div>
                             }
                         </div>
                     </div>
@@ -215,40 +214,23 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             {params.embeded !== true && <BackButton />}
                             <div className="form-wrapper-title"> {createHeaderTitle}</div>
                         </div>
-                        <div className="hidden lg:flex gap-3">
-                            {normalHeaderButtons.map((button: any, index: number) => {
-                                return (
-                                    // <Button
-                                    //     text
-                                    //     type="button"
-                                    //     className="w-full text-left gap-2"
-                                    //     label={button.attrs.label}
-                                    //     size="small"
-                                    //     iconPos="left"
-                                    //     severity="contrast"
-                                    //     icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
-                                    //     onClick={() => {
-                                    //         const event = {
-                                    //             action: button.attrs.action,
-                                    //             params,
-                                    //             formik,
-                                    //             solidFormViewMetaData: solidFormViewMetaData.data
-                                    //         }
-                                    //         handleCustomButtonClick(button.attrs, event)
-                                    //     }}
-                                    // />
-                                    <SolidFormViewNormalHeaderButton
-                                        key={index}
-                                        button={button}
-                                        params={params}
-                                        formik={formik}
-                                        solidFormViewMetaData={solidFormViewMetaData}
-                                        handleCustomButtonClick={handleCustomButtonClick}
-                                    />
+                        <div className="flex gap-3">
+                            <div className="hidden lg:flex gap-3">
+                                {normalHeaderButtons.map((button: any, index: number) => {
+                                    return (
+                                        <SolidFormViewNormalHeaderButton
+                                            key={index}
+                                            button={button}
+                                            params={params}
+                                            formik={formik}
+                                            solidFormViewMetaData={solidFormViewMetaData}
+                                            handleCustomButtonClick={handleCustomButtonClick}
+                                        />
 
-                                )
-                            })
-                            }
+                                    )
+                                })
+                                }
+                            </div>
                             {params.embeded !== true &&
                                 actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
                                 !formViewLayout.attrs.readonly &&
@@ -261,17 +243,19 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     />
                                 </div>
                             }
-                            {params.embeded !== true && params.draftEnabled &&
-                                !formViewLayout.attrs.readonly && params.publish !== 'null' &&
-                                formik.dirty &&
-                                <div>
-                                    <Button
-                                        label="Draft"
-                                        size="small"
-                                        type="button"
-                                    />
-                                </div>
-                            }
+                            <div className="hidden lg:flex">
+                                {params.embeded !== true && params.draftEnabled &&
+                                    !formViewLayout.attrs.readonly && params.publish !== 'null' &&
+                                    formik.dirty &&
+                                    <div>
+                                        <Button
+                                            label="Draft"
+                                            size="small"
+                                            type="button"
+                                        />
+                                    </div>
+                                }
+                            </div>
                             {params.embeded == true &&
                                 actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
                                 !formViewLayout.attrs.readonly &&
@@ -288,7 +272,16 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 </div>
                             }
                             {params.embeded == true &&
-                                <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' style={{ minWidth: 66 }} />
+                                <>
+                                    <div className="hidden lg:flex">
+                                    <div>
+                                        <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' style={{ minWidth: 66 }} />
+                                  </div>
+                                    </div>
+                                    <div className="lg:hidden">
+                                        <Button outlined size="small" type="button" icon="pi pi-times" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' />
+                                    </div>
+                                </>
                             }
                             {params.embeded !== true &&
                                 <SolidCancelButton />
@@ -308,47 +301,57 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             <div className="form-wrapper-title"> {viewMode === "edit" ? editHeaderTitle : solidView.model.displayName}</div>
                         </div>
 
-                        <div className="hidden lg:flex gap-3">
-                            {normalHeaderButtons.map((button: any, index: number) => {
-                                return (
-                                    // <Button
-                                    //     text
-                                    //     type="button"
-                                    //     className="w-full text-left gap-2"
-                                    //     label={button.attrs.label}
-                                    //     size="small"
-                                    //     iconPos="left"
-                                    //     severity="contrast"
-                                    //     icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
-                                    //     onClick={() => {
-                                    //         const event = {
-                                    //             action: button.attrs.action,
-                                    //             params,
-                                    //             formik,
-                                    //             solidFormViewMetaData: solidFormViewMetaData.data
-                                    //         }
-                                    //         handleCustomButtonClick(button.attrs, event)
-                                    //     }}
-                                    // />
-                                    <SolidFormViewNormalHeaderButton
-                                        key={index}
-                                        button={button}
-                                        params={params}
-                                        formik={formik}
-                                        solidFormViewMetaData={solidFormViewMetaData}
-                                        handleCustomButtonClick={handleCustomButtonClick}
-                                    />
-                                )
-                            })
-                            }
+                        <div className="flex gap-3">
+                            <div className="hidden lg:flex gap-3">
+                                {normalHeaderButtons.map((button: any, index: number) => {
+                                    return (
+                                        // <Button
+                                        //     text
+                                        //     type="button"
+                                        //     className="w-full text-left gap-2"
+                                        //     label={button.attrs.label}
+                                        //     size="small"
+                                        //     iconPos="left"
+                                        //     severity="contrast"
+                                        //     icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                                        //     onClick={() => {
+                                        //         const event = {
+                                        //             action: button.attrs.action,
+                                        //             params,
+                                        //             formik,
+                                        //             solidFormViewMetaData: solidFormViewMetaData.data
+                                        //         }
+                                        //         handleCustomButtonClick(button.attrs, event)
+                                        //     }}
+                                        // />
+                                        <SolidFormViewNormalHeaderButton
+                                            key={index}
+                                            button={button}
+                                            params={params}
+                                            formik={formik}
+                                            solidFormViewMetaData={solidFormViewMetaData}
+                                            handleCustomButtonClick={handleCustomButtonClick}
+                                        />
+                                    )
+                                })
+                                }
+                            </div>
                             {
                                 !formViewLayout.attrs.readonly &&
                                 solidView?.layout?.attrs?.showAddFormButton !== false &&
                                 params.embeded !== true &&
                                 viewMode === "view" &&
                                 actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
-
-                                <Button type="button" label="Add" size='small' onClick={() => router.replace('new?viewMode=edit')} />
+                                <>
+                                    <div className="hidden lg:flex">
+                                    <div>
+                                        <Button type="button" label="Add" size='small' onClick={() => router.replace('new?viewMode=edit')} />
+                                    </div>
+                                    </div>
+                                    <div className="lg:hidden">
+                                        <Button type="button" icon="pi pi-plus" size='small' onClick={() => router.replace('new?viewMode=edit')} />
+                                    </div>
+                                </>
                             }
                             {
                                 !formViewLayout.attrs.readonly &&
@@ -356,10 +359,16 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 params.embeded !== true &&
                                 viewMode === "view" &&
                                 actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
-
-                                <div>
-                                    <Button label="Edit" size="small" onClick={() => updateViewMode("edit")} type="button" />
-                                </div>
+                                <>
+                                    <div className="hidden lg:flex">
+                                        <div>
+                                        <Button label="Edit" size="small" onClick={() => updateViewMode("edit")} type="button" />
+                                        </div>
+                                    </div>
+                                    <div className="lg:hidden">
+                                        <Button icon="pi pi-pencil" size="small" onClick={() => updateViewMode("edit")} type="button" />
+                                    </div>
+                                </>
                             }
 
                             {
@@ -396,8 +405,16 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             }
                             {
                                 params.embeded == true &&
-
-                                <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' style={{ minWidth: 66 }} />
+                                <>
+                                    <div className="hidden lg:flex">
+                                    <div>
+                                        <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' style={{ minWidth: 66 }} />
+                                   </div>
+                                    </div>
+                                    <div className="lg:hidden">
+                                        <Button outlined size="small" type="button" icon="pi pi-times" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' />
+                                    </div>
+                                </>
                             }
                             {
                                 params.embeded !== true &&
