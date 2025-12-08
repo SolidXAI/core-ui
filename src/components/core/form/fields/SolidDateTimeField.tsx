@@ -207,13 +207,13 @@ export const DefaultDateTimeFormViewWidget = ({ formik, fieldContext }: SolidFor
         if (!value) return "-";
 
         if (value instanceof Date) {
-            return value.toLocaleString("en-GB"); 
+            return value.toLocaleString(); 
         }
 
         if (typeof value === "string" && value.includes("T")) {
             const d = new Date(value);
             if (!isNaN(d.getTime())) {
-                return d.toLocaleString("en-GB"); 
+                return d.toLocaleString(); 
             }
         }
 

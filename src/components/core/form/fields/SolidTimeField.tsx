@@ -37,7 +37,7 @@ function parseTimeStringToDate(timeStr: string): Date | null {
 // Formats a Date object to a HH:mm:ss string for display
 function formatTime(date: Date | null): string {
     if (!date) return "";
-    return date.toLocaleTimeString("en-GB", { hour12: false });
+    return date.toLocaleTimeString();
 }
 
 
