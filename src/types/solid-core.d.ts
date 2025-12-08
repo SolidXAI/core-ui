@@ -259,15 +259,15 @@ export type RootState = ReturnType<ReturnType<typeof initializeStore>['getState'
 
 export interface AiInteraction {
     id: number;
-    threadId: string;
+    thread_id: string;
     role: 'human' | 'gen-ai' | string;
     message: string;
-    contentType?: string;
+    content_type?: string;
     status?: string;
-    errorMessage?: string;
-    modelUsed?: string;
-    responseTimeMs?: number;
+    error_message?: string;
+    model_used?: string;
+    response_time_ms?: number;
     metadata?: string;
-    isApplied?: boolean;
-    createdAt?: Date
+    is_applied?: boolean;
+    created_at?: Date
 }

@@ -10,6 +10,7 @@ import { SolidXAIModule } from '../solid-ai/SolidXAIModule';
 import styles from './SolidDashboard.module.css';
 import SolidDashboardBody from './SolidDashboardBody';
 import SolidDashboardVariable from './SolidDashboardVariable';
+import { SolidAiMainWrapper } from '../solid-ai/SolidAiMainWrapper';
 import { SolidDashboardFilterRequired } from './SolidDashboardFilterRequired';
 import { SolidDashboardLoading } from './SolidDashboardLoading';
 import { SolidDashboardRenderError } from './SolidDashboardRenderError';
@@ -263,7 +264,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
               />
             </div>
             :
-            <SolidXAIModule showHeader inListView />
+            <SolidAiMainWrapper showHeader inListView/>
           }
         </div>
       )}

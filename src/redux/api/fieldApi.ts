@@ -59,6 +59,13 @@ export const fieldsApi = createApi({
                 method: 'DELETE',
             }),
         }),
+        resolveS3Url: builder.mutation({
+            query: (data) => ({
+                url: '/field-metadata/resolve-s3-url',
+                method: 'POST',
+                body: data
+            }),
+        }),
     })
 })
 
@@ -74,5 +81,6 @@ export const {
     useLazyGetFieldDefaultMetaDataQuery,
     useGetfieldByIdQuery,
     useCreatefieldMutation,
-    useDeletefieldMutation
+    useDeletefieldMutation,
+    useResolveS3UrlMutation
 } = fieldsApi  

@@ -345,7 +345,7 @@ export const SolidXAiJsonDisplay: React.FC<SolidXAiJsonDisplayProps> = ({ intera
                             <div className="border-round-lg overflow-hidden">
                                 <div className="border-round-lg overflow-hidden">{renderDataComponent()}</div>
                             </div>
-                            {interaction?.isApplied ?
+                            {interaction?.is_applied ?
                                 <div className="mt-3 font-medium solid-primary-black-text">
                                     ✅ Applied Successfully
                                 </div>

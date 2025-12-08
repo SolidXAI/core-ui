@@ -61,7 +61,8 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     isChild: modelMetaData ? modelMetaData?.isChild : "",
     parentModelId: modelMetaData ? modelMetaData?.parentModel?.id : "",
     parentModel: modelMetaData ? modelMetaData?.parentModel : "",
-
+    isLegacyTable: modelMetaData ? modelMetaData?.isLegacyTable : false,
+    isLegacyTableWithId: modelMetaData ? modelMetaData?.isLegacyTableWithId : false,
   };
 
   const [showTableName, setShowTableName] = useState<any>(false);
@@ -76,7 +77,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     if (modelMetaData && modelMetaData.isChild) {
       setShowParentModel(true)
     }
-    else if (modelMetaData && !modelMetaData.isChild){
+    else if (modelMetaData && !modelMetaData.isChild) {
       setShowParentModel(false)
     }
   }, [modelMetaData])
@@ -87,7 +88,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
       //   /^[a-z]+(-[a-z]+)*$/,
       //   "Invalid format. Use lowercase letters and hyphens only."
       // )
-      .notOneOf(allModelsNames, ERROR_MESSAGES.FIELD_ALREADY_USE('Name','name'))
+      .notOneOf(allModelsNames, ERROR_MESSAGES.FIELD_ALREADY_USE('Name', 'name'))
       .required(ERROR_MESSAGES.FIELD_REUQIRED('Singular Name')),
     pluralName: Yup.string()
       // .matches(
@@ -95,11 +96,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
       //   "Invalid format. Use lowercase letters and hyphens only."
       // )
       .required(ERROR_MESSAGES.FIELD_REUQIRED('Plural Name')),
-    tableName: Yup.string().required()
-      .matches(
-        /^[a-z0-9_]+$/,
-        ERROR_MESSAGES.SNAKE_CASE('Tabale')
-      ),
+    // tableName: Yup.string().required().matches(/^[a-z0-9_]+$/, ERROR_MESSAGES.SNAKE_CASE('Tabale')),
     displayName: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Display Name")),
     description: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Description Name")),
     dataSource: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Data Source")),
@@ -126,7 +123,8 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
         return schema.notRequired().nullable();
       }
     }),
-
+    isLegacyTable: Yup.boolean(),
+    isLegacyTableWithId: Yup.boolean(),
   });
 
 
@@ -164,6 +162,8 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
             parentModelId: values.parentModelId,
             parentModel: values.parentModel,
           }),
+          isLegacyTable: values.isLegacyTable === true ? true : false,
+          isLegacyTableWithId: values.isLegacyTableWithId === true ? true : false,
         };
         setModelMetaData(modelData);
         nextTab()
@@ -251,12 +251,12 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
         },
       };
 
-    // Add module filter dynamically
-    if (selectedModule?.name) {
-      (queryData.filters as any)["module"] = {
-        name: { $containsi: selectedModule.name },
-      };
-    }
+      // Add module filter dynamically
+      if (selectedModule?.name) {
+        (queryData.filters as any)["module"] = {
+          name: { $containsi: selectedModule.name },
+        };
+      }
 
 
       const queryString = qs.stringify(queryData, {
@@ -370,7 +370,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     searchData={searchModule}
                     existingData={formik.values.module}
                     formErrors={formErrors}
-                    additionalAction={(e:any) => setSelectedModule(e.value)} 
+                    additionalAction={(e: any) => setSelectedModule(e.value)}
                   />
                   {(isFormFieldValid(formik, "module") || (formErrors["module"])) && (
                     <Message severity="error" text={formik?.errors?.moduleId?.toString()} />
@@ -571,6 +571,30 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                   ></Checkbox>
                   <label htmlFor="draftPublishWorkflow" className="form-field-label">
                     Draft/Publish Workflow
+                  </label>
+                </div>
+                <div className="flex align-items-center gap-2 mt-3">
+                  <Checkbox
+                    name="isLegacyTable"
+                    onChange={(e) => {
+                      formik.setFieldValue("isLegacyTable", e.checked);
+                    }}
+                    checked={formik.values.isLegacyTable}
+                  ></Checkbox>
+                  <label htmlFor="isLegacyTable" className="form-field-label">
+                    Is Legacy Table
+                  </label>
+                </div>
+                <div className="flex align-items-center gap-2 mt-3">
+                  <Checkbox
+                    name="isLegacyTableWithId"
+                    onChange={(e) => {
+                      formik.setFieldValue("isLegacyTableWithId", e.checked);
+                    }}
+                    checked={formik.values.isLegacyTableWithId}
+                  ></Checkbox>
+                  <label htmlFor="isLegacyTableWithId" className="form-field-label">
+                    Is Legacy Table With Id
                   </label>
                 </div>
                 {/* <div className="field col-6">
