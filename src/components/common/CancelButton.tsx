@@ -47,9 +47,10 @@ export const SolidCancelButton = () => {
             <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse' style={{ minWidth: 66 }}/>
             </div>
         </div>
-        <div className="lg:hidden">
-            <Button outlined size="small" type="button" icon="pi pi-times" onClick={handleGoBack} className='bg-primary-reverse'/>
+        <div className="flex lg:hidden">
+            <Button size="small" type="button" icon="pi pi-times" onClick={handleGoBack} className='bg-primary-reverse solid-icon-button '/>
         </div>
         </>
     )
 }
+

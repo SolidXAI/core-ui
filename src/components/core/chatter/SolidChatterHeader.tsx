@@ -86,7 +86,7 @@ export const SolidChatterHeader = (props: Props) => {
     return (
         <div className={styles.chatterTitle}>
             <div className='flex justify-content-between align-items-center'>
-                <div className="form-wrapper-title">
+                <div className="form-wrapper-title ">
                     Activity
                 </div>
                 <div className='flex align-items-center gap-2'>

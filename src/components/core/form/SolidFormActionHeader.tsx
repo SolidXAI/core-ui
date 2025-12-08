@@ -88,7 +88,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                         type="button"
                         icon={'pi pi-cog'}
                         size="small"
-                        className="surface-card"
+                        className="surface-card solid-icon-button"
                         // style={{
                         //     height: 33.06,
                         //     width: 33.06
@@ -212,7 +212,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                     <>
                         <div className="flex align-items-center gap-3">
                             {params.embeded !== true && <BackButton />}
-                            <div className="form-wrapper-title"> {createHeaderTitle}</div>
+                            <div className="form-wrapper-title solid-text-wrapper"> {createHeaderTitle}</div>
                         </div>
                         <div className="flex gap-3">
                             <div className="hidden lg:flex gap-3">
@@ -275,11 +275,11 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 <>
                                     <div className="hidden lg:flex">
                                     <div>
-                                        <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' style={{ minWidth: 66 }} />
+                                        <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse ' style={{ minWidth: 66 }} />
                                   </div>
                                     </div>
                                     <div className="lg:hidden">
-                                        <Button outlined size="small" type="button" icon="pi pi-times" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' />
+                                        <Button outlined size="small" type="button" icon="pi pi-times" onClick={() => params.handlePopupClose()} className='bg-primary-reverse solid-icon-button' />
                                     </div>
                                 </>
                             }
@@ -298,7 +298,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                     <>
                         <div className="flex align-items-center gap-3">
                             {params.embeded !== true && <BackButton />}
-                            <div className="form-wrapper-title"> {viewMode === "edit" ? editHeaderTitle : solidView.model.displayName}</div>
+                            <div className="form-wrapper-title solid-text-wrapper"> {viewMode === "edit" ? editHeaderTitle : solidView.model.displayName}</div>
                         </div>
 
                         <div className="flex gap-3">
@@ -349,7 +349,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     </div>
                                     </div>
                                     <div className="lg:hidden">
-                                        <Button type="button" icon="pi pi-plus" size='small' onClick={() => router.replace('new?viewMode=edit')} />
+                                        <Button type="button" icon="pi pi-plus" size='small' onClick={() => router.replace('new?viewMode=edit')} className="p-button-sm solid-icon-button" />
                                     </div>
                                 </>
                             }
@@ -366,7 +366,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                         </div>
                                     </div>
                                     <div className="lg:hidden">
-                                        <Button icon="pi pi-pencil" size="small" onClick={() => updateViewMode("edit")} type="button" />
+                                        <Button icon="pi pi-pencil" size="small"  onClick={() => updateViewMode("edit")} type="button" className="p-button-sm solid-icon-button "/>
                                     </div>
                                 </>
                             }
@@ -408,11 +408,11 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 <>
                                     <div className="hidden lg:flex">
                                     <div>
-                                        <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' style={{ minWidth: 66 }} />
+                                        <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse ' style={{ minWidth: 66 }} />
                                    </div>
                                     </div>
                                     <div className="lg:hidden">
-                                        <Button outlined size="small" type="button" icon="pi pi-times" onClick={() => params.handlePopupClose()} className='bg-primary-reverse' />
+                                        <Button outlined size="small"  type="button" icon="pi pi-times" onClick={() => params.handlePopupClose()} className='bg-primary-reverse solid-icon-button' />
                                     </div>
                                 </>
                             }

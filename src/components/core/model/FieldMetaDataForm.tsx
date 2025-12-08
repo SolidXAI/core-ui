@@ -1451,7 +1451,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                         size="small"
                         type="button"
                         aria-label="Back"
-                        className='max-w-2rem bg-primary-reverse text-color'
+                        className='max-w-2rem bg-primary-reverse text-color solid-icon-button'
                         onClick={() => {
                           if (!formik.values.displayName) {
                             setShowTypeFilter(true)
@@ -1461,11 +1461,11 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                         }
                         }
                       />
-                      <div className="form-wrapper-title text-base">{capitalize(modelMetaData?.displayName)}</div>
+                      <div className="form-wrapper-title solid-text-wrapper text-base">{capitalize(modelMetaData?.displayName)}</div>
                     </>
                     :
                     <div className="flex text-2xl font-bold align-items-center ml-4" style={{ color: '#000' }}>
-                      <div className="form-wrapper-title text-base">Model - {capitalize(modelMetaData?.displayName)}</div>
+                      <div className="form-wrapper-title solid-text-wrapper text-base">Model - {capitalize(modelMetaData?.displayName)}</div>
                     </div>
                   }
                 </div>
@@ -1484,7 +1484,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                       size="small"
                       type="button"
                       aria-label="Back"
-                      className='max-w-2rem bg-primary-reverse text-color'
+                      className='max-w-2rem bg-primary-reverse text-color solid-icon-button'
                       onClick={() => {
                         if (!formik.values.displayName) {
                           setShowTypeFilter(true)
@@ -1496,9 +1496,9 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                   }
                   {fieldMetaData ?
 
-                    <div className="form-wrapper-title text-base">Edit {capitalize(fieldMetaData?.displayName)}</div>
+                    <div className="form-wrapper-title solid-text-wrapper text-base">Edit {capitalize(fieldMetaData?.displayName)}</div>
                     :
-                    <div className="form-wrapper-title text-base">Add New {selectedType?.label && !showTypeFilter && capitalize(selectedType.label)} Field to {capitalize(modelMetaData?.displayName)}</div>
+                    <div className="form-wrapper-title solid-text-wrapper  text-base">Add New {selectedType?.label && !showTypeFilter && capitalize(selectedType.label)} Field to {capitalize(modelMetaData?.displayName)}</div>
                   }
                 </div>
                 <div className="flex align-items-center gap-3 close-popup">

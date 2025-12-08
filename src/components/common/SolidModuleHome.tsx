@@ -24,7 +24,7 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
     return (
         <div className="h-screen surface-0">
             <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
-                <p className="m-0 view-title">
+                <p className="m-0 view-title solid-text-wrapper">
                     {moduleName}
                 </p>
             </div>

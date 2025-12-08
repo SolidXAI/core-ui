@@ -5,7 +5,7 @@ export const SolidListViewShimmerLoading = () => {
     const rows = Array.from({ length: 14 });
     return (
         <div className='h-screen surface-0'>
-            <div className="page-header pl-2 md:pl-0">
+            <div className="page-header pl-2 ">
                 <div className='flex align-items-center gap-3'>
                     <Skeleton width="50px" height='1.3rem' className='border-round-lg '></Skeleton>
                     <Skeleton width="300px" className='border-round-lg hidden md:flex'></Skeleton>

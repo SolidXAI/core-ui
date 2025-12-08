@@ -1119,9 +1119,9 @@ export const SolidListView = (params: SolidListViewParams) => {
         <div className="page-header flex-column lg:flex-row">
           <Toast ref={toast} />
           {/* <div> */}
-          <div className="flex justify-content-between w-full pl-5 md:pl-0 ">
+          <div className="flex justify-content-between w-full pl-4 md:pl-0 ">
             <div className="flex gap-3 align-items-center w-full ">
-              <p className="m-0 view-title">
+              <p className="m-0 view-title solid-text-wrapper">
                 {solidListViewMetaData?.data?.solidView?.displayName}
               </p>
               {solidListViewLayout?.attrs?.enableGlobalSearch === true &&

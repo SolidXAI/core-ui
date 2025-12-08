@@ -417,7 +417,7 @@ const CreateModule = ({ data }: any) => {
         {/* <div className="solid-form-stepper">
           <SolidFormStepper />
         </div> */}
-        <div className="p-3 md:p-4 solid-form-content">
+        <div className="px-4 py-3 md:p-4 solid-form-content">
           {/* <p className="form-wrapper-heading text-base">Basic Info</p> */}
           <Panel header={"Basic Info"} className="solid-column-panel">
             <div className="formgrid grid mt-3">

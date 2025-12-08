@@ -723,7 +723,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         <div className="flex justify-content-between w-full  pl-5 md:pl-0 ">
 
           <div className="flex gap-3 align-items-center">
-            <p className="m-0 view-title">{kanbanViewTitle}</p>
+            <p className="m-0 view-title solid-text-wrapper">{kanbanViewTitle}</p>
             {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
               // <SolidGlobalSearchElement viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} ></SolidGlobalSearchElement>
               <div className="hidden lg:flex">

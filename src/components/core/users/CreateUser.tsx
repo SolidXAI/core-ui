@@ -288,7 +288,7 @@ const CreateUser = ({ data, params }: any) => {
           {/* <div className="solid-form-stepper">
           <SolidFormStepper />
         </div> */}
-          <div className="p-3 md:p-4 solid-form-content">
+          <div className="px-4 py-3 md:p-4 solid-form-content">
             <div className="grid">
               <div className="col-12 lg:col-10 xl:col-8 mx-auto">
                 {/* <p className="form-wrapper-heading text-base">Basic Info</p> */}

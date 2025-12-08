@@ -202,7 +202,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
         {!isLoading && !error && (
           <>
             <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
-            <p className={`view-title flex align-items-center gap-1 ${styles.SolidDashboardTitle}`}>
+            <p className={`view-title solid-text-wrapper flex align-items-center gap-1 ${styles.SolidDashboardTitle}`}>
               {data?.records[0]?.displayName ? data?.records[0]?.displayName : data?.records[0]?.name}
               {data?.records[0]?.description &&
                 <>

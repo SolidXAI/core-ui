@@ -261,6 +261,30 @@
         height: 80vh !important;
     }
 
+
+    /* ====================== Logo====================== */
+    .solid-app-logo,
+    .solid-compony-logo {
+        width: 150px !important;
+        height: auto;
+        min-height: 100px;
+    }
+
+
+    /* ============================= Solid Form ==================== */
+    .solid-form-header {
+        padding: 10px 16px 16px 20px !important;
+    }
+
+
+    .solid-text-wrapper {
+        max-width: clamp(100px, 25vw, 600px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
 }
 
 @media(max-width:767px) {
@@ -313,6 +337,7 @@
         margin-left: 0 !important;
     }
 
+
     .sidebar-toggle-button.s-collapsed {
         left: 46px !important;
         top: 12px !important;
@@ -321,6 +346,7 @@
     .chatter-section.collapsed {
         width: 40px !important;
     }
+
 
     .sidebar-toggle-button {
         left: 274px !important;
@@ -429,11 +455,11 @@
     }
 
 
-    .solid-icon-category{
+    .solid-icon-category {
         padding: 8px 12px !important;
     }
-    
-    .solid-icon-category-wrapper{
+
+    .solid-icon-category-wrapper {
         gap: 0.7rem !important;
     }
 
@@ -484,6 +510,15 @@
 
     .solid-common-dialog {
         max-width: 90% !important;
+    }
+
+
+
+    /* ====================== Logo====================== */
+    .solid-app-logo,
+    .solid-compony-logo {
+        width: 130px !important;
+
     }
 
 }

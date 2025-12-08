@@ -453,7 +453,7 @@ export const GeneralSettings = () => {
                 <div className="solid-form-section">
                     <form onSubmit={formik.handleSubmit}>
                         <div className="page-header secondary-border-bottom">
-                            <div className="form-wrapper-title">Settings</div>
+                            <div className="form-wrapper-title ">Settings</div>
                             <div className="gap-3 flex">
                                 {formik.dirty &&
                                     <Button label="Save" size="small" onClick={() => showError()} type="submit" />
@@ -461,7 +461,7 @@ export const GeneralSettings = () => {
                                 <CancelButton />
                             </div>
                         </div>
-                        <div className="p-3 md:p-4 solid-form-content">
+                        <div className="px-4 py-3 md:p-4 solid-form-content">
                             {pathname.includes("app-settings") &&
                                 <>
                                     <div className='formgrid grid'>
@@ -492,7 +492,7 @@ export const GeneralSettings = () => {
                                                                     src = `${process.env.API_URL}/${src}`;
                                                                 }
                                                                 return (
-                                                                    <SolidUploadedImage src={src} />
+                                                                    <SolidUploadedImage src={src} className='solid-app-logo' />
                                                                 );
                                                             })()}
                                                         </div>
@@ -527,7 +527,7 @@ export const GeneralSettings = () => {
                                                                 }
 
                                                                 return (
-                                                                    <SolidUploadedImage src={src} />
+                                                                    <SolidUploadedImage src={src} className='solid-compony-logo'/>
                                                                 );
                                                             })()}
                                                         </div>

@@ -370,7 +370,7 @@ const CreateModel = ({ data, params }: any) => {
             <>
               <div className="flex align-items-center gap-3">
                 <BackButton />
-                <div className="form-wrapper-title">Create Model {modelMetaData?.displayName ? `- ${modelMetaData?.displayName}` : ""}</div>
+                <div className="form-wrapper-title ">Create Model {modelMetaData?.displayName ? `- ${modelMetaData?.displayName}` : ""}</div>
               </div>
               <div className="gap-3 flex">
                 {isDirty &&
@@ -408,7 +408,7 @@ const CreateModel = ({ data, params }: any) => {
         {/* <div className="solid-form-stepper">
           <SolidFormStepper />
         </div> */}
-        <div className="p-3 md:p-4 solid-form-content">
+        <div className="px-4 py-3 md:p-4 solid-form-content">
           <TabView
             activeIndex={activeIndex}
             onTabChange={(e) => {
