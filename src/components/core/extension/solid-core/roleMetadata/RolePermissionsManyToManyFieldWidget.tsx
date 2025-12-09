@@ -55,7 +55,7 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
         return (
             <div className={className}>
                 <div className="flex align-items-center gap-3">
-                    <label className="form-field-label text-lg font-bold">
+                    <label className="form-field-label text-base lg:text-lg font-bold">
                         {controllerName}
                     </label>
                     {fieldContext.field.attrs.inlineCreate && (
@@ -93,12 +93,12 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
     return (
             <div>
                 {Object.keys(groupedEntities).map((controllerName) => (
-                    <Panel toggleable headerTemplate={getHeaderTemplate(controllerName)} key={controllerName} className="mt-4">
-                        <div className="formgrid grid">
+                    <Panel toggleable headerTemplate={getHeaderTemplate(controllerName)} key={controllerName} className="mt-3 lg:mt-4">
+                        <div className="formgrid grid gap-3 lg:gap-0 ">
                             {groupedEntities[controllerName].map((entity: any, i: number) => {
                                 const isChecked = formik.values[fieldLayoutInfo.attrs.name].some((item: any) => item.value === entity.value);
                                 return (
-                                    <div key={entity.label} className={`field col-6 flex gap-2 ${i >= 2 ? 'mt-3' : ''}`}>
+                                    <div key={entity.label} className={`field col-12 lg:col-6  flex gap-2 ${i >= 2 ? 'lg:mt-3' : ''}`}>
                                         <Checkbox
                                             readOnly={readOnlyPermission}
                                             inputId={entity.label}

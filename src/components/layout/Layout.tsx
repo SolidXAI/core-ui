@@ -173,24 +173,23 @@ useEffect(() => {
 
 
 
-    const dispatch = useDispatch();
 
-const toggleBothSidebars = () => {
-    if (visibleNavbar) {
-        dispatch(toggleNavbar());   // close both
-    } else {
-        dispatch(showNavbar());     // open both
-    }
-};
+// const toggleBothSidebars = () => {
+//     if (visibleNavbar) {
+//         dispatch(toggleNavbar());   // close both
+//     } else {
+//         dispatch(showNavbar());     // open both
+//     }
+// };
     
     return (
         <React.Fragment>
             <div className={containerClass}>
                 {/* {process.env.NEXT_PUBLIC_ENABLE_CUSTOM_HEADER_FOOTER == "true" && <CustomHeader />} */}
                 <AppSidebar />
-                <div className="apps-icon block md:hidden" onClick={toggleBothSidebars}>
+                {/* <div className="apps-icon block md:hidden" onClick={toggleBothSidebars}>
                     <i className="pi pi-th-large"></i>
-                </div>
+                </div> */}
                 <SolidPopupContainer></SolidPopupContainer>
                 <div className={`main-content ${visibleNavbar ? "shifted" : ""}`}>
                     {children}

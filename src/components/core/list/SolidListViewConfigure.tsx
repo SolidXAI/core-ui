@@ -18,6 +18,8 @@ import "../../common/solid-export.css";
 import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
 import { useHasAnyRole } from "@/helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
+import { useDispatch, useSelector } from "react-redux";
+import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 
 export const SolidListViewConfigure = (
     { listViewMetaData,
@@ -51,6 +53,7 @@ export const SolidListViewConfigure = (
     const [view, setView] = useState<string>("");
     const [exportView, setExportView] = useState<boolean>(false);
     const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+
 
     const handleViewChange = (newView: string) => {
         if (view === newView) return; // Prevent unnecessary updates
@@ -130,8 +133,27 @@ export const SolidListViewConfigure = (
         return true;
     };
 
+    const dispatch = useDispatch();
+
+    // const visibleNavbar = useSelector((state: any) => state.navbar?.visibleNavbar);
+    const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
+
+
+
+    const toggleBothSidebars = () => {
+        if (visibleNavbar) {
+            dispatch(toggleNavbar());   // close both
+        } else {
+            dispatch(showNavbar());     // open both
+        }
+    };
+
+
     return (
         <div className="position-relative">
+            <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                <i className="pi pi-th-large"></i>
+            </div>
             <Button
                 type="button"
                 size="small"
@@ -153,9 +175,9 @@ export const SolidListViewConfigure = (
                     (actionsAllowed.includes(`${permissionExpression(params.modelName, 'deleteMany')}`) &&
                         viewData?.data?.solidView?.layout?.attrs?.delete !== false &&
                         selectedRecords.length > 0) ||
-                    isHeaderActionEnabled('import') && actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && actionsAllowed.includes(`${permissionExpression('importTransaction', 'create')}`)||
-                    isHeaderActionEnabled('export') && actionsAllowed.includes(`${permissionExpression(params.modelName, 'findMany')}`) && actionsAllowed.includes(`${permissionExpression('exportTransaction', 'create')}`)||
-                    isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`)||
+                    isHeaderActionEnabled('import') && actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && actionsAllowed.includes(`${permissionExpression('importTransaction', 'create')}`) ||
+                    isHeaderActionEnabled('export') && actionsAllowed.includes(`${permissionExpression(params.modelName, 'findMany')}`) && actionsAllowed.includes(`${permissionExpression('exportTransaction', 'create')}`) ||
+                    isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`) ||
                     isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`) ||
                     (solidListViewLayout?.attrs?.headerButtons
                         ?.some((rb: any) => rb.attrs.actionInContextMenu === true)) ||
@@ -181,7 +203,7 @@ export const SolidListViewConfigure = (
                                             onClick={() => setOpenImportDialog(true)}
                                         />
                                     )}
-                                    {isHeaderActionEnabled("export") && actionsAllowed.includes(`${permissionExpression(params.modelName, 'findMany')}`) && actionsAllowed.includes(`${permissionExpression('exportTransaction', 'create')}`) &&(
+                                    {isHeaderActionEnabled("export") && actionsAllowed.includes(`${permissionExpression(params.modelName, 'findMany')}`) && actionsAllowed.includes(`${permissionExpression('exportTransaction', 'create')}`) && (
                                         <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base"
                                             // @ts-ignore
                                             onClick={() => { setExportView((exportView) => !exportView); }} />
@@ -215,19 +237,19 @@ export const SolidListViewConfigure = (
                                     )}
 
                                     <div className="flex flex-column lg:hidden">
-                                        { solidListViewLayout?.attrs?.headerButtons
-                                            ?.filter((rb:any) => rb.attrs.actionInContextMenu != true)
+                                        {solidListViewLayout?.attrs?.headerButtons
+                                            ?.filter((rb: any) => rb.attrs.actionInContextMenu != true)
                                             ?.map((button: any, index: number) => (
                                                 <SolidListViewHeaderButton
-                                                key={index}
-                                                button={button}
-                                                params={params}
-                                                solidListViewMetaData={listViewMetaData}
-                                                handleCustomButtonClick={handleCustomButtonClick}
-                                                selectedRecords={selectedRecords}
-                                                filters={filters}
+                                                    key={index}
+                                                    button={button}
+                                                    params={params}
+                                                    solidListViewMetaData={listViewMetaData}
+                                                    handleCustomButtonClick={handleCustomButtonClick}
+                                                    selectedRecords={selectedRecords}
+                                                    filters={filters}
                                                 />
-                                        ))}
+                                            ))}
                                     </div>
 
                                 </div>

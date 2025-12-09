@@ -98,6 +98,11 @@
         padding: 16px !important;
     }
 
+
+    .solid-layout-accordion{
+        max-width: 300px;
+    }
+
 }
 
 
@@ -292,6 +297,8 @@
     }
 
 
+
+
 }
 
 @media(max-width:767px) {
@@ -470,6 +477,23 @@
         gap: 0.7rem !important;
     }
 
+
+
+    .solid-layout-accordion{
+        max-width: 250px;
+    }
+
+
+    .p-panel .p-panel-content{
+        padding: 0.8rem !important;
+    }
+
+    .solid-tab-view .p-tabview-panels {
+        padding-top: 10px;
+        padding-left: 0;
+        padding-right: 0;
+      }
+      
 }
 
 
