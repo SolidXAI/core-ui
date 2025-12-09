@@ -1,6 +1,6 @@
 import { ToastContainer } from "@/helpers/ToastContainer";
 import { useGetSolidMenuBasedOnRoleQuery } from "@/redux/api/solidMenuApi";
-import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
+import { showNavbar, toggleNavbar, hideNavbar } from "@/redux/features/navbarSlice";
 import { setIsAuthenticated, setUser } from "@/redux/features/userSlice";
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
@@ -11,12 +11,13 @@ import Image from "next/image";
 import AppBuilderSvg from '../../resources/images/menu/app-builder.svg'
 import SettingImage from '../../resources/images/Navigation/SolidSettinsIcon.svg'
 import { Avatar } from "primereact/avatar";
+import { usePathname } from "next/navigation";
 
 // import menu from "@/helpers/menu";
 
 const AppSidebar = () => {
     const dispatch = useDispatch();
-
+    const pathname = usePathname();
     // const [show, setShow] = useState(false);
     const visibleNavbar = useSelector(
         (state: any) => state.navbarState.visibleNavbar
@@ -27,7 +28,7 @@ const AppSidebar = () => {
     const [currentMenu, setCurrentMenu] = useState();
     const [currentMainMenu, setCurrentMainMenu] = useState();
     const [searchTerm, setSearchTerm] = useState("");
-
+   
     useEffect(() => {
         if (menu) {
             setCurrentMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === process.env.NEXT_PUBLIC_DEFAULT_MENU_KEY)[0]?.children);
@@ -46,6 +47,12 @@ const AppSidebar = () => {
         setCurrentMenu(m.children);
     };
 
+    useEffect(() => {
+        // Check if screen is small at the time of route change
+        if (window.innerWidth <= 1199) {
+            dispatch(hideNavbar());
+        }
+    }, [pathname, dispatch]);
 
 
     useEffect(() => {
@@ -125,7 +132,12 @@ const AppSidebar = () => {
     return (
         <>
             <ToastContainer />
-
+            {visibleNavbar && (
+                <div 
+                    className="sidebar-backdrop"
+                    onClick={handleToggle}
+                />
+            )}
             {/* commented this as this is not working properly @Jenendar to figure this out... */}
             {(visibleNavbar || currentMainMenu) && (
                 <div

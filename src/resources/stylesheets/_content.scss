@@ -53,6 +53,10 @@
     border-right: 1px solid var(--primary-light-color)
 }
 
+.sidebar-backdrop {
+    display: none; /* Hidden by default */
+}
+
 .sidebar-toggle-button {
     position: absolute;
     z-index: 999;
