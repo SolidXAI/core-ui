@@ -104,9 +104,9 @@ export const GeneralSettings = () => {
             try {
 
                 const profiles = values.solidXGenAiCodeBuilderConfig.availableProviders;
-
+                console.log("profiles", profiles);
                 // ✅ Only set defaultProvider if it's empty AND there is at least one profile
-                if (!values.solidXGenAiCodeBuilderConfig.defaultProvider && profiles.length > 0) {
+                if (!values.solidXGenAiCodeBuilderConfig.defaultProvider && profiles && profiles.length > 0) {
                     values.solidXGenAiCodeBuilderConfig.defaultProvider = profiles[0].provider;
                 }
 
@@ -157,6 +157,7 @@ export const GeneralSettings = () => {
                 }
 
             } catch (error) {
+                console.log("Error updating settings:", error);
                 showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
             }
         },
