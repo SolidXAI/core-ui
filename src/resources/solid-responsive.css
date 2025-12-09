@@ -6,6 +6,23 @@
         z-index: 99 !important;
     }
 
+    .sidebar-left {
+        z-index: 99 !important;
+    }
+
+    .sidebar-backdrop {
+        display: block !important;
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent dark overlay */
+        z-index: 98; /* Below sidebar but above content */
+        transition: opacity 0.3s ease;
+        cursor: pointer;
+    }
+
     .main-content.shifted {
         margin-left: 70px !important;
         /* backdrop-filter: blur(20px); */
