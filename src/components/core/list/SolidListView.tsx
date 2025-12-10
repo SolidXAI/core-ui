@@ -218,12 +218,20 @@ export const SolidListView = (params: SolidListViewParams) => {
     useRecoverSolidEntityMutation,
   } = entityApi;
 
+  const menuItemId = searchParams.get("menuItemId"),
+  const menuItemName = searchParams.get("menuItemName"),
+  const actionId = searchParams.get("actionId"),
+  const actionName = searchParams.get("actionName"),
   // Get the list view layout & metadata first.
   const listViewMetaDataQs = qs.stringify(
     {
       modelName: params.modelName,
       moduleName: params.moduleName,
       viewType: "list",
+      menuItemId: menuItemId,
+      menuItemName: menuItemName,
+      actionId: actionId,
+      actionName: actionName,
     },
     {
       encodeValuesOnly: true,
@@ -344,6 +352,12 @@ export const SolidListView = (params: SolidListViewParams) => {
           fieldsMetadata: solidListViewInitialMetaData?.data?.solidFieldsMetadata,
           viewMetadata: solidListViewInitialMetaData?.data?.solidView,
           listViewLayout: finalLayout,
+          queryParams: {
+            menuItemId: menuItemId,
+            menuItemName: menuItemName,
+            actionId: actionId,
+            actionName: actionName,
+          },
           user: user,
           session: session
         };
@@ -607,6 +621,12 @@ export const SolidListView = (params: SolidListViewParams) => {
           type: "onListLoad",
           viewMetadata: solidListViewMetaData?.data?.solidView,
           listViewLayout: listLayout,
+          queryParams: {
+            menuItemId: menuItemId,
+            menuItemName: menuItemName,
+            actionId: actionId,
+            actionName: actionName,
+          },
           user: user,
           session: session
         };
@@ -661,7 +681,6 @@ export const SolidListView = (params: SolidListViewParams) => {
   const onPageChange = (event: any) => {
     setFirst(event.first);
     setRows(event.rows);
-    // setQueryString(event.first, event.rows, sortField, sortOrder, filters, showArchived);
   };
 
   // Handle sort event.
@@ -671,13 +690,6 @@ export const SolidListView = (params: SolidListViewParams) => {
     setSortField(sortField);
     setSortOrder(validSortOrder);
     setFirst(0);
-    // setQueryString(
-    //   0,
-    //   rows,
-    //   sortField,
-    //   sortOrder === 1 || sortOrder === -1 ? sortOrder : 0,
-    //   filters
-    // );
   };
 
   // handle change in the records which are currently selected...
@@ -782,7 +794,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (fixedFilterBeforeListDataLoad) {
       filters.$and.push(fixedFilterBeforeListDataLoad)
     }
-    
+
     if (sortField && solidFieldsMetadata && solidFieldsMetadata[sortField]) {
       const sortFieldMetadata = solidFieldsMetadata[sortField];
       if (

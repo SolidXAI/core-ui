@@ -145,6 +145,7 @@ export type SolidLoadList = {
     totalRecords: number;
     viewMetadata: SolidView;
     listViewLayout: ListLayoutType;
+    queryParams?:any,
     user: any,
     session: any
 }
@@ -154,6 +155,8 @@ export type SolidBeforeListDataLoad = {
     fieldsMetadata: FieldsMetadata;
     viewMetadata: SolidView;
     listViewLayout: ListLayoutType;
+    filter?:any,
+    queryParams?:any,
     user: any,
     session: any
 }
