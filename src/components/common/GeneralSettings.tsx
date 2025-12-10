@@ -23,6 +23,7 @@ import { SettingsImageRemoveButton } from './SolidSettings/SettingsImageRemoveBu
 import { Dropdown } from 'primereact/dropdown';
 import { OpenAiProviderComponent } from './SolidSettings/LlmSettings/OpenAiProviderComponent';
 import { AnthropicProviderComponent } from './SolidSettings/LlmSettings/AnthropicProviderComponent';
+import { ERROR_MESSAGES } from '@/constants/error-messages';
 
 
 export const GeneralSettings = () => {
@@ -98,9 +99,9 @@ export const GeneralSettings = () => {
             try {
 
                 const profiles = values.solidXGenAiCodeBuilderConfig.availableProviders;
-
+                console.log("profiles", profiles);
                 // ✅ Only set defaultProvider if it's empty AND there is at least one profile
-                if (!values.solidXGenAiCodeBuilderConfig.defaultProvider && profiles.length > 0) {
+                if (!values.solidXGenAiCodeBuilderConfig.defaultProvider && profiles && profiles.length > 0) {
                     values.solidXGenAiCodeBuilderConfig.defaultProvider = profiles[0].provider;
                 }
 
@@ -151,7 +152,8 @@ export const GeneralSettings = () => {
                 }
 
             } catch (error) {
-                showToast("error", "Failed", "Something went wrong");
+                console.log("Error updating settings:", error);
+                showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
             }
         },
     });
