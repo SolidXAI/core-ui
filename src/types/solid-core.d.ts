@@ -97,7 +97,7 @@ export type ListLayoutType = {
 };
 
 // Event type
-export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender" | "onFormDataLoad" | "onFormLayoutLoad" | "onFormLoad" | "onListLoad" | "afterLogin" | "beforeLogout" | "onApplicationMount";
+export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender" | "onFormDataLoad" | "onFormLayoutLoad" | "onFormLoad" | "onListLoad" | "onBeforeListDataLoad" | "afterLogin" | "beforeLogout" | "onApplicationMount";
 export type SolidUiEvent = {
     type: SolidUiEvents;
     modifiedField?: string;
@@ -145,11 +145,25 @@ export type SolidLoadList = {
     totalRecords: number;
     viewMetadata: SolidView;
     listViewLayout: ListLayoutType;
+    queryParams?:any,
+    user: any,
+    session: any
+}
+
+export type SolidBeforeListDataLoad = {
+    type: SolidUiEvents;
+    fieldsMetadata: FieldsMetadata;
+    viewMetadata: SolidView;
+    listViewLayout: ListLayoutType;
+    filter?:any,
+    queryParams?:any,
     user: any,
     session: any
 }
 
 export type SolidListUiEventResponse = {
+    filterApplied?:Boolean;
+    newFilter?:any;
     dataChanged?: Boolean;
     newListData?: any[];
     layoutChanged?: Boolean;
