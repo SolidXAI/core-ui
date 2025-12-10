@@ -18,8 +18,6 @@ import "../../common/solid-export.css";
 import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
 import { useHasAnyRole } from "@/helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
-import { useDispatch, useSelector } from "react-redux";
-import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 
 export const SolidListViewConfigure = (
     { listViewMetaData,
@@ -133,27 +131,8 @@ export const SolidListViewConfigure = (
         return true;
     };
 
-    const dispatch = useDispatch();
-
-    // const visibleNavbar = useSelector((state: any) => state.navbar?.visibleNavbar);
-    const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
-
-
-
-    const toggleBothSidebars = () => {
-        if (visibleNavbar) {
-            dispatch(toggleNavbar());   // close both
-        } else {
-            dispatch(showNavbar());     // open both
-        }
-    };
-
-
     return (
         <div className="position-relative">
-            <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
-                <i className="pi pi-th-large"></i>
-            </div>
             <Button
                 type="button"
                 size="small"

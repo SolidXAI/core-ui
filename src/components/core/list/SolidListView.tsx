@@ -50,7 +50,7 @@ import { useHandleListCustomButtonClick } from "@/components/common/useHandleLis
 import { hasAnyRole, useHasAnyRole } from "@/helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { SolidListViewRowButtonContextMenu } from "./SolidListViewRowButtonContextMenu";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import styles from "./SolidListViewWrapper.module.css";
 import { SolidXAIModule } from "../solid-ai/SolidXAIModule";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
@@ -59,6 +59,7 @@ import { getExtensionFunction } from "@/helpers/registry";
 import { useSession } from "next-auth/react";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
+import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 // import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -106,6 +107,8 @@ type SolidListViewParams = {
 
 export const SolidListView = (params: SolidListViewParams) => {
   const { user } = useSelector((state: any) => state.auth);
+  const dispatch = useDispatch();
+  const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
 
   const solidGlobalSearchElementRef = useRef();
 
@@ -1112,19 +1115,30 @@ export const SolidListView = (params: SolidListViewParams) => {
     : [];
 
   const hasMedia = slides.some((s) => (s as any).type === "video");
-
+ 
+  const toggleBothSidebars = () => {
+    if (visibleNavbar) {
+        dispatch(toggleNavbar());   // close both
+    } else {
+        dispatch(showNavbar());     // open both
+    }
+  };
   return (
     <div className="page-parent-wrapper flex">
       <div className={`h-full flex-grow-1 ${styles.ListContentWrapper}`}>
-
         <div className="page-header flex-column lg:flex-row">
           <Toast ref={toast} />
           {/* <div> */}
-          <div className="flex justify-content-between w-full pl-4 md:pl-0 ">
+          <div className="flex justify-content-between w-full">
             <div className="flex gap-3 align-items-center w-full ">
+            <div className='flex align-items-center gap-2'>
+            <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                <i className="pi pi-th-large"></i>
+            </div>
               <p className="m-0 view-title solid-text-wrapper">
                 {solidListViewMetaData?.data?.solidView?.displayName}
               </p>
+              </div>
               {solidListViewLayout?.attrs?.enableGlobalSearch === true &&
                 params.embeded === false && (
                   <div className="hidden lg:flex">

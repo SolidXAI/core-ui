@@ -335,12 +335,6 @@
 
     /* ===================== Layout  ============================= */
 
-    .apps-icon {
-        position: absolute;
-        top: 18px;
-        left: 16px;
-    }
-
     .apps-icon i {
         font-size: 1.12rem !important;
     }
