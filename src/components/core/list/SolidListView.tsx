@@ -36,7 +36,7 @@ import CozyImage from "../../../resources/images/layout/images/cozy.png";
 import ComfortableImage from "../../../resources/images/layout/images/comfortable.png";
 import ListImage from "../../../resources/images/layout/images/cozy.png";
 import KanbanImage from "../../../resources/images/layout/images/kanban.png";
-import { capitalize, set } from "lodash";
+import { capitalize, filter, set } from "lodash";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import Download from "yet-another-react-lightbox/plugins/download";
@@ -114,7 +114,6 @@ export const SolidListView = (params: SolidListViewParams) => {
   const localeName = searchParams.get("locale");
   // TODO: The initial filter state will be created based on the fields which are present on this list view.
   const [filters, setFilters] = useState<any>(params.customFilter || { $and: [] });
-  const [fixedFilterBeforeListDataLoad, setFixedFilterBeforeListDataLoad] = useState<any>(null);
   // const [customFilter, setCustomFilter] = useState<FilterRule[]>(initialState);
   // const [showGlobalSearchElement, setShowGlobalSearchElement] = useState<boolean>(false);
 
@@ -324,6 +323,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         }
       }
     }
+    // setFilters(initialFilters);
     const rows = currentLayout?.attrs?.defaultPageSize ?? 25;
     const populate = toPopulate;
     const populateMedia = toPopulateMedia;
@@ -335,50 +335,17 @@ export const SolidListView = (params: SolidListViewParams) => {
     return { rows, populate, populateMedia };
   };
 
-
-  // Set the initial filter state based on the metadata and fire onBeforeListDataLoad event.
+  // Set the initial filter state based on the metadata.
   useEffect(() => {
     console.log("useEffect: [solidListViewMetaData] line no 227");
+    // refetch();
     if (solidListViewInitialMetaData) {
-      let finalLayout = solidListViewInitialMetaData?.data.solidView.layout;
       if (params.customLayout) {
-        finalLayout = params.customLayout
+        setSolidListViewLayout(params.customLayout);
+      } else {
+        setSolidListViewLayout(solidListViewInitialMetaData?.data.solidView.layout);
       }
-      const handleDynamicFunction = async () => {
-        const dynamicHeader = solidListViewInitialMetaData?.data?.solidView?.layout?.onBeforeListDataLoad;
-        let DynamicFunctionComponent = null;
-        const event: SolidBeforeListDataLoad = {
-          type: "onBeforeListDataLoad",
-          fieldsMetadata: solidListViewInitialMetaData?.data?.solidFieldsMetadata,
-          viewMetadata: solidListViewInitialMetaData?.data?.solidView,
-          listViewLayout: finalLayout,
-          queryParams: {
-            menuItemId: menuItemId,
-            menuItemName: menuItemName,
-            actionId: actionId,
-            actionName: actionName,
-          },
-          user: user,
-          session: session
-        };
-
-        if (dynamicHeader) {
-          DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
-          if (DynamicFunctionComponent) {
-            const updatedListData: SolidListUiEventResponse = await DynamicFunctionComponent(event);
-            if (updatedListData && updatedListData?.filterApplied && updatedListData?.newFilter) {
-              setFixedFilterBeforeListDataLoad(updatedListData.newFilter);
-            }
-            if (updatedListData && updatedListData?.layoutChanged && updatedListData?.newLayout) {
-              finalLayout = updatedListData.newLayout;
-            }
-          }
-        }
-        setSolidListViewLayout(finalLayout);
-        setSolidListViewMetaData(solidListViewInitialMetaData);
-      };
-      handleDynamicFunction();
-
+      setSolidListViewMetaData(solidListViewInitialMetaData);
       // initialFilterMethod()
     }
   }, [solidListViewInitialMetaData]);
@@ -660,7 +627,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       "useEffect: [first, rows, sortField, sortOrder, showArchived, toPopulate, toPopulateMedia, customFilter, queryDataLoaded]"
     );
 
-    if (queryDataLoaded && solidListViewMetaData && solidListViewLayout) {
+    if (queryDataLoaded) {
       setQueryString(first, rows, sortField, sortOrder, filters, showArchived);
     }
   }, [
@@ -673,14 +640,13 @@ export const SolidListView = (params: SolidListViewParams) => {
     toPopulateMedia,
     customFilter,
     queryDataLoaded,
-    solidListViewLayout,
-    solidListViewMetaData
   ]);
 
   // Handle pagination event.
   const onPageChange = (event: any) => {
     setFirst(event.first);
     setRows(event.rows);
+    // setQueryString(event.first, event.rows, sortField, sortOrder, filters, showArchived);
   };
 
   // Handle sort event.
@@ -690,6 +656,13 @@ export const SolidListView = (params: SolidListViewParams) => {
     setSortField(sortField);
     setSortOrder(validSortOrder);
     setFirst(0);
+    // setQueryString(
+    //   0,
+    //   rows,
+    //   sortField,
+    //   sortOrder === 1 || sortOrder === -1 ? sortOrder : 0,
+    //   filters
+    // );
   };
 
   // handle change in the records which are currently selected...
@@ -783,7 +756,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     const solidFieldsMetadata =
       solidListViewMetaData?.data?.solidFieldsMetadata;
 
-    const queryData: any = {
+    let queryData: any = {
       offset: offset ?? first,
       limit: limit ?? rows,
       filters: filters ?? filters,
@@ -791,9 +764,8 @@ export const SolidListView = (params: SolidListViewParams) => {
       populateMedia: toPopulateMedia,
       locale: localeName ? localeName : "en",
     };
-    if (fixedFilterBeforeListDataLoad) {
-      filters.$and.push(fixedFilterBeforeListDataLoad)
-    }
+
+
 
     if (sortField && solidFieldsMetadata && solidFieldsMetadata[sortField]) {
       const sortFieldMetadata = solidFieldsMetadata[sortField];
@@ -814,6 +786,37 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (showArchived) {
       queryData.showSoftDeleted = "inclusive";
     }
+
+
+    //  SolidBeforeListDataLoad Event that allows filter modification just before api call 
+    const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onBeforeListDataLoad;
+    let DynamicFunctionComponent = null;
+    const event: SolidBeforeListDataLoad = {
+      type: "onBeforeListDataLoad",
+      fieldsMetadata: solidListViewMetaData?.data?.solidFieldsMetadata,
+      viewMetadata: solidListViewMetaData?.data?.solidView,
+      listViewLayout: solidListViewMetaData?.data.solidView.layout,
+      filter: queryData,
+      queryParams: {
+        menuItemId: menuItemId,
+        menuItemName: menuItemName,
+        actionId: actionId,
+        actionName: actionName,
+      },
+      user: user,
+      session: session
+    };
+
+    if (dynamicHeader) {
+      DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
+      if (DynamicFunctionComponent) {
+        const updatedListData: SolidListUiEventResponse = await DynamicFunctionComponent(event);
+        if (updatedListData && updatedListData?.filterApplied && updatedListData?.newFilter) {
+          queryData = updatedListData?.newFilter
+        }
+      }
+    }
+
     const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
 
     if (customFilter) {
@@ -840,6 +843,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     }
 
     const customFilter = transformedFilter;
+    const updatedFilter = { ...(filters || {}), ...(queryfilter || {}) };
     setFilters((prevFilters) => ({
       ...(prevFilters || {}),
       ...(queryfilter || {}),
@@ -852,7 +856,9 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (solidListViewMetaData) {
       initialFilterMethod();
     }
-    setFilters({ $and: [] });
+    setFilters({
+      $and: []
+    });
     solidGlobalSearchElementRef.current.clearFilter();
   };
 
