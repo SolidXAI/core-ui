@@ -6,6 +6,8 @@ import { Divider } from 'primereact/divider';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { RadioButton } from 'primereact/radiobutton';
 import React, { useEffect, useRef, useState } from 'react'
+import { useDispatch, useSelector } from "react-redux";
+import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 
 export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllowed, setLayoutDialogVisible, viewModes, setShowSaveFilterPopup }: any) => {
     const op = useRef(null);
@@ -52,8 +54,28 @@ export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllow
         return () => document.removeEventListener("click", handleClickOutside);
     }, [isOverlayOpen])
 
+
+    const dispatch = useDispatch();
+
+    // const visibleNavbar = useSelector((state: any) => state.navbar?.visibleNavbar);
+    const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
+
+
+
+    const toggleBothSidebars = () => {
+        if (visibleNavbar) {
+            dispatch(toggleNavbar());   // close both
+        } else {
+            dispatch(showNavbar());     // open both
+        }
+    };
+
+
     return (
         <div className="position-relative">
+            <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                <i className="pi pi-th-large"></i>
+            </div>
             <Button
                 type="button"
                 size="small"

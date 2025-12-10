@@ -240,6 +240,13 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                         label="Save"
                                         size="small"
                                         type="submit"
+                                        className="hidden lg:flex"
+                                    />
+                                      <Button
+                                        size="small"
+                                        type="submit"
+                                        className="lg:hidden solid-icon-button"
+                                        icon="pi pi-check"
                                     />
                                 </div>
                             }
@@ -268,6 +275,16 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                             setRedirectToList(params.redirectToPath ? true : false);
                                         }}
                                         type="submit"
+                                        className="hidden lg:flex"
+                                    />
+                                    <Button
+                                        size="small"
+                                        onClick={() => {
+                                            setRedirectToList(params.redirectToPath ? true : false);
+                                        }}
+                                        type="submit"
+                                        className="lg:hidden solid-icon-button"
+                                        icon="pi pi-check"
                                     />
                                 </div>
                             }
@@ -378,7 +395,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 formik.dirty &&
 
                                 <div>
-                                    <Button label="Save" size="small" type="submit" />
+                                    <Button label="Save" size="small" type="submit"  className="hidden lg:flex"/>
+                                    <Button  size="small" type="submit" className="lg:hidden solid-icon-button" icon="pi pi-check" />
                                 </div>
                             }
 
@@ -390,7 +408,9 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 formik.dirty &&
 
                                 <div>
-                                    <Button label="Save" size="small" type="submit" />
+                                    <Button label="Save" size="small" type="submit"  className="hidden lg:flex"/>
+                                    <Button  size="small" type="submit" className="lg:hidden solid-icon-button" icon="pi pi-check" />
+
                                 </div>
                             }
                             {

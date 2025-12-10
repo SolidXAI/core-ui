@@ -120,6 +120,13 @@
         max-width: 300px;
     }
 
+
+    .solid-permisson-form-label{
+        white-space: normal;
+        overflow-wrap: anywhere;
+        word-break: break-word;
+    }
+
 }
 
 

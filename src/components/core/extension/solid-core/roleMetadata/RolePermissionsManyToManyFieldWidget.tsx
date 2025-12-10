@@ -105,7 +105,7 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
                                             checked={isChecked}
                                             onChange={() => handleCheckboxChange(entity)}
                                         />
-                                        <label htmlFor={entity.label} className="form-field-label m-0"> {entity.label}</label>
+                                        <label htmlFor={entity.label} className="form-field-label m-0 solid-permisson-form-label"> {entity.label}</label>
                                     </div>
                                 )
                             })}
