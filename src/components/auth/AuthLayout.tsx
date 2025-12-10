@@ -176,7 +176,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 }
             </div>
             {/* {solidSettingsData?.data?.showLegalLinks === true && */}
-            <div className={`absolute  ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'solid-auth-footer flex align-items-center justify-content-between' : 'solid-auth-footer-2 grid'}`}>
+            <div className={`absolute  ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'solid-auth-footer flex flex-column sm:flex-row align-items-center justify-content-between' : 'solid-auth-footer-2 grid'}`}>
                 {solidSettingsData?.data?.authPagesLayout !== 'left' &&
                     <div className={solidSettingsData?.data?.authPagesLayout !== 'center' ? 'col-6 lg:col-5  xl:col-6 flex justify-content-center' : ''}>
                         {solidSettingsData?.data?.showLegalLinks === true &&
@@ -185,7 +185,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                     </div>
                 }
                 <div className={solidSettingsData?.data?.authPagesLayout !== 'center' ? 'col-6 flex justify-content-center' : ''}>
-                    {solidSettingsData?.data?.showLegalLinks === true && <div className={`flex align-items-center gap-5 solid-auth-subtitle ${solidSettingsData?.data?.authPagesLayout === 'left' ? 'left' : ''}`}>
+                    {solidSettingsData?.data?.showLegalLinks === true && <div className={`flex flex-column sm:flex-row align-items-center gap-1 sm:gap-5 solid-auth-subtitle ${solidSettingsData?.data?.authPagesLayout === 'left' ? 'left' : ''}`}>
                         {solidSettingsData?.data?.appTnc !== "" && <p className="m-0 "> <Link className="text-sm no-underline font-normal" href={solidSettingsData?.data?.appTnc}>Terms of Service</Link></p>}
                         {solidSettingsData?.data?.appPrivacyPolicy !== "" && <p className="m-0 "> <Link className="text-sm no-underline font-normal" href={solidSettingsData?.data?.appPrivacyPolicy}>Privacy Policy.</Link></p>}
                     </div>

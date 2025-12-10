@@ -1562,6 +1562,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         '960px': '80vw',
                         '641px': '95vw'
                     }}
+                    contentClassName="p-3 pt-0 lg:p-4"
                 >
                     <SolidFormUserViewLayout solidFormViewMetaData={solidFormViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
                 </Dialog>

@@ -511,6 +511,10 @@
         padding-left: 0;
         padding-right: 0;
       }
+
+      .solid-logo.in_form_view {
+        margin-bottom: 15px;
+      }
       
 }
 
@@ -569,6 +573,11 @@
         width: 130px !important;
 
     }
+
+    .solid-logo.in_form_view {
+        margin-bottom: 10px;
+      }
+      
 
 }
 

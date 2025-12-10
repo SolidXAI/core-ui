@@ -34,7 +34,7 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
     };
 
     return (
-        <div className="h-screen surface-0">
+        <div className="h-screen surface-0 overflow-y-auto">
             <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
             <div className='flex align-items-center gap-2'>
             <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
@@ -45,9 +45,9 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
                 </p>
             </div>
             </div>
-            <div className="p-5 flex flex-column gap-4">
+            <div className="p-4 md:p-5 flex flex-column gap-4">
                 <div className={styles.solidModuleWelcomeSection}>
-                    <div className='flex flex-column gap-2'>
+                    <div className='flex flex-column gap-2 pr-3 lg:pr-0'>
                         <h3 className={styles.solidModuleHomeTitle1}>
                             Welcome, {status === "loading" ? "..." : user}
                         </h3>
@@ -81,7 +81,7 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
                         class: styles.dashboardCardThree,
                         type: 'popup'
                     }].map((card, i) => (
-                        <div className='col' key={i}>
+                        <div className='col-12 md:col-6 xl:col-4' key={i}>
                             <div className={`${styles.solidModuleHomeColorCards} ${card.class}`}>
                                 <div>
                                     <div className={styles.solidModuleHomeCardSvgWrapper}>{card.icon}</div>
