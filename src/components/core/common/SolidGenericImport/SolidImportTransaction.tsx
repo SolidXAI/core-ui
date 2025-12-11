@@ -63,12 +63,45 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
         });
     };
 
+     // Validate that all visible fields are mapped
+     const validateMapping = () => {
+        const unmappedFields: string[] = [];
+        
+        visibleHeaders.forEach((header) => {
+            const mappedValue = fieldMapping[header];
+            if (!mappedValue || mappedValue.trim() === "") {
+                unmappedFields.push(header);
+            }
+        });
+
+        return unmappedFields;
+    };
+
     const handleImportTransaction = async () => {
+        // Validate mapping before proceeding
+        const unmappedFields = validateMapping();
+        
+        if (unmappedFields.length > 0) {
+            showToast(
+                "error", 
+                "Unmapped Fields", 
+                `Please map or remove the following fields: ${unmappedFields.join(", ")}`
+            );
+            return;
+        }
+
         try {
-            const mappingArray = Object.entries(fieldMapping).map(([header, fieldName]) => ({
-                header,
-                fieldName,
-            }));
+            // const mappingArray = Object.entries(fieldMapping).map(([header, fieldName]) => ({
+            //     header,
+            //     fieldName,
+            // }));
+
+            const mappingArray = Object.entries(fieldMapping)
+                .filter(([header]) => visibleHeaders.includes(header))
+                .map(([header, fieldName]) => ({
+                    header,
+                    fieldName,
+                }));
 
             const patchData = {
                 status: "mapping_created",
@@ -126,19 +159,6 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
                                     (f: any) => f.name === fieldMapping[sample.cellHeader]
                                 );
                                 const isRequired = fieldMeta?.required;
-                                // {sampleRecords.length > 0 ? (
-                                //    sampleRecords    
-                                //     ?.filter((sample: any) => visibleHeaders.includes(sample.cellHeader))
-                                //     ?.sort((a: any, b: any) => {
-                                //         const aRequired = mappingInfo.data.importableFields.find((f: any) => f.name === fieldMapping[a.cellHeader])?.required;
-                                //         const bRequired = mappingInfo.data.importableFields.find((f: any) => f.name === fieldMapping[b.cellHeader])?.required;
-                                //         return (bRequired ? 1 : 0) - (aRequired ? 1 : 0); // true comes before false
-                                //     })
-                                //     .map((sample: any) => {
-                                //         const fieldMeta = mappingInfo.data.importableFields.find(
-                                //             (f: any) => f.name === fieldMapping[sample.cellHeader]
-                                //         );
-                                //         const isRequired = fieldMeta?.required;
                                 return (
                                     <React.Fragment key={sample.cellHeader}>
                                         <div
