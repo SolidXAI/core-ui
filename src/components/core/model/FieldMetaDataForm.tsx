@@ -3148,20 +3148,16 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               <Checkbox
                                 name="required"
                                 onChange={(e) => {
-                                  // Prevent unchecking if isPrimaryKey is true
-                                  if (!formik.values.isPrimaryKey) {
+                                  if (!formik.values.isPrimaryKey && !formik.values.unique) {
                                     formik.setFieldValue("required", e.checked);
-                                    // If unchecking required, also uncheck unique (since unique requires required)
-                                    if (!e.checked && formik.values.unique) {
-                                      formik.setFieldValue("unique", false);
-                                    }
                                   }
                                 }}
                                 checked={formik.values.required}
-                                disabled={formik.values.isPrimaryKey}
+                                disabled={formik.values.isPrimaryKey || formik.values.unique}
                               ></Checkbox>
                               <label htmlFor="ingredient1" className="form-field-label ml-2">
                                 Required {formik.values.isPrimaryKey && "(Auto-enabled for Primary Key)"}
+                                 {!formik.values.isPrimaryKey && formik.values.unique && "(Auto-enabled for Unique)"}
                               </label>
                             </div>
                             <p className="text-xs mt-2">You won't be able to create an entry if this field is empty</p>
@@ -3185,19 +3181,21 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                     formik.setFieldValue("unique", e.checked);
                                     formik.setFieldValue("isUserKey", false);
                                     // Auto-enable required when unique is checked
-                                    if (e.checked && !formik.values.required) {
+                                    if (e.checked) {
                                       formik.setFieldValue("required", true);
+                                    }else{
+                                      formik.setFieldValue("required", false);
                                     }
                                   }
                                 }}
                                 checked={formik.values.unique}
-                                disabled={formik.values.isPrimaryKey || !formik.values.required}
+                                disabled={formik.values.isPrimaryKey}
                               ></Checkbox>
                               <label htmlFor="ingredient1" className="form-field-label ml-2">
                                 Unique {formik.values.isPrimaryKey && "(Auto-enabled for Primary Key)"}
                               </label>
                             </div>
-                            <p className="text-xs mt-2">You won't be able to create an entry if there is an existing entry with identical content  {!formik.values.required && " (Requires field to be marked as Required)"}</p>
+                            <p className="text-xs mt-2">You won't be able to create an entry if there is an existing entry with identical content</p>
 
                             {isFormFieldValid(formik, "unique") && (
                               <Message
