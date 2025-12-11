@@ -796,7 +796,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       fieldsMetadata: solidListViewMetaData?.data?.solidFieldsMetadata,
       viewMetadata: solidListViewMetaData?.data?.solidView,
       listViewLayout: solidListViewMetaData?.data.solidView.layout,
-      filter: queryData,
+      filter:  structuredClone(queryData),
       queryParams: {
         menuItemId: menuItemId,
         menuItemName: menuItemName,
@@ -811,7 +811,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
       if (DynamicFunctionComponent) {
         const updatedListData: SolidListUiEventResponse = await DynamicFunctionComponent(event);
-        if (updatedListData && updatedListData?.filterApplied && updatedListData?.filterApplied != "false" && updatedListData?.filterApplied !== false && updatedListData?.newFilter) {
+        if (updatedListData && updatedListData?.filterApplied  && updatedListData?.newFilter) {
           queryData = updatedListData?.newFilter
         }
       }
