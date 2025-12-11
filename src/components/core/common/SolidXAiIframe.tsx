@@ -8,7 +8,6 @@ export const SolidXAiIframe: React.FC<SolidXAiIframeProps> = ({ url }) => {
   const [reachable, setReachable] = useState<boolean | null>(null);
 
 
-
   useEffect(() => {
   const handler = (event:any) => {
     if (event.data?.action === "REFRESH_PARENT") {
