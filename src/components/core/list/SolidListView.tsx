@@ -811,7 +811,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
       if (DynamicFunctionComponent) {
         const updatedListData: SolidListUiEventResponse = await DynamicFunctionComponent(event);
-        if (updatedListData && updatedListData?.filterApplied && updatedListData?.newFilter) {
+        if (updatedListData && updatedListData?.filterApplied && updatedListData?.filterApplied != "false" && updatedListData?.filterApplied !== false && updatedListData?.newFilter) {
           queryData = updatedListData?.newFilter
         }
       }
