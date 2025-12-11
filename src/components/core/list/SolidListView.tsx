@@ -1132,9 +1132,11 @@ export const SolidListView = (params: SolidListViewParams) => {
           <div className="flex justify-content-between w-full">
             <div className="flex gap-3 align-items-center w-full ">
             <div className='flex align-items-center gap-2'>
-            <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
-                <i className="pi pi-th-large"></i>
-            </div>
+              {params.embeded !== true &&
+                <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                    <i className="pi pi-th-large"></i>
+                </div>
+              }
               <p className="m-0 view-title solid-text-wrapper">
                 {solidListViewMetaData?.data?.solidView?.displayName}
               </p>
