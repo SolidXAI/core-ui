@@ -54,7 +54,7 @@ import { useDispatch, useSelector } from "react-redux";
 import styles from "./SolidListViewWrapper.module.css";
 import { SolidXAIModule } from "../solid-ai/SolidXAIModule";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
-import { SolidListUiEventResponse, SolidLoadList } from "@/types/solid-core";
+import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from "@/types/solid-core";
 import { getExtensionFunction } from "@/helpers/registry";
 import { useSession } from "next-auth/react";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
@@ -116,7 +116,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const searchParams = useSearchParams(); // Converts the query params to a string
   const localeName = searchParams.get("locale");
   // TODO: The initial filter state will be created based on the fields which are present on this list view.
-  const [filters, setFilters] = useState<any>(params.customFilter || null);
+  const [filters, setFilters] = useState<any>(params.customFilter || { $and: [] });
   // const [customFilter, setCustomFilter] = useState<FilterRule[]>(initialState);
   // const [showGlobalSearchElement, setShowGlobalSearchElement] = useState<boolean>(false);
 
@@ -220,20 +220,28 @@ export const SolidListView = (params: SolidListViewParams) => {
     useRecoverSolidEntityMutation,
   } = entityApi;
 
+  const menuItemId = searchParams.get("menuItemId"),
+  const menuItemName = searchParams.get("menuItemName"),
+  const actionId = searchParams.get("actionId"),
+  const actionName = searchParams.get("actionName"),
   // Get the list view layout & metadata first.
   const listViewMetaDataQs = qs.stringify(
     {
       modelName: params.modelName,
       moduleName: params.moduleName,
       viewType: "list",
+      menuItemId: menuItemId,
+      menuItemName: menuItemName,
+      actionId: actionId,
+      actionName: actionName,
     },
     {
       encodeValuesOnly: true,
     }
   );
 
-  const [solidListViewMetaData, setSolidListViewMetaData] = useState({});
-  const [solidListViewLayout, setSolidListViewLayout] = useState({});
+  const [solidListViewMetaData, setSolidListViewMetaData] = useState(null);
+  const [solidListViewLayout, setSolidListViewLayout] = useState(null);
   const {
     data: solidListViewInitialMetaData,
     error: solidListViewMetaDataError,
@@ -567,7 +575,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
 
   useEffect(() => {
-    if (solidListViewMetaData?.data && !loading) {
+    if (solidListViewMetaData && solidListViewMetaData?.data && !loading) {
       const handleDynamicFunction = async () => {
         const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onListLoad;
         let DynamicFunctionComponent = null;
@@ -583,6 +591,12 @@ export const SolidListView = (params: SolidListViewParams) => {
           type: "onListLoad",
           viewMetadata: solidListViewMetaData?.data?.solidView,
           listViewLayout: listLayout,
+          queryParams: {
+            menuItemId: menuItemId,
+            menuItemName: menuItemName,
+            actionId: actionId,
+            actionName: actionName,
+          },
           user: user,
           session: session
         };
@@ -745,7 +759,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     const solidFieldsMetadata =
       solidListViewMetaData?.data?.solidFieldsMetadata;
 
-    const queryData: any = {
+    let queryData: any = {
       offset: offset ?? first,
       limit: limit ?? rows,
       filters: filters ?? filters,
@@ -753,6 +767,8 @@ export const SolidListView = (params: SolidListViewParams) => {
       populateMedia: toPopulateMedia,
       locale: localeName ? localeName : "en",
     };
+
+
 
     if (sortField && solidFieldsMetadata && solidFieldsMetadata[sortField]) {
       const sortFieldMetadata = solidFieldsMetadata[sortField];
@@ -773,6 +789,37 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (showArchived) {
       queryData.showSoftDeleted = "inclusive";
     }
+
+
+    //  SolidBeforeListDataLoad Event that allows filter modification just before api call 
+    const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onBeforeListDataLoad;
+    let DynamicFunctionComponent = null;
+    const event: SolidBeforeListDataLoad = {
+      type: "onBeforeListDataLoad",
+      fieldsMetadata: solidListViewMetaData?.data?.solidFieldsMetadata,
+      viewMetadata: solidListViewMetaData?.data?.solidView,
+      listViewLayout: solidListViewMetaData?.data.solidView.layout,
+      filter:  structuredClone(queryData),
+      queryParams: {
+        menuItemId: menuItemId,
+        menuItemName: menuItemName,
+        actionId: actionId,
+        actionName: actionName,
+      },
+      user: user,
+      session: session
+    };
+
+    if (dynamicHeader) {
+      DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
+      if (DynamicFunctionComponent) {
+        const updatedListData: SolidListUiEventResponse = await DynamicFunctionComponent(event);
+        if (updatedListData && updatedListData?.filterApplied  && updatedListData?.newFilter) {
+          queryData = updatedListData?.newFilter
+        }
+      }
+    }
+
     const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
 
     if (customFilter) {
@@ -812,7 +859,9 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (solidListViewMetaData) {
       initialFilterMethod();
     }
-    setFilters(null);
+    setFilters({
+      $and: []
+    });
     solidGlobalSearchElementRef.current.clearFilter();
   };
 
@@ -1454,7 +1503,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                   params,
                                   rowData: rowData,
                                   solidListViewMetaData:
-                                    solidListViewMetaData.data,
+                                    solidListViewMetaData?.data,
                                 };
                                 handleCustomButtonClick(button.attrs, event);
                               }}
@@ -1571,7 +1620,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                           icon={"pi pi-pencil"}
                                           onClick={() => {
                                             if (params.embeded == true) {
-                                                params.handlePopUpOpen(
+                                              params.handlePopUpOpen(
                                                 selectedDataRef.current?.id
                                               );
                                             } else {

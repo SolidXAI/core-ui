@@ -434,7 +434,7 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
                 <SolidListView key={refreshList.toString()}  {...listViewParams} handlePopUpOpen={handlePopupOpen} />
             }
             {readOnlyPermission !== true && formViewParams &&
-                <RenderSolidFormEmbededView  fieldLayoutInfo={fieldLayoutInfo} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
+                <RenderSolidFormEmbededView fieldLayoutInfo={fieldLayoutInfo} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
             }
 
 
@@ -527,7 +527,7 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
             isCustomCreate: false,
             inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
             customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
-            parentData: childFieldName ? { [childFieldName]: formViewData.data[parentFieldName] } : {},
+            parentData: childFieldName && formViewData?.data && formViewData?.data[parentFieldName] ? { [childFieldName]: formViewData.data[parentFieldName] } : {},
             onEmbeddedFormSave: fieldLayoutInfo.onEmbeddedFormSave ? fieldLayoutInfo : false
         }
         setformViewParams(formviewparams);
@@ -546,12 +546,14 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
             inlineCreate: readOnlyPermission === false ? true : false,
             customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
             embeded: true,
-            id: formViewData.data ? formViewData?.data?.id : 'new',
-            customFilter: {
-                [childFieldName]: {
-                    $eq: formViewData.data[parentFieldName]
+            id: formViewData && formViewData?.data ? formViewData?.data?.id : 'new',
+            customFilter: childFieldName && formViewData?.data
+                ? {
+                    [childFieldName]: {
+                        $eq: formViewData.data[parentFieldName]
+                    }
                 }
-            }
+                : {}
         }
         setListViewParams(lisviewparams)
     }
@@ -564,14 +566,16 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
             inlineCreate: readOnlyPermission === false ? true : false,
             customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
             embeded: true,
-            id: formViewData.data ? formViewData?.data?.id : 'new',
-            customFilter: {
-                [childFieldName]: {
-                    $eq: formViewData.data[parentFieldName]
+            id: formViewData && formViewData?.data ? formViewData?.data?.id : 'new',
+            customFilter: childFieldName && formViewData?.data
+                ? {
+                    [childFieldName]: {
+                        $eq: formViewData.data[parentFieldName]
+                    }
                 }
-
-            }
+                : {}
         }
+
         setListViewParams(listviewparams);
         const formviewparams: FormViewParams = {
             moduleName: childModuleName,
@@ -581,8 +585,8 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
             isCustomCreate: false,
             inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
             customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
-            parentData: childFieldName ? { [childFieldName]: formViewData.data[parentFieldName] } : {},
-            onEmbeddedFormSave: formViewData.onEmbeddedFormSave
+            parentData: childFieldName && formViewData && formViewData?.data && formViewData?.data[parentFieldName] ? { [childFieldName]: formViewData.data[parentFieldName] } : {},
+            onEmbeddedFormSave: formViewData && formViewData.onEmbeddedFormSave
 
         }
 
@@ -606,7 +610,7 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
                 <SolidListView key={refreshList.toString()}  {...listViewParams} handlePopUpOpen={handlePopupOpen} />
             }
             {readOnlyPermission !== true && formViewParams &&
-                <RenderSolidFormEmbededView  fieldLayoutInfo={fieldLayoutInfo} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
+                <RenderSolidFormEmbededView fieldLayoutInfo={fieldLayoutInfo} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
             }
 
         </div>
