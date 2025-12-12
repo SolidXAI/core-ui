@@ -17,7 +17,10 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
     const fileType = fieldLayoutInfo.attrs.fileType?.toLowerCase();
     const downloadAllowed = fieldLayoutInfo.attrs.downloadAllowed !== false;
     const bucketName = fieldLayoutInfo.attrs.bucketName;
-    const isPrivate = fieldLayoutInfo.attrs.isPrivate;
+    const isPrivate = fieldLayoutInfo.attrs.isPrivate ? fieldLayoutInfo.attrs.isPrivate : "false";
+    const modelName = fieldLayoutInfo.attrs.modelName;
+    const fieldName = fieldLayoutInfo.attrs.fieldName;
+    const s3KeyFieldName = fieldLayoutInfo.attrs.s3KeyFieldName;
 
     const [previewUrl, setPreviewUrl] = useState<string | null>(null);
     const [isLoading, setIsLoading] = useState(false);
@@ -30,14 +33,15 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
         console.log("fetcch url called");
         setIsLoading(true);
         try {
+
             const result = await resolveS3Url({
-                modelName: fieldContext.modelName,
-                fieldName: fieldContext.fieldMetadata.name,
-                modelRecordId: fieldContext?.data?.id,
+                modelName: modelName,
+                fieldName: fieldName,
+                fieldValue: value,
+                s3KeyFieldName: s3KeyFieldName,
                 fileType: fileType,
                 bucketName: bucketName,
-                isPrivate: isPrivate,
-                s3Key: value
+                isPrivate: isPrivate
             }).unwrap();
 
             setIsLoading(false);
