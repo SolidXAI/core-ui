@@ -22,8 +22,15 @@ export class SolidShortTextField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        if (value !== undefined && value !== null) {
-            formData.append(fieldLayoutInfo.attrs.name, value);
+        const editWidget = fieldLayoutInfo.attrs.editWidget;
+        if (editWidget === "PseudoRelationManyToOneFormWidget") {
+            if (value?.solidManyToOneValue) {
+                formData.append(fieldLayoutInfo.attrs.name, value.solidManyToOneValue);
+            }
+        }else{            
+            if (value !== undefined && value !== null) {
+                formData.append(fieldLayoutInfo.attrs.name, value);
+            }
         }
     }
 
@@ -42,31 +49,89 @@ export class SolidShortTextField implements ISolidField {
     }
 
     validationSchema(): Schema {
-        let schema: Yup.StringSchema<string | null | undefined> = Yup.string();
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-        // 1. required  
-        // 1. required
-        if (fieldMetadata.required) {
-            schema = schema.required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel));
-        } else {
-            schema = schema.nullable(); // Allow null when not required
-        }
-        // 2. length (min/max)
-        if (fieldMetadata.min && fieldMetadata.min > 0) {
-            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel, fieldMetadata.min));
-        }
-        if (fieldMetadata.max && fieldMetadata.max > 0) {
-            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel, fieldMetadata.max));
-        }
-        // 3. regular expression
-        if (fieldMetadata.regexPattern) {
-            const regexPatternNotMatchingErrorMsg = fieldMetadata.regexPatternNotMatchingErrorMsg ?? ERROR_MESSAGES.FIELD_INVALID_DATA(fieldLabel)
-            schema = schema.matches(fieldMetadata.regexPattern, regexPatternNotMatchingErrorMsg);
-        }
+        const editWidget = fieldLayoutInfo.attrs.editWidget;
+        if (editWidget === "PseudoRelationManyToOneFormWidget") {
+            let schema = Yup.mixed();
 
-        return schema;
+            // Custom validation for relation field
+            if (fieldMetadata.required) {
+                schema = schema.test(
+                    ERROR_MESSAGES.REQUIRED_REALTION,
+                    ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel),
+                    function (value: any) {
+                        // Handle empty values
+                        if (!value) return false;
+
+                        // If it's an object with solidManyToOneValue, check if it's valid
+                        if (typeof value === 'object' && value !== null && (value as any).solidManyToOneValue) {
+                            return true;
+                        }
+
+                        // If it's a string (user typed but didn't select), it's invalid for required field
+                        if (typeof value === 'string') {
+                            return false;
+                        }
+
+                        return false;
+                    }
+                );
+            }
+
+            // Add validation to ensure valid selection
+            schema = schema.test(
+                ERROR_MESSAGES.VALIDATE_SELECTION,
+                ERROR_MESSAGES.SELECT_VALID_FROM_DROPDOWN(fieldLabel),
+                function (value: any) {
+                    // If not required and empty, it's valid
+                    if (!fieldMetadata.required && (!value || value === '')) {
+                        return true;
+                    }
+
+                    // If it's an object with solidManyToOneValue, it's a valid selection
+                    if (typeof value === 'object' && value !== null && (value as any).solidManyToOneValue) {
+                        return true;
+                    }
+
+                    // If it's a string (user typed but didn't select), it's invalid
+                    if (typeof value === 'string' && value.trim() !== '') {
+                        return false;
+                    }
+
+                    // Empty value for non-required field
+                    return !fieldMetadata.required;
+                }
+            );
+            return schema;
+        } else {
+
+            let schema: Yup.StringSchema<string | null | undefined> = Yup.string();
+            const fieldMetadata = this.fieldContext.fieldMetadata;
+            const fieldLayoutInfo = this.fieldContext.field;
+            const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+            // 1. required  
+            // 1. required
+            if (fieldMetadata.required) {
+                schema = schema.required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel));
+            } else {
+                schema = schema.nullable(); // Allow null when not required
+            }
+            // 2. length (min/max)
+            if (fieldMetadata.min && fieldMetadata.min > 0) {
+                schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel, fieldMetadata.min));
+            }
+            if (fieldMetadata.max && fieldMetadata.max > 0) {
+                schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel, fieldMetadata.max));
+            }
+            // 3. regular expression
+            if (fieldMetadata.regexPattern) {
+                const regexPatternNotMatchingErrorMsg = fieldMetadata.regexPatternNotMatchingErrorMsg ?? ERROR_MESSAGES.FIELD_INVALID_DATA(fieldLabel)
+                schema = schema.matches(fieldMetadata.regexPattern, regexPatternNotMatchingErrorMsg);
+            }
+            return schema;
+        }
     }
 
     render(formik: FormikObject) {
@@ -206,7 +271,7 @@ export const DefaultShortTextFormViewWidget = ({ formik, fieldContext }: SolidFo
             {showFieldLabel !== false && (
                 <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
             )}
-            <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name]}</p>
+            <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name] && typeof formik.values[fieldLayoutInfo.attrs.name] !== "object" && typeof formik.values[fieldLayoutInfo.attrs.name] == "string" && formik.values[fieldLayoutInfo.attrs.name]}</p>
         </div>
     );
 }
