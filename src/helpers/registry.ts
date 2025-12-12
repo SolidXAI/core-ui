@@ -20,7 +20,7 @@ import { DefaultMediaSingleFormEditWidget, DefaultMediaSingleFormViewWidget } fr
 import { DefaultPasswordFormCreateWidget, DefaultPasswordFormEditWidget, DefaultPasswordFormViewWidget } from "@/components/core/form/fields/SolidPasswordField";
 import { DefaultRichTextFormEditWidget, DefaultRichTextFormViewWidget } from "@/components/core/form/fields/SolidRichTextField";
 import { DefaultSelectionStaticAutocompleteFormEditWidget, DefaultSelectionStaticFormViewWidget, SolidSelectionStaticRadioFormEditWidget, SolidSelectionStaticSelectButtonFormEditWidget } from "@/components/core/form/fields/SolidSelectionStaticField";
-import { DefaultShortTextFormEditWidget, DefaultShortTextFormViewWidget, MaskedShortTextFormViewWidget, MaskedShortTextFormEditWidget, MaskedShortTextListViewWidget } from "@/components/core/form/fields/SolidShortTextField";
+import { DefaultShortTextFormEditWidget, DefaultShortTextFormViewWidget, MaskedShortTextFormViewWidget, MaskedShortTextFormEditWidget, MaskedShortTextListViewWidget, PublishedStatusListViewWidget } from "@/components/core/form/fields/SolidShortTextField";
 import { DefaultRelationManyToOneFormEditWidget, DefaultRelationManyToOneFormViewWidget, PseudoRelationManyToOneFormWidget } from "@/components/core/form/fields/relations/SolidRelationManyToOneField";
 import { DefaultRelationOneToManyFormEditWidget, DefaultRelationOneToManyFormViewWidget, PseudoRelationOneToManyFormWidget } from "@/components/core/form/fields/relations/SolidRelationOneToManyField";
 import { DefaultRelationManyToManyAutoCompleteFormEditWidget, DefaultRelationManyToManyCheckBoxFormEditWidget } from "@/components/core/form/fields/relations/SolidRelationManyToManyField";
@@ -301,6 +301,7 @@ registerExtensionComponent("ChartFormPreviewWidget", ChartFormPreviewWidget, ["c
 
 // Formview Default View widgets
 registerExtensionComponent("MaskedShortTextListViewWidget", MaskedShortTextListViewWidget, ["maskedShortTextList"]);
+registerExtensionComponent("PublishedStatusListViewWidget",PublishedStatusListViewWidget,["PublishedStatusListViewWidget"])
 
 // Formview Custom view widgets
 registerExtensionComponent("SolidRelationFieldAvatarFormWidget", SolidRelationFieldAvatarFormWidget, []);

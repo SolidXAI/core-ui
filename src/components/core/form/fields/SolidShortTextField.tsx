@@ -11,6 +11,7 @@ import { Button } from "primereact/button";
 import { useState } from "react";
 import { Password } from "primereact/password";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { Tag } from "primereact/tag";
 
 export class SolidShortTextField implements ISolidField {
 
@@ -218,6 +219,31 @@ export const MaskedShortTextListViewWidget = ({ rowData, solidListViewMetaData, 
     const maskedValue = colVal ? '*'.repeat(colVal.length) : '';
     return (
         <span>{maskedValue}</span>
+    );
+};
+
+export const PublishedStatusListViewWidget = ({rowData,solidListViewMetaData,fieldMetadata,column}: SolidListFieldWidgetProps) => {
+
+    const colVal = rowData[column.attrs.name]; // publishedAt value
+
+    const isPublished = !!colVal;
+
+    return (
+        <span>
+            {isPublished ? (
+                <Tag
+                    icon="pi pi-check"
+                    severity="success"
+                    rounded
+                />
+            ) : (
+                <Tag
+                    icon="pi pi-times"
+                    severity="danger"
+                    rounded
+                />
+            )}
+        </span>
     );
 };
 
