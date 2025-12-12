@@ -22,14 +22,14 @@ export class SolidShortTextField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        const editWidget = fieldLayoutInfo.attrs.editWidget;
+        const editWidget = fieldLayoutInfo?.attrs?.editWidget;
         if (editWidget === "PseudoRelationManyToOneFormWidget") {
             if (value?.solidManyToOneValue) {
-                formData.append(fieldLayoutInfo.attrs.name, value.solidManyToOneValue);
+                formData.append(fieldLayoutInfo?.attrs?.name, value.solidManyToOneValue);
             }
         }else{            
             if (value !== undefined && value !== null) {
-                formData.append(fieldLayoutInfo.attrs.name, value);
+                formData.append(fieldLayoutInfo?.attrs?.name, value);
             }
         }
     }
@@ -51,8 +51,8 @@ export class SolidShortTextField implements ISolidField {
     validationSchema(): Schema {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
-        const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-        const editWidget = fieldLayoutInfo.attrs.editWidget;
+        const fieldLabel = fieldLayoutInfo?.attrs?.label ?? fieldMetadata.displayName;
+        const editWidget = fieldLayoutInfo?.attrs?.editWidget;
         if (editWidget === "PseudoRelationManyToOneFormWidget") {
             let schema = Yup.mixed();
 
