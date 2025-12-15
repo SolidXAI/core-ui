@@ -180,6 +180,7 @@ export const SolidFormStepper = (props: Props) => {
     let visibleSteps: any[] = [];
     let previousSteps: any[] = [];
     let nextSteps: any[] = [];
+    const isSingleVisibleStep = visibleStepsCount === 1;
 
     if (solidFormViewWorkflowData && solidFormViewWorkflowData.length > 0) {
         if (activeIndex === -1) {
@@ -210,8 +211,11 @@ export const SolidFormStepper = (props: Props) => {
         }
     }
 
-    const hasPreviousSteps = previousSteps.length > 0;
-    const hasNextSteps = nextSteps.length > 0;
+    const hasPreviousSteps =
+    previousSteps.length > 0 && !isSingleVisibleStep;
+
+    const hasNextSteps =
+    nextSteps.length > 0 || (isSingleVisibleStep && previousSteps.length > 0);
 
     return (
         <>
@@ -221,13 +225,13 @@ export const SolidFormStepper = (props: Props) => {
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <button
                             type='button'
-                            className="overflow-button"
+                            className="overflow-button overlow-left-button"
                             onClick={(e) => {
                                 // @ts-ignore
                                 leftFormStepperOverlay.current.toggle(e)
                             }}
                         >
-                            <i className="pi pi-angle-left" />
+                            <i className="pi pi-ellipsis-h" />
                         </button>
                         <OverlayPanel
                             ref={leftFormStepperOverlay}
@@ -259,50 +263,61 @@ export const SolidFormStepper = (props: Props) => {
                     </div>
                 )}
 
-                {visibleSteps.map((step: any, index: number) => {
-                    const actualIndex = hasPreviousSteps ? previousSteps.length + index : index;
-                    const isActive = actualIndex === activeIndex;
-                    const isBeforeActive = actualIndex < activeIndex;
+                {visibleSteps.map((step: any) => {
+                    const stepIndex = solidFormViewWorkflowData.findIndex(
+                        (s: any) => s.value === step.value
+                    );
+
+                    const isActive = stepIndex === activeIndex;
+                    const isBeforeActive = stepIndex < activeIndex;
                     const isSingleButton = visibleSteps.length === 1;
 
                     return (
                         <button
-                            key={actualIndex}
+                            key={step.value}
                             type="button"
                             className={`arrow-step-button ${
                                 isSingleButton ? 'single-button' : ''
                             } ${
-                                isActive ? 'arrow-step-active'
-                                : isBeforeActive ? 'arrow-step-completed'
-                                : 'arrow-step-future'
+                                isActive
+                                    ? 'arrow-step-active'
+                                    : isBeforeActive
+                                    ? 'arrow-step-completed'
+                                    : 'arrow-step-future'
                             }`}
                             onClick={() => handleButtonClick(step.value)}
                             title={step.label}
                         >
                             <span className="step-text">{step.label}</span>
                         </button>
-                    )
+                    );
                 })}
 
                 {hasNextSteps && (
                     <div style={{ display: 'flex', alignItems: 'center' }}>
                         <button
                             type='button'
-                            className="overflow-button"
+                            className="overflow-button overflow-right-button"
                             onClick={(e) => {
                                 // @ts-ignore
                                 formStepperOverlay.current.toggle(e)
                             }}
                         >
-                            <i className="pi pi-angle-right" />
+                            <i className="pi pi-ellipsis-h" />
                         </button>
                         <OverlayPanel
                             ref={formStepperOverlay}
                             className="solid-custom-overlay solid-form-stepper-overlay"
                         >
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', padding: '0.5rem' }}>
-                                {nextSteps.map((step: any, index: number) => {
-                                    const stepIndex = previousSteps.length + visibleSteps.length + index;
+                            {(isSingleVisibleStep
+                                ? [...previousSteps, ...nextSteps]
+                                : nextSteps).map((step: any) => {
+
+                                    const stepIndex = solidFormViewWorkflowData.findIndex(
+                                        (s: any) => s.value === step.value
+                                    );
+                                    
                                     const isStepActive = stepIndex === activeIndex;
                                     const isStepBeforeActive = stepIndex < activeIndex;
 

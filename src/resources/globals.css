@@ -1931,7 +1931,7 @@ li.header-li-px {
 
 .step-text {
   display: inline-block;
-  max-width: 200px;        /* your limit */
+  max-width: 180px;        /* your limit */
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -2006,6 +2006,25 @@ li.header-li-px {
   align-items: center;
   justify-content: center;
   transition: all 0.2s ease;
+}
+
+.overflow-right-button {
+  border-top: 1px solid var(--solid-light-grey);
+  border-bottom: 1px solid var(--solid-light-grey);
+  border-right: 1px solid var(--solid-light-grey);
+  border-left: none;
+  border-top-right-radius: 4px;
+  border-bottom-right-radius: 4px;
+}
+
+.overflow-left-button {
+  border-top: 1px solid var(--solid-light-grey);
+  border-bottom: 1px solid var(--solid-light-grey);
+  border-left: 1px solid var(--solid-light-grey);
+  border-right: none;
+
+  border-top-left-radius: 4px;
+  border-bottom-left-radius: 4px;
 }
 
 .overflow-button:hover {
