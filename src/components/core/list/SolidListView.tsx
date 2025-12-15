@@ -1161,6 +1161,23 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   const hasMedia = slides.some((s) => (s as any).type === "video");
 
+  const hasEditInContextMenu = actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
+    solidListViewLayout?.attrs?.edit !== false &&
+    solidListViewLayout?.attrs?.showDefaultEditButton !== false &&
+    solidListViewLayout?.attrs?.showRowEditInContextMenu !== false;
+
+  const hasDeleteInContextMenu = actionsAllowed.includes( `${permissionExpression(params.modelName, 'delete')}`) &&
+    solidListViewLayout?.attrs?.delete !== false &&
+    solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== false;
+
+  const hasCustomContextMenuButtons =
+    solidListViewLayout?.attrs?.rowButtons?.some(
+      (rb) => rb?.attrs?.actionInContextMenu === true
+    );
+
+  const hasAnyContextMenuActions =
+    hasEditInContextMenu || hasDeleteInContextMenu || hasCustomContextMenuButtons;
+
   return (
     <div className="page-parent-wrapper flex">
       <div className={`h-full flex-grow-1 ${styles.ListContentWrapper}`}>
@@ -1489,10 +1506,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                   />
                 )}
 
-              {actionsAllowed.includes(
-                `${permissionExpression(params.modelName, 'update')}`
-              ) &&
-                solidListViewLayout?.attrs?.edit !== false && (
+              {hasAnyContextMenuActions && (
                   <Column
                     frozen
                     alignFrozen="right"
@@ -1522,8 +1536,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                   style={{ top: 10, minWidth: 120 }}
                                 >
                                   <div className="flex flex-column gap-1 p-1">
-                                    {solidListViewLayout?.attrs?.showDefaultEditButton !== false &&
-                                      solidListViewLayout?.attrs?.showRowEditInContextMenu !== false && (
+                                    {hasEditInContextMenu && (
                                         <Button
                                           type="button"
                                           className="w-full text-left gap-1"
@@ -1545,12 +1558,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                         />
                                       )}
 
-                                    {actionsAllowed.includes(
-                                      `${permissionExpression(params.modelName, 'delete')}`
-                                    ) &&
-                                      solidListViewLayout?.attrs?.delete !==
-                                      false &&
-                                      solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== false && (
+                                    {hasDeleteInContextMenu && (
                                         <Button
                                           text
                                           type="button"
@@ -1563,7 +1571,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                           onClick={() => setDeleteEntity(true)}
                                         />
                                       )}
-                                    {solidListViewLayout?.attrs?.rowButtons
+                                    {hasCustomContextMenuButtons && solidListViewLayout?.attrs?.rowButtons
                                       ?.filter(
                                         (rb) =>
                                           rb?.attrs?.actionInContextMenu === true
