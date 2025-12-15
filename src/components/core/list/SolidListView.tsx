@@ -239,6 +239,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   const [solidListViewMetaData, setSolidListViewMetaData] = useState(null);
   const [solidListViewLayout, setSolidListViewLayout] = useState(null);
+  const [ isDraftPublishWorkflowEnabled, setIsDraftPublishWorkflowEnabled ] = useState(false);
   const {
     data: solidListViewInitialMetaData,
     error: solidListViewMetaDataError,
@@ -346,9 +347,12 @@ export const SolidListView = (params: SolidListViewParams) => {
         setSolidListViewLayout(solidListViewInitialMetaData?.data.solidView.layout);
       }
       setSolidListViewMetaData(solidListViewInitialMetaData);
+      console.log("solidListViewInitialMetaData", solidListViewInitialMetaData);
+      setIsDraftPublishWorkflowEnabled(solidListViewInitialMetaData?.data?.solidView?.model?.draftPublishWorkflow === true);
       // initialFilterMethod()
     }
   }, [solidListViewInitialMetaData]);
+
 
   // set layout and actions for create and edit buttons and view modes
   useEffect(() => {
@@ -883,6 +887,8 @@ export const SolidListView = (params: SolidListViewParams) => {
             selectedDataRef.current = solidViewData;
             setSelectedSolidViewData(solidViewData);
             op.current.toggle(e)
+            console.log("selectedDataRef",selectedDataRef);
+            console.log("solidViewData",solidViewData);
           }
           }
         >
@@ -1436,26 +1442,33 @@ export const SolidListView = (params: SolidListViewParams) => {
                   <Column
                     header="Edit"
                     body={(rowData) => {
+                      console.log('rowData', rowData);
+                      const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.isPublished;
+                      console.log('shouldHideEditOrDeleteButton', shouldHideEditOrDeleteButton);
                       return (
-                        <Button
-                          text
-                          type="button"
-                          severity="secondary"
-                          className=""
-                          label=""
-                          size="small"
-                          iconPos="left"
-                          icon={"pi pi-pencil"}
-                          onClick={() => {
-                            if (params.embeded == true) {
-                              params.handlePopUpOpen(rowData?.id);
-                            } else {
-                              router.push(
-                                `${editButtonUrl}/${rowData?.id}?viewMode=edit`
-                              );
-                            }
-                          }}
-                        />
+                        <>
+                        {!shouldHideEditOrDeleteButton && (
+                          <Button
+                            text
+                            type="button"
+                            severity="secondary"
+                            className=""
+                            label=""
+                            size="small"
+                            iconPos="left"
+                            icon={"pi pi-pencil"}
+                            onClick={() => {
+                              if (params.embeded == true) {
+                                params.handlePopUpOpen(rowData?.id);
+                              } else {
+                                router.push(
+                                  `${editButtonUrl}/${rowData?.id}?viewMode=edit`
+                                );
+                              }
+                            }}
+                          />
+                        )}
+                        </>
                       );
                     }}
                   />
@@ -1470,20 +1483,25 @@ export const SolidListView = (params: SolidListViewParams) => {
                   <Column
                     header="Delete"
                     body={(rowData) => {
+                      const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.isPublished;
                       return (
-                        <Button
-                          text
-                          type="button"
-                          className=""
-                          size="small"
-                          iconPos="left"
-                          severity="danger"
-                          icon={"pi pi-trash"}
-                          onClick={() => {
-                            setSelectedSolidViewData(rowData);
-                            setDeleteEntity(true);
-                          }}
-                        />
+                        <>
+                        {!shouldHideEditOrDeleteButton && (
+                          <Button
+                            text
+                            type="button"
+                            className=""
+                            size="small"
+                            iconPos="left"
+                            severity="danger"
+                            icon={"pi pi-trash"}
+                            onClick={() => {
+                              setSelectedSolidViewData(rowData);
+                              setDeleteEntity(true);
+                            }}
+                          />
+                        )}
+                        </>
                       );
                     }}
                   />
@@ -1523,7 +1541,8 @@ export const SolidListView = (params: SolidListViewParams) => {
                                 >
                                   <div className="flex flex-column gap-1 p-1">
                                     {solidListViewLayout?.attrs?.showDefaultEditButton !== false &&
-                                      solidListViewLayout?.attrs?.showRowEditInContextMenu !== false && (
+                                      solidListViewLayout?.attrs?.showRowEditInContextMenu !== false &&
+                                      !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.isPublished) && (
                                         <Button
                                           type="button"
                                           className="w-full text-left gap-1"
@@ -1550,7 +1569,8 @@ export const SolidListView = (params: SolidListViewParams) => {
                                     ) &&
                                       solidListViewLayout?.attrs?.delete !==
                                       false &&
-                                      solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== false && (
+                                      solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== false &&
+                                      !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.isPublished) && (
                                         <Button
                                           text
                                           type="button"
