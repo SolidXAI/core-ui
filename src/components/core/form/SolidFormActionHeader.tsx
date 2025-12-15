@@ -83,9 +83,6 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     const FormActionDropdown = () => {
         const canPublish = actionsAllowed.includes(permissionExpression(params.modelName, 'publish'));
         const canUnpublish = actionsAllowed.includes(permissionExpression(params.modelName, 'unpublish'));
-        console.log("active user",user)
-        console.log('isPublished', isPublished);
-        console.log('canPublish', canPublish, 'canUnpublish', canUnpublish);
 
         return (
             <div>

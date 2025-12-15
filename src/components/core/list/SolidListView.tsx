@@ -1443,7 +1443,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                     header="Edit"
                     body={(rowData) => {
                       console.log('rowData', rowData);
-                      const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.isPublished;
+                      const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.publishedAt;
                       console.log('shouldHideEditOrDeleteButton', shouldHideEditOrDeleteButton);
                       return (
                         <>
@@ -1483,7 +1483,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                   <Column
                     header="Delete"
                     body={(rowData) => {
-                      const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.isPublished;
+                      const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.publishedAt;
                       return (
                         <>
                         {!shouldHideEditOrDeleteButton && (
@@ -1542,7 +1542,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                   <div className="flex flex-column gap-1 p-1">
                                     {solidListViewLayout?.attrs?.showDefaultEditButton !== false &&
                                       solidListViewLayout?.attrs?.showRowEditInContextMenu !== false &&
-                                      !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.isPublished) && (
+                                      !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.publishedAt) && (
                                         <Button
                                           type="button"
                                           className="w-full text-left gap-1"
@@ -1570,7 +1570,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                       solidListViewLayout?.attrs?.delete !==
                                       false &&
                                       solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== false &&
-                                      !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.isPublished) && (
+                                      !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.publishedAt) && (
                                         <Button
                                           text
                                           type="button"

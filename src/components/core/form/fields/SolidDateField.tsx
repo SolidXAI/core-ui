@@ -6,9 +6,10 @@ import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "@/helpers/registry";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { SolidFormFieldWidgetProps, SolidListFieldWidgetProps } from "@/types/solid-core";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { Tag } from "primereact/tag";
 
 export class SolidDateField implements ISolidField {
 
@@ -224,3 +225,27 @@ export const DefaultDateFormViewWidget = ({ formik, fieldContext }: SolidFormFie
     );
 }
 
+export const PublishedStatusListViewWidget = ({rowData,solidListViewMetaData,fieldMetadata,column}: SolidListFieldWidgetProps) => {
+
+    const colVal = rowData[column.attrs.name]; // publishedAt value
+
+    const isPublished = !!colVal;
+
+    return (
+        <span>
+            {isPublished ? (
+                <Tag
+                    icon="pi pi-check"
+                    severity="success"
+                    rounded
+                />
+            ) : (
+                <Tag
+                    icon="pi pi-times"
+                    severity="danger"
+                    rounded
+                />
+            )}
+        </span>
+    );
+};
