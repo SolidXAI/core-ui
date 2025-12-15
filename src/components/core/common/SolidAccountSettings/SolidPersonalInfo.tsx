@@ -36,7 +36,9 @@ export const SolidPersonalInfo = () => {
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
     };
 

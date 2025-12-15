@@ -62,7 +62,7 @@ const SolidRegister = () => {
                     severity: "error",
                     summary: ERROR_MESSAGES.ERROR,
                     detail: errorMessages.join(", "),
-                    life: 3000,
+                    sticky: true
                 });
             } else {
                 const serializedError = error as Error;
@@ -70,7 +70,7 @@ const SolidRegister = () => {
                     severity: "error",
                     summary: ERROR_MESSAGES.ERROR ,
                     detail: serializedError.message || ERROR_MESSAGES.ERROR_OCCURED,
-                    life: 3000,
+                    sticky: true
                 });
             }
         }
@@ -92,7 +92,9 @@ const SolidRegister = () => {
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
     };
 

@@ -650,7 +650,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 severity: 'error',
                 summary: 'Error',
                 detail: errorMessage,
-                life: 3000,
+                sticky: true,
                 //@ts-ignore
                 content: () => (
                     <div className="flex flex-column align-items-left" style={{ flex: "1" }}>
@@ -689,7 +689,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
     };
 

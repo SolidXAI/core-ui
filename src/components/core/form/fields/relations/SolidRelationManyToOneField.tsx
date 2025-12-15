@@ -201,7 +201,9 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
     };
     // auto complete specific code. 
@@ -610,7 +612,9 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
     };
     // auto complete specific code. 

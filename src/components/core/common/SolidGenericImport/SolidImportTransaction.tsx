@@ -15,7 +15,9 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
     };
     const [trigger, { data: mappingInfo, isLoading, isError }] = useLazyGetImportMappingInfoQuery();

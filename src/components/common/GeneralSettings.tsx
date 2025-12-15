@@ -47,7 +47,9 @@ export const GeneralSettings = () => {
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
     };
 
@@ -191,7 +193,7 @@ export const GeneralSettings = () => {
                         severity: "error",
                         summary: "File too large",
                         detail: "Maximum file size is 2MB",
-                        life: 3000,
+                        sticky: true
                     });
                     return;
                 }
@@ -210,7 +212,7 @@ export const GeneralSettings = () => {
                     severity: "error",
                     summary: "File too large",
                     detail: "Maximum file size is 2MB",
-                    life: 3000,
+                    sticky: true
                 });
                 return;
             }
@@ -274,7 +276,7 @@ export const GeneralSettings = () => {
                         severity: "error",
                         summary: ERROR_MESSAGES.FILE_LARGE,
                         detail: ERROR_MESSAGES.MAX_FILE_SIZE,
-                        life: 3000,
+                        sticky: true
                     });
                     return;
                 }
@@ -293,7 +295,7 @@ export const GeneralSettings = () => {
                     severity: "error",
                     summary: ERROR_MESSAGES.FILE_LARGE,
                     detail: ERROR_MESSAGES.MAX_FILE_SIZE,
-                    life: 3000,
+                    sticky: true,
                 });
                 return;
             }
@@ -310,7 +312,7 @@ export const GeneralSettings = () => {
                     severity: "error",
                     summary: ERROR_MESSAGES.FILE_LARGE,
                     detail: ERROR_MESSAGES.MAX_FILE_SIZE,
-                    life: 3000,
+                    sticky: true,
                 });
                 return;
             }

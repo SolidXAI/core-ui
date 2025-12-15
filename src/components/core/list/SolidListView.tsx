@@ -991,7 +991,9 @@ export const SolidListView = (params: SolidListViewParams) => {
       severity: 'success',
       summary: 'Deleted',
       detail: ERROR_MESSAGES.RECORD_DELETE,
-      life: 3000,
+      ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
     });
     setDialogVisible(false);
   };
@@ -1114,14 +1116,18 @@ export const SolidListView = (params: SolidListViewParams) => {
           severity: "success",
           summary: ERROR_MESSAGES.DELETED,
           detail: ERROR_MESSAGES.ENTITY_DELETE,
-          life: 3000,
+          ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
       } else {
         toast.current?.show({
           severity: "error",
           summary: ERROR_MESSAGES.DELETE_FAIELD,
           detail: response?.error?.data?.error,
-          life: 3000,
+          ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
       }
     } catch (error: any) {
@@ -1129,7 +1135,9 @@ export const SolidListView = (params: SolidListViewParams) => {
         severity: "error",
         summary: ERROR_MESSAGES.DELETE_FAIELD,
         detail: ERROR_MESSAGES.SOMETHING_WRONG,
-        life: 3000,
+        ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
       });
     }
   };

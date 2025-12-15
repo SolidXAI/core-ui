@@ -173,7 +173,7 @@ const CreateUser = ({ data, params }: any) => {
         severity: 'error',
         summary: ERROR_MESSAGES.ERROR,
         detail: errorMessage,
-        life: 3000,
+        sticky: true,
         //@ts-ignore
         content: (props) => (
           <div className="flex flex-column align-items-left" style={{ flex: "1" }}>
