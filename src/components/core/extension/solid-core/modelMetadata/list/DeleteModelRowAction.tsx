@@ -41,7 +41,6 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
             
             // console.log('delete model res', res);
             if (res.error) {
-                console.log("deleting model response", res.error);
                 // handle backend or RTK error object
                 const message =
                     res.error?.data?.message ||
