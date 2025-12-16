@@ -76,6 +76,7 @@ export type LayoutAttribute = {
     inlineListLayout?: any;
     inlineCreateLayout?: any;
     formButtons?: any;
+    rowButtons?:any;
     whereClause?: string;
     disabled?: boolean;
     readonly?: boolean;
