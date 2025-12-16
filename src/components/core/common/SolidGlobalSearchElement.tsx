@@ -83,24 +83,54 @@ let idCounter = 1;
 const generateId = () => Date.now() + Math.floor(Math.random() * 1000);
 
 
-const transformRulesToFilters = (input: any) => {
+const transformRulesToFilters = (input: any, viewData?:any) => {
 
     // Helper function to process individual rules
     const processRule = (rule: any) => {
         if (rule.value && rule.value.length > 0) {
-
-            // Ensure rule.value is always an array
-            let values = typeof rule.value[0] === "object" ? rule.value.map((i: any) => i?.value ? i?.value : i) : rule?.value;
-            if (rule.matchMode !== '$in' && rule.matchMode !== '$notIn' && rule.matchMode !== '$between') {
-                values = values[0];
-            }
-            // Rule transformation
-            let transformedRule = {
-                [rule.fieldName]: {
-                    [rule.matchMode]: values    // Assuming `value` is always an array with `value` and `label`
+            
+            // Flatten and extract values properly
+            let values = Array.isArray(rule.value) 
+                ? rule.value.flat().map((i: any) => {
+                    // If it's an object with a value property, extract it
+                    if (typeof i === "object" && i !== null && 'value' in i) {
+                        return i.value;
+                    }
+                    // Otherwise return as is
+                    return i;
+                })
+                : [rule.value];
+            
+            // Remove any null/undefined values
+            values = values.filter((v: any) => v != null);
+                        
+            // Check if this is a many-to-many relation
+            const fieldMeta = viewData?.data?.solidFieldsMetadata?.[rule.fieldName];
+            const isManyToMany = fieldMeta?.type === 'relation' && fieldMeta?.relationType === 'many-to-many';
+            
+            let transformedRule;
+            if (isManyToMany) {
+                // For many-to-many relations, always use array format for $in/$notIn
+                transformedRule = {
+                    [rule.fieldName]: {
+                        id: {
+                            [rule.matchMode]: values // Keep as array
+                        }
+                    }
+                };
+            } else {
+                // For other field types
+                if (rule.matchMode !== '$in' && rule.matchMode !== '$notIn' && rule.matchMode !== '$between') {
+                    values = values[0];
                 }
-            };
-
+                // Rule transformation
+                transformedRule = {
+                    [rule.fieldName]: {
+                        [rule.matchMode]: values    // Assuming `value` is always an array with `value` and `label`
+                    }
+                };
+            }
+    
             // If the rule has children (which means it's a rule group), process them
             let processedFields;
             if (rule.children && rule.children.length > 0) {
@@ -657,7 +687,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
 
     const transformFilterRules = (filterRules: any) => {
-        const transformedFilter = transformRulesToFilters(filterRules[0]);
+        const transformedFilter = transformRulesToFilters(filterRules[0], viewData);
     
         // If there's a predefined search, merge it with the new custom filter
         let finalCustomFilter = transformedFilter;
