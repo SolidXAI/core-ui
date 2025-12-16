@@ -75,10 +75,13 @@ export type LayoutAttribute = {
     showLabel?: boolean;
     inlineListLayout?: any;
     inlineCreateLayout?: any;
-    showDefaultAddButton?:boolean;
-    showDefaultEditButton?:boolean;
+    showDefaultAddButton?: boolean;
+    showDefaultEditButton?: boolean;
+    showEditFormButton?: boolean;
+    showAddFormButton?: boolean;
+    showDeleteFormButton?: boolean;
     formButtons?: any;
-    rowButtons?:any;
+    rowButtons?: any;
     whereClause?: string;
     disabled?: boolean;
     readonly?: boolean;
@@ -148,7 +151,7 @@ export type SolidLoadList = {
     totalRecords: number;
     viewMetadata: SolidView;
     listViewLayout: ListLayoutType;
-    queryParams?:any,
+    queryParams?: any,
     user: any,
     session: any
 }
@@ -158,15 +161,15 @@ export type SolidBeforeListDataLoad = {
     fieldsMetadata: FieldsMetadata;
     viewMetadata: SolidView;
     listViewLayout: ListLayoutType;
-    filter?:any,
-    queryParams?:any,
+    filter?: any,
+    queryParams?: any,
     user: any,
     session: any
 }
 
 export type SolidListUiEventResponse = {
-    filterApplied?:Boolean;
-    newFilter?:any;
+    filterApplied?: Boolean;
+    newFilter?: any;
     dataChanged?: Boolean;
     newListData?: any[];
     layoutChanged?: Boolean;
