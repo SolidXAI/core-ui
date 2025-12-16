@@ -151,6 +151,34 @@ export class SolidViewLayoutManager {
     }
 
 
+
+    /**
+     * Adds or updates view-level attributes.
+     * Existing attributes are updated, missing attributes are added.
+     *
+     * @param attrs - Attributes to set on the view
+     * @returns true if at least one attribute was applied
+     */
+    setViewAttributes(attrs: Partial<LayoutAttribute>): boolean {
+        const viewNode = this.findNode(this.layout, this.layout.attrs.name);
+        if (!viewNode) return false;
+
+        let changed = false;
+
+        for (const key of Object.keys(attrs) as (keyof LayoutAttribute)[]) {
+            const newValue = attrs[key];
+
+            if (viewNode.attrs[key] !== newValue) {
+                viewNode.attrs[key] = newValue;
+                changed = true;
+            }
+        }
+
+        return changed;
+    }
+
+
+
     /**
      * Adds view-level attributes only if they do not already exist.
      *
