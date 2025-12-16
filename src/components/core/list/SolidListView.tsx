@@ -796,7 +796,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       fieldsMetadata: solidListViewMetaData?.data?.solidFieldsMetadata,
       viewMetadata: solidListViewMetaData?.data?.solidView,
       listViewLayout: solidListViewMetaData?.data.solidView.layout,
-      filter:  structuredClone(queryData),
+      filter: structuredClone(queryData),
       queryParams: {
         menuItemId: menuItemId,
         menuItemName: menuItemName,
@@ -811,7 +811,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
       if (DynamicFunctionComponent) {
         const updatedListData: SolidListUiEventResponse = await DynamicFunctionComponent(event);
-        if (updatedListData && updatedListData?.filterApplied  && updatedListData?.newFilter) {
+        if (updatedListData && updatedListData?.filterApplied && updatedListData?.newFilter) {
           queryData = updatedListData?.newFilter
         }
       }
@@ -1381,7 +1381,9 @@ export const SolidListView = (params: SolidListViewParams) => {
                       roles.length === 0 ||
                       hasAnyRole(user?.user?.roles, roles);
 
-                    return !isInContextMenu && isAllowed;
+                    const isVisible = rb?.attrs?.visible !== false;
+
+                    return !isInContextMenu && isAllowed && isVisible;
                   })
                   .map((button: any, index: number) => {
                     // const hasRole = button.attrs.roles && button.attrs.roles.length > 0 ? useHasAnyRole(button.attrs.roles) : true;
@@ -1566,7 +1568,8 @@ export const SolidListView = (params: SolidListViewParams) => {
                                     {solidListViewLayout?.attrs?.rowButtons
                                       ?.filter(
                                         (rb) =>
-                                          rb?.attrs?.actionInContextMenu === true
+                                          rb?.attrs?.actionInContextMenu === true &&
+                                          rb?.attrs?.visible !== false
                                       )
                                       .map((button: any, index: number) => (
                                         <SolidListViewRowButtonContextMenu
