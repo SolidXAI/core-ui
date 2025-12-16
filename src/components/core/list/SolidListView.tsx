@@ -168,8 +168,6 @@ export const SolidListView = (params: SolidListViewParams) => {
   }, [isResizing]);
 
   useEffect(() => {
-    console.log("useEffect: [params.modelName]");
-
     const fetchPermissions = async () => {
       if (params.modelName) {
         const permissionNames = [
@@ -338,7 +336,6 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   // Set the initial filter state based on the metadata.
   useEffect(() => {
-    console.log("useEffect: [solidListViewMetaData] line no 227");
     // refetch();
     if (solidListViewInitialMetaData) {
       if (params.customLayout) {
@@ -347,7 +344,6 @@ export const SolidListView = (params: SolidListViewParams) => {
         setSolidListViewLayout(solidListViewInitialMetaData?.data.solidView.layout);
       }
       setSolidListViewMetaData(solidListViewInitialMetaData);
-      console.log("solidListViewInitialMetaData", solidListViewInitialMetaData);
       setIsDraftPublishWorkflowEnabled(solidListViewInitialMetaData?.data?.solidView?.model?.draftPublishWorkflow === true);
       // initialFilterMethod()
     }
@@ -356,7 +352,6 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   // set layout and actions for create and edit buttons and view modes
   useEffect(() => {
-    console.log("useEffect: [solidListViewMetaData] line no 245");
     if (solidListViewMetaData) {
       const createActionUrl =
         solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction &&
@@ -468,7 +463,6 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   // After data is fetched populate the list view state so as to be able to render the data.
   useEffect(() => {
-    console.log("useEffect: [solidListViewMetaData] line no 310");
     if (solidEntityListViewData) {
       const cleanedRecords = solidEntityListViewData.records.map((record) => {
         const newRecord = { ...record };
@@ -887,8 +881,6 @@ export const SolidListView = (params: SolidListViewParams) => {
             selectedDataRef.current = solidViewData;
             setSelectedSolidViewData(solidViewData);
             op.current.toggle(e)
-            console.log("selectedDataRef",selectedDataRef);
-            console.log("solidViewData",solidViewData);
           }
           }
         >
@@ -1442,9 +1434,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                   <Column
                     header="Edit"
                     body={(rowData) => {
-                      console.log('rowData', rowData);
                       const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.publishedAt;
-                      console.log('shouldHideEditOrDeleteButton', shouldHideEditOrDeleteButton);
                       return (
                         <>
                         {!shouldHideEditOrDeleteButton && (
