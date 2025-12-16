@@ -65,14 +65,14 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
             <div className="flex justify-content-end gap-3">
             </div>
             {solidFormViewData && (viewMode === 'edit') &&
-                (<div className="w-full" style={{ backgroundColor: 'var(--surface-ground)', margin: '10px 0', padding: 0 }}>
+                (<div className="w-full" style={{ backgroundColor: 'var(--surface-ground)', margin: '10px 0', padding: 0, overflow:'hidden' }}>
                     {solidFormViewMetaData.data.solidView?.model?.draftPublishWorkflow &&
                         published !== null ? (
-                        <li className="w-full text-left list-disc" style={{ padding: '10px', color: '#15803D' }}>
+                        <li className="w-full text-left list-disc" style={{ padding: '10px 0px',margin: '0 20px', color: '#15803D' }}>
                             Editing <span className="font-bold">published version</span>
                         </li>
                     ) : (
-                        <li className="w-full text-left list-disc" style={{ padding: '10px', color: '#EF4444' }}>
+                        <li className="w-full text-left list-disc" style={{ padding: '10px 0px',margin: '0 20px', color: '#EF4444' }}>
                             Editing <span className="font-bold">unpublished version</span>
                         </li>
                     )}

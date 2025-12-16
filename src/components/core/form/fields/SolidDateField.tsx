@@ -10,6 +10,7 @@ import { SolidFormFieldWidgetProps, SolidListFieldWidgetProps } from "@/types/so
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { Tag } from "primereact/tag";
+import { StatusIcon } from "../../extension/solid-core/CustomIcon/StatusIcon";
 
 export class SolidDateField implements ISolidField {
 
@@ -232,20 +233,6 @@ export const PublishedStatusListViewWidget = ({rowData,solidListViewMetaData,fie
     const isPublished = !!colVal;
 
     return (
-        <span>
-            {isPublished ? (
-                <Tag
-                    icon="pi pi-check"
-                    severity="success"
-                    rounded
-                />
-            ) : (
-                <Tag
-                    icon="pi pi-times"
-                    severity="danger"
-                    rounded
-                />
-            )}
-        </span>
+        <StatusIcon isPublished={isPublished}/>
     );
 };
