@@ -75,6 +75,8 @@ export type LayoutAttribute = {
     showLabel?: boolean;
     inlineListLayout?: any;
     inlineCreateLayout?: any;
+    showDefaultAddButton?:boolean;
+    showDefaultEditButton?:boolean;
     formButtons?: any;
     rowButtons?:any;
     whereClause?: string;
