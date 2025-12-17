@@ -644,7 +644,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                         $and: [
                             {
                                 [parentFieldName]: {
-                                    [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$eqi']: formik.values[fieldLayoutInfo.attrs.name]
+                                    [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$eqi']:  formik.values[fieldLayoutInfo.attrs.name]
                                 }
                             }
                         ]

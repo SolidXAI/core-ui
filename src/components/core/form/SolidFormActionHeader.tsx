@@ -324,7 +324,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             }
                             {
                                 !formViewLayout.attrs.readonly &&
-                                solidView?.layout?.attrs?.showAddFormButton !== false &&
+                                formViewLayout.attrs?.showAddFormButton !== false &&
                                 params.embeded !== true &&
                                 viewMode === "view" &&
                                 actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
@@ -333,7 +333,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             }
                             {
                                 !formViewLayout.attrs.readonly &&
-                                solidView?.layout?.attrs?.showEditFormButton !== false &&
+                                formViewLayout.attrs?.showEditFormButton !== false &&
                                 params.embeded !== true &&
                                 viewMode === "view" &&
                                 !isPublished &&
@@ -369,7 +369,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             {
                                 params.embeded == true &&
                                 actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
-                                solidView?.layout?.attrs?.showDeleteFormButton !== false &&
+                                formViewLayout.attrs?.showDeleteFormButton !== false &&
                                 !formViewLayout.attrs.readonly &&
                                 !isPublished &&
                                 <div>
