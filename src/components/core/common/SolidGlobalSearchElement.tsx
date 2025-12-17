@@ -25,8 +25,8 @@ interface PredefinedSearch {
 }
 
 const transformFiltersToRules = (filter: any, parentRule: number | null = null): FilterRule => {
-    if (!filter || typeof filter !== "object") {
-        throw new Error("Invalid filter: expected a non-null object");
+    if (!filter || typeof filter !== "object" || Object.keys(filter).length === 0) {
+        throw new Error("Invalid filter: expected a non-null object with properties");
     }
     const currentId = idCounter++;
     if (filter["$or"]) {
@@ -36,7 +36,13 @@ const transformFiltersToRules = (filter: any, parentRule: number | null = null):
             matchOperator: FilterOperator.OR,
             parentRule,
             children: filter["$or"]
-                .filter((sub: any) => sub != null) // skip nulls
+                .filter((sub: any) => {
+                    // Filter out null, undefined, empty strings, and empty objects
+                    if (sub == null) return false;
+                    if (typeof sub === "string" && sub.trim() === "") return false;
+                    if (typeof sub === "object" && Object.keys(sub).length === 0) return false;
+                    return true;
+                })
                 .map((subFilter: any) => transformFiltersToRules(subFilter, currentId))
         };
     }
@@ -48,8 +54,14 @@ const transformFiltersToRules = (filter: any, parentRule: number | null = null):
             matchOperator: FilterOperator.AND,
             parentRule,
             children: filter["$and"]
-                .filter((sub: any) => sub != null)
-                .map((subFilter: any) => transformFiltersToRules(subFilter, currentId))
+            .filter((sub: any) => {
+                // Filter out null, undefined, empty strings, and empty objects
+                if (sub == null) return false;
+                if (typeof sub === "string" && sub.trim() === "") return false;
+                if (typeof sub === "object" && Object.keys(sub).length === 0) return false;
+                return true;
+            })
+            .map((subFilter: any) => transformFiltersToRules(subFilter, currentId))
         };
     }
 
@@ -87,7 +99,10 @@ const transformRulesToFilters = (input: any, viewData?:any) => {
 
     // Helper function to process individual rules
     const processRule = (rule: any) => {
-        if (rule.value && rule.value.length > 0) {
+        if (!rule.value || rule.value.length === 0) {
+            return null;
+        }
+        // if (rule.value && rule.value.length > 0) {
             
             // Flatten and extract values properly
             let values = Array.isArray(rule.value) 
@@ -104,6 +119,11 @@ const transformRulesToFilters = (input: any, viewData?:any) => {
             // Remove any null/undefined values
             values = values.filter((v: any) => v != null);
                         
+             // If no valid values after filtering, return null
+            if (values.length === 0) {
+                return null;
+            }
+
             // Check if this is a many-to-many relation
             const fieldMeta = viewData?.data?.solidFieldsMetadata?.[rule.fieldName];
             const isManyToMany = fieldMeta?.type === 'relation' && fieldMeta?.relationType === 'many-to-many';
@@ -134,13 +154,13 @@ const transformRulesToFilters = (input: any, viewData?:any) => {
             // If the rule has children (which means it's a rule group), process them
             let processedFields;
             if (rule.children && rule.children.length > 0) {
-                processedFields = rule.children.map((child: any) => processRuleGroup(child));
+                processedFields = rule.children.map((child: any) => processRuleGroup(child)).filter((child: any) => child != null); ;
             }
             if (processedFields) {
                 return { ...transformedRule, processedFields }
             }
             return { ...transformedRule }
-        }
+        // }
 
     };
 
@@ -155,7 +175,16 @@ const transformRulesToFilters = (input: any, viewData?:any) => {
                 // Process the rule group recursively
                 return processRuleGroup(child);
             }
-        });
+        }).filter((child: any) => child != null);;
+        // If no valid children, return null
+        if (children.length === 0) {
+            return null;
+        }
+
+        // If only one child, return it directly without wrapping in operator
+        if (children.length === 1) {
+            return children[0];
+        }
 
         return {
             [operator]: children
@@ -164,6 +193,11 @@ const transformRulesToFilters = (input: any, viewData?:any) => {
 
     // Start processing the root rule group
     const filterObject = processRuleGroup(input);
+
+    // If the result is null or empty, return an empty filter
+    if (!filterObject) {
+        return {};
+    }
 
     function liftProcessedFields(filters: any) {
         if (!filters || typeof filters !== 'object') return filters;
@@ -899,7 +933,14 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         };
     }, [showOverlay]);
 
-    const CustomChip = () => (
+    const CustomChip = () => {
+        console.log("customFilter", customFilter);
+        const ruleCount =
+  customFilter?.$or?.length ??
+  customFilter?.$and?.length ??
+  Object.keys(customFilter || {}).length;
+
+        return (
         <li>
             <div className="custom-filter-chip-type">
                 <div className="flex align-items-center gap-2 text-base">
@@ -909,7 +950,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                         <path d="M8.66667 15V13.3333H11.3333V15H8.66667ZM6 10.8333V9.16667H14V10.8333H6ZM4 6.66667V5H16V6.66667H4Z"
                             fill="white" />
                     </svg>
-                    <span><strong>{customFilter?.$or && customFilter?.$or?.length > 0 ? `${customFilter?.$or?.length}` : customFilter.$and.length}</strong> rules applied</span>
+                    <span><strong>{ruleCount}</strong> rules applied</span>
                 </div>
 
                 {/* button to clear filter */}
@@ -920,7 +961,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     </i></a>
             </div>
         </li>
-    );
+    )};
 
 
     const SearchChip = () => (
