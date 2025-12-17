@@ -17,6 +17,7 @@ import { SolidListViewHeaderContextMenuButton } from "./SolidListViewHeaderConte
 import "../../common/solid-export.css";
 import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
 import { useHasAnyRole } from "@/helpers/rolesHelper";
+import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 
 export const SolidListViewConfigure = (
     { listViewMetaData,
@@ -34,7 +35,9 @@ export const SolidListViewConfigure = (
         setDialogVisible,
         setShowSaveFilterPopup,
         filters,
-        handleFetchUpdatedRecords
+        handleFetchUpdatedRecords,
+        setRecoverDialogVisible,
+
     }:
         any) => {
     // const [visible, setVisible] = useState<boolean>(false);
@@ -48,6 +51,7 @@ export const SolidListViewConfigure = (
     const [view, setView] = useState<string>("");
     const [exportView, setExportView] = useState<boolean>(false);
     const [isOverlayOpen, setIsOverlayOpen] = useState(false);
+
 
     const handleViewChange = (newView: string) => {
         if (view === newView) return; // Prevent unnecessary updates
@@ -95,17 +99,16 @@ export const SolidListViewConfigure = (
         if (Array.isArray(value)) return { enabled: true, roles: value };
         return { enabled: true, roles: [] }; // default
     };
-    
     const normalized = {
         import: normalizeAction(headerActions.import),
         export: normalizeAction(headerActions.export),
         customizeLayout: normalizeAction(headerActions.customizeLayout),
         savedFilters: normalizeAction(headerActions.savedFilters),
     };
-    
+
     // Role checks
     const useRoleCheck = (roles: string[]) => useHasAnyRole(roles ?? []);
-    
+
     // Map of action → roleCheck
     const roleCheckMap = {
         import: useRoleCheck(normalized.import.roles),
@@ -113,18 +116,17 @@ export const SolidListViewConfigure = (
         customizeLayout: useRoleCheck(normalized.customizeLayout.roles),
         savedFilters: useRoleCheck(normalized.savedFilters.roles),
     };
-    
+
     const isHeaderActionEnabled = (action: keyof typeof normalized) => {
         const { enabled, roles } = normalized[action];
-    
+
         // 1. If explicitly disabled
         if (!enabled) return false;
-    
+
         // 2. If roles list exists → must have at least one
         if (roles.length > 0) {
             return roleCheckMap[action] === true;
         }
-    
         // 3. No restrictions → enabled
         return true;
     };
@@ -136,11 +138,12 @@ export const SolidListViewConfigure = (
                 size="small"
                 icon="pi pi-cog"
                 severity="secondary"
+                className="solid-icon-button"
                 outlined
                 // @ts-ignore
                 onClick={(e) => op.current.toggle(e)}
             />
-            <Dialog header="Export" visible={exportView} className="ExportDialog p-0 m-0" onHide={() => { if (!exportView) return; setExportView(false); }}>
+            <Dialog header="Export" visible={exportView} headerClassName="solid-export-dialog-header" className="ExportDialog p-0 m-0" onHide={() => { if (!exportView) return; setExportView(false); }}>
                 <SolidExport listViewMetaData={listViewMetaData} filters={filters} />
             </Dialog>
             <OverlayPanel ref={exportRef} className="listview-export-panel">
@@ -151,9 +154,9 @@ export const SolidListViewConfigure = (
                     (actionsAllowed.includes(`${permissionExpression(params.modelName, 'deleteMany')}`) &&
                         viewData?.data?.solidView?.layout?.attrs?.delete !== false &&
                         selectedRecords.length > 0) ||
-                    isHeaderActionEnabled('import') && actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && actionsAllowed.includes(`${permissionExpression('importTransaction', 'create')}`)||
-                    isHeaderActionEnabled('export') && actionsAllowed.includes(`${permissionExpression(params.modelName, 'findMany')}`) && actionsAllowed.includes(`${permissionExpression('exportTransaction', 'create')}`)||
-                    isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`)||
+                    isHeaderActionEnabled('import') && actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && actionsAllowed.includes(`${permissionExpression('importTransaction', 'create')}`) ||
+                    isHeaderActionEnabled('export') && actionsAllowed.includes(`${permissionExpression(params.modelName, 'findMany')}`) && actionsAllowed.includes(`${permissionExpression('exportTransaction', 'create')}`) ||
+                    isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`) ||
                     isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`) ||
                     (solidListViewLayout?.attrs?.headerButtons
                         ?.some((rb: any) => rb.attrs.actionInContextMenu === true)) ||
@@ -179,7 +182,7 @@ export const SolidListViewConfigure = (
                                             onClick={() => setOpenImportDialog(true)}
                                         />
                                     )}
-                                    {isHeaderActionEnabled("export") && actionsAllowed.includes(`${permissionExpression(params.modelName, 'findMany')}`) && actionsAllowed.includes(`${permissionExpression('exportTransaction', 'create')}`) &&(
+                                    {isHeaderActionEnabled("export") && actionsAllowed.includes(`${permissionExpression(params.modelName, 'findMany')}`) && actionsAllowed.includes(`${permissionExpression('exportTransaction', 'create')}`) && (
                                         <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base"
                                             // @ts-ignore
                                             onClick={() => { setExportView((exportView) => !exportView); }} />
@@ -207,13 +210,34 @@ export const SolidListViewConfigure = (
                                             </label>
                                         </div>
                                     )}
+                                    {showArchived && (
+                                        <Button text icon='pi pi-refresh' label="Recover" size="small" severity="secondary" className="flex lg:hidden text-left gap-2 text-base "
+                                            onClick={() => setRecoverDialogVisible(true)} />
+                                    )}
+
+                                    <div className="flex flex-column lg:hidden">
+                                        {solidListViewLayout?.attrs?.headerButtons
+                                            ?.filter((rb: any) => rb.attrs.actionInContextMenu != true)
+                                            ?.map((button: any, index: number) => (
+                                                <SolidListViewHeaderButton
+                                                    key={index}
+                                                    button={button}
+                                                    params={params}
+                                                    solidListViewMetaData={listViewMetaData}
+                                                    handleCustomButtonClick={handleCustomButtonClick}
+                                                    selectedRecords={selectedRecords}
+                                                    filters={filters}
+                                                />
+                                            ))}
+                                    </div>
+
                                 </div>
                             </div>
                             <Divider className="m-0" />
                         </>
                     )}
                 <div className="p-2 relative flex flex-column gap-1">
-                    {isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`) && (<Button
+                    {isHeaderActionEnabled('customizeLayout') && permissionExpression('userViewMetadata', 'create') && (<Button
                         icon='pi pi-sliders-h'
                         label="Customize Layout"
                         severity={isOverlayOpen ? undefined : "secondary"}
@@ -229,7 +253,7 @@ export const SolidListViewConfigure = (
                         <i className="pi pi-chevron-right text-sm"></i>
                     </Button>
                     )}
-                    {isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`) && (
+                    {isHeaderActionEnabled('savedFilters') && permissionExpression('savedFilters', 'create') && (
                         <Button text icon='pi pi-save' label="Save Custom Filter" size="small" severity="secondary" className="text-left gap-2 text-base" onClick={() => setShowSaveFilterPopup(true)} />
                     )}
                     <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}

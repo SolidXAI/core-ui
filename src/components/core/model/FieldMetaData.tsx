@@ -180,7 +180,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
             header=""
             visible={visiblePopup}
             style={{ width: "40vw" }}
-            className="solid-dialog"
+            className="solid-dialog solid-field-dialog"
             onHide={() => {
               if (!visiblePopup) return;
 
@@ -201,9 +201,8 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
             headerClassName="text-center warning-header-popup"
             modal
             style={{ width: '20vw' }}
-
             onHide={() => setIsRequiredPopUp(false)}
-            className="solid-dialog"
+            className="solid-dialog solid-confirm-dialog"
           >
             <p className="p-3 mb-0">If there is data against this model this operation might not work and manual intervention will be required</p>
             <div className="flex justify-content-start p-3">
@@ -225,7 +224,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
             setDeleteAlertPopup(false);
             setRowToDelete(null);
           }}
-          className="solid-dialog"
+          className="solid-dialog solid-confirm-dialog"
         >
           <p className="p-3 mb-0 text-center">Are you sure you want to delete this field?</p>
           <div className="flex justify-content-start p-3 align-items-center justify-content-center gap-3">

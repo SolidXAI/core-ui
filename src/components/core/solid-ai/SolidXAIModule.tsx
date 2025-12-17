@@ -86,4 +86,4 @@ export const SolidXAIModule = () => {
       <SolidXAIInputBox onTriggerComplete={setLatestInteractionId} threadId={`thread-${userId}`} userId={userId} />
     </>
   );
-};
+};  

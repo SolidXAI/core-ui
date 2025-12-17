@@ -370,7 +370,7 @@ const CreateModel = ({ data, params }: any) => {
             <>
               <div className="flex align-items-center gap-3">
                 <BackButton />
-                <div className="form-wrapper-title">Create Model {modelMetaData?.displayName ? `- ${modelMetaData?.displayName}` : ""}</div>
+                <div className="form-wrapper-title solid-long-text-wrapper  ">Create Model {modelMetaData?.displayName ? `- ${modelMetaData?.displayName}` : ""}</div>
               </div>
               <div className="gap-3 flex">
                 {isDirty &&
@@ -383,7 +383,7 @@ const CreateModel = ({ data, params }: any) => {
             <>
               <div className="flex align-items-center gap-3">
                 <BackButton />
-                <div className="form-wrapper-title">Edit Model {modelMetaData?.displayName ? `- ${modelMetaData?.displayName}` : ""}</div>
+                <div className="form-wrapper-title solid-long-text-wrapper ">Edit Model {modelMetaData?.displayName ? `- ${modelMetaData?.displayName}` : ""}</div>
               </div>
               <div className="gap-3 flex">
                 {data?.isSystem !== true &&
@@ -408,7 +408,7 @@ const CreateModel = ({ data, params }: any) => {
         {/* <div className="solid-form-stepper">
           <SolidFormStepper />
         </div> */}
-        <div className="p-3 md:p-4 solid-form-content">
+        <div className="px-4 py-3 md:p-4 solid-form-content">
           <TabView
             activeIndex={activeIndex}
             onTabChange={(e) => {
@@ -456,7 +456,7 @@ const CreateModel = ({ data, params }: any) => {
         </div>
       </div>
       {/* <div style={{ width: '22.5%' }}></div> */}
-      <Dialog header="Delete Field" headerClassName="py-2" contentClassName="px-0 pb-0" visible={deleteEntity} style={{ width: '20vw' }} onHide={() => { if (!deleteEntity) return; setDeleteEntity(false); }}>
+      <Dialog header="Delete Field" headerClassName="py-2" className="solid-confirm-dialog" contentClassName="px-0 pb-0" visible={deleteEntity} style={{ width: '20vw' }} onHide={() => { if (!deleteEntity) return; setDeleteEntity(false); }}>
         <Divider className="m-0" />
         <div className="p-4">
           <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>

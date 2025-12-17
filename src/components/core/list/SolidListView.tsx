@@ -50,7 +50,7 @@ import { useHandleListCustomButtonClick } from "@/components/common/useHandleLis
 import { hasAnyRole, useHasAnyRole } from "@/helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { SolidListViewRowButtonContextMenu } from "./SolidListViewRowButtonContextMenu";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import styles from "./SolidListViewWrapper.module.css";
 import { SolidXAIModule } from "../solid-ai/SolidXAIModule";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
@@ -59,6 +59,7 @@ import { getExtensionFunction } from "@/helpers/registry";
 import { useSession } from "next-auth/react";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
+import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 // import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -106,6 +107,8 @@ type SolidListViewParams = {
 
 export const SolidListView = (params: SolidListViewParams) => {
   const { user } = useSelector((state: any) => state.auth);
+  const dispatch = useDispatch();
+  const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
 
   const solidGlobalSearchElementRef = useRef();
 
@@ -1003,6 +1006,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   const [openLightbox, setOpenLightbox] = useState(false);
   const [lightboxUrls, setLightboxUrls] = useState({});
+  const [showGlobalSearchElement, setShowGlobalSearchElement] = useState(false);
 
   // Render columns dynamically based on metadata
   const renderColumnsDynamically = (solidListViewMetaData: any, solidListViewLayout: any) => {
@@ -1158,18 +1162,178 @@ export const SolidListView = (params: SolidListViewParams) => {
     : [];
 
   const hasMedia = slides.some((s) => (s as any).type === "video");
-
+ 
+  const toggleBothSidebars = () => {
+    if (visibleNavbar) {
+        dispatch(toggleNavbar());   // close both
+    } else {
+        dispatch(showNavbar());     // open both
+    }
+  };
   return (
     <div className="page-parent-wrapper flex">
       <div className={`h-full flex-grow-1 ${styles.ListContentWrapper}`}>
-        <div className="page-header">
+        <div className="page-header flex-column lg:flex-row">
           <Toast ref={toast} />
-          <div className="flex gap-3 align-items-center">
-            <p className="m-0 view-title">
-              {solidListViewMetaData?.data?.solidView?.displayName}
-            </p>
-            {solidListViewLayout?.attrs?.enableGlobalSearch === true &&
-              params.embeded === false && (
+          {/* <div> */}
+          <div className="flex justify-content-between w-full">
+            <div className="flex gap-3 align-items-center w-full ">
+            <div className='flex align-items-center gap-2'>
+              {params.embeded !== true &&
+                <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                    <i className="pi pi-th-large"></i>
+                </div>
+              }
+              <p className="m-0 view-title solid-text-wrapper">
+                {solidListViewMetaData?.data?.solidView?.displayName}
+              </p>
+              </div>
+              {solidListViewLayout?.attrs?.enableGlobalSearch === true &&
+                params.embeded === false && (
+                  <div className="hidden lg:flex">
+                    <SolidGlobalSearchElement
+                      showSaveFilterPopup={showSaveFilterPopup}
+                      setShowSaveFilterPopup={setShowSaveFilterPopup}
+                      filters={filters}
+                      clearFilter={clearFilter}
+                      ref={solidGlobalSearchElementRef}
+                      viewData={solidListViewMetaData}
+                      handleApplyCustomFilter={handleApplyCustomFilter}>
+                    </SolidGlobalSearchElement>
+                  </div>
+
+                )}
+
+            </div>
+            <div className="flex align-items-center gap-3">
+              {solidListViewLayout?.attrs?.enableGlobalSearch === true &&
+                params.embeded === false && (
+                  <div className="flex lg:hidden">
+                    <Button
+                      type="button"
+                      size="small"
+                      icon="pi pi-search"
+                      severity="secondary"
+                      outlined
+                      className="solid-icon-button"
+                      onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
+                    >
+                    </Button>
+                  </div>
+
+                )}
+
+              <div className="hidden lg:flex align-items-center gap-3">
+                {solidListViewLayout?.attrs?.headerButtons
+                  ?.filter((rb) => rb.attrs.actionInContextMenu != true)
+                  ?.map((button: any, index: number) => (
+                    <SolidListViewHeaderButton
+                      key={index}
+                      button={button}
+                      params={params}
+                      solidListViewMetaData={solidListViewMetaData}
+                      handleCustomButtonClick={handleCustomButtonClick}
+                      selectedRecords={selectedRecords}
+                      filters={filters}
+                    />
+                  ))}
+              </div>
+
+              {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
+                solidListViewLayout?.attrs?.create !== false &&
+                params.embeded !== true &&
+                solidListViewMetaData?.data?.solidView?.layout?.attrs
+                  .showDefaultAddButton !== false && (
+                  <SolidCreateButton
+                    url={createButtonUrl}
+                    solidListViewLayout={solidListViewLayout}
+                    responsiveIconOnly={true}
+                  />
+                )}
+              {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
+                solidListViewLayout?.attrs?.create !== false &&
+                params.embeded == true &&
+                params.inlineCreate == true &&
+                searchParams.get("viewMode") !== "view" && (
+                  // < SolidCreateButton url={createButtonUrl} />
+                  <Button
+                    type="button"
+                    icon={
+                      solidListViewLayout?.attrs?.addButtonIcon
+                        ? solidListViewLayout?.attrs?.addButtonIcon
+                        : "pi pi-plus"
+                    }
+                    label={
+                      solidListViewLayout?.attrs?.addButtonTitle
+                        ? solidListViewLayout?.attrs?.addButtonTitle
+                        : "Add"
+                    }
+                    className={`${solidListViewLayout?.attrs?.addButtonClassName}`}
+                    size="small"
+                    onClick={() => params.handlePopUpOpen("new")}
+                  ></Button>
+                )}
+              {/* Button For Manual Refresh */}
+              {params.embeded !== true && (
+                <Button
+                  type="button"
+                  size="small"
+                  icon="pi pi-refresh"
+                  severity="secondary"
+                  className="solid-icon-button "
+                  outlined
+                  onClick={() => {
+                    setQueryString(
+                      first,
+                      rows,
+                      sortField,
+                      sortOrder,
+                      filters,
+                      showArchived
+                    );
+                  }}
+                />
+              )}
+              {showArchived && (
+                <Button
+                  type="button"
+                  icon="pi pi-refresh"
+                  label="Recover"
+                  size="small"
+                  severity="secondary"
+                  className="hidden lg:flex solid-icon-button "
+                  onClick={() => setRecoverDialogVisible(true)}
+                ></Button>
+              )}
+
+              {params.embeded === false &&
+                solidListViewLayout?.attrs?.configureView !== false && (
+                  <SolidListViewConfigure
+                    listViewMetaData={solidListViewMetaData}
+                    solidListViewLayout={solidListViewLayout}
+                    setShowArchived={setShowArchived}
+                    showArchived={showArchived}
+                    viewData={solidListViewMetaData}
+                    sizeOptions={sizeOptions}
+                    setSize={setSize}
+                    size={size}
+                    viewModes={viewModes}
+                    params={params}
+                    actionsAllowed={actionsAllowed}
+                    selectedRecords={selectedRecords}
+                    setDialogVisible={setDialogVisible}
+                    setShowSaveFilterPopup={setShowSaveFilterPopup}
+                    filters={filters}
+                    handleFetchUpdatedRecords={handleFetchUpdatedRecords}
+                    setRecoverDialogVisible={setRecoverDialogVisible}
+                  />
+                )}
+            </div>
+          </div>
+          {/* </div> */}
+          {solidListViewLayout?.attrs?.enableGlobalSearch === true && showGlobalSearchElement &&
+            params.embeded === false && (
+              <div className="flex lg:hidden">
                 <SolidGlobalSearchElement
                   showSaveFilterPopup={showSaveFilterPopup}
                   setShowSaveFilterPopup={setShowSaveFilterPopup}
@@ -1177,112 +1341,34 @@ export const SolidListView = (params: SolidListViewParams) => {
                   clearFilter={clearFilter}
                   ref={solidGlobalSearchElementRef}
                   viewData={solidListViewMetaData}
-                  handleApplyCustomFilter={handleApplyCustomFilter}
-                ></SolidGlobalSearchElement>
-              )}
-          </div>
-          <div className="flex align-items-center gap-3">
-            {solidListViewLayout?.attrs?.headerButtons
-              ?.filter((rb) => rb.attrs.actionInContextMenu != true)
-              ?.map((button: any, index: number) => (
-                <SolidListViewHeaderButton
-                  key={index}
-                  button={button}
-                  params={params}
-                  solidListViewMetaData={solidListViewMetaData}
-                  handleCustomButtonClick={handleCustomButtonClick}
-                  selectedRecords={selectedRecords}
-                  filters={filters}
-                />
-              ))}
+                  handleApplyCustomFilter={handleApplyCustomFilter}>
+                </SolidGlobalSearchElement>
+              </div>
 
-            {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
-              solidListViewLayout?.attrs?.create !== false &&
-              params.embeded !== true &&
-              solidListViewMetaData?.data?.solidView?.layout?.attrs
-                .showDefaultAddButton !== false && (
-                <SolidCreateButton
-                  url={createButtonUrl}
-                  solidListViewLayout={solidListViewLayout}
-                />
-              )}
-            {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
-              solidListViewLayout?.attrs?.create !== false &&
-              params.embeded == true &&
-              params.inlineCreate == true &&
-              searchParams.get("viewMode") !== "view" && (
-                // < SolidCreateButton url={createButtonUrl} />
-                <Button
-                  type="button"
-                  icon={
-                    solidListViewLayout?.attrs?.addButtonIcon
-                      ? solidListViewLayout?.attrs?.addButtonIcon
-                      : "pi pi-plus"
-                  }
-                  label={
-                    solidListViewLayout?.attrs?.addButtonTitle
-                      ? solidListViewLayout?.attrs?.addButtonTitle
-                      : "Add"
-                  }
-                  className={`${solidListViewLayout?.attrs?.addButtonClassName}`}
-                  size="small"
-                  onClick={() => params.handlePopUpOpen("new")}
-                ></Button>
-              )}
-            {/* Button For Manual Refresh */}
-            {params.embeded !== true && (
-              <Button
-                type="button"
-                size="small"
-                icon="pi pi-refresh"
-                severity="secondary"
-                outlined
-                onClick={() => {
-                  setQueryString(
-                    first,
-                    rows,
-                    sortField,
-                    sortOrder,
-                    filters,
-                    showArchived
-                  );
-                }}
-              />
             )}
-            {showArchived && (
-              <Button
-                type="button"
-                icon="pi pi-refresh"
-                label="Recover"
-                size="small"
-                severity="secondary"
-                onClick={() => setRecoverDialogVisible(true)}
-              ></Button>
-            )}
-
-            {params.embeded === false &&
-              solidListViewLayout?.attrs?.configureView !== false && (
-                <SolidListViewConfigure
-                  listViewMetaData={solidListViewMetaData}
-                  solidListViewLayout={solidListViewLayout}
-                  setShowArchived={setShowArchived}
-                  showArchived={showArchived}
-                  viewData={solidListViewMetaData}
-                  sizeOptions={sizeOptions}
-                  setSize={setSize}
-                  size={size}
-                  viewModes={viewModes}
-                  params={params}
-                  actionsAllowed={actionsAllowed}
-                  selectedRecords={selectedRecords}
-                  setDialogVisible={setDialogVisible}
-                  setShowSaveFilterPopup={setShowSaveFilterPopup}
-                  filters={filters}
-                  handleFetchUpdatedRecords={handleFetchUpdatedRecords}
-                />
-              )}
-          </div>
+          {/* <Dialog
+            visible={showGlobalSearchElement}
+            // header="Confirm Delete"
+            onHide={() => setShowGlobalSearchElement(false)}
+            headerClassName="py-2"
+            contentClassName="px-0 pb-0"
+            // style={{ width: '20vw' }}
+            style={{height:'50vw'}}
+            breakpoints={{ '1199px': '20vw', '1024px': '30vw', '767px': '90vw', '250px': '80vw' }}
+          >
+            <SolidGlobalSearchElement
+              showSaveFilterPopup={showSaveFilterPopup}
+              setShowSaveFilterPopup={setShowSaveFilterPopup}
+              filters={filters}
+              clearFilter={clearFilter}
+              ref={solidGlobalSearchElementRef}
+              viewData={solidListViewMetaData}
+              handleApplyCustomFilter={handleApplyCustomFilter}>
+            </SolidGlobalSearchElement>
+          </Dialog> */}
         </div>
+
+
         {isListViewEmptyWithoutFilters ? (
           <SolidEmptyListViewPlaceholder
             createButtonUrl={createButtonUrl}
@@ -1290,8 +1376,9 @@ export const SolidListView = (params: SolidListViewParams) => {
             params={params}
             solidListViewMetaData={solidListViewMetaData}
           />
+
         ) : (
-          <div className="solid-datatable-wrapper">
+          <div className="solid-datatable-wrapper flex-1 min-h-0 overflow-auto">
             <DataTable
               value={listViewData}
               rowClassName={(rowData) => {
@@ -1612,7 +1699,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       {process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === "true" &&
         params.embeded !== true && (
           <div
-            className={`chatter-section ${isOpenSolidXAiPanel === false ? "collapsed" : ""
+            className={`chatter-section ${isOpenSolidXAiPanel === false ? "collapsed" : "open"
               }`}
             style={{ width: chatterWidth }}
           >
@@ -1672,7 +1759,8 @@ export const SolidListView = (params: SolidListViewParams) => {
         onHide={() => setDialogVisible(false)}
         headerClassName="py-2"
         contentClassName="px-0 pb-0"
-        style={{ width: '20vw' }}
+        // style={{ width: '20vw' }}
+        breakpoints={{ '1199px': '20vw', '1024px': '30vw', '767px': '50vw', '250px': '80vw' }}
       >
         <Divider className="m-0" />
         <div className="p-4">
@@ -1687,6 +1775,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         visible={isRecoverDialogVisible}
         header="Confirm Recover"
         modal
+        className="solid-confirm-dialog"
         footer={() => (
           <div className="flex justify-content-center">
             <Button
@@ -1732,6 +1821,7 @@ export const SolidListView = (params: SolidListViewParams) => {
           if (!deleteEntity) return;
           setDeleteEntity(false);
         }}
+        className="solid-confirm-dialog"
       >
         <Divider className="m-0" />
         <div className="p-4">

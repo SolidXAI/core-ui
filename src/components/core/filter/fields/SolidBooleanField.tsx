@@ -20,7 +20,7 @@ const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilter
 
 
     return (
-        <div className='flex align-items-start gap-3 w-full'>
+        <div className='flex flex-column md:flex-row  align-items-start gap-2 md:gap-3 w-full'>
             <Dropdown
                 value={rule.matchMode}
                 onChange={(e: any) => {
@@ -30,9 +30,9 @@ const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilter
                 optionLabel='label'
                 optionValue='value'
                 placeholder="Select Operator"
-                className="w-full p-inputtext-sm"
+                className="w-full p-inputtext-sm col-12 md:col-6"
             />
-            <div className='flex flex-column gap-2 w-full'>
+            <div className='flex flex-column gap-2 w-full col-12 md:col-6 pl-0 md:pl-2'>
                 <Dropdown
                     value={rule.value}
                     options={booleanOptions}

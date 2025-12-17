@@ -116,7 +116,7 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
             <Toast ref={toast} />
             <div>
                 <div className='grid'>
-                    <div className='col-5'>
+                    <div className='col-12 md-col-8 lg:col-5'>
                         <div className="flex flex-column gap-2">
                             <label htmlFor="currentPassword" className="solid-auth-input-label">Current Password</label>
                             <Password

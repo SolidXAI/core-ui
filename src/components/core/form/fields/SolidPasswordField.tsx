@@ -336,6 +336,7 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
                 visible={visible}
                 onHide={() => setVisible(false)}
                 style={{ width: '30vw' }}
+                className="solid-confirm-dialog"
             >
                 <form onSubmit={modalFormik.handleSubmit} className="p-fluid">
                     <div className="field">

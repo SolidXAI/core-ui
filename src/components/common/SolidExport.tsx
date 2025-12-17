@@ -477,6 +477,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
 
             <Dialog
               header="Save Export Template"
+              className="solid-confirm-dialog"
               visible={isDialogVisible}
               style={{ width: "20rem", right: "0" }}
               footer={dialogFooter}

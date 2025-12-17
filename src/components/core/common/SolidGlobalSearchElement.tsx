@@ -28,6 +28,9 @@ const transformFiltersToRules = (filter: any, parentRule: number | null = null):
     if (!filter || typeof filter !== "object") {
         throw new Error("Invalid filter: expected a non-null object");
     }
+    if (!filter || typeof filter !== "object") {
+        throw new Error("Invalid filter: expected a non-null object");
+    }
     const currentId = idCounter++;
     if (filter["$or"]) {
         return {
@@ -960,7 +963,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                   {customFilter && (!predefinedSearchChip || hasCustomFilterChanged()) && <CustomChip />}
                         <SearchChip />
                         <li ref={chipsRef}>
-                            <div className="relative">
+                            <div className="relative solid-global-search-element-wrapper">
                                 <InputText
                                     value={inputValue || ""}
                                     placeholder="Search..."
@@ -992,7 +995,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 </div>
 
                 {showOverlay && (
-                    <div ref={overlayRef} className="absolute w-full z-5 surface-0 border-round border-1 border-300 shadow-2" style={{ top: 35 }}>
+                    <div ref={overlayRef} className="absolute w-full z-5 surface-0 border-round border-1 border-300 shadow-2 solid-search-overlay-pannel" style={{ top: 35 }}>
                         {inputValue ? (
                             <>
                                 <div className="custom-filter-search-options px-3 py-2 flex flex-column">
@@ -1086,19 +1089,19 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     </div>
                 )
                 }
-                <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={showGlobalSearchElement} style={{ width: '65vw' }} onHide={() => { if (!showGlobalSearchElement) return; setShowGlobalSearchElement(false); }}>
+                <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={showGlobalSearchElement} style={{ width: '65vw' }} breakpoints={{ '1024px': '75vw','991px': '90vw','767px':'94w', '250px': '96vw'}} onHide={() => { if (!showGlobalSearchElement) return; setShowGlobalSearchElement(false); }}>
                     <div className="flex align-items-center justify-content-between px-3">
                         <h5 className="solid-custom-title m-0">Add Custom Filter</h5>
                         <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setShowGlobalSearchElement(false)} />
                     </div>
                     <Divider className="m-0" />
-                    <div className="p-4">
+                    <div className="p-3 lg:p-4">
                         {fields.length > 0 &&
                             <FilterComponent viewData={viewData} fields={fields} filterRules={filterRules} setFilterRules={setFilterRules} transformFilterRules={transformFilterRules} closeDialog={() => setShowGlobalSearchElement(false)}></FilterComponent>
                         }
                     </div>
                 </Dialog>
-                <Dialog header="Save Custom Filter" visible={showSaveFilterPopup} style={{ width: 500 }} onHide={() => { if (!showSaveFilterPopup) return; setShowSaveFilterPopup(false); }}>
+                <Dialog header="Save Custom Filter" className="solid-custom-filter-dialog" visible={showSaveFilterPopup} style={{ width: 500 }} onHide={() => { if (!showSaveFilterPopup) return; setShowSaveFilterPopup(false); }}>
                     <SolidSaveCustomFilterForm currentSavedFilterData={currentSavedFilterData} handleSaveFilter={handleSaveFilter} closeDialog={setShowSaveFilterPopup}></SolidSaveCustomFilterForm>
                 </Dialog>
 
@@ -1106,6 +1109,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     visible={isDeleteSQDialogVisible}
                     header="Confirm Delete"
                     modal
+                    className="solid-confirm-dialog"
                     footer={() => (
                         <div className="flex justify-content-center">
                             <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteSavedFilter} />

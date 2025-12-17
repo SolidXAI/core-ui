@@ -26,6 +26,7 @@ export function SolidFormViewContextMenuHeaderButton({
     if (!hasRole) return null;
     if(button.attrs?.visible == "false") return null
     return (
+        <div>
         <Button
             text
             type="button"
@@ -44,5 +45,6 @@ export function SolidFormViewContextMenuHeaderButton({
                 handleCustomButtonClick(button.attrs, event)
             }}
         />
+        </div>
     );
 }
