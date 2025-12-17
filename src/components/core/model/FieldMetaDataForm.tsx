@@ -419,7 +419,7 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
   const schema = {
     name: Yup.string()
       // .matches(/^[a-z]+(-[a-z]+)*$/,"Invalid format. Use lowercase letters and hyphens only.")
-      .notOneOf(reservedNames,ERROR_MESSAGES.FIELD_ALREADY_USE('Name','name'))
+      .notOneOf(reservedNames, ERROR_MESSAGES.FIELD_ALREADY_USE('Name', 'name'))
       .required(ERROR_MESSAGES.FIELD_REUQIRED('Name')),
     displayName: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Display Name')),
     description: Yup.string().nullable(),
@@ -430,7 +430,7 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
       ormType: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Orm Type')),
     }),
     ...(currentFields.includes("length") && {
-      length: Yup.number().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Length','interger')).nullable(),
+      length: Yup.number().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Length', 'interger')).nullable(),
     }),
     // ...(currentFields.includes("defaultValue") && {
     //   defaultValue: Yup.string().required("Default Value is required"),
@@ -441,22 +441,22 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
         switch (selectedType.value) {
           case "int":
           case "bigint":
-            return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value','integer'))
-              .integer(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value','integer'));
+            return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value', 'integer'))
+              .integer(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value', 'integer'));
           case "float":
           case "decimal":
-            return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value','integer'))
+            return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value', 'integer'))
           case "shortText":
           case "longText":
           case "richText":
           case "json":
-            return Yup.string().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value','boolean'))
+            return Yup.string().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value', 'boolean'))
           case "boolean":
-            return Yup.boolean().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value','boolean'))
+            return Yup.boolean().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value', 'boolean'))
           case "date":
           case "datetime":
           case "time":
-            return Yup.date().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value','Date'))
+            return Yup.date().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Default value', 'Date'))
           default:
             return Yup.mixed().nullable(); // Default fallback if no match
         }
@@ -498,14 +498,14 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
         .when("type", (type: any) => {
           switch (selectedType.value) {
             case "int":
-              return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Min','interger'))
-                .integer(ERROR_MESSAGES.FIELD_MUST_BE_AN('Min','interger'));
+              return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Min', 'interger'))
+                .integer(ERROR_MESSAGES.FIELD_MUST_BE_AN('Min', 'interger'));
             case "decimal":
             case "shortText":
             case "longText":
             case "richText":
             case "json":
-              return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Min','interger'));
+              return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Min', 'interger'));
             default:
               return Yup.mixed().nullable().nullable(); // Default fallback if no match
           }
@@ -519,11 +519,11 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
         .when("type", (type: any) => {
           switch (selectedType.value) {
             case "int":
-              return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Max','interger'))
-                .integer(ERROR_MESSAGES.FIELD_MUST_BE_AN('Max','interger'))
+              return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Max', 'interger'))
+                .integer(ERROR_MESSAGES.FIELD_MUST_BE_AN('Max', 'interger'))
                 .test(
                   ERROR_MESSAGES.GREATER_THAN_MIN,
-                  ERROR_MESSAGES.FIELD_MUST_BE_AN('Max','greater than Min'),
+                  ERROR_MESSAGES.FIELD_MUST_BE_AN('Max', 'greater than Min'),
                   function (value) {
                     const { min } = this.parent; // Access sibling field 'min'
                     // if (min != null && value == null) {
@@ -542,10 +542,10 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
             case "longText":
             case "richText":
             case "json":
-              return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Max','interger'))
+              return Yup.number().nullable().typeError(ERROR_MESSAGES.FIELD_MUST_BE_AN('Max', 'interger'))
                 .test(
                   ERROR_MESSAGES.GREATER_THAN_MIN,
-                  ERROR_MESSAGES.FIELD_MUST_BE_AN('Max','greater than Min'),
+                  ERROR_MESSAGES.FIELD_MUST_BE_AN('Max', 'greater than Min'),
                   function (value) {
                     const { min } = this.parent; // Access sibling field 'min'
                     // if (min != null && value == null) {
@@ -568,7 +568,7 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
       private: Yup.boolean(),
     }),
     ...(currentFields.includes("mediaTypes") && {
-      mediaTypes: Yup.mixed().required( ERROR_MESSAGES.FIELD_MUST_BE_AN('Media Types','Arrays')).required(ERROR_MESSAGES.FIELD_REUQIRED('Media Types')),
+      mediaTypes: Yup.mixed().required(ERROR_MESSAGES.FIELD_MUST_BE_AN('Media Types', 'Arrays')).required(ERROR_MESSAGES.FIELD_REUQIRED('Media Types')),
     }),
 
     ...(currentFields.includes("mediaMaxSizeKb") && {
@@ -710,12 +710,8 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
         .required(ERROR_MESSAGES.FIELD_REUQIRED('Computed Field Trigger Config')),
     }),
 
-    ...(currentFields.includes("columnName") && {
-      columnName: Yup.string().nullable().matches(
-        /^[a-z0-9_]+$/,
-        ERROR_MESSAGES.SNAKE_CASE('column')
-      ),
-    }),
+    // ...(currentFields.includes("columnName") && { columnName: Yup.string().nullable().matches(/^[a-z0-9_]+$/, ERROR_MESSAGES.SNAKE_CASE('column')), }),
+    ...(currentFields.includes("isPrimaryKey") && { isPrimaryKey: Yup.boolean(), }),
 
 
 
@@ -1225,6 +1221,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     relationJoinTableName: fieldMetaData ? fieldMetaData?.relationJoinTableName : null,
     userKey: fieldMetaData ? fieldMetaData?.userKey : null,
     enableAuditTracking: fieldMetaData ? fieldMetaData?.enableAuditTracking : false,
+    isPrimaryKey: fieldMetaData ? fieldMetaData?.isPrimaryKey : false,
     isMultiSelect: fieldMetaData ? fieldMetaData?.isMultiSelect : false,
   };
 
@@ -3317,6 +3314,30 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               <Message
                                 severity="error"
                                 text={formik?.errors?.isUserKey?.toString()}
+                              />
+                            )}
+                          </div>
+                        )}
+                        {currentFields.includes("isPrimaryKey") && (modelMetaData?.isLegacyTable || modelMetaData?.isLegacyTableWithId ) && (
+                          <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="flex align-items-center gap-2">
+                              <Checkbox
+                                name="isPrimaryKey"
+                                onChange={(e) => {
+                                  formik.setFieldValue("isPrimaryKey", e.checked);
+                                }}
+                                checked={formik.values.isPrimaryKey}
+                              ></Checkbox>
+                              <label htmlFor="ingredient1" className="form-field-label">
+                                Is Primary Key
+                              </label>
+                            </div>
+                            <p className="fieldSubTitle">By selecting this option, you are setting this field as the primary key for this legacy table.</p>
+
+                            {isFormFieldValid(formik, "isPrimaryKey") && (
+                              <Message
+                                severity="error"
+                                text={formik?.errors?.isPrimaryKey?.toString()}
                               />
                             )}
                           </div>

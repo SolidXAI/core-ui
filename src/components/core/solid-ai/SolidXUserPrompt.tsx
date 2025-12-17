@@ -5,7 +5,7 @@ import { AiInteraction } from '@/types/solid-core'
 import moment from 'moment'
 
 export const SolidXUserPrompt = ({ interaction }: { interaction: AiInteraction }) => {
-  const timestamp = moment(interaction.createdAt).format('HH:mm')
+  const timestamp = moment(interaction.created_at).format('HH:mm')
 
   return (
     <div className={`${styles.SolidXUserPromptWrapper} flex justify-content-end`}>

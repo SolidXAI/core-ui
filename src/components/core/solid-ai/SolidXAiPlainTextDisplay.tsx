@@ -7,18 +7,18 @@ export interface SolidXAiPlainTextDisplayProps {
 
 export const SolidXAiPlainTextDisplay: React.FC<SolidXAiPlainTextDisplayProps> = ({ interaction }) => {
 
-    let response = '';
-    let parsed: any = {}
-    try {
-        parsed = JSON.parse(interaction.message)
-        response = parsed.response ? parsed.response : '';
-    } catch (e) {
-        response = 'Invalid JSON'
-    }
+    // let response = '';
+    // let parsed: any = {}
+    // try {
+    //     parsed = JSON.parse(interaction.message)
+    //     response = parsed.response ? parsed.response : '';
+    // } catch (e) {
+    //     response = 'Invalid JSON'
+    // }
 
     return (
         <div className={`p-3 ${styles.SolidXAIResponse}`}>
-            {response}
+            {interaction?.message}
         </div>
     )
 }

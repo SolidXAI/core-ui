@@ -75,7 +75,13 @@ export type LayoutAttribute = {
     showLabel?: boolean;
     inlineListLayout?: any;
     inlineCreateLayout?: any;
+    showDefaultAddButton?: boolean;
+    showDefaultEditButton?: boolean;
+    showEditFormButton?: boolean;
+    showAddFormButton?: boolean;
+    showDeleteFormButton?: boolean;
     formButtons?: any;
+    rowButtons?: any;
     whereClause?: string;
     disabled?: boolean;
     readonly?: boolean;
@@ -97,7 +103,7 @@ export type ListLayoutType = {
 };
 
 // Event type
-export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender" | "onFormDataLoad" | "onFormLayoutLoad" | "onFormLoad" | "onListLoad" | "afterLogin" | "beforeLogout" | "onApplicationMount";
+export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender" | "onFormDataLoad" | "onFormLayoutLoad" | "onFormLoad" | "onListLoad" | "onBeforeListDataLoad" | "afterLogin" | "beforeLogout" | "onApplicationMount";
 export type SolidUiEvent = {
     type: SolidUiEvents;
     modifiedField?: string;
@@ -134,6 +140,8 @@ export type SolidListUiEvent = {
     totalRecords: number;
     viewMetadata: SolidView;
     listViewLayout: ListLayoutType;
+    user: any;
+    session: any
 };
 
 export type SolidLoadList = {
@@ -143,11 +151,25 @@ export type SolidLoadList = {
     totalRecords: number;
     viewMetadata: SolidView;
     listViewLayout: ListLayoutType;
+    queryParams?: any,
+    user: any,
+    session: any
+}
+
+export type SolidBeforeListDataLoad = {
+    type: SolidUiEvents;
+    fieldsMetadata: FieldsMetadata;
+    viewMetadata: SolidView;
+    listViewLayout: ListLayoutType;
+    filter?: any,
+    queryParams?: any,
     user: any,
     session: any
 }
 
 export type SolidListUiEventResponse = {
+    filterApplied?: Boolean;
+    newFilter?: any;
     dataChanged?: Boolean;
     newListData?: any[];
     layoutChanged?: Boolean;
@@ -257,15 +279,15 @@ export type RootState = ReturnType<ReturnType<typeof initializeStore>['getState'
 
 export interface AiInteraction {
     id: number;
-    threadId: string;
+    thread_id: string;
     role: 'human' | 'gen-ai' | string;
     message: string;
-    contentType?: string;
+    content_type?: string;
     status?: string;
-    errorMessage?: string;
-    modelUsed?: string;
-    responseTimeMs?: number;
+    error_message?: string;
+    model_used?: string;
+    response_time_ms?: number;
     metadata?: string;
-    isApplied?: boolean;
-    createdAt?: Date
+    is_applied?: boolean;
+    created_at?: Date
 }

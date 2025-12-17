@@ -6,6 +6,7 @@ import { SolidChatterMessageBox } from './SolidChatterMessageBox'
 import { useLazyGetchatterMessageQuery } from '@/redux/api/solidChatterMessageApi'
 import qs from "qs";
 import { ERROR_MESSAGES } from '@/constants/error-messages'
+import { permissionExpression } from '@/helpers/permissions'
 
 interface FilterState {
     name: string;
@@ -13,7 +14,7 @@ interface FilterState {
     endDate: Date | null;
 }
 
-export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, setRefreshChatterMessage }: { modelSingularName: any, id: any, refreshChatterMessage: boolean, setRefreshChatterMessage: (value: boolean) => void }) => {
+export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, setRefreshChatterMessage, actionsAllowed=[] }: { modelSingularName: any, id: any, refreshChatterMessage: boolean, setRefreshChatterMessage: (value: boolean) => void , actionsAllowed?:string[]}) => {    
     const [activeTab, setActiveTab] = useState<'email-message' | 'log' | null>('email-message');
     const [visibleBox, setVisibleBox] = useState<'email-message' | 'log' | null>(null);
     const [messages, setMessages] = useState<any[]>([]);
@@ -186,7 +187,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                     </div>
                 ) : (
                     <>
-                        {messages.map((message, index) => {
+                        {actionsAllowed.includes(`${permissionExpression('chatterMessage', 'findMany')}`) && messages.map((message, index) => {
                             const showDateDivider = index === 0 || message.date !== messages[index - 1].date;
                             return (
                                 <div key={message.id}>

@@ -60,7 +60,7 @@ export class SolidLongTextField implements ISolidField {
             schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel,fieldMetadata.min));
         }
         if (fieldMetadata.max && fieldMetadata.max > 0) {
-            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel,fieldMetadata.min));
+            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel,fieldMetadata.max));
         }
         // 3. regular expression
         if (fieldMetadata.regexPattern) {
@@ -152,11 +152,9 @@ export const DefaultLongTextFormEditWidget = ({ formik, fieldContext }: SolidFor
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                     disabled={formDisabled || fieldDisabled}
                     id={fieldLayoutInfo.attrs.name}
-                    name={fieldMetadata.name}
                     aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
                     // onChange={formik.handleChange}
                     onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-                    onBlur={(e) => fieldContext.onBlur(e, 'onFieldBlur')}
                     value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                     rows={5}
                     cols={30}

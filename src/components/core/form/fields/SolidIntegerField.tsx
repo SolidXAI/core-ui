@@ -31,6 +31,12 @@ export class SolidIntegerField implements ISolidField {
     initialValue(): any {
         const fieldName = this.fieldContext.field.attrs.name;
         const fieldDefaultValue = this.fieldContext?.fieldMetadata?.defaultValue;
+        if (this.fieldContext.parentData && this.fieldContext.parentData[fieldName]) {
+            const parentDataForKey = this.fieldContext.parentData[fieldName];
+            if (parentDataForKey && typeof parentDataForKey !== 'object') {
+                return this.fieldContext.parentData[fieldName]
+            }
+        }
 
         const existingValue = this.fieldContext.data[fieldName];
 
@@ -53,10 +59,10 @@ export class SolidIntegerField implements ISolidField {
         }
         // 2. length (min/max)
         if (fieldMetadata.min && fieldMetadata.min > 0) {
-            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel,fieldMetadata.min));
+            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel, fieldMetadata.min));
         }
         if (fieldMetadata.max && fieldMetadata.max > 0) {
-            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel,fieldMetadata.min));
+            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel,fieldMetadata.max));
         }
         return schema;
     }
