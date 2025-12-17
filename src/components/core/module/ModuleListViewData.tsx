@@ -399,6 +399,7 @@ export const ModuleListViewData = () => {
         visible={isDialogVisible}
         header="Confirm Delete"
         modal
+        className="solid-confirm-dialog"
         footer={() => (
           <div className="flex justify-content-center">
             <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteBulk} />
@@ -414,6 +415,7 @@ export const ModuleListViewData = () => {
         header="Generate Code"
         headerClassName="text-center"
         modal
+        className="solid-confirm-dialog"
         footer={() => (
           <div className="flex justify-content-center">
             <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={generateCodeHandler} />

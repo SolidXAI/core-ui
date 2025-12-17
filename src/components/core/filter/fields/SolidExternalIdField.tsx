@@ -14,7 +14,7 @@ const SolidExternalIdField = ({ fieldMetadata, onChange, index, rule }: SolidFil
 
 
     return (
-        <div className='flex align-items-start gap-3 w-full'>
+        <div className='flex flex-column md:flex-row align-items-start gap-2 md:gap-3 w-full'>
             <Dropdown
                 value={rule.matchMode}
                 onChange={(e: any) => {
@@ -24,9 +24,9 @@ const SolidExternalIdField = ({ fieldMetadata, onChange, index, rule }: SolidFil
                 optionLabel='label'
                 optionValue='value'
                 placeholder="Select Operator"
-                className="w-full p-inputtext-sm"
+                className="w-full p-inputtext-sm col-12 md:col-6"
             />
-            <div className='flex flex-column gap-2 w-full'>
+            <div className='flex flex-column gap-2 w-full col-12 md:col-6'>
                 <SolidVarInputsFilterElement
                     values={rule.value}
                     onChange={(e: any) => {

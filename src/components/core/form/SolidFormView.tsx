@@ -1478,7 +1478,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             internationalisationEnabled={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}
                             handleDraftPublishWorkFlow={handleDraftPublishWorkFlow}
                         />
-                        <div className={`p-3 md:p-4 solid-form-content ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
+                        <div className={`px-4 py-3 md:p-4 solid-form-content ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
                             {params.id === 'new' && DynamicFormComponentNew ? (
                                 <DynamicFormComponentNew params={params} />
@@ -1491,7 +1491,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     </form>
                 </div>
                 {params.embeded !== true &&
-                    <div className={`chatter-section ${isShowChatter === false ? 'collapsed' : ''}`} style={{ width: chatterLocaleWidth }}>
+                    <div className={`chatter-section ${isShowChatter === false ? 'collapsed' : 'open'}`} style={{ width: chatterLocaleWidth }}>
                         {isShowChatter && (
                             <div
                                 style={{
@@ -1566,6 +1566,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 <Dialog
                     visible={isDeleteDialogVisible}
                     header="Confirm Delete"
+                    className="solid-confirm-dialog"
                     modal
                     footer={() => (
                         <div className="flex justify-content-center">
@@ -1582,9 +1583,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     header="Change Form Layout"
                     modal
                     onHide={() => setLayoutDialogVisible(false)}
-                    contentStyle={{
-                        width: 800
+                    style={{ width: '50vw' }}
+                    breakpoints={{
+                        '960px': '80vw',
+                        '641px': '95vw'
                     }}
+                    contentClassName="p-3 pt-0 lg:p-4"
                 >
                     <SolidFormUserViewLayout solidFormViewMetaData={solidFormViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
                 </Dialog>

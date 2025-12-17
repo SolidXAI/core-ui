@@ -22,7 +22,7 @@ const SolidShortTextField = ({ fieldMetadata, onChange, index, rule }: SolidFilt
     const numberOfInputs = getNumberOfInputs(rule.matchMode);
 
     return (
-        <div className='flex align-items-start gap-3 w-full'>
+        <div className='flex flex-column md:flex-row align-items-start gap-2 md:gap-3 md:w-full col-12 '>
             <Dropdown
                 value={rule.matchMode}
                 onChange={(e: any) => {
@@ -32,9 +32,9 @@ const SolidShortTextField = ({ fieldMetadata, onChange, index, rule }: SolidFilt
                 optionLabel='label'
                 optionValue='value'
                 placeholder="Select Operator"
-                className="w-full p-inputtext-sm"
+                className="w-full p-inputtext-sm md:col-6 "
             />
-            <div className='flex flex-column gap-2 w-full'>
+            <div className='flex flex-column gap-2 w-full col-12 md:col-6 pl-0 md:pl-2'>
                 <SolidVarInputsFilterElement
                     values={rule.value}
                     onChange={(e: any) => {

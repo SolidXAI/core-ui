@@ -50,3 +50,10 @@
 .SolidRemoveProfile:hover {
     transform: scale(1.1);
 }
+
+
+@media(max-width:991px) {
+    .SolidSettingTab {
+        padding: 10px 12px !important;
+    }
+}
