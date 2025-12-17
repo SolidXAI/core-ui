@@ -1338,7 +1338,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         const handleChatterExpandClick = (option?: string) => {
             setShowChatter(true);
-            if (option === 'locale') {
+            if (option === 'info') {
                 setDefaultTabViewOptionIndex(0);
             } else if (option === 'chatter') {
                 setDefaultTabViewOptionIndex(1);
@@ -1519,8 +1519,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         {isShowChatter === false ?
                             <div className="flex flex-column gap-2 justify-content-center p-2">
                                 {/*if solidview Internationalisation is enabled then show the locale tab */}
-                                {solidFormViewMetaData?.data?.solidView?.model?.internationalisation &&
-                                    <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('locale')}>
+                                {solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow &&
+                                    <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('info')}>
                                         Info
                                     </div>}
                                     <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('chatter')}>
