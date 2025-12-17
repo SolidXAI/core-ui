@@ -54,8 +54,8 @@ export const GeneralSettings = () => {
         appLogo: solidSettingsData?.data?.system?.appLogo ?? null,
         companylogo: solidSettingsData?.data?.system?.companylogo ?? null,
         allowPublicRegistration: solidSettingsData?.data?.system?.allowPublicRegistration ?? false,
-        iamPasswordRegistrationEnabled: solidSettingsData?.data?.system?.iamPasswordRegistrationEnabled ?? false,
-        passwordlessRegistration: solidSettingsData?.data?.system?.passwordlessRegistration ?? false,
+        passwordBasedAuth: solidSettingsData?.data?.system?.passwordBasedAuth ?? false,
+        passwordLessAuth: solidSettingsData?.data?.system?.passwordLessAuth ?? false,
         activateUserOnRegistration: solidSettingsData?.data?.system?.activateUserOnRegistration ?? false,
         iamGoogleOAuthEnabled: solidSettingsData?.data?.system?.iamGoogleOAuthEnabled ?? false,
         shouldQueueEmails: solidSettingsData?.data?.system?.shouldQueueEmails ?? false,
@@ -762,13 +762,13 @@ export const GeneralSettings = () => {
                                                 <div className="col-12 md:col-6 mt-3 md:mt-0">
                                                     <div className="formgrid grid align-items-center">
                                                         <div className="col-10 sm:col-9 lg:col-5">
-                                                            <label className="form-field-label">Signup with Password</label>
+                                                            <label className="form-field-label">Password Based Authentication</label>
                                                         </div>
                                                         <div className="col-2 sm:col-3 lg:col-7">
                                                             <InputSwitch
-                                                                name="iamPasswordRegistrationEnabled"
-                                                                checked={formik.values.iamPasswordRegistrationEnabled}
-                                                                onChange={(e) => formik.setFieldValue("iamPasswordRegistrationEnabled", e.value)}
+                                                                name="passwordBasedAuth"
+                                                                checked={formik.values.passwordBasedAuth}
+                                                                onChange={(e) => formik.setFieldValue("passwordBasedAuth", e.value)}
                                                             />
                                                         </div>
                                                     </div>
@@ -776,13 +776,13 @@ export const GeneralSettings = () => {
                                                 <div className="col-12 md:col-6 mt-3">
                                                     <div className="formgrid grid align-items-center">
                                                         <div className="col-10 sm:col-9 lg:col-5">
-                                                            <label className="form-field-label">Signup without Password</label>
+                                                            <label className="form-field-label">Password Less Authentication</label>
                                                         </div>
                                                         <div className="col-2 sm:col-3 lg:col-7">
                                                             <InputSwitch
-                                                                name="passwordlessRegistration"
-                                                                checked={formik.values.passwordlessRegistration}
-                                                                onChange={(e) => formik.setFieldValue("passwordlessRegistration", e.value)}
+                                                                name="passwordLessAuth"
+                                                                checked={formik.values.passwordLessAuth}
+                                                                onChange={(e) => formik.setFieldValue("passwordLessAuth", e.value)}
                                                             />
                                                         </div>
                                                     </div>
