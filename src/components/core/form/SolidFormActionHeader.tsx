@@ -27,6 +27,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
 
     const { user } = useSelector((state: any) => state.auth);
 
+    const isPublished = publish !== null;   // record is published if publish has value
+
     useEffect(() => {
         if (solidView) {
             let contextMenuHeaderButtonsData: any = [];
@@ -79,6 +81,9 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
 
     };
     const FormActionDropdown = () => {
+        const canPublish = actionsAllowed.includes(permissionExpression(params.modelName, 'publish'));
+        const canUnpublish = actionsAllowed.includes(permissionExpression(params.modelName, 'unpublish'));
+
         return (
             <div>
                 <Button
@@ -102,6 +107,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                         {params.embeded !== true &&
                             params.id !== "new" &&
                             actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
+                            !isPublished &&
                             solidView?.layout?.attrs?.showDeleteFormButton !== false &&
                             !formViewLayout.attrs.readonly &&
                             <Button
@@ -127,31 +133,39 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             icon={'pi pi-objects-column'}
                             onClick={() => setLayoutDialogVisible(true)}
                         />
-                        {draftEnabled && internationalisationEnabled && params.id !== 'new' &&
-                            (publish !== null ?
-                                <Button
-                                    text
-                                    type="button"
-                                    className="w-8rem text-left gap-2 purple-200"
-                                    label="Unpublish"
-                                    size="small"
-                                    iconPos="left"
-                                    severity="contrast"
-                                    icon={'pi pi-cloud-download'}
-                                    onClick={() => handleDraftPublishWorkFlow('unpublish')}
-                                /> :
-                                <Button
-                                    text
-                                    type="button"
-                                    className="w-8rem text-left gap-2 purple-200"
-                                    label="Publish"
-                                    size="small"
-                                    iconPos="left"
-                                    severity="contrast"
-                                    icon={'pi pi-cloud-upload'}
-                                    onClick={() => handleDraftPublishWorkFlow('publish')}
-                                />
-                            )}
+                        {draftEnabled && params.id !== 'new' && (
+                            <>
+                                {!isPublished && canPublish && (
+                                    <Button
+                                        text
+                                        type="button"
+                                        className="w-8rem text-left gap-2 purple-200"
+                                        label="Publish"
+                                        size="small"
+                                        iconPos="left"
+                                        severity="contrast"
+                                        icon="pi pi-cloud-upload"
+                                        onClick={() => handleDraftPublishWorkFlow('publish')}
+                                    />
+                                )}
+
+                                {isPublished && canUnpublish && (
+                                    <Button
+                                        text
+                                        type="button"
+                                        className="w-8rem text-left gap-2 purple-200"
+                                        label="Unpublish"
+                                        size="small"
+                                        iconPos="left"
+                                        severity="contrast"
+                                        icon="pi pi-cloud-download"
+                                        onClick={() => handleDraftPublishWorkFlow('unpublish')}
+                                    />
+                                )}
+                            </>
+                        )}
+
+
                         {contextMenuHeaderButtons.map((button: any, index: number) => {
                             return (
                                 <SolidFormViewContextMenuHeaderButton
@@ -172,6 +186,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
             </div>
         )
     }
+
     return (
         <>
             <div className="solid-form-header">
@@ -321,6 +336,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 solidView?.layout?.attrs?.showEditFormButton !== false &&
                                 params.embeded !== true &&
                                 viewMode === "view" &&
+                                !isPublished &&
                                 actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
 
                                 <div>
@@ -355,7 +371,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
                                 solidView?.layout?.attrs?.showDeleteFormButton !== false &&
                                 !formViewLayout.attrs.readonly &&
-
+                                !isPublished &&
                                 <div>
                                     <Button size="small" type="button" label="Delete" severity="danger" onClick={() => setDeleteDialogVisible(true)} />
                                 </div>
