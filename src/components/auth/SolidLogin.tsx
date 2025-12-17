@@ -237,9 +237,6 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 text={formik?.errors?.email?.toString()}
                             />}
                         </div>
-                        <div className="mt-4 text-right">
-                            <Link href={"/auth/initiate-forgot-password"} className="solid-auth-input-label">Forgot Password?</Link>
-                        </div>
                         <div className="mt-4">
                             <Button className="w-full font-light auth-submit-button" label="Sign In" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
                         </div>
