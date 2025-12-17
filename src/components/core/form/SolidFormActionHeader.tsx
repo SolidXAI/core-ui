@@ -66,7 +66,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                 setNormalHeaderButtons(normalHeaderButtonsData);
             }
         }
-    }, []);
+    }, [formViewLayout]);
 
     const updateViewMode = (newMode: "view" | "edit") => {
         setViewMode(newMode);
@@ -171,7 +171,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                         {contextMenuHeaderButtons.map((button: any, index: number) => {
                             return (
                                 <SolidFormViewContextMenuHeaderButton
-                                    key={index}
+                                    key={button?.attrs?.action ?? index}
                                     button={button}
                                     params={params}
                                     formik={formik}
@@ -186,7 +186,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             {normalHeaderButtons.map((button: any, index: number) => {
                                 return (
                                     <SolidFormViewNormalHeaderButton
-                                        key={index}
+                                        key={button?.attrs?.action ?? index}
                                         button={button}
                                         params={params}
                                         formik={formik}
