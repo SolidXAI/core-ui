@@ -10,7 +10,7 @@ import GenerateModuleCodeRowAction from "@/components/core/extension/solid-core/
 import { DefaultBooleanFormEditWidget, DefaultBooleanFormViewWidget, SolidBooleanCheckboxStyleFormEditWidget, SolidBooleanSwitchStyleFormEditWidget } from "@/components/core/form/fields/SolidBooleanField";
 import { DefaultDateFormEditWidget, DefaultDateFormViewWidget } from "@/components/core/form/fields/SolidDateField";
 import { DefaultDateTimeFormEditWidget, DefaultDateTimeFormViewWidget } from "@/components/core/form/fields/SolidDateTimeField";
-import { DefaultDecimalFormEditWidget } from "@/components/core/form/fields/SolidDecimalField";
+import { DefaultDecimalFormEditWidget, DefaultDecimalFormViewWidget } from "@/components/core/form/fields/SolidDecimalField";
 import { DefaultEmailFormEditWidget } from "@/components/core/form/fields/SolidEmailField";
 import { DefaultIntegerFormEditWidget, SolidIntegerSliderStyleFormEditWidget } from "@/components/core/form/fields/SolidIntegerField";
 import { DefaultJsonFormEditWidget, DefaultJsonFormViewWidget } from "@/components/core/form/fields/SolidJsonField";
@@ -44,6 +44,7 @@ import { DefaultTimeFormEditWidget, DefaultTimeFormViewWidget } from "@/componen
 import { SolidAiInteractionMetadataFieldFormWidget } from "@/components/core/form/fields/widgets/SolidAiInteractionMetadataFieldFormWidget";
 import { SolidAiInteractionMessageFieldFormWidget } from "@/components/core/form/fields/widgets/SolidAiInteractionMessageFieldFormWidget";
 import { SolidS3FileViewerWidget } from "@/components/core/form/fields/widgets/SolidS3FileViewerWidget";
+import DeleteModuleRowAction from "@/components/core/extension/solid-core/moduleMetadata/list/DeleteModuleRowAction";
 
 type ExtensionComponentType = null | 'list_field_widget' | 'form_field_view_widget' | 'form_field_edit_widget' | 'list_row_action ' | 'list_header_action' | 'form_action' | 'form_widget';
 
@@ -267,6 +268,9 @@ registerExtensionComponent("DefaultPasswordFormViewWidget", DefaultPasswordFormV
 // - richText
 registerExtensionComponent("DefaultRichTextFormViewWidget", DefaultRichTextFormViewWidget, []);
 
+// - Decimal
+registerExtensionComponent("DefaultDecimalFormViewWidget", DefaultDecimalFormViewWidget, []);
+
 // - selectionStatic
 registerExtensionComponent("DefaultSelectionStaticFormViewWidget", DefaultSelectionStaticFormViewWidget, []);
 
@@ -292,6 +296,7 @@ registerExtensionComponent("DefaultRelationOneToManyFormViewWidget", DefaultRela
 registerExtensionComponent("GenerateModelCodeRowAction", GenerateModelCodeRowAction, []);
 registerExtensionComponent("GenerateModuleCodeRowAction", GenerateModuleCodeRowAction, []);
 registerExtensionComponent("DeleteModelRowAction", DeleteModelRowAction, []);
+registerExtensionComponent("DeleteModuleRowAction", DeleteModuleRowAction, []);
 
 // 7. form widget 
 registerExtensionComponent("CustomHtml", CustomHtml, []);
