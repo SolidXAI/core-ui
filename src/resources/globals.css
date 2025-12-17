@@ -3361,3 +3361,23 @@ flex-shrink: 0; */
 .p-toast-icon-close {
   border-radius: 50px;
 }
+
+/*css for custom status icon */
+.status-icon {
+  width: 2rem;
+  height: 1.5rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 18px;
+}
+
+.status-icon.success {
+  background: var(--green-500);
+  color: var(--surface-0);
+}
+
+.status-icon.danger {
+  background: var(--red-500);
+  color: var(--surface-0);
+}
