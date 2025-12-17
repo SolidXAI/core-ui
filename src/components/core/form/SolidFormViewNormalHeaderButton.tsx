@@ -24,6 +24,7 @@ export function SolidFormViewNormalHeaderButton({
         : useHasAnyRole(button?.attrs?.roles);
 
     if (!hasRole) return null;
+    if (button?.attrs?.visible == "false") return null
     return (
         <Button
             type="button"
