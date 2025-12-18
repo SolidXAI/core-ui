@@ -1,28 +1,38 @@
 'use client';
-import { useGenerateCodeForModelMutation } from "@/redux/api/modelApi";
+import { SolidCircularLoader } from "@/components/core/common/SolidLoaders/SolidCircularLoader";
+import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { useGetModelsQuery, useLazyGetModelsQuery } from "@/redux/api/modelApi";
+import { useGenerateCodeFormoduleMutation } from "@/redux/api/moduleApi";
+import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
+import { useSeederMutation } from "@/redux/api/solidServiceApi";
 import { closePopup } from "@/redux/features/popupSlice";
 import { SolidListRowdataDynamicFunctionProps } from "@/types/solid-core";
-import { Button } from "primereact/button";
-import { useRef, useState } from "react";
-import { useDispatch } from "react-redux";
-import { Toast } from 'primereact/toast';
-import { DataTable } from "primereact/datatable";
-import { Column } from "primereact/column";
-import { Checkbox } from "primereact/checkbox";
 import { kebabCase } from "lodash";
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { Button } from "primereact/button";
+import { Checkbox } from "primereact/checkbox";
+import { Column } from "primereact/column";
+import { DataTable } from "primereact/datatable";
+import { Toast } from "primereact/toast";
+import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
 
+const DeleteModuleRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
 
-const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     const [isConfirmed, setIsConfirmed] = useState(false);
-
+    const [errorState, setErrorState] = useState<string | null>(null);
+    const [isDeleting, setIsDeleting] = useState(false);
     const dispatch = useDispatch();
-    const entityApi = createSolidEntityApi(event.params.modelName);
-    const {useDeleteSolidEntityMutation} = entityApi;
-    const [deleteSolidSingleEntiry, { 
-        isError:isSolidEntitiesDeleteError , 
+    const entityApi = createSolidEntityApi("moduleMetadata");
+    const { useDeleteSolidEntityMutation } = entityApi;
+
+    const [deleteSolidSingleEntiry, {
+        isError: isSolidEntitiesDeleteError,
     }] = useDeleteSolidEntityMutation()
+
+    const queryString = `filters[$and][0][$or][0][module][$in][0]=${event?.rowData?.id}`;
+    const { data: models, isLoading: getModelsLoading, error } = useGetModelsQuery(queryString);
+    console.log("models", models);
+
 
     const toast = useRef<Toast>(null);
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
@@ -34,11 +44,31 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
         });
     };
 
-    const deleteModelHandler = async () => {
-        const res :any= await deleteSolidSingleEntiry(event.rowData.id)
-        if(!isSolidEntitiesDeleteError && res && res.data){
-            dispatch(closePopup());
-            showToast('success', 'Model Deleted', `Model ${event.rowData.singularName} has been deleted successfully.`);
+    const deleteModuleHandler = async () => {
+        setIsDeleting(true);
+        setErrorState(null);
+        try {
+            const res: any = await deleteSolidSingleEntiry(event.rowData.id)
+            // console.log('delete model res', res);
+            setErrorState(res.error || null);
+            if (res.error) {
+                // handle backend or RTK error object
+                const message =
+                    res.error?.data?.message ||
+                    res.error?.error ||
+                    ERROR_MESSAGES.ERROR_OCCURED;
+                setErrorState(message);
+                showToast('error', ERROR_MESSAGES.DELETE_FAIELD, message);
+            } else {
+                showToast('success', ERROR_MESSAGES.MODEL_DELETE, ERROR_MESSAGES.MODEL_DELETE_SUCCESSFULLY(event.rowData.singularName));
+                dispatch(closePopup());
+            }
+        } catch (err: any) {
+            console.error(ERROR_MESSAGES.DELETE_ERROR, err);
+            setErrorState(err.message || ERROR_MESSAGES.NETWORK_ERROR);
+            showToast('error', ERROR_MESSAGES.ERROR, ERROR_MESSAGES.NETWORK_OR_SERVER_ERROR);
+        } finally {
+            setIsDeleting(false);
         }
     }
 
@@ -53,7 +83,6 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
         { file: `${kebabCase(event.rowData.singularName)}-metadata.json`, description: 'Remove references to this model in the model metadata, menu, action & view sections.', intervention: 'Automatic' },
         { file: '-', description: 'Drop database table. Removes the database table from the DB, this is a very risky step. Best to review all relations to other models etc and then do this manually.', intervention: 'Manual (X)', manual: true },
     ];
-
 
 
     return (
@@ -87,7 +116,7 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
                     </div>
                 </div>
                 <div className="flex gap-3 justify-content-start">
-                    <Button size="small" label="Apply" disabled={!isConfirmed} autoFocus onClick={deleteModelHandler} />
+                    <Button size="small" label="Apply" disabled={!isConfirmed} autoFocus onClick={deleteModuleHandler} />
                     <Button size="small" label="Cancel" outlined onClick={() => dispatch(closePopup())} />
                 </div>
             </div>
@@ -95,4 +124,4 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     )
 }
 
-export default DeleteModelRowAction;
+export default DeleteModuleRowAction;

@@ -106,9 +106,9 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
     // <div style={{ marginLeft: (level - 1) * 10 + 'px' }} className="filter-rule">
 
     <div className='mt-2'>
-      <div className='flex align-items-center gap-3'>
+      <div className='flex flex-column md:flex-row  align-items-start md:align-items-center gap-2 md:gap-3'>
         <div className='formgrid grid w-full'>
-          <div className='col-4'>
+          <div className='col-12 md:col-4 pb-2 md:pb-0'>
              <AutoComplete
                             value={fieldName.name}
                             suggestions={filteredFields}
@@ -117,7 +117,7 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
                             dropdown
                             forceSelection // only values from list
                             placeholder="Select Field"
-                            className="w-full p-inputtext-sm"
+                            className="w-full p-inputtext-sm solid-filter-auto-complete-field"
                             onChange={(e) => {
                                 setFieldName({name:e.value}); // e.value will be an object or null
                                 if (e.value) {
@@ -128,22 +128,22 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
                             }}
                         />
           </div>
-          <div className='col-8'>
+          <div className='col-12 md:col-8'>
             <div className='formgrid grid w-full'>
               {rule.fieldName ?
                 <div className='col-12'>
                   <SolidFilterFields viewData={viewData} fieldMetadata={viewData.data.solidFieldsMetadata[rule.fieldName]} onChange={onChange} index={rule.id} rule={rule}></SolidFilterFields>
                 </div>
                 : <>
-                  <div className='col-6'>
+                  <div className='col-12 md:col-6 pb-2 md:pb-0'>
                     <InputText
                       disabled
                       value={rule.value || ''}
                       placeholder="operator"
-                      className='w-full p-inputtext-sm'
+                      className='w-full p-inputtext-sm '
                     />
                   </div>
-                  <div className='col-6'>
+                  <div className='col-12 md:col-6'>
                     <InputText
                       disabled
                       value={rule.value || ''}

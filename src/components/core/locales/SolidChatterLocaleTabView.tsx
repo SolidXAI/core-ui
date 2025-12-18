@@ -41,8 +41,8 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
 }) => {
   return (
     <TabView className="SolidCustomLocaleTabviewPanels h-full" activeIndex={activeTab}>
-      {solidFormViewMetaData?.data?.solidView?.model?.internationalisation &&
-        <TabPanel header="Internationalisation" className={`SolidCustomLocaleTab p-2`}>
+      {solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow &&
+        <TabPanel header="Info" className={`SolidCustomLocaleTab p-2`}>
           <SolidLocale
             setSelectedLocale={setSelectedLocale}
             solidFormViewMetaData={solidFormViewMetaData}

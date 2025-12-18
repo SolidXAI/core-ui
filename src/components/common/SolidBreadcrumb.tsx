@@ -83,59 +83,6 @@ export const SolidBreadcrumb = (props: Props) => {
     });
   }
 
-  // useEffect(() => {
-  //   if (segments.length === 6 && segments[4] === "form" && userKeyFieldValue && !queryUserKeyField) {
-  //     const params = new URLSearchParams(searchParams.toString());
-  //     params.set("userKeyField", userKeyFieldValue);
-  //     const newUrl = `${pathname}?${params.toString()}`;
-  //     router.push(newUrl, { scroll: false });
-  //   }
-  // }, [pathname, userKeyFieldValue, queryUserKeyField, router]);
-
-  // const [fromView, setFromView] = useState<"list" | "kanban" | null>(null);
-
-  // useEffect(() => {
-  //   if (typeof window !== "undefined") {
-  //     const storedView = sessionStorage.getItem("fromView");
-  //     if (storedView === "list" || storedView === "kanban") {
-  //       setFromView(storedView);
-  //     }
-  //   }
-  // }, []);
-
-  // let breadcrumbItems: BreadcrumbItem[] = [];
-
-  // if (segments.length >= 4 && segments[0] === "admin" && segments[1] === "core") {
-  //   const moduleName = segments[2].replace(/-/g, " ");
-  //   const modelName = segments[3].replace(/-/g, " ");
-
-  //   breadcrumbItems.push({
-  //     label: moduleName,
-  //     link: `/admin/core/${segments[2]}/home`,
-  //   });
-
-  //   if (segments.length >= 5) {
-  //     if (segments[4] === "form" && segments.length === 6) {
-  //       const view = fromView ?? "list";
-  //       breadcrumbItems.push({
-  //         label: view === "kanban" ? "Kanban" : "List",
-  //         link: `/admin/core/${segments[2]}/${segments[3]}/${view}`,
-  //       });
-  //     } else {
-  //       breadcrumbItems.push({
-  //         label: modelName,
-  //         link: `/admin/core/${segments[2]}/${segments[3]}`,
-  //       });
-  //     }
-  //   }
-
-  //   if (segments.length === 6 && segments[4] === "form") {
-  //     breadcrumbItems.push({
-  //       label: queryUserKeyField ? decodeURIComponent(queryUserKeyField) : segments[5],
-  //     });
-  //   }
-  // }
-
   const items = breadcrumbItems.map((item, index) => ({
     label: item.label,
     ...(item.link

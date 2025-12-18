@@ -299,7 +299,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
                 <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
             }
 
-            <Dialog showHeader={false} headerClassName="py-2" contentClassName="px-0 pb-0" contentStyle={{ borderRadius: 6 }} visible={showSaveParentEntityConfirmationPopup} style={{ width: '20vw' }} onHide={() => { if (!showSaveParentEntityConfirmationPopup) return; setShowSaveParentEntityConfirmationPopup(false); }}>
+            <Dialog showHeader={false} headerClassName="py-2" contentClassName="px-0 pb-0" className="solid-confirm-dialog" contentStyle={{ borderRadius: 6 }} visible={showSaveParentEntityConfirmationPopup} style={{ width: '20vw' }} onHide={() => { if (!showSaveParentEntityConfirmationPopup) return; setShowSaveParentEntityConfirmationPopup(false); }}>
                 <div className="p-4">
                     <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
                         Before Creating {fieldLabel} you need to save {solidFormViewMetaData?.data?.solidView?.model?.displayName ? solidFormViewMetaData?.data?.solidView?.model?.displayName : capitalize(fieldContext.modelName)}.

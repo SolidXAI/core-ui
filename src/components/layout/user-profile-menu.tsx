@@ -184,7 +184,7 @@ const UserProfileMenu = () => {
           </div>
         </OverlayPanel>
       </div>
-      <Dialog header="Logout" headerClassName="py-2" contentClassName="px-0 pb-0" visible={confirmLogout} style={{ width: '20vw' }} onHide={() => { if (!confirmLogout) return; setConfirmLogout(false); }}
+      <Dialog header="Logout" headerClassName="py-2" contentClassName="px-0 pb-0" className="solid-confirm-dialog" visible={confirmLogout} style={{ width: '20vw' }} onHide={() => { if (!confirmLogout) return; setConfirmLogout(false); }}
         footer={<div className="flex align-items-center gap-2">
           <Button label="Logout" size="small" onClick={() => handleLogout(toast)} />
           <Button label="Cancel" size="small" onClick={() => setConfirmLogout(false)} outlined />
