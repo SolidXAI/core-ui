@@ -12,7 +12,7 @@ import { DefaultDateFormEditWidget, DefaultDateFormViewWidget, PublishedStatusLi
 import { DefaultDateTimeFormEditWidget, DefaultDateTimeFormViewWidget } from "@/components/core/form/fields/SolidDateTimeField";
 import { DefaultDecimalFormEditWidget, DefaultDecimalFormViewWidget } from "@/components/core/form/fields/SolidDecimalField";
 import { DefaultEmailFormEditWidget } from "@/components/core/form/fields/SolidEmailField";
-import { DefaultIntegerFormEditWidget, SolidIntegerSliderStyleFormEditWidget } from "@/components/core/form/fields/SolidIntegerField";
+import { DefaultIntegerFormEditWidget, DefaultIntegerFormViewWidget, SolidIntegerSliderStyleFormEditWidget } from "@/components/core/form/fields/SolidIntegerField";
 import { DefaultJsonFormEditWidget, DefaultJsonFormViewWidget } from "@/components/core/form/fields/SolidJsonField";
 import { DefaultLongTextFormEditWidget, CodeEditorFormEditWidget, DynamicJsonEditorFormEditWidget, DynamicJsonEditorFormViewWidget, DynamicSelectionStaticEditWidget } from "@/components/core/form/fields/SolidLongTextField";
 import { DefaultMediaMultipleFormEditWidget, DefaultMediaMultipleFormViewWidget } from "@/components/core/form/fields/SolidMediaMultipleField";
@@ -267,6 +267,10 @@ registerExtensionComponent("DefaultPasswordFormViewWidget", DefaultPasswordFormV
 
 // - richText
 registerExtensionComponent("DefaultRichTextFormViewWidget", DefaultRichTextFormViewWidget, []);
+
+
+// - int
+registerExtensionComponent("DefaultIntegerFormViewWidget", DefaultIntegerFormViewWidget, []);
 
 // - Decimal
 registerExtensionComponent("DefaultDecimalFormViewWidget", DefaultDecimalFormViewWidget, []);
