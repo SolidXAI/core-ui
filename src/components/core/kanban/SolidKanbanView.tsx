@@ -325,12 +325,24 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           const filters = {
             $and: []
           }
-          if (queryObject.s_filter) {
-            filters.$and.push(queryObject.s_filter);
+          // if (queryObject.s_filter) {
+          //   filters.$and.push(queryObject.s_filter);
+          // }
+          // if (queryObject.c_filter) {
+          //   filters.$and.push(queryObject.c_filter);
+          // }
+          if (queryObject.custom_filter_predicate) {
+            filters.$and.push(queryObject.custom_filter_predicate);
           }
-          if (queryObject.c_filter) {
-            filters.$and.push(queryObject.c_filter);
+          if (queryObject.search_predicate) {
+            filters.$and.push(queryObject.search_predicate);
           }
+          // if (queryObject.saved_filter_predicate) {
+          //   filters.$and.push(queryObject.saved_filter_predicate);
+          // }
+          // if (queryObject.predefined_search_predicate) {
+          //   filters.$and.push(queryObject.predefined_search_predicate);
+          // }
 
           const queryData = {
             offset: 0,
@@ -639,11 +651,18 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         $and: [
         ]
       }
-      if (transformedFilter.s_filter) {
-        queryfilter.$and.push(transformedFilter.s_filter)
+      // if (transformedFilter.s_filter) {
+      //   queryfilter.$and.push(transformedFilter.s_filter)
+      // }
+      // if (transformedFilter.c_filter) {
+      //   queryfilter.$and.push(transformedFilter.c_filter)
+      // }
+
+      if (transformedFilter.custom_filter_predicate) {
+        queryfilter.$and.push(transformedFilter.custom_filter_predicate);
       }
-      if (transformedFilter.c_filter) {
-        queryfilter.$and.push(transformedFilter.c_filter)
+      if (transformedFilter.search_predicate) {
+        queryfilter.$and.push(transformedFilter.search_predicate);
       }
 
       const customFilter = transformedFilter;
@@ -678,8 +697,10 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         let url
         const urlData = queryData;
         delete urlData.filters;
-        urlData.s_filter = customFilter.s_filter || {};
-        urlData.c_filter = customFilter.c_filter || {};
+        // urlData.s_filter = customFilter.s_filter || {};
+        // urlData.c_filter = customFilter.c_filter || {};
+        urlData.custom_filter_predicate = customFilter.custom_filter_predicate || {};
+        urlData.search_predicate = customFilter.search_predicate || {};
         queryObjectToQueryString(urlData);
       }
 
@@ -733,22 +754,22 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           </div>
 
           <div className="flex align-items-center gap-3">
-          {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
-            <div className="flex lg:hidden">
-                  <Button
-                    type="button"
-                    size="small"
-                    icon="pi pi-search"
-                    severity="secondary"
-                    outlined
-                    className="solid-icon-button"
-                    onClick={()=>setShowGlobalSearchElement(!showGlobalSearchElement)}>
-                  </Button>
+            {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
+              <div className="flex lg:hidden">
+                <Button
+                  type="button"
+                  size="small"
+                  icon="pi pi-search"
+                  severity="secondary"
+                  outlined
+                  className="solid-icon-button"
+                  onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}>
+                </Button>
               </div>
             }
 
             {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.create !== false &&
-              <SolidCreateButton url={createButtonUrl}  responsiveIconOnly={true}/>
+              <SolidCreateButton url={createButtonUrl} responsiveIconOnly={true} />
             }
 
             {actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false && selectedRecords.length > 0 && <Button
@@ -779,13 +800,13 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             />
             {/* <SolidConfigureLayoutElement></SolidConfigureLayoutElement> */}
           </div>
-        </div>  
-                  {/* </div> */}
-          {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true  && showGlobalSearchElement && (
-              <div className="flex lg:hidden">
-                  <SolidGlobalSearchElement showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
-              </div>
-            )}
+        </div>
+        {/* </div> */}
+        {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && showGlobalSearchElement && (
+          <div className="flex lg:hidden">
+            <SolidGlobalSearchElement showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
+          </div>
+        )}
       </div>
 
       <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
@@ -824,10 +845,11 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         // contentStyle={{
         //   width: 800
         // }}
-        style={{width:'800px'}}
-        breakpoints={{ '1024px': '75vw','991px': '86vw','767px':'92vw', '250px': '96vw'
+        style={{ width: '800px' }}
+        breakpoints={{
+          '1024px': '75vw', '991px': '86vw', '767px': '92vw', '250px': '96vw'
         }}
-      
+
       >
         <KanbanUserViewLayout solidKanbanViewMetaData={solidKanbanViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
       </Dialog>
