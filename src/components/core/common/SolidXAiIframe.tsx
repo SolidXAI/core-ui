@@ -52,7 +52,7 @@ export const SolidXAiIframe: React.FC<SolidXAiIframeProps> = ({ url }) => {
   // Error state
   if (reachable === false) {
     return (
-      <div className="flex  items-center justify-center align-items-center h-full text-center p-4">
+      <div className="flex  items-center justify-center align-items-center h-full text-center p-4 overflow-x-auto	">
         <h3>Mcp Server not reachable. <br></br>
           <span className="opacity-60 mt-2">
             <strong>{url}</strong>

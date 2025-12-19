@@ -23,20 +23,23 @@ const SolidIntField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFiel
     const numberOfInputs = getNumberOfInputs(rule.matchMode);
 
     return (
-        <div className='flex flex-column flex-row align-items-start gap-2 md:gap-3 md:w-full'>
-            <Dropdown
-                value={rule.matchMode}
-                onChange={(e: any) => {
-                    // updateEnumValues(index, 'operator', e.value)
-                    onChange(rule.id, 'matchMode', e.value)
-                }}
-                options={filterMatchModeOptions}
-                optionLabel='label'
-                optionValue='value'
-                placeholder="Select Operator"
-                className="w-full p-inputtext-sm col-12 md:col-6"
-            />
-            <div className='flex flex-column gap-2 w-full col-12 md:col-6 pl-0 md:pl-2'>
+        <div className='flex flex-column md:flex-row align-items-start gap-2 md:gap-0'>
+            <div className="col-12 md:col-6 px-0 md:pr-2 md:pl-0">
+                <Dropdown
+                    value={rule.matchMode}
+                    onChange={(e: any) => {
+                        // updateEnumValues(index, 'operator', e.value)
+                        onChange(rule.id, 'matchMode', e.value)
+                    }}
+                    options={filterMatchModeOptions}
+                    optionLabel='label'
+                    optionValue='value'
+                    placeholder="Select Operator"
+                    className="p-inputtext-sm w-full "
+                />
+            </div>
+
+            <div className='flex flex-column gap-2 col-12 md:col-6 px-0 md:pl-2 md:pr-0'>
                 <SolidVarInputsFilterElement
                     values={rule.value}
                     onChange={(e: any) => {
