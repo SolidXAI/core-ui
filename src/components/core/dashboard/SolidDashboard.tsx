@@ -16,6 +16,7 @@ import { SolidDashboardLoading } from './SolidDashboardLoading';
 import { SolidDashboardRenderError } from './SolidDashboardRenderError';
 import { useDispatch, useSelector } from "react-redux";
 import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
+import SolidDashboardNotAvailable from './SolidDashboardNotAvailable';
 
 export enum DashboardVariableType {
   DATE = 'date',
@@ -212,7 +213,10 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
       <div className={`h-full flex-grow-1 ${styles.SolidDashboardPageContentWrapper}`}>
         {isLoading && <SolidDashboardLoading />}
         {error && <SolidDashboardRenderError />}
-        {!isLoading && !error && (
+        {!isLoading && !error && data && data.records.length === 0 && (
+          <SolidDashboardNotAvailable />
+        )}
+        {!isLoading && !error && data && data.records.length > 0 && (
           <>
             <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
               <div className='flex align-items-center gap-2'>
@@ -285,7 +289,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
           }
         </div>
       )}
-
+      
     </div>
   );
 }
