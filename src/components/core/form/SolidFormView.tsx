@@ -789,9 +789,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     if (!params.embeded) {
                         const currentUrl = new URL(window.location.href);
                         currentUrl.pathname = currentUrl.pathname.replace(/new$/, result?.data?.id);
+                        currentUrl.searchParams.set('viewMode', 'view');
                         const updatedUrl = currentUrl.toString();
                         router.push(updatedUrl);
-                        const updatedPath = currentUrl.toString();
                         setViewMode("view")
                     }
                     return result;
