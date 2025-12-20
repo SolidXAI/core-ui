@@ -398,6 +398,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                 visible={isDeleteImageDialogVisible}
                 header="Confirm Delete"
                 modal
+                className="solid-confirm-dialog"
                 footer={() => (
                     <div className="flex justify-content-center">
                         <Button type="button" label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={handleCancelUpload} />
@@ -412,6 +413,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                 visible={isReplaceImageDialogVisible}
                 header="Replace Image"
                 modal
+                className="solid-confirm-dialog"
                 footer={() => (
                     <div className="flex justify-content-center">
                         <Button type="button" label="Yes, Replace" icon="pi pi-check" className='small-button' severity="danger" onClick={handleReplaceFile} />

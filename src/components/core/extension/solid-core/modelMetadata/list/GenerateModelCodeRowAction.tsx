@@ -86,7 +86,9 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
     };
 
@@ -115,7 +117,7 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
                 // console.log("isGenerateCodeSuceess", isGenerateCodeSuceess);
                 // setIsPinging(true);
                 // const hasMqMessageCompleted = await fetchMqMessageStatus(30, 500, generateCodeData);
-                const isAlive = await pingBackendWithRetry(10, 500);
+                const isAlive = await pingBackendWithRetry();
                 setIsPinging(false);
 
                 // const hasMqMessageCompleted = true;

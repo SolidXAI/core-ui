@@ -82,7 +82,9 @@ const SolidInitialLoginOtp = () => {
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
     };
 
@@ -128,7 +130,7 @@ const SolidInitialLoginOtp = () => {
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-4' : 'text-left'}`}>OTP Verification</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>OTP Verification</h2>
                 <p className="solid-auth-subtitle text-sm">
                     Please enter the OTP sent to your email to complete verification
                 </p>

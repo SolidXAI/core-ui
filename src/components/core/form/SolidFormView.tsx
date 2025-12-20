@@ -438,7 +438,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [confirmVisible, setConfirmVisible] = useState(false);
     const confirmResolveRef = useRef<(value: boolean) => void>();
     const [redirectToList, setRedirectToList] = useState(false);
-    const [selectedLocale, setSelectedLocale] = useState<string | null>(null);
+    const [selectedLocale, setSelectedLocale] = useState<string | null>('en');
     const [defaultEntityLocaleId, setDefaultEntityLocaleId] = useState<string | null>(null);
     const [isDeleteDialogVisible, setDeleteDialogVisible] = useState(false);
     const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
@@ -531,6 +531,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     permissionExpression(params.modelName, 'delete'),
                     permissionExpression(params.modelName, 'update'),
                     permissionExpression(params.modelName, 'findOne'),
+                    permissionExpression(params.modelName, 'publish'),
+                    permissionExpression(params.modelName, 'unpublish'),
                     permissionExpression('chatterMessage', 'findMany')
                 ]
                 const queryData = {
@@ -557,7 +559,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
         useDeleteSolidEntityMutation,
         useGetSolidEntityByIdQuery,
         useUpdateSolidEntityMutation,
-        usePatchUpdateSolidEntityMutation
+        usePatchUpdateSolidEntityMutation,
+        usePublishSolidEntityMutation,
+        useUnpublishSolidEntityMutation
     } = entityApi;
 
     const [
@@ -579,6 +583,16 @@ const SolidFormView = (params: SolidFormViewProps) => {
         patchEntity,
         { isSuccess: isEntityPatchSuceess, isError: isEntityPatchError, error: entityPatchError },
     ] = usePatchUpdateSolidEntityMutation();
+
+    const [
+        publishSolidEntity,
+        { isSuccess:  isEntityPublishedSuccess, isError: isEntityPublishedError, error: entityPublishedError },
+    ] = usePublishSolidEntityMutation();
+
+    const [
+        unpublishSolidEntity,
+        { isSuccess:  isEntityUnpublishedSuccess, isError: isEntityUnpublishedError, error: entityUnpublishedError },
+    ] = useUnpublishSolidEntityMutation();
 
     // - - - - - - - - - - - -- - - - - - - - - - - - METADATA here
     // Get the form view layout & metadata first. 
@@ -650,7 +664,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 severity: 'error',
                 summary: 'Error',
                 detail: errorMessage,
-                life: 3000,
+                sticky: true,
                 //@ts-ignore
                 content: () => (
                     <div className="flex flex-column align-items-left" style={{ flex: "1" }}>
@@ -689,7 +703,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
     };
 
@@ -775,9 +791,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     if (!params.embeded) {
                         const currentUrl = new URL(window.location.href);
                         currentUrl.pathname = currentUrl.pathname.replace(/new$/, result?.data?.id);
+                        currentUrl.searchParams.set('viewMode', 'view');
                         const updatedUrl = currentUrl.toString();
                         router.push(updatedUrl);
-                        const updatedPath = currentUrl.toString();
                         setViewMode("view")
                     }
                     return result;
@@ -1324,7 +1340,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         const handleChatterExpandClick = (option?: string) => {
             setShowChatter(true);
-            if (option === 'locale') {
+            if (option === 'info') {
                 setDefaultTabViewOptionIndex(0);
             } else if (option === 'chatter') {
                 setDefaultTabViewOptionIndex(1);
@@ -1382,22 +1398,34 @@ const SolidFormView = (params: SolidFormViewProps) => {
             confirmResolveRef.current?.(false);
             setConfirmVisible(false);
         };
-        const handleDraftPublishWorkFlow = async (type: string) => {
-            const userChoice = await confirmDialogWithPromise();
-            if (!userChoice) return; // Optional: handle cancel
-            let finalPublishedValue = type === 'publish' ? new Date().toISOString() : '';
-            setPublished(finalPublishedValue);
-            let formdata = new FormData();
-            formdata.append('publishedAt', finalPublishedValue)
-            const result = await patchEntity({ id: +params.id, data: formdata }).unwrap();
-            setPublished(result?.data?.publishedAt);
-            if (type === 'publish') {
-                showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_PUBLISH);
-                //todo: patch request
-            } else {
-                showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_UNPUBLISH);
-            }
+        const handleDraftPublishWorkFlow = async (type: "publish" | "unpublish") => {
+        const userChoice = await confirmDialogWithPromise();
+        if (!userChoice) return;
+
+        // const finalPublishedValue =
+        //     type === "publish" ? new Date().toISOString() : "";
+
+     //   setPublished(finalPublishedValue);
+
+        // const formdata = new FormData();
+        // formdata.append("publishedAt", finalPublishedValue);
+
+        let result;
+
+        if (type === "publish") {
+            result = await publishSolidEntity(params.id).unwrap();
+            showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_PUBLISH);
+        } else {
+            result = await unpublishSolidEntity(params.id).unwrap();
+            showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_UNPUBLISH);
         }
+
+        console.log("publish/unpublish result", result);
+
+        // Set updated publish value from API response
+        setPublished(result?.data?.publishedAt);
+        };
+
 
         const isVideoOrAudio = (url: string) => {
             // Remove query params if present
@@ -1452,7 +1480,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             internationalisationEnabled={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}
                             handleDraftPublishWorkFlow={handleDraftPublishWorkFlow}
                         />
-                        <div className={`p-3 md:p-4 solid-form-content ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
+                        <div className={`px-4 py-3 md:p-4 solid-form-content ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
                             {params.id === 'new' && DynamicFormComponentNew ? (
                                 <DynamicFormComponentNew params={params} />
@@ -1465,7 +1493,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     </form>
                 </div>
                 {params.embeded !== true &&
-                    <div className={`chatter-section ${isShowChatter === false ? 'collapsed' : ''}`} style={{ width: chatterLocaleWidth }}>
+                    <div className={`chatter-section ${isShowChatter === false ? 'collapsed' : 'open'}`} style={{ width: chatterLocaleWidth }}>
                         {isShowChatter && (
                             <div
                                 style={{
@@ -1493,28 +1521,28 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         {isShowChatter === false ?
                             <div className="flex flex-column gap-2 justify-content-center p-2">
                                 {/*if solidview Internationalisation is enabled then show the locale tab */}
-                                {solidFormViewMetaData?.data?.solidView?.model?.internationalisation &&
-                                    <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('locale')}>
-                                        Internationalisation
+                                {solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow &&
+                                    <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('info')}>
+                                        Info
                                     </div>}
-                                <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('chatter')}>
-                                    Audit Trail
-                                </div>
-                                {
-                                    process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' &&
-                                    (
-                                        <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('solidx-ai')}>
-                                            <div className="flex gap-2"> <SolidXAIIcon /> SolidX AI </div>
-                                        </div>
-                                    )
-                                }
-                                <Button
-                                    icon="pi pi-chevron-left"
-                                    size="small"
-                                    className="px-0"
-                                    style={{ width: 30 }}
-                                    onClick={() => handleChatterExpandClick('default')}
-                                />
+                                    <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('chatter')}>
+                                        Audit Trail
+                                    </div>
+                                    {
+                                        process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' &&
+                                        (
+                                            <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('solidx-ai')}>
+                                                <div className="flex gap-2"> <SolidXAIIcon /> SolidX AI </div>
+                                            </div>
+                                        )
+                                    }
+                                    <Button
+                                        icon="pi pi-chevron-left"
+                                        size="small"
+                                        className="px-0"
+                                        style={{ width: 30 }}
+                                        onClick={() => handleChatterExpandClick('default')}
+                                    />
                             </div>
                             :
                             <SolidChatterLocaleTabView
@@ -1540,6 +1568,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 <Dialog
                     visible={isDeleteDialogVisible}
                     header="Confirm Delete"
+                    className="solid-confirm-dialog"
                     modal
                     footer={() => (
                         <div className="flex justify-content-center">
@@ -1556,9 +1585,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     header="Change Form Layout"
                     modal
                     onHide={() => setLayoutDialogVisible(false)}
-                    contentStyle={{
-                        width: 800
+                    style={{ width: '50vw' }}
+                    breakpoints={{
+                        '960px': '80vw',
+                        '641px': '95vw'
                     }}
+                    contentClassName="p-3 pt-0 lg:p-4"
                 >
                     <SolidFormUserViewLayout solidFormViewMetaData={solidFormViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
                 </Dialog>

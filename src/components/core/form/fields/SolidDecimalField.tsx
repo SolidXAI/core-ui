@@ -67,7 +67,7 @@ export class SolidDecimalField implements ISolidField {
             editWidget = 'DefaultDecimalFormEditWidget';
         }
         if (!viewWidget) {
-            viewWidget = 'DefaultShortTextFormViewWidget';
+            viewWidget = 'DefaultDecimalFormViewWidget';
         }
         const viewMode: string = this.fieldContext.viewMode;
         return (
@@ -105,6 +105,21 @@ export class SolidDecimalField implements ISolidField {
 
 
 
+export const DefaultDecimalFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+    return (
+        <div className="mt-2 flex-column gap-2">
+            {showFieldLabel !== false && (
+                <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            )}
+            <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name] && typeof formik.values[fieldLayoutInfo.attrs.name] !== "object" && formik.values[fieldLayoutInfo.attrs.name]}</p>
+        </div>
+    );
+}
 
 export const DefaultDecimalFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
 

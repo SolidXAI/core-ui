@@ -25,17 +25,17 @@ export const createSolidEntityApi = (entityName: string) => {
                         groupRecords: response?.data?.groupRecords ? response.data.groupRecords : [],
                     }
                 },
-                providesTags:  (result) =>
-                result?.records
-                ? [
-                    ...result.records.map((record: { id: any; }) => ({
-                        type: entityName,
-                        id: record.id,
-                    })),
-                    { type: entityName, id: 'LIST' },
-                    ]
-                : [{ type: entityName, id: 'LIST' }]
-                }),
+                providesTags: (result) =>
+                    result?.records
+                        ? [
+                            ...result.records.map((record: { id: any; }) => ({
+                                type: entityName,
+                                id: record.id,
+                            })),
+                            { type: entityName, id: 'LIST' },
+                        ]
+                        : [{ type: entityName, id: 'LIST' }]
+            }),
             getSolidKanbanEntities: builder.query({
                 query: (qs) => {
                     return `/${kebabEntityName}/group-kanban?&${qs}`
@@ -52,10 +52,10 @@ export const createSolidEntityApi = (entityName: string) => {
                 providesTags: [{ type: entityName, id: 'KANBAN' }],
             }),
             getSolidEntityById: builder.query({
-                query:({ id, qs }) => { 
-                    return`/${kebabEntityName}/${id}?${qs}`
+                query: ({ id, qs }) => {
+                    return `/${kebabEntityName}/${id}?${qs}`
                 },
-               // providesTags: () => [{ type: entityName }],
+                // providesTags: () => [{ type: entityName }],
                 providesTags: (_result, _error, { id }) => [{ type: entityName, id }],
             }),
             createSolidEntity: builder.mutation({
@@ -80,9 +80,9 @@ export const createSolidEntityApi = (entityName: string) => {
                     method: 'PUT',
                     body: data,
                 }),
-                 invalidatesTags: (_result, _error, { id }) => [
-                { type: entityName, id },
-                { type: entityName, id: 'LIST' },
+                invalidatesTags: (_result, _error, { id }) => [
+                    { type: entityName, id },
+                    { type: entityName, id: 'LIST' },
                 ],
             }),
             deleteMultipleSolidEntities: builder.mutation({
@@ -91,14 +91,14 @@ export const createSolidEntityApi = (entityName: string) => {
                     method: 'DELETE',
                     body: data
                 }),
-                invalidatesTags: [{ type: entityName ,id: 'LIST' }]
+                invalidatesTags: [{ type: entityName, id: 'LIST' }]
             }),
             deleteSolidEntity: builder.mutation({
                 query: (id) => ({
                     url: `/${kebabEntityName}/${id}`,
                     method: 'DELETE',
                 }),
-                 invalidatesTags: (_result, _error, id) => [
+                invalidatesTags: (_result, _error, id) => [
                     { type: entityName, id },
                     { type: entityName, id: 'LIST' },
                 ],
@@ -121,11 +121,32 @@ export const createSolidEntityApi = (entityName: string) => {
                     method: 'PATCH',
                     body: data,
                 }),
-                 invalidatesTags: (_result, _error, { id }) => [
-                { type: entityName, id },
-                { type: entityName, id: 'LIST' },
+                invalidatesTags: (_result, _error, { id }) => [
+                    { type: entityName, id },
+                    { type: entityName, id: 'LIST' },
                 ],
             }),
+            publishSolidEntity: builder.mutation({
+                query: (id) => ({
+                    url: `/${kebabEntityName}/${id}/publish`,
+                    method: 'POST'
+                }),
+                invalidatesTags: (_result, _error, id) => [
+                    { type: entityName, id },
+                    { type: entityName, id: 'LIST' }
+                ]
+            }),
+            unpublishSolidEntity: builder.mutation({
+                query: (id) => ({
+                    url: `/${kebabEntityName}/${id}/unpublish`,
+                    method: 'POST'
+                }),
+                invalidatesTags: (_result, _error, id) => [
+                    { type: entityName, id },
+                    { type: entityName, id: 'LIST' }
+                ]
+            }),
+
         }),
     });
 };

@@ -173,7 +173,7 @@ const CreateUser = ({ data, params }: any) => {
         severity: 'error',
         summary: ERROR_MESSAGES.ERROR,
         detail: errorMessage,
-        life: 3000,
+        sticky: true,
         //@ts-ignore
         content: (props) => (
           <div className="flex flex-column align-items-left" style={{ flex: "1" }}>
@@ -288,13 +288,13 @@ const CreateUser = ({ data, params }: any) => {
           {/* <div className="solid-form-stepper">
           <SolidFormStepper />
         </div> */}
-          <div className="p-3 md:p-4 solid-form-content">
+          <div className="px-4 py-3 md:p-4 solid-form-content">
             <div className="grid">
-              <div className="col-8 mx-auto">
+              <div className="col-12 lg:col-10 xl:col-8 mx-auto">
                 {/* <p className="form-wrapper-heading text-base">Basic Info</p> */}
                 <Panel header="Basic Info" className="solid-column-panel">
                   <div className="grid formgrid mt-3">
-                    <div className="field col-6 flex flex-column gap-2">
+                    <div className="field col-12 md:col-6 flex flex-column gap-2">
                       <label htmlFor="fullName" className="form-field-label">
                         Full Name
                       </label>
@@ -316,7 +316,7 @@ const CreateUser = ({ data, params }: any) => {
                         />
                       )}
                     </div>
-                    <div className="field col-6 flex flex-column gap-2">
+                    <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3 md:mt-3">
                       <label htmlFor="username" className="form-field-label">
                         Username
                       </label>
@@ -339,7 +339,7 @@ const CreateUser = ({ data, params }: any) => {
                         />
                       )}
                     </div>
-                    <div className="field col-6 flex flex-column gap-1 mt-4">
+                    <div className="field col-12 md:col-6 flex flex-column gap-1 mt-4">
                       <label htmlFor="email" className="form-field-label">
                         Email
                       </label>
@@ -362,7 +362,7 @@ const CreateUser = ({ data, params }: any) => {
                         />
                       )}
                     </div>
-                    <div className="field col-6 flex flex-column gap-1 mt-4">
+                    <div className="field col-12 md:col-6 flex flex-column gap-1 mt-4">
                       <label htmlFor="mobile" className="form-field-label">
                         Mobile
                       </label>
@@ -385,7 +385,7 @@ const CreateUser = ({ data, params }: any) => {
                       )}
                     </div>
                     {params.id === "new" && <>
-                      <div className="field col-6 flex flex-column gap-2 my-4">
+                      <div className="field col-12 md:col-6 flex flex-column gap-2 my-4">
                         <label htmlFor="Password" className="form-field-label">
                           Password
                         </label>
@@ -409,7 +409,7 @@ const CreateUser = ({ data, params }: any) => {
                           />
                         )}
                       </div>
-                      <div className="field col-6 flex flex-column gap-2 my-4">
+                      <div className="field col-12 md:col-6 flex flex-column gap-2 pb-4 md:pb-0 md:my-4">
                         <label htmlFor="Confirm Password" className="form-field-label">
                           Confirm Password
                         </label>
