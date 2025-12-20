@@ -17,8 +17,10 @@
         left: 0;
         width: 100%;
         height: 100%;
-        background-color: rgba(0, 0, 0, 0.5); /* Semi-transparent dark overlay */
-        z-index: 98; /* Below sidebar but above content */
+        background-color: rgba(0, 0, 0, 0.5);
+        /* Semi-transparent dark overlay */
+        z-index: 98;
+        /* Below sidebar but above content */
         transition: opacity 0.3s ease;
         cursor: pointer;
     }
@@ -116,12 +118,12 @@
     }
 
 
-    .solid-layout-accordion{
+    .solid-layout-accordion {
         max-width: 300px;
     }
 
 
-    .solid-permisson-form-label{
+    .solid-permisson-form-label {
         white-space: normal;
         overflow-wrap: anywhere;
         word-break: break-word;
@@ -418,14 +420,21 @@
 
     /* ======================= Solid Import  ================================ */
 
-    .solid-import-dialog {
+    /* .solid-import-dialog {
         overflow-x: auto !important;
     }
 
     .solid-import-dialog .p-dialog-content,
     .solid-import-dialog-header {
         width: 44rem !important;
+    } */
+
+    .solid-import-dialog .p-dialog-content,
+    .solid-import-dialog-header {
+        width: 100% !important;
+        max-width: 98%;
     }
+
 
 
 
@@ -468,7 +477,8 @@
 
     .p-button.p-button-icon-only.solid-icon-button {
         padding: 0.4rem 0.6rem;
-        width: 2.3rem;
+        width: 2.2rem;
+        height: 2rem !important;
     }
 
     /*  ======================= Search ================================== */
@@ -478,8 +488,8 @@
     }
 
     .solid-global-search-element {
-        min-height: 34px;
-        height: auto;
+        min-height: 33px;
+        height: 33px;
     }
 
     .solid-filter-auto-complete-field button {
@@ -497,12 +507,12 @@
 
 
 
-    .solid-layout-accordion{
+    .solid-layout-accordion {
         max-width: 250px;
     }
 
 
-    .p-panel .p-panel-content{
+    .p-panel .p-panel-content {
         padding: 0.8rem !important;
     }
 
@@ -510,12 +520,32 @@
         padding-top: 10px;
         padding-left: 0;
         padding-right: 0;
-      }
+    }
 
-      .solid-logo.in_form_view {
+    .solid-logo.in_form_view {
         margin-bottom: 15px;
-      }
-      
+    }
+
+    /* ============================= Solid Form ==================== */
+    .solid-form-header {
+        padding: 10px 16px 16px 16px !important;
+    }
+
+    .form-wrapper-title{
+        font-size: 14px !important;
+    }
+
+    .solid-header-buttons-wrapper{
+        gap: 10px !important;
+    }
+
+    .solid-mobile-text-wrapper {
+        max-width: clamp(180px, 60vw, 600px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
 }
 
 
@@ -576,8 +606,8 @@
 
     .solid-logo.in_form_view {
         margin-bottom: 10px;
-      }
-      
+    }
+
 
 }
 
@@ -626,7 +656,7 @@
 
 
     .solid-text-wrapper {
-        max-width: clamp(80px, 25vw, 600px);
+        max-width: clamp(80px, 23vw, 600px);
         white-space: nowrap;
         overflow: hidden;
         text-overflow: ellipsis;

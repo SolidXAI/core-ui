@@ -93,7 +93,22 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                         type="button"
                         icon={'pi pi-cog'}
                         size="small"
-                        className="surface-card solid-icon-button"
+                        className="surface-card solid-icon-button hidden md:flex"
+                        // style={{
+                        //     height: 33.06,
+                        //     width: 33.06
+                        // }}
+                        onClick={(e) =>
+                            // @ts-ignore 
+                            op.current.toggle(e)
+                        }
+                    />
+                       <Button
+                        outlined
+                        type="button"
+                        icon={'pi pi-cog'}
+                        size="small"
+                        className="surface-card solid-icon-button md:hidden"
                         // style={{
                         //     height: 33.06,
                         //     width: 33.06
@@ -223,8 +238,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             {params.embeded !== true && <BackButton />}
                             <div className="form-wrapper-title solid-text-wrapper"> {createHeaderTitle}</div>
                         </div>
-                        <div className="flex gap-3">
-                            <div className="hidden lg:flex gap-3">
+                        <div className="flex solid-header-buttons-wrapper">
+                            <div className="hidden lg:flex solid-header-buttons-wrapper">
                                 {normalHeaderButtons.map((button: any, index: number) => {
                                     return (
                                         <SolidFormViewNormalHeaderButton
@@ -327,8 +342,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             <div className="form-wrapper-title solid-text-wrapper"> {viewMode === "edit" ? editHeaderTitle : solidView.model.displayName}</div>
                         </div>
 
-                        <div className="flex gap-3">
-                            <div className="hidden lg:flex gap-3">
+                        <div className="flex solid-header-buttons-wrapper">
+                            <div className="hidden lg:flex solid-header-buttons-wrapper">
                                 {normalHeaderButtons.map((button: any, index: number) => {
                                     return (
                                         // <Button

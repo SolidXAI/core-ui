@@ -27,6 +27,8 @@ export const InlineRelationEntityDialog = ({ visible, setVisible, fieldContext, 
       width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw",
       height: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.height ?? "auto"
       }}
+      // breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
+
       onHide={() => setVisible(false)}
       className="solid-dialog"
     >

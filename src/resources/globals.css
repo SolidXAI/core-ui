@@ -1783,6 +1783,10 @@ li.header-li-px {
   border-bottom: 1px solid var(--primary-light-color);
 }
 
+.solid-header-buttons-wrapper{
+  gap: 1rem !important;
+}
+
 .solid-form-stepper {
   padding: 7.5px 14px 7.5px 24px;
   background-color: #fff;

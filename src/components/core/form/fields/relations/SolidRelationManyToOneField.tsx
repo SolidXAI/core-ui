@@ -536,6 +536,8 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
                     setvisibleCreateRelationEntity(false);
                 }}
                 className="solid-dialog"
+                breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
+                
             >
                 <SolidFormView {...params} />
 
