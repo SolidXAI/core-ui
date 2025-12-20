@@ -226,11 +226,11 @@ export const SolidPersonalInfo = () => {
                         </div>
                     </div>
                 </div>
-                <div className='mt-4' style={{ borderBottom: '1px dashed #D8E2EA' }}></div>
+                <div className='mt-4 mb-2 sm:mb-0' style={{ borderBottom: '1px dashed #D8E2EA' }}></div>
                 <div className="mt-4">
                     <label className="form-field-label mb-2 font-bold">Details</label>
                     <div className="grid">
-                        <div className="col-5">
+                        <div className="col-12 md:col-8 lg:col-5">
                             <label className="form-field-label mb-2">Name</label>
                             <InputText
                                 name="fullName"
@@ -239,17 +239,17 @@ export const SolidPersonalInfo = () => {
                                 className="w-full"
                             />
                         </div>
-                        <div className="col-5">
+                        <div className="col-12 md:col-8 lg:col-5">
                             <label className="form-field-label mb-2">Email</label>
                             <InputText disabled placeholder={userData?.data?.email} value={userData?.data?.email}
                                 className="w-full" />
                         </div>
-                        <div className="col-5">
+                        <div className="col-12 md:col-8 lg:col-5">
                             <label className="form-field-label mb-2">Contact Number</label>
                             <InputText disabled placeholder={userData?.data?.mobile} value={userData?.data?.mobile}
                                 className="w-full" />
                         </div>
-                        <div className="col-5">
+                        <div className="col-12 md:col-8 lg:col-5">
                             <label className="form-field-label mb-2">Role</label>
                             <AutoComplete
                                 multiple
@@ -274,6 +274,7 @@ export const SolidPersonalInfo = () => {
                 headerClassName="px-4 py-3 secondary-border-bottom"
                 contentClassName="p-0"
                 style={{ width: '25vw' }}
+                className="solid-confirm-dialog "
                 modal
                 onHide={() => setReplaceDialogVisible(false)}
             >
@@ -293,6 +294,7 @@ export const SolidPersonalInfo = () => {
                 contentClassName="p-0"
                 style={{ width: '25vw' }}
                 modal
+                className="solid-confirm-dialog "
                 onHide={() => setDeleteDialogVisible(false)}
             >
                 <div className="p-4">

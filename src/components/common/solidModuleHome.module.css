@@ -103,3 +103,33 @@
 .solidModuleHomeActionCard:hover .solidModuleHomeActionCardSvgWrapper svg path {
     fill: var(--surface-a);
 }
+
+@media(max-width:991px) {
+    .solidModuleWelcomeSection {
+        padding: 16px;
+        height: 100%;
+        padding-bottom: 0 !important;
+        padding-right: 0px !important;
+    }
+
+    .solidModuleHomeColorCards {
+        padding: 16px;
+    }
+
+    .solidModuleHomeActionCard {
+        padding: 16px;
+    }
+
+    .solidModuleHomeTitle1 {
+        font-size: 1.4rem;
+    }
+
+    .homeSvg {
+        position: relative;
+        right: 0;
+        top: 0;
+        bottom: 0;
+    }
+
+
+}

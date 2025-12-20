@@ -587,6 +587,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
     const childFieldName = fieldLayoutInfo?.attrs?.childFieldName;
     const parentModuleName = fieldLayoutInfo?.attrs?.parentModuleName;
     const parentFieldLabels = fieldLayoutInfo?.attrs?.parentFieldLabels;
+    const parentSearchFields = fieldLayoutInfo?.attrs?.parentSearchFields;
 
     const [formViewParams, setformViewParams] = useState<FormViewParams>()
 
@@ -639,7 +640,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
 
     useEffect(() => {
         const fn = async () => {
-            if (formik.values[fieldLayoutInfo.attrs.name]) {
+            if (fieldContext.data[fieldLayoutInfo.attrs.name]) {
                 const queryData = {
                     offset: 0,
                     limit: LIMIT,
@@ -647,7 +648,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                         $and: [
                             {
                                 [parentFieldName]: {
-                                    [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$eqi']: formik.values[fieldLayoutInfo.attrs.name]
+                                    [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$eqi']:  fieldContext.data[fieldLayoutInfo.attrs.name] ?? formik.values[fieldLayoutInfo.attrs.name] 
                                 }
                             }
                         ]
@@ -661,7 +662,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                 const autocompleteData = autocompleteResponse.data;
                 if (autocompleteData) {
                     const formattedRecords = autocompleteData.records.map((item: any) => {
-                        const label = parentFieldLabels ? parentFieldLabels.map((label: any) => item[label]).join(" - ") : item[parentFieldName];
+                        const label = parentFieldLabels && parentFieldLabels.length > 0 ? parentFieldLabels.map((label: any) => item[label]).join(" - ") : item[parentFieldName];
                         return {
                             solidManyToOneLabel: label,
                             solidManyToOneValue: item[parentFieldName],
@@ -675,7 +676,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
             }
         }
         fn()
-    }, [formik.values])
+    }, [])
 
     const autoCompleteSearch = async (event: AutoCompleteCompleteEvent) => {
         setOffset(0);
@@ -687,11 +688,26 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
             limit: LIMIT,
             filters: {
                 $and: [
-                    {
-                        [parentFieldName]: {
-                            [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']: event.query
-                        }
-                    }
+                    ...(parentSearchFields?.length > 0
+                        ? [
+                            {
+                                $or: parentSearchFields.map((field:any) => ({
+                                    [field]: {
+                                        [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']:
+                                            event.query
+                                    }
+                                }))
+                            }
+                        ]
+                        : [
+                            {
+                                [parentFieldName]: {
+                                    [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']:
+                                        event.query
+                                }
+                            }
+                        ])
+
                 ]
             }
         };
@@ -760,7 +776,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
 
                 if (autocompleteData) {
                     const autoCompleteItems = autocompleteData.records.map((item: any) => {
-                        const label = parentFieldLabels ? parentFieldLabels.map((label: any) => item[label]).join(" - ") : item[parentFieldName];
+                        const label = parentFieldLabels && parentFieldLabels.length > 0 ? parentFieldLabels.map((label: any) => item[label]).join(" - ") : item[parentFieldName];
                         return {
                             solidManyToOneLabel: label,
                             solidManyToOneValue: item[parentFieldName],
@@ -789,11 +805,25 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
             limit: LIMIT,
             filters: {
                 $and: [
-                    {
-                        [parentFieldName]: {
-                            [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']: currentQuery
-                        }
-                    }
+                    ...(parentSearchFields?.length > 0
+                        ? [
+                            {
+                                $or: parentSearchFields.map((field:any) => ({
+                                    [field]: {
+                                        [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']:
+                                            currentQuery                                    }
+                                }))
+                            }
+                        ]
+                        : [
+                            {
+                                [parentFieldName]: {
+                                    [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']:
+                                        currentQuery
+                                }
+                            }
+                        ])
+
                 ]
             }
         };
@@ -852,7 +882,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                 const records = response.data?.records || [];
                 if (records.length < LIMIT) setHasMore(false);
                 setAutoCompleteItems((prev: any) => [...prev, ...records.map((item: any) => {
-                    const label = parentFieldLabels ? parentFieldLabels.map((label: any) => item[label]).join(" - ") : item[parentFieldName];
+                    const label = parentFieldLabels && parentFieldLabels.length > 0 ? parentFieldLabels.map((label: any) => item[label]).join(" - ") : item[parentFieldName];
                     return {
                         solidManyToOneLabel: label,
                         solidManyToOneValue: item[parentFieldName],
@@ -873,7 +903,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
         const currentRelationData = formik.values[fieldLayoutInfo.attrs.name] || [];
         const jsonValues = Object.fromEntries(values.entries());
         console.log("jsonValues", jsonValues);
-        const label = parentFieldLabels ? parentFieldLabels.map((label: any) => jsonValues[label]).join(" - ") : jsonValues[parentFieldName];
+        const label = parentFieldLabels && parentFieldLabels.length > 0 ? parentFieldLabels.map((label: any) => jsonValues[label]).join(" - ") : jsonValues[parentFieldName];
 
         const updatedRelationData = [
             ...currentRelationData,

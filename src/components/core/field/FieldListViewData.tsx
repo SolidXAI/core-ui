@@ -297,6 +297,7 @@ export const FieldListViewData = () => {
         visible={isDialogVisible}
         header="Confirm Delete"
         modal
+        className="solid-confirm-dialog"
         footer={() => (
           <div className="flex justify-content-center">
             <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteBulk} />

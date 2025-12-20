@@ -24,10 +24,12 @@ export function SolidFormViewNormalHeaderButton({
         : useHasAnyRole(button?.attrs?.roles);
 
     if (!hasRole) return null;
+    if (button?.attrs?.visible == false) return null
     return (
+        <div>
         <Button
             type="button"
-            className={`w-full text-left gap-2 ${button?.attrs?.className ? button?.attrs?.className : ''}`}
+            className={`w-full text-left gap-2 p-button-sm solid-icon-button ${button?.attrs?.className ? button?.attrs?.className : ''}`}
             label={button.attrs.label}
             size="small"
             iconPos="left"
@@ -42,5 +44,6 @@ export function SolidFormViewNormalHeaderButton({
                 handleCustomButtonClick(button.attrs, event);
             }}
         />
+        </div>
     );
 }

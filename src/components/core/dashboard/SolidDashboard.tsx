@@ -14,6 +14,8 @@ import { SolidAiMainWrapper } from '../solid-ai/SolidAiMainWrapper';
 import { SolidDashboardFilterRequired } from './SolidDashboardFilterRequired';
 import { SolidDashboardLoading } from './SolidDashboardLoading';
 import { SolidDashboardRenderError } from './SolidDashboardRenderError';
+import { useDispatch, useSelector } from "react-redux";
+import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 
 export enum DashboardVariableType {
   DATE = 'date',
@@ -128,6 +130,8 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
 
   // TODO [HP]: replace dashboardVariableFilterRules with filters everywhere...
   // const [dashboardVariableFilterRules, setDashboardVariableFilterRules] = useState<ISolidDashboardVariableFilterRule[]>([]);
+  const dispatch = useDispatch();
+  const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
   const [filters, setFilters] = useState<SqlExpression[]>([]);
   const [isOpenSolidXAiPanel, setIsOpenSolidXAiPanel] = useState(false);
   const [chatterWidth, setChatterWidth] = useState(380);
@@ -146,11 +150,11 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
   useEffect(() => {
     const storedOpen = localStorage.getItem('d_solidxai_open');
     const storedWidth = localStorage.getItem('d_solidxai_width');
-  
+
     if (storedOpen !== null) {
       setIsOpenSolidXAiPanel(storedOpen === 'true');
     }
-  
+
     if (storedWidth !== null) {
       const width = parseInt(storedWidth, 10);
       if (!isNaN(width)) {
@@ -158,7 +162,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
       }
     }
   }, []);
-  
+
 
   useEffect(() => {
     if (isResizing) {
@@ -168,33 +172,41 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
         setChatterWidth(clampedWidth);
         localStorage.setItem('d_solidxai_width', clampedWidth.toString());
       };
-  
+
       const handleMouseUp = () => {
         setIsResizing(false);
       };
-  
+
       window.addEventListener('mousemove', handleMouseMove);
       window.addEventListener('mouseup', handleMouseUp);
-  
+
       return () => {
         window.removeEventListener('mousemove', handleMouseMove);
         window.removeEventListener('mouseup', handleMouseUp);
       };
     }
   }, [isResizing]);
-  
+
 
   const handleOpen = () => {
     setIsOpenSolidXAiPanel(true);
     localStorage.setItem('d_solidxai_open', 'true');
   };
-  
+
   const handleClose = () => {
     setIsOpenSolidXAiPanel(false);
     localStorage.setItem('d_solidxai_open', 'false');
   };
 
-  
+  const toggleBothSidebars = () => {
+    if (visibleNavbar) {
+      dispatch(toggleNavbar());   // close both
+    } else {
+      dispatch(showNavbar());     // open both
+    }
+  };
+
+
   return (
     <div className={`h-screen surface-0 flex`}>
       <div className={`h-full flex-grow-1 ${styles.SolidDashboardPageContentWrapper}`}>
@@ -203,28 +215,33 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
         {!isLoading && !error && (
           <>
             <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
-            <p className={`view-title flex align-items-center gap-1 ${styles.SolidDashboardTitle}`}>
-              {data?.records[0]?.displayName ? data?.records[0]?.displayName : data?.records[0]?.name}
-              {data?.records[0]?.description &&
-                <>
-                  <Tooltip className='solid-field-tooltip' target=".solid-field-tooltip-icon" />
-                  <i className="pi pi-info-circle solid-field-tooltip-icon"
-                    data-pr-tooltip={data?.records[0]?.description}
-                    data-pr-position={'right'}
-                  />
-                </>
-              }
-            </p>
+              <div className='flex align-items-center gap-2'>
+                <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                  <i className="pi pi-th-large"></i>
+                </div>
+                <p className={`view-title solid-text-wrapper flex align-items-center gap-1 ${styles.SolidDashboardTitle}`}>
+                  {data?.records[0]?.displayName ? data?.records[0]?.displayName : data?.records[0]?.name}
+                  {data?.records[0]?.description &&
+                    <>
+                      <Tooltip className='solid-field-tooltip' target=".solid-field-tooltip-icon" />
+                      <i className="pi pi-info-circle solid-field-tooltip-icon"
+                        data-pr-tooltip={data?.records[0]?.description}
+                        data-pr-position={'right'}
+                      />
+                    </>
+                  }
+                </p>
+              </div>
               {dashboardVariables && dashboardVariables.length > 0 && <SolidDashboardVariable dashboardVariables={dashboardVariables} filters={filters} setFilters={setFilters} />}
             </div>
-            {!isRenderDashboardBody(questions, dashboardVariables, filters) &&  <SolidDashboardFilterRequired />}
+            {!isRenderDashboardBody(questions, dashboardVariables, filters) && <SolidDashboardFilterRequired />}
             {isRenderDashboardBody(questions, dashboardVariables, filters) && <SolidDashboardBody questions={questions} filters={filters} />}
           </>
         )}
       </div>
       {process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' && (
-        <div className={`chatter-section ${isOpenSolidXAiPanel === false ? 'collapsed' : ''}`} style={{ width: chatterWidth }}>
-          {isOpenSolidXAiPanel &&(
+        <div className={`chatter-section ${isOpenSolidXAiPanel === false ? 'collapsed' : 'open'}`} style={{ width: chatterWidth }}>
+          {isOpenSolidXAiPanel && (
             <div
               style={{
                 width: 5,
@@ -233,7 +250,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
                 left: 0,
                 top: 0,
                 bottom: 0,
-                height:'100%',
+                height: '100%',
                 zIndex: 9,
               }}
               onMouseDown={() => setIsResizing(true)}
@@ -264,7 +281,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
               />
             </div>
             :
-            <SolidAiMainWrapper showHeader inListView/>
+            <SolidAiMainWrapper showHeader inListView />
           }
         </div>
       )}

@@ -10,6 +10,8 @@ import { HomePageModuleSvg } from '../Svg/HomePageModuleSvg';
 import Link from 'next/link';
 import { useState } from 'react';
 import { SolidAccountSettings } from '../core/common/SolidAccountSettings/SolidAccountSettings';
+import { useDispatch, useSelector } from "react-redux";
+import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 
 type SolidModuleHomeProps = {
     moduleName?: string;
@@ -17,21 +19,35 @@ type SolidModuleHomeProps = {
 
 export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomeProps) => {
     const { data: session, status } = useSession();
+    const dispatch = useDispatch();
+    const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
     //@ts-ignore
     const user = session?.user?.user?.username;
     const [showAccountSettings, setShowAccountSettings] = useState(false);
 
+    const toggleBothSidebars = () => {
+        if (visibleNavbar) {
+            dispatch(toggleNavbar());   // close both
+        } else {
+            dispatch(showNavbar());     // open both
+        }
+    };
+
     return (
-        <div className="h-screen surface-0">
+        <div className="h-screen surface-0 overflow-y-auto">
             <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
-                <p className="m-0 view-title">
+            <div className='flex align-items-center gap-2'>
+            <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                <i className="pi pi-th-large"></i>
+            </div>
+                <p className="m-0 view-title solid-text-wrapper">
                     {moduleName}
                 </p>
             </div>
-            <div></div>
-            <div className="p-5 flex flex-column gap-4">
+            </div>
+            <div className="p-4 md:p-5 flex flex-column gap-4">
                 <div className={styles.solidModuleWelcomeSection}>
-                    <div className='flex flex-column gap-2'>
+                    <div className='flex flex-column gap-2 pr-3 lg:pr-0'>
                         <h3 className={styles.solidModuleHomeTitle1}>
                             Welcome, {status === "loading" ? "..." : user}
                         </h3>
@@ -65,7 +81,7 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
                         class: styles.dashboardCardThree,
                         type: 'popup'
                     }].map((card, i) => (
-                        <div className='col' key={i}>
+                        <div className='col-12 md:col-6 xl:col-4' key={i}>
                             <div className={`${styles.solidModuleHomeColorCards} ${card.class}`}>
                                 <div>
                                     <div className={styles.solidModuleHomeCardSvgWrapper}>{card.icon}</div>
