@@ -6,6 +6,7 @@ import { SolidManyToOneFilterElement } from "./SolidManyToOneFilterElement";
 import { SolidSelectionDynamicFilterElement } from "./SolidSelectionDynamicFilterElement";
 import { SolidSelectionStaticFilterElement } from "./SolidSelectionStaticFilterElement";
 import { Button } from "primereact/button";
+import { SolidManyToManyFilterElement } from "./fields/SolidManyToManyFilterElement";
 
 export enum InputTypes {
     Date = 'Date',
@@ -15,6 +16,7 @@ export enum InputTypes {
     Text = 'Text',
     SelectionStatic = 'SelectionStatic',
     RelationManyToOne = 'RelationManyToOne',
+    RelationManyToMany = 'RelationManyToMany',
     SelectionDynamic = 'SelectionDynamic'
 }
 
@@ -124,13 +126,21 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                             inputClassName="w-full p-inputtext-sm"
                         />
                     }
-                    {inputType === InputTypes.RelationManyToOne &&
+                    {inputType === InputTypes.RelationManyToOne && 
                         <SolidManyToOneFilterElement
                             value={value}
                             index={index}
                             updateInputs={updateInputs}
                             fieldMetadata={fieldMetadata}
                         ></SolidManyToOneFilterElement>
+                    }
+                    {inputType === InputTypes.RelationManyToMany && 
+                        <SolidManyToManyFilterElement
+                            value={value}
+                            index={index}
+                            updateInputs={updateInputs}
+                            fieldMetadata={fieldMetadata}
+                        ></SolidManyToManyFilterElement>
                     }
                     {inputType === InputTypes.SelectionDynamic &&
                         <SolidSelectionDynamicFilterElement

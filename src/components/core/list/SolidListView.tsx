@@ -240,7 +240,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   const [solidListViewMetaData, setSolidListViewMetaData] = useState(null);
   const [solidListViewLayout, setSolidListViewLayout] = useState(null);
-  const [ isDraftPublishWorkflowEnabled, setIsDraftPublishWorkflowEnabled ] = useState(false);
+  const [isDraftPublishWorkflowEnabled, setIsDraftPublishWorkflowEnabled] = useState(false);
   const {
     data: solidListViewInitialMetaData,
     error: solidListViewMetaDataError,
@@ -537,12 +537,26 @@ export const SolidListView = (params: SolidListViewParams) => {
         const filters = {
           $and: [],
         };
-        if (queryObject.s_filter) {
-          filters.$and.push(queryObject.s_filter);
+
+        if (queryObject.custom_filter_predicate) {
+          filters.$and.push(queryObject.custom_filter_predicate);
         }
-        if (queryObject.c_filter) {
-          filters.$and.push(queryObject.c_filter);
+        if (queryObject.search_predicate) {
+          filters.$and.push(queryObject.search_predicate);
         }
+        // if (queryObject.saved_filter_predicate) {
+        //   filters.$and.push(queryObject.saved_filter_predicate);
+        // }
+        // if (queryObject.predefined_search_predicate) {
+        //   filters.$and.push(queryObject.predefined_search_predicate);
+        // }
+
+        // if (queryObject.s_filter) {
+        //   filters.$and.push(queryObject.s_filter);
+        // }
+        // if (queryObject.c_filter) {
+        //   filters.$and.push(queryObject.c_filter);
+        // }
         setRows(Number(queryData.limit));
         setToPopulate(queryData?.populate);
         setToPopulateMedia(queryData?.populateMedia);
@@ -824,8 +838,13 @@ export const SolidListView = (params: SolidListViewParams) => {
       let url;
       const urlData = queryData;
       delete urlData.filters;
-      urlData.s_filter = customFilter.s_filter || {};
-      urlData.c_filter = customFilter.c_filter || {};
+      // urlData.s_filter = customFilter.s_filter || {};
+      // urlData.c_filter = customFilter.c_filter || {};
+      urlData.custom_filter_predicate = customFilter.custom_filter_predicate || {};
+      urlData.search_predicate = customFilter.search_predicate || {};
+      // urlData.saved_filter_predicate = customFilter.saved_filter_predicate || {};
+      // urlData.predefined_search_predicate = customFilter.predefined_search_predicate || {};
+
       queryObjectToQueryString(urlData);
     }
     triggerGetSolidEntities(queryString);
@@ -836,11 +855,22 @@ export const SolidListView = (params: SolidListViewParams) => {
     const queryfilter = {
       $and: [],
     };
-    if (transformedFilter.s_filter) {
-      queryfilter.$and.push(transformedFilter.s_filter);
+
+    // custom_filter_predicate
+    // search_predicate
+    // saved_filter_predicate
+    // predefined_search_predicate
+    if (transformedFilter.custom_filter_predicate) {
+      queryfilter.$and.push(transformedFilter.custom_filter_predicate);
     }
-    if (transformedFilter.c_filter) {
-      queryfilter.$and.push(transformedFilter.c_filter);
+    if (transformedFilter.search_predicate) {
+      queryfilter.$and.push(transformedFilter.search_predicate);
+    }
+    if (transformedFilter.saved_filter_predicate) {
+      queryfilter.$and.push(transformedFilter.saved_filter_predicate);
+    }
+    if (transformedFilter.predefined_search_predicate) {
+      queryfilter.$and.push(transformedFilter.predefined_search_predicate);
     }
 
     const customFilter = transformedFilter;
@@ -1162,12 +1192,12 @@ export const SolidListView = (params: SolidListViewParams) => {
     : [];
 
   const hasMedia = slides.some((s) => (s as any).type === "video");
- 
+
   const toggleBothSidebars = () => {
     if (visibleNavbar) {
-        dispatch(toggleNavbar());   // close both
+      dispatch(toggleNavbar());   // close both
     } else {
-        dispatch(showNavbar());     // open both
+      dispatch(showNavbar());     // open both
     }
   };
   return (
@@ -1178,15 +1208,15 @@ export const SolidListView = (params: SolidListViewParams) => {
           {/* <div> */}
           <div className="flex justify-content-between w-full">
             <div className="flex gap-3 align-items-center w-full ">
-            <div className='flex align-items-center gap-2'>
-              {params.embeded !== true &&
-                <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+              <div className='flex align-items-center gap-2'>
+                {params.embeded !== true &&
+                  <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
                     <i className="pi pi-th-large"></i>
-                </div>
-              }
-              <p className="m-0 view-title solid-text-wrapper">
-                {solidListViewMetaData?.data?.solidView?.displayName}
-              </p>
+                  </div>
+                }
+                <p className="m-0 view-title solid-text-wrapper">
+                  {solidListViewMetaData?.data?.solidView?.displayName}
+                </p>
               </div>
               {solidListViewLayout?.attrs?.enableGlobalSearch === true &&
                 params.embeded === false && (
@@ -1526,27 +1556,27 @@ export const SolidListView = (params: SolidListViewParams) => {
                       const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.publishedAt;
                       return (
                         <>
-                        {!shouldHideEditOrDeleteButton && (
-                          <Button
-                            text
-                            type="button"
-                            severity="secondary"
-                            className=""
-                            label=""
-                            size="small"
-                            iconPos="left"
-                            icon={"pi pi-pencil"}
-                            onClick={() => {
-                              if (params.embeded == true) {
-                                params.handlePopUpOpen(rowData?.id);
-                              } else {
-                                router.push(
-                                  `${editButtonUrl}/${rowData?.id}?viewMode=edit`
-                                );
-                              }
-                            }}
-                          />
-                        )}
+                          {!shouldHideEditOrDeleteButton && (
+                            <Button
+                              text
+                              type="button"
+                              severity="secondary"
+                              className=""
+                              label=""
+                              size="small"
+                              iconPos="left"
+                              icon={"pi pi-pencil"}
+                              onClick={() => {
+                                if (params.embeded == true) {
+                                  params.handlePopUpOpen(rowData?.id);
+                                } else {
+                                  router.push(
+                                    `${editButtonUrl}/${rowData?.id}?viewMode=edit`
+                                  );
+                                }
+                              }}
+                            />
+                          )}
                         </>
                       );
                     }}
@@ -1565,21 +1595,21 @@ export const SolidListView = (params: SolidListViewParams) => {
                       const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.publishedAt;
                       return (
                         <>
-                        {!shouldHideEditOrDeleteButton && (
-                          <Button
-                            text
-                            type="button"
-                            className=""
-                            size="small"
-                            iconPos="left"
-                            severity="danger"
-                            icon={"pi pi-trash"}
-                            onClick={() => {
-                              setSelectedSolidViewData(rowData);
-                              setDeleteEntity(true);
-                            }}
-                          />
-                        )}
+                          {!shouldHideEditOrDeleteButton && (
+                            <Button
+                              text
+                              type="button"
+                              className=""
+                              size="small"
+                              iconPos="left"
+                              severity="danger"
+                              icon={"pi pi-trash"}
+                              onClick={() => {
+                                setSelectedSolidViewData(rowData);
+                                setDeleteEntity(true);
+                              }}
+                            />
+                          )}
                         </>
                       );
                     }}
