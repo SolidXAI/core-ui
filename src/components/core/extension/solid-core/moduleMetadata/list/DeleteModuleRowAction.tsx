@@ -25,14 +25,22 @@ const DeleteModuleRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     const entityApi = createSolidEntityApi("moduleMetadata");
     const { useDeleteSolidEntityMutation } = entityApi;
 
+    const [allowDelete, setAllowDelete] = useState(false);
+
     const [deleteSolidSingleEntiry, {
         isError: isSolidEntitiesDeleteError,
     }] = useDeleteSolidEntityMutation()
 
     const queryString = `filters[$and][0][$or][0][module][$in][0]=${event?.rowData?.id}`;
     const { data: models, isLoading: getModelsLoading, error } = useGetModelsQuery(queryString);
-    console.log("models", models);
 
+    useEffect(() => {
+        if (models && models.meta.totalRecords == 0) {
+            setAllowDelete(true);
+        } else {
+            setAllowDelete(false);
+        }
+    }, [models]);
 
     const toast = useRef<Toast>(null);
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
@@ -73,50 +81,53 @@ const DeleteModuleRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     }
 
     const rows = [
-        { file: `${kebabCase(event.rowData.singularName)}.entity.ts`, description: 'The TypeORM entity definition for this model. Deleting it removes the model’s schema mapping.', intervention: 'Automatic' },
-        { file: `${kebabCase(event.rowData.singularName)}.create.dto.ts`, description: 'DTO defining the payload for creating a new record of this model', intervention: 'Automatic' },
-        { file: `${kebabCase(event.rowData.singularName)}.update.dto.ts`, description: 'DTO defining the payload for updating an existing record of this model.', intervention: 'Automatic' },
-        { file: `${kebabCase(event.rowData.singularName)}.repository.ts`, description: 'Custom repository encapsulating database operations for this model.', intervention: 'Automatic' },
-        { file: `${kebabCase(event.rowData.singularName)}.service.ts`, description: 'Service layer containing business logic and interactions for this model.', intervention: 'Automatic' },
-        { file: `${kebabCase(event.rowData.singularName)}.controller.ts`, description: 'Controller exposing API endpoints related to this model.', intervention: 'Automatic' },
-        { file: `${kebabCase(event.rowData.singularName)}.module.ts`, description: 'Module declaration that wires together the controller, service, and repository. All references to the deleted model must be removed here', intervention: 'Manual (X)', manual: true },
-        { file: `${kebabCase(event.rowData.singularName)}-metadata.json`, description: 'Remove references to this model in the model metadata, menu, action & view sections.', intervention: 'Automatic' },
-        { file: '-', description: 'Drop database table. Removes the database table from the DB, this is a very risky step. Best to review all relations to other models etc and then do this manually.', intervention: 'Manual (X)', manual: true },
+        { file: `${kebabCase(event.rowData.name)}.module.ts`, description: 'Delete the module file.', intervention: 'Automatic'},
+        { file: `${kebabCase(event.rowData.name)}-metadata.json`, description: 'Remove the module metadata json file.', intervention: 'Automatic' },
     ];
-
 
     return (
         <div className="">
             <div className="p-dialog-header secondary-border-bottom py-3" style={{ background: 'var(--solid-light-grey)' }}>
                 <span className="p-dialog-title">
-                    Delete Model
+                    Delete Module
                 </span>
             </div>
             <div className="px-4 pb-4 pt-3">
                 <div>
                     <p className="form-field-label font-medium">
-                        Deleting a model should be done carefully. The below files will be impacted as part of deleting a model:
+                        {allowDelete === true ?
+                            "Deleting a module should be done carefully. The below files will be impacted as part of deleting a model:"
+                            :
+                            "This module still has models associated with it. Please delete those models before deleting the module."
+                        }
                     </p>
-                    <DataTable value={rows} size="small">
-                        <Column field="file" header="File Name" />
-                        <Column field="description" header="Description" />
-                        <Column field="intervention" header="Intervention" />
-                    </DataTable>
-                    <div className="my-4">
-                        <div className="flex align-items-center">
-                            <Checkbox
-                                inputId="confirmation"
-                                name="confirm"
-                                checked={isConfirmed}
-                                onChange={() => setIsConfirmed(!isConfirmed)} />
-                            <label htmlFor="confirmation" className="ml-2 form-field-label">
-                                I confirm that #7 &amp; #9 will be done by me manually after the automatic steps above are applied.
-                            </label>
+                    {/* {allowDelete === true && */}
+                        <DataTable value={rows} size="small">
+                            <Column field="file" header="File Name" />
+                            <Column field="description" header="Description" />
+                            <Column field="intervention" header="Intervention" />
+                        </DataTable>
+                    {/* } */}
+                    {/* {allowDelete === true &&
+
+                        <div className="my-4">
+                            <div className="flex align-items-center">
+                                <Checkbox
+                                    inputId="confirmation"
+                                    name="confirm"
+                                    checked={isConfirmed}
+                                    onChange={() => setIsConfirmed(!isConfirmed)} />
+                                <label htmlFor="confirmation" className="ml-2 form-field-label">
+                                    I confirm that #7 &amp; #9 will be done by me manually after the automatic steps above are applied.
+                                </label>
+                            </div>
                         </div>
-                    </div>
+                    } */}
                 </div>
                 <div className="flex gap-3 justify-content-start">
-                    <Button size="small" label="Apply" disabled={!isConfirmed} autoFocus onClick={deleteModuleHandler} />
+                    {allowDelete === true &&
+                        <Button size="small" label="Apply" autoFocus onClick={deleteModuleHandler} />
+                    }
                     <Button size="small" label="Cancel" outlined onClick={() => dispatch(closePopup())} />
                 </div>
             </div>

@@ -60,6 +60,7 @@ import { useSession } from "next-auth/react";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
 import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
+import { useLazyGetMcpUrlQuery } from "@/redux/api/solidSettingsApi";
 // import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -130,6 +131,32 @@ export const SolidListView = (params: SolidListViewParams) => {
     useLazyCheckIfPermissionExistsQuery();
 
   const handleCustomButtonClick = useHandleListCustomButtonClick();
+
+
+  const [mcpUrl, setMcpUrl] = useState<string | null>(null);
+  const [getMcpUrl] = useLazyGetMcpUrlQuery();
+
+  useEffect(() => {
+    enableSolidXAiPanel();
+  }, []);
+
+  const enableSolidXAiPanel = async () => {
+    try {
+      const queryData = {
+        showHeader: "true",
+        inListView: "true"
+      };
+      const queryString = qs.stringify({ ...queryData }, { encodeValuesOnly: true });
+      const response = await getMcpUrl(queryString).unwrap();
+      console.log("response", response);
+      if (response && response?.data?.mcpUrl) {
+        setMcpUrl(response?.data?.mcpUrl);
+      }
+    } catch (error) {
+
+    }
+  }
+
 
   useEffect(() => {
     const storedOpen = localStorage.getItem("l_solidxai_open");
@@ -1023,8 +1050,8 @@ export const SolidListView = (params: SolidListViewParams) => {
       summary: 'Deleted',
       detail: ERROR_MESSAGES.RECORD_DELETE,
       ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+        ? { sticky: true }            // stays until user closes
+        : { life: 3000 }),
     });
     setDialogVisible(false);
   };
@@ -1168,8 +1195,8 @@ export const SolidListView = (params: SolidListViewParams) => {
         summary: ERROR_MESSAGES.DELETE_FAIELD,
         detail: ERROR_MESSAGES.SOMETHING_WRONG,
         ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+          ? { sticky: true }            // stays until user closes
+          : { life: 3000 }),
       });
     }
   };
@@ -1204,10 +1231,10 @@ export const SolidListView = (params: SolidListViewParams) => {
   const hasEditInContextMenu = actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
     solidListViewLayout?.attrs?.edit !== false &&
     solidListViewLayout?.attrs?.showDefaultEditButton !== false &&
-    solidListViewLayout?.attrs?.showRowEditInContextMenu !== false && 
+    solidListViewLayout?.attrs?.showRowEditInContextMenu !== false &&
     !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.publishedAt);
 
-  const hasDeleteInContextMenu = actionsAllowed.includes( `${permissionExpression(params.modelName, 'delete')}`) &&
+  const hasDeleteInContextMenu = actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
     solidListViewLayout?.attrs?.delete !== false &&
     solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== false &&
     !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.publishedAt);
@@ -1644,105 +1671,105 @@ export const SolidListView = (params: SolidListViewParams) => {
                 )}
 
               {hasAnyContextMenuActions && (
-                  <Column
-                    frozen
-                    alignFrozen="right"
-                    body={(rowData) =>
-                      rowData?.deletedAt ? (
-                        <a
-                          onClick={(event) => {
-                            event.stopPropagation();
-                            recoverById(rowData.id);
-                          }}
-                          className="retrieve-button"
-                        >
-                          <i
-                            className="pi pi-refresh"
-                            style={{ fontSize: "1rem" }}
-                          />
-                        </a>
-                      ) : (
-                        <>
-                          {solidListViewLayout?.attrs?.showRowContextMenu !==
-                            false && (
-                              <>
-                                {detailsBodyTemplate(rowData)}
-                                <OverlayPanel
-                                  ref={op}
-                                  className="solid-custom-overlay"
-                                  style={{ top: 10, minWidth: 120 }}
-                                >
-                                  <div className="flex flex-column gap-1 p-1">
-                                    {hasEditInContextMenu && (
-                                        <Button
-                                          type="button"
-                                          className="w-full text-left gap-1"
-                                          label="Edit"
-                                          size="small"
-                                          iconPos="left"
-                                          icon={"pi pi-pencil"}
-                                          onClick={() => {
-                                            if (params.embeded == true) {
-                                              params.handlePopUpOpen(
-                                                selectedDataRef.current?.id
-                                              );
-                                            } else {
-                                              router.push(
-                                                `${editButtonUrl}/${selectedDataRef.current?.id}?viewMode=edit`
-                                              );
-                                            }
-                                          }}
-                                        />
-                                      )}
+                <Column
+                  frozen
+                  alignFrozen="right"
+                  body={(rowData) =>
+                    rowData?.deletedAt ? (
+                      <a
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          recoverById(rowData.id);
+                        }}
+                        className="retrieve-button"
+                      >
+                        <i
+                          className="pi pi-refresh"
+                          style={{ fontSize: "1rem" }}
+                        />
+                      </a>
+                    ) : (
+                      <>
+                        {solidListViewLayout?.attrs?.showRowContextMenu !==
+                          false && (
+                            <>
+                              {detailsBodyTemplate(rowData)}
+                              <OverlayPanel
+                                ref={op}
+                                className="solid-custom-overlay"
+                                style={{ top: 10, minWidth: 120 }}
+                              >
+                                <div className="flex flex-column gap-1 p-1">
+                                  {hasEditInContextMenu && (
+                                    <Button
+                                      type="button"
+                                      className="w-full text-left gap-1"
+                                      label="Edit"
+                                      size="small"
+                                      iconPos="left"
+                                      icon={"pi pi-pencil"}
+                                      onClick={() => {
+                                        if (params.embeded == true) {
+                                          params.handlePopUpOpen(
+                                            selectedDataRef.current?.id
+                                          );
+                                        } else {
+                                          router.push(
+                                            `${editButtonUrl}/${selectedDataRef.current?.id}?viewMode=edit`
+                                          );
+                                        }
+                                      }}
+                                    />
+                                  )}
 
-                                    {hasDeleteInContextMenu && (
-                                        <Button
-                                          text
-                                          type="button"
-                                          className="w-full text-left gap-1"
-                                          label="Delete"
-                                          size="small"
-                                          iconPos="left"
-                                          severity="danger"
-                                          icon={"pi pi-trash"}
-                                          onClick={() => setDeleteEntity(true)}
-                                        />
-                                      )}
-                                    {hasCustomContextMenuButtons && solidListViewLayout?.attrs?.rowButtons
-                                      ?.filter(
-                                        (rb) =>
-                                          rb?.attrs?.actionInContextMenu === true &&
-                                          rb?.attrs?.visible !== false
-                                      )
-                                      .map((button: any, index: number) => (
-                                        <SolidListViewRowButtonContextMenu
-                                          key={`${index}-${selectedDataRef?.current?.id || ''}`}
-                                          button={button}
-                                          params={params}
-                                          getSelectedSolidViewData={() => selectedDataRef.current}
-                                          // selectedSolidViewData={selectedSolidViewData}
-                                          solidListViewMetaData={
-                                            solidListViewMetaData
-                                          }
-                                          handleCustomButtonClick={
-                                            handleCustomButtonClick
-                                          }
-                                        />
-                                      ))}
-                                  </div>
-                                </OverlayPanel>
-                              </>
-                            )}
-                        </>
-                      )
-                    }
-                  ></Column>
-                )}
+                                  {hasDeleteInContextMenu && (
+                                    <Button
+                                      text
+                                      type="button"
+                                      className="w-full text-left gap-1"
+                                      label="Delete"
+                                      size="small"
+                                      iconPos="left"
+                                      severity="danger"
+                                      icon={"pi pi-trash"}
+                                      onClick={() => setDeleteEntity(true)}
+                                    />
+                                  )}
+                                  {hasCustomContextMenuButtons && solidListViewLayout?.attrs?.rowButtons
+                                    ?.filter(
+                                      (rb) =>
+                                        rb?.attrs?.actionInContextMenu === true &&
+                                        rb?.attrs?.visible !== false
+                                    )
+                                    .map((button: any, index: number) => (
+                                      <SolidListViewRowButtonContextMenu
+                                        key={`${index}-${selectedDataRef?.current?.id || ''}`}
+                                        button={button}
+                                        params={params}
+                                        getSelectedSolidViewData={() => selectedDataRef.current}
+                                        // selectedSolidViewData={selectedSolidViewData}
+                                        solidListViewMetaData={
+                                          solidListViewMetaData
+                                        }
+                                        handleCustomButtonClick={
+                                          handleCustomButtonClick
+                                        }
+                                      />
+                                    ))}
+                                </div>
+                              </OverlayPanel>
+                            </>
+                          )}
+                      </>
+                    )
+                  }
+                ></Column>
+              )}
             </DataTable>
           </div>
         )}
       </div>
-      {process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === "true" &&
+      {mcpUrl &&
         params.embeded !== true && (
           <div
             className={`chatter-section ${isOpenSolidXAiPanel === false ? "collapsed" : "open"
@@ -1795,7 +1822,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                 />
               </div>
             ) : (
-              <SolidAiMainWrapper showHeader inListView />
+              <SolidAiMainWrapper mcpUrl={mcpUrl} />
             )}
           </div>
         )}
