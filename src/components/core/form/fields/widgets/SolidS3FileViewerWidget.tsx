@@ -86,11 +86,23 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
             {value ? (
                 <div className="flex gap-3 items-center">
                     {(isImage || isPDF) && (
+                        // <Button
+                        //     icon="pi pi-eye"
+                        //     type="button"
+                        //     className=""
+                        //     style={{ width: "100%" }}
+                        //     loading={isLoading}
+                        //     tooltip={value}
+                        //     disabled={isLoading}
+                        //     label={`View ${fileType}`}
+                        //     size="small"
+                        //     iconPos="left"
+                        //     onClick={handleView}
+                        // />
                         <Button
                             icon="pi pi-eye"
                             type="button"
-                            className="text-left gap-1"
-                            style={{ width: "100%" }}
+                            style={{ minWidth: 66 }}
                             loading={isLoading}
                             tooltip={value}
                             disabled={isLoading}
@@ -100,17 +112,17 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
                             onClick={handleView}
                         />
                     )}
-
                     {downloadAllowed && (
                         <Button
-                            icon="pi pi-download"
+                            size="small"
                             type="button"
-                            className="text-left gap-1"
-                            loading={isLoading}
+                            icon="pi pi-download"
                             tooltip={`Download ${value?.split("/").pop()}`}
-                            disabled={isLoading}
+                            loading={isLoading}
                             onClick={handleDownload}
-                        />
+                            disabled={isLoading}
+                            className='solid-icon-button' />
+
                     )}
                 </div>
             ) : (
