@@ -242,7 +242,7 @@
     }
 
     .solid-global-search-element-wrapper {
-        width: 80vw;
+        width: 85vw;
     }
 
     .solid-global-search-element ul {
@@ -499,13 +499,13 @@
     /*  ======================= Search ================================== */
 
     .solid-global-search-element-wrapper {
-        width: calc(100vw - 80px)
+        width: calc(100vw - 55px)
     }
 
-    .solid-global-search-element {
-        min-height: 33px;
+    /* .solid-global-search-element {
+        max-height: 100%;
         height: 33px;
-    }
+    } */
 
     .solid-filter-auto-complete-field button {
         height: 2.5rem !important;
