@@ -6,7 +6,6 @@ import { Tooltip } from "primereact/tooltip";
 import qs from 'qs';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { SolidXAIIcon } from '../solid-ai/SolidXAIIcon';
-import { SolidXAIModule } from '../solid-ai/SolidXAIModule';
 import styles from './SolidDashboard.module.css';
 import SolidDashboardBody from './SolidDashboardBody';
 import SolidDashboardVariable from './SolidDashboardVariable';
@@ -16,6 +15,7 @@ import { SolidDashboardLoading } from './SolidDashboardLoading';
 import { SolidDashboardRenderError } from './SolidDashboardRenderError';
 import { useDispatch, useSelector } from "react-redux";
 import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
+import { useLazyGetMcpUrlQuery } from '@/redux/api/solidSettingsApi';
 
 export enum DashboardVariableType {
   DATE = 'date',
@@ -138,6 +138,8 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
   const [isResizing, setIsResizing] = useState(false);
   const [questions, setQuestions] = useState<any[]>([]);
   const [dashboardVariables, setDashboardVariables] = useState<DashboardVariableRecord[]>([]);
+
+
   useEffect(() => {
     // Invoke the dashboard api to fetch the dashboard data
     // console.log('Dashboard Data testing:', isLoading, data, error);
@@ -207,6 +209,32 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
   };
 
 
+
+  const [mcpUrl, setMcpUrl] = useState<string | null>(null);
+  const [getMcpUrl] = useLazyGetMcpUrlQuery();
+
+  useEffect(() => {
+    enableSolidXAiPanel();
+  }, []);
+
+  const enableSolidXAiPanel = async () => {
+    try {
+      const queryData = {
+        showHeader: "true",
+        inListView: "true"
+      };
+      const queryString = qs.stringify({ ...queryData }, { encodeValuesOnly: true });
+      const response = await getMcpUrl(queryString).unwrap();
+      console.log("response", response);
+      if (response && response?.data?.mcpUrl) {
+        setMcpUrl(response?.data?.mcpUrl);
+      }
+    } catch (error) {
+
+    }
+  }
+
+
   return (
     <div className={`h-screen surface-0 flex`}>
       <div className={`h-full flex-grow-1 ${styles.SolidDashboardPageContentWrapper}`}>
@@ -239,7 +267,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
           </>
         )}
       </div>
-      {process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' && (
+      {mcpUrl && (
         <div className={`chatter-section ${isOpenSolidXAiPanel === false ? 'collapsed' : 'open'}`} style={{ width: chatterWidth }}>
           {isOpenSolidXAiPanel && (
             <div
@@ -281,7 +309,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
               />
             </div>
             :
-            <SolidAiMainWrapper showHeader inListView />
+            <SolidAiMainWrapper mcpUrl={mcpUrl} />
           }
         </div>
       )}
