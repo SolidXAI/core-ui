@@ -117,11 +117,22 @@ export const SolidChatterHeader = (props: Props) => {
                         size='small'
                         severity="secondary"
                         aria-label="Filter"
-                        style={{ 
+                        style={{
                             width: 20,
                             color: hasActiveFilters ? '#722ED1' : undefined
                         }}
                         onClick={handleFilterClick}
+                    />
+                    <Button
+                        icon="pi pi-refresh"
+                        text
+                        size='small'
+                        severity="secondary"
+                        aria-label="Refresh"
+                        style={{
+                            width: 20
+                        }}
+                        onClick={refetch}
                     />
                 </div>
             </div>
