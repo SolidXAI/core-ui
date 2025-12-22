@@ -46,6 +46,10 @@ export const solidSettingsApi = createApi({
                 body: data,
             }),
         }),
+        getMcpUrl: builder.query({
+            query: (qs) => `/setting/get-mcp-url?${qs}`,
+        }),
+
     })
 });
 
@@ -59,5 +63,7 @@ export const {
     useLazyGetSolidSettingsByIdQuery,
     useUpdateSolidSettingsMutation,
     useBulkUpdateSolidSettingsMutation,
-    useBulkUpdateSolidUserSettingsMutation
+    useBulkUpdateSolidUserSettingsMutation,
+    useGetMcpUrlQuery,
+    useLazyGetMcpUrlQuery
 } = solidSettingsApi;

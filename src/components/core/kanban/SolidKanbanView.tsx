@@ -247,8 +247,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       summary,
       detail,
       ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+        ? { sticky: true }            // stays until user closes
+        : { life: 3000 }),
     });
   };
   // Get the kanban view data.
@@ -366,13 +366,12 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           setRecordsInSwimlane(queryData.groupFilter.limit);
           setToPopulate(queryData.populate);
           setToPopulateMedia(queryData.populateMedia);
-          setFilters(filters);
+          // setFilters(filters);
           setQueryDataLoaded(true);
 
           queryString = qs.stringify(queryData, {
             encodeValuesOnly: true
           });
-
 
         } else {
           const { recordsInSwimlane, toPopulate, toPopulateMedia } = initialFilterMethod();
@@ -404,7 +403,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           setQueryDataLoaded(true)
         }
 
-        triggerGetSolidEntities(queryString);
+        // triggerGetSolidEntities(queryString);
         setSelectedRecords([]);
       }
     }
@@ -660,19 +659,29 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       //   queryfilter.$and.push(transformedFilter.c_filter)
       // }
 
+
       if (transformedFilter.custom_filter_predicate) {
         queryfilter.$and.push(transformedFilter.custom_filter_predicate);
       }
       if (transformedFilter.search_predicate) {
         queryfilter.$and.push(transformedFilter.search_predicate);
       }
+      if (transformedFilter.saved_filter_predicate) {
+        queryfilter.$and.push(transformedFilter.saved_filter_predicate);
+      }
+      if (transformedFilter.predefined_search_predicate) {
+        queryfilter.$and.push(transformedFilter.predefined_search_predicate);
+      }
 
       const customFilter = transformedFilter;
       const updatedFilter = { ...(filters || {}), ...(queryfilter || {}) };
-      setFilters((prevFilters) => ({ ...(prevFilters || {}), ...(queryfilter || {}) }));
+
+      // Then update state
+      setFilters(updatedFilter);
+
 
       const swimlanesCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.swimlanesCount || 5;
-      const { toPopulate, toPopulateMedia } = initialFilterMethod();
+      // const { toPopulate, toPopulateMedia } = initialFilterMethod();
 
       const queryData = {
         offset: 0,
@@ -697,7 +706,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       // only present if handleCustomFilter is applied
       if (customFilter) {
         let url
-        const urlData = queryData;
+        const urlData =  structuredClone(queryData);
         delete urlData.filters;
         // urlData.s_filter = customFilter.s_filter || {};
         // urlData.c_filter = customFilter.c_filter || {};
