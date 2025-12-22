@@ -2883,7 +2883,8 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   }} options={passwordPolicyOptions} optionLabel="label"
                                     placeholder="Select a Password Policy"
                                     // className="w-full md:w-14rem"
-                                    className="w-full md:w-14rem"
+                                    className=""
+                                    panelClassName="password-policy-dropdown-panel"
                                     checkmark={true} highlightOnSelect={false} />
 
                                 </div>

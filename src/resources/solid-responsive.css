@@ -322,6 +322,10 @@
         text-overflow: ellipsis;
     }
 
+    .password-policy-dropdown-panel{
+        width: 450px !important;
+        max-width: 80% !important;
+    }
 
 
 
@@ -429,10 +433,9 @@
         width: 44rem !important;
     } */
 
-    .solid-import-dialog .p-dialog-content,
-    .solid-import-dialog-header {
-        width: 100% !important;
-        max-width: 98%;
+    .solid-import-dialog{
+        /* width: 100% !important; */
+        max-width: 95% !important;
     }
 
 
@@ -440,17 +443,29 @@
 
     /* ======================= Solid Export  ================================ */
 
-    .ExportDialog {
+    /* .ExportDialog {
         overflow-x: auto !important;
     }
 
     .ExportDialog .p-dialog-content,
     .solid-export-dialog-header {
         width: 44rem !important;
-    }
+    } */
+    .ExportDialog .p-dialog-content {
+        padding-left: 1rem !important;
+        padding-right: 1rem !important;
+    } 
 
     .SolidExportControls {
-        justify-self: flex-start !important;
+        /* justify-self: flex-start !important; */
+        flex-wrap: wrap;
+        justify-content: start !important;
+    }
+
+    .SolidExportProgressToaster{
+        min-width: auto;
+        width: 28rem !important;
+        max-width: 92% !important;
     }
 
     /* =================  cog wheel ================== */
@@ -608,7 +623,11 @@
         margin-bottom: 10px;
     }
 
+    .p-toast{
+        width: 90% !important;
+    }
 
+ 
 }
 
 @media(max-width:480px) {

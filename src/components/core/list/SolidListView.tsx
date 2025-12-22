@@ -1177,8 +1177,8 @@ export const SolidListView = (params: SolidListViewParams) => {
           <Toast ref={toast} />
           {/* <div> */}
           <div className="flex justify-content-between w-full">
-            <div className="flex  align-items-center w-full ">
-            <div className='flex align-items-center gap-2'>
+            <div className="flex gap-3 align-items-center w-full ">
+             <div className='flex align-items-center gap-2'>
               {params.embeded !== true &&
                 <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
                     <i className="pi pi-th-large"></i>
@@ -1760,7 +1760,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         headerClassName="py-2"
         contentClassName="px-0 pb-0"
         // style={{ width: '20vw' }}
-        breakpoints={{ '1199px': '30rem',  '400px': '85vw' }}
+        breakpoints={{ '1199px': '30rem',   '550px': '85vw' }}
       >
         <Divider className="m-0" />
         <div className="p-4">

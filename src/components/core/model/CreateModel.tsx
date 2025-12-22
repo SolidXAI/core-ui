@@ -406,7 +406,7 @@ const CreateModel = ({ data, params }: any) => {
                     <div>
                       {isDirty &&
                       <>
-                        <Button label="Save" size="small" type="submit" className="hidden md:flex" onClick={handleSubmit} />
+                        <Button label="Save" size="small" type="submit" className="hidden lg:flex" onClick={handleSubmit} />
                         <Button  icon="pi pi-check" size="small" type="submit"  className=" lg:hidden solid-icon-button" onClick={handleSubmit} />
                       </>
                       }

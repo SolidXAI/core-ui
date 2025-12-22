@@ -37,7 +37,7 @@ import { Toast } from "primereact/toast";
 import { useSelector } from "react-redux";
 import { queryObjectToQueryString, queryStringToQueryObject } from "../list/SolidListView";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
-
+import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 
 
 type SolidKanbanViewParams = {
