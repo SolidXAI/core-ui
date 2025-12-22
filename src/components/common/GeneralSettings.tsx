@@ -46,7 +46,9 @@ export const GeneralSettings = () => {
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
     };
 
@@ -186,7 +188,7 @@ export const GeneralSettings = () => {
                         severity: "error",
                         summary: "File too large",
                         detail: "Maximum file size is 2MB",
-                        life: 3000,
+                        sticky: true
                     });
                     return;
                 }
@@ -205,7 +207,7 @@ export const GeneralSettings = () => {
                     severity: "error",
                     summary: "File too large",
                     detail: "Maximum file size is 2MB",
-                    life: 3000,
+                    sticky: true
                 });
                 return;
             }
@@ -267,9 +269,9 @@ export const GeneralSettings = () => {
                 if (file.size > 2 * 1024 * 1024) {
                     toast.current?.show({
                         severity: "error",
-                        summary: "File too large",
-                        detail: "Maximum file size is 2MB",
-                        life: 3000,
+                        summary: ERROR_MESSAGES.FILE_LARGE,
+                        detail: ERROR_MESSAGES.MAX_FILE_SIZE,
+                        sticky: true
                     });
                     return;
                 }
@@ -286,9 +288,9 @@ export const GeneralSettings = () => {
             if (file.size > 2 * 1024 * 1024) {
                 toast.current?.show({
                     severity: "error",
-                    summary: "File too large",
-                    detail: "Maximum file size is 2MB",
-                    life: 3000,
+                    summary: ERROR_MESSAGES.FILE_LARGE,
+                    detail: ERROR_MESSAGES.MAX_FILE_SIZE,
+                    sticky: true,
                 });
                 return;
             }
@@ -303,9 +305,9 @@ export const GeneralSettings = () => {
             if (file.size > 2 * 1024 * 1024) {
                 toast.current?.show({
                     severity: "error",
-                    summary: "File too large",
-                    detail: "Maximum file size is 2MB",
-                    life: 3000,
+                    summary: ERROR_MESSAGES.FILE_LARGE,
+                    detail: ERROR_MESSAGES.MAX_FILE_SIZE,
+                    sticky: true,
                 });
                 return;
             }

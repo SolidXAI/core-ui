@@ -154,7 +154,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
                       severity: 'error',
                       summary: ERROR_MESSAGES.ERROR,
                       detail: ERROR_MESSAGES.ORM_TYPE_REQUIRED,
-                      life: 3000,
+                      sticky: true,
                     });
                   } else {
                     setSelectedFieldMetaData(null);

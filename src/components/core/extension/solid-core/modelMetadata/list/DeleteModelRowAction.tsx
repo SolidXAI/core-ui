@@ -16,7 +16,6 @@ import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     const [isConfirmed, setIsConfirmed] = useState(false);
-
     const dispatch = useDispatch();
     const entityApi = createSolidEntityApi(event.params.modelName);
     const {useDeleteSolidEntityMutation} = entityApi;
@@ -30,15 +29,31 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
     };
 
     const deleteModelHandler = async () => {
-        const res :any= await deleteSolidSingleEntiry(event.rowData.id)
-        if(!isSolidEntitiesDeleteError && res && res.data){
-            dispatch(closePopup());
-            showToast('success', 'Model Deleted', `Model ${event.rowData.singularName} has been deleted successfully.`);
+        try {
+            const res: any = await deleteSolidSingleEntiry(event.rowData.id);
+            
+            // console.log('delete model res', res);
+            if (res.error) {
+                // handle backend or RTK error object
+                const message =
+                    res.error?.data?.message ||
+                    res.error?.error ||
+                    ERROR_MESSAGES.ERROR_OCCURED;
+                showToast('error', ERROR_MESSAGES.DELETE_FAIELD, message);
+            } else {
+                showToast('success', ERROR_MESSAGES.MODEL_DELETE, ERROR_MESSAGES.MODEL_DELETE_SUCCESSFULLY(event.rowData.singularName));
+                dispatch(closePopup());
+            }
+        } catch (err: any) {
+            console.error("catch error", err);
+            showToast('error', ERROR_MESSAGES.ERROR, ERROR_MESSAGES.NETWORK_OR_SERVER_ERROR);
         }
     }
 
@@ -58,6 +73,7 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
 
     return (
         <div className="">
+            <Toast ref={toast} />
             <div className="p-dialog-header secondary-border-bottom py-3" style={{ background: 'var(--solid-light-grey)' }}>
                 <span className="p-dialog-title">
                     Delete Model

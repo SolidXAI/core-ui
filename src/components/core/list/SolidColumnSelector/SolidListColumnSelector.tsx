@@ -34,7 +34,9 @@ export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: a
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
     };
 
