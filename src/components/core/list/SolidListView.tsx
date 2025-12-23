@@ -117,7 +117,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const searchParams = useSearchParams(); // Converts the query params to a string
   const localeName = searchParams.get("locale");
   // TODO: The initial filter state will be created based on the fields which are present on this list view.
-  const [filters, setFilters] = useState<any>(null);
+  const [filters, setFilters] = useState<any>(params.customFilter || null);
 
 
 

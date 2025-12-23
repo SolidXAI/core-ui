@@ -55,11 +55,8 @@ export class SolidShortTextField implements ISolidField {
         }
         let existingValue = this.fieldContext.data[fieldName];
 
-        if (editWidget === "PseudoRelationManyToOneFormWidget") {
+        if (editWidget === "PseudoRelationManyToOneFormWidget" && this.fieldContext.data[fieldName]) {
             existingValue =  { solidManyToOneLabel: this.fieldContext.data[fieldName], solidManyToOneValue: this.fieldContext.data[fieldName] };
-
-        } else {
-            existingValue = this.fieldContext.data[fieldName]
 
         }
 
