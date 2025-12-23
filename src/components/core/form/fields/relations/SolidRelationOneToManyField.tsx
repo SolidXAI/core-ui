@@ -553,7 +553,11 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
                         $eq: formViewData.data[parentFieldName]
                     }
                 }
-                : {}
+                : {
+                    id :{
+                        $eq:-1
+                    } 
+                }
         }
         setListViewParams(lisviewparams)
     }
@@ -573,7 +577,11 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
                         $eq: formViewData.data[parentFieldName]
                     }
                 }
-                : {}
+                : {
+                    id :{
+                        $eq:-1
+                    } 
+                }
         }
 
         setListViewParams(listviewparams);
