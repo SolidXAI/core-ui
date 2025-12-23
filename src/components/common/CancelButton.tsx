@@ -42,14 +42,12 @@ export const SolidCancelButton = () => {
     };
     return (
         <>
-        <div className="hidden lg:flex">
-            <div>
-            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse' style={{ minWidth: 66 }}/>
-            </div>
-        </div>
-        <div className="flex lg:hidden">
-            <Button size="small" type="button" icon="pi pi-times" onClick={handleGoBack} className='bg-primary-reverse solid-icon-button '/>
-        </div>
+        {/* <div className="hidden lg:flex"> */}
+            {/* <div> */}
+            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse hidden lg:flex' style={{ minWidth: 66 }}/>
+            {/* </div> */}
+        {/* </div> */}
+            <Button size="small" type="button" icon="pi pi-times" onClick={handleGoBack} className='bg-primary-reverse solid-icon-button flex lg:hidden'/>
         </>
     )
 }

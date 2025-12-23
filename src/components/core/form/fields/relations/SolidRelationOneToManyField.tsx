@@ -485,6 +485,8 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
                     if (!visibleCreateRelationEntity) return;
                     setvisibleCreateRelationEntity(false);
                 }}
+              breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
+
             >
                 {params &&
                     < SolidFormView {...params} />

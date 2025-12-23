@@ -1,6 +1,6 @@
 "use client"
 
-import { CancelButton } from "@/components/common/CancelButton";
+import { CancelButton, SolidCancelButton } from "@/components/common/CancelButton";
 import { handleError } from "@/helpers/ToastContainer";
 import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
 import { useCreatemodelMutation, useDeletemodelMutation, useLazyGetModelsQuery, useUpdatemodelMutation } from "@/redux/api/modelApi";
@@ -318,11 +318,26 @@ const CreateModel = ({ data, params }: any) => {
           type="button"
           icon={'pi pi-cog'}
           size="small"
-          className="surface-card p-0"
+          className="surface-card p-0 hidden md:flex"
           style={{
             height: 33.06,
             width: 33.06
           }}
+          onClick={(e) =>
+            // @ts-ignore 
+            op.current.toggle(e)
+          }
+        />
+          <Button
+          outlined
+          type="button"
+          icon={'pi pi-cog'}
+          size="small"
+          className="surface-card p-0 solid-icon-button md:hidden"
+          // style={{
+          //   height: 33.06,
+          //   width: 33.06
+          // }}
           onClick={(e) =>
             // @ts-ignore 
             op.current.toggle(e)
@@ -390,7 +405,10 @@ const CreateModel = ({ data, params }: any) => {
                   <>
                     <div>
                       {isDirty &&
-                        <Button label="Save" size="small" type="submit" onClick={handleSubmit} />
+                      <>
+                        <Button label="Save" size="small" type="submit" className="hidden lg:flex" onClick={handleSubmit} />
+                        <Button  icon="pi pi-check" size="small" type="submit"  className=" lg:hidden solid-icon-button" onClick={handleSubmit} />
+                      </>
                       }
                     </div>
                     {/* <div>
@@ -398,7 +416,8 @@ const CreateModel = ({ data, params }: any) => {
                     </div> */}
                   </>
                 }
-                <CancelButton />
+                {/* <CancelButton /> */}
+                <SolidCancelButton/>
                 {formActionDropdown()}
               </div>
             </>

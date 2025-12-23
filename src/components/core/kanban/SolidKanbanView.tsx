@@ -29,7 +29,7 @@ import "yet-another-react-lightbox/plugins/counter.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
 import { KanbanUserViewLayout } from "./KanbanUserViewLayout";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { queryObjectToQueryString, queryStringToQueryObject } from "../list/SolidListView";
 
 
@@ -37,7 +37,7 @@ import { Toast } from "primereact/toast";
 import { useSelector } from "react-redux";
 import { queryObjectToQueryString, queryStringToQueryObject } from "../list/SolidListView";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
-
+import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 
 
 type SolidKanbanViewParams = {
@@ -49,6 +49,8 @@ type SolidKanbanViewParams = {
 
 export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const { user } = useSelector((state: any) => state.auth);
+  const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
+  const dispatch = useDispatch()
 
   const solidGlobalSearchElementRef = useRef();
   const searchParams = useSearchParams().toString(); // Converts the query params to a string
@@ -748,13 +750,28 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
   const kanbanViewTitle = solidKanbanViewMetaData?.data?.solidView?.displayName
 
+
+  const toggleBothSidebars = () => {
+    if (visibleNavbar) {
+      dispatch(toggleNavbar());   // close both
+    } else {
+      dispatch(showNavbar());     // open both
+    }
+  };
+
   return (
     <div className="page-parent-wrapper">
       <Toast ref={toast} />
       <div className="page-header flex-column lg:flex-row">
-        <div className="flex justify-content-between w-full  pl-5 md:pl-0 ">
+        <div className="flex justify-content-between w-full ">
 
-          <div className="flex gap-3 align-items-center">
+          <div className="flex align-items-center solid-header-buttons-wrapper">
+            {params.embeded !== true &&
+              <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                <i className="pi pi-th-large"></i>
+              </div>
+            }
+
             <p className="m-0 view-title solid-text-wrapper">{kanbanViewTitle}</p>
             {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
               // <SolidGlobalSearchElement viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} ></SolidGlobalSearchElement>
@@ -764,18 +781,18 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             }
           </div>
 
-          <div className="flex align-items-center gap-3">
-            {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
-              <div className="flex lg:hidden">
-                <Button
-                  type="button"
-                  size="small"
-                  icon="pi pi-search"
-                  severity="secondary"
-                  outlined
-                  className="solid-icon-button"
-                  onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}>
-                </Button>
+          <div className="flex align-items-center solid-header-buttons-wrapper">
+          {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
+            <div className="flex lg:hidden">
+                  <Button
+                    type="button"
+                    size="small"
+                    icon="pi pi-search"
+                    severity="secondary"
+                    outlined
+                    className="solid-icon-button"
+                    onClick={()=>setShowGlobalSearchElement(!showGlobalSearchElement)}>
+                  </Button>
               </div>
             }
 

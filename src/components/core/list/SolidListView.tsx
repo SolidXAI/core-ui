@@ -1280,9 +1280,9 @@ export const SolidListView = (params: SolidListViewParams) => {
           {/* <div> */}
           <div className="flex justify-content-between w-full">
             <div className="flex gap-3 align-items-center w-full ">
-              <div className='flex align-items-center gap-2'>
-                {params.embeded !== true &&
-                  <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+             <div className='flex align-items-center gap-2'>
+              {params.embeded !== true &&
+                <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
                     <i className="pi pi-th-large"></i>
                   </div>
                 }
@@ -1307,7 +1307,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                 )}
 
             </div>
-            <div className="flex align-items-center gap-3">
+            <div className="flex align-items-center solid-header-buttons-wrapper">
               {solidListViewLayout?.attrs?.enableGlobalSearch === true &&
                 params.embeded === false && (
                   <div className="flex lg:hidden">
@@ -1325,7 +1325,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
                 )}
 
-              <div className="hidden lg:flex align-items-center gap-3">
+              <div className="hidden lg:flex align-items-center solid-header-buttons-wrapper">
                 {solidListViewLayout?.attrs?.headerButtons
                   ?.filter((rb) => rb.attrs.actionInContextMenu != true)
                   ?.map((button: any, index: number) => (
@@ -1852,7 +1852,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         headerClassName="py-2"
         contentClassName="px-0 pb-0"
         // style={{ width: '20vw' }}
-        breakpoints={{ '1199px': '20vw', '1024px': '30vw', '767px': '50vw', '250px': '80vw' }}
+        breakpoints={{ '1199px': '30rem',   '550px': '85vw' }}
       >
         <Divider className="m-0" />
         <div className="p-4">
