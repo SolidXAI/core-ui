@@ -44,7 +44,7 @@ export class SolidShortTextField implements ISolidField {
         if (this.fieldContext.parentData && this.fieldContext.parentData[fieldName]) {
             const parentDataForKey = this.fieldContext.parentData[fieldName];
             if (editWidget === "PseudoRelationManyToOneFormWidget") {
-                if(parentDataForKey){
+                if (parentDataForKey) {
                     return { solidManyToOneLabel: this.fieldContext.parentData[fieldName], solidManyToOneValue: this.fieldContext.parentData[fieldName] };
                 }
             } else {
@@ -53,7 +53,15 @@ export class SolidShortTextField implements ISolidField {
                 }
             }
         }
-        const existingValue = this.fieldContext.data[fieldName];
+        let existingValue = this.fieldContext.data[fieldName];
+
+        if (editWidget === "PseudoRelationManyToOneFormWidget") {
+            existingValue =  { solidManyToOneLabel: this.fieldContext.data[fieldName], solidManyToOneValue: this.fieldContext.data[fieldName] };
+
+        } else {
+            existingValue = this.fieldContext.data[fieldName]
+
+        }
 
         return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
     }
