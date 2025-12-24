@@ -1,10 +1,12 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { useResolveS3UrlMutation } from "@/redux/api/fieldApi";
-import PDFViewer from "@/components/core/common/PDFViewer";
+// import PDFViewer from "@/components/core/common/PDFViewer";
+import Viewer from "react-viewer";
+
 
 /**
  * SolidS3FileViewerWidget (PrimeReact version)
@@ -19,9 +21,10 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
     const bucketName = fieldLayoutInfo.attrs.bucketName;
     const isPrivate = fieldLayoutInfo.attrs.isPrivate ? fieldLayoutInfo.attrs.isPrivate : "false";
 
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const [previewUrl, setPreviewUrl] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);
     const [open, setOpen] = useState(false);
+    const [openLightbox, setOpenLightbox] = useState(false);
 
     const [resolveS3Url] = useResolveS3UrlMutation();
 
@@ -72,12 +75,19 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
         console.log("url after fetch success", url);
         if (!url) return;
         setPreviewUrl(url);
-        setOpen(true);
+        if (isImage) {
+            setOpenLightbox(true)
+        } else {
+            setOpen(true);
+        }
     };
 
     const isImage = ["jpeg", "jpg", "png", "gif", "webp"].includes(fileType);
     const isPDF = fileType === "pdf";
     const isDownloadOnly = ["xlsx", "xls", "csv", "doc", "docx"].includes(fileType);
+
+  
+
 
     return (
         <div className="mt-2 flex flex-col gap-2">
@@ -129,6 +139,24 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
                 <p className="text-sm text-muted-foreground">No file uploaded</p>
             )}
 
+            {isImage &&
+                <Viewer
+                    visible={openLightbox}
+                    onClose={() => setOpenLightbox(false)}
+                    images={[
+                        {
+                            src: previewUrl,
+                            alt: value,
+                        },
+                    ]}
+                    zoomSpeed={0.2}
+                    rotatable
+                    scalable
+                    // draggable
+                    drag
+                    downloadable={false}
+                />
+            }
             <Dialog
                 header={value}
                 visible={open}
@@ -140,7 +168,7 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
                 contentStyle={{ borderRadius: 6 }}
 
             >
-                {previewUrl && isImage && (
+                {/* {previewUrl && isImage && (
                     // container limits height and enables vertical scrolling only
                     <div
                         style={{
@@ -160,7 +188,7 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
                             }}
                         />
                     </div>
-                )}
+                )} */}
 
                 {previewUrl && isPDF && (
                     // <PDFViewer url={previewUrl} />
