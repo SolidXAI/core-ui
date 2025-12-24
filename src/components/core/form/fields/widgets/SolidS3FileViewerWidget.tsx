@@ -155,6 +155,7 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
                     // draggable
                     drag
                     downloadable={false}
+                    zIndex={9999}
                 />
             }
             <Dialog

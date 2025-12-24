@@ -487,7 +487,7 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
                 }}
             >
                 {params &&
-                    < SolidFormView {...params} />
+                    <SolidFormView {...params} />
                 }
             </Dialog>
         </div>
