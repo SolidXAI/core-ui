@@ -9,6 +9,9 @@ const SolidExternalIdField = ({ fieldMetadata, onChange, index, rule }: SolidFil
     const filterMatchModeOptions = [
         { label: 'In', value: "$in" },
         { label: 'Not In', value: "$notIn" },
+        { label: 'Is null', value: "$null" },
+        { label: 'Is Not null', value: "$notNull" }
+
     ];
     const numberOfInputs = getNumberOfInputs(rule.matchMode);
 

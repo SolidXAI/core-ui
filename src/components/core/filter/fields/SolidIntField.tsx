@@ -14,7 +14,9 @@ const SolidIntField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFiel
         { label: 'Greater Than Or Equal', value: "$gte" },
         { label: 'In', value: "$in" },
         { label: 'Not In', value: "$notIn" },
-        { label: 'Between', value: "$between" }
+        { label: 'Between', value: "$between" },
+        { label: 'Is null', value: "$null" },
+        { label: 'Is Not null', value: "$notNull" }        
     ];
 
 

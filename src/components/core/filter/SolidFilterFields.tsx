@@ -54,6 +54,9 @@ export const getNumberOfInputs = (matchMode: any): number | null => {
         case '$gt':
         case '$gte':
             return 1;
+        case '$null':
+        case '$notNull':
+            return 0;    
         default:
             return 1; // Default to single input if no specific match is found
     }
