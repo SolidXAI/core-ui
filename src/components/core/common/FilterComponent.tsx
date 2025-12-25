@@ -88,20 +88,26 @@ const getRandomInt = (min, max) => {
 const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAddGroup, onDelete, level }) => {
   // const applicableOperators = rule.fieldName ? operatorOptions[fields.find(f => f.name === rule.fieldName)?.value.type].map(e => { return { name: e } }) : [];
   // const applicableInputField = rule.fieldName ? fields.find(f => f.name === rule.fieldName)?.type : "";
+
+  const autoCompleteRef = useRef(null);
+
   const [fieldName, setFieldName] = useState({ name: rule.fieldName });
   const [matchMode, setMatchMode] = useState({ name: rule.matchMode });
 
   const [filteredFields, setFilteredFields] = useState<any[]>([]);
 
-    const searchFields = (event: any) => {
-        const query = event.query.toLowerCase();
-        const filtered = !query
-            ? fields
-            : fields.filter((item: any) =>
-                item.name.toLowerCase().startsWith(query)
-            );
-        setFilteredFields(filtered);
-    };
+  const searchFields = (event: any) => {
+    const query = event.query.toLowerCase();
+    const filtered = !query
+      ? fields
+      : fields.filter((item: any) =>
+        item.name.toLowerCase().startsWith(query)
+      );
+    setFilteredFields(filtered);
+    setTimeout(() => {
+        autoCompleteRef.current?.show();
+    }, 0);
+  };
   return (
     // <div style={{ marginLeft: (level - 1) * 10 + 'px' }} className="filter-rule">
 
@@ -109,24 +115,25 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
       <div className='flex flex-column md:flex-row  align-items-start md:align-items-center gap-2 md:gap-3'>
         <div className='formgrid grid w-full'>
           <div className='col-12 md:col-4 pb-2 md:pb-0'>
-             <AutoComplete
-                            value={fieldName.name}
-                            suggestions={filteredFields}
-                            completeMethod={searchFields}
-                            field="name"
-                            dropdown
-                            forceSelection // only values from list
-                            placeholder="Select Field"
-                            className="w-full p-inputtext-sm solid-filter-auto-complete-field"
-                            onChange={(e) => {
-                                setFieldName({name:e.value}); // e.value will be an object or null
-                                if (e.value) {
-                                    onChange(rule.id, 'fieldName', e.value.value); // send value to parent
-                                } else {
-                                    onChange(rule.id, 'fieldName', '');
-                                }
-                            }}
-                        />
+            <AutoComplete
+              ref={autoCompleteRef}
+              value={fieldName.name}
+              suggestions={filteredFields}
+              completeMethod={searchFields}
+              field="name"
+              dropdown
+              forceSelection // only values from list
+              placeholder="Select Field"
+              className="w-full p-inputtext-sm solid-filter-auto-complete-field"
+              onChange={(e) => {
+                setFieldName({ name: e.value }); // e.value will be an object or null
+                if (e.value) {
+                  onChange(rule.id, 'fieldName', e.value.value); // send value to parent
+                } else {
+                  onChange(rule.id, 'fieldName', '');
+                }
+              }}
+            />
           </div>
           <div className='col-12 md:col-8'>
             <div className='formgrid grid w-full'>
