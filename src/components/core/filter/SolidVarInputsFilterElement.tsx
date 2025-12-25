@@ -7,6 +7,7 @@ import { SolidSelectionDynamicFilterElement } from "./SolidSelectionDynamicFilte
 import { SolidSelectionStaticFilterElement } from "./SolidSelectionStaticFilterElement";
 import { Button } from "primereact/button";
 import { SolidManyToManyFilterElement } from "./fields/SolidManyToManyFilterElement";
+import { SolidBooleanFilterElement } from "./SolidBooleanFilterElement";
 
 export enum InputTypes {
     Date = 'Date',
@@ -17,7 +18,8 @@ export enum InputTypes {
     SelectionStatic = 'SelectionStatic',
     RelationManyToOne = 'RelationManyToOne',
     RelationManyToMany = 'RelationManyToMany',
-    SelectionDynamic = 'SelectionDynamic'
+    SelectionDynamic = 'SelectionDynamic',
+    Boolean = 'Boolean',
 }
 
 
@@ -126,7 +128,7 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                             inputClassName="w-full p-inputtext-sm"
                         />
                     }
-                    {inputType === InputTypes.RelationManyToOne && 
+                    {inputType === InputTypes.RelationManyToOne &&
                         <SolidManyToOneFilterElement
                             value={value}
                             index={index}
@@ -134,7 +136,7 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                             fieldMetadata={fieldMetadata}
                         ></SolidManyToOneFilterElement>
                     }
-                    {inputType === InputTypes.RelationManyToMany && 
+                    {inputType === InputTypes.RelationManyToMany &&
                         <SolidManyToManyFilterElement
                             value={value}
                             index={index}
@@ -159,6 +161,17 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                             fieldMetadata={fieldMetadata}
                         ></SolidSelectionStaticFilterElement>
                     }
+                    {inputType === InputTypes.Boolean &&
+
+                        <SolidBooleanFilterElement
+                            value={value}
+                            index={index}
+                            updateInputs={updateInputs}
+                            fieldMetadata={fieldMetadata}
+                        ></SolidBooleanFilterElement>
+                    }
+
+
                     {numberOfInputs === null &&
                         <>
                             {/* Plus Button to add a new row */}

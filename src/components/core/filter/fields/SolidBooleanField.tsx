@@ -1,6 +1,7 @@
 "use client";
 import { Dropdown } from 'primereact/dropdown';
-import { SolidFilterFieldsParams } from '../SolidFilterFields';
+import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
+import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
 
 const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
     // const filterable = column.attrs.filterable;
@@ -18,6 +19,7 @@ const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilter
 
     // const header = column.attrs.label ?? fieldMetadata.displayName;
 
+    const numberOfInputs = getNumberOfInputs(rule.matchMode);
 
     return (
         <div className='flex flex-column md:flex-row align-items-start gap-2 md:gap-0'>
@@ -36,7 +38,7 @@ const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilter
             </div>
 
             <div className='flex flex-column gap-2 col-12 md:col-6 px-0 md:pl-2 md:pr-0'>
-                <Dropdown
+                {/* <Dropdown
                     value={rule.value}
                     options={booleanOptions}
                     onChange={(e: any) => {
@@ -44,7 +46,17 @@ const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilter
                     }}
                     placeholder="Select"
                     className="p-column-filter"
-                />
+                /> */}
+                <SolidVarInputsFilterElement
+                    values={rule.value}
+                    onChange={(e: any) => {
+                        onChange(rule.id, 'value', e)
+                    }}
+                    numberOfInputs={numberOfInputs}
+                    inputType={InputTypes.Boolean}
+                    fieldMetadata={fieldMetadata}
+                >
+                </SolidVarInputsFilterElement>
             </div>
         </div>
     );
