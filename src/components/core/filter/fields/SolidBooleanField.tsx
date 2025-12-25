@@ -14,6 +14,9 @@ const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilter
     ];
     const filterMatchModeOptions = [
         { label: 'Equals', value: "$eq" },
+        { label: 'Is null', value: "$null" },
+        { label: 'Is Not null', value: "$notNull" }
+
     ];
 
 

@@ -15,7 +15,10 @@ const SolidShortTextField = ({ fieldMetadata, onChange, index, rule }: SolidFilt
         { label: 'Equals', value: "$eqi" },
         { label: 'Not Equals', value: "$nei" },
         { label: 'In', value: "$in" },
-        { label: 'Not In', value: "$notIn" }
+        { label: 'Not In', value: "$notIn" },
+        { label: 'Is null', value: "$null" },
+        { label: 'Is Not null', value: "$notNull" }
+
     ];
 
     // const header = column.attrs.label ?? fieldMetadata.displayName;
