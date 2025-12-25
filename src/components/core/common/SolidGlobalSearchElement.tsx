@@ -102,7 +102,7 @@ const transformRulesToFilters = (input: any, viewData: any) => {
 
     // Helper function to process individual rules
     const processRule = (rule: any) => {
-        if (rule.value && rule.value.length > 0) {
+        if (rule.value !== null && rule.value !== undefined) {
 
             // Ensure rule.value is always an array
             let values = typeof rule.value[0] === "object" ? rule.value.map((i: any) => i?.value ? i?.value : i) : rule?.value;
