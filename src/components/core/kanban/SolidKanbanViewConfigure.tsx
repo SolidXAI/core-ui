@@ -55,27 +55,13 @@ export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllow
     }, [isOverlayOpen])
 
 
-    const dispatch = useDispatch();
-
-    // const visibleNavbar = useSelector((state: any) => state.navbar?.visibleNavbar);
-    const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
 
 
 
-    const toggleBothSidebars = () => {
-        if (visibleNavbar) {
-            dispatch(toggleNavbar());   // close both
-        } else {
-            dispatch(showNavbar());     // open both
-        }
-    };
 
 
     return (
         <div className="position-relative">
-            <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
-                <i className="pi pi-th-large"></i>
-            </div>
             <Button
                 type="button"
                 size="small"

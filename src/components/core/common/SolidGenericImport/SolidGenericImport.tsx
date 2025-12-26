@@ -29,7 +29,7 @@ export const SolidGenericImport = ({
             className='solid-import-dialog'
         >
             <SolidImportStepper importStep={importStep} setImportStep={setImportStep} />
-            <div className='px-4 py-3'>
+            <div className='px-3 md:px-4 py-3'>
                 {importStep === 1 &&
                     <SolidImportInstructions setImportStep={setImportStep} listViewMetaData={listViewMetaData} />
                 }

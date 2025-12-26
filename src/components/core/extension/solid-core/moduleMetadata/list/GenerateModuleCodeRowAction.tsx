@@ -66,10 +66,16 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
     // };
 
     const generateCodeHandler = async () => {
-        const response = await generateCode({ id: event?.rowData?.id });
-        console.log(ERROR_MESSAGES.RESPONSE_GENERATE_CODE_HANDLER, response);
-        setIsGenerating(true);
-        // showToast("error", "Login Error", response.error);
+        try {
+            const response = await generateCode({ id: event?.rowData?.id });
+            console.log(ERROR_MESSAGES.RESPONSE_GENERATE_CODE_HANDLER, response);
+            setIsGenerating(true);
+        } catch (error) {
+            setIsGenerating(false);
+            dispatch(closePopup());
+            console.log("error",error);
+            showToast("error", "Something went wrong.", ERROR_MESSAGES.API_ERROR);
+        }
     }
 
     // TODO: START REFACTORING - reusable code alert
@@ -106,8 +112,8 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
             summary,
             detail,
             ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+                ? { sticky: true }            // stays until user closes
+                : { life: 3000 }),
         });
     };
 

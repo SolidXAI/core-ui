@@ -158,7 +158,7 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
 
                         <div className="col-6 p-0 flex lg:hidden">
                             <div className="p-3 lg:p-4">
-                                <p className="font-medium">Select Icon</p>
+                                <p className="font-medium">Selected Icon</p>
                                 {selectedIcon && (
                                     <>
                                         <div className="flex justify-content-center">
@@ -233,7 +233,7 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
 
                         <div className="col-3 p-0 hidden lg:flex">
                             <div className="p-3 lg:p-4">
-                                <p className="font-medium">Select Icon</p>
+                                <p className="font-medium">Selected Icon</p>
                                 {selectedIcon && (
                                     <>
                                         <div className="flex justify-content-center">

@@ -27,7 +27,7 @@ export class SolidShortTextField implements ISolidField {
             if (value?.solidManyToOneValue) {
                 formData.append(fieldLayoutInfo?.attrs?.name, value.solidManyToOneValue);
             }
-        }else{            
+        } else {
             if (value !== undefined && value !== null) {
                 formData.append(fieldLayoutInfo?.attrs?.name, value);
             }
@@ -37,13 +37,28 @@ export class SolidShortTextField implements ISolidField {
     initialValue(): any {
         const fieldName = this.fieldContext.field.attrs.name;
         const fieldDefaultValue = this.fieldContext?.fieldMetadata?.defaultValue;
+        const fieldLayoutInfo = this.fieldContext.field;
+
+        const editWidget = fieldLayoutInfo?.attrs?.editWidget;
+
         if (this.fieldContext.parentData && this.fieldContext.parentData[fieldName]) {
             const parentDataForKey = this.fieldContext.parentData[fieldName];
-            if (parentDataForKey && typeof parentDataForKey !== 'object') {
-                return this.fieldContext.parentData[fieldName]
+            if (editWidget === "PseudoRelationManyToOneFormWidget") {
+                if (parentDataForKey) {
+                    return { solidManyToOneLabel: this.fieldContext.parentData[fieldName], solidManyToOneValue: this.fieldContext.parentData[fieldName] };
+                }
+            } else {
+                if (parentDataForKey && typeof parentDataForKey !== 'object') {
+                    return this.fieldContext.parentData[fieldName]
+                }
             }
         }
-        const existingValue = this.fieldContext.data[fieldName];
+        let existingValue = this.fieldContext.data[fieldName];
+
+        if (editWidget === "PseudoRelationManyToOneFormWidget" && this.fieldContext.data[fieldName]) {
+            existingValue =  { solidManyToOneLabel: this.fieldContext.data[fieldName], solidManyToOneValue: this.fieldContext.data[fieldName] };
+
+        }
 
         return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
     }

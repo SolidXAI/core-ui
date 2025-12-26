@@ -8,7 +8,7 @@ const SolidIdField = ({ fieldMetadata, onChange, index, rule }: SolidFilterField
     const columnDataType = 'text';
     const filterMatchModeOptions = [
         { label: 'In', value: "$in" },
-        { label: 'Not In', value: "$notIn" },
+        { label: 'Not In', value: "$notIn" }
     ];
     const numberOfInputs = getNumberOfInputs(rule.matchMode);
 

@@ -102,11 +102,11 @@ const transformRulesToFilters = (input: any, viewData: any) => {
 
     // Helper function to process individual rules
     const processRule = (rule: any) => {
-        if (rule.value && rule.value.length > 0) {
+        if (rule.value !== undefined && rule.value !== null) {
 
             // Ensure rule.value is always an array
             let values = typeof rule.value[0] === "object" ? rule.value.map((i: any) => i?.value ? i?.value : i) : rule?.value;
-            if (rule.matchMode !== '$in' && rule.matchMode !== '$notIn' && rule.matchMode !== '$between') {
+            if (rule.matchMode !== '$in' && rule.matchMode !== '$notIn' && rule.matchMode !== '$between' && rule.matchMode !== '$null' && rule.matchMode !== '$notNull') {
                 values = values[0];
             }
 
@@ -471,6 +471,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     const [predefinedSearchBaseFilter, setPredefinedSearchBaseFilter] = useState<any>(null);
 
     const [savedFilters, setSavedFilters] = useState([]);
+    const [savedFiltersLoaded, setSavedFiltersLoaded] = useState(false);
 
     const entityApi = createSolidEntityApi("savedFilters");
     const {
@@ -496,48 +497,53 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         { isSuccess: isEntityDeleteSuceess, isError: isEntityDeleteError, error: entityDeleteError },
     ] = useDeleteSolidEntityMutation();
 
-    const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading, error }] = useLazyGetSolidEntitiesQuery();
+    const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading: isSavedFilterLoading, error }] = useLazyGetSolidEntitiesQuery();
+
+    console.log("isSavedFilterLoading", isSavedFilterLoading);
 
 
     useEffect(() => {
-        const filters = {
-            $or: [
-                {
-                    $and: [
-                        { model: { $in: [viewData?.data?.solidView?.model?.id] } },
-                        { view: { $in: [viewData?.solidView?.id] } },
-                        { user: { $in: [user?.user?.id] } },
-                        { isPrivate: { $eq: true } }
-                    ]
-                },
-                {
-                    $and: [
-                        { model: { $in: [viewData?.data?.solidView?.model?.id] } },
-                        { view: { $in: [viewData?.solidView?.id] } },
-                        { isPrivate: { $eq: false } }
-                    ]
-                }
+        const fn = async () => {
 
-            ]
+            const filters = {
+                $or: [
+                    {
+                        $and: [
+                            { model: { $in: [viewData?.data?.solidView?.model?.id] } },
+                            { view: { $in: [viewData?.solidView?.id] } },
+                            { user: { $in: [user?.user?.id] } },
+                            { isPrivate: { $eq: true } }
+                        ]
+                    },
+                    {
+                        $and: [
+                            { model: { $in: [viewData?.data?.solidView?.model?.id] } },
+                            { view: { $in: [viewData?.solidView?.id] } },
+                            { isPrivate: { $eq: false } }
+                        ]
+                    }
+
+                ]
+            }
+            const queryData: any = {
+                offset: 0,
+                limit: 10,
+                filters: filters,
+                populate: ["model", "view", "user"],
+                sort: ["id:desc"],
+            };
+            const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
+            setSavedFilterQueryString(queryString)
+            const savedFilter = await triggerGetSolidEntities(queryString);
+            console.log("savedFilter", savedFilter);
+
+            if (savedFilter) {
+                setSavedFilters(savedFilter?.data?.records)
+                setSavedFiltersLoaded(true);
+            }
         }
-        const queryData: any = {
-            offset: 0,
-            limit: 10,
-            filters: filters,
-            populate: ["model", "view", "user"],
-            sort: ["id:desc"],
-        };
-        const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
-        setSavedFilterQueryString(queryString)
-        triggerGetSolidEntities(queryString);
-
+        fn()
     }, [searchParams])
-
-    useEffect(() => {
-        if (solidEntityListViewData) {
-            setSavedFilters(solidEntityListViewData.records)
-        }
-    }, [solidEntityListViewData])
 
     useImperativeHandle(ref, () => ({
         clearFilter: () => {
@@ -549,68 +555,60 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         let searchChips: any;
         let customChips: any;
         let parsedSearchParams = searchParams;
-        let doRefresh = false;
-        const queryObject = queryStringToQueryObject();
+        if (savedFiltersLoaded) {
 
-        // const savedQuery = parsedSearchParams?.get("savedQuery");
-        if (activeSavedFilter) {
-            const currentSavedFilterId = Number(activeSavedFilter);
-            const currentSavedFilterData: any = savedFilters.find((savedFilter: any) => savedFilter.id === currentSavedFilterId);
-            setCurrentSavedFilterData(currentSavedFilterData);
-            if (currentSavedFilterData) {
-                const filterJson = JSON.parse(currentSavedFilterData?.filterQueryJson);
-                if (filterJson) {
-                    let finalSavedFilter = filterJson
-                    setCurrentSavedFilterQuery(finalSavedFilter)
+            if (activeSavedFilter && savedFilters.length === 0) return;
+
+            const queryObject = queryStringToQueryObject();
+
+            // const savedQuery = parsedSearchParams?.get("savedQuery");
+            if (activeSavedFilter) {
+                const currentSavedFilterId = Number(activeSavedFilter);
+                const currentSavedFilterData: any = savedFilters.find((savedFilter: any) => savedFilter.id === currentSavedFilterId);
+                setCurrentSavedFilterData(currentSavedFilterData);
+                if (currentSavedFilterData) {
+                    const filterJson = JSON.parse(currentSavedFilterData?.filterQueryJson);
+                    if (filterJson) {
+                        let finalSavedFilter = filterJson
+                        setCurrentSavedFilterQuery(finalSavedFilter)
+                    }
+                }
+            } else {
+                setCurrentSavedFilterData(null)
+                setCurrentSavedFilterQuery(null)
+            }
+            if (queryObject) {
+                if (queryObject) {
+                    searchChips = queryObject?.search_predicate || null;
+                    customChips = queryObject?.custom_filter_predicate || null;
                 }
             }
-            setHasSearched(true)
-            doRefresh = true
-            // setRefreshKey((prev) => prev + 1)
-        } else if (queryObject) {
-            if (queryObject) {
-                searchChips = queryObject?.search_predicate || null;
-                customChips = queryObject?.custom_filter_predicate || null;
+            if (searchChips) {
+                const formattedChips = searchChips?.$and.map((chip: any, key: any) => {
+                    const chipKey = Object.keys(chip)[0]; // Get the key, e.g., "displayName"
+                    const chipValue = chip[chipKey]?.$containsi; // Get the value of "$containsi"
+                    const chipdata = {
+                        columnName: chipKey,
+                        value: chipValue
+                    };
+                    return chipdata
+                }
+                );
+                setSearchChips(formattedChips);
+                setSearchFilter(searchChips);
+
             }
-            doRefresh = true
-        } else if (!activeSavedFilter) {
-            setCurrentSavedFilterData(null)
-            setHasSearched(true)
-            // setRefreshKey((prev) => prev + 1)
-            doRefresh = true
-        }
 
-        if (searchChips) {
-            const formattedChips = searchChips?.$and.map((chip: any, key: any) => {
-                const chipKey = Object.keys(chip)[0]; // Get the key, e.g., "displayName"
-                const chipValue = chip[chipKey]?.$containsi; // Get the value of "$containsi"
-                const chipdata = {
-                    columnName: chipKey,
-                    value: chipValue
-                };
-                return chipdata
+            if (customChips) {
+                setCustomFilter(customChips);
+                const formatedCustomChips: FilterRule = transformFiltersToRules(customChips);
+                // setFilterRules([formatedCustomChips]);
             }
-            );
-            setSearchChips(formattedChips);
-            setSearchFilter(searchChips);
-            setHasSearched(true)
-            // setRefreshKey((prev) => prev + 1)
-            doRefresh = true
 
-        }
-
-        if (customChips) {
-            setCustomFilter(customChips);
-            const formatedCustomChips: FilterRule = transformFiltersToRules(customChips);
-            // setFilterRules([formatedCustomChips]);
             setHasSearched(true);
-            doRefresh = true
-        }
-
-        if (doRefresh === true) {
             setRefreshKey((prev) => prev + 1)
         }
-    }, [activeSavedFilter, savedFilters])
+    }, [activeSavedFilter, savedFilters,savedFiltersLoaded])
 
     useEffect(() => {
         if (viewData?.data?.solidFieldsMetadata) {
@@ -759,8 +757,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     }
 
     useEffect(() => {
-        if (hasSearched === true) {
-            // console.log("searchChips", searchChips);
+        if (refreshKey > 0) {
+            console.log("refres", refreshKey);
+            console.log("hasSearched", hasSearched);
 
             const formattedChips = {
                 $and: searchChips.map((chip: any) => ({
@@ -776,11 +775,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             setSearchFilter(finalSearchFilter);
 
             let finalSavedFilter: any = currentSavedFilterQuery
-            // custom_filter_predicate
-            // search_predicate
-            // saved_filter_predicate
-            // predefined_search_predicate
-
             const finalPredefinedFilter = predefinedSearchBaseFilter
 
             const finalCustomFilter = customFilter
@@ -791,12 +785,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             console.log("finalSearchFilter", finalSearchFilter);
 
             const finalFilter = mergeAllDiffFilters(finalCustomFilter, finalSearchFilter, finalSavedFilter, finalPredefinedFilter)
-            console.log("finalFilter", finalFilter);
-
             handleApplyCustomFilter(finalFilter);
             // }
         }
-    }, [hasSearched, refreshKey]);
+    }, [refreshKey]);
 
 
     // Handle predefined search selection
