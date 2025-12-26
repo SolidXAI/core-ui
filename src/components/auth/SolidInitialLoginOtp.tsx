@@ -20,9 +20,11 @@ import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 const SolidInitialLoginOtp = () => {
     const searchParams = useSearchParams();
-    const tempEmail = searchParams.get('email');
-    const email = tempEmail ? decodeURIComponent(tempEmail) : '';
-    const RESEND_OTP_KEY = `resendOtpLogin_${email}`;
+    const tempIdentifier = searchParams.get('identifier');
+    const type = searchParams.get('type') || 'email';
+    const identifier = tempIdentifier ? decodeURIComponent(tempIdentifier) : '';
+    
+    const RESEND_OTP_KEY = `resendOtpLogin_${identifier}`;
     const RESEND_OTP_TIMER_MIN = parseFloat(process.env.NEXT_PUBLIC_RESEND_OTP_TIMER || '0.5');
     const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
@@ -32,6 +34,30 @@ const SolidInitialLoginOtp = () => {
     const router = useRouter();
     const [timeLeft, setTimeLeft] = useState(RESEND_OTP_TIMER);
     const [resendEnabled, setResendEnabled] = useState(false);
+
+    const getDisplayText = () => {
+        switch (type) {
+            case "mobile":
+                return {
+                    title: "OTP Verification",
+                    subtitle: "Please enter the OTP sent to your mobile number to complete verification"
+                };
+            case "transactional":
+                return {
+                    title: "OTP Verification",
+                    subtitle: "Please enter the OTP for your transaction to complete verification"
+                };
+            case "email":
+            default:
+                return {
+                    title: "OTP Verification",
+                    subtitle: "Please enter the OTP sent to your email to complete verification"
+                };
+        }
+    };
+
+    const displayText = getDisplayText();
+
     useEffect(() => {
         trigger("");
     
@@ -52,7 +78,7 @@ const SolidInitialLoginOtp = () => {
             setTimeLeft(0);
             setResendEnabled(true);
         }
-    }, [trigger, email]);    
+    }, [trigger, identifier]);    
 
     useEffect(() => {
         if (resendEnabled || timeLeft <= 0) return;
@@ -95,8 +121,8 @@ const SolidInitialLoginOtp = () => {
     const handleResendOtp = async () => {
         try {
             const payload = {
-                type: "email",
-                identifier: email,
+                type: type,
+                identifier: identifier,
             };
 
             const response = await initiateResendOTP(payload).unwrap();
@@ -142,25 +168,43 @@ const SolidInitialLoginOtp = () => {
                         validationSchema={validationSchema}
                         onSubmit={async (values, { setSubmitting, setErrors }) => {
                             try {
-                                const payload = {
-                                    type: "email",
-                                    identifier: email,
+                               const payload = {
+                                    type: type,
+                                    identifier: identifier,
                                     otp: values.otp
                                 };
 
                                 const response = await initiateOtpLogin(payload).unwrap(); // Call mutation trigger
 
                                 if (response?.statusCode === 200) {
-                                    const otpResponse = await signIn("credentials", {
+                                    const credentials: any = {
                                         redirect: false,
                                         accessToken: response?.data?.accessToken,
-                                        email: response?.data?.user?.email,
-                                    });
+                                    };
 
+                                     // Pass both email and mobile if available
+                                     if (response?.data?.user?.email) {
+                                        credentials.email = response?.data?.user?.email;
+                                    }
+                                    if (response?.data?.user?.mobile) {
+                                        credentials.mobile = response?.data?.user?.mobile;
+                                    }
+
+                                    // Fallback: if neither exists in response, use the identifier based on type
+                                    if (!credentials.email && !credentials.mobile) {
+                                        if (type === "mobile") {
+                                            credentials.mobile = identifier;
+                                        } else if (type === "email") {
+                                            credentials.email = identifier;
+                                        }
+                                    }
+
+                                    const otpResponse = await signIn("credentials", credentials);
+                                    
                                     if (otpResponse?.error) {
                                         showToast("error", ERROR_MESSAGES.LOGIN_ERROR, otpResponse.error);
                                     } else {
-                                        localStorage.removeItem(`resendOtpLogin_${email}`);
+                                        localStorage.removeItem(`resendOtpLogin_${identifier}`);
                                         showToast("success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
                                         router.push(`${process.env.NEXT_PUBLIC_LOGIN_REDIRECT_URL}`);
                                     }

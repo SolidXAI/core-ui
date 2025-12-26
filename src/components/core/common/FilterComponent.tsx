@@ -117,7 +117,8 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
                             dropdown
                             forceSelection // only values from list
                             placeholder="Select Field"
-                            className="w-full p-inputtext-sm solid-filter-auto-complete-field"
+                            className="w-full solid-standard-autocomplete"
+                            inputClassName="p-button-sm py-2"
                             onChange={(e) => {
                                 setFieldName({name:e.value}); // e.value will be an object or null
                                 if (e.value) {
