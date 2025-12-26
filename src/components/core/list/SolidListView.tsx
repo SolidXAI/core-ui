@@ -1004,27 +1004,44 @@ export const SolidListView = (params: SolidListViewParams) => {
   };
 
   useEffect(() => {
-    console.log("useEffect: [recoverIsError, recoverByIdIsError]");
-    if (recoverIsError || recoverByIdIsError) {
-      showError(recoverByIdIsError ? recoverByIdError : recoverError);
+    if (recoverByIdIsSuccess && recoverByIdData) {
+      toast.current?.show({
+        severity: "success",
+        summary: "Success",
+        detail: recoverByIdData.data.message,
+        life: 3000,
+      });
+      return;
     }
-  }, [recoverIsError, recoverByIdIsError]);
+    if (recoverByIdIsError && recoverByIdError) {
+      showError(recoverByIdError);
+      return;
+    }
+  
+    if (recoverIsError && recoverError) {
+      showError(recoverError);
+    }
+  }, [  recoverByIdIsSuccess, recoverByIdData, recoverByIdIsError, recoverByIdError, recoverIsError, recoverError]);
 
   const showError = async (error) => {
     const errorMessages = error?.data?.message;
-    if (errorMessages.length > 0) {
+    const messages = Array.isArray(errorMessages) 
+    ? errorMessages 
+    : errorMessages 
+      ? [errorMessages] 
+      : [];
+    if (messages.length > 0) {
       toast?.current?.show({
         severity: "error",
         summary: ERROR_MESSAGES.SEND_REPORT,
-        // sticky: true,
-        life: 3000,
+        sticky: true,
         //@ts-ignore
         content: (props) => (
           <div
             className="flex flex-column align-items-left"
             style={{ flex: "1" }}
           >
-            {errorMessages.map((m, index) => (
+            {messages.map((m, index) => (
               <div className="flex align-items-center gap-2" key={index}>
                 <span className="font-bold text-900">{String(m)}</span>
               </div>
@@ -1068,9 +1085,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       severity: 'success',
       summary: 'Deleted',
       detail: ERROR_MESSAGES.RECORD_DELETE,
-      ...(severity === "error"
-        ? { sticky: true }            // stays until user closes
-        : { life: 3000 }),
+      life: 3000
     });
     setDialogVisible(false);
   };
