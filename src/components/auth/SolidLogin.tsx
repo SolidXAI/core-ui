@@ -190,9 +190,9 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         label: signInValidatorLabel || "Username or Email",
                         placeholder: signInValidatorPlaceholder || "Email ID",
                         type: "email",
-                        validationSchema: Yup.string()
-                            .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
-                            .required(ERROR_MESSAGES.FIELD_REUQIRED('Email'))
+                        // validationSchema: Yup.string()
+                        //     .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
+                        //     .required(ERROR_MESSAGES.FIELD_REUQIRED('Email'))
                     };
             }
         };
