@@ -203,9 +203,13 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                 initialValues={{
                     identifier: "",
                 }}
-                validationSchema={Yup.object({
-                    identifier: fieldConfig.validationSchema
-                })}
+                validationSchema={
+                    validationType === "email"
+                      ? Yup.object({
+                          identifier: Yup.string().required("required"),
+                        })
+                      : undefined
+                  }
                 enableReinitialize={false}
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
                     try {
