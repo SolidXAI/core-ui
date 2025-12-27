@@ -1458,11 +1458,11 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                         }
                         }
                       />
-                      <div className="form-wrapper-title solid-text-wrapper text-base">{capitalize(modelMetaData?.displayName)}</div>
+                      <div className="form-wrapper-title solid-mobile-text-wrapper text-base">{capitalize(modelMetaData?.displayName)}</div>
                     </>
                     :
                     <div className="flex text-2xl font-bold align-items-center ml-4" style={{ color: '#000' }}>
-                      <div className="form-wrapper-title solid-text-wrapper text-base">Model - {capitalize(modelMetaData?.displayName)}</div>
+                      <div className="form-wrapper-title solid-mobile-text-wrapper text-base">Model - {capitalize(modelMetaData?.displayName)}</div>
                     </div>
                   }
                 </div>
@@ -1493,9 +1493,9 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                   }
                   {fieldMetaData ?
 
-                    <div className="form-wrapper-title solid-text-wrapper text-base">Edit {capitalize(fieldMetaData?.displayName)}</div>
+                    <div className="form-wrapper-title solid-mobile-text-wrapper text-base">Edit {capitalize(fieldMetaData?.displayName)}</div>
                     :
-                    <div className="form-wrapper-title solid-text-wrapper  text-base">Add New {selectedType?.label && !showTypeFilter && capitalize(selectedType.label)} Field to {capitalize(modelMetaData?.displayName)}</div>
+                    <div className="form-wrapper-title solid-mobile-text-wrapper text-base">Add New {selectedType?.label && !showTypeFilter && capitalize(selectedType.label)} Field to {capitalize(modelMetaData?.displayName)}</div>
                   }
                 </div>
                 <div className="flex align-items-center gap-3 close-popup">
@@ -1967,7 +1967,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                           )}
 
                           {currentFields.includes("mediaEmbedded") && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="mediaEmbedded"
                                 className="form-field-label"
@@ -2243,7 +2243,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             </div>
                           )}
                           {askForUserKeyField && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="userKey"
                                 className="form-field-label"
@@ -2415,7 +2415,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
 
 
                           {currentFields.includes("relationJoinTableName") && formik.values.relationType === "many-to-many" && (
-                            <div className="field col-6 flex-flex-column gap-2 mt-3">
+                            <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
                               <label
                                 htmlFor="relationJoinTableName"
                                 className="form-field-label"
@@ -2884,6 +2884,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                     placeholder="Select a Password Policy"
                                     // className="w-full md:w-14rem"
                                     className=""
+                                    panelClassName="password-policy-dropdown-panel"
                                     checkmark={true} highlightOnSelect={false} />
 
                                 </div>
@@ -2953,7 +2954,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                             {(currentFields.includes("min") || currentFields.includes("max")) &&
                               <>
                                 {currentFields.includes("min") && (
-                                  <div className="field col-6 flex-flex-column gap-2 mt-2 md:mt-3">
+                                  <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-2 md:mt-3">
                                     <label htmlFor="min" className="form-field-label">
                                       Min {(selectedType.value !== "int" && selectedType.value !== "decimal") && `(Characters Allowed)`}
 
@@ -3001,7 +3002,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   </div>
                                 )}
                                 {currentFields.includes("max") && (
-                                  <div className="field col-6 flex-flex-column gap-2 mt-2  md:mt-3">
+                                  <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
                                     <label htmlFor="max" className="form-field-label">
                                       Max {(selectedType.value !== "int" &&
                                         selectedType.value !== "decimal") && `(Characters allowed)`}
@@ -3050,9 +3051,9 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               </>
                             }
                             {currentFields.includes("ormType") && (
-                              <div className="md:col-12 sm:col-12">
+                              <div className="col-12">
                                 {ormTypeOptions && ormTypeOptions.length > 1 &&
-                                  <div className="field col-6 flex-flex-column gap-2 mt-3">
+                                  <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
                                     <label htmlFor="ormType" className="form-field-label">
                                       Type
                                     </label>

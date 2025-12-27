@@ -2,7 +2,7 @@
 'use client';
 import React, { useRef } from "react";
 import { SolidKanbanViewFields } from "./SolidKanbanViewFields";
-import { useRouter } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Draggable, DraggableProvided } from "@hello-pangea/dnd";
@@ -47,7 +47,8 @@ const renderFieldsDynamically = (field: any, data: any, solidKanbanViewMetaData:
 
 const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, setLightboxUrls, setOpenLightbox, editButtonUrl, groupedView }) => {
   const router = useRouter()
-
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const SolidRow = ({ children, attrs }: any) => {
     const className = attrs.className;
     return (
@@ -251,7 +252,9 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
             className={`${!groupedView ? 'solid-media-card' : 'solid-kanban-card'}`}
             onClick={() => {
               if (typeof window !== "undefined") {
-                sessionStorage.setItem("fromView", "kanban");
+                const queryString = searchParams.toString();
+                const finalUrl = queryString ? `${pathname}?${queryString}` : pathname;
+                sessionStorage.setItem("fromView", finalUrl);
               }
               router.push(`${editButtonUrl}/${data?.id}`)
             }}

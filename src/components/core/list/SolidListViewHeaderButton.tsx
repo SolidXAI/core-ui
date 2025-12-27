@@ -16,7 +16,7 @@ export const SolidListViewHeaderButton = ({ button, params, solidListViewMetaDat
             label={button.attrs.label}
             size="small"
             iconPos="left"
-            icon={button?.attrs?.icon ? button?.attrs?.icon : "pi pi-pencil"}
+            icon={button?.attrs?.icon ?? button?.attrs?.icon}
             onClick={() => {
                 const event = {
                     params,

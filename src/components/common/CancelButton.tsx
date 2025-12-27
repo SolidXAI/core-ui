@@ -29,27 +29,22 @@ export const SolidCancelButton = () => {
 
     const handleGoBack = () => {
         let fromView: string | null = null;
-        if (typeof window !== "undefined") {
-            fromView = sessionStorage.getItem("fromView");
+        fromView = sessionStorage.getItem("fromView");
+        if (fromView) {
+            router.push(fromView);
+        } else {
+            // fallback if path is not matched
+            router.back();
         }
-
-        // Default to 'list' if not available
-        const view = fromView === "kanban" ? "kanban" : "list";
-
-        // Navigate back to the previous path with the appropriate view type
-        const newPath = pathname.replace(/\/form\/[^/]+$/, `/${view}`);
-        router.push(newPath);
     };
     return (
         <>
-        <div className="hidden lg:flex">
-            <div>
-            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse' style={{ minWidth: 66 }}/>
-            </div>
-        </div>
-        <div className="flex lg:hidden">
-            <Button size="small" type="button" icon="pi pi-times" onClick={handleGoBack} className='bg-primary-reverse solid-icon-button '/>
-        </div>
+        {/* <div className="hidden lg:flex"> */}
+            {/* <div> */}
+            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse hidden lg:flex' style={{ minWidth: 66 }}/>
+            {/* </div> */}
+        {/* </div> */}
+            <Button size="small" type="button" icon="pi pi-times" onClick={handleGoBack} className='bg-primary-reverse solid-icon-button flex lg:hidden'/>
         </>
     )
 }

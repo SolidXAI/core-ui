@@ -1,10 +1,11 @@
 "use client";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { useResolveS3UrlMutation } from "@/redux/api/fieldApi";
-import PDFViewer from "@/components/core/common/PDFViewer";
+import Viewer from "viewerjs";
+import "viewerjs/dist/viewer.css";
 
 /**
  * SolidS3FileViewerWidget (PrimeReact version)
@@ -18,27 +19,25 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
     const downloadAllowed = fieldLayoutInfo.attrs.downloadAllowed !== false;
     const bucketName = fieldLayoutInfo.attrs.bucketName;
     const isPrivate = fieldLayoutInfo.attrs.isPrivate ? fieldLayoutInfo.attrs.isPrivate : "false";
-    const modelName = fieldLayoutInfo.attrs.modelName;
-    const fieldName = fieldLayoutInfo.attrs.fieldName;
-    const s3KeyFieldName = fieldLayoutInfo.attrs.s3KeyFieldName;
 
-    const [previewUrl, setPreviewUrl] = useState<string | null>(null);
+    const imageRef = useRef<HTMLImageElement | null>(null);
+    const viewerRef = useRef<Viewer | null>(null);
+
+    const [previewUrl, setPreviewUrl] = useState<string>("");
     const [isLoading, setIsLoading] = useState(false);
     const [open, setOpen] = useState(false);
+    const [shouldShowViewer, setShouldShowViewer] = useState(false);
 
     const [resolveS3Url] = useResolveS3UrlMutation();
 
     const fetchS3Url = async () => {
-
-        console.log("fetcch url called");
+        console.log("fetch url called");
         setIsLoading(true);
         try {
-
             const result = await resolveS3Url({
-                modelName: modelName,
-                fieldName: fieldName,
-                fieldValue: value,
-                s3KeyFieldName: s3KeyFieldName,
+                modelName: fieldContext.modelName,
+                fieldName: fieldContext.fieldMetadata.name,
+                s3Key: value,
                 fileType: fileType,
                 bucketName: bucketName,
                 isPrivate: isPrivate
@@ -46,7 +45,7 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
 
             setIsLoading(false);
             if (result.statusCode == "200") {
-                console.log("fetcch url success", result.data.url);
+                console.log("fetch url success", result.data.url);
                 return result.data.url;
             }
         } catch (e) {
@@ -63,25 +62,82 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
         const a = document.createElement("a");
         a.href = url;
         a.download = value?.split("/").pop() || "file";
-        a.target = "_blank";       // <-- open in new tab
-        a.rel = "noopener noreferrer"; // <-- security best practice
+        a.target = "_blank";
+        a.rel = "noopener noreferrer";
         a.click();
     };
 
     const handleView = async () => {
         console.log("isLoading in view", isLoading);
         if (isLoading) return;
-        console.log("isLoading in view", isLoading);
+        
         const url = await fetchS3Url();
         console.log("url after fetch success", url);
         if (!url) return;
+        
         setPreviewUrl(url);
-        setOpen(true);
+        
+        if (isImage) {
+            // Trigger viewer to show after state update
+            setShouldShowViewer(true);
+        } else {
+            setOpen(true);
+        }
     };
 
     const isImage = ["jpeg", "jpg", "png", "gif", "webp"].includes(fileType);
     const isPDF = fileType === "pdf";
     const isDownloadOnly = ["xlsx", "xls", "csv", "doc", "docx"].includes(fileType);
+
+    // 🔹 Initialize Viewer.js once image exists
+    useEffect(() => {
+        if (imageRef.current && previewUrl && isImage) {
+            // Destroy existing viewer if any
+            if (viewerRef.current) {
+                viewerRef.current.destroy();
+            }
+
+            // Create new viewer instance
+            viewerRef.current = new Viewer(imageRef.current, {
+                toolbar: {
+                    zoomIn: 1,
+                    zoomOut: 1,
+                    rotateLeft: 1,
+                    rotateRight: 1,
+                    reset: 1,
+                },
+                navbar: false,
+                title: false,
+                transition: true,
+                movable: true,
+                scalable: true,
+                rotatable: true,
+                zoomable: true,
+                zIndex:9999,
+                // Add hidden event to reset state
+                hidden: () => {
+                    setShouldShowViewer(false);
+                }
+            });
+
+            console.log("Viewer initialized");
+        }
+
+        return () => {
+            if (viewerRef.current) {
+                viewerRef.current.destroy();
+                viewerRef.current = null;
+            }
+        };
+    }, [previewUrl, isImage]);
+
+    // 🔹 Show viewer when shouldShowViewer becomes true
+    useEffect(() => {
+        if (shouldShowViewer && viewerRef.current) {
+            console.log("Showing viewer");
+            viewerRef.current.show();
+        }
+    }, [shouldShowViewer]);
 
     return (
         <div className="mt-2 flex flex-col gap-2">
@@ -93,8 +149,7 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
                         <Button
                             icon="pi pi-eye"
                             type="button"
-                            className="text-left gap-1"
-                            style={{ width: "100%" }}
+                            style={{ minWidth: 66 }}
                             loading={isLoading}
                             tooltip={value}
                             disabled={isLoading}
@@ -104,21 +159,35 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
                             onClick={handleView}
                         />
                     )}
-
                     {downloadAllowed && (
                         <Button
-                            icon="pi pi-download"
+                            size="small"
                             type="button"
-                            className="text-left gap-1"
-                            loading={isLoading}
+                            icon="pi pi-download"
                             tooltip={`Download ${value?.split("/").pop()}`}
-                            disabled={isLoading}
+                            loading={isLoading}
                             onClick={handleDownload}
-                        />
+                            disabled={isLoading}
+                            className='solid-icon-button' />
                     )}
                 </div>
             ) : (
                 <p className="text-sm text-muted-foreground">No file uploaded</p>
+            )}
+
+            {/* Hidden image for Viewer.js - keep visibility hidden instead of display none */}
+            {isImage && previewUrl && (
+                <img
+                    ref={imageRef}
+                    src={previewUrl}
+                    alt={value}
+                    style={{ 
+                        position: "absolute",
+                        visibility: "hidden",
+                        width: "1px",
+                        height: "1px"
+                    }}
+                />
             )}
 
             <Dialog
@@ -130,37 +199,13 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
                 headerClassName='p-1 form-wrapper-title'
                 contentClassName='p-0'
                 contentStyle={{ borderRadius: 6 }}
-
             >
-                {previewUrl && isImage && (
-                    // container limits height and enables vertical scrolling only
-                    <div
-                        style={{
-                            maxHeight: "75vh",     // control visible area inside dialog
-                            overflowY: "auto",     // allow vertical scroll when image is taller
-                            overflowX: "hidden",   // avoid horizontal scroll
-                        }}
-                        className="flex justify-center items-start"
-                    >
-                        <img
-                            src={previewUrl}
-                            alt={value}
-                            style={{
-                                width: "100%",   // take available width of the container
-                                height: "100%",  // preserve aspect ratio (do not change height)
-                                display: "block",
-                            }}
-                        />
-                    </div>
-                )}
-
                 {previewUrl && isPDF && (
-                    // <PDFViewer url={previewUrl} />
                     <div
                         style={{
                             width: "100%",
-                            height: "75vh",      // control visible height inside dialog
-                            overflow: "hidden",  // iframe handles scrolling
+                            height: "75vh",
+                            overflow: "hidden",
                         }}
                     >
                         <iframe
@@ -170,7 +215,6 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
                     </div>
                 )}
             </Dialog>
-
         </div>
     );
 };
