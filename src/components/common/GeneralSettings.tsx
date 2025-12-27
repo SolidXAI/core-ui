@@ -748,7 +748,7 @@ export const GeneralSettings = () => {
                                     <div className='formgrid grid'>
                                         <div className='col-12 lg:col-10 xl:col-8'>
                                             <div className="formgrid grid">
-                                                <div className="col-12 md:col-6">
+                                                <div className="col-12">
                                                     <div className="formgrid grid align-items-center">
                                                         <div className="col-10 sm:col-9 lg:col-5">
                                                             <label className="form-field-label">Public Registration</label>
@@ -762,7 +762,7 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-12 md:col-6 mt-3 md:mt-0">
+                                                <div className="col-12 mt-3">
                                                     <div className="formgrid grid align-items-center">
                                                         <div className="col-10 sm:col-9 lg:col-5">
                                                             <label className="form-field-label">Password Based Authentication</label>
@@ -776,7 +776,7 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-12 md:col-6 mt-3">
+                                                <div className="col-12 mt-3">
                                                     <div className="formgrid grid align-items-center">
                                                         <div className="col-10 sm:col-9 lg:col-5">
                                                             <label className="form-field-label">Password Less Authentication</label>
@@ -790,7 +790,7 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-12 md:col-6 mt-3">
+                                                <div className="col-12 mt-3">
                                                     <div className="formgrid grid align-items-center">
                                                         <div className="col-10 sm:col-9 lg:col-5">
                                                             <label className="form-field-label">Auto Activate User on Registration </label>
@@ -804,7 +804,7 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-12 md:col-6 mt-3">
+                                                <div className="col-12 mt-3">
                                                     <div className="formgrid grid align-items-center">
                                                         <div className="col-10 sm:col-9 lg:col-5">
                                                             <label className="form-field-label">Allow Login/ Signup with Google </label>
@@ -818,7 +818,7 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-12 md:col-6 mt-3">
+                                                <div className="col-12 mt-3">
                                                     <div className="formgrid grid align-items-center">
                                                         <div className="col-10 sm:col-9 lg:col-5">
                                                             <label className="form-field-label">Force Password change on first Login </label>
@@ -832,9 +832,10 @@ export const GeneralSettings = () => {
                                                         </div>
                                                     </div>
                                                 </div>
-                                                <div className="col-12 md:col-12 mt-3">
+                                                {formik.values.passwordLessAuth === true &&
+                                                <div className="col-12 mt-3">
                                                     <div className="formgrid grid align-items-center">
-                                                        <div className="col-12 sm:col-12 lg:col-6 xl:col-6">
+                                                        <div className="col-12 sm:col-12 lg:col-5 xl:col-5">
                                                             <label className="form-field-label">Password Less Authentication Method</label>
                                                         </div>
                                                         <div className='col-12 sm:col-12 lg:col-6 xl:col-6'>
@@ -876,6 +877,7 @@ export const GeneralSettings = () => {
                                                         <p className="mt-3 text-sm font-bold">Note : In this method, you can pass the authentication method from the ui with possible values being either email or mobile. You can also pass both the values here</p>
                                                     }
                                                 </div>
+                                                }
                                             </div>
                                         </div>
                                     </div>
