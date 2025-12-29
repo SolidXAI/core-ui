@@ -1505,6 +1505,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                   // scrollHeight="90vh"
                   size={size}
                   resizableColumns
+                  columnResizeMode="expand"
                   paginator={true}
                   rows={rows}
                   rowsPerPageOptions={solidListViewLayout?.attrs?.pageSizeOptions}
