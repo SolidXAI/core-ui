@@ -97,6 +97,20 @@ export const DefaultTextListWidget = ({rowData, solidListViewMetaData, fieldMeta
 
     let displayValue = rowData[fieldMetadata.name];
 
+   if (typeof displayValue === "string" && displayValue.includes("T") && displayValue.endsWith("Z")) {
+        const d = new Date(displayValue);
+        if (!isNaN(d.getTime())) {
+            const year = d.getFullYear();
+            const month = String(d.getMonth() + 1).padStart(2, "0");
+            const day = String(d.getDate()).padStart(2, "0");
+            const hours = String(d.getHours()).padStart(2, "0");
+            const minutes = String(d.getMinutes()).padStart(2, "0");
+            const seconds = String(d.getSeconds()).padStart(2, "0");
+
+            displayValue = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.000`;
+        }
+    }
+
     if (fieldMetadata?.selectionStaticValues && displayValue) {
         const mapping: Record<string, string> = {};
 
