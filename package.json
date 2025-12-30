@@ -35,6 +35,7 @@
     "cloudinary": "^1.40.0",
     "copyfile": "^0.1.2",
     "copyfiles": "^2.4.1",
+    "dayjs": "^1.11.19",
     "gridstack": "^12.2.1",
     "handlebars": "^4.7.8",
     "html-react-parser": "^5.2.2",
