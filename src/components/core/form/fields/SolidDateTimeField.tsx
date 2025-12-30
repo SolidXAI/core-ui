@@ -9,6 +9,7 @@ import { getExtensionComponent } from "@/helpers/registry";
 import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { DateFieldViewComponent } from "../../common/DateFieldViewComponent";
 
 export class SolidDateTimeField implements ISolidField {
 
@@ -195,37 +196,35 @@ export const DefaultDateTimeFormEditWidget = ({ formik, fieldContext }: SolidFor
     );
 }
 
-export const DefaultDateTimeFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+
+export const DefaultDateTimeFormViewWidget = ({
+    formik,
+    fieldContext,
+}: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+
+    const fieldName = fieldLayoutInfo.attrs.name;
+    const fieldLabel =
+        fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
 
-    const rawValue = formik.values[fieldLayoutInfo.attrs.name];
-
-    const formatDateTime = (value: any) => {
-        if (!value) return "-";
-
-        if (value instanceof Date) {
-            return value.toLocaleString(); 
-        }
-
-        if (typeof value === "string" && value.includes("T")) {
-            const d = new Date(value);
-            if (!isNaN(d.getTime())) {
-                return d.toLocaleString(); 
-            }
-        }
-
-        return value;
-    };
+    const rawValue = formik.values[fieldName];
+    const format = fieldLayoutInfo.attrs?.format as string | undefined;
 
     return (
-        <div className="mt-2 flex-column gap-2">
+        <div className="mt-2 flex flex-column gap-2">
             {showFieldLabel !== false && (
-                <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+                <p className="m-0 form-field-label font-medium">
+                    {fieldLabel}
+                </p>
             )}
-            <p className="m-0">{formatDateTime(rawValue)}</p>
+
+            <p className="m-0">
+                {/* {displayValue ?? "-"} */}
+                <DateFieldViewComponent value={rawValue} format={format} fallback="-"></DateFieldViewComponent>
+
+            </p>
         </div>
     );
 };

@@ -11,6 +11,7 @@ import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { Tag } from "primereact/tag";
 import { StatusIcon } from "../../extension/solid-core/CustomIcon/StatusIcon";
+import { DateFieldViewComponent } from "../../common/DateFieldViewComponent";
 
 export class SolidDateField implements ISolidField {
 
@@ -205,34 +206,43 @@ export const DefaultDateFormEditWidget = ({ formik, fieldContext }: SolidFormFie
         </div>
     );
 }
-
-export const DefaultDateFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+export const DefaultDateFormViewWidget = ({ formik, fieldContext, }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+
+    const fieldName = fieldLayoutInfo.attrs.name;
+    const fieldLabel =
+        fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+
+    const rawValue = formik.values[fieldName];
+    const format = fieldLayoutInfo.attrs?.format as string | undefined;
+
+
     return (
-        <div className="mt-2 flex-column gap-2">
+        <div className="mt-2 flex flex-column gap-2">
             {showFieldLabel !== false && (
-                <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+                <p className="m-0 form-field-label font-medium">
+                    {fieldLabel}
+                </p>
             )}
-            {/* <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name]}</p> */}
+
             <p className="m-0">
-                {formik.values[fieldLayoutInfo.attrs.name] instanceof Date
-                    ? formik.values[fieldLayoutInfo.attrs.name].toLocaleDateString()
-                    : formik.values[fieldLayoutInfo.attrs.name]}
+                {/* {displayValue ?? "-"} */}
+                <DateFieldViewComponent value={rawValue} format={format} fallback="-"></DateFieldViewComponent>
             </p>
         </div>
     );
-}
+};
 
-export const PublishedStatusListViewWidget = ({rowData,solidListViewMetaData,fieldMetadata,column}: SolidListFieldWidgetProps) => {
+
+export const PublishedStatusListViewWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
 
     const colVal = rowData[column.attrs.name]; // publishedAt value
 
     const isPublished = !!colVal;
 
     return (
-        <StatusIcon isPublished={isPublished}/>
+        <StatusIcon isPublished={isPublished} />
     );
 };

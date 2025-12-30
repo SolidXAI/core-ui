@@ -7,6 +7,7 @@ import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilter
 import SolidTableRowCell from '../SolidTableRowCell';
 import { getExtensionComponent } from '@/helpers/registry';
 import { SolidListFieldWidgetProps, SolidMediaListFieldWidgetProps, SolidShortTextImageRenderModeWidgetProps } from '@/types/solid-core';
+import dayjs from 'dayjs';
 
 const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
@@ -91,25 +92,51 @@ const SolidShortTextColumn = ({ solidListViewMetaData, fieldMetadata, column, se
 
 export default SolidShortTextColumn;
 
+function parseIsoDate(value: string): Date | null {
+    if (!value || typeof value !== "string") return null;
 
-export const DefaultTextListWidget = ({rowData, solidListViewMetaData, fieldMetadata, column}: SolidListFieldWidgetProps) => {
+    // Fast reject (avoids false positives)
+    if (!value.includes("T")) return null;
+
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : d;
+}
+
+
+export const DefaultTextListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
     const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter;
-
     let displayValue = rowData[fieldMetadata.name];
+    //    if (typeof displayValue === "string" && displayValue.includes("T") && displayValue.endsWith("Z")) {
+    //         const d = new Date(displayValue);
+    //         if (!isNaN(d.getTime())) {
+    //             const year = d.getFullYear();
+    //             const month = String(d.getMonth() + 1).padStart(2, "0");
+    //             const day = String(d.getDate()).padStart(2, "0");
+    //             const hours = String(d.getHours()).padStart(2, "0");
+    //             const minutes = String(d.getMinutes()).padStart(2, "0");
+    //             const seconds = String(d.getSeconds()).padStart(2, "0");
 
-   if (typeof displayValue === "string" && displayValue.includes("T") && displayValue.endsWith("Z")) {
-        const d = new Date(displayValue);
-        if (!isNaN(d.getTime())) {
-            const year = d.getFullYear();
-            const month = String(d.getMonth() + 1).padStart(2, "0");
-            const day = String(d.getDate()).padStart(2, "0");
-            const hours = String(d.getHours()).padStart(2, "0");
-            const minutes = String(d.getMinutes()).padStart(2, "0");
-            const seconds = String(d.getSeconds()).padStart(2, "0");
+    //             displayValue = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.000`;
+    //         }
+    //     }
+    if (typeof displayValue === "string") {
+        const parsedDate = parseIsoDate(displayValue);
 
-            displayValue = `${year}-${month}-${day} ${hours}:${minutes}:${seconds}.000`;
+        if (parsedDate) {
+            const format = column?.attrs?.format as string | undefined;
+
+            // 🔵 Explicit format → dayjs
+            if (format) {
+                displayValue = dayjs(parsedDate).format(format);
+            }
+            // 🟢 Default → user locale
+            else {
+                displayValue = parsedDate.toLocaleString();
+            }
         }
     }
+
+
 
     if (fieldMetadata?.selectionStaticValues && displayValue) {
         const mapping: Record<string, string> = {};
@@ -118,7 +145,7 @@ export const DefaultTextListWidget = ({rowData, solidListViewMetaData, fieldMeta
             const [val, label] = entry.split(":");
             mapping[val] = label;
         });
-        
+
         const values = displayValue.split(",").map((v: string) => v.trim());
 
         displayValue = values.map((v: string) => mapping[v] || v).join(", ");
