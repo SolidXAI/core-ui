@@ -1,3 +1,19 @@
+@media(max-width:1399px){
+
+.kanban-ungrouped-column-content {
+    column-gap: 20px;
+  }
+  
+  .kanban-card-container {
+    margin-top: 1.5rem;
+  }
+  
+  .kanban-ungrouped-column .kanban-card-container {
+    flex: 1 1 calc(20% - 20px);
+    max-width: calc(20% - 20px);
+  }
+}
+
 @media (max-width: 1199px) {
 
     /* ===================== Layout  ============================= */
@@ -119,7 +135,7 @@
 
 
     .solid-layout-accordion {
-        max-width: 300px;
+        max-width: 250px;
     }
 
 
@@ -128,6 +144,11 @@
         overflow-wrap: anywhere;
         word-break: break-word;
     }
+
+    .kanban-ungrouped-column .kanban-card-container {
+        flex: 1 1 calc(33.33% - 20px);
+        max-width: calc(33.33% - 20px);
+      }
 
 }
 
@@ -322,7 +343,7 @@
         text-overflow: ellipsis;
     }
 
-    .password-policy-dropdown-panel{
+    .password-policy-dropdown-panel {
         width: 450px !important;
         max-width: 80% !important;
     }
@@ -415,7 +436,7 @@
     }
 
     .p-dialog .p-dialog-header {
-        padding: 1rem 1.5rem !important;
+        padding: 1rem 1.5rem ;
     }
 
     .solid-icon-dialog {
@@ -433,7 +454,7 @@
         width: 44rem !important;
     } */
 
-    .solid-import-dialog{
+    .solid-import-dialog {
         /* width: 100% !important; */
         max-width: 95% !important;
     }
@@ -454,7 +475,7 @@
     .ExportDialog .p-dialog-content {
         padding-left: 1rem !important;
         padding-right: 1rem !important;
-    } 
+    }
 
     .SolidExportControls {
         /* justify-self: flex-start !important; */
@@ -462,12 +483,14 @@
         justify-content: start !important;
     }
 
-    .SolidExportProgressToaster{
+    .SolidExportProgressToaster {
         min-width: auto;
         width: 28rem !important;
         max-width: 92% !important;
     }
 
+
+    
     /* =================  cog wheel ================== */
     .customize-layout-panel.p-overlaypanel {
         top: 16% !important;
@@ -497,15 +520,19 @@
     }
 
     /*  ======================= Search ================================== */
-
+    /* default */
     .solid-global-search-element-wrapper {
-        width: calc(100vw - 55px)
+        width: calc(100vw - 55px);
     }
 
-    /* .solid-global-search-element {
-        max-height: 100%;
-        height: 33px;
-    } */
+    /* jab main-content ke andar chatter-section.collapsed ho */
+    .main-content:has(.chatter-section.collapsed) .solid-global-search-element-wrapper {
+        width: calc(100vw - 80px);
+    }
+
+     .solid-global-search-element input {
+        height: 28px;
+    } 
 
     .solid-filter-auto-complete-field button {
         height: 2.5rem !important;
@@ -546,11 +573,11 @@
         padding: 10px 16px 16px 16px !important;
     }
 
-    .form-wrapper-title{
+    .form-wrapper-title {
         font-size: 14px !important;
     }
 
-    .solid-header-buttons-wrapper{
+    .solid-header-buttons-wrapper {
         gap: 10px !important;
     }
 
@@ -561,6 +588,17 @@
         text-overflow: ellipsis;
     }
 
+    .solid-module-mobile-text-wrapper{
+        max-width: clamp(180px, 65vw, 600px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+    .kanban-ungrouped-column .kanban-card-container {
+        flex: 1 1 calc(50% - 20px);
+        max-width: calc(50% - 20px);
+      }
 }
 
 
@@ -623,11 +661,19 @@
         margin-bottom: 10px;
     }
 
-    .p-toast{
+    .p-toast {
         width: 90% !important;
     }
 
- 
+    .solid-module-mobile-text-wrapper{
+        max-width: clamp(120px, 52vw, 600px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
+
+
+
 }
 
 @media(max-width:480px) {
@@ -646,6 +692,12 @@
         width: fit-content !important;
         flex: 0 0 auto !important;
     }
+
+    .kanban-ungrouped-column .kanban-card-container {
+        flex: 1 1 100%;
+        max-width: 100%;
+      }
+    
 
 
 
