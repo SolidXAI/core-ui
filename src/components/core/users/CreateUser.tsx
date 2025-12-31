@@ -385,7 +385,7 @@ const CreateUser = ({ data, params }: any) => {
                       )}
                     </div>
                     {params.id === "new" && <>
-                      <div className="field col-12 md:col-6 flex flex-column gap-2 my-4">
+                      <div className="field col-12 md:col-6 flex flex-column gap-2 py-4">
                         <label htmlFor="Password" className="form-field-label">
                           Password
                         </label>

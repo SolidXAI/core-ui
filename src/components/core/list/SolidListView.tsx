@@ -1111,14 +1111,25 @@ export const SolidListView = (params: SolidListViewParams) => {
     selectedRecords.forEach((element: any) => {
       deleteList.push(element.id);
     });
-    deleteManySolidEntities(deleteList);
-    toast.current?.show({
-      severity: 'success',
-      summary: 'Deleted',
-      detail: ERROR_MESSAGES.RECORD_DELETE,
-      life: 3000
+    deleteManySolidEntities(deleteList)
+    .unwrap()
+    .then(() => {
+      toast.current?.show({
+        severity: 'success',
+        summary: 'Deleted',
+        detail: ERROR_MESSAGES.RECORD_DELETE,
+        life: 3000
+      });
+      setDialogVisible(false);
+    })
+    .catch((error) => {
+      toast.current?.show({
+        severity: 'error',
+        summary: 'Delete Failed',
+        detail: error?.data?.message,
+        life: 4000
+      });
     });
-    setDialogVisible(false);
   };
 
   // handle closing of the delete dialog...
