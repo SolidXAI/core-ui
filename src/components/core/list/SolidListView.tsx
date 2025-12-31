@@ -141,7 +141,23 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [getMcpUrl] = useLazyGetMcpUrlQuery();
 
   useEffect(() => {
-    enableSolidXAiPanel();
+
+    const fetchPermissions = async () => {
+      const permissionNames = ["SettingController.getMcpUrl"]
+      const queryData = {
+        permissionNames: permissionNames
+      };
+      const queryString = qs.stringify(queryData, {
+        encodeValuesOnly: true
+      });
+      const response = await triggerCheckIfPermissionExists(queryString);
+      if (response.data.data) {
+        if (response.data.data.inclues("SettingController.getMcpUrl")) {
+          enableSolidXAiPanel();
+        }
+      }
+    };
+    fetchPermissions();
   }, []);
 
   const enableSolidXAiPanel = async () => {
@@ -360,12 +376,15 @@ export const SolidListView = (params: SolidListViewParams) => {
     const rows = currentLayout?.attrs?.defaultPageSize ?? 25;
     const populate = toPopulate;
     const populateMedia = toPopulateMedia;
-    setRows(rows);
-    setToPopulate(populate);
-    setToPopulateMedia(populateMedia);
-    setSortField("id");
-    setSortOrder(-1);
-    return { rows, populate, populateMedia };
+    const rows = currentLayout?.attrs?.defaultPageSize ?? 25;
+    const sortField = "id";
+    const sortOrder = -1;
+    // setRows(rows);
+    // setToPopulate(populate);
+    // setToPopulateMedia(populateMedia);
+    // setSortField("id");
+    // setSortOrder(-1);
+    return { sortField, sortOrder, rows, populate, populateMedia };
   };
 
   // Set the initial filter state based on the metadata.
@@ -429,8 +448,8 @@ export const SolidListView = (params: SolidListViewParams) => {
       : 10
   );
   const [totalRecords, setTotalRecords] = useState(0);
-  const [sortField, setSortField] = useState("");
-  const [sortOrder, setSortOrder] = useState(0);
+  const [sortField, setSortField] = useState("id");
+  const [sortOrder, setSortOrder] = useState(-1);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
   const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>(
     []
@@ -589,18 +608,26 @@ export const SolidListView = (params: SolidListViewParams) => {
         //   filters.$and.push(queryObject.c_filter);
         // }
         setRows(Number(queryData.limit));
-        setToPopulate(queryData?.populate);
-        setToPopulateMedia(queryData?.populateMedia);
         setFirst(Number(queryData?.offset));
         setSortField(queryData?.sort[0]?.field);
         setSortOrder(queryData?.sort[0]?.order);
         // latestFiltersRef.current = filters;
         // setFilters(filters);
 
+        const { sortField, sortOrder, rows, populate, populateMedia } = initialFilterMethod();
+        setToPopulate(populate);
+        setToPopulateMedia(populateMedia);
+
         setQueryDataLoaded(true);
       } else {
-        initialFilterMethod();
+        const { sortField, sortOrder, rows, populate, populateMedia } = initialFilterMethod();
+        setRows(rows);
+        setSortField(sortField);
+        setSortOrder(sortOrder);
         setQueryDataLoaded(true);
+        setToPopulate(populate);
+        setToPopulateMedia(populateMedia);
+
       }
       setSelectedRecords([]);
       setSelectedRecoverRecords([]);
@@ -927,7 +954,12 @@ export const SolidListView = (params: SolidListViewParams) => {
   // clear Filter
   const clearFilter = () => {
     if (solidListViewMetaData) {
-      initialFilterMethod();
+      const { sortField, sortOrder, rows, populate, populateMedia } = initialFilterMethod();
+      setRows(rows);
+      setSortField(sortField);
+      setSortOrder(sortOrder);
+      setToPopulate(populate);
+      setToPopulateMedia(populateMedia);
     }
     latestFiltersRef.current = {
       $and: []
@@ -1018,19 +1050,19 @@ export const SolidListView = (params: SolidListViewParams) => {
       showError(recoverByIdError);
       return;
     }
-  
+
     if (recoverIsError && recoverError) {
       showError(recoverError);
     }
-  }, [  recoverByIdIsSuccess, recoverByIdData, recoverByIdIsError, recoverByIdError, recoverIsError, recoverError]);
+  }, [recoverByIdIsSuccess, recoverByIdData, recoverByIdIsError, recoverByIdError, recoverIsError, recoverError]);
 
   const showError = async (error) => {
     const errorMessages = error?.data?.message;
-    const messages = Array.isArray(errorMessages) 
-    ? errorMessages 
-    : errorMessages 
-      ? [errorMessages] 
-      : [];
+    const messages = Array.isArray(errorMessages)
+      ? errorMessages
+      : errorMessages
+        ? [errorMessages]
+        : [];
     if (messages.length > 0) {
       toast?.current?.show({
         severity: "error",

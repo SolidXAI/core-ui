@@ -4,7 +4,7 @@ import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { Message } from "primereact/message";
 import { SelectButton } from "primereact/selectbutton";
 import { classNames } from "primereact/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
@@ -91,7 +91,7 @@ export class SolidBooleanField implements ISolidField {
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
         let editWidget = fieldLayoutInfo.attrs.editWidget;
         if (!editWidget) {
-            editWidget = 'booleanSelectbox';
+            editWidget = 'booleanCheckbox';
         }
         if (!viewWidget) {
             viewWidget = 'DefaultBooleanFormViewWidget';
@@ -142,10 +142,18 @@ export const DefaultBooleanFormEditWidget = ({ formik, fieldContext }: SolidForm
     const fieldLayoutInfo = fieldContext.field;
     const className = fieldLayoutInfo.attrs?.className || 'field col-12';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-    const booleanOptions = ["false", "true"];
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+    const trueLabel = fieldLayoutInfo?.attrs?.trueLabel;
+    const falseLabel = fieldLayoutInfo?.attrs?.falseLabel;
     const readOnlyPermission = fieldContext.readOnly;
+    const [booleanOptions, setBooleanOptions] = useState<string[]>(["false", "true"]);
+    // let booleanOptions = ["false", "true"];
+    useEffect(() => {
+        if (trueLabel || falseLabel) {
+            setBooleanOptions([trueLabel, falseLabel])
+        }
+    }, [trueLabel, falseLabel])
 
     useEffect(() => { formik.setFieldValue(fieldLayoutInfo.attrs.name, "false") }, [])
 
@@ -196,7 +204,6 @@ export const DefaultBooleanFormEditWidget = ({ formik, fieldContext }: SolidForm
         </div>
     );
 }
-
 
 export const SolidBooleanCheckboxStyleFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
@@ -366,21 +373,35 @@ export const SolidBooleanSwitchStyleFormEditWidget = ({ formik, fieldContext }: 
     );
 }
 
-
-
-
 export const DefaultBooleanFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+
+    // const trueLabel = fieldLayoutInfo?.attrs?.trueLabel;
+    // const falseLabel = fieldLayoutInfo?.attrs?.falseLabel;
+
+    const [trueLabel, setTrueLabel] = useState<string>("true");
+    const [falseLabel, setFalseLabel] = useState<string>("false");
+
+    useEffect(() => {
+        if (fieldLayoutInfo?.attrs?.trueLabel) {
+            setTrueLabel(fieldLayoutInfo?.attrs?.trueLabel)
+        }
+        if (fieldLayoutInfo?.attrs?.falseLabel) {
+            setFalseLabel(fieldLayoutInfo?.attrs?.falseLabel)
+        }
+    }, [fieldLayoutInfo?.attrs?.falseLabel, fieldLayoutInfo?.attrs?.trueLabel])
+
+
     return (
         <div className="mt-2 flex-column gap-2">
             {showFieldLabel !== false && (
                 <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
             )}
-            <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name] === true || formik.values[fieldLayoutInfo.attrs.name] === "true" ? "true" : "false"}</p>
+            <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name] === true || formik.values[fieldLayoutInfo.attrs.name] === "true" ? trueLabel : falseLabel}</p>
         </div>
     );
 }
