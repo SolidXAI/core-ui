@@ -87,6 +87,7 @@ export const queryStringToQueryObject = () => {
 export const queryObjectToQueryString = (queryObject: string) => {
   if (queryObject) {
     const stringifiedObject = qs.stringify(queryObject);
+    // const stringifiedObject = qs.stringify(queryObject, { encodeValuesOnly: true, arrayFormat: "brackets" });
     const encodedQueryString = btoa(stringifiedObject); // Base64 encode the stringified object
     const currentPageUrl = window.location.pathname; // Get the current page URL
     localStorage.setItem(currentPageUrl, encodedQueryString); // Store in local storage with the URL as the key
@@ -372,8 +373,6 @@ export const SolidListView = (params: SolidListViewParams) => {
         }
       }
     }
-    // setFilters(initialFilters);
-    const rows = currentLayout?.attrs?.defaultPageSize ?? 25;
     const populate = toPopulate;
     const populateMedia = toPopulateMedia;
     const rows = currentLayout?.attrs?.defaultPageSize ?? 25;
@@ -398,7 +397,6 @@ export const SolidListView = (params: SolidListViewParams) => {
       }
       setSolidListViewMetaData(solidListViewInitialMetaData);
       setIsDraftPublishWorkflowEnabled(solidListViewInitialMetaData?.data?.solidView?.model?.draftPublishWorkflow === true);
-      // initialFilterMethod()
     }
   }, [solidListViewInitialMetaData]);
 
