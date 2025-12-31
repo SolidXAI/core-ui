@@ -131,6 +131,12 @@ export const SolidListViewConfigure = (
         return true;
     };
 
+    const clearLocalstorageCache = () => {
+        const currentPageUrl = window.location.pathname; // Get the current page URL
+        localStorage.removeItem(currentPageUrl); // Remove from local storage with the URL as the key
+        window.location.reload();
+    };
+
     return (
         <div className="position-relative">
             <Button
@@ -256,6 +262,9 @@ export const SolidListViewConfigure = (
                     {isHeaderActionEnabled('savedFilters') && permissionExpression('savedFilters', 'create') && (
                         <Button text icon='pi pi-save' label="Save Custom Filter" size="small" severity="secondary" className="text-left gap-2 text-base" onClick={() => setShowSaveFilterPopup(true)} />
                     )}
+                    <Button text icon='pi pi-trash' label="Clear cache" size="small" severity="secondary" className="text-left gap-2 text-base "
+                        onClick={() => clearLocalstorageCache()} />
+
                     <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}
                         onShow={() => setIsOverlayOpen(true)}
                         onHide={() => {
