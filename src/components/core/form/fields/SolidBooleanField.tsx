@@ -268,7 +268,7 @@ export const SolidBooleanCheckboxStyleFormEditWidget = ({ formik, fieldContext }
                             })}
                         />
                         {checkboxLabel && 
-                            <span className="ml-2">{fieldLabel || "Yes"}</span>
+                            <span className="ml-2">{checkboxLabel || "Yes"}</span>
                         }
                     </div>
                 </div>
