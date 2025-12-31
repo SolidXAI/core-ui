@@ -212,6 +212,7 @@ export const SolidBooleanCheckboxStyleFormEditWidget = ({ formik, fieldContext }
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+    const checkboxLabel = fieldLayoutInfo?.attrs?.checkboxLabel;
     const readOnlyPermission = fieldContext.readOnly;
 
     // Set default value to false on mount
@@ -266,7 +267,9 @@ export const SolidBooleanCheckboxStyleFormEditWidget = ({ formik, fieldContext }
                                 "p-invalid": isFormFieldValid(formik, fieldLayoutInfo.attrs.name),
                             })}
                         />
-                        <span className="ml-2">{fieldLabel || "Yes"}</span>
+                        {checkboxLabel && 
+                            <span className="ml-2">{fieldLabel || "Yes"}</span>
+                        }
                     </div>
                 </div>
 
