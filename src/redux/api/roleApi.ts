@@ -12,7 +12,7 @@ export const roleApi = createApi({
   endpoints: (builder) => ({
     getroles: builder.query({
       query: (qs) => {
-        return `/${resourceName}?offset=0&limit=10&${qs}`
+        return `/${resourceName}?offset=0&limit=1000&${qs}`
       },
     }),
     getroleById: builder.query({
