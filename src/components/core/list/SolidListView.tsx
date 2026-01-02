@@ -154,7 +154,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       });
       const response = await triggerCheckIfPermissionExists(queryString);
       if (response.data.data) {
-        if (response.data.data.inclues("SettingController.getMcpUrl")) {
+        if (response.data.data.includes("SettingController.getMcpUrl")) {
           enableSolidXAiPanel();
         }
       }

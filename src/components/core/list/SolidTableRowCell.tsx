@@ -10,13 +10,15 @@ const SolidTableRowCell = ({ value, truncateAfter }: { value: string; truncateAf
     const displayValue = isHTML(value) ? stripHTML(value) : value;
 
     return (
-        <div
-            className="solid-table-row"
-            style={truncateAfter ? { maxWidth: `${truncateAfter}ch` } : {}}
+        <div className="flex align-items-center">
+            <div
+                className="solid-table-row"
+                style={truncateAfter ? { maxWidth: `${truncateAfter}ch` } : {}}
             // title={truncateAfter ? displayValue : undefined}
-        >
-            {displayValue}
-            {truncateAfter &&
+            >
+                {displayValue}
+            </div>
+            {truncateAfter && displayValue.length > truncateAfter &&
                 <>
                     <Tooltip target=".solid-field-tooltip-icon" />
                     <i className="pi pi-info-circle solid-field-tooltip-icon"
@@ -26,6 +28,7 @@ const SolidTableRowCell = ({ value, truncateAfter }: { value: string; truncateAf
             }
         </div>
     );
+
 };
 
 export default SolidTableRowCell;

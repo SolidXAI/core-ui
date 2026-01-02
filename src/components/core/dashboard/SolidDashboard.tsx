@@ -17,6 +17,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 import SolidDashboardNotAvailable from './SolidDashboardNotAvailable';
 import { useLazyGetMcpUrlQuery } from '@/redux/api/solidSettingsApi';
+import { useLazyCheckIfPermissionExistsQuery } from '@/redux/api/userApi';
 
 export enum DashboardVariableType {
   DATE = 'date',
@@ -213,9 +214,26 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
 
   const [mcpUrl, setMcpUrl] = useState<string | null>(null);
   const [getMcpUrl] = useLazyGetMcpUrlQuery();
+  const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
 
   useEffect(() => {
-    enableSolidXAiPanel();
+
+    const fetchPermissions = async () => {
+      const permissionNames = ["SettingController.getMcpUrl"]
+      const queryData = {
+        permissionNames: permissionNames
+      };
+      const queryString = qs.stringify(queryData, {
+        encodeValuesOnly: true
+      });
+      const response = await triggerCheckIfPermissionExists(queryString);
+      if (response.data.data) {
+        if (response.data.data.includes("SettingController.getMcpUrl")) {
+          enableSolidXAiPanel();
+        }
+      }
+    };
+    fetchPermissions();
   }, []);
 
   const enableSolidXAiPanel = async () => {
@@ -317,7 +335,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
           }
         </div>
       )}
-      
+
     </div>
   );
 }
