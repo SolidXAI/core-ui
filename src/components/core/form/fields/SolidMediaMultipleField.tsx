@@ -493,7 +493,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
 
-    useEffect(() => { formik.setFieldValue(fieldLayoutInfo.attrs.name, "false") }, [])
+    // useEffect(() => { formik.setFieldValue(fieldLayoutInfo.attrs.name, "false") }, [])
 
     const formatFileSize = (size: number) => {
         return size >= 1024 * 1024
