@@ -60,6 +60,7 @@ import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
 import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 import { useLazyGetMcpUrlQuery } from "@/redux/api/solidSettingsApi";
+import { log } from "console";
 // import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -312,6 +313,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       const column = currentLayout?.children[i];
       const fieldMetadata = solidFieldsMetadata?.[column.attrs.name];
       if (!fieldMetadata?.type) {
+        console.log(`Some problem in rendering column: `, column);
         showFieldError(ERROR_MESSAGES.FIELD_NOT_IN_METADATA(column.attrs.label));
         // return;
       }
@@ -1112,24 +1114,24 @@ export const SolidListView = (params: SolidListViewParams) => {
       deleteList.push(element.id);
     });
     deleteManySolidEntities(deleteList)
-    .unwrap()
-    .then(() => {
-      toast.current?.show({
-        severity: 'success',
-        summary: 'Deleted',
-        detail: ERROR_MESSAGES.RECORD_DELETE,
-        life: 3000
+      .unwrap()
+      .then(() => {
+        toast.current?.show({
+          severity: 'success',
+          summary: 'Deleted',
+          detail: ERROR_MESSAGES.RECORD_DELETE,
+          life: 3000
+        });
+        setDialogVisible(false);
+      })
+      .catch((error) => {
+        toast.current?.show({
+          severity: 'error',
+          summary: 'Delete Failed',
+          detail: error?.data?.message,
+          life: 4000
+        });
       });
-      setDialogVisible(false);
-    })
-    .catch((error) => {
-      toast.current?.show({
-        severity: 'error',
-        summary: 'Delete Failed',
-        detail: error?.data?.message,
-        life: 4000
-      });
-    });
   };
 
   // handle closing of the delete dialog...
