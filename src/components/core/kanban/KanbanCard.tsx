@@ -252,9 +252,11 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
             className={`${!groupedView ? 'solid-media-card' : 'solid-kanban-card'}`}
             onClick={() => {
               if (typeof window !== "undefined") {
-                const queryString = searchParams.toString();
-                const finalUrl = queryString ? `${pathname}?${queryString}` : pathname;
-                sessionStorage.setItem("fromView", finalUrl);
+                // const queryString = searchParams.toString();
+                // const finalUrl = queryString ? `${pathname}?${queryString}` : pathname;
+                // sessionStorage.setItem("fromView", finalUrl);
+                sessionStorage.setItem("fromView", "kanban");
+
               }
               router.push(`${editButtonUrl}/${data?.id}`)
             }}

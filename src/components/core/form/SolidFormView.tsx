@@ -462,8 +462,26 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [getMcpUrl] = useLazyGetMcpUrlQuery();
 
     useEffect(() => {
-        enableSolidXAiPanel();
+
+        const fetchPermissions = async () => {
+            const permissionNames = ["SettingController.getMcpUrl"]
+            const queryData = {
+                permissionNames: permissionNames
+            };
+            const queryString = qs.stringify(queryData, {
+                encodeValuesOnly: true
+            });
+            const response = await triggerCheckIfPermissionExists(queryString);
+            if (response.data.data) {
+                if (response.data.data.includes("SettingController.getMcpUrl")) {
+                    enableSolidXAiPanel();
+                }
+            }
+        };
+        fetchPermissions();
     }, []);
+
+
 
     const enableSolidXAiPanel = async () => {
         try {

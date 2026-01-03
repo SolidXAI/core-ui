@@ -1600,9 +1600,10 @@ export const SolidListView = (params: SolidListViewParams) => {
                       params.handlePopUpOpen(rowData?.id);
                     } else {
                       if (typeof window !== "undefined") {
-                        const queryString = searchParams.toString();
-                        const finalUrl = queryString ? `${pathname}?${queryString}` : pathname;
-                        sessionStorage.setItem("fromView", finalUrl);
+                        // const queryString = searchParams.toString();
+                        // const finalUrl = queryString ? `${pathname}?${queryString}` : pathname;
+                        // sessionStorage.setItem("fromView", finalUrl);
+                        sessionStorage.setItem("fromView", "list");
                       }
                       router.push(`${editButtonUrl}/${rowData?.id}?viewMode=view`);
                     }
