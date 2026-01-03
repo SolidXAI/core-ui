@@ -668,7 +668,7 @@ export const SolidListView = (params: SolidListViewParams) => {
             actionName: actionName,
           },
           user: user,
-          session: session
+          session: session.data
         };
 
         if (dynamicHeader) {
@@ -865,7 +865,6 @@ export const SolidListView = (params: SolidListViewParams) => {
       queryData.showSoftDeleted = "inclusive";
     }
 
-
     //  SolidBeforeListDataLoad Event that allows filter modification just before api call 
     const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onBeforeListDataLoad;
     let DynamicFunctionComponent = null;
@@ -882,7 +881,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         actionName: actionName,
       },
       user: user,
-      session: session
+      session: session.data
     };
 
     if (dynamicHeader) {
