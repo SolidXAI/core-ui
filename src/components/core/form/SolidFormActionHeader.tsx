@@ -324,9 +324,9 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     </div>
                                 </>
                             }
-                            {params.embeded !== true &&
+                            {/* {params.embeded !== true &&
                                 <SolidCancelButton />
-                            }
+                            } */}
                             {
                                 formViewLayout?.attrs?.showCogWheelFormButton !== false &&
                                 actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
@@ -461,11 +461,11 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     </div>
                                 </>
                             }
-                            {
+                            {/* {
                                 params.embeded !== true &&
 
                                 <SolidCancelButton />
-                            }
+                            } */}
                             {
                                 formViewLayout?.attrs?.showCogWheelFormButton !== false &&
                                 actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
