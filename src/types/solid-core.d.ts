@@ -153,7 +153,8 @@ export type SolidLoadList = {
     listViewLayout: ListLayoutType;
     queryParams?: any,
     user: any,
-    session: any
+    session: any,
+    params?: SolidListViewParams
 }
 
 export type SolidBeforeListDataLoad = {
@@ -164,7 +165,8 @@ export type SolidBeforeListDataLoad = {
     filter?: any,
     queryParams?: any,
     user: any,
-    session: any
+    session: any,
+    params?: SolidListViewParams
 }
 
 export type SolidListUiEventResponse = {
