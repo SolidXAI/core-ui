@@ -86,7 +86,7 @@ export const SolidChatterHeader = (props: Props) => {
     return (
         <div className={styles.chatterTitle}>
             <div className='flex justify-content-between align-items-center'>
-                <div className="form-wrapper-title">
+                <div className="form-wrapper-title ">
                     Activity
                 </div>
                 <div className='flex align-items-center gap-2'>
@@ -141,6 +141,7 @@ export const SolidChatterHeader = (props: Props) => {
                 visible={showFilterDialog} 
                 style={{ width: 500 }} 
                 onHide={() => setShowFilterDialog(false)}
+                className='solid-chatter-filter-main'
             >
                 <div className="p-fluid">
                     <div className="flex flex-column gap-2">

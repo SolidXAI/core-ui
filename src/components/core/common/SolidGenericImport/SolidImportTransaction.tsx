@@ -15,7 +15,9 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
     };
     const [trigger, { data: mappingInfo, isLoading, isError }] = useLazyGetImportMappingInfoQuery();
@@ -142,44 +144,48 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
                                 return (
                                     <React.Fragment key={sample.cellHeader}>
                                         <div
-                                            className="col-6 py-2 px-3 flex flex-column justify-content-center"
+                                            className="col-5 md:col-6 py-2 pl-3 pr-2 md:px-3 flex flex-column justify-content-center"
                                             style={{ borderBottom: "1px solid var(--gray-100)" }}
                                         >
+                                             
                                             <div className="font-medium text-primary">{sample.cellHeader}</div>
                                             <div className="text-sm" style={{ color: "var(--solid-grey-500)" }}>
                                                 {sample.cellValue || ""}
                                             </div>
                                         </div>
-                                        <div className="col-6 py-2 px-3 flex align-items-center gap-2" style={{ borderBottom: "1px solid var(--gray-100)" }}>
-                                            <Dropdown
-                                                value={fieldMapping[sample.cellHeader]}
-                                                options={dropdownOptions}
-                                                onChange={(e) => handleChange(sample.cellHeader, e.value)}
-                                                className="w-full p-inputtext-sm"
-                                                placeholder="Select field"
-                                            />
-                                            {!isRequired ? (
-                                                <span
-                                                    onClick={() => handleRemoveRow(sample.cellHeader)}
-                                                    title="Remove this row"
-                                                    style={{ cursor: 'pointer' }}
-                                                >
-                                                    <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                                        <rect width="16" height="16" rx="8" fill="#F0F0F0" />
-                                                        <path d="M5.6 11L5 10.4L7.4 8L5 5.6L5.6 5L8 7.4L10.4 5L11 5.6L8.6 8L11 10.4L10.4 11L8 8.6L5.6 11Z" fill="#4B4D52" />
-                                                    </svg>
-                                                </span>
-                                            )
-                                                :
-                                                <span style={{ height: 16, width: 16 }}></span>
-                                            }
+                                        <div className="col-7 md:col-6 py-0" style={{ borderBottom: "1px solid var(--gray-100)" }}>
+                                            <div className={`flex align-items-center gap-2  py-2 md:px-3  ${fieldMapping[sample.cellHeader] ? "col-11 sm:col-12" : "col-12"} `}>
+                                                <Dropdown
+                                                    value={fieldMapping[sample.cellHeader]}
+                                                    options={dropdownOptions}
+                                                    onChange={(e) => handleChange(sample.cellHeader, e.value)}
+                                                    className="w-full p-inputtext-sm"
+                                                    placeholder="Select field"
+                                                />
+                                                {!isRequired ? (
+                                                    <span
+                                                        onClick={() => handleRemoveRow(sample.cellHeader)}
+                                                        title="Remove this row"
+                                                        style={{ cursor: 'pointer' }}
+                                                    >
+                                                        <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                                            <rect width="16" height="16" rx="8" fill="#F0F0F0" />
+                                                            <path d="M5.6 11L5 10.4L7.4 8L5 5.6L5.6 5L8 7.4L10.4 5L11 5.6L8.6 8L11 10.4L10.4 11L8 8.6L5.6 11Z" fill="#4B4D52" />
+                                                        </svg>
+                                                    </span>
+                                                )
+                                                    :
+                                                    <span style={{ height: 16, width: 16 }}></span>
+                                                }
+                                            </div>
+
                                         </div>
                                     </React.Fragment>
                                 );
                             })
                     ) : (
                         <div className='col-12 flex flex-column align-items-center'>
-                            <h4>No Sample Imported Record Info Found</h4>
+                            <h4 className='text-center px-2'>No Sample Imported Record Info Found</h4>
                             <p>Please Add Records</p>
                         </div>
                     )}

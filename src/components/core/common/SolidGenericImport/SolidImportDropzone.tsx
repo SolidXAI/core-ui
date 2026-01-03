@@ -14,7 +14,9 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
     };
 
@@ -90,7 +92,7 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
                     </div>
                     {/* ) : ( */}
                     {file &&
-                        <div className="flex align-items-start justify-content-between gap-3 p-3 mt-4" style={{ border: '1px solid var(--primary-light-color)', borderRadius: 6, minWidth: 400 }} onClick={(e) => e.stopPropagation()}>
+                        <div className="flex align-items-start justify-content-between gap-3 p-3 mt-4 w-full md:w-8" style={{ border: '1px solid var(--primary-light-color)', borderRadius: 6 }} onClick={(e) => e.stopPropagation()}>
                             <div>
                                 <p className='m-0'><strong>File:</strong> {file.name}</p>
                                 <p className='m-0'><strong>Type:</strong> {file.type || 'Unknown'}</p>

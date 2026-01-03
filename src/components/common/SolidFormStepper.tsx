@@ -7,6 +7,7 @@ import { useFormik } from 'formik';
 import { Toast } from 'primereact/toast';
 import { useSearchParams } from 'next/navigation';
 import { ERROR_MESSAGES } from '@/constants/error-messages';
+
 interface Props {
     solidFormViewMetaData?: any;
     modelName?: any,
@@ -20,8 +21,12 @@ export const SolidFormStepper = (props: Props) => {
     const { solidFormViewMetaData, modelName, initialEntityData, id, solidWorkflowFieldValue, setSolidWorkflowFieldValue } = props;
     const toast = useRef<Toast>(null);
     const formStepperOverlay = useRef(null);
+    const containerRef = useRef<HTMLDivElement>(null);
+    const leftFormStepperOverlay = useRef(null);
+
     const searchParams = useSearchParams();
     const viewMode = searchParams.get('viewMode');
+
     const solidFormViewWorkflowData = solidFormViewMetaData?.data?.solidFormViewWorkflowData;
     const solidWorkflowField = solidFormViewMetaData?.data?.solidView?.layout?.attrs?.workflowField;
     const solidWorkflowFieldEnabled = solidFormViewMetaData?.data?.solidView?.layout?.attrs?.workflowFieldUpdateEnabled;
@@ -29,6 +34,72 @@ export const SolidFormStepper = (props: Props) => {
     const defaultWorkflowFieldDisplayName = solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.displayName
     const activeStep = solidFormViewMetaData?.data?.solidFormViewWorkflowData[0].value
     const [solidWorkflowFieldKey, setSolidWorkflowFieldKey] = useState<string>("");
+    const [visibleStepsCount, setVisibleStepsCount] = useState<number>(1);
+
+    // Dynamic responsive logic
+    useEffect(() => {
+        const calculateVisibleSteps = () => {
+            if (!containerRef.current || !solidFormViewWorkflowData || solidFormViewWorkflowData.length === 0) return;
+            
+            const containerWidth = containerRef.current.offsetWidth;
+            const overflowButtonWidth = 50;
+            const arrowWidth = 30; // Width for arrow between buttons
+            const spacing = 0; // No gap needed as arrows connect buttons
+            
+            const tempContainer = document.createElement('div');
+            tempContainer.style.visibility = 'hidden';
+            tempContainer.style.position = 'absolute';
+            document.body.appendChild(tempContainer);
+
+            const buttonWidths: number[] = [];
+            
+            solidFormViewWorkflowData.forEach((step: any) => {
+                const tempButton = document.createElement('button');
+                tempButton.className = 'arrow-step-button';
+                tempButton.textContent = step.label;
+                tempButton.style.padding = '0.5rem 1.5rem';
+                tempButton.style.minWidth = '100px';
+                tempContainer.appendChild(tempButton);
+                buttonWidths.push(Math.max(100, tempButton.offsetWidth));
+            });
+
+            document.body.removeChild(tempContainer);
+
+            let count = 0;
+            let totalWidth = 0;
+
+            for (let i = 0; i < buttonWidths.length; i++) {
+                const buttonWidth = buttonWidths[i];
+                const arrowSpace = i > 0 ? arrowWidth : 0;
+                const needsOverflow = i < buttonWidths.length - 1;
+                const requiredWidth = totalWidth + buttonWidth + arrowSpace + (needsOverflow ? overflowButtonWidth : 0);
+                
+                if (requiredWidth <= containerWidth) {
+                    totalWidth += buttonWidth + arrowSpace;
+                    count++;
+                } else {
+                    break;
+                }
+            }
+
+            count = Math.max(1, count);
+            setVisibleStepsCount(count);
+        };
+
+        calculateVisibleSteps();
+        
+        const resizeObserver = new ResizeObserver(calculateVisibleSteps);
+        if (containerRef.current) {
+            resizeObserver.observe(containerRef.current);
+        }
+
+        const timeoutId = setTimeout(calculateVisibleSteps, 100);
+
+        return () => {
+            resizeObserver.disconnect();
+            clearTimeout(timeoutId);
+        };
+    }, [solidFormViewWorkflowData]);
 
     useEffect(() => {
         if (!solidWorkflowField) return;
@@ -62,22 +133,21 @@ export const SolidFormStepper = (props: Props) => {
     });
 
     const entityApi = createSolidEntityApi(modelName);
-    const {
-        usePatchUpdateSolidEntityMutation,
-    } = entityApi;
+    const { usePatchUpdateSolidEntityMutation } = entityApi;
 
     const [
         updateStepper,
         { isSuccess: isStepperUpdateSuccessfull, isError: isStepperUpdateError, error: stepperUpdateError },
     ] = usePatchUpdateSolidEntityMutation();
 
-
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
         toast.current?.show({
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
     };
 
@@ -97,6 +167,8 @@ export const SolidFormStepper = (props: Props) => {
     }
 
     const handleButtonClick = (stepValue: any) => {
+        console.log("Clicked step value:", stepValue);
+        
         if (solidWorkflowFieldEnabled === false || id === "new" || viewMode === "view") {
             return
         } else {
@@ -105,119 +177,171 @@ export const SolidFormStepper = (props: Props) => {
         }
     }
 
-    const activeIndex = solidFormViewWorkflowData.findIndex((step: any) => step.value === solidWorkflowFieldValue);
-    const visibleSteps = solidFormViewWorkflowData.length > 5 ? solidFormViewWorkflowData.slice(0, 5) : solidFormViewWorkflowData;
+    const activeIndex = solidFormViewWorkflowData?.findIndex((step: any) => step.value === solidWorkflowFieldValue) ?? -1;
+
+    let visibleSteps: any[] = [];
+    let previousSteps: any[] = [];
+    let nextSteps: any[] = [];
+    const isSingleVisibleStep = visibleStepsCount === 1;
+
+    if (solidFormViewWorkflowData && solidFormViewWorkflowData.length > 0) {
+        if (activeIndex === -1) {
+            visibleSteps = solidFormViewWorkflowData.slice(0, visibleStepsCount);
+            nextSteps = solidFormViewWorkflowData.slice(visibleStepsCount);
+        } else if (visibleStepsCount === 1) {
+            visibleSteps = [solidFormViewWorkflowData[activeIndex]];
+            previousSteps = solidFormViewWorkflowData.slice(0, activeIndex);
+            nextSteps = solidFormViewWorkflowData.slice(activeIndex + 1);
+        } else {
+            const totalSteps = solidFormViewWorkflowData.length;
+
+            if (activeIndex < visibleStepsCount) {
+                visibleSteps = solidFormViewWorkflowData.slice(0, visibleStepsCount);
+                nextSteps = solidFormViewWorkflowData.slice(visibleStepsCount);
+            } else {
+                const slotsAvailable = visibleStepsCount - 1;
+                const afterActive = Math.min(Math.floor(slotsAvailable / 2), totalSteps - activeIndex - 1);
+                const beforeActive = slotsAvailable - afterActive;
+
+                const startIndex = Math.max(0, activeIndex - beforeActive);
+                const endIndex = Math.min(totalSteps, activeIndex + afterActive + 1);
+
+                previousSteps = solidFormViewWorkflowData.slice(0, startIndex);
+                visibleSteps = solidFormViewWorkflowData.slice(startIndex, endIndex);
+                nextSteps = solidFormViewWorkflowData.slice(endIndex);
+            }
+        }
+    }
+
+    const hasPreviousSteps =
+    previousSteps.length > 0 && !isSingleVisibleStep;
+
+    const hasNextSteps =
+    nextSteps.length > 0 || (isSingleVisibleStep && previousSteps.length > 0);
 
     return (
         <>
             <Toast ref={toast} />
-            <div className='flex solid-dynamic-stepper'>
-                {visibleSteps.map((step: any, index: number) => {
-                    const isActive = index === activeIndex;
-                    const isBeforeActive = index < activeIndex;
-                    const isAfterActive = index > activeIndex;
-                    const isFirstVisible = index === 0;
-                    const isLastVisible = index === visibleSteps.length - 1;
-                    const isNextAfterActive = index === activeIndex + 1;
-                    const isTwoStepsOnly = visibleSteps.length === 2;
+            <div ref={containerRef} className='arrow-stepper-container'>
+                {hasPreviousSteps && (
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <button
+                            type='button'
+                            className="overflow-button overlow-left-button"
+                            onClick={(e) => {
+                                // @ts-ignore
+                                leftFormStepperOverlay.current.toggle(e)
+                            }}
+                        >
+                            <i className="pi pi-ellipsis-h" />
+                        </button>
+                        <OverlayPanel
+                            ref={leftFormStepperOverlay}
+                            className="solid-custom-overlay solid-form-stepper-overlay"
+                        >
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', padding: '0.5rem' }}>
+                                {previousSteps.map((step: any, index: number) => {
+                                    const stepIndex = index;
+                                    const isStepActive = stepIndex === activeIndex;
+                                    const isStepBeforeActive = stepIndex < activeIndex;
+
+                                    return (
+                                        <button
+                                            key={stepIndex}
+                                            type='button'
+                                            className={`overlay-step-button ${isStepActive ? 'active' : ''} ${isStepBeforeActive ? 'completed' : ''}`}
+                                            onClick={() => {
+                                                handleButtonClick(step.value);
+                                                // @ts-ignore
+                                                leftFormStepperOverlay.current.hide();
+                                            }}
+                                        >
+                                            {step.label}
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        </OverlayPanel>
+                    </div>
+                )}
+
+                {visibleSteps.map((step: any) => {
+                    const stepIndex = solidFormViewWorkflowData.findIndex(
+                        (s: any) => s.value === step.value
+                    );
+
+                    const isActive = stepIndex === activeIndex;
+                    const isBeforeActive = stepIndex < activeIndex;
+                    const isSingleButton = visibleSteps.length === 1;
 
                     return (
-                        <Button
-                            key={index}
+                        <button
+                            key={step.value}
                             type="button"
-                            className={`solid-step-button relative ${isTwoStepsOnly ? 'two-step-button' : ''} ${isActive ? 'p-button-primary' : ''} ${isBeforeActive ? 'p-button-secondary' : ''}`}
-                            text={!isActive && !isBeforeActive}
+                            className={`arrow-step-button ${
+                                isSingleButton ? 'single-button' : ''
+                            } ${
+                                isActive
+                                    ? 'arrow-step-active'
+                                    : isBeforeActive
+                                    ? 'arrow-step-completed'
+                                    : 'arrow-step-future'
+                            }`}
                             onClick={() => handleButtonClick(step.value)}
+                            title={step.label}
                         >
-                            {step.label}
-                            <>
-                                {isNextAfterActive && solidFormViewWorkflowData.map((step: any) => step.value).includes(solidWorkflowFieldValue) &&
-                                    (
-                                        <div className="absolute active-step-arrow">
-                                            <svg viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" fill="#000000" transform="rotate(30)"
-                                                height="48px"
-                                                width="48px"
-                                            >
-                                                <g id="SVGRepo_iconCarrier">
-                                                    <g id="color">
-                                                        <polygon fill={"var(--primary-color)"} points="36,62 65,12 7,12" />
-                                                    </g>
-                                                    <g id="line">
-                                                        <polyline fill="none" stroke="" stroke-miterlimit="10" stroke-width="1.5" points="36,62 65,12 7,12" />
-                                                    </g>
-                                                </g>
-                                            </svg>
-                                        </div>
-                                    )}
-
-                                {(isActive || isBeforeActive) && !isFirstVisible && (!isTwoStepsOnly || index === 1) && (
-                                    <div className="absolute active-before-step-arrow">
-                                        <svg viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" fill="#000000" transform="rotate(30)"
-                                            height="48px"
-                                            width="48px"
-                                        >
-                                            <g id="SVGRepo_iconCarrier">
-                                                <g id="color">
-                                                    <polygon fill="#EAEDF1" points="36,62 65,12 7,12" />
-                                                </g>
-                                                <g id="line">
-                                                    <polyline fill="none" stroke="var(--solid-stepper-border)" stroke-miterlimit="10" stroke-width="1.5" points="36,62 65,12 7,12" />
-                                                </g>
-                                            </g>
-                                        </svg>
-                                    </div>
-                                )}
-
-                                {isAfterActive && !isLastVisible && (
-                                    <div className="absolute inactive-step-arrow">
-                                        <svg viewBox="0 0 72 72" xmlns="http://www.w3.org/2000/svg" fill="#000000" transform="rotate(30)"
-                                            height="48px"
-                                            width="48px"
-                                        >
-                                            <g id="SVGRepo_iconCarrier">
-                                                <g id="color">
-                                                    <polygon fill="#fff" points="36,62 65,12 7,12" />
-                                                </g>
-                                                <g id="line">
-                                                    <polyline fill="none" stroke="var(--solid-stepper-border)" stroke-miterlimit="10" stroke-width="1.5" points="36,62 65,12 7,12" />
-                                                </g>
-                                            </g>
-                                        </svg>
-                                    </div>
-                                )}
-                            </>
-                            {solidFormViewWorkflowData.length > 5 && index === 4 && (
-                                <div className='absolute' style={{ right: 5 }}>
-                                    <Button
-                                        type='button'
-                                        icon="pi pi-angle-down"
-                                        text
-                                        size='small'
-                                        style={{ height: 24, width: '1.5rem', padding: 0 }}
-                                        onClick={(e) =>
-                                            // @ts-ignore 
-                                            formStepperOverlay.current.toggle(e)
-                                        }
-                                    />
-                                    <OverlayPanel ref={formStepperOverlay} className="solid-custom-overlay solid-form-stepper-overlay">
-                                        <div className='flex flex-column gap-1 p-1'>
-                                            {solidFormViewWorkflowData.slice(5).map((step: any, index: number) => (
-                                                <Button
-                                                    key={index}
-                                                    type='button'
-                                                    label={step.label}
-                                                    size='small'
-                                                    text
-                                                    onClick={() => handleButtonClick(step.value)}
-                                                />
-                                            ))}
-                                        </div>
-                                    </OverlayPanel>
-                                </div>
-                            )}
-                        </Button>
-                    )
+                            <span className="step-text">{step.label}</span>
+                        </button>
+                    );
                 })}
+
+                {hasNextSteps && (
+                    <div style={{ display: 'flex', alignItems: 'center' }}>
+                        <button
+                            type='button'
+                            className="overflow-button overflow-right-button"
+                            onClick={(e) => {
+                                // @ts-ignore
+                                formStepperOverlay.current.toggle(e)
+                            }}
+                        >
+                            <i className="pi pi-ellipsis-h" />
+                        </button>
+                        <OverlayPanel
+                            ref={formStepperOverlay}
+                            className="solid-custom-overlay solid-form-stepper-overlay"
+                        >
+                            <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', padding: '0.5rem' }}>
+                            {(isSingleVisibleStep
+                                ? [...previousSteps, ...nextSteps]
+                                : nextSteps).map((step: any) => {
+
+                                    const stepIndex = solidFormViewWorkflowData.findIndex(
+                                        (s: any) => s.value === step.value
+                                    );
+                                    
+                                    const isStepActive = stepIndex === activeIndex;
+                                    const isStepBeforeActive = stepIndex < activeIndex;
+
+                                    return (
+                                        <button
+                                            key={stepIndex}
+                                            type='button'
+                                            className={`overlay-step-button ${isStepActive ? 'active' : ''} ${isStepBeforeActive ? 'completed' : ''}`}
+                                            onClick={() => {
+                                                handleButtonClick(step.value);
+                                                // @ts-ignore
+                                                formStepperOverlay.current.hide();
+                                            }}
+                                        >
+                                            {step.label}
+                                        </button>
+                                    )
+                                })}
+                            </div>
+                        </OverlayPanel>
+                    </div>
+                )}
             </div>
         </>
     )

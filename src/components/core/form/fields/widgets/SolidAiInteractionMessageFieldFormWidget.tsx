@@ -105,7 +105,8 @@ export const JsonDisplay: React.FC<JsonDisplayProps> = ({ message }) => {
         const parsed = JSON.parse(message)
         formattedJson = JSON.stringify(parsed, null, 2)
     } catch (e) {
-        formattedJson = 'Invalid JSON'
+        // formattedJson = 'Invalid JSON'
+        formattedJson = message;
     }
 
     return (

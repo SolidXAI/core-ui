@@ -6,6 +6,8 @@ import { Divider } from 'primereact/divider';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { RadioButton } from 'primereact/radiobutton';
 import React, { useEffect, useRef, useState } from 'react'
+import { useDispatch, useSelector } from "react-redux";
+import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 
 export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllowed, setLayoutDialogVisible, viewModes, setShowSaveFilterPopup }: any) => {
     const op = useRef(null);
@@ -52,6 +54,12 @@ export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllow
         return () => document.removeEventListener("click", handleClickOutside);
     }, [isOverlayOpen])
 
+
+
+
+
+
+
     return (
         <div className="position-relative">
             <Button
@@ -60,6 +68,7 @@ export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllow
                 icon="pi pi-cog"
                 severity="secondary"
                 outlined
+                className='solid-icon-button'
                 // @ts-ignore
                 onClick={(e) => op.current.toggle(e)}
             />

@@ -1,6 +1,6 @@
 "use client"
 
-import { CancelButton } from "@/components/common/CancelButton";
+import { CancelButton, SolidCancelButton } from "@/components/common/CancelButton";
 import { handleError } from "@/helpers/ToastContainer";
 import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
 import { useCreatemodelMutation, useDeletemodelMutation, useLazyGetModelsQuery, useUpdatemodelMutation } from "@/redux/api/modelApi";
@@ -318,11 +318,26 @@ const CreateModel = ({ data, params }: any) => {
           type="button"
           icon={'pi pi-cog'}
           size="small"
-          className="surface-card p-0"
+          className="surface-card p-0 hidden md:flex"
           style={{
             height: 33.06,
             width: 33.06
           }}
+          onClick={(e) =>
+            // @ts-ignore 
+            op.current.toggle(e)
+          }
+        />
+          <Button
+          outlined
+          type="button"
+          icon={'pi pi-cog'}
+          size="small"
+          className="surface-card p-0 solid-icon-button md:hidden"
+          // style={{
+          //   height: 33.06,
+          //   width: 33.06
+          // }}
           onClick={(e) =>
             // @ts-ignore 
             op.current.toggle(e)
@@ -370,7 +385,7 @@ const CreateModel = ({ data, params }: any) => {
             <>
               <div className="flex align-items-center gap-3">
                 <BackButton />
-                <div className="form-wrapper-title">Create Model {modelMetaData?.displayName ? `- ${modelMetaData?.displayName}` : ""}</div>
+                <div className="form-wrapper-title solid-long-text-wrapper  ">Create Model {modelMetaData?.displayName ? `- ${modelMetaData?.displayName}` : ""}</div>
               </div>
               <div className="gap-3 flex">
                 {isDirty &&
@@ -383,14 +398,17 @@ const CreateModel = ({ data, params }: any) => {
             <>
               <div className="flex align-items-center gap-3">
                 <BackButton />
-                <div className="form-wrapper-title">Edit Model {modelMetaData?.displayName ? `- ${modelMetaData?.displayName}` : ""}</div>
+                <div className="form-wrapper-title solid-long-text-wrapper ">Edit Model {modelMetaData?.displayName ? `- ${modelMetaData?.displayName}` : ""}</div>
               </div>
               <div className="gap-3 flex">
                 {data?.isSystem !== true &&
                   <>
                     <div>
                       {isDirty &&
-                        <Button label="Save" size="small" type="submit" onClick={handleSubmit} />
+                      <>
+                        <Button label="Save" size="small" type="submit" className="hidden lg:flex" onClick={handleSubmit} />
+                        <Button  icon="pi pi-check" size="small" type="submit"  className=" lg:hidden solid-icon-button" onClick={handleSubmit} />
+                      </>
                       }
                     </div>
                     {/* <div>
@@ -398,7 +416,8 @@ const CreateModel = ({ data, params }: any) => {
                     </div> */}
                   </>
                 }
-                <CancelButton />
+                {/* <CancelButton /> */}
+                <SolidCancelButton/>
                 {formActionDropdown()}
               </div>
             </>
@@ -408,7 +427,7 @@ const CreateModel = ({ data, params }: any) => {
         {/* <div className="solid-form-stepper">
           <SolidFormStepper />
         </div> */}
-        <div className="p-3 md:p-4 solid-form-content">
+        <div className="px-4 py-3 md:p-4 solid-form-content">
           <TabView
             activeIndex={activeIndex}
             onTabChange={(e) => {
@@ -456,7 +475,7 @@ const CreateModel = ({ data, params }: any) => {
         </div>
       </div>
       {/* <div style={{ width: '22.5%' }}></div> */}
-      <Dialog header="Delete Field" headerClassName="py-2" contentClassName="px-0 pb-0" visible={deleteEntity} style={{ width: '20vw' }} onHide={() => { if (!deleteEntity) return; setDeleteEntity(false); }}>
+      <Dialog header="Delete Field" headerClassName="py-2" className="solid-confirm-dialog" contentClassName="px-0 pb-0" visible={deleteEntity} style={{ width: '20vw' }} onHide={() => { if (!deleteEntity) return; setDeleteEntity(false); }}>
         <Divider className="m-0" />
         <div className="p-4">
           <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>

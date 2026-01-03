@@ -417,11 +417,11 @@ const CreateModule = ({ data }: any) => {
         {/* <div className="solid-form-stepper">
           <SolidFormStepper />
         </div> */}
-        <div className="p-3 md:p-4 solid-form-content">
+        <div className="px-4 py-3 md:p-4 solid-form-content">
           {/* <p className="form-wrapper-heading text-base">Basic Info</p> */}
           <Panel header={"Basic Info"} className="solid-column-panel">
             <div className="formgrid grid mt-3">
-              <div className="field col-6 flex flex-column gap-2">
+              <div className="field col-12 pb-3 lg:pb-0 lg:col-6 flex flex-column gap-2">
                 <label htmlFor="displayName" className="form-field-label">
                   Display Name <span style={{ color: 'red' }}>*</span>
                 </label>
@@ -451,7 +451,7 @@ const CreateModule = ({ data }: any) => {
                   />
                 )}
               </div>
-              <div className="field col-6 flex flex-column gap-2">
+              <div className="field col-12  lg:col-6 flex flex-column gap-2">
                 <label htmlFor="name" className="form-field-label">
                   Name <span style={{ color: 'red' }}>*</span>
                 </label>
@@ -472,7 +472,7 @@ const CreateModule = ({ data }: any) => {
               </div>
             </div>
             <div className="formgrid grid mt-4">
-              <div className="field col-6 flex flex-column gap-2">
+              <div className="field col-12 pb-3 ld:pb-0 lg:col-6 flex flex-column gap-2"> 
                 <label htmlFor="description" className="form-field-label">
                   Menu Sequence Number
                 </label>
@@ -493,7 +493,7 @@ const CreateModule = ({ data }: any) => {
                   />
                 )}
               </div>
-              <div className="field col-6 flex flex-column gap-2">
+              <div className="field col-12 lg:col-6 flex flex-column gap-2">
                 <label htmlFor="description" className="form-field-label">
                   Description <span style={{ color: 'red' }}>*</span>
                 </label>
@@ -521,7 +521,7 @@ const CreateModule = ({ data }: any) => {
           {/* <p className="form-wrapper-heading text-base" style={{ fontSize: 16 }}>Configurations</p> */}
           <Panel header={"Configurations"} className="solid-column-panel mt-4">
             <div className="formgrid grid mt-3">
-              <div className="field col-6 flex flex-column gap-2">
+              <div className="field col-12 pb-3 lg:pb-0 lg:col-6 flex flex-column gap-2">
                 <label htmlFor="defaultDataSource" className="form-field-label">
                   Default Data Source
                 </label>
@@ -545,7 +545,7 @@ const CreateModule = ({ data }: any) => {
                   />
                 )}
               </div>
-              <div className="field col-6 flex flex-column gap-2">
+              <div className="field col-12 lg:col-6 flex flex-column gap-2">
                 <label htmlFor="menuIconUrl" className="form-label form-field-label">
                   Menu Icon <small className="text-red-500 helper-text">(only svg, png and jpeg are allowed)</small>
                 </label>
@@ -563,7 +563,7 @@ const CreateModule = ({ data }: any) => {
                       <FileReaderExt fileDetails={fileDetails} />
                       <div className="w-full flex flex-column gap-1">
                         <div className="flex align-items-center justify-content-between">
-                          <div className="font-bold">{fileDetails.name}</div>
+                          <div className="font-bold solid-module-mobile-text-wrapper">{fileDetails.name}</div>
                           <div className="cancel-upload-button" onClick={handleCancelUpload}>
                             <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 6 6" fill="none">
                               <path d="M0.6 6L0 5.4L2.4 3L0 0.6L0.6 0L3 2.4L5.4 0L6 0.6L3.6 3L6 5.4L5.4 6L3 3.6L0.6 6Z" fill="#4B4D52" />

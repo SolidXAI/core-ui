@@ -12,11 +12,11 @@ export const SolidListViewHeaderButton = ({ button, params, solidListViewMetaDat
     return (
         <Button
             type="button"
-            className={`text-left gap-2 ${button?.attrs?.className ? button?.attrs?.className : ''}`}
+            className={`text-left ${button?.attrs?.className ?? "gap-2"}`}
             label={button.attrs.label}
             size="small"
             iconPos="left"
-            icon={button?.attrs?.icon ? button?.attrs?.icon : "pi pi-pencil"}
+            icon={button?.attrs?.icon ?? button?.attrs?.icon}
             onClick={() => {
                 const event = {
                     params,

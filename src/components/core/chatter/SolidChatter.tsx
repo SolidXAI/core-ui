@@ -59,10 +59,10 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
         } else if (date.toDateString() === yesterday.toDateString()) {
             return 'Yesterday';
         } else {
-            return date.toLocaleDateString('en-US', { 
-                year: 'numeric', 
-                month: 'long', 
-                day: 'numeric' 
+            return date.toLocaleDateString('en-US', {
+                year: 'numeric',
+                month: 'long',
+                day: 'numeric'
             });
         }
     };
@@ -159,12 +159,12 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
 
     return (
         <div className='h-full'>
-            <SolidChatterHeader 
-                id={id} 
-                refetch={fetchData} 
-                modelSingularName={modelSingularName} 
-                activeTab={activeTab} 
-                handleTabClick={handleTabClick} 
+            <SolidChatterHeader
+                id={id}
+                refetch={fetchData}
+                modelSingularName={modelSingularName}
+                activeTab={activeTab}
+                handleTabClick={handleTabClick}
                 visibleBox={visibleBox}
                 onFilterChange={handleFilterChange}
             />
@@ -187,25 +187,33 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                     </div>
                 ) : (
                     <>
-                        {actionsAllowed.includes(`${permissionExpression('chatterMessage', 'findMany')}`) && messages.map((message, index) => {
-                            const showDateDivider = index === 0 || message.date !== messages[index - 1].date;
-                            return (
-                                <div key={message.id}>
-                                    {showDateDivider && <SolidChatterDateDivider date={message.date} />}
-                                    <SolidChatterMessageBox
-                                        user={message.user}
-                                        messageType={message.messageType}
-                                        message={message.message}
-                                        time={message.time}
-                                        auditRecord={message.auditRecord}
-                                        media={message.media}
-                                        messageSubType={message.messageSubType}
-                                        modelDisplayName={message.modelDisplayName}
-                                        modelUserKey={message.modelUserKey}
-                                    />
+                        {actionsAllowed.includes(`${permissionExpression('chatterMessage', 'findMany')}`) ?
+                            (messages.map((message, index) => {
+                                const showDateDivider = index === 0 || message.date !== messages[index - 1].date;
+                                return (
+                                    <div key={message.id}>
+                                        {showDateDivider && <SolidChatterDateDivider date={message.date} />}
+                                        <SolidChatterMessageBox
+                                            user={message.user}
+                                            messageType={message.messageType}
+                                            message={message.message}
+                                            time={message.time}
+                                            auditRecord={message.auditRecord}
+                                            media={message.media}
+                                            messageSubType={message.messageSubType}
+                                            modelDisplayName={message.modelDisplayName}
+                                            modelUserKey={message.modelUserKey}
+                                        />
+                                    </div>
+                                );
+                            }))
+                            : <div className="p-3">
+                                <div className='p-3 border-round text-red-500 bg-red-50 flex align-items-center gap-3'>
+                                    <i className="pi pi-exclamation-triangle" />
+                                    You do not have permission to view these messages.
                                 </div>
-                            );
-                        })}
+                            </div>
+                        }
                         {totalRecords > messages.length && (
                             <div className='flex justify-content-center mt-3 mb-3'>
                                 <span

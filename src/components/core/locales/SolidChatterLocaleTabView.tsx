@@ -1,9 +1,8 @@
-import React from 'react';
+import React, { useEffect, useState } from 'react';
 import { TabView, TabPanel } from 'primereact/tabview';
 import { SolidChatter } from '../chatter/SolidChatter';
 import SolidLocale from './SolidLocale';
 import './solid-locale.css';
-import { SolidXAIModule } from '../solid-ai/SolidXAIModule';
 import { SolidAiMainWrapper } from '../solid-ai/SolidAiMainWrapper';
 interface Props {
   solidFormViewMetaData: any;
@@ -21,6 +20,7 @@ interface Props {
   solidFormViewData: any;
   published: string | null;
   actionsAllowed?: string[];
+  mcpUrl?: string | null;
 }
 
 const SolidChatterLocaleTabView: React.FC<Props> = ({
@@ -37,12 +37,19 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
   defaultEntityLocaleId,
   solidFormViewData,
   published,
-  actionsAllowed
+  actionsAllowed,
+  mcpUrl
 }) => {
+
+
+
+
+
+
   return (
     <TabView className="SolidCustomLocaleTabviewPanels h-full" activeIndex={activeTab}>
-      {solidFormViewMetaData?.data?.solidView?.model?.internationalisation &&
-        <TabPanel header="Internationalisation" className={`SolidCustomLocaleTab p-2`}>
+      {solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow &&
+        <TabPanel header="Info" className={`SolidCustomLocaleTab p-2`}>
           <SolidLocale
             setSelectedLocale={setSelectedLocale}
             solidFormViewMetaData={solidFormViewMetaData}
@@ -68,11 +75,11 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
         />
       </TabPanel>
       {
-        process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' &&
+        mcpUrl &&
         (
           <TabPanel header="SolidX AI" className={`SolidCustomLocaleTab py-2`} contentClassName='h-full'>
             <div style={{ height: "calc(100vh - 60px)" }}>
-              <SolidAiMainWrapper />
+              <SolidAiMainWrapper mcpUrl={mcpUrl} />
             </div>
           </TabPanel>
         )
