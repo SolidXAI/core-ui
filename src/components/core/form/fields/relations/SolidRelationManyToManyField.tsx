@@ -45,7 +45,6 @@ export class SolidRelationManyToManyField implements ISolidField {
                 };
             });
         }
-
         return [];
     }
 

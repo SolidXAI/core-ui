@@ -2,7 +2,7 @@
 
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import qs from "qs";
 
 export const SolidManyToManyFilterElement = ({
@@ -41,20 +41,23 @@ export const SolidManyToManyFilterElement = ({
             );
         }
     };
+
+
     return (
         <AutoComplete
-        multiple
-        field="label"
-        value={value}
-        suggestions={suggestions}
-        completeMethod={search}
-        onChange={(e) => {
-            const cleanValues = Array.isArray(e.value) ? e.value : [];
-            updateInputs(index, cleanValues);
-        }}
-        placeholder={`Select ${fieldMetadata.displayName}`}
-        className="w-full"
-        inputClassName="w-full p-inputtext-sm"
-    />
+            // multiple
+            field="label"
+            value={value}
+            suggestions={suggestions}
+            completeMethod={search}
+            onChange={(e) => {
+                // const cleanValues = Array.isArray(e.value) ? e.value : [];
+                // updateInputs(index, cleanValues);
+                updateInputs(index, e.value)
+            }}
+            placeholder={`Select ${fieldMetadata.displayName}`}
+            className="w-full"
+            inputClassName="w-full p-inputtext-sm"
+        />
     );
 };
