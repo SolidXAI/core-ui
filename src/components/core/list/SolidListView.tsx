@@ -73,7 +73,7 @@ export const queryStringToQueryObject = () => {
   if (encodedQueryString) {
     try {
       const decodedQueryString = atob(encodedQueryString); // Base64 decode the string
-      const parsedParams = qs.parse(decodedQueryString); // Parse the decoded string into an object
+      const parsedParams = JSON.parse(decodedQueryString); // Parse the decoded string into an object
       return parsedParams;
     } catch (error) {
       console.error(
@@ -86,7 +86,7 @@ export const queryStringToQueryObject = () => {
 
 export const queryObjectToQueryString = (queryObject: string) => {
   if (queryObject) {
-    const stringifiedObject = qs.stringify(queryObject);
+    const stringifiedObject = JSON.stringify(queryObject);
     // const stringifiedObject = qs.stringify(queryObject, { encodeValuesOnly: true, arrayFormat: "brackets" });
     const encodedQueryString = btoa(stringifiedObject); // Base64 encode the stringified object
     const currentPageUrl = window.location.pathname; // Get the current page URL
@@ -899,10 +899,8 @@ export const SolidListView = (params: SolidListViewParams) => {
       let url;
       const urlData = structuredClone(queryData);
       delete urlData.filters;
-      urlData.custom_filter_predicate = latestCustomFilterRef.current.custom_filter_predicate || {};
-      urlData.search_predicate = latestCustomFilterRef.current.search_predicate || {};
-
-      queryObjectToQueryString(urlData);
+      urlData.custom_filter_predicate = latestCustomFilterRef.current.custom_filter_predicate || null;
+      urlData.search_predicate = latestCustomFilterRef.current.search_predicate || null;
 
       queryObjectToQueryString(urlData);
     }
@@ -1112,24 +1110,24 @@ export const SolidListView = (params: SolidListViewParams) => {
       deleteList.push(element.id);
     });
     deleteManySolidEntities(deleteList)
-    .unwrap()
-    .then(() => {
-      toast.current?.show({
-        severity: 'success',
-        summary: 'Deleted',
-        detail: ERROR_MESSAGES.RECORD_DELETE,
-        life: 3000
+      .unwrap()
+      .then(() => {
+        toast.current?.show({
+          severity: 'success',
+          summary: 'Deleted',
+          detail: ERROR_MESSAGES.RECORD_DELETE,
+          life: 3000
+        });
+        setDialogVisible(false);
+      })
+      .catch((error) => {
+        toast.current?.show({
+          severity: 'error',
+          summary: 'Delete Failed',
+          detail: error?.data?.message,
+          life: 4000
+        });
       });
-      setDialogVisible(false);
-    })
-    .catch((error) => {
-      toast.current?.show({
-        severity: 'error',
-        summary: 'Delete Failed',
-        detail: error?.data?.message,
-        life: 4000
-      });
-    });
   };
 
   // handle closing of the delete dialog...
