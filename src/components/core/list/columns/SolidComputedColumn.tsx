@@ -1,5 +1,6 @@
 'use client';
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
+import SolidBooleanColumn from './SolidBooleanColumn';
 import SolidDateColumn from './SolidDateColumn';
 import SolidDatetimeColumn from './SolidDatetimeColumn';
 import SolidIntColumn from './SolidIntColumn';
@@ -17,6 +18,9 @@ const SolidComputedColumn = ({ solidListViewMetaData, fieldMetadata, column }: S
     }
     if (fieldMetadata.computedFieldValueType === 'datetime') {
         return SolidDatetimeColumn({ solidListViewMetaData, fieldMetadata, column });
+    }
+    if (fieldMetadata.computedFieldValueType === 'boolean') {
+        return SolidBooleanColumn({ solidListViewMetaData, fieldMetadata, column });
     }
 };
 
