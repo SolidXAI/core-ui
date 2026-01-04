@@ -668,7 +668,8 @@ export const SolidListView = (params: SolidListViewParams) => {
             actionName: actionName,
           },
           user: user,
-          session: session.data
+          session: session.data,
+          params: params
         };
 
         if (dynamicHeader) {
@@ -881,7 +882,8 @@ export const SolidListView = (params: SolidListViewParams) => {
         actionName: actionName,
       },
       user: user,
-      session: session.data
+      session: session.data,
+      params: params
     };
 
     if (dynamicHeader) {
