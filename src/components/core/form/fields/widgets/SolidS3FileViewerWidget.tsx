@@ -18,6 +18,7 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
     const fileType = fieldLayoutInfo.attrs.fileType?.toLowerCase();
     const downloadAllowed = fieldLayoutInfo.attrs.downloadAllowed !== false;
     const bucketName = fieldLayoutInfo.attrs.bucketName;
+    const mediaStorageProviderUserKey = fieldLayoutInfo.attrs.mediaStorageProviderUserKey;
     const isPrivate = fieldLayoutInfo.attrs.isPrivate ? fieldLayoutInfo.attrs.isPrivate : "false";
 
     const imageRef = useRef<HTMLImageElement | null>(null);
@@ -40,6 +41,7 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
                 s3Key: value,
                 fileType: fileType,
                 bucketName: bucketName,
+                mediaStorageProviderUserKey: mediaStorageProviderUserKey,
                 isPrivate: isPrivate
             }).unwrap();
 
