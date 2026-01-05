@@ -1,7 +1,7 @@
 'use client';
 import { AutoComplete } from "primereact/autocomplete";
 import { useEffect, useState } from "react";
-
+import { getVirtualScrollerOptions } from "@/helpers/autoCompleteVirtualScroll";
 
 
 // UsesCases
@@ -27,15 +27,6 @@ export const MultipleSelectAutoCompleteField = ({ formik, isFormFieldValid, rela
     };
 
 
-    const MAX_VISIBLE_ITEMS = 5;
-    const ITEM_HEIGHT = 38;
-    
-    const height =
-      filteredItem.length >= MAX_VISIBLE_ITEMS
-        ? MAX_VISIBLE_ITEMS * ITEM_HEIGHT + 10
-        : MAX_VISIBLE_ITEMS * ITEM_HEIGHT;
-    
-    const MAX_HEIGHT = `${height}px`;
 
     return (
 
@@ -46,14 +37,9 @@ export const MultipleSelectAutoCompleteField = ({ formik, isFormFieldValid, rela
             invalid={isFormFieldValid(formik, fieldName)}
             completeMethod={searchItems}
             // virtualScrollerOptions={{ itemSize: 38 }}
-            virtualScrollerOptions={
-                filteredItem.length > MAX_VISIBLE_ITEMS
-                  ? {
-                      itemSize: ITEM_HEIGHT,
-                      scrollHeight: MAX_HEIGHT
-                    }
-                  : undefined
-              }
+            virtualScrollerOptions={getVirtualScrollerOptions({
+                itemsLength: filteredItem.length,
+              })}
             className="solid-standard-autocomplete w-full"
             // style={{
             //     maxHeight: 39.67
