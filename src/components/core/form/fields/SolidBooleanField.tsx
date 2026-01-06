@@ -13,6 +13,10 @@ import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 import { InputSwitch } from "primereact/inputswitch";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
 
+type BooleanOption = {
+    label: string;
+    value: string;
+};
 
 
 export class SolidBooleanField implements ISolidField {
@@ -147,16 +151,35 @@ export const DefaultBooleanFormEditWidget = ({ formik, fieldContext }: SolidForm
     const trueLabel = fieldLayoutInfo?.attrs?.trueLabel;
     const falseLabel = fieldLayoutInfo?.attrs?.falseLabel;
     const readOnlyPermission = fieldContext.readOnly;
-    const [booleanOptions, setBooleanOptions] = useState<string[]>(["false", "true"]);
+    // const [booleanOptions, setBooleanOptions] = useState<string[]>(["false", "true"]);
+    const [booleanOptions, setBooleanOptions] = useState<BooleanOption[]>([
+        { label: "False", value: "false" },
+        { label: "True", value: "true" },
+    ]);
+
     // let booleanOptions = ["false", "true"];
     useEffect(() => {
         if (trueLabel || falseLabel) {
-            setBooleanOptions([trueLabel, falseLabel])
+            setBooleanOptions([
+                {
+                    label: falseLabel ?? "False",
+                    value: "false",
+                },
+                {
+                    label: trueLabel ?? "True",
+                    value: "true",
+                },
+            ]);
         }
-    }, [trueLabel, falseLabel])
+    }, [trueLabel, falseLabel]);
 
-    useEffect(() => { formik.setFieldValue(fieldLayoutInfo.attrs.name, "false") }, [])
-
+    // useEffect(() => { formik.setFieldValue(fieldLayoutInfo.attrs.name, "false") }, [])
+    useEffect(() => {
+        const name = fieldLayoutInfo.attrs.name;
+        if (formik.values[name] === undefined || formik.values[name] === null) {
+            formik.setFieldValue(name, "false");
+        }
+    }, []);
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
     const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
@@ -185,6 +208,8 @@ export const DefaultBooleanFormEditWidget = ({ formik, fieldContext }: SolidForm
                 <SelectButton
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                     disabled={formDisabled || fieldDisabled}
+                    optionLabel="label"
+                    optionValue="value"
                     id={fieldLayoutInfo.attrs.name}
                     aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
                     onChange={(e) => { formik.setFieldValue(fieldLayoutInfo.attrs.name, e.value); console.log("value is", e.value) }} // Custom handling for boolean input
@@ -267,7 +292,7 @@ export const SolidBooleanCheckboxStyleFormEditWidget = ({ formik, fieldContext }
                                 "p-invalid": isFormFieldValid(formik, fieldLayoutInfo.attrs.name),
                             })}
                         />
-                        {checkboxLabel && 
+                        {checkboxLabel &&
                             <span className="ml-2">{checkboxLabel || "Yes"}</span>
                         }
                     </div>

@@ -26,6 +26,23 @@ interface PredefinedSearch {
     filters: Record<string, any>;
 }
 
+const extractFields = (nodes: any[] = []): any[] => {
+    const result: any[] = [];
+
+    for (const node of nodes) {
+        if (node?.type === "field") {
+            result.push(node);
+        }
+
+        if (Array.isArray(node?.children)) {
+            result.push(...extractFields(node.children));
+        }
+    }
+
+    return result;
+};
+
+
 const transformFiltersToRules = (filter: any, parentRule: number | null = null): FilterRule => {
     if (!filter || typeof filter !== "object" || Object.keys(filter).length === 0) {
         throw new Error("Invalid filter: expected a non-null object with properties");
@@ -640,17 +657,23 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         fn()
     }, [activeSavedFilter, savedFilters, savedFiltersLoaded])
 
+
+
+
     useEffect(() => {
         if (viewData?.data?.solidFieldsMetadata) {
             let fieldsData = viewData?.data?.solidFieldsMetadata;
             // console.log(`fiels data while rendering solid global search element: `);
             // console.log(fieldsData);
 
-            const children = viewData?.data?.solidView?.layout?.children ?? [];
+            const layoutChildren = viewData?.data?.solidView?.layout?.children ?? [];
+            const fieldElements = extractFields(layoutChildren);
+
 
             const fieldsList = Object.entries(fieldsData ?? {}).map(([key, value]: any) => {
-                const viewFieldElement = children.find((f: any) => f?.attrs?.name === key);
-
+                const viewFieldElement = fieldElements.find(
+                    (f: any) => f?.attrs?.name === key
+                );
                 return {
                     name: value.displayName,
                     value: key,
