@@ -1,7 +1,7 @@
 import { Tooltip } from "primereact/tooltip";
 
 const SolidTableRowCell = ({ value, truncateAfter }: { value: string; truncateAfter?: number }) => {
-    const safeValue = typeof value === "string" ? value : "";
+    const safeValue = value !== null && value !== undefined ? String(value) : "";
     // Utility function to detect if value contains HTML
     const isHTML = (str: string) => /<\/?[a-z][\s\S]*>/i.test(str);
 
