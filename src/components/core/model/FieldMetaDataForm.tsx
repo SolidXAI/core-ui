@@ -30,6 +30,7 @@ import React, { useCallback, useEffect, useMemo, useRef, useState } from "react"
 import * as Yup from "yup";
 import FieldSelector from "./FieldSelector";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { getVirtualScrollerOptions } from "@/helpers/autoCompleteVirtualScroll";
 
 
 
@@ -2602,7 +2603,10 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 invalid={isFormFieldValid(formik, "computedFieldValueType")}
                                 suggestions={filteredComputedFieldValueTypes}
                                 completeMethod={searchComputedFieldValueType}
-                                virtualScrollerOptions={{ itemSize: 38 }}
+                                // virtualScrollerOptions={{ itemSize: 38 }}
+                                 virtualScrollerOptions={getVirtualScrollerOptions({
+                                                    itemsLength: filteredComputedFieldValueTypes.length,
+                                                  })}
                                 field="label"
                                 dropdown
                                 className="solid-standard-autocomplete"

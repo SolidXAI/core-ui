@@ -20,6 +20,7 @@ import { Toast } from "primereact/toast";
 import { SolidFormFieldRender } from "../../SolidFormFieldRender";
 import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { getVirtualScrollerOptions } from "@/helpers/autoCompleteVirtualScroll";
 
 
 export type FormViewParams = {
@@ -464,11 +465,16 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                         onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
                         onFocus={(e) => e.target.select()}
                         className="w-full solid-standard-autocomplete"
-                        virtualScrollerOptions={{
-                            itemSize: 38,
+                        // virtualScrollerOptions={{
+                        //     itemSize: 38,
+                        //     lazy: true,
+                        //     onLazyLoad
+                        // }}
+                        virtualScrollerOptions={getVirtualScrollerOptions({
+                            itemsLength: autoCompleteItems.length,
                             lazy: true,
-                            onLazyLoad
-                        }}
+                            onLazyLoad,
+                          })}
                     />
                     {fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false && formViewParams &&
                         <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} customCreateHandler={customCreateHandler} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams}></RenderSolidFormEmbededView>
@@ -946,11 +952,16 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                         onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
                         onFocus={(e) => e.target.select()}
                         className="w-full solid-standard-autocomplete"
-                        virtualScrollerOptions={{
-                            itemSize: 38,
+                        // virtualScrollerOptions={{
+                        //     itemSize: 38,
+                        //     lazy: true,
+                        //     onLazyLoad
+                        // }}
+                        virtualScrollerOptions={getVirtualScrollerOptions({
+                            itemsLength: autoCompleteItems.length,
                             lazy: true,
-                            onLazyLoad
-                        }}
+                            onLazyLoad,
+                          })}
                     />
                     {
                         fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false && formViewParams && viewMode !== "view" &&

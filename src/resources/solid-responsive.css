@@ -145,6 +145,11 @@
         word-break: break-word;
     }
 
+    .solid-form-wrapper .solid-form-content {
+        height: calc(100vh - 120px) !important;
+        /* overflow-y: auto; */
+      }
+
     .kanban-ungrouped-column .kanban-card-container {
         flex: 1 1 calc(33.33% - 20px);
         max-width: calc(33.33% - 20px);
@@ -306,6 +311,8 @@
 
     .page-header {
         flex-shrink: 0;
+        padding: 10px 16px 12px 20px !important;
+
     }
 
 
@@ -327,6 +334,9 @@
     .solid-form-header {
         padding: 10px 16px 16px 20px !important;
     }
+    .solid-form-wrapper .solid-form-content {
+        height: calc(100vh - 138px) !important;
+      }
 
 
     .solid-text-wrapper {
@@ -570,8 +580,12 @@
 
     /* ============================= Solid Form ==================== */
     .solid-form-header {
-        padding: 10px 16px 16px 16px !important;
+        padding: 10px 16px 12px 16px !important;
     }
+
+    .solid-form-wrapper .solid-form-content {
+        height: calc(100vh - 130px) !important;
+      }
 
     .form-wrapper-title {
         font-size: 14px !important;

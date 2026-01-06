@@ -154,7 +154,7 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
                                             </div>
                                         </div>
                                         <div className="col-7 md:col-6 py-0" style={{ borderBottom: "1px solid var(--gray-100)" }}>
-                                            <div className={`flex align-items-center gap-2  py-2 md:px-3  ${fieldMapping[sample.cellHeader] ? "col-11 sm:col-12" : "col-12"} `}>
+                                            <div className={`flex w-full justify-between align-items-center gap-2  py-2 md:px-3  ${fieldMapping[sample.cellHeader] ? "col-11 sm:col-12" : "col-12"} `}>
                                                 <Dropdown
                                                     value={fieldMapping[sample.cellHeader]}
                                                     options={dropdownOptions}

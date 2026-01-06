@@ -60,6 +60,7 @@ import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
 import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 import { useLazyGetMcpUrlQuery } from "@/redux/api/solidSettingsApi";
+import { log } from "console";
 // import { ERROR_MESSAGES } from "@/constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -312,6 +313,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       const column = currentLayout?.children[i];
       const fieldMetadata = solidFieldsMetadata?.[column.attrs.name];
       if (!fieldMetadata?.type) {
+        console.log(`Some problem in rendering column: `, column);
         showFieldError(ERROR_MESSAGES.FIELD_NOT_IN_METADATA(column.attrs.label));
         // return;
       }
@@ -666,7 +668,8 @@ export const SolidListView = (params: SolidListViewParams) => {
             actionName: actionName,
           },
           user: user,
-          session: session
+          session: session.data,
+          params: params
         };
 
         if (dynamicHeader) {
@@ -863,7 +866,6 @@ export const SolidListView = (params: SolidListViewParams) => {
       queryData.showSoftDeleted = "inclusive";
     }
 
-
     //  SolidBeforeListDataLoad Event that allows filter modification just before api call 
     const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onBeforeListDataLoad;
     let DynamicFunctionComponent = null;
@@ -880,7 +882,8 @@ export const SolidListView = (params: SolidListViewParams) => {
         actionName: actionName,
       },
       user: user,
-      session: session
+      session: session.data,
+      params: params
     };
 
     if (dynamicHeader) {

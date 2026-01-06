@@ -25,13 +25,13 @@ export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, actionsAllowed,
                         if (!hasRole) return null;
                         return (
                             <Button
-                                text
+                                text={button?.attrs?.showText ?? true }
                                 type="button"
-                                className="w-full text-left gap-2"
+                                className={`w-full text-left ${button?.attrs?.className ?? 'gap-2' } `}
                                 label={button.attrs.label}
                                 size="small"
                                 iconPos="left"
-                                icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                                icon={button?.attrs?.icon ? button?.attrs?.icon : "pi pi-pencil"}
                                 onClick={() => {
                                     const event = {
                                         params,

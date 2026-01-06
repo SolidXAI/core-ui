@@ -436,7 +436,7 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
 
-    useEffect(() => { formik.setFieldValue(fieldLayoutInfo.attrs.name, "false") }, [])
+    // useEffect(() => { formik.setFieldValue(fieldLayoutInfo.attrs.name, "false") }, [])
 
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
     const formatFileSize = (size: number) => {
