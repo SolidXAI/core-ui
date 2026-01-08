@@ -14,7 +14,7 @@ import { SolidFormViewContextMenuHeaderButton } from "./SolidFormViewContextMenu
 import { hasAnyRole } from "@/helpers/rolesHelper";
 import { useSelector } from "react-redux";
 
-export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled }: any) => {
+export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate }: any) => {
     const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
     const router = useRouter();
     const pathname = usePathname();
@@ -485,6 +485,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                     id={params.id}
                     solidWorkflowFieldValue={solidWorkflowFieldValue}
                     setSolidWorkflowFieldValue={setSolidWorkflowFieldValue}
+                    onStepperUpdate={onStepperUpdate}
                 />
             }
         </>
