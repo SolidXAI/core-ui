@@ -58,8 +58,8 @@ import { hasAnyRole } from "@/helpers/rolesHelper";
 import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
-import { SolidXAIModule } from "../solid-ai/SolidXAIModule";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { useLazyGetMcpUrlQuery } from "@/redux/api/solidSettingsApi";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -457,6 +457,51 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const errorFields: string[] = [];
 
     const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
+
+    const [mcpUrl, setMcpUrl] = useState<string | null>(null);
+    const [getMcpUrl] = useLazyGetMcpUrlQuery();
+
+    useEffect(() => {
+
+        const fetchPermissions = async () => {
+            const permissionNames = ["SettingController.getMcpUrl"]
+            const queryData = {
+                permissionNames: permissionNames
+            };
+            const queryString = qs.stringify(queryData, {
+                encodeValuesOnly: true
+            });
+            const response = await triggerCheckIfPermissionExists(queryString);
+            if (response.data.data) {
+                if (response.data.data.includes("SettingController.getMcpUrl")) {
+                    enableSolidXAiPanel();
+                }
+            }
+        };
+        fetchPermissions();
+    }, []);
+
+
+
+    const enableSolidXAiPanel = async () => {
+        try {
+            const queryData = {
+                showHeader: "false",
+                inListView: "false"
+            };
+            const queryString = qs.stringify({ ...queryData }, { encodeValuesOnly: true });
+            const response = await getMcpUrl(queryString).unwrap();
+            console.log("response", response);
+            if (response && response?.data?.mcpUrl) {
+                setMcpUrl(response?.data?.mcpUrl);
+            }
+        } catch (error) {
+
+        }
+    }
+
+
+
     const op = useRef(null);
     useEffect(() => {
         const stored = localStorage.getItem('chatter_locale_width');
@@ -586,12 +631,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     const [
         publishSolidEntity,
-        { isSuccess:  isEntityPublishedSuccess, isError: isEntityPublishedError, error: entityPublishedError },
+        { isSuccess: isEntityPublishedSuccess, isError: isEntityPublishedError, error: entityPublishedError },
     ] = usePublishSolidEntityMutation();
 
     const [
         unpublishSolidEntity,
-        { isSuccess:  isEntityUnpublishedSuccess, isError: isEntityUnpublishedError, error: entityUnpublishedError },
+        { isSuccess: isEntityUnpublishedSuccess, isError: isEntityUnpublishedError, error: entityUnpublishedError },
     ] = useUnpublishSolidEntityMutation();
 
     // - - - - - - - - - - - -- - - - - - - - - - - - METADATA here
@@ -610,7 +655,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
         if (
             isEntityCreateSuccess == true ||
             isEntityUpdateSuceess == true ||
-            isEntityDeleteSuceess == true
+                isEntityDeleteSuceess == true ||
+            isEntityPatchSuceess == true ||
+            isEntityPublishedSuccess == true ||
+            isEntityUnpublishedSuccess == true
         ) {
             setRefreshChatterMessage(true);
             if (params.embeded == true && params.onEmbeddedFormSave) {
@@ -631,7 +679,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
             }
         }
-    }, [isEntityCreateSuccess, isEntityUpdateSuceess, isEntityDeleteSuceess]);
+    }, [isEntityCreateSuccess, isEntityUpdateSuceess, isEntityDeleteSuceess, isEntityPatchSuceess, isEntityPublishedSuccess, isEntityUnpublishedSuccess]);
 
     useEffect(() => {
 
@@ -664,7 +712,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 severity: 'error',
                 summary: 'Error',
                 detail: errorMessage,
-                life: 3000,
+                sticky: true,
                 //@ts-ignore
                 content: () => (
                     <div className="flex flex-column align-items-left" style={{ flex: "1" }}>
@@ -691,11 +739,20 @@ const SolidFormView = (params: SolidFormViewProps) => {
             handleError(entityDeleteError);
         } else if (isEntityUpdateError) {
             handleError(entityUpdateError);
+        } else if (isEntityPatchError) {
+            handleError(entityPatchError);
+        } else if (isEntityPublishedError) {
+            handleError(entityPublishedError);
+        } else if (isEntityUnpublishedError) {
+            handleError(entityUnpublishedError);
         }
     }, [
         isEntityCreateError,
         isEntityDeleteError,
-        isEntityUpdateError
+        isEntityUpdateError,
+        isEntityPatchError,
+        isEntityPublishedError,
+        isEntityUnpublishedError
     ]);
 
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
@@ -703,7 +760,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+                ? { sticky: true }            // stays until user closes
+                : { life: 3000 }),
         });
     };
 
@@ -789,9 +848,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     if (!params.embeded) {
                         const currentUrl = new URL(window.location.href);
                         currentUrl.pathname = currentUrl.pathname.replace(/new$/, result?.data?.id);
+                        currentUrl.searchParams.set('viewMode', 'view');
                         const updatedUrl = currentUrl.toString();
                         router.push(updatedUrl);
-                        const updatedPath = currentUrl.toString();
                         setViewMode("view")
                     }
                     return result;
@@ -1397,31 +1456,31 @@ const SolidFormView = (params: SolidFormViewProps) => {
             setConfirmVisible(false);
         };
         const handleDraftPublishWorkFlow = async (type: "publish" | "unpublish") => {
-        const userChoice = await confirmDialogWithPromise();
-        if (!userChoice) return;
+            const userChoice = await confirmDialogWithPromise();
+            if (!userChoice) return;
 
-        // const finalPublishedValue =
-        //     type === "publish" ? new Date().toISOString() : "";
+            // const finalPublishedValue =
+            //     type === "publish" ? new Date().toISOString() : "";
 
-     //   setPublished(finalPublishedValue);
+            //   setPublished(finalPublishedValue);
 
-        // const formdata = new FormData();
-        // formdata.append("publishedAt", finalPublishedValue);
+            // const formdata = new FormData();
+            // formdata.append("publishedAt", finalPublishedValue);
 
-        let result;
+            let result;
 
-        if (type === "publish") {
-            result = await publishSolidEntity(params.id).unwrap();
-            showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_PUBLISH);
-        } else {
-            result = await unpublishSolidEntity(params.id).unwrap();
-            showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_UNPUBLISH);
-        }
+            if (type === "publish") {
+                result = await publishSolidEntity(params.id).unwrap();
+                showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_PUBLISH);
+            } else {
+                result = await unpublishSolidEntity(params.id).unwrap();
+                showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_UNPUBLISH);
+            }
 
-        console.log("publish/unpublish result", result);
+            console.log("publish/unpublish result", result);
 
-        // Set updated publish value from API response
-        setPublished(result?.data?.publishedAt);
+            // Set updated publish value from API response
+            setPublished(result?.data?.publishedAt);
         };
 
 
@@ -1451,7 +1510,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const hasMedia = slides.some((s) => s.type === "video");
 
 
-        console.log("lightbox urls", slides);
 
         return (
             <div className="solid-form-wrapper">
@@ -1477,8 +1535,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             publish={published}
                             internationalisationEnabled={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}
                             handleDraftPublishWorkFlow={handleDraftPublishWorkFlow}
+                            onStepperUpdate={() => setRefreshChatterMessage(true)}
                         />
-                        <div className={`p-3 md:p-4 solid-form-content ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
+                        <div className={`px-4 py-3 md:p-4 solid-form-content ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
                             {params.id === 'new' && DynamicFormComponentNew ? (
                                 <DynamicFormComponentNew params={params} />
@@ -1491,7 +1550,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     </form>
                 </div>
                 {params.embeded !== true &&
-                    <div className={`chatter-section ${isShowChatter === false ? 'collapsed' : ''}`} style={{ width: chatterLocaleWidth }}>
+                    <div className={`chatter-section ${isShowChatter === false ? 'collapsed' : 'open'}`} style={{ width: chatterLocaleWidth }}>
                         {isShowChatter && (
                             <div
                                 style={{
@@ -1523,24 +1582,24 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('info')}>
                                         Info
                                     </div>}
-                                    <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('chatter')}>
-                                        Audit Trail
-                                    </div>
-                                    {
-                                        process.env.NEXT_PUBLIC_ENABLE_SOLIDX_AI === 'true' &&
-                                        (
-                                            <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('solidx-ai')}>
-                                                <div className="flex gap-2"> <SolidXAIIcon /> SolidX AI </div>
-                                            </div>
-                                        )
-                                    }
-                                    <Button
-                                        icon="pi pi-chevron-left"
-                                        size="small"
-                                        className="px-0"
-                                        style={{ width: 30 }}
-                                        onClick={() => handleChatterExpandClick('default')}
-                                    />
+                                <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('chatter')}>
+                                    Audit Trail
+                                </div>
+                                {
+                                    mcpUrl &&
+                                    (
+                                        <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('solidx-ai')}>
+                                            <div className="flex gap-2"> <SolidXAIIcon /> SolidX AI </div>
+                                        </div>
+                                    )
+                                }
+                                <Button
+                                    icon="pi pi-chevron-left"
+                                    size="small"
+                                    className="px-0"
+                                    style={{ width: 30 }}
+                                    onClick={() => handleChatterExpandClick('default')}
+                                />
                             </div>
                             :
                             <SolidChatterLocaleTabView
@@ -1558,6 +1617,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 solidFormViewData={solidFormViewData}
                                 published={published}
                                 actionsAllowed={actionsAllowed}
+                                mcpUrl={mcpUrl}
                             />
                         }
                     </div>
@@ -1566,6 +1626,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 <Dialog
                     visible={isDeleteDialogVisible}
                     header="Confirm Delete"
+                    className="solid-confirm-dialog"
                     modal
                     footer={() => (
                         <div className="flex justify-content-center">
@@ -1582,9 +1643,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     header="Change Form Layout"
                     modal
                     onHide={() => setLayoutDialogVisible(false)}
-                    contentStyle={{
-                        width: 800
+                    style={{ width: '50vw' }}
+                    breakpoints={{
+                        '960px': '80vw',
+                        '641px': '95vw'
                     }}
+                    contentClassName="p-3 pt-0 lg:p-4"
                 >
                     <SolidFormUserViewLayout solidFormViewMetaData={solidFormViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
                 </Dialog>

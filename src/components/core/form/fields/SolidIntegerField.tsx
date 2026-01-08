@@ -78,7 +78,7 @@ export class SolidIntegerField implements ISolidField {
             editWidget = 'DefaultIntegerFormEditWidget';
         }
         if (!viewWidget) {
-            viewWidget = 'DefaultShortTextFormViewWidget';
+            viewWidget = 'DefaultIntegerFormViewWidget';
         }
         const viewMode: string = this.fieldContext.viewMode;
         return (
@@ -112,6 +112,23 @@ export class SolidIntegerField implements ISolidField {
             </>
         )
     }
+}
+
+
+export const DefaultIntegerFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+    return (
+        <div className="mt-2 flex-column gap-2">
+            {showFieldLabel !== false && (
+                <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+            )}
+            <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name] && typeof formik.values[fieldLayoutInfo.attrs.name] !== "object" && formik.values[fieldLayoutInfo.attrs.name]}</p>
+        </div>
+    );
 }
 
 

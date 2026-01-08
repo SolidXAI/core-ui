@@ -215,30 +215,33 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                 }}
             />
 
-            {/* VIEW ALL BUTTON */}
-            {fullrecord?.length > 1 && (
-                <Button
-                    type='button'
-                    text
-                    size='small'
-                    label='View All'
-                    className='view-media-button'
-                    onClick={(event) => {
-                        event.stopPropagation();
+                {fullrecord?.length > 1 && <span
+                        style={{
+                            color: "#0895CD",
+                            fontWeight: "bold",
+                            cursor: "pointer",
+                            marginLeft: "4px"
+                        }}
+                        onClick={(event) => {
+                            event.stopPropagation();
+    
+                            if (isDocumentType(fullrecord[0]?.fileUrl)) {
+                                setShowAllFiles(true);
+                            } else {
+                                const urlsWithType = fullrecord.map((file: any) => ({
+                                    src: file.fileUrl,
+                                    downloadUrl: file.fileUrl
+                                }));
+                                setLightboxUrls(urlsWithType);
+                                setOpenLightbox(true);
+                            }
+                        }}
+                    >
+                        +{fullrecord.length - 1}
+                   </span>
+                }
 
-                        if (isDocumentType(fullrecord[0]?.fileUrl)) {
-                            setShowAllFiles(true);
-                        } else {
-                            const urlsWithType = fullrecord.map((file: any) => ({
-                                src: file.fileUrl,
-                                downloadUrl: file.fileUrl
-                            }));
-                            setLightboxUrls(urlsWithType);
-                            setOpenLightbox(true);
-                        }
-                    }}
-                />
-            )}
+             
 
             {/* VIEW ALL DIALOG */}
             <Dialog

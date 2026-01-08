@@ -1,7 +1,7 @@
 'use client';
 import { AutoComplete } from "primereact/autocomplete";
 import { useEffect, useState } from "react";
-
+import { getVirtualScrollerOptions } from "@/helpers/autoCompleteVirtualScroll";
 
 
 // UsesCases
@@ -28,7 +28,6 @@ export const MultipleSelectAutoCompleteField = ({ formik, isFormFieldValid, rela
 
 
 
-
     return (
 
         <AutoComplete
@@ -37,7 +36,10 @@ export const MultipleSelectAutoCompleteField = ({ formik, isFormFieldValid, rela
             suggestions={filteredItem}
             invalid={isFormFieldValid(formik, fieldName)}
             completeMethod={searchItems}
-            virtualScrollerOptions={{ itemSize: 38 }}
+            // virtualScrollerOptions={{ itemSize: 38 }}
+            virtualScrollerOptions={getVirtualScrollerOptions({
+                itemsLength: filteredItem.length,
+              })}
             className="solid-standard-autocomplete w-full"
             // style={{
             //     maxHeight: 39.67

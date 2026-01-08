@@ -101,7 +101,7 @@ const authProviders: NextAuthOptions = {
                         } else {
 
                             let data = JSON.stringify({
-                                username: email,
+                                username: username,
                                 email: email,
                                 password: password
                             });

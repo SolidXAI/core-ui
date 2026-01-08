@@ -27,6 +27,7 @@ const SolidPopupContainer = () => {
             headerClassName='p-0'
             contentClassName='p-0'
             contentStyle={{ borderRadius: 6 }}
+            className='solid-common-dialog'
         >
             {DynamicComponent && <DynamicComponent {...event} />}
         </Dialog>

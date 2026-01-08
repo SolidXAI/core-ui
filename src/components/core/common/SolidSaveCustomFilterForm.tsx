@@ -58,7 +58,7 @@ export const SolidSaveCustomFilterForm: React.FC<SolidSaveCustomFilterFormProps>
             <div className="mt-3 flex align-items-center gap-2">
                 <Button
                     type="submit"
-                    label="Save"
+                    label={currentSavedFilterData ? "Update" : "Save"}
                     size="small"
                 />
                 <Button

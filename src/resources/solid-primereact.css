@@ -689,9 +689,12 @@
         padding: 0.53rem 0.65625rem;
     }
 
-    .solid-custom-filter-wrapper .p-inputtext {
-        min-width: 24rem !important;
+    @media(min-width:992px){
+        .solid-custom-filter-wrapper .p-inputtext {
+            min-width: 24rem !important;
+        }
     }
+
 
     .p-inputtext.p-inputtext-lg {
         font-size: 1.25rem;

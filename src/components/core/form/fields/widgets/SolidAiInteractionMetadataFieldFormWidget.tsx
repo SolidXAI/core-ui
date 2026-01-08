@@ -4,6 +4,8 @@ import MarkdownViewer from "@/components/common/MarkdownViewer";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
 import { TabView, TabPanel } from "primereact/tabview";
+import ReactCodeMirror, { EditorView, oneDark } from "@uiw/react-codemirror";
+import { javascript } from "@codemirror/lang-javascript";
 
 export const SolidAiInteractionMetadataFieldFormWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
 
@@ -120,6 +122,18 @@ export const SolidAiInteractionMetadataFieldFormWidget = ({ formik, fieldContext
                     {value?.user_prompt && (
                         <div>
                             <MarkdownViewer data={value.user_prompt} />
+                        </div>
+                    )}
+                </TabPanel>
+                <TabPanel header="Token Usage">
+                    {value?.tokenUsage && (
+                        <div className={`p-3 `} style={{ width: '100%' }}>
+                            <ReactCodeMirror
+                                value={JSON.stringify(value.tokenUsage, null, 2)}
+                                style={{ fontSize: '10px' }}
+                                theme={oneDark}
+                                extensions={[javascript(), EditorView.lineWrapping]}
+                            />
                         </div>
                     )}
                 </TabPanel>

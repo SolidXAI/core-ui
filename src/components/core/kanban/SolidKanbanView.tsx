@@ -29,7 +29,7 @@ import "yet-another-react-lightbox/plugins/counter.css";
 import { useRouter, useSearchParams } from "next/navigation";
 import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
 import { KanbanUserViewLayout } from "./KanbanUserViewLayout";
-import { useSelector } from "react-redux";
+import { useDispatch, useSelector } from "react-redux";
 import { queryObjectToQueryString, queryStringToQueryObject } from "../list/SolidListView";
 
 
@@ -37,7 +37,7 @@ import { Toast } from "primereact/toast";
 import { useSelector } from "react-redux";
 import { queryObjectToQueryString, queryStringToQueryObject } from "../list/SolidListView";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
-
+import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 
 
 type SolidKanbanViewParams = {
@@ -49,6 +49,8 @@ type SolidKanbanViewParams = {
 
 export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const { user } = useSelector((state: any) => state.auth);
+  const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
+  const dispatch = useDispatch()
 
   const solidGlobalSearchElementRef = useRef();
   const searchParams = useSearchParams().toString(); // Converts the query params to a string
@@ -246,7 +248,9 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       severity,
       summary,
       detail,
-      life: 3000,
+      ...(severity === "error"
+        ? { sticky: true }            // stays until user closes
+        : { life: 3000 }),
     });
   };
   // Get the kanban view data.
@@ -325,12 +329,24 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           const filters = {
             $and: []
           }
-          if (queryObject.s_filter) {
-            filters.$and.push(queryObject.s_filter);
+          // if (queryObject.s_filter) {
+          //   filters.$and.push(queryObject.s_filter);
+          // }
+          // if (queryObject.c_filter) {
+          //   filters.$and.push(queryObject.c_filter);
+          // }
+          if (queryObject.custom_filter_predicate) {
+            filters.$and.push(queryObject.custom_filter_predicate);
           }
-          if (queryObject.c_filter) {
-            filters.$and.push(queryObject.c_filter);
+          if (queryObject.search_predicate) {
+            filters.$and.push(queryObject.search_predicate);
           }
+          // if (queryObject.saved_filter_predicate) {
+          //   filters.$and.push(queryObject.saved_filter_predicate);
+          // }
+          // if (queryObject.predefined_search_predicate) {
+          //   filters.$and.push(queryObject.predefined_search_predicate);
+          // }
 
           const queryData = {
             offset: 0,
@@ -352,13 +368,12 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           setRecordsInSwimlane(queryData.groupFilter.limit);
           setToPopulate(queryData.populate);
           setToPopulateMedia(queryData.populateMedia);
-          setFilters(filters);
+          // setFilters(filters);
           setQueryDataLoaded(true);
 
           queryString = qs.stringify(queryData, {
             encodeValuesOnly: true
           });
-
 
         } else {
           const { recordsInSwimlane, toPopulate, toPopulateMedia } = initialFilterMethod();
@@ -390,7 +405,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           setQueryDataLoaded(true)
         }
 
-        triggerGetSolidEntities(queryString);
+        // triggerGetSolidEntities(queryString);
         setSelectedRecords([]);
       }
     }
@@ -639,19 +654,36 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         $and: [
         ]
       }
-      if (transformedFilter.s_filter) {
-        queryfilter.$and.push(transformedFilter.s_filter)
+      // if (transformedFilter.s_filter) {
+      //   queryfilter.$and.push(transformedFilter.s_filter)
+      // }
+      // if (transformedFilter.c_filter) {
+      //   queryfilter.$and.push(transformedFilter.c_filter)
+      // }
+
+
+      if (transformedFilter.custom_filter_predicate) {
+        queryfilter.$and.push(transformedFilter.custom_filter_predicate);
       }
-      if (transformedFilter.c_filter) {
-        queryfilter.$and.push(transformedFilter.c_filter)
+      if (transformedFilter.search_predicate) {
+        queryfilter.$and.push(transformedFilter.search_predicate);
+      }
+      if (transformedFilter.saved_filter_predicate) {
+        queryfilter.$and.push(transformedFilter.saved_filter_predicate);
+      }
+      if (transformedFilter.predefined_search_predicate) {
+        queryfilter.$and.push(transformedFilter.predefined_search_predicate);
       }
 
       const customFilter = transformedFilter;
       const updatedFilter = { ...(filters || {}), ...(queryfilter || {}) };
-      setFilters((prevFilters) => ({ ...(prevFilters || {}), ...(queryfilter || {}) }));
+
+      // Then update state
+      setFilters(updatedFilter);
+
 
       const swimlanesCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.swimlanesCount || 5;
-      const { toPopulate, toPopulateMedia } = initialFilterMethod();
+      // const { toPopulate, toPopulateMedia } = initialFilterMethod();
 
       const queryData = {
         offset: 0,
@@ -676,10 +708,12 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       // only present if handleCustomFilter is applied
       if (customFilter) {
         let url
-        const urlData = queryData;
+        const urlData =  structuredClone(queryData);
         delete urlData.filters;
-        urlData.s_filter = customFilter.s_filter || {};
-        urlData.c_filter = customFilter.c_filter || {};
+        // urlData.s_filter = customFilter.s_filter || {};
+        // urlData.c_filter = customFilter.c_filter || {};
+        urlData.custom_filter_predicate = customFilter.custom_filter_predicate || {};
+        urlData.search_predicate = customFilter.search_predicate || {};
         queryObjectToQueryString(urlData);
       }
 
@@ -716,51 +750,93 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
   const kanbanViewTitle = solidKanbanViewMetaData?.data?.solidView?.displayName
 
+
+  const toggleBothSidebars = () => {
+    if (visibleNavbar) {
+      dispatch(toggleNavbar());   // close both
+    } else {
+      dispatch(showNavbar());     // open both
+    }
+  };
+
   return (
     <div className="page-parent-wrapper">
       <Toast ref={toast} />
-      <div className="page-header">
-        <div className="flex gap-3 align-items-center">
-          <p className="m-0 view-title">{kanbanViewTitle}</p>
+      <div className="page-header flex-column lg:flex-row">
+        <div className="flex justify-content-between w-full ">
+
+          <div className="flex align-items-center solid-header-buttons-wrapper">
+            {params.embeded !== true &&
+              <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                <i className="pi pi-th-large"></i>
+              </div>
+            }
+
+            <p className="m-0 view-title solid-text-wrapper">{kanbanViewTitle}</p>
+            {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
+              // <SolidGlobalSearchElement viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} ></SolidGlobalSearchElement>
+              <div className="hidden lg:flex">
+                <SolidGlobalSearchElement showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
+              </div>
+            }
+          </div>
+
+          <div className="flex align-items-center solid-header-buttons-wrapper">
           {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
-            // <SolidGlobalSearchElement viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} ></SolidGlobalSearchElement>
+            <div className="flex lg:hidden">
+                  <Button
+                    type="button"
+                    size="small"
+                    icon="pi pi-search"
+                    severity="secondary"
+                    outlined
+                    className="solid-icon-button"
+                    onClick={()=>setShowGlobalSearchElement(!showGlobalSearchElement)}>
+                  </Button>
+              </div>
+            }
+
+            {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.create !== false &&
+              <SolidCreateButton url={createButtonUrl} responsiveIconOnly={true} />
+            }
+
+            {actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false && selectedRecords.length > 0 && <Button
+              type="button"
+              label="Delete"
+              size="small"
+              onClick={() => setDialogVisible(true)}
+              className="small-button "
+              severity="danger"
+            />}
+            <Button
+              type="button"
+              size="small"
+              icon="pi pi-refresh"
+              severity="secondary"
+              className="solid-icon-button"
+              outlined
+              onClick={() => {
+                window.location.reload()
+              }}
+            />
+            <SolidKanbanViewConfigure
+              solidKanbanViewMetaData={solidKanbanViewMetaData}
+              actionsAllowed={actionsAllowed}
+              viewModes={viewModes}
+              setLayoutDialogVisible={setLayoutDialogVisible}
+              setShowSaveFilterPopup={setShowSaveFilterPopup}
+            />
+            {/* <SolidConfigureLayoutElement></SolidConfigureLayoutElement> */}
+          </div>
+        </div>
+        {/* </div> */}
+        {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && showGlobalSearchElement && (
+          <div className="flex lg:hidden">
             <SolidGlobalSearchElement showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
-
-          }
-        </div>
-        <div className="flex align-items-center gap-3">
-          {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.create !== false &&
-            <SolidCreateButton url={createButtonUrl} />
-          }
-
-          {actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false && selectedRecords.length > 0 && <Button
-            type="button"
-            label="Delete"
-            size="small"
-            onClick={() => setDialogVisible(true)}
-            className="small-button"
-            severity="danger"
-          />}
-          <Button
-            type="button"
-            size="small"
-            icon="pi pi-refresh"
-            severity="secondary"
-            outlined
-            onClick={() => {
-              window.location.reload()
-            }}
-          />
-          <SolidKanbanViewConfigure
-            solidKanbanViewMetaData={solidKanbanViewMetaData}
-            actionsAllowed={actionsAllowed}
-            viewModes={viewModes}
-            setLayoutDialogVisible={setLayoutDialogVisible}
-            setShowSaveFilterPopup={setShowSaveFilterPopup}
-          />
-          {/* <SolidConfigureLayoutElement></SolidConfigureLayoutElement> */}
-        </div>
+          </div>
+        )}
       </div>
+
       <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
       {solidKanbanViewMetaData && kanbanViewData &&
         <KanbanBoard groupByFieldName={groupByFieldName} groupedView={groupedView} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl}></KanbanBoard>
@@ -770,6 +846,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         visible={isDialogVisible}
         header="Confirm Delete"
         modal
+        className="solid-confirm-dialog"
         footer={() => (
           <div className="flex justify-content-center">
             <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteBulk} />
@@ -793,9 +870,14 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         header="Change Kanban Layout"
         modal
         onHide={() => setLayoutDialogVisible(false)}
-        contentStyle={{
-          width: 800
+        // contentStyle={{
+        //   width: 800
+        // }}
+        style={{ width: '800px' }}
+        breakpoints={{
+          '1024px': '75vw', '991px': '86vw', '767px': '92vw', '250px': '96vw'
         }}
+
       >
         <KanbanUserViewLayout solidKanbanViewMetaData={solidKanbanViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
       </Dialog>

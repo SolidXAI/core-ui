@@ -86,7 +86,7 @@ export const SolidChatterHeader = (props: Props) => {
     return (
         <div className={styles.chatterTitle}>
             <div className='flex justify-content-between align-items-center'>
-                <div className="form-wrapper-title">
+                <div className="form-wrapper-title ">
                     Activity
                 </div>
                 <div className='flex align-items-center gap-2'>
@@ -117,11 +117,22 @@ export const SolidChatterHeader = (props: Props) => {
                         size='small'
                         severity="secondary"
                         aria-label="Filter"
-                        style={{ 
+                        style={{
                             width: 20,
                             color: hasActiveFilters ? '#722ED1' : undefined
                         }}
                         onClick={handleFilterClick}
+                    />
+                    <Button
+                        icon="pi pi-refresh"
+                        text
+                        size='small'
+                        severity="secondary"
+                        aria-label="Refresh"
+                        style={{
+                            width: 20
+                        }}
+                        onClick={refetch}
                     />
                 </div>
             </div>
@@ -141,6 +152,7 @@ export const SolidChatterHeader = (props: Props) => {
                 visible={showFilterDialog} 
                 style={{ width: 500 }} 
                 onHide={() => setShowFilterDialog(false)}
+                className='solid-chatter-filter-main'
             >
                 <div className="p-fluid">
                     <div className="flex flex-column gap-2">

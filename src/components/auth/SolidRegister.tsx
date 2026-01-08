@@ -62,7 +62,7 @@ const SolidRegister = () => {
                     severity: "error",
                     summary: ERROR_MESSAGES.ERROR,
                     detail: errorMessages.join(", "),
-                    life: 3000,
+                    sticky: true
                 });
             } else {
                 const serializedError = error as Error;
@@ -70,7 +70,7 @@ const SolidRegister = () => {
                     severity: "error",
                     summary: ERROR_MESSAGES.ERROR ,
                     detail: serializedError.message || ERROR_MESSAGES.ERROR_OCCURED,
-                    life: 3000,
+                    sticky: true
                 });
             }
         }
@@ -92,7 +92,9 @@ const SolidRegister = () => {
             severity,
             summary,
             detail,
-            life: 3000,
+            ...(severity === "error"
+            ? { sticky: true }            // stays until user closes
+            : { life: 3000 }),
         });
     };
 
@@ -265,7 +267,7 @@ const SolidRegister = () => {
                             {isFormFieldValid(formik, "password") &&
                                 <Message severity="error" text={formik.errors.password?.toString()} />}
                         </div>
-                        <SolidPasswordHelperText text={solidSettingsData?.data?.authenticationPasswordComplexityDescription} />
+                        {/* <SolidPasswordHelperText text={solidSettingsData?.data?.authenticationPasswordComplexityDescription} /> */}
                         <div className="mt-4">
                             <Button className="w-full font-light auth-submit-button" label="Sign Up" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
                         </div>
@@ -426,7 +428,7 @@ const SolidRegister = () => {
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-4' : 'text-left'}`}>Sign Up</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>Sign Up</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
                 <AuthTabs passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} showNameFieldsForRegistration={solidSettingsData?.data?.showNameFieldsForRegistration} />
                 {solidSettingsData?.data?.iamGoogleOAuthEnabled &&
@@ -440,7 +442,7 @@ const SolidRegister = () => {
                     </>
                 }
             </div>
-            <div className="text-center mt-4">
+            <div className="text-center mt-3 md:mt-4">
                 <div className="text-sm text-400 secondary-dark-color">
                     Already have an account ? <Link className="font-bold" href="/auth/login">Sign In</Link>
                 </div>

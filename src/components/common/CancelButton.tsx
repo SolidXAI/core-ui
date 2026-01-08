@@ -18,7 +18,7 @@ export const CancelButton = () => {
     };
     return (
         <div>
-            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse' style={{ minWidth: 66 }}/>
+            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse' style={{ minWidth: 66 }} />
         </div>
     )
 }
@@ -39,10 +39,23 @@ export const SolidCancelButton = () => {
         // Navigate back to the previous path with the appropriate view type
         const newPath = pathname.replace(/\/form\/[^/]+$/, `/${view}`);
         router.push(newPath);
+        // fromView = sessionStorage.getItem("fromView");
+        // if (fromView) {
+        //     router.push(fromView);
+        // } else {
+        //     // fallback if path is not matched
+        //     router.back();
+        // }
     };
     return (
-        <div>
-            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse' style={{ minWidth: 66 }}/>
-        </div>
+        <>
+            {/* <div className="hidden lg:flex"> */}
+            {/* <div> */}
+            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse hidden lg:flex' style={{ minWidth: 66 }} />
+            {/* </div> */}
+            {/* </div> */}
+            <Button size="small" type="button" icon="pi pi-times" onClick={handleGoBack} className='bg-primary-reverse solid-icon-button flex lg:hidden' />
+        </>
     )
 }
+

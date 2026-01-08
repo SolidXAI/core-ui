@@ -345,7 +345,7 @@ export class SolidViewLayoutManager {
      * @param attrs - Attributes to update
      * @returns true if button was updated
      */
-    updateRowButton(
+    updateRowButtonByAction(
         fieldName: string,
         action: string,
         attrs: Partial<LayoutAttribute>
@@ -371,7 +371,7 @@ export class SolidViewLayoutManager {
      * @param action - Button action identifier
      * @returns true if button was removed
      */
-    removeRowButton(fieldName: string, action: string): boolean {
+    removeRowButtonByAction(fieldName: string, action: string): boolean {
         const fieldNode = this.findNode(this.layout, fieldName);
         if (!fieldNode?.attrs?.rowButtons) return false;
 

@@ -4,7 +4,7 @@ import { SolidFormFieldWidgetProps } from "@/types/solid-core";
 import { Message } from "primereact/message";
 import { SelectButton } from "primereact/selectbutton";
 import { classNames } from "primereact/utils";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import * as Yup from 'yup';
 import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
@@ -13,6 +13,10 @@ import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
 import { InputSwitch } from "primereact/inputswitch";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
 
+type BooleanOption = {
+    label: string;
+    value: string;
+};
 
 
 export class SolidBooleanField implements ISolidField {
@@ -91,7 +95,7 @@ export class SolidBooleanField implements ISolidField {
         let viewWidget = fieldLayoutInfo.attrs.viewWidget;
         let editWidget = fieldLayoutInfo.attrs.editWidget;
         if (!editWidget) {
-            editWidget = 'booleanSelectbox';
+            editWidget = 'booleanCheckbox';
         }
         if (!viewWidget) {
             viewWidget = 'DefaultBooleanFormViewWidget';
@@ -142,13 +146,40 @@ export const DefaultBooleanFormEditWidget = ({ formik, fieldContext }: SolidForm
     const fieldLayoutInfo = fieldContext.field;
     const className = fieldLayoutInfo.attrs?.className || 'field col-12';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-    const booleanOptions = ["false", "true"];
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+    const trueLabel = fieldLayoutInfo?.attrs?.trueLabel;
+    const falseLabel = fieldLayoutInfo?.attrs?.falseLabel;
     const readOnlyPermission = fieldContext.readOnly;
+    // const [booleanOptions, setBooleanOptions] = useState<string[]>(["false", "true"]);
+    const [booleanOptions, setBooleanOptions] = useState<BooleanOption[]>([
+        { label: "False", value: "false" },
+        { label: "True", value: "true" },
+    ]);
 
-    useEffect(() => { formik.setFieldValue(fieldLayoutInfo.attrs.name, "false") }, [])
+    // let booleanOptions = ["false", "true"];
+    useEffect(() => {
+        if (trueLabel || falseLabel) {
+            setBooleanOptions([
+                {
+                    label: falseLabel ?? "False",
+                    value: "false",
+                },
+                {
+                    label: trueLabel ?? "True",
+                    value: "true",
+                },
+            ]);
+        }
+    }, [trueLabel, falseLabel]);
 
+    // useEffect(() => { formik.setFieldValue(fieldLayoutInfo.attrs.name, "false") }, [])
+    useEffect(() => {
+        const name = fieldLayoutInfo.attrs.name;
+        if (formik.values[name] === undefined || formik.values[name] === null) {
+            formik.setFieldValue(name, "false");
+        }
+    }, []);
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
     const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
@@ -177,6 +208,8 @@ export const DefaultBooleanFormEditWidget = ({ formik, fieldContext }: SolidForm
                 <SelectButton
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                     disabled={formDisabled || fieldDisabled}
+                    optionLabel="label"
+                    optionValue="value"
                     id={fieldLayoutInfo.attrs.name}
                     aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
                     onChange={(e) => { formik.setFieldValue(fieldLayoutInfo.attrs.name, e.value); console.log("value is", e.value) }} // Custom handling for boolean input
@@ -197,7 +230,6 @@ export const DefaultBooleanFormEditWidget = ({ formik, fieldContext }: SolidForm
     );
 }
 
-
 export const SolidBooleanCheckboxStyleFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
@@ -205,6 +237,7 @@ export const SolidBooleanCheckboxStyleFormEditWidget = ({ formik, fieldContext }
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+    const checkboxLabel = fieldLayoutInfo?.attrs?.checkboxLabel;
     const readOnlyPermission = fieldContext.readOnly;
 
     // Set default value to false on mount
@@ -259,7 +292,9 @@ export const SolidBooleanCheckboxStyleFormEditWidget = ({ formik, fieldContext }
                                 "p-invalid": isFormFieldValid(formik, fieldLayoutInfo.attrs.name),
                             })}
                         />
-                        <span className="ml-2">{fieldLabel || "Yes"}</span>
+                        {checkboxLabel &&
+                            <span className="ml-2">{checkboxLabel || "Yes"}</span>
+                        }
                     </div>
                 </div>
 
@@ -366,21 +401,35 @@ export const SolidBooleanSwitchStyleFormEditWidget = ({ formik, fieldContext }: 
     );
 }
 
-
-
-
 export const DefaultBooleanFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+
+    // const trueLabel = fieldLayoutInfo?.attrs?.trueLabel;
+    // const falseLabel = fieldLayoutInfo?.attrs?.falseLabel;
+
+    const [trueLabel, setTrueLabel] = useState<string>("true");
+    const [falseLabel, setFalseLabel] = useState<string>("false");
+
+    useEffect(() => {
+        if (fieldLayoutInfo?.attrs?.trueLabel) {
+            setTrueLabel(fieldLayoutInfo?.attrs?.trueLabel)
+        }
+        if (fieldLayoutInfo?.attrs?.falseLabel) {
+            setFalseLabel(fieldLayoutInfo?.attrs?.falseLabel)
+        }
+    }, [fieldLayoutInfo?.attrs?.falseLabel, fieldLayoutInfo?.attrs?.trueLabel])
+
+
     return (
         <div className="mt-2 flex-column gap-2">
             {showFieldLabel !== false && (
                 <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
             )}
-            <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name] === true || formik.values[fieldLayoutInfo.attrs.name] === "true" ? "true" : "false"}</p>
+            <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name] === true || formik.values[fieldLayoutInfo.attrs.name] === "true" ? trueLabel : falseLabel}</p>
         </div>
     );
 }

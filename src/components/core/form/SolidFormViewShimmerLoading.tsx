@@ -5,15 +5,15 @@ import { Skeleton } from 'primereact/skeleton'
 export const SolidFormViewShimmerLoading = () => {
     return (
         <div className='h-screen surface-0'>
-            <div className="page-header">
+            <div className="page-header pl-2 ">
                 <div className='flex align-items-center gap-3'>
-                    <Skeleton width="2rem" height="2rem"></Skeleton>
-                    <Skeleton width="300px" className='border-round-lg'></Skeleton>
+                    <Skeleton width="50px" height='1.4rem' className='md:h-1.3rem  border-round-lg '></Skeleton>
+                    <Skeleton width="300px" className='border-round-lg hidden md:flex'></Skeleton>
                 </div>
                 <div className='flex align-items-center gap-3'>
-                    <Skeleton width="4rem" height="2rem"></Skeleton>
-                    <Skeleton width="4rem" height="2rem"></Skeleton>
-                    <Skeleton width="2rem" height="2rem"></Skeleton>
+                    <Skeleton width="2.7rem" height="1.6rem" className="md:w-4rem md:h-2rem" />
+                    <Skeleton width="2.7rem" height="1.6rem" className="md:w-4rem md:h-2rem" />
+                    <Skeleton width="2.7rem" height="1.6rem" className="md:w-4rem md:h-2rem flex md:hidden" />
                 </div>
             </div>
             <div className="page-header" style={{ borderTop: '1px solid var(--primary-light-color)' }}>

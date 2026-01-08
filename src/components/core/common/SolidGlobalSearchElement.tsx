@@ -6,7 +6,7 @@ import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@/c
 import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Divider } from "primereact/divider";
-import { useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { queryStringToQueryObject } from "../list/SolidListView";
 import { InputText } from "primereact/inputtext";
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
@@ -14,6 +14,8 @@ import qs from "qs";
 import { useSelector } from "react-redux";
 import { SolidSaveCustomFilterForm } from "./SolidSaveCustomFilterForm";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { hydrateRelationRules } from "@/helpers/hydrateRelationRules";
+
 const getRandomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
 }
@@ -24,7 +26,27 @@ interface PredefinedSearch {
     filters: Record<string, any>;
 }
 
+const extractFields = (nodes: any[] = []): any[] => {
+    const result: any[] = [];
+
+    for (const node of nodes) {
+        if (node?.type === "field") {
+            result.push(node);
+        }
+
+        if (Array.isArray(node?.children)) {
+            result.push(...extractFields(node.children));
+        }
+    }
+
+    return result;
+};
+
+
 const transformFiltersToRules = (filter: any, parentRule: number | null = null): FilterRule => {
+    if (!filter || typeof filter !== "object" || Object.keys(filter).length === 0) {
+        throw new Error("Invalid filter: expected a non-null object with properties");
+    }
     if (!filter || typeof filter !== "object") {
         throw new Error("Invalid filter: expected a non-null object");
     }
@@ -36,7 +58,13 @@ const transformFiltersToRules = (filter: any, parentRule: number | null = null):
             matchOperator: FilterOperator.OR,
             parentRule,
             children: filter["$or"]
-                .filter((sub: any) => sub != null) // skip nulls
+                .filter((sub: any) => {
+                    // Filter out null, undefined, empty strings, and empty objects
+                    if (sub == null) return false;
+                    if (typeof sub === "string" && sub.trim() === "") return false;
+                    if (typeof sub === "object" && Object.keys(sub).length === 0) return false;
+                    return true;
+                })
                 .map((subFilter: any) => transformFiltersToRules(subFilter, currentId))
         };
     }
@@ -48,31 +76,58 @@ const transformFiltersToRules = (filter: any, parentRule: number | null = null):
             matchOperator: FilterOperator.AND,
             parentRule,
             children: filter["$and"]
-                .filter((sub: any) => sub != null)
+                .filter((sub: any) => {
+                    // Filter out null, undefined, empty strings, and empty objects
+                    if (sub == null) return false;
+                    if (typeof sub === "string" && sub.trim() === "") return false;
+                    if (typeof sub === "object" && Object.keys(sub).length === 0) return false;
+                    return true;
+                })
                 .map((subFilter: any) => transformFiltersToRules(subFilter, currentId))
         };
     }
 
     // Handle single rule condition
-    for (const key in filter) {
-        const condition = filter[key];
+    for (const fieldName in filter) {
+        const condition = filter[fieldName];
         if (!condition || typeof condition !== "object") {
-            throw new Error(`Invalid condition for field '${key}'`);
+            throw new Error(`Invalid condition for field '${fieldName}'`);
         }
+
+        // CASE 1: relation filter → unwrap first
+        if (condition?.id && typeof condition?.id === "object") {
+            for (const matchMode in condition.id) {
+                const rawValue = condition.id[matchMode];
+                const mathcModeValue: any = matchMode
+                return {
+                    id: currentId,
+                    type: FilterRuleType.RULE,
+                    fieldName,
+                    matchMode: mathcModeValue,
+                    value: Array.isArray(rawValue) ? rawValue : [rawValue],
+                    parentRule,
+                    children: []
+                };
+            }
+        }
+
+        // CASE 2: normal field → loop stays
         for (const matchMode in condition) {
+            const rawValue = condition[matchMode];
+            const mathcModeValue: any = matchMode
             return {
                 id: currentId,
                 type: FilterRuleType.RULE,
-                fieldName: key,
-                //@ts-ignore
-                matchMode,
-                value: matchMode !== "$between" ? [condition[matchMode]] : condition[matchMode],
+                fieldName,
+                matchMode: mathcModeValue,
+                value: Array.isArray(rawValue) ? rawValue : [rawValue],
                 parentRule,
                 children: []
             };
         }
-    }
 
+
+    }
     throw new Error(ERROR_MESSAGES.INVALID_FILTER_STRUCTURE);
 }
 
@@ -83,33 +138,51 @@ let idCounter = 1;
 const generateId = () => Date.now() + Math.floor(Math.random() * 1000);
 
 
-const transformRulesToFilters = (input: any) => {
+const transformRulesToFilters = (input: any, viewData: any) => {
 
     // Helper function to process individual rules
     const processRule = (rule: any) => {
-        if (rule.value && rule.value.length > 0) {
+        if (rule.value !== undefined && rule.value !== null) {
 
             // Ensure rule.value is always an array
             let values = typeof rule.value[0] === "object" ? rule.value.map((i: any) => i?.value ? i?.value : i) : rule?.value;
-            if (rule.matchMode !== '$in' && rule.matchMode !== '$notIn' && rule.matchMode !== '$between') {
+            if (rule.matchMode !== '$in' && rule.matchMode !== '$notIn' && rule.matchMode !== '$between' && rule.matchMode !== '$null' && rule.matchMode !== '$notNull') {
                 values = values[0];
             }
-            // Rule transformation
-            let transformedRule = {
-                [rule.fieldName]: {
-                    [rule.matchMode]: values    // Assuming `value` is always an array with `value` and `label`
-                }
-            };
 
-            // If the rule has children (which means it's a rule group), process them
+
+            const fieldMeta = viewData?.data?.solidFieldsMetadata?.[rule.fieldName];
+            const isManyToMany = fieldMeta?.type === 'relation' && fieldMeta?.relationType === 'many-to-many';
+
+
+            let transformedRule;
+            if (isManyToMany) {
+                // For many-to-many relations, always use array format for $in/$notIn
+                transformedRule = {
+                    [rule.fieldName]: {
+                        id: {
+                            [rule.matchMode]: values // Keep as array
+                        }
+                    }
+                };
+            } else {
+                // Rule transformation
+                transformedRule = {
+                    [rule.fieldName]: {
+                        [rule.matchMode]: values    // Assuming `value` is always an array with `value` and `label`
+                    }
+                };
+            }
+
             let processedFields;
             if (rule.children && rule.children.length > 0) {
-                processedFields = rule.children.map((child: any) => processRuleGroup(child));
+                processedFields = rule.children.map((child: any) => processRuleGroup(child)).filter((child: any) => child != null);;
             }
             if (processedFields) {
                 return { ...transformedRule, processedFields }
             }
             return { ...transformedRule }
+
         }
 
     };
@@ -125,15 +198,29 @@ const transformRulesToFilters = (input: any) => {
                 // Process the rule group recursively
                 return processRuleGroup(child);
             }
-        });
+        }).filter((child: any) => child != null);
+        // If no valid children, return null
+        // if (children.length === 0) {
+        //     return null;
+        // }
+
+        // If only one child, return it directly without wrapping in operator
+        // if (children.length === 1) {
+        //     return children[0];
+        // }
 
         return {
             [operator]: children
         };
     };
 
+
     // Start processing the root rule group
     const filterObject = processRuleGroup(input);
+
+    if (!filterObject) {
+        return {};
+    }
 
     function liftProcessedFields(filters: any) {
         if (!filters || typeof filters !== 'object') return filters;
@@ -166,9 +253,12 @@ const transformRulesToFilters = (input: any) => {
 
         return filters;
     }
+
+
     return liftProcessedFields(filterObject)
 
 }
+
 
 type GroupedType = {
     values: string[];
@@ -265,6 +355,26 @@ export const mergeSearchAndCustomFilters = (transformedFilter: any, newFilter: a
 }
 
 
+export const mergeAllDiffFilters = (customFilter: any, searchFilter: any, savedFilter: any, preDefinedFilter?: any) => {
+    const filters: any = {};
+
+    // Add only non-null filters
+    if (customFilter && Object.keys(customFilter).length > 0) {
+        filters["custom_filter_predicate"] = customFilter;
+    }
+    if (searchFilter && Object.keys(searchFilter).length > 0) {
+        filters["search_predicate"] = searchFilter;
+    }
+    if (savedFilter && Object.keys(savedFilter).length > 0) {
+        filters["saved_filter_predicate"] = savedFilter;
+    }
+    if (preDefinedFilter && Object.keys(preDefinedFilter).length > 0) {
+        filters["predefined_search_predicate"] = preDefinedFilter;
+    }
+    // Return the combined filters object
+    return filters;
+}
+
 const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, openSavedCustomFilter, setSavedFilterTobeDeleted, setIsDeleteSQDialogVisible }: any) => {
     return (
         <div className="flex align-items-center justify-content-between gap-2">
@@ -313,6 +423,10 @@ const replacePlaceholders = (obj: any, searchValue: string): any => {
     return obj;
 };
 
+type RelationCache = Map<string, { label: string; value: number }>;
+
+
+
 export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCustomFilter, filters, clearFilter, showSaveFilterPopup, setShowSaveFilterPopup }: any, ref) => {
     const defaultState: FilterRule[] = [
         {
@@ -343,6 +457,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         }
     ];
     const [initialState, setInitialState] = useState(defaultState);
+    const pathname = usePathname();
+
 
     const searchParams = useSearchParams() // Converts the query params to a string
     const activeSavedFilter = searchParams?.get("savedQuery");
@@ -351,19 +467,41 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     const chipsRef = useRef<HTMLDivElement | null | any>(null);
 
+    // filterRules is used to maintian the ui of custom filter 
+    // customFilter is used to maintian the transformed filter object of custom filter
     const [filterRules, setFilterRules] = useState<FilterRule[]>(initialState);
+    const [customFilter, setCustomFilter] = useState<any | null>(null);
+
     const [fields, setFields] = useState<any[]>([]);
     const [searchableFields, setSearchableFields] = useState<any[]>([]);
+
+    // used to show the list of predefined searches 
     const [predefinedSearches, setPredefinedSearches] = useState<PredefinedSearch[]>([]);
+
+    // used to open / close the custom fitler popup 
     const [showGlobalSearchElement, setShowGlobalSearchElement] = useState<boolean>(false);
-    const [customChip, setCustomChip] = useState("");
+
+    // searchChips maintain the ui to display searched query 
+    // searchFilter maintain the transformed filter of the  searched query 
     const [searchChips, setSearchChips] = useState<{ columnName?: string; value: string }[]>([]);
-    const [predefinedSearchChip, setPredefinedSearchChip] = useState<{ name: string; value: string } | null>(null);
-    const [inputValue, setInputValue] = useState<string | null>("");
     const [searchFilter, setSearchFilter] = useState<any | null>(null);
-    const [customFilter, setCustomFilter] = useState<any | null>(null);
+
+    // predefinedSearchChip maintain the ui to display predefined searches query 
+    const [predefinedSearchChip, setPredefinedSearchChip] = useState<{ name: string; value: string } | null>(null);
+
+    //  state to maintain the text typed in the search input box
+    const [inputValue, setInputValue] = useState<string | null>("");
+
+    // flag to prevent un necessary re renders
     const [hasSearched, setHasSearched] = useState<boolean>(false);
+
+    // currentSavedFilterData  is used to save the whole object of saved filter 
     const [currentSavedFilterData, setCurrentSavedFilterData] = useState<any>();
+    const [currentSavedFilterQuery, setCurrentSavedFilterQuery] = useState<any>();
+    const [currentSavedFilterRules, setCurrentSavedFilterRules] = useState<any>();
+    const [showSavedFilterComponent, setShowSavedFilterComponent] = useState<boolean>(false);
+
+
     const [savedFilterTobeDeleted, setSavedFilterTobeDeleted] = useState<any>();
     const [isDeleteSQDialogVisible, setIsDeleteSQDialogVisible] = useState<boolean>(false);
     const [savedFilterQueryString, setSavedFilterQueryString] = useState<string>();
@@ -372,7 +510,13 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     const { user } = useSelector((state: any) => state.auth);
 
 
+
+    const [refreshKey, setRefreshKey] = useState(0);
+
+    const [predefinedSearchBaseFilter, setPredefinedSearchBaseFilter] = useState<any>(null);
+
     const [savedFilters, setSavedFilters] = useState([]);
+    const [savedFiltersLoaded, setSavedFiltersLoaded] = useState(false);
 
     const entityApi = createSolidEntityApi("savedFilters");
     const {
@@ -398,51 +542,52 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         { isSuccess: isEntityDeleteSuceess, isError: isEntityDeleteError, error: entityDeleteError },
     ] = useDeleteSolidEntityMutation();
 
-    const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading, error }] = useLazyGetSolidEntitiesQuery();
+    const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading: isSavedFilterLoading, error }] = useLazyGetSolidEntitiesQuery();
 
-
-    useEffect(() => {
-
-        const filters = {
-            $or: [
-                {
-                    $and: [
-                        { model: { $in: [viewData?.data?.solidView?.model?.id] } },
-                        { view: { $in: [viewData?.solidView?.id] } },
-                        { user: { $in: [user?.user?.id] } },
-                        { isPrivate: { $eq: true } }
-                    ]
-                },
-                {
-                    $and: [
-                        { model: { $in: [viewData?.data?.solidView?.model?.id] } },
-                        { view: { $in: [viewData?.solidView?.id] } },
-                        { isPrivate: { $eq: false } }
-                    ]
-                }
-
-            ]
-
-        }
-
-        const queryData: any = {
-            offset: 0,
-            limit: 10,
-            filters: filters,
-            populate: ["model", "view", "user"],
-            sort: ["id:desc"],
-        };
-        const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
-        setSavedFilterQueryString(queryString)
-        triggerGetSolidEntities(queryString);
-
-    }, [searchParams])
+    const [savedFilterFetchDataRefreshKey, setSavedFilterFetchDataRefreshKey] = useState(0);
 
     useEffect(() => {
-        if (solidEntityListViewData) {
-            setSavedFilters(solidEntityListViewData.records)
+        const fn = async () => {
+            setSavedFiltersLoaded(false)
+            const filters = {
+                $or: [
+                    {
+                        $and: [
+                            { model: { $in: [viewData?.data?.solidView?.model?.id] } },
+                            { view: { $in: [viewData?.solidView?.id] } },
+                            { user: { $in: [user?.user?.id] } },
+                            { isPrivate: { $eq: true } }
+                        ]
+                    },
+                    {
+                        $and: [
+                            { model: { $in: [viewData?.data?.solidView?.model?.id] } },
+                            { view: { $in: [viewData?.solidView?.id] } },
+                            { isPrivate: { $eq: false } }
+                        ]
+                    }
+
+                ]
+            }
+            const queryData: any = {
+                offset: 0,
+                limit: 10,
+                filters: filters,
+                populate: ["model", "view", "user"],
+                sort: ["id:desc"],
+            };
+            const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
+            setSavedFilterQueryString(queryString)
+            const savedFilter = await triggerGetSolidEntities(queryString).unwrap();
+
+            if (savedFilter) {
+                console.log("savedFilter", savedFilter);
+                setSavedFilters(savedFilter?.records)
+                setSavedFiltersLoaded(true);
+            }
         }
-    }, [solidEntityListViewData])
+        fn()
+    }, [activeSavedFilter, savedFilterFetchDataRefreshKey])
 
     useImperativeHandle(ref, () => ({
         clearFilter: () => {
@@ -451,52 +596,69 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     }));
 
     useEffect(() => {
-        let searchChips: any;
-        let customChips: any;
-        let parsedSearchParams = searchParams;
+        const fn = async () => {
+            let searchChips: any;
+            let customChips: any;
+            let parsedSearchParams = searchParams;
+            if (savedFiltersLoaded) {
 
+                if (activeSavedFilter && savedFilters.length === 0) return;
 
-        const savedQuery = parsedSearchParams?.get("savedQuery");
-        if (savedQuery && savedFilters.length > 0) {
-            const currentSavedFilterId = Number(savedQuery);
-            const currentSavedFilterData: any = savedFilters.find((savedFilter: any) => savedFilter.id === currentSavedFilterId);
-            setCurrentSavedFilterData(currentSavedFilterData)
-            if (currentSavedFilterData) {
-                const filterJson = JSON.parse(currentSavedFilterData?.filterQueryJson);
-                if (filterJson) {
-                    searchChips = filterJson?.s_filter || null;
-                    customChips = filterJson?.c_filter || null;
+                const queryObject = queryStringToQueryObject();
+                // const savedQuery = parsedSearchParams?.get("savedQuery");
+                if (activeSavedFilter) {
+                    const currentSavedFilterId = Number(activeSavedFilter);
+                    const currentSavedFilterData: any = savedFilters.find((savedFilter: any) => savedFilter.id === currentSavedFilterId);
+                    setCurrentSavedFilterData(currentSavedFilterData);
+                    if (currentSavedFilterData) {
+                        const filterJson = JSON.parse(currentSavedFilterData?.filterQueryJson);
+                        if (filterJson) {
+                            let finalSavedFilter = filterJson
+                            setCurrentSavedFilterQuery(finalSavedFilter)
+                        }
+                    }
+                } else {
+                    setCurrentSavedFilterData(null)
+                    setCurrentSavedFilterQuery(null)
                 }
-            }
-        } else {
-            const queryObject = queryStringToQueryObject();
-            if (queryObject) {
-                searchChips = queryObject?.s_filter || null;
-                customChips = queryObject?.c_filter || null;
+                if (queryObject) {
+                    if (queryObject) {
+                        searchChips = queryObject?.search_predicate || null;
+                        customChips = queryObject?.custom_filter_predicate || null;
+                    }
+                }
+                if (searchChips) {
+                    const formattedChips = searchChips?.$and.map((chip: any, key: any) => {
+                        const chipKey = Object.keys(chip)[0]; // Get the key, e.g., "displayName"
+                        const chipValue = chip[chipKey]?.$containsi; // Get the value of "$containsi"
+                        const chipdata = {
+                            columnName: chipKey,
+                            value: chipValue
+                        };
+                        return chipdata
+                    }
+                    );
+                    setSearchChips(formattedChips);
+                    setSearchFilter(searchChips);
+
+                }
+
+                if (customChips && Object.keys(customChips).length !== 0) {
+                    setCustomFilter(customChips);
+                    const rules: FilterRule = transformFiltersToRules(customChips);
+                    const hydratedRules = await hydrateRelationRules([rules], viewData);
+                    setFilterRules(hydratedRules);
+                }
+
+                setHasSearched(true);
+                setRefreshKey((prev) => prev + 1)
             }
         }
-        if (searchChips) {
-            const formattedChips = searchChips?.$and.map((chip: any, key: any) => {
-                const chipKey = Object.keys(chip)[0]; // Get the key, e.g., "displayName"
-                const chipValue = chip[chipKey]?.$containsi; // Get the value of "$containsi"
-                const chipdata = {
-                    columnName: chipKey,
-                    value: chipValue
-                };
-                return chipdata
-            }
-            );
-            setSearchChips(formattedChips);
-            setSearchFilter(searchChips);
-            setHasSearched(true);
-        }
-        if (customChips) {
-            setCustomFilter(customChips);
-            const formatedCustomChips: FilterRule = transformFiltersToRules(customChips);
-            setFilterRules([formatedCustomChips]);
-            setHasSearched(true);
-        }
-    }, [searchParams, savedFilters])
+        fn()
+    }, [activeSavedFilter, savedFilters, savedFiltersLoaded])
+
+
+
 
     useEffect(() => {
         if (viewData?.data?.solidFieldsMetadata) {
@@ -504,11 +666,14 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             // console.log(`fiels data while rendering solid global search element: `);
             // console.log(fieldsData);
 
-            const children = viewData?.data?.solidView?.layout?.children ?? [];
+            const layoutChildren = viewData?.data?.solidView?.layout?.children ?? [];
+            const fieldElements = extractFields(layoutChildren);
+
 
             const fieldsList = Object.entries(fieldsData ?? {}).map(([key, value]: any) => {
-                const viewFieldElement = children.find((f: any) => f?.attrs?.name === key);
-
+                const viewFieldElement = fieldElements.find(
+                    (f: any) => f?.attrs?.name === key
+                );
                 return {
                     name: value.displayName,
                     value: key,
@@ -560,6 +725,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             const predefinedSearchesList = viewData?.data?.solidView?.layout?.attrs?.predefinedSearches || [];
             setPredefinedSearches(predefinedSearchesList);
         }
+        // used to open the 
     }, [])
 
     useEffect(() => {
@@ -573,15 +739,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         }
     }, []);
 
-    // useEffect(() => {
-    //     // Get the last valid filter
-    //     const validFilters = filters?.$or?.filter((filter: any) => filter !== undefined) || [];
-    //     if (validFilters.length > 0) {
-    //         setCustomChip(validFilters.length.toString()); // Store only the number
-    //     } else {
-    //         setCustomChip(""); // Reset when no filters are present
-    //     }
-    // }, [filters]);
 
     const handleAddChip = (columnName?: string) => {
         if (inputValue?.trim()) {
@@ -597,87 +754,65 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             setSearchChips((prev) => [...prev, newChip]);
             setInputValue("");
             setHasSearched(true)
+            setRefreshKey((prev) => prev + 1)
+
         }
 
     };
 
     const clearCustomFilter = () => {
-        const finalFilter = mergeSearchAndCustomFilters(null, searchFilter, "c_filter", "s_filter");
-        handleApplyCustomFilter(finalFilter)
+        // handleApplyCustomFilter(finalFilter)
         setFilterRules(initialState);
         setCustomFilter(null)
-        setPredefinedSearchChip(null)
-        setPredefinedSearchBaseFilter(null)
-    }
+        // setPredefinedSearchChip(null)
+        // setPredefinedSearchBaseFilter(null)
+        setHasSearched(true)
+        setRefreshKey((prev) => prev + 1)
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter" && inputValue?.trim()) {
-            handleAddChip();
-            e.preventDefault();
-            setShowOverlay(false);
-        } else if (e.key === "Backspace" && inputValue === "") {
-            if (searchChips.length > 0) {
-                // Remove last search chip only
-                setSearchChips((prev) => prev.slice(0, -1));
-                setHasSearched(true);
-            } else if (customFilter && hasCustomFilterChanged()) {
-                // If there's a custom filter on top of predefined search, remove only the custom part
-                setCustomFilter(predefinedSearchBaseFilter);
-                setFilterRules(initialState);
-                const finalFilter = mergeSearchAndCustomFilters(predefinedSearchBaseFilter, searchFilter, "c_filter", "s_filter");
-                handleApplyCustomFilter(finalFilter);
-            } else if (predefinedSearchChip) {
-                // Remove predefined search chip
-                setPredefinedSearchChip(null);
-                setPredefinedSearchBaseFilter(null);
-                setCustomFilter(null);
-                const finalFilter = mergeSearchAndCustomFilters(null, searchFilter, "c_filter", "s_filter");
-                handleApplyCustomFilter(finalFilter);
-            } else if (customFilter) {
-                clearCustomFilter();
-            }
-        }
-    };
-
-
-    const mergeSearchAndCustomFilters = (transformedFilter: any, newFilter: any, transformedFilterName: string, newFilterName: string) => {
-        const filters: any = {};
-
-        // Add only non-null filters
-        if (transformedFilter && Object.keys(transformedFilter).length > 0) {
-            filters[transformedFilterName] = transformedFilter;
-        }
-        if (newFilter && Object.keys(newFilter).length > 0) {
-            filters[newFilterName] = newFilter;
-        }
-
-        // Return the combined filters object
-        return filters;
     }
 
 
-    const transformFilterRules = (filterRules: any) => {
-        const transformedFilter = transformRulesToFilters(filterRules[0]);
-    
+    const transformCustomFilterRules = (filterRules: any) => {
+        const transformedFilter = transformRulesToFilters(filterRules[0], viewData);
         // If there's a predefined search, merge it with the new custom filter
         let finalCustomFilter = transformedFilter;
-        if (predefinedSearchChip && predefinedSearchBaseFilter) {
-            // Combine predefined filter with new custom filter
-            finalCustomFilter = {
-                $and: [predefinedSearchBaseFilter, transformedFilter]
-            };
-        }
-        
+        // if (predefinedSearchChip && predefinedSearchBaseFilter) {
+        //     // Combine predefined filter with new custom filter
+        //     finalCustomFilter = {
+        //         $and: [predefinedSearchBaseFilter, transformedFilter]
+        //     };
+        // }
         setCustomFilter(finalCustomFilter);
-        
-        const finalFilter = mergeSearchAndCustomFilters(finalCustomFilter, searchFilter, "c_filter", "s_filter");
-        handleApplyCustomFilter(finalFilter);
+        // handleApplyCustomFilter(finalFilter);
         setShowGlobalSearchElement(false);
+        setHasSearched(true)
+        setRefreshKey((prev) => prev + 1)
+    }
+
+    const transformSavedFilterRules = (filterRules: any) => {
+        const transformedFilter = transformRulesToFilters(filterRules[0], viewData);
+
+        // If there's a predefined search, merge it with the new custom filter
+        let finalCustomFilter = transformedFilter;
+        // if (predefinedSearchChip && predefinedSearchBaseFilter) {
+        //     // Combine predefined filter with new custom filter
+        //     finalCustomFilter = {
+        //         $and: [predefinedSearchBaseFilter, transformedFilter]
+        //     };
+        // }
+        setCurrentSavedFilterQuery(finalCustomFilter);
+        // handleApplyCustomFilter(finalFilter);
+        setShowSavedFilterComponent(false);
+        setHasSearched(true)
+        setRefreshKey((prev) => prev + 1)
+
+
     }
 
     useEffect(() => {
-        if (hasSearched === true) {
-            // console.log("searchChips", searchChips);
+        if (refreshKey > 0) {
+            console.log("refres", refreshKey);
+            console.log("hasSearched", hasSearched);
 
             const formattedChips = {
                 $and: searchChips.map((chip: any) => ({
@@ -688,61 +823,28 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 }))
             };
 
-            // console.log("formattedChips", formattedChips);
 
-            // if (formattedChips.$and.length > 0) {
-            const transformedFilter = tranformSearchToFilters(formattedChips);
-            setSearchFilter(transformedFilter);
-            const finalFilter = mergeSearchAndCustomFilters(transformedFilter, customFilter, "s_filter", "c_filter");
+            const finalSearchFilter = tranformSearchToFilters(formattedChips);
+            setSearchFilter(finalSearchFilter);
+
+            let finalSavedFilter: any = currentSavedFilterQuery
+            const finalPredefinedFilter = predefinedSearchBaseFilter
+
+            const finalCustomFilter = customFilter
+
+            console.log("finalCustomFilter", finalCustomFilter);
+            console.log("finalPredefinedFilter", finalPredefinedFilter);
+            console.log("finalSavedFilter", finalSavedFilter);
+            console.log("finalSearchFilter", finalSearchFilter);
+
+            const finalFilter = mergeAllDiffFilters(finalCustomFilter, finalSearchFilter, finalSavedFilter, finalPredefinedFilter)
             handleApplyCustomFilter(finalFilter);
             // }
         }
-    }, [searchChips, hasSearched]);
+    }, [refreshKey]);
 
-    const [predefinedSearchBaseFilter, setPredefinedSearchBaseFilter] = useState<any>(null);
 
     // Handle predefined search selection
-    const handlePredefinedSearch = (predefinedSearch: any) => {
-        if (!inputValue?.trim()) return;
-
-        if (!predefinedSearch?.filters) {
-            console.error('Invalid predefined search: missing filters', predefinedSearch);
-            return;
-        }
-
-        try {
-           // Replace {{search}} placeholders with actual search value
-            const processedFilter = replacePlaceholders(predefinedSearch.filters, inputValue.trim());
-
-            // Clear all existing filters and searches
-            setSearchChips([]);
-            setSearchFilter(null);
-            setFilterRules(initialState);
-
-            // Set the predefined search chip
-            setPredefinedSearchChip({
-                name: predefinedSearch.name,
-                value: inputValue.trim()
-            });
-
-            setPredefinedSearchBaseFilter(processedFilter);
-
-            // Apply the predefined search filter as custom filter
-            setCustomFilter(processedFilter);
-
-            // Apply the filter
-            const finalFilter = mergeSearchAndCustomFilters(processedFilter, null, "c_filter", "s_filter");
-            handleApplyCustomFilter(finalFilter);
-
-            // Clear input and close overlay
-            setInputValue("");
-            setShowOverlay(false);
-            setHasSearched(true);
-        } catch (error) {
-            console.error('Error applying predefined search:', error);
-            // Optionally show user-friendly error message
-        }
-    };
 
     const hasCustomFilterChanged = () => {
         if (!predefinedSearchChip || !customFilter || !predefinedSearchBaseFilter) {
@@ -752,9 +854,192 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         return JSON.stringify(customFilter) !== JSON.stringify(predefinedSearchBaseFilter);
     };
 
-    // Saved Filter related 
+    const openSavedCustomFilter = async (savedfilter: any) => {
+        //Open custom filter popup 
+        // router.push(`?savedQuery=${savedfilter.id}`);
+        // setShowGlobalSearchElement(true);
+        // // dont refetch the data yet
+        // const customFilter = JSON.parse(savedfilter.filterQueryJson);
+        // setCustomFilter(customFilter ? customFilter : null);
+        // if (customFilter) {
+        //     const formatedCustomChips: FilterRule = transformFiltersToRules(customFilter ? customFilter : null);
+        //     setFilterRules(formatedCustomChips ? [formatedCustomChips] : initialState);
+        // }
+
+
+        setSearchChips([]);
+        setSearchFilter(null);
+        setFilterRules(initialState);
+        setCustomFilter(null)
+        setPredefinedSearchChip(null);
+        setPredefinedSearchBaseFilter(null);
+
+        // push the savedQuery=1 in url 
+        if (savedfilter?.id) {
+            const savedfilterId = savedfilter.id;
+            // router.push(`?savedQuery=${savedfilter.id}`);
+            setShowOverlay(false);
+            const currentSavedFilterData: any = savedFilters.find((savedFilter: any) => savedFilter.id === savedfilterId);
+            setCurrentSavedFilterData(currentSavedFilterData);
+            if (currentSavedFilterData) {
+                const filterJson = JSON.parse(currentSavedFilterData?.filterQueryJson);
+                if (filterJson) {
+                    let finalSavedFilter = filterJson
+                    setCurrentSavedFilterQuery(finalSavedFilter)
+                    const rules: FilterRule = transformFiltersToRules(finalSavedFilter ? finalSavedFilter : null);
+                    const hydratedRules = await hydrateRelationRules(
+                        [rules],
+                        viewData
+                    );
+                    setCurrentSavedFilterRules(hydratedRules ? hydratedRules : initialState);
+                    setShowSavedFilterComponent(true)
+                }
+            }
+        } else {
+            console.error(ERROR_MESSAGES.SAVE_FILTER_UNDEFINED_NULL);
+        }
+
+    }
+    const deleteSavedFilter = async () => {
+        // delte the saved filter with id 
+        await deleteEntity(savedFilterTobeDeleted);
+        // triggerGetSolidEntities(savedFilterQueryString);
+        let parsedSearchParams = searchParams;
+        const savedQuery = parsedSearchParams?.get("savedQuery");
+        if (savedFilterTobeDeleted == savedQuery) {
+            const urlParams = new URLSearchParams(window.location.search);
+            urlParams.delete("savedQuery");
+            router.push(`?${urlParams.toString()}`);
+        }
+        setIsDeleteSQDialogVisible(false);
+        setTimeout(() => {
+            setSavedFilterFetchDataRefreshKey(prev => prev + 1)
+        }, 500)
+    }
+    const handleSaveFilter = async (formValues: any) => {
+        setShowSaveFilterPopup(false)
+
+        try {
+            if (formValues.id) {
+                const filterJson = currentSavedFilterQuery;
+                const formData = new FormData();
+                formData.append("name", formValues.name);
+                formData.append("filterQueryJson", JSON.stringify(filterJson, null, 2));
+                formData.append("modelId", viewData?.data?.solidView?.model?.id);
+                formData.append("viewId", viewData?.data?.solidView?.id);
+                formData.append("isPrivate", formValues.isPrivate);
+                formData.append("userId", user?.user?.id);
+
+                await updateEntity({ id: +formValues.id, data: formData }).unwrap();
+
+                setSearchChips([]);
+                setSearchFilter(null);
+                setFilterRules(initialState);
+                setCustomFilter(null)
+                setPredefinedSearchChip(null);
+                const currentPageUrl = window.location.pathname; // Get the current page URL
+                localStorage.removeItem(currentPageUrl); // Store in local storage with the URL as the key
+
+                setPredefinedSearchBaseFilter(null);
+                setTimeout(() => {
+                    router.push(`?savedQuery=${formValues.id}`);
+                }, 500)
+            } else {
+
+                const filterJson = customFilter;
+                const formData = new FormData();
+                formData.append("name", formValues.name);
+                formData.append("filterQueryJson", JSON.stringify(filterJson, null, 2));
+                formData.append("modelId", viewData?.data?.solidView?.model?.id);
+                formData.append("viewId", viewData?.data?.solidView?.id);
+                formData.append("isPrivate", formValues.isPrivate);
+                formData.append("userId", user?.user?.id);
+                const result = await createEntity(formData).unwrap();
+
+                setSearchChips([]);
+                setSearchFilter(null);
+                setFilterRules(initialState);
+                setCustomFilter(null)
+                setPredefinedSearchChip(null);
+                setPredefinedSearchBaseFilter(null);
+
+                const currentPageUrl = window.location.pathname; // Get the current page URL
+                localStorage.removeItem(currentPageUrl); // Store in local storage with the URL as the key
+
+                setTimeout(() => {
+                    router.push(`?savedQuery=${result.data.id}`);
+                }, 500)
+
+            }
+        } catch (error) {
+
+        }
+    }
+
+
+
+    useEffect(() => {
+        // Explicitly type the event as a MouseEvent
+        function handleClickOutside(event: MouseEvent) {
+            if (overlayRef.current && !overlayRef.current.contains(event.target as Node)) {
+                setShowOverlay(false);
+            }
+        }
+        if (showOverlay) {
+            document.addEventListener("mousedown", handleClickOutside);
+        }
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [showOverlay]);
+
+    const CustomChip = () => {
+        console.log("customFilter", customFilter);
+        const ruleCount =
+            customFilter?.$or?.length ??
+            customFilter?.$and?.length ??
+            Object.keys(customFilter || {}).length;
+
+        return (
+            <li>
+                <div className="custom-filter-chip-type">
+                    <div className="flex align-items-center gap-2 text-base">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"
+                            onClick={() => {
+                                setShowGlobalSearchElement(true)
+                            }
+                            }>
+                            <rect width="20" height="20" rx="4" fill="#722ED1" />
+                            <path d="M8.66667 15V13.3333H11.3333V15H8.66667ZM6 10.8333V9.16667H14V10.8333H6ZM4 6.66667V5H16V6.66667H4Z"
+                                fill="white" />
+                        </svg>
+                        <span><strong>{ruleCount}</strong> rules applied</span>
+                    </div>
+
+                    {/* button to clear filter */}
+                    <a onClick={clearCustomFilter}
+                        style={{ cursor: "pointer" }}
+                    >
+                        <i className="pi pi-times ml-1">
+                        </i></a>
+                </div>
+            </li>
+        )
+    };
+
+
+    //saved filter related code start
 
     const applySavedFilter = (savedfilter: any) => {
+
+        setSearchChips([]);
+        setSearchFilter(null);
+        setFilterRules(initialState);
+        setCustomFilter(null)
+        setPredefinedSearchChip(null);
+        setPredefinedSearchBaseFilter(null);
+        const currentPageUrl = window.location.pathname; // Get the current page URL
+        localStorage.removeItem(currentPageUrl); // Store in local storage with the URL as the key
         // push the savedQuery=1 in url 
         if (savedfilter?.id) {
             router.push(`?savedQuery=${savedfilter.id}`);
@@ -762,75 +1047,78 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         } else {
             console.error(ERROR_MESSAGES.SAVE_FILTER_UNDEFINED_NULL);
         }
-
     }
 
-    const savedQuery = searchParams?.get("savedQuery");
-    useEffect(() => {
-        if (savedQuery && savedFilters.length > 0) {
-            const currentSavedFilterData: any = savedFilters.find((f: any) => f.id === Number(savedQuery));
-            if (currentSavedFilterData) {
-                const filterJson = JSON.parse(currentSavedFilterData?.filterQueryJson);
-                const finalFilter = mergeSearchAndCustomFilters(
-                    filterJson?.c_filter, 
-                    filterJson?.s_filter, 
-                    "c_filter", 
-                    "s_filter"
-                );
-                handleApplyCustomFilter(finalFilter);
-            }
-        }
-    }, [savedQuery]);
-    
-    const openSavedCustomFilter = (savedfilter: any) => {
-        //Open custom filter popup 
-        router.push(`?savedQuery=${savedfilter.id}`);
-        setShowGlobalSearchElement(true);
-        // dont refetch the data yet
-        const customFilter = JSON.parse(savedfilter.filterQueryJson).c_filter;
-        setCustomFilter(customFilter ? customFilter : null);
-        if (customFilter) {
-            const formatedCustomChips: FilterRule = transformFiltersToRules(customFilter ? customFilter : null);
-            setFilterRules(formatedCustomChips ? [formatedCustomChips] : initialState);
-        }
-    }
-    const deleteSavedFilter = () => {
-        // delte the saved filter with id 
-        deleteEntity(savedFilterTobeDeleted);
-        triggerGetSolidEntities(savedFilterQueryString);
-        setIsDeleteSQDialogVisible(false);
-        let parsedSearchParams = searchParams;
-        const savedQuery = parsedSearchParams?.get("savedQuery");
-        if (savedFilterTobeDeleted === savedQuery) {
-            const urlParams = new URLSearchParams(window.location.search);
-            urlParams.delete("savedQuery");
-            router.push(`?${urlParams.toString()}`);
+    const removeSavedFilter = () => {
+        const params = new URLSearchParams(searchParams.toString());
+        setCurrentSavedFilterData(null);
+        setCurrentSavedFilterQuery(null)
+        if (params.has("savedQuery")) {
+            params.delete("savedQuery");
+            const newUrl = params.toString()
+                ? `${pathname}?${params.toString()}`
+                : pathname;
+            router.push(newUrl);
         }
     }
 
-    const handleSaveFilter = async (formValues: any) => {
-        const filterJson = mergeSearchAndCustomFilters(customFilter, searchFilter, "c_filter", "s_filter");
-        setShowSaveFilterPopup(false)
 
-        const formData = new FormData();
-        formData.append("name", formValues.name);
-        formData.append("filterQueryJson", JSON.stringify(filterJson, null, 2));
-        formData.append("modelId", viewData?.data?.solidView?.model?.id);
-        formData.append("viewId", viewData?.data?.solidView?.id);
-        formData.append("isPrivate", formValues.isPrivate);
-        formData.append("userId", user?.user?.id);
-        if (formValues.id) {
-            await updateEntity({ id: +formValues.id, data: formData }).unwrap();
-            router.push(`?savedQuery=${formValues.id}`);
+    const SavedFiltersChip = () => {
 
-        } else {
-            const result = await createEntity(formData).unwrap();
-            // localStorage.setItem(window.location.pathname, result.data.id);
-            router.push(`?savedQuery=${result.data.id}`);
+        return (
+            <li>
+                <div className="custom-filter-chip-type">
+                    <div className="flex align-items-center gap-2 text-base">
+                        <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"
+                            onClick={() => {
+                                const fn = async () => {
+                                    if (currentSavedFilterQuery) {
+                                        const rules: FilterRule = transformFiltersToRules(currentSavedFilterQuery ? currentSavedFilterQuery : null);
+                                        const hydratedRules = await hydrateRelationRules(
+                                            [rules],
+                                            viewData
+                                        );
+                                        setCurrentSavedFilterRules(hydratedRules ? hydratedRules : initialState);
+                                        setShowSavedFilterComponent(true)
+                                    }
+                                }
+                                fn()
+                            }
+                            }
+                        >
+                            <rect width="20" height="20" rx="4" fill="#722ED1" />
+                            <path d="M8.66667 15V13.3333H11.3333V15H8.66667ZM6 10.8333V9.16667H14V10.8333H6ZM4 6.66667V5H16V6.66667H4Z"
+                                fill="white" />
+                        </svg>
+                        <span><strong>{currentSavedFilterData?.name}</strong></span>
+                    </div>
 
-        }
-    }
+                    {/* button to clear filter */}
+                    <a onClick={removeSavedFilter}
+                        style={{ cursor: "pointer" }}
+                    >
+                        <i className="pi pi-times ml-1">
+                        </i></a>
+                </div>
+            </li>
+        )
+    };
 
+
+
+
+    //saved filter related code end
+
+
+    // search related code start
+
+    const handleRemoveChipGroup = (columnName: string) => {
+        const updatedChips = searchChips.filter(chip => chip.columnName !== columnName);
+        setSearchChips(updatedChips);
+        setHasSearched(true);
+        setRefreshKey((prev) => prev + 1)
+
+    };
 
     const groupedSearchChips = searchChips.reduce((acc: Record<string, string[]>, chip) => {
         const key = chip.columnName;
@@ -844,54 +1132,30 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     }, {});
 
 
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        if (e.key === "Enter" && inputValue?.trim()) {
+            handleAddChip();
+            e.preventDefault();
+            setShowOverlay(false);
+        } else if (e.key === "Backspace" && inputValue === "") {
 
-    const handleRemoveChipGroup = (columnName: string) => {
-        const updatedChips = searchChips.filter(chip => chip.columnName !== columnName);
-        setSearchChips(updatedChips);
-        setHasSearched(true);
-    };
-
-
-    useEffect(() => {
-        // Explicitly type the event as a MouseEvent
-        function handleClickOutside(event: MouseEvent) {
-            if (overlayRef.current && !overlayRef.current.contains(event.target as Node)) {
-                setShowOverlay(false);
+            if (searchChips.length > 0) {
+                setSearchChips((prev) => prev.slice(0, -1));
+            } else if (customFilter) {
+                setCustomFilter(null)
+                setFilterRules(initialState);
+            } else if (predefinedSearchChip) {
+                setPredefinedSearchChip(null);
+                setPredefinedSearchBaseFilter(null);
+            } else if (activeSavedFilter) {
+                removeSavedFilter()
+            } else if (activeSavedFilter) {
+                clearCustomFilter();
             }
+            setHasSearched(true);
+            setRefreshKey((prev) => prev + 1)
         }
-
-        if (showOverlay) {
-            document.addEventListener("mousedown", handleClickOutside);
-        }
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [showOverlay]);
-
-    const CustomChip = () => (
-        <li>
-            <div className="custom-filter-chip-type">
-                <div className="flex align-items-center gap-2 text-base">
-                    <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none"
-                        onClick={() => setShowGlobalSearchElement(true)}>
-                        <rect width="20" height="20" rx="4" fill="#722ED1" />
-                        <path d="M8.66667 15V13.3333H11.3333V15H8.66667ZM6 10.8333V9.16667H14V10.8333H6ZM4 6.66667V5H16V6.66667H4Z"
-                            fill="white" />
-                    </svg>
-                    <span><strong>{customFilter?.$or && customFilter?.$or?.length > 0 ? `${customFilter?.$or?.length}` : customFilter.$and.length}</strong> rules applied</span>
-                </div>
-
-                {/* button to clear filter */}
-                <a onClick={clearCustomFilter}
-                    style={{ cursor: "pointer" }}
-                >
-                    <i className="pi pi-times ml-1">
-                    </i></a>
-            </div>
-        </li>
-    );
-
+    };
 
     const SearchChip = () => (
         <>
@@ -926,12 +1190,62 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         </>
     );
 
+    // search related code end
+
+
+    // predefinedfilter related code start
+
+    const handlePredefinedSearch = (predefinedSearch: any) => {
+        if (!inputValue?.trim()) return;
+
+        if (!predefinedSearch?.filters) {
+            console.error('Invalid predefined search: missing filters', predefinedSearch);
+            return;
+        }
+
+        try {
+            // Replace {{search}} placeholders with actual search value
+            const processedFilter = replacePlaceholders(predefinedSearch.filters, inputValue.trim());
+
+            // Clear all existing filters and searches
+            // setSearchChips([]);
+            // setSearchFilter(null);
+            // setFilterRules(initialState);
+            // setCustomFilter(null)
+            // removeSavedFilter();
+            // Set the predefined search chip
+            setPredefinedSearchChip({
+                name: predefinedSearch.name,
+                value: inputValue.trim()
+            });
+
+            setPredefinedSearchBaseFilter(processedFilter);
+
+            // Apply the predefined search filter as custom filter
+            // setCustomFilter(processedFilter);
+
+            // Apply the filter
+            // handleApplyCustomFilter(finalFilter);
+
+            // Clear input and close overlay
+            setInputValue("");
+            setShowOverlay(false);
+            setHasSearched(true);
+            setRefreshKey((prev) => prev + 1)
+        } catch (error) {
+            console.error('Error applying predefined search:', error);
+            // Optionally show user-friendly error message
+        }
+    };
+
+
     const removePredefinedSearchChip = () => {
         setPredefinedSearchChip(null);
+        setPredefinedSearchBaseFilter(null)
         setCustomFilter(null);
-        const finalFilter = mergeSearchAndCustomFilters(null, searchFilter, "c_filter", "s_filter");
-        handleApplyCustomFilter(finalFilter);
+        // handleApplyCustomFilter(finalFilter);
         setHasSearched(true);
+        setRefreshKey((prev) => prev + 1)
     };
 
     const PredefinedSearchChip = () => (
@@ -951,16 +1265,19 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         </li>
     );
 
+    // predefinedfilter related code end
+
     return (
         <>
             <div className="flex justify-content-center solid-custom-filter-wrapper relative">
                 <div className="solid-global-search-element">
                     <ul className="">
-                  {predefinedSearchChip && <PredefinedSearchChip />}
-                  {customFilter && (!predefinedSearchChip || hasCustomFilterChanged()) && <CustomChip />}
+                        {currentSavedFilterData && <SavedFiltersChip />}
+                        {predefinedSearchChip && <PredefinedSearchChip />}
+                        {customFilter && <CustomChip />}
                         <SearchChip />
                         <li ref={chipsRef}>
-                            <div className="relative">
+                            <div className="relative solid-global-search-element-wrapper">
                                 <InputText
                                     value={inputValue || ""}
                                     placeholder="Search..."
@@ -992,7 +1309,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 </div>
 
                 {showOverlay && (
-                    <div ref={overlayRef} className="absolute w-full z-5 surface-0 border-round border-1 border-300 shadow-2" style={{ top: 35 }}>
+                    <div ref={overlayRef} className="absolute w-full z-5 surface-0 border-round border-1 border-300 shadow-2 solid-search-overlay-pannel" style={{ top: 35 }}>
                         {inputValue ? (
                             <>
                                 <div className="custom-filter-search-options px-3 py-2 flex flex-column">
@@ -1020,6 +1337,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                                                             }]);
                                                             setInputValue("");
                                                             setHasSearched(true);
+                                                            setRefreshKey((prev) => prev + 1)
                                                             setShowOverlay(false);
                                                         }
                                                     }}
@@ -1086,19 +1404,31 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     </div>
                 )
                 }
-                <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={showGlobalSearchElement} style={{ width: '65vw' }} onHide={() => { if (!showGlobalSearchElement) return; setShowGlobalSearchElement(false); }}>
+                <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={showGlobalSearchElement} style={{ width: '65vw' }} breakpoints={{ '1024px': '75vw', '991px': '90vw', '767px': '94w', '250px': '96vw' }} onHide={() => { if (!showGlobalSearchElement) return; setShowGlobalSearchElement(false); }}>
                     <div className="flex align-items-center justify-content-between px-3">
                         <h5 className="solid-custom-title m-0">Add Custom Filter</h5>
                         <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setShowGlobalSearchElement(false)} />
                     </div>
                     <Divider className="m-0" />
-                    <div className="p-4">
+                    <div className="p-3 lg:p-4">
                         {fields.length > 0 &&
-                            <FilterComponent viewData={viewData} fields={fields} filterRules={filterRules} setFilterRules={setFilterRules} transformFilterRules={transformFilterRules} closeDialog={() => setShowGlobalSearchElement(false)}></FilterComponent>
+                            <FilterComponent viewData={viewData} fields={fields} filterRules={filterRules} setFilterRules={setFilterRules} transformFilterRules={transformCustomFilterRules} closeDialog={() => setShowGlobalSearchElement(false)}></FilterComponent>
                         }
                     </div>
                 </Dialog>
-                <Dialog header="Save Custom Filter" visible={showSaveFilterPopup} style={{ width: 500 }} onHide={() => { if (!showSaveFilterPopup) return; setShowSaveFilterPopup(false); }}>
+                <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={showSavedFilterComponent} style={{ width: '65vw' }} breakpoints={{ '1024px': '75vw', '991px': '90vw', '767px': '94w', '250px': '96vw' }} onHide={() => { if (!showSavedFilterComponent) return; setShowSavedFilterComponent(false); }}>
+                    <div className="flex align-items-center justify-content-between px-3">
+                        <h5 className="solid-custom-title m-0">Saved Filter</h5>
+                        <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setShowSavedFilterComponent(false)} />
+                    </div>
+                    <Divider className="m-0" />
+                    <div className="p-3 lg:p-4">
+                        {fields.length > 0 &&
+                            <FilterComponent viewData={viewData} fields={fields} filterRules={currentSavedFilterRules} setFilterRules={setCurrentSavedFilterRules} transformFilterRules={transformSavedFilterRules} closeDialog={() => setShowSavedFilterComponent(false)}></FilterComponent>
+                        }
+                    </div>
+                </Dialog>
+                <Dialog header="Save Custom Filter" className="solid-custom-filter-dialog" visible={showSaveFilterPopup} style={{ width: 500 }} onHide={() => { if (!showSaveFilterPopup) return; setShowSaveFilterPopup(false); }}>
                     <SolidSaveCustomFilterForm currentSavedFilterData={currentSavedFilterData} handleSaveFilter={handleSaveFilter} closeDialog={setShowSaveFilterPopup}></SolidSaveCustomFilterForm>
                 </Dialog>
 
@@ -1106,6 +1436,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     visible={isDeleteSQDialogVisible}
                     header="Confirm Delete"
                     modal
+                    className="solid-confirm-dialog"
                     footer={() => (
                         <div className="flex justify-content-center">
                             <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteSavedFilter} />

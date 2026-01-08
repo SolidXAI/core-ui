@@ -6,6 +6,8 @@ import { SolidManyToOneFilterElement } from "./SolidManyToOneFilterElement";
 import { SolidSelectionDynamicFilterElement } from "./SolidSelectionDynamicFilterElement";
 import { SolidSelectionStaticFilterElement } from "./SolidSelectionStaticFilterElement";
 import { Button } from "primereact/button";
+import { SolidManyToManyFilterElement } from "./fields/SolidManyToManyFilterElement";
+import { SolidBooleanFilterElement } from "./SolidBooleanFilterElement";
 
 export enum InputTypes {
     Date = 'Date',
@@ -15,7 +17,9 @@ export enum InputTypes {
     Text = 'Text',
     SelectionStatic = 'SelectionStatic',
     RelationManyToOne = 'RelationManyToOne',
-    SelectionDynamic = 'SelectionDynamic'
+    RelationManyToMany = 'RelationManyToMany',
+    SelectionDynamic = 'SelectionDynamic',
+    Boolean = 'Boolean',
 }
 
 
@@ -72,87 +76,110 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
         <>
             {inputs && inputs.map((value: any, index: number) => (
                 <div className="flex">
-                    {inputType === InputTypes.Text &&
-                        <InputText
-                            value={value}
-                            onChange={(e) => updateInputs(index, e.target.value)}
-                            placeholder=""
-                            className='w-full p-inputtext-sm'
-                        />
-                    }
-                    {inputType === InputTypes.Numeric &&
-                        <InputNumber
-                            value={value}
-                            onChange={(e) => updateInputs(index, e.value)}
-                            placeholder=""
-                            className='w-full p-inputtext-sm'
-                        />
-                    }
-                    {inputType === InputTypes.Date &&
-                        <Calendar
-                            value={value}
-                            onChange={(e) => updateInputs(index, e.target.value)}
-                            dateFormat="mm/dd/yy"
-                            placeholder="mm/dd/yyyy"
-                            mask="99/99/9999"
-                            className="w-full"
-                            inputClassName="w-full p-inputtext-sm"
-                        />
-                    }
-                    {inputType === InputTypes.DateTime &&
-                        <Calendar
-                            value={value}
-                            onChange={(e) => updateInputs(index, e.target.value)}
-                            dateFormat="mm/dd/yy"
-                            placeholder="mm/dd/yyyy hh:mm"
-                            mask="99/99/9999 99:99"
-                            showTime
-                            hourFormat="24"
-                            className="w-full"
-                            inputClassName="w-full p-inputtext-sm"
-                        />
-                    }
-                    {inputType === InputTypes.Time &&
-                        <Calendar
-                            value={value}
-                            onChange={(e) => updateInputs(index, e.target.value)}
-                            placeholder="hh:mm"
-                            mask="99:99"
-                            timeOnly
-                            hourFormat="24"
-                            className="w-full"
-                            inputClassName="w-full p-inputtext-sm"
-                        />
-                    }
-                    {inputType === InputTypes.RelationManyToOne &&
-                        <SolidManyToOneFilterElement
-                            value={value}
-                            index={index}
-                            updateInputs={updateInputs}
-                            fieldMetadata={fieldMetadata}
-                        ></SolidManyToOneFilterElement>
-                    }
-                    {inputType === InputTypes.SelectionDynamic &&
-                        <SolidSelectionDynamicFilterElement
-                            value={value}
-                            index={index}
-                            updateInputs={updateInputs}
-                            fieldMetadata={fieldMetadata}
-                        ></SolidSelectionDynamicFilterElement>
-                    }
-                    {inputType === InputTypes.SelectionStatic &&
-
-                        <SolidSelectionStaticFilterElement
-                            value={value}
-                            index={index}
-                            updateInputs={updateInputs}
-                            fieldMetadata={fieldMetadata}
-                        ></SolidSelectionStaticFilterElement>
-                    }
-                    {numberOfInputs === null &&
+                    {numberOfInputs === 0 ?
+                        <></>
+                        :
                         <>
-                            {/* Plus Button to add a new row */}
-                            {/* < Button
+                            {inputType === InputTypes.Text &&
+                                <InputText
+                                    value={value}
+                                    onChange={(e) => updateInputs(index, e.target.value)}
+                                    placeholder=""
+                                    className='w-full p-inputtext-sm'
+                                />
+                            }
+                            {inputType === InputTypes.Numeric &&
+                                <InputNumber
+                                    value={value}
+                                    onChange={(e) => updateInputs(index, e.value)}
+                                    placeholder=""
+                                    className='w-full p-inputtext-sm'
+                                />
+                            }
+                            {inputType === InputTypes.Date &&
+                                <Calendar
+                                    value={value}
+                                    onChange={(e) => updateInputs(index, e.target.value)}
+                                    dateFormat="mm/dd/yy"
+                                    placeholder="mm/dd/yyyy"
+                                    mask="99/99/9999"
+                                    className="w-full"
+                                    inputClassName="w-full p-inputtext-sm"
+                                />
+                            }
+                            {inputType === InputTypes.DateTime &&
+                                <Calendar
+                                    value={value}
+                                    onChange={(e) => updateInputs(index, e.target.value)}
+                                    dateFormat="mm/dd/yy"
+                                    placeholder="mm/dd/yyyy hh:mm"
+                                    mask="99/99/9999 99:99"
+                                    showTime
+                                    hourFormat="24"
+                                    className="w-full"
+                                    inputClassName="w-full p-inputtext-sm"
+                                />
+                            }
+                            {inputType === InputTypes.Time &&
+                                <Calendar
+                                    value={value}
+                                    onChange={(e) => updateInputs(index, e.target.value)}
+                                    placeholder="hh:mm"
+                                    mask="99:99"
+                                    timeOnly
+                                    hourFormat="24"
+                                    className="w-full"
+                                    inputClassName="w-full p-inputtext-sm"
+                                />
+                            }
+                            {inputType === InputTypes.RelationManyToOne &&
+                                <SolidManyToOneFilterElement
+                                    value={value}
+                                    index={index}
+                                    updateInputs={updateInputs}
+                                    fieldMetadata={fieldMetadata}
+                                ></SolidManyToOneFilterElement>
+                            }
+                            {inputType === InputTypes.RelationManyToMany &&
+                                <SolidManyToManyFilterElement
+                                    value={value}
+                                    index={index}
+                                    updateInputs={updateInputs}
+                                    fieldMetadata={fieldMetadata}
+                                ></SolidManyToManyFilterElement>
+                            }
+                            {inputType === InputTypes.SelectionDynamic &&
+                                <SolidSelectionDynamicFilterElement
+                                    value={value}
+                                    index={index}
+                                    updateInputs={updateInputs}
+                                    fieldMetadata={fieldMetadata}
+                                ></SolidSelectionDynamicFilterElement>
+                            }
+                            {inputType === InputTypes.SelectionStatic &&
+
+                                <SolidSelectionStaticFilterElement
+                                    value={value}
+                                    index={index}
+                                    updateInputs={updateInputs}
+                                    fieldMetadata={fieldMetadata}
+                                ></SolidSelectionStaticFilterElement>
+                            }
+                            {inputType === InputTypes.Boolean &&
+
+                                <SolidBooleanFilterElement
+                                    value={value}
+                                    index={index}
+                                    updateInputs={updateInputs}
+                                    fieldMetadata={fieldMetadata}
+                                ></SolidBooleanFilterElement>
+                            }
+
+
+                            {numberOfInputs === null &&
+                                <>
+                                    {/* Plus Button to add a new row */}
+                                    {/* < Button
                                     icon="pi pi-plus"
                                     size="small"
                                     className="small-button"
@@ -160,8 +187,8 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                                     type="button"
                                 /> */}
 
-                            {/* Trash Button to delete the row */}
-                            {/* <Button
+                                    {/* Trash Button to delete the row */}
+                                    {/* <Button
                                     icon="pi pi-trash"
                                     size="small"
                                     className="small-button"
@@ -169,8 +196,10 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                                     severity="danger"
                                     type="button"
                                 /> */}
-                            <Button text severity='secondary' icon="pi pi-plus" size='small' onClick={() => addInput()} className='solid-filter-action-btn' />
-                            <Button text severity='secondary' icon="pi pi-trash" size='small' onClick={() => deleteInput(index)} className='solid-filter-action-btn' />
+                                    <Button text severity='secondary' icon="pi pi-plus" size='small' onClick={() => addInput()} className='solid-filter-action-btn' />
+                                    <Button text severity='secondary' icon="pi pi-trash" size='small' onClick={() => deleteInput(index)} className='solid-filter-action-btn' />
+                                </>
+                            }
                         </>
                     }
                 </div>
