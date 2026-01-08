@@ -9,6 +9,7 @@ interface Props {
     id?: any,
     solidWorkflowFieldValue?: any
     setSolidWorkflowFieldValue?: any
+    onStepperUpdate?: () => void
 }
 
 export const SolidFormHeader = (props: Props) => {

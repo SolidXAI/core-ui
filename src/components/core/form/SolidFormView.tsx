@@ -637,7 +637,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
         if (
             isEntityCreateSuccess == true ||
             isEntityUpdateSuceess == true ||
-            isEntityDeleteSuceess == true
+                isEntityDeleteSuceess == true ||
+            isEntityPatchSuceess == true ||
+            isEntityPublishedSuccess == true ||
+            isEntityUnpublishedSuccess == true
         ) {
             setRefreshChatterMessage(true);
             if (params.embeded == true && params.onEmbeddedFormSave) {
@@ -658,7 +661,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
             }
         }
-    }, [isEntityCreateSuccess, isEntityUpdateSuceess, isEntityDeleteSuceess]);
+    }, [isEntityCreateSuccess, isEntityUpdateSuceess, isEntityDeleteSuceess, isEntityPatchSuceess, isEntityPublishedSuccess, isEntityUnpublishedSuccess]);
 
     useEffect(() => {
 
@@ -718,11 +721,20 @@ const SolidFormView = (params: SolidFormViewProps) => {
             handleError(entityDeleteError);
         } else if (isEntityUpdateError) {
             handleError(entityUpdateError);
+        } else if (isEntityPatchError) {
+            handleError(entityPatchError);
+        } else if (isEntityPublishedError) {
+            handleError(entityPublishedError);
+        } else if (isEntityUnpublishedError) {
+            handleError(entityUnpublishedError);
         }
     }, [
         isEntityCreateError,
         isEntityDeleteError,
-        isEntityUpdateError
+        isEntityUpdateError,
+        isEntityPatchError,
+        isEntityPublishedError,
+        isEntityUnpublishedError
     ]);
 
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
@@ -1505,6 +1517,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             publish={published}
                             internationalisationEnabled={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}
                             handleDraftPublishWorkFlow={handleDraftPublishWorkFlow}
+                            onStepperUpdate={() => setRefreshChatterMessage(true)}
                         />
                         <div className={`px-4 py-3 md:p-4 solid-form-content ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
