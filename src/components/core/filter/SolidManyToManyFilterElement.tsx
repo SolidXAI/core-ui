@@ -46,6 +46,7 @@ export const SolidManyToManyFilterElement = ({
     return (
         <AutoComplete
             // multiple
+            dropdown
             field="label"
             value={value}
             suggestions={suggestions}

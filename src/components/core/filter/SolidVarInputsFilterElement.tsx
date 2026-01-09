@@ -6,7 +6,7 @@ import { SolidManyToOneFilterElement } from "./SolidManyToOneFilterElement";
 import { SolidSelectionDynamicFilterElement } from "./SolidSelectionDynamicFilterElement";
 import { SolidSelectionStaticFilterElement } from "./SolidSelectionStaticFilterElement";
 import { Button } from "primereact/button";
-import { SolidManyToManyFilterElement } from "./fields/SolidManyToManyFilterElement";
+import { SolidManyToManyFilterElement } from "./SolidManyToManyFilterElement";
 import { SolidBooleanFilterElement } from "./SolidBooleanFilterElement";
 
 export enum InputTypes {

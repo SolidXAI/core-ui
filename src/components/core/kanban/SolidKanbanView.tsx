@@ -169,43 +169,46 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     for (let i = 0; i < layoutFields.length; i++) {
       const column = layoutFields[i];
       const fieldMetadata = solidFieldsMetadata[column.attrs.name];
+      if (fieldMetadata) {
 
-      // Form the initial filters after iterating over the columns and field metadata. 
-      if (['int', 'bigint', 'float', 'decimal'].includes(fieldMetadata.type)) {
-        // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] }
-        initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.EQUALS }
-      }
-      else if (['date', 'datetime', 'time', 'boolean'].includes(fieldMetadata.type)) {
-        // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }] }
-        initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.EQUALS }
-      }
-      else if (['relation', 'selectionStatic', 'selectionDynamic'].includes(fieldMetadata.type)) {
-        initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.IN }
-      }
-      else {
-        // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
-        initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.STARTS_WITH }
-      }
+        // Form the initial filters after iterating over the columns and field metadata. 
+        if (['int', 'bigint', 'float', 'decimal'].includes(fieldMetadata.type)) {
+          // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.EQUALS }] }
+          initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.EQUALS }
+        }
+        else if (['date', 'datetime', 'time', 'boolean'].includes(fieldMetadata.type)) {
+          // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.DATE_IS }] }
+          initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.EQUALS }
+        }
+        else if (['relation', 'selectionStatic', 'selectionDynamic'].includes(fieldMetadata.type)) {
+          initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.IN }
+        }
+        else {
+          // initialFilters[column.attrs.name] = { operator: FilterOperator.OR, constraints: [{ value: null, matchMode: FilterMatchMode.STARTS_WITH }] }
+          initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.STARTS_WITH }
+        }
 
-      if (column.attrs.name === 'id') {
-        initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.IN }
-      }
+        if (column.attrs.name === 'id') {
+          initialFilters[column.attrs.name] = { value: null, matchMode: FilterMatchMode.IN }
+        }
 
-      // Form the "toPopulate" array. 
-      if (fieldMetadata.type === 'relation') {
-        toPopulate.push(fieldMetadata.name);
-      }
-      if (fieldMetadata.type === 'mediaSingle' || fieldMetadata.type === 'mediaMultiple') {
-        toPopulateMedia.push(fieldMetadata.name);
+        // Form the "toPopulate" array. 
+        if (fieldMetadata.type === 'relation') {
+          toPopulate.push(fieldMetadata.name);
+        }
+        if (fieldMetadata.type === 'mediaSingle' || fieldMetadata.type === 'mediaMultiple') {
+          toPopulateMedia.push(fieldMetadata.name);
+        }
       }
     }
+
     // setFilters(initialFilters);
     const recordsInSwimlane = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsInSwimlane ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsInSwimlane : 10;
     // setToPopulate(toPopulate);
     // setToPopulateMedia(toPopulateMedia);
-    setRecordsInSwimlane(recordsInSwimlane);
-    setToPopulate(toPopulate);
-    setToPopulateMedia(toPopulateMedia);
+    // setRecordsInSwimlane(recordsInSwimlane);
+    // setToPopulate(toPopulate);
+    // setToPopulateMedia(toPopulateMedia);
     return { recordsInSwimlane, toPopulate, toPopulateMedia }
   }
 
@@ -215,7 +218,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
     if (solidKanbanViewMetaData) {
       setKanbanViewMetaData(solidKanbanViewMetaData);
-      // initialFilterMethod();
       const viewModes = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.length > 0 && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view } });
       setViewModes(viewModes);
       if (solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.grouped !== false) {
@@ -329,12 +331,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           const filters = {
             $and: []
           }
-          // if (queryObject.s_filter) {
-          //   filters.$and.push(queryObject.s_filter);
-          // }
-          // if (queryObject.c_filter) {
-          //   filters.$and.push(queryObject.c_filter);
-          // }
           if (queryObject.custom_filter_predicate) {
             filters.$and.push(queryObject.custom_filter_predicate);
           }
@@ -365,9 +361,11 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             // sort: [`id:desc`],
           };
 
-          setRecordsInSwimlane(queryData.groupFilter.limit);
-          setToPopulate(queryData.populate);
-          setToPopulateMedia(queryData.populateMedia);
+
+          const { recordsInSwimlane, toPopulate, toPopulateMedia } = initialFilterMethod();
+          setToPopulate(toPopulate);
+          setToPopulateMedia(toPopulateMedia);
+          setRecordsInSwimlane(recordsInSwimlane);
           // setFilters(filters);
           setQueryDataLoaded(true);
 
@@ -708,7 +706,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       // only present if handleCustomFilter is applied
       if (customFilter) {
         let url
-        const urlData =  structuredClone(queryData);
+        const urlData = structuredClone(queryData);
         delete urlData.filters;
         // urlData.s_filter = customFilter.s_filter || {};
         // urlData.c_filter = customFilter.c_filter || {};
@@ -782,17 +780,17 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           </div>
 
           <div className="flex align-items-center solid-header-buttons-wrapper">
-          {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
-            <div className="flex lg:hidden">
-                  <Button
-                    type="button"
-                    size="small"
-                    icon="pi pi-search"
-                    severity="secondary"
-                    outlined
-                    className="solid-icon-button"
-                    onClick={()=>setShowGlobalSearchElement(!showGlobalSearchElement)}>
-                  </Button>
+            {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
+              <div className="flex lg:hidden">
+                <Button
+                  type="button"
+                  size="small"
+                  icon="pi pi-search"
+                  severity="secondary"
+                  outlined
+                  className="solid-icon-button"
+                  onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}>
+                </Button>
               </div>
             }
 
