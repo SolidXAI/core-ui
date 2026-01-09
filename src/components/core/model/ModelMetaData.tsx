@@ -55,7 +55,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     module: modelMetaData ? modelMetaData?.module : "",
     isSystem: modelMetaData ? modelMetaData?.isSystem : false,
     enableSoftDelete: modelMetaData ? modelMetaData?.enableSoftDelete : "",
-    enableAuditTracking: modelMetaData ? modelMetaData?.enableAuditTracking : "",
+    enableAuditTracking: modelMetaData ? modelMetaData?.enableAuditTracking : true,
     internationalisation: modelMetaData ? modelMetaData?.internationalisation : "",
     draftPublishWorkflow: modelMetaData ? modelMetaData?.draftPublishWorkflow : "",
     isChild: modelMetaData ? modelMetaData?.isChild : "",
