@@ -75,7 +75,7 @@ export const getNumberOfInputs = (matchMode: any): number | null => {
 // };
 
 export const SolidKanbanViewFields = ({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data, setLightboxUrls, setOpenLightbox, groupedView }: SolidKanbanViewFieldsParams) => {
-
+    if(!fieldMetadata) return null
     // And finally we can implement additional switching logic based on certain special fields. 
     if (fieldMetadata.name === 'id') {
         return SolidIntKanbanField({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data });

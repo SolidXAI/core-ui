@@ -71,7 +71,10 @@ export const modelsApi = createApi({
                 body: data,
             }), 
         }),
+        navigation: builder.query({
+            query: (qs) => `/model-metadata/navigation?${qs}`,
+        }),
     })
 })
 
-export const { useGetModelsQuery,useLazyGetModelsQuery, useLazyGetmodelByIdQuery, useGetmodelByIdQuery, useCreatemodelMutation,useGenerateCodeForModelMutation,useUpdatemodelMutation, useDeleteMultipleModelsMutation ,useDeletemodelMutation, useUpdateUserKeyMutation } = modelsApi  
+export const { useGetModelsQuery,useLazyGetModelsQuery, useLazyGetmodelByIdQuery, useGetmodelByIdQuery, useCreatemodelMutation,useGenerateCodeForModelMutation,useUpdatemodelMutation, useDeleteMultipleModelsMutation ,useDeletemodelMutation, useUpdateUserKeyMutation,useLazyNavigationQuery } = modelsApi  

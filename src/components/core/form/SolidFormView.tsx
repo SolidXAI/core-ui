@@ -60,6 +60,7 @@ import { ConfirmDialog } from "primereact/confirmdialog";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { useLazyGetMcpUrlQuery } from "@/redux/api/solidSettingsApi";
+import { SolidFormFooter } from "./SolidFormFooter";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -1534,7 +1535,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 renderFormDynamically(formViewMetaData)
                             )}
                         </div>
+
                     </form>
+                    <SolidFormFooter params={params}></SolidFormFooter>
                 </div>
                 {params.embeded !== true &&
                     <div className={`chatter-section ${isShowChatter === false ? 'collapsed' : 'open'}`} style={{ width: chatterLocaleWidth }}>
