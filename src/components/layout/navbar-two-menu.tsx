@@ -6,18 +6,11 @@ import { useState } from "react";
 
 const NavbarTwoMenu = ({ menuItems }: any) => {
     const pathname = usePathname();
-    const activeParentPath = pathname.split('/').slice(-2, -1)[0];
-
     const [expandedKeys, setExpandedKeys] = useState<any>({});
     const itemRenderer = (item: any, options: any) => {
-        const currentItem = item?.url?.split('/').slice(-2, -1)[0];
-        const isSettingsPage = pathname.includes('/settings/') && item?.url?.includes('/settings/')
-        ? pathname === item?.url // Exact match check for settings pages
-        : currentItem === activeParentPath
-
-        // currentItem === activeParentPath ?' p-highlight' : ''
+        const isSelected = pathname === item.url
         return (
-            <div key={item?.key} className={`flex align-items-center cursor-pointer menuHead px-3 ${isSettingsPage ? ' p-highlight' : ''}`} onClick={options.onClick}>
+            <div key={item?.key} className={`flex align-items-center cursor-pointer menuHead px-3 ${isSelected ? ' p-highlight' : ''}`} onClick={options.onClick}>
                 <Link href={item?.url ? item?.url : '#'} className="w-full flex justify-content-between font-normal">
                     <div className="flex align-items-center" style={{gap: 10}}>
                         {item.icon && (

@@ -15,10 +15,11 @@ interface Props {
     id?: any,
     solidWorkflowFieldValue?: any
     setSolidWorkflowFieldValue?: any
+    onStepperUpdate?: () => void
 }
 
 export const SolidFormStepper = (props: Props) => {
-    const { solidFormViewMetaData, modelName, initialEntityData, id, solidWorkflowFieldValue, setSolidWorkflowFieldValue } = props;
+    const { solidFormViewMetaData, modelName, initialEntityData, id, solidWorkflowFieldValue, setSolidWorkflowFieldValue, onStepperUpdate } = props;
     const toast = useRef<Toast>(null);
     const formStepperOverlay = useRef(null);
     const containerRef = useRef<HTMLDivElement>(null);
@@ -159,6 +160,9 @@ export const SolidFormStepper = (props: Props) => {
                 if (result?.data?.[solidWorkflowFieldKey]) {
                     setSolidWorkflowFieldValue(result.data[solidWorkflowFieldKey]);
                 }
+                if (onStepperUpdate) {
+                    onStepperUpdate();
+                }
             }
         } catch (error) {
             console.error(ERROR_MESSAGES.UPDATING_STEPPER, error);
@@ -167,8 +171,6 @@ export const SolidFormStepper = (props: Props) => {
     }
 
     const handleButtonClick = (stepValue: any) => {
-        console.log("Clicked step value:", stepValue);
-        
         if (solidWorkflowFieldEnabled === false || id === "new" || viewMode === "view") {
             return
         } else {

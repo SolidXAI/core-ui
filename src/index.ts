@@ -152,9 +152,6 @@ export { Layout } from '@/components/layout/Layout'
 // export * from '@/components/layout/user-profile';
 
 export { FilterIcon } from '@/components/modelsComponents/filterIcon';
-
-export { DemoService } from '@/components/tables/DemoData';
-export { DynamicTable } from '@/components/tables/DynamicTable';
 // Excluded folders
 // dashboard
 // automationComponents

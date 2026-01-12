@@ -34,8 +34,8 @@ export const solidSettingsApi = createApi({
         }),
         bulkUpdateSolidSettings: builder.mutation({
             query: ({ data }) => ({
-                url: `/setting/bulk-update`,
-                method: 'POST',
+                url: `/setting/bulk`,
+                method: 'PUT',
                 body: data,
             }),
         }),
