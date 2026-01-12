@@ -24,6 +24,7 @@ import { formatTimeLeft } from "@/helpers/resendOtpHelper";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { SolidPasswordHelperText } from "../core/common/SolidPasswordHelperText";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { useSelector } from "react-redux";
 
 interface AuthTabsProps {
     passwordBasedAuth: boolean;
@@ -34,11 +35,16 @@ interface AuthTabsProps {
 const SolidRegister = () => {
     const envPasswordHelperText = process.env.NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC;
     const [activeIndex, setActiveIndex] = useState(0);
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+
+    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    // useEffect(() => {
+    //     trigger("") // Fetch settings on mount
+    // }, [trigger])
+
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.authSettings);
+
     const [showOverlay, setShowOverlay] = useState(false);
-    useEffect(() => {
-        trigger("")
-    }, [trigger])
+
     const toast = useRef<Toast>(null);
 
     const router = useRouter();
@@ -68,7 +74,7 @@ const SolidRegister = () => {
                 const serializedError = error as Error;
                 toast.current?.show({
                     severity: "error",
-                    summary: ERROR_MESSAGES.ERROR ,
+                    summary: ERROR_MESSAGES.ERROR,
                     detail: serializedError.message || ERROR_MESSAGES.ERROR_OCCURED,
                     sticky: true
                 });
@@ -93,8 +99,8 @@ const SolidRegister = () => {
             summary,
             detail,
             ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+                ? { sticky: true }            // stays until user closes
+                : { life: 3000 }),
         });
     };
 
@@ -132,7 +138,7 @@ const SolidRegister = () => {
                         .matches(/[a-z]/, ERROR_MESSAGES.PASSWORD_CONTAIN('lowercase'))
                         .matches(/[A-Z]/, ERROR_MESSAGES.PASSWORD_CONTAIN('uppercase'))
                         .matches(/\d/, ERROR_MESSAGES.PASSWORD_CONTAIN('one', 'number'))
-                        .matches(/[@$!%*?&#^(){}[\]|\\/~`+=<>:;'"_,.-]/, ERROR_MESSAGES.PASSWORD_CONTAIN('special','character')),
+                        .matches(/[@$!%*?&#^(){}[\]|\\/~`+=<>:;'"_,.-]/, ERROR_MESSAGES.PASSWORD_CONTAIN('special', 'character')),
                 })}
 
                 onSubmit={async (values, { setSubmitting }) => {
@@ -168,7 +174,7 @@ const SolidRegister = () => {
                             showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                         }
                     } catch (err: any) {
-                        showToast("error", ERROR_MESSAGES.EMAIL_ALREADY_TAKEN , err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                        showToast("error", ERROR_MESSAGES.EMAIL_ALREADY_TAKEN, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                     } finally {
                         setSubmitting(false);
                     }

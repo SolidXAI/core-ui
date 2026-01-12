@@ -24,6 +24,8 @@ import { Dropdown } from 'primereact/dropdown';
 import { OpenAiProviderComponent } from './SolidSettings/LlmSettings/OpenAiProviderComponent';
 import { AnthropicProviderComponent } from './SolidSettings/LlmSettings/AnthropicProviderComponent';
 import { ERROR_MESSAGES } from '@/constants/error-messages';
+import { useDispatch } from 'react-redux';
+import { setSolidSettings } from '@/redux/features/settingsSlice';
 
 
 export const GeneralSettings = () => {
@@ -32,8 +34,17 @@ export const GeneralSettings = () => {
     const [authScreenRightBackgroundImagePreview, setAuthScreenRightBackgroundImagePreview] = useState<string | null>(null);
     const [authScreenLeftBackgroundImagePreview, setAuthScreenLeftBackgroundImagePreview] = useState<string | null>(null);
     const [authScreenCenterBackgroundImagePreview, setAuthScreenCenterBackgroundImagePreview] = useState<string | null>(null);
+    const dispatch = useDispatch()
 
     const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery()
+    useEffect(() => {
+        if (solidSettingsData) {
+            dispatch(setSolidSettings(solidSettingsData?.data));
+        }
+    }, [solidSettingsData]);
+
+
+
     useEffect(() => {
         trigger("") // Fetch settings on mount
     }, [trigger])
@@ -152,6 +163,7 @@ export const GeneralSettings = () => {
 
                 if (response.statusCode === 200) {
                     showToast("success", "Updated", "Settings updated");
+                    trigger("")
                 }
 
             } catch (error) {
@@ -833,50 +845,50 @@ export const GeneralSettings = () => {
                                                     </div>
                                                 </div>
                                                 {formik.values.passwordLessAuth === true &&
-                                                <div className="col-12 mt-3">
-                                                    <div className="formgrid grid align-items-center">
-                                                        <div className="col-12 sm:col-12 lg:col-5 xl:col-5">
-                                                            <label className="form-field-label">Password Less Authentication Method</label>
-                                                        </div>
-                                                        <div className='col-12 sm:col-12 lg:col-6 xl:col-6'>
-                                                            <div className="flex align-items-center gap-3 mt-3 lg:mt-0">
-                                                                <div className="flex align-items-center">
-                                                                    <RadioButton
-                                                                        inputId="passwordlessRegistrationValidateWhat-email"
-                                                                        name="passwordlessRegistrationValidateWhat"
-                                                                        value="email"
-                                                                        checked={formik.values.passwordlessRegistrationValidateWhat === "email"}
-                                                                        onChange={(e) => formik.setFieldValue("passwordlessRegistrationValidateWhat", e.value)}
-                                                                    />
-                                                                    <label htmlFor="passwordlessRegistrationValidateWhat-email" className="ml-2">Email</label>
-                                                                </div>
-                                                                <div className="flex align-items-center">
-                                                                    <RadioButton
-                                                                        inputId="passwordlessRegistrationValidateWhat-mobile"
-                                                                        name="passwordlessRegistrationValidateWhat"
-                                                                        value="mobile"
-                                                                        checked={formik.values.passwordlessRegistrationValidateWhat === "mobile"}
-                                                                        onChange={(e) => formik.setFieldValue("passwordlessRegistrationValidateWhat", e.value)}
-                                                                    />
-                                                                    <label htmlFor="passwordlessRegistrationValidateWhat-mobile" className="ml-2">Mobile</label>
-                                                                </div>
-                                                                <div className="flex align-items-center">
-                                                                    <RadioButton
-                                                                        inputId="passwordlessRegistrationValidateWhat-transactional"
-                                                                        name="passwordlessRegistrationValidateWhat"
-                                                                        value="transactional"
-                                                                        checked={formik.values.passwordlessRegistrationValidateWhat === "transactional"}
-                                                                        onChange={(e) => formik.setFieldValue("passwordlessRegistrationValidateWhat", e.value)}
-                                                                    />
-                                                                    <label htmlFor="passwordlessRegistrationValidateWhat-transactional" className="ml-2">Transactional</label>
+                                                    <div className="col-12 mt-3">
+                                                        <div className="formgrid grid align-items-center">
+                                                            <div className="col-12 sm:col-12 lg:col-5 xl:col-5">
+                                                                <label className="form-field-label">Password Less Authentication Method</label>
+                                                            </div>
+                                                            <div className='col-12 sm:col-12 lg:col-6 xl:col-6'>
+                                                                <div className="flex align-items-center gap-3 mt-3 lg:mt-0">
+                                                                    <div className="flex align-items-center">
+                                                                        <RadioButton
+                                                                            inputId="passwordlessRegistrationValidateWhat-email"
+                                                                            name="passwordlessRegistrationValidateWhat"
+                                                                            value="email"
+                                                                            checked={formik.values.passwordlessRegistrationValidateWhat === "email"}
+                                                                            onChange={(e) => formik.setFieldValue("passwordlessRegistrationValidateWhat", e.value)}
+                                                                        />
+                                                                        <label htmlFor="passwordlessRegistrationValidateWhat-email" className="ml-2">Email</label>
+                                                                    </div>
+                                                                    <div className="flex align-items-center">
+                                                                        <RadioButton
+                                                                            inputId="passwordlessRegistrationValidateWhat-mobile"
+                                                                            name="passwordlessRegistrationValidateWhat"
+                                                                            value="mobile"
+                                                                            checked={formik.values.passwordlessRegistrationValidateWhat === "mobile"}
+                                                                            onChange={(e) => formik.setFieldValue("passwordlessRegistrationValidateWhat", e.value)}
+                                                                        />
+                                                                        <label htmlFor="passwordlessRegistrationValidateWhat-mobile" className="ml-2">Mobile</label>
+                                                                    </div>
+                                                                    <div className="flex align-items-center">
+                                                                        <RadioButton
+                                                                            inputId="passwordlessRegistrationValidateWhat-transactional"
+                                                                            name="passwordlessRegistrationValidateWhat"
+                                                                            value="transactional"
+                                                                            checked={formik.values.passwordlessRegistrationValidateWhat === "transactional"}
+                                                                            onChange={(e) => formik.setFieldValue("passwordlessRegistrationValidateWhat", e.value)}
+                                                                        />
+                                                                        <label htmlFor="passwordlessRegistrationValidateWhat-transactional" className="ml-2">Transactional</label>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                        {formik.values.passwordlessRegistrationValidateWhat === "transactional" &&
+                                                            <p className="mt-3 text-sm font-bold">Note : In this method, you can pass the authentication method from the ui with possible values being either email or mobile. You can also pass both the values here</p>
+                                                        }
                                                     </div>
-                                                    {formik.values.passwordlessRegistrationValidateWhat === "transactional" &&
-                                                        <p className="mt-3 text-sm font-bold">Note : In this method, you can pass the authentication method from the ui with possible values being either email or mobile. You can also pass both the values here</p>
-                                                    }
-                                                </div>
                                                 }
                                             </div>
                                         </div>

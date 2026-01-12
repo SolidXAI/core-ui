@@ -8,20 +8,22 @@ import { Button } from "primereact/button";
 import { InputOtp } from "primereact/inputotp";
 import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import * as Yup from "yup";
-import { LayoutContext } from "../layout/context/layoutcontext";
-import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
-import { AppTitle } from "@/helpers/AppTitle";
 import Image from "next/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { useSelector } from "react-redux";
 
 const SolidOTPVerify = () => {
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
-    useEffect(() => {
-        trigger("")
-    }, [trigger])
+
+    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    // useEffect(() => {
+    //     trigger("") // Fetch settings on mount
+    // }, [trigger])
+
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.authSettings);
+
     const [otp, setOTP] = useState<number | any>();
 
     const toast = useRef<Toast>(null);
@@ -42,8 +44,8 @@ const SolidOTPVerify = () => {
             summary,
             detail,
             ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+                ? { sticky: true }            // stays until user closes
+                : { life: 3000 }),
         });
     };
 

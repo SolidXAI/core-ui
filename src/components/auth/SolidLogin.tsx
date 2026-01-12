@@ -23,19 +23,26 @@ import Image from "next/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "@/helpers/resendOtpHelper";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { useSelector } from "react-redux";
 // import { Checkbox } from "primereact/checkbox";
 interface AuthTabsProps {
     passwordBasedAuth: boolean;
     passwordLessAuth: boolean;
 }
 const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+
+    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    // useEffect(() => {
+    //     trigger("") // Fetch settings on mount
+    // }, [trigger])
+
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.authSettings);
+
     const [initiateLogin] = useInitateLoginMutation();
     const [activeIndex, setActiveIndex] = useState(0);
     useEffect(() => {
-        trigger("") // Fetch settings on mount
         sessionStorage.removeItem("app-mounted");
-    }, [trigger])
+    }, [])
     const toast = useRef<Toast>(null);
     const router = useRouter();
 
@@ -205,11 +212,11 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                 }}
                 validationSchema={
                     validationType === "email"
-                      ? Yup.object({
-                          identifier: Yup.string().required("required"),
+                        ? Yup.object({
+                            identifier: Yup.string().required("required"),
                         })
-                      : undefined
-                  }
+                        : undefined
+                }
                 enableReinitialize={false}
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
                     try {

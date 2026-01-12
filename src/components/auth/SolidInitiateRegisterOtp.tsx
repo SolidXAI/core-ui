@@ -15,6 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { useSelector } from "react-redux";
 
 const SolidInitiateRegisterOtp = () => {
     const searchParams = useSearchParams();
@@ -24,7 +25,14 @@ const SolidInitiateRegisterOtp = () => {
     const RESEND_OTP_TIMER_MIN = parseFloat(process.env.NEXT_PUBLIC_RESEND_OTP_TIMER || '0.5');
     const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
     const username = searchParams.get('username') || '';
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    // useEffect(() => {
+    //     trigger("") // Fetch settings on mount
+    // }, [trigger])
+
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.authSettings);
+
+
     const [initiateResendOTP] = useInitateRegisterMutation();
     const [initiateOtpRegister] = useConfirmOtpRegisterMutation();
     const toast = useRef<Toast>(null);
@@ -33,7 +41,6 @@ const SolidInitiateRegisterOtp = () => {
     const [resendEnabled, setResendEnabled] = useState(false);
 
     useEffect(() => {
-        trigger("");
 
         // Set timer if not already set (e.g., after login)
         const storedTime = localStorage.getItem(RESEND_OTP_KEY);
@@ -52,7 +59,7 @@ const SolidInitiateRegisterOtp = () => {
             setTimeLeft(0);
             setResendEnabled(true);
         }
-    }, [trigger, email]);
+    }, [email]);
 
     useEffect(() => {
         if (resendEnabled || timeLeft <= 0) return;
@@ -83,8 +90,8 @@ const SolidInitiateRegisterOtp = () => {
             summary,
             detail,
             ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+                ? { sticky: true }            // stays until user closes
+                : { life: 3000 }),
         });
     };
 

@@ -3,18 +3,21 @@
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
 import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
+import { useSelector } from "react-redux";
 
 export const SolidThemeProvider = () => {
     const pathname = usePathname();
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
+    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
+
+    // useEffect(() => {
+    //     if (pathname.includes("/auth/")) {
+    //         trigger("");
+    //     }
+    // }, [pathname, trigger]);
+
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.authSettings);
+
     const [theme, setTheme] = useState("solid-light-purple");
-
-    useEffect(() => {
-        if (pathname.includes("/auth/")) {
-            trigger("");
-        }
-    }, [pathname, trigger]);
-
     useEffect(() => {
         if (pathname.includes("/auth/") && solidSettingsData?.data?.authPagesTheme) {
             const selectedTheme =

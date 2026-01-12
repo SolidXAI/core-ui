@@ -1,6 +1,6 @@
 "use client"
 import { AppTitle } from "@/helpers/AppTitle";
-import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
+import { useGetAuthSettingsQuery, useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { toggleTheme } from "@/redux/features/themeSlice";
 import { LayoutConfig } from "@/types";
 import Link from "next/link";
@@ -17,8 +17,22 @@ import { Divider } from "primereact/divider";
 import AuthScreenRightBackgroundImage from '../../resources/images/auth/solid-left-layout-bg.png';
 import AuthScreenLeftBackgroundImage from '../../resources/images/auth/solid-right-layout-bg.png';
 import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
+import { setAuthSettings } from "@/redux/features/settingsSlice";
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
+    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
+
+    const { data: solidSettingsData } = useGetAuthSettingsQuery("")
+
+
+    useEffect(() => {
+        if (solidSettingsData) {
+            dispatch(setAuthSettings(solidSettingsData));
+        }
+    }, [solidSettingsData]);
+
+
+
+
     const [allowRegistration, setAllowRegistration] = useState<boolean | null>(null);
     const [isRestricted, setIsRestricted] = useState(false);
     const pathname = usePathname();
@@ -44,7 +58,6 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     }, [solidSettingsData]);
     useEffect(() => {
         // Fetch settings if not already available
-        trigger("");
 
         const allowPublicRegistration = solidSettingsData?.data?.allowPublicRegistration;
 
@@ -59,7 +72,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
             setAllowRegistration(true);
             setIsRestricted(false);
         }
-    }, [solidSettingsData, pathname, trigger]);
+    }, [solidSettingsData, pathname]);
 
 
     if (allowRegistration === null) return null;

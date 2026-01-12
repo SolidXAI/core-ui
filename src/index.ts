@@ -349,6 +349,7 @@ export { default as dataViewReducer } from '@/redux/features/dataViewSlice';
 export { default as navbarReducer } from '@/redux/features/navbarSlice';
 export { default as popupReducer } from '@/redux/features/popupSlice';
 export { default as themeReducer } from '@/redux/features/themeSlice';
+export { default as settingsReducer } from '@/redux/features/settingsSlice';
 export { default as userReducer } from '@/redux/features/userSlice';
 export { default as useSolidPopup } from '@/redux/hooks/useSolidPopup';
 export { solidApiSlices, solidReducers } from '@/redux/store/defaultStoreConfig';

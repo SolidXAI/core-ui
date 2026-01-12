@@ -2,26 +2,26 @@
 
 import { useInitiateChangePasswordMutation } from "@/redux/api/authApi";
 import { useFormik } from "formik";
-import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
-import { useContext, useEffect, useRef } from "react";
+import { useRef } from "react";
 import * as Yup from "yup";
-import { LayoutContext } from "../layout/context/layoutcontext";
-import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
-import { AppTitle } from "@/helpers/AppTitle";
 import Image from "next/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { useSelector } from "react-redux";
 
 const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
-    useEffect(() => {
-        trigger("") // Fetch settings on mount
-    }, [trigger])
+    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
+    
+    // useEffect(() => {
+    //     trigger("") // Fetch settings on mount
+    // }, [trigger])
+    
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.authSettings);
     const toast = useRef<Toast>(null);
     const router = useRouter();
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {

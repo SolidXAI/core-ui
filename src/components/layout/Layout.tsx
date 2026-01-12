@@ -7,7 +7,7 @@ import { PrimeReactContext } from 'primereact/api';
 import { useEventListener, useUnmountEffect } from 'primereact/hooks';
 import { classNames } from 'primereact/utils';
 import React, { useContext, useEffect, useRef } from 'react';
-import { useSelector , useDispatch } from 'react-redux';
+import { useSelector, useDispatch } from 'react-redux';
 import AppConfig from './AppConfig';
 import { LayoutContext } from './context/layoutcontext';
 import AppSidebar from './AppSidebar';
@@ -17,6 +17,8 @@ import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
 import { useSession } from 'next-auth/react';
 import { getExtensionFunction } from '@/helpers/registry';
 import { SolidOnApplicationMountEvent } from '@/types/solid-core';
+import { useGetSolidSettingsQuery } from '@/redux/api/solidSettingsApi';
+import { setSolidSettings } from '@/redux/features/settingsSlice';
 
 export const Layout = ({ children }: ChildContainerProps) => {
     const { layoutConfig, layoutState, setLayoutState } = useContext(LayoutContext);
@@ -128,60 +130,67 @@ export const Layout = ({ children }: ChildContainerProps) => {
     const session = useSession();
     const hasRunRef = useRef(false);
 
-useEffect(() => {
-    if (hasRunRef.current) return;
-    if (!session || !user) return;
+    useEffect(() => {
+        if (hasRunRef.current) return;
+        if (!session || !user) return;
 
-    const navEntry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
-    const isReload = navEntry?.type === "reload";
+        const navEntry = performance.getEntriesByType("navigation")[0] as PerformanceNavigationTiming;
+        const isReload = navEntry?.type === "reload";
 
-    // Detect first mount (after login redirect)
-    const isFirstMount = !sessionStorage.getItem("app-mounted");
+        // Detect first mount (after login redirect)
+        const isFirstMount = !sessionStorage.getItem("app-mounted");
 
-    // Allow execution only for:
-    //  1. First mount
-    //  2. Reload
-    if (isFirstMount || isReload) {
-        sessionStorage.setItem("app-mounted", "true");
-    } else {
-        return;
-    }
+        // Allow execution only for:
+        //  1. First mount
+        //  2. Reload
+        if (isFirstMount || isReload) {
+            sessionStorage.setItem("app-mounted", "true");
+        } else {
+            return;
+        }
 
-    hasRunRef.current = true;
+        hasRunRef.current = true;
 
-    const handleDynamicFunction = async () => {
-        const dynamicHeader = process.env.SOLIDX_ON_APPLICATION_MOUNT_HANDLER;
-        
-        const event: SolidOnApplicationMountEvent = {
-            type: "onApplicationMount",
-            user,
-            session
+        const handleDynamicFunction = async () => {
+            const dynamicHeader = process.env.SOLIDX_ON_APPLICATION_MOUNT_HANDLER;
+
+            const event: SolidOnApplicationMountEvent = {
+                type: "onApplicationMount",
+                user,
+                session
+            };
+
+            if (dynamicHeader) {
+                const DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
+                if (DynamicFunctionComponent) {
+                    await DynamicFunctionComponent(event);
+                }
+            }
         };
 
-        if (dynamicHeader) {
-            const DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
-            if (DynamicFunctionComponent) {
-                await DynamicFunctionComponent(event);
-            }
+        handleDynamicFunction();
+    }, [session, session?.data, user]);
+
+
+    const dispatch = useDispatch()
+    const { data: solidSettingsData } = useGetSolidSettingsQuery("")
+
+    useEffect(() => {
+        if (solidSettingsData) {
+            dispatch(setSolidSettings(solidSettingsData?.data));
         }
-    };
-
-    handleDynamicFunction();
-}, [session, session?.data, user]);
+    }, [solidSettingsData]);
 
 
 
+    // const toggleBothSidebars = () => {
+    //     if (visibleNavbar) {
+    //         dispatch(toggleNavbar());   // close both
+    //     } else {
+    //         dispatch(showNavbar());     // open both
+    //     }
+    // };
 
-
-
-// const toggleBothSidebars = () => {
-//     if (visibleNavbar) {
-//         dispatch(toggleNavbar());   // close both
-//     } else {
-//         dispatch(showNavbar());     // open both
-//     }
-// };
-    
     return (
         <React.Fragment>
             <div className={containerClass}>

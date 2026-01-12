@@ -16,15 +16,21 @@ import { useEffect, useRef } from "react";
 import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { useSelector } from "react-redux";
 const SolidResetPassword = () => {
     const searchParams = useSearchParams();
     const verificationToken = searchParams.get('token');
     // const decodedUsername = searchParams.get('username');
     // const username = decodedUsername ? decodeURIComponent(decodedUsername) : '';
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
-    useEffect(() => {
-        trigger("")
-    }, [trigger])
+
+    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    // useEffect(() => {
+    //     trigger("") // Fetch settings on mount
+    // }, [trigger])
+
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.authSettings);
+
+
     const toast = useRef<Toast>(null);
     const router = useRouter();
 
@@ -35,8 +41,8 @@ const SolidResetPassword = () => {
             summary,
             detail,
             ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+                ? { sticky: true }            // stays until user closes
+                : { life: 3000 }),
         });
     };
 
@@ -87,7 +93,7 @@ const SolidResetPassword = () => {
                     showToast("error", ERROR_MESSAGES.ERROR, response.error)
                 )
             } catch (err: any) {
-                showToast("error", err?.data?.message, err?.data?.data?.message? err?.data?.data?.message : err?.data?.message);
+                showToast("error", err?.data?.message, err?.data?.data?.message ? err?.data?.data?.message : err?.data?.message);
             }
         },
     });

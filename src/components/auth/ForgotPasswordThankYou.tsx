@@ -2,17 +2,19 @@
 
 import Link from "next/link";
 import { useSearchParams } from "next/navigation";
-import { useEffect } from "react";
-import Image from "next/image";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
-import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
+import { useSelector } from "react-redux";
 
 
 export const ForgotPasswordThankYou = () => {
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
-    useEffect(() => {
-        trigger("") // Fetch settings on mount
-    }, [trigger])
+    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
+
+    // useEffect(() => {
+    //     trigger("") // Fetch settings on mount
+    // }, [trigger])
+
+
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.authSettings);
+
     const searchParams = useSearchParams();
     const email = searchParams.get('email');
     const decodedEmail = email ? decodeURIComponent(email) : '';
