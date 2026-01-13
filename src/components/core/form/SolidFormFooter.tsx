@@ -131,15 +131,15 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
     // -----------------------------
     return (
         <div
-            className="flex justify-content-end align-items-baseline gap-2 p-0"
+            className="flex justify-content-end align-items-center gap-2 p-1"
             style={{ borderTop: "1px solid var(--surface-border)" }}
         >{meta &&
-            <p>{`${meta.currentIndexGlobal} of ${meta.totalRecords}`}</p>
+            <span>{`${meta.currentIndexGlobal} of ${meta.totalRecords}`}</span>
             }
             {prevNav && (
                 <Button
                     icon="pi pi-angle-left"
-                    className="p-button-sm p-button-text p-1"
+                    className="p-button-sm p-button-text"
                     onClick={() => handlePrev()}
                     disabled={isLoading}
                     tooltip="Previous"
@@ -150,7 +150,7 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
             {nextNav && (
                 <Button
                     icon="pi pi-angle-right"
-                    className="p-button-sm p-button-text p-1"
+                    className="p-button-sm p-button-text"
                     onClick={() => handleNext()}
                     disabled={isLoading}
                     tooltip="Next"

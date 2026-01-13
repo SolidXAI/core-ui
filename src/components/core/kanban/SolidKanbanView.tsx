@@ -347,7 +347,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           const queryData = {
             offset: 0,
             limit: Number(queryObject.limit) + Number(queryObject.offset),
-            fields: queryObject.fields || [`${groupByFieldName}`, `count(${groupByFieldName})`],
+            // fields: queryObject.fields || [`${groupByFieldName}`, `count(${groupByFieldName})`],
             groupBy: queryObject.groupBy || groupByFieldName,
             populateMedia: queryObject.populateMedia || toPopulateMedia,
             populateGroup: queryObject.populateGroup || true,
@@ -378,7 +378,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           const queryData = {
             offset: 0,
             limit: swimlanesCount,
-            fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
+            // fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
             groupBy: groupByFieldName,
             populateMedia: toPopulateMedia,
             populateGroup: true,
@@ -614,7 +614,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       const queryData = {
         offset: swimLaneCurrentPageNumber * swimlanesCount,
         limit: swimlanesCount,
-        fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
+        // fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
         groupBy: groupByFieldName,
         populateMedia: toPopulateMedia,
         populate: toPopulate,
@@ -686,7 +686,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       const queryData = {
         offset: 0,
         limit: swimlanesCount,
-        fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
+        // fields: [`${groupByFieldName}`, `count(${groupByFieldName})`],
         groupBy: groupByFieldName,
         populateMedia: toPopulateMedia,
         populateGroup: true,
