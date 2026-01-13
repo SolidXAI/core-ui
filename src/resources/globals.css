@@ -1725,7 +1725,7 @@ li.header-li-px {
 }
 
 .solid-form-wrapper .solid-form-content {
-  height: calc(100vh - 116px);
+  height: calc(100vh - 130px);
   /* height: calc(100vh - 111px); */
   /* If No Breadcrumb */
   /* height: calc(100vh - 64px); */

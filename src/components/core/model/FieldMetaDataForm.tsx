@@ -1221,7 +1221,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     relationCoModelColumnName: fieldMetaData ? fieldMetaData?.relationCoModelColumnName : null,
     relationJoinTableName: fieldMetaData ? fieldMetaData?.relationJoinTableName : null,
     userKey: fieldMetaData ? fieldMetaData?.userKey : null,
-    enableAuditTracking: fieldMetaData ? fieldMetaData?.enableAuditTracking : false,
+    enableAuditTracking: fieldMetaData ? fieldMetaData?.enableAuditTracking : true,
     isPrimaryKey: fieldMetaData ? fieldMetaData?.isPrimaryKey : false,
     isMultiSelect: fieldMetaData ? fieldMetaData?.isMultiSelect : false,
   };

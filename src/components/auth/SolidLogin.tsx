@@ -23,6 +23,7 @@ import Image from "next/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "@/helpers/resendOtpHelper";
 import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { RadioButton } from "primereact/radiobutton";
 // import { Checkbox } from "primereact/checkbox";
 interface AuthTabsProps {
     passwordBasedAuth: boolean;
@@ -165,7 +166,30 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
 
     const PasswordLessLogin = () => {
         const validationType = solidSettingsData?.data?.passwordlessRegistrationValidateWhat || "email";
+        const [selectedAuthMethod, setSelectedAuthMethod] = useState<"email" | "mobile">("email");
+        
         const getFieldConfig = () => {
+            if (validationType === "transactional") {
+                if (selectedAuthMethod === "mobile") {
+                    return {
+                        label: "Mobile Number",
+                        placeholder: "Enter your mobile number",
+                        type: "mobile",
+                        validationSchema: Yup.string()
+                            .matches(/^[0-9]{10}$/, ERROR_MESSAGES.FIELD_INVALID('mobile number'))
+                            .required(ERROR_MESSAGES.FIELD_REUQIRED('Mobile number'))
+                    };
+                } else {
+                    return {
+                        label: "Email Address",
+                        placeholder: "Enter your email",
+                        type: "email",
+                        // validationSchema: Yup.string()
+                        //     .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
+                        //     .required(ERROR_MESSAGES.FIELD_REUQIRED('Email'))
+                    };
+                }
+            }
             switch (validationType) {
                 case "mobile":
                     return {
@@ -175,14 +199,6 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         validationSchema: Yup.string()
                             .matches(/^[0-9]{10}$/, ERROR_MESSAGES.FIELD_INVALID('mobile number'))
                             .required(ERROR_MESSAGES.FIELD_REUQIRED('Mobile number'))
-                    };
-                case "transactional":
-                    return {
-                        label: signInValidatorLabel || "Mobile Number or email id",
-                        placeholder: signInValidatorPlaceholder || "Enter your email or Mobile",
-                        type: "transactional",
-                        validationSchema: Yup.string()
-                            .required(ERROR_MESSAGES.FIELD_REUQIRED('Email or Mobile'))
                     };
                 case "email":
                 default:
@@ -204,11 +220,13 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                     identifier: "",
                 }}
                 validationSchema={
-                    validationType === "email"
-                      ? Yup.object({
+                    fieldConfig.validationSchema 
+                    ? Yup.object({
+                          identifier: fieldConfig.validationSchema
+                      })
+                    : Yup.object({
                           identifier: Yup.string().required("required"),
-                        })
-                      : undefined
+                      })
                   }
                 enableReinitialize={false}
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
@@ -216,10 +234,15 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         const RESEND_OTP_KEY = `resendOtpLogin_${values.identifier}`;
                         const RESEND_OTP_TIMER_MIN = parseFloat(process.env.NEXT_PUBLIC_RESEND_OTP_TIMER || '0.5');
                         const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
+                        
+                        // Use selectedAuthMethod for transactional, otherwise use fieldConfig.type
+                        const authType = validationType === "transactional" ? selectedAuthMethod : fieldConfig.type;
+                    
                         const payload = {
-                            type: fieldConfig.type,
+                            type: authType,
                             identifier: values.identifier,
                         };
+
                         const storedTimeStr = localStorage.getItem(RESEND_OTP_KEY);
                         const now = Date.now();
                         if (storedTimeStr) {
@@ -244,7 +267,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                             showToast("success", ERROR_MESSAGES.OPT_RESEND, response?.data?.message);
                             const identifier = values.identifier;
                             localStorage.setItem(`resendOtpLogin_${identifier}`, Date.now().toString());
-                            router.push(`/auth/initiate-login?identifier=${encodeURIComponent(identifier)}&type=${fieldConfig.type}`);
+                            router.push(`/auth/initiate-login?identifier=${encodeURIComponent(identifier)}&type=${authType}`);
                         } else {
                             showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                         }
@@ -260,6 +283,42 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
             >
                 {(formik) => (
                     <Form>
+                        {/* Radio buttons for transactional type */}
+                        {validationType === "transactional" && (
+                            <div className="flex flex-column gap-3 mt-3">
+                                <label className="solid-auth-input-label">Select Authentication Method</label>
+                                <div className="flex gap-4">
+                                    <div className="flex align-items-center">
+                                        <RadioButton
+                                            inputId="auth-email"
+                                            name="authMethod"
+                                            value="email"
+                                            checked={selectedAuthMethod === "email"}
+                                            onChange={(e) => {
+                                                setSelectedAuthMethod("email");
+                                                formik.setFieldValue("identifier", "");
+                                            }}
+                                            className="mr-2"
+                                        />
+                                        <label htmlFor="auth-email" className="solid-auth-input-label cursor-pointer">Email / Username</label>
+                                    </div>
+                                    <div className="flex align-items-center">
+                                        <RadioButton
+                                            inputId="auth-mobile"
+                                            name="authMethod"
+                                            value="mobile"
+                                            checked={selectedAuthMethod === "mobile"}
+                                            onChange={(e) => {
+                                                setSelectedAuthMethod("mobile");
+                                                formik.setFieldValue("identifier", "");
+                                            }}
+                                            className="mr-2"
+                                        />
+                                        <label htmlFor="auth-mobile" className="solid-auth-input-label cursor-pointer">Mobile</label>
+                                    </div>
+                                </div>
+                            </div>
+                        )}
                         <div className="flex flex-column gap-2 mt-3">
                             <label htmlFor="identifier" className="solid-auth-input-label">{fieldConfig.label}</label>
                             <InputText

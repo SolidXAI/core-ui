@@ -85,12 +85,44 @@ export const queryStringToQueryObject = () => {
   }
 };
 
+
+export const queryStringToQueryObjectByUrl = (url) => {
+  const currentPageUrl = url; // Get the current page URL
+  const encodedQueryString = localStorage.getItem(currentPageUrl); // Retrieve the encoded query string from local storage
+
+  if (encodedQueryString) {
+    try {
+      const decodedQueryString = atob(encodedQueryString); // Base64 decode the string
+      const parsedParams = JSON.parse(decodedQueryString); // Parse the decoded string into an object
+      return parsedParams;
+    } catch (error) {
+      console.error(
+        ERROR_MESSAGES.ERROR_DECODING,
+        error
+      );
+    }
+  }
+};
+
 export const queryObjectToQueryString = (queryObject: string) => {
   if (queryObject) {
     const stringifiedObject = JSON.stringify(queryObject);
     // const stringifiedObject = qs.stringify(queryObject, { encodeValuesOnly: true, arrayFormat: "brackets" });
     const encodedQueryString = btoa(stringifiedObject); // Base64 encode the stringified object
     const currentPageUrl = window.location.pathname; // Get the current page URL
+    localStorage.setItem(currentPageUrl, encodedQueryString); // Store in local storage with the URL as the key
+    return encodedQueryString;
+  }
+  return null;
+};
+
+
+export const queryObjectToQueryStringByUrl = (url,queryObject: string) => {
+  if (queryObject) {
+    const stringifiedObject = JSON.stringify(queryObject);
+    // const stringifiedObject = qs.stringify(queryObject, { encodeValuesOnly: true, arrayFormat: "brackets" });
+    const encodedQueryString = btoa(stringifiedObject); // Base64 encode the stringified object
+    const currentPageUrl = url; // Get the current page URL
     localStorage.setItem(currentPageUrl, encodedQueryString); // Store in local storage with the URL as the key
     return encodedQueryString;
   }
@@ -761,73 +793,6 @@ export const SolidListView = (params: SolidListViewParams) => {
     setSelectedRecords(activeRecords);
     setSelectedRecoverRecords(deletedRecords);
   };
-
-  const identifySolidOperatorAndValue = (
-    primeReactMatchMode: FilterMatchMode,
-    value: any
-  ): { operator: string; value: string | string[] | any[] } => {
-    // @ts-ignore
-    if (primeReactMatchMode.label && primeReactMatchMode.label === "Not In") {
-      primeReactMatchMode = FilterMatchMode.NOT_IN;
-    }
-
-    // Default value, this might not be useful as the solid server might not support these match modes.
-    let solidOperator = "";
-    let solidValue = value[0];
-
-    switch (primeReactMatchMode) {
-      case FilterMatchMode.STARTS_WITH:
-        solidOperator = "$startsWithi";
-        break;
-      case FilterMatchMode.CONTAINS:
-        solidOperator = "$containsi";
-        break;
-      case FilterMatchMode.NOT_CONTAINS:
-        solidOperator = "$notContains";
-        break;
-      case FilterMatchMode.ENDS_WITH:
-        solidOperator = "$endsWith";
-        break;
-      case FilterMatchMode.EQUALS:
-        solidOperator = "$eqi";
-        solidValue = value;
-        break;
-      case FilterMatchMode.NOT_EQUALS:
-        solidOperator = "$nei";
-        solidValue = value;
-        break;
-      case FilterMatchMode.IN:
-        solidOperator = "$in";
-        solidValue = value;
-        break;
-      case FilterMatchMode.NOT_IN:
-        solidOperator = "$notIn";
-        solidValue = value;
-        break;
-      case FilterMatchMode.LESS_THAN:
-        solidOperator = "$lt";
-        break;
-      case FilterMatchMode.LESS_THAN_OR_EQUAL_TO:
-        solidOperator = "$lte";
-        break;
-      case FilterMatchMode.GREATER_THAN:
-        solidOperator = "$gt";
-        break;
-      case FilterMatchMode.GREATER_THAN_OR_EQUAL_TO:
-        solidOperator = "$gte";
-        break;
-      case FilterMatchMode.BETWEEN:
-        solidOperator = "$between";
-        solidValue = value;
-        break;
-    }
-
-    return { operator: solidOperator, value: solidValue };
-  };
-
-  // Common utility function that gets called on filter, sort & pagination events.
-  // This function creates the query string as per the solid backend API specification
-
 
 
 
