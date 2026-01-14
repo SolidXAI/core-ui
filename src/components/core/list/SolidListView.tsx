@@ -430,7 +430,6 @@ export const SolidListView = (params: SolidListViewParams) => {
     }
   }, [solidListViewInitialMetaData]);
 
-
   // set layout and actions for create and edit buttons and view modes
   useEffect(() => {
     if (solidListViewMetaData) {
