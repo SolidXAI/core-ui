@@ -105,7 +105,27 @@ export type ListLayoutType = {
 };
 
 // Event type
-export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender" | "onFormDataLoad" | "onFormLayoutLoad" | "onFormLoad" | "onListLoad" | "onBeforeListDataLoad" | "afterLogin" | "beforeLogout" | "onApplicationMount";
+export type SolidUiEvents =
+    // Implemented
+    "onFieldChange" |
+    // Implemented
+    "onFieldBlur" |
+    // Implemented
+    "onFormDataLoad" |
+    // Implemented
+    "onFormLayoutLoad" |
+    // Implemented
+    "onFormLoad" |
+    // Implemented
+    "onListLoad" |
+    // Implemented
+    "onBeforeListDataLoad" |
+    // Not Implemented
+    "afterLogin" |
+    // Not Implemented
+    "beforeLogout" |
+    // Implemented
+    "onApplicationMount";
 export type SolidUiEvent = {
     type: SolidUiEvents;
     modifiedField?: string;

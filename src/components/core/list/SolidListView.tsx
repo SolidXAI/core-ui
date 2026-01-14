@@ -431,9 +431,42 @@ export const SolidListView = (params: SolidListViewParams) => {
   }, [solidListViewInitialMetaData]);
 
   // set layout and actions for create and edit buttons and view modes
+  // useEffect(() => {
+  //   if (solidListViewMetaData) {
+  //     const listLayoutAttrs = solidListViewMetaData?.data?.solidView?.layout?.attrs;
+  //     const createActionUrl = listLayoutAttrs?.createAction && listLayoutAttrs?.createAction?.type === "custom" ? listLayoutAttrs?.createAction?.customComponent : "form/new";
+  //     const editActionUrl = listLayoutAttrs?.editAction && listLayoutAttrs?.editAction?.type === "custom" ? listLayoutAttrs?.editAction?.customComponent : "form";
+
+  //     if (listLayoutAttrs?.createAction) {
+  //       setCreateActionQueryParams({
+  //         actionName: listLayoutAttrs.createAction.name,
+  //         actionType: listLayoutAttrs.createAction.type,
+  //         actionContext: listLayoutAttrs.createAction.context,
+  //       });
+  //     }
+  //     if (listLayoutAttrs?.editAction) {
+  //       setEditActionQueryParams({
+  //         actionName: listLayoutAttrs.editAction.name,
+  //         actionType: listLayoutAttrs.editAction.type,
+  //         actionContext: listLayoutAttrs.editAction.context,
+  //       });
+  //     }
+
+  //     const viewModes = listLayoutAttrs?.allowedViews && listLayoutAttrs?.allowedViews.length > 0 && listLayoutAttrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view }; });
+  //     setViewModes(viewModes);
+  //     if (createActionUrl) {
+  //       setCreateButtonUrl(createActionUrl);
+  //     }
+  //     if (editActionUrl) {
+  //       setEditButtonUrl(editActionUrl);
+  //     }
+  //   }
+  // }, [solidListViewMetaData]);
+
+  // set layout and actions for create and edit buttons and view modes
   useEffect(() => {
-    if (solidListViewMetaData) {
-      const listLayoutAttrs = solidListViewMetaData?.data?.solidView?.layout?.attrs;
+    if (solidListViewLayout) {
+      const listLayoutAttrs = solidListViewLayout.attrs;
       const createActionUrl = listLayoutAttrs?.createAction && listLayoutAttrs?.createAction?.type === "custom" ? listLayoutAttrs?.createAction?.customComponent : "form/new";
       const editActionUrl = listLayoutAttrs?.editAction && listLayoutAttrs?.editAction?.type === "custom" ? listLayoutAttrs?.editAction?.customComponent : "form";
 
@@ -461,23 +494,17 @@ export const SolidListView = (params: SolidListViewParams) => {
         setEditButtonUrl(editActionUrl);
       }
     }
-  }, [solidListViewMetaData]);
+  }, [solidListViewLayout]);
 
   // All list view state.
   const [listViewData, setListViewData] = useState<any[]>([]);
   const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(
-    solidListViewLayout?.attrs?.defaultPageSize
-      ? solidListViewLayout?.attrs?.defaultPageSize
-      : 10
-  );
+  const [rows, setRows] = useState(solidListViewLayout?.attrs?.defaultPageSize ? solidListViewLayout?.attrs?.defaultPageSize : 10);
   const [totalRecords, setTotalRecords] = useState(0);
   const [sortField, setSortField] = useState("id");
   const [sortOrder, setSortOrder] = useState(-1);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
-  const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>(
-    []
-  );
+  const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [isRecoverDialogVisible, setRecoverDialogVisible] = useState(false);
@@ -488,8 +515,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [showArchived, setShowArchived] = useState(false);
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
   const [customFilter, setCustomFilter] = useState(null);
-  const [showSaveFilterPopup, setShowSaveFilterPopup] =
-    useState<boolean>(false);
+  const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
 
   const sizeOptions = [
     { label: "Compact", value: "small", image: CompactImage },
@@ -506,17 +532,13 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [viewModes, setViewModes] = useState<any>([]);
 
   // Custom Row Action
-  const [listViewRowActionPopupState, setListViewRowActionPopupState] =
-    useState(false);
+  const [listViewRowActionPopupState, setListViewRowActionPopupState] = useState(false);
   const [listViewRowActionData, setListRowActionData] = useState<any>();
 
   const toast = useRef<Toast>(null);
 
   // Get the list view data.
-  const [
-    triggerGetSolidEntities,
-    { data: solidEntityListViewData, isLoading, error },
-  ] = useLazyGetSolidEntitiesQuery();
+  const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading, error },] = useLazyGetSolidEntitiesQuery();
 
   const [
     triggerRecoverSolidEntitiesById,
@@ -667,14 +689,11 @@ export const SolidListView = (params: SolidListViewParams) => {
     solidListViewLayout
   ]);
 
-
-
-
   useEffect(() => {
     if (solidListViewMetaData && solidListViewMetaData?.data && !loading) {
       const handleDynamicFunction = async () => {
         const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onListLoad;
-        let DynamicFunctionComponent = null;
+        let dynamicExtensionFunction = null;
         let listViewRecords = listViewData;
         let listLayout = solidListViewMetaData?.data?.solidView?.layout;
         if (params.customLayout) {
@@ -699,9 +718,9 @@ export const SolidListView = (params: SolidListViewParams) => {
         };
 
         if (dynamicHeader) {
-          DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
-          if (DynamicFunctionComponent) {
-            const updatedListData: SolidListUiEventResponse = await DynamicFunctionComponent(event);
+          dynamicExtensionFunction = getExtensionFunction(dynamicHeader);
+          if (dynamicExtensionFunction) {
+            const updatedListData: SolidListUiEventResponse = await dynamicExtensionFunction(event);
 
             if (updatedListData && updatedListData?.dataChanged && updatedListData?.newListData) {
               listViewRecords = updatedListData.newListData;
@@ -827,7 +846,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
     //  SolidBeforeListDataLoad Event that allows filter modification just before api call 
     const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onBeforeListDataLoad;
-    let DynamicFunctionComponent = null;
+    let dynamicExtensionFunction = null;
     const event: SolidBeforeListDataLoad = {
       type: "onBeforeListDataLoad",
       fieldsMetadata: solidListViewMetaData?.data?.solidFieldsMetadata,
@@ -846,9 +865,9 @@ export const SolidListView = (params: SolidListViewParams) => {
     };
 
     if (dynamicHeader) {
-      DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
-      if (DynamicFunctionComponent) {
-        const updatedListData: SolidListUiEventResponse = await DynamicFunctionComponent(event);
+      dynamicExtensionFunction = getExtensionFunction(dynamicHeader);
+      if (dynamicExtensionFunction) {
+        const updatedListData: SolidListUiEventResponse = await dynamicExtensionFunction(event);
         if (updatedListData && updatedListData?.filterApplied && updatedListData?.newFilter) {
           queryData = updatedListData?.newFilter
         }
