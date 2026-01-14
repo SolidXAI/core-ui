@@ -108,6 +108,7 @@ export type SolidUiEvent = {
     type: SolidUiEvents;
     modifiedField?: string;
     modifiedFieldValue?: any;
+    queryParams?: any;
     // This comes from Formik...
     formData: Record<string, any>;
     viewMetadata: SolidView;
@@ -130,6 +131,7 @@ export type SolidLoadForm = {
     viewMetadata: SolidView;
     fieldsMetadata: FieldsMetadata;
     formViewLayout: LayoutNode;
+    queryParams?: any;
 }
 
 

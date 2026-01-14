@@ -238,6 +238,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [createButtonUrl, setCreateButtonUrl] = useState<string>();
   const [editButtonUrl, setEditButtonUrl] = useState<string>();
+  const [createActionQueryParams, setCreateActionQueryParams] = useState<Record<string, string>>({});
+  const [editActionQueryParams, setEditActionQueryParams] = useState<Record<string, string>>({});
   const [columnsCount, setColumnsCount] = useState(5);
   const [swimLaneCurrentPageNumber, setSwimLaneCurrentPageNumber] = useState(1);
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
@@ -301,13 +303,27 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     }
   }, [solidEntityKanbanViewData]);
 
-
-
-
   useEffect(() => {
     if (solidKanbanViewMetaData) {
-      const createActionUrl = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.type === "custom" ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.customComponent : "form/new";
-      const editActionUrl = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.type === "custom" ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.customComponent : "form";
+      const kanbanViewLayoutAttrs = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs;
+      const createActionUrl = kanbanViewLayoutAttrs?.createAction && kanbanViewLayoutAttrs?.createAction?.type === "custom" ? kanbanViewLayoutAttrs?.createAction?.customComponent : "form/new";
+      const editActionUrl = kanbanViewLayoutAttrs?.editAction && kanbanViewLayoutAttrs?.editAction?.type === "custom" ? kanbanViewLayoutAttrs?.editAction?.customComponent : "form";
+
+      if (kanbanViewLayoutAttrs?.createAction) {
+        setCreateActionQueryParams({
+          actionName: kanbanViewLayoutAttrs.createAction.name,
+          actionType: kanbanViewLayoutAttrs.createAction.type,
+          actionContext: kanbanViewLayoutAttrs.createAction.context,
+        });
+      }
+      if (kanbanViewLayoutAttrs?.editAction) {
+        setEditActionQueryParams({
+          actionName: kanbanViewLayoutAttrs.editAction.name,
+          actionType: kanbanViewLayoutAttrs.editAction.type,
+          actionContext: kanbanViewLayoutAttrs.editAction.context,
+        });
+      }
+
       if (createActionUrl) {
         setCreateButtonUrl(createActionUrl)
       }
@@ -409,11 +425,10 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     }
   }, [isDeleteSolidEntitiesSucess, groupByFieldName, solidKanbanViewMetaData]);
 
-
   // clickable link allowing one to open the detail / form view.
   const detailsBodyTemplate = (solidViewData: any) => {
     return (
-      <Link href={`${editButtonUrl}/${solidViewData.id}`} rel="noopener noreferrer" className="text-sm font-bold p-0" style={{ color: "#12415D" }}>
+      <Link href={`${editButtonUrl}/${solidViewData.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`} rel="noopener noreferrer" className="text-sm font-bold p-0" style={{ color: "#12415D" }}>
         <i className="pi pi-pencil" style={{ fontSize: "1rem" }}></i>
       </Link>
     );
@@ -795,7 +810,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             }
 
             {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.create !== false &&
-              <SolidCreateButton url={createButtonUrl} responsiveIconOnly={true} />
+              <SolidCreateButton createButtonUrl={createButtonUrl} createActionQueryParams={createActionQueryParams} responsiveIconOnly={true} />
             }
 
             {actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false && selectedRecords.length > 0 && <Button
