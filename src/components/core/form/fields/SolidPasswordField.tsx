@@ -37,7 +37,8 @@ export class SolidPasswordField implements ISolidField {
         const fieldDefaultValue = this.fieldContext?.fieldMetadata?.defaultValue;
 
         const existingValue = this.fieldContext.data[fieldName];
-        return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
+        // return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
+        return existingValue !== undefined && existingValue !== null ? undefined : fieldDefaultValue || '';
     }
 
     validationSchema(): Schema {
@@ -72,10 +73,15 @@ export class SolidPasswordField implements ISolidField {
         //check password and confirm password match if password have value
         schema = schema.test('passwords-match', ERROR_MESSAGES.FIELD_MUST_MATCH(fieldLabel), function (value) {
             const { path, parent } = this;
-            if (value) {
-                return value === parent[confirmFieldName];
-            } else if (!value && parent[confirmFieldName]) {
-                return false; // If password is empty but confirm password has value, show error    
+            const confirmValue = parent[confirmFieldName];
+
+            //  Edit mode / untouched → SKIP
+            if (!value && !confirmValue) {
+                return true;
+            }
+            //  Only one filled → ERROR
+            if (value || confirmValue) {
+                return value === confirmValue;
             }
             return true; // If password is empty, don't validate match
         });
@@ -289,7 +295,7 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
             [fieldName]: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel)),
             [confirmFieldName]: Yup.string()
                 .required(`Confirm ${ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel)}`)
-                .oneOf([Yup.ref(fieldName)], ERROR_MESSAGES.FIELD_REUQIRED(fieldLabel)),
+                .oneOf([Yup.ref(fieldName)], ERROR_MESSAGES.FIELD_MUST_MATCH(fieldLabel)),
         }),
         onSubmit: async (values: { [x: string]: any; }, { resetForm }: any) => {
             try {
@@ -302,7 +308,7 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
                     confirmFieldValue: values[confirmFieldName],
                 });
 
-                formik.setFieldValue(fieldName, values[fieldName]);
+                // formik.setFieldValue(fieldName, values[fieldName]);
                 resetForm();
                 setVisible(false);
             } catch (err) {
