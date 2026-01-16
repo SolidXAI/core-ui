@@ -19,7 +19,7 @@ const downloadOnlyExt = [
     "doc", "docx",
     "xls", "xlsx",
     "ppt", "pptx",
-    "pdf"
+    "pdf", "csv"
 ];
 
 const isDocumentType = (url: string) => {
@@ -249,8 +249,10 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                 header="Items Uploaded"
                 modal
                 onHide={() => setShowAllFiles(false)}
-                style={{ minWidth: 450 }}
+                // style={{ minWidth: 450 }}
+                style={{ width: '32rem' }}
                 onClick={(event) => event.stopPropagation()}
+                breakpoints={{ '591px': '94vw'}}
             >
                 {fullrecord?.map((file: any) => {
                     const fileId = `${file.name}-${file.size}`;
