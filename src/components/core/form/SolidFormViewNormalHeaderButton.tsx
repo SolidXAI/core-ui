@@ -9,6 +9,7 @@ interface SolidFormViewNormalHeaderButtonProps {
     formik: any;
     solidFormViewMetaData: any;
     handleCustomButtonClick: (attrs: any, event: any) => void;
+    formData:any
 }
 
 export function SolidFormViewNormalHeaderButton({
@@ -18,6 +19,7 @@ export function SolidFormViewNormalHeaderButton({
     formik,
     solidFormViewMetaData,
     handleCustomButtonClick,
+    formData
 }: SolidFormViewNormalHeaderButtonProps) {
     const hasRole = !button?.attrs?.roles || button?.attrs?.roles.length === 0
         ? true
@@ -40,6 +42,7 @@ export function SolidFormViewNormalHeaderButton({
                     params,
                     formik,
                     solidFormViewMetaData: solidFormViewMetaData.data,
+                    formData
                 };
                 handleCustomButtonClick(button.attrs, event);
             }}

@@ -1540,6 +1540,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     <form style={{ width: '100%' }} onSubmit={formik.handleSubmit}>
                         <SolidFormActionHeader
                             formik={formik}
+                            formData={solidFormViewData?.data}
                             params={params}
                             actionsAllowed={actionsAllowed}
                             formViewLayout={formViewLayout}
