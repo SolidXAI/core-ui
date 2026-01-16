@@ -117,7 +117,7 @@ export const queryObjectToQueryString = (queryObject: string) => {
 };
 
 
-export const queryObjectToQueryStringByUrl = (url,queryObject: string) => {
+export const queryObjectToQueryStringByUrl = (url, queryObject: string) => {
   if (queryObject) {
     const stringifiedObject = JSON.stringify(queryObject);
     // const stringifiedObject = qs.stringify(queryObject, { encodeValuesOnly: true, arrayFormat: "brackets" });
@@ -149,12 +149,10 @@ export const SolidListView = (params: SolidListViewParams) => {
   const solidGlobalSearchElementRef = useRef();
 
   const router = useRouter();
-  const searchParams = useSearchParams(); // Converts the query params to a string
+  const searchParams = useSearchParams();
   const localeName = searchParams.get("locale");
   // TODO: The initial filter state will be created based on the fields which are present on this list view.
   const [filters, setFilters] = useState<any>(params.customFilter || null);
-
-
 
   // const [customFilter, setCustomFilter] = useState<FilterRule[]>(initialState);
   // const [showGlobalSearchElement, setShowGlobalSearchElement] = useState<boolean>(false);
@@ -165,11 +163,9 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [isOpenSolidXAiPanel, setIsOpenSolidXAiPanel] = useState(false);
   const [chatterWidth, setChatterWidth] = useState(380);
   const [isResizing, setIsResizing] = useState(false);
-  const [triggerCheckIfPermissionExists] =
-    useLazyCheckIfPermissionExistsQuery();
+  const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
 
   const handleCustomButtonClick = useHandleListCustomButtonClick();
-
 
   const [mcpUrl, setMcpUrl] = useState<string | null>(null);
   const [getMcpUrl] = useLazyGetMcpUrlQuery();
@@ -434,33 +430,62 @@ export const SolidListView = (params: SolidListViewParams) => {
     }
   }, [solidListViewInitialMetaData]);
 
+  // set layout and actions for create and edit buttons and view modes
+  // useEffect(() => {
+  //   if (solidListViewMetaData) {
+  //     const listLayoutAttrs = solidListViewMetaData?.data?.solidView?.layout?.attrs;
+  //     const createActionUrl = listLayoutAttrs?.createAction && listLayoutAttrs?.createAction?.type === "custom" ? listLayoutAttrs?.createAction?.customComponent : "form/new";
+  //     const editActionUrl = listLayoutAttrs?.editAction && listLayoutAttrs?.editAction?.type === "custom" ? listLayoutAttrs?.editAction?.customComponent : "form";
+
+  //     if (listLayoutAttrs?.createAction) {
+  //       setCreateActionQueryParams({
+  //         actionName: listLayoutAttrs.createAction.name,
+  //         actionType: listLayoutAttrs.createAction.type,
+  //         actionContext: listLayoutAttrs.createAction.context,
+  //       });
+  //     }
+  //     if (listLayoutAttrs?.editAction) {
+  //       setEditActionQueryParams({
+  //         actionName: listLayoutAttrs.editAction.name,
+  //         actionType: listLayoutAttrs.editAction.type,
+  //         actionContext: listLayoutAttrs.editAction.context,
+  //       });
+  //     }
+
+  //     const viewModes = listLayoutAttrs?.allowedViews && listLayoutAttrs?.allowedViews.length > 0 && listLayoutAttrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view }; });
+  //     setViewModes(viewModes);
+  //     if (createActionUrl) {
+  //       setCreateButtonUrl(createActionUrl);
+  //     }
+  //     if (editActionUrl) {
+  //       setEditButtonUrl(editActionUrl);
+  //     }
+  //   }
+  // }, [solidListViewMetaData]);
 
   // set layout and actions for create and edit buttons and view modes
   useEffect(() => {
-    if (solidListViewMetaData) {
-      const createActionUrl =
-        solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction &&
-          solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction
-            ?.type === "custom"
-          ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.createAction
-            ?.customComponent
-          : "form/new";
-      const editActionUrl =
-        solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction &&
-          solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction
-            ?.type === "custom"
-          ? solidListViewMetaData?.data?.solidView?.layout?.attrs?.editAction
-            ?.customComponent
-          : "form";
-      const viewModes =
-        solidListViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews &&
-        solidListViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews
-          .length > 0 &&
-        solidListViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.map(
-          (view: any) => {
-            return { label: capitalize(view), value: view };
-          }
-        );
+    if (solidListViewLayout) {
+      const listLayoutAttrs = solidListViewLayout.attrs;
+      const createActionUrl = listLayoutAttrs?.createAction && listLayoutAttrs?.createAction?.type === "custom" ? listLayoutAttrs?.createAction?.customComponent : "form/new";
+      const editActionUrl = listLayoutAttrs?.editAction && listLayoutAttrs?.editAction?.type === "custom" ? listLayoutAttrs?.editAction?.customComponent : "form";
+
+      if (listLayoutAttrs?.createAction) {
+        setCreateActionQueryParams({
+          actionName: listLayoutAttrs.createAction.name,
+          actionType: listLayoutAttrs.createAction.type,
+          actionContext: listLayoutAttrs.createAction.context,
+        });
+      }
+      if (listLayoutAttrs?.editAction) {
+        setEditActionQueryParams({
+          actionName: listLayoutAttrs.editAction.name,
+          actionType: listLayoutAttrs.editAction.type,
+          actionContext: listLayoutAttrs.editAction.context,
+        });
+      }
+
+      const viewModes = listLayoutAttrs?.allowedViews && listLayoutAttrs?.allowedViews.length > 0 && listLayoutAttrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view }; });
       setViewModes(viewModes);
       if (createActionUrl) {
         setCreateButtonUrl(createActionUrl);
@@ -469,33 +494,28 @@ export const SolidListView = (params: SolidListViewParams) => {
         setEditButtonUrl(editActionUrl);
       }
     }
-  }, [solidListViewMetaData]);
+  }, [solidListViewLayout]);
 
   // All list view state.
   const [listViewData, setListViewData] = useState<any[]>([]);
   const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(
-    solidListViewLayout?.attrs?.defaultPageSize
-      ? solidListViewLayout?.attrs?.defaultPageSize
-      : 10
-  );
+  const [rows, setRows] = useState(solidListViewLayout?.attrs?.defaultPageSize ? solidListViewLayout?.attrs?.defaultPageSize : 10);
   const [totalRecords, setTotalRecords] = useState(0);
   const [sortField, setSortField] = useState("id");
   const [sortOrder, setSortOrder] = useState(-1);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
-  const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>(
-    []
-  );
+  const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [isRecoverDialogVisible, setRecoverDialogVisible] = useState(false);
   const [createButtonUrl, setCreateButtonUrl] = useState<string>();
   const [editButtonUrl, setEditButtonUrl] = useState<string>();
+  const [createActionQueryParams, setCreateActionQueryParams] = useState<Record<string, string>>({});
+  const [editActionQueryParams, setEditActionQueryParams] = useState<Record<string, string>>({});
   const [showArchived, setShowArchived] = useState(false);
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
   const [customFilter, setCustomFilter] = useState(null);
-  const [showSaveFilterPopup, setShowSaveFilterPopup] =
-    useState<boolean>(false);
+  const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
 
   const sizeOptions = [
     { label: "Compact", value: "small", image: CompactImage },
@@ -512,17 +532,13 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [viewModes, setViewModes] = useState<any>([]);
 
   // Custom Row Action
-  const [listViewRowActionPopupState, setListViewRowActionPopupState] =
-    useState(false);
+  const [listViewRowActionPopupState, setListViewRowActionPopupState] = useState(false);
   const [listViewRowActionData, setListRowActionData] = useState<any>();
 
   const toast = useRef<Toast>(null);
 
   // Get the list view data.
-  const [
-    triggerGetSolidEntities,
-    { data: solidEntityListViewData, isLoading, error },
-  ] = useLazyGetSolidEntitiesQuery();
+  const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading, error },] = useLazyGetSolidEntitiesQuery();
 
   const [
     triggerRecoverSolidEntitiesById,
@@ -673,14 +689,11 @@ export const SolidListView = (params: SolidListViewParams) => {
     solidListViewLayout
   ]);
 
-
-
-
   useEffect(() => {
     if (solidListViewMetaData && solidListViewMetaData?.data && !loading) {
       const handleDynamicFunction = async () => {
         const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onListLoad;
-        let DynamicFunctionComponent = null;
+        let dynamicExtensionFunction = null;
         let listViewRecords = listViewData;
         let listLayout = solidListViewMetaData?.data?.solidView?.layout;
         if (params.customLayout) {
@@ -705,9 +718,9 @@ export const SolidListView = (params: SolidListViewParams) => {
         };
 
         if (dynamicHeader) {
-          DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
-          if (DynamicFunctionComponent) {
-            const updatedListData: SolidListUiEventResponse = await DynamicFunctionComponent(event);
+          dynamicExtensionFunction = getExtensionFunction(dynamicHeader);
+          if (dynamicExtensionFunction) {
+            const updatedListData: SolidListUiEventResponse = await dynamicExtensionFunction(event);
 
             if (updatedListData && updatedListData?.dataChanged && updatedListData?.newListData) {
               listViewRecords = updatedListData.newListData;
@@ -833,7 +846,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
     //  SolidBeforeListDataLoad Event that allows filter modification just before api call 
     const dynamicHeader = solidListViewMetaData?.data?.solidView?.layout?.onBeforeListDataLoad;
-    let DynamicFunctionComponent = null;
+    let dynamicExtensionFunction = null;
     const event: SolidBeforeListDataLoad = {
       type: "onBeforeListDataLoad",
       fieldsMetadata: solidListViewMetaData?.data?.solidFieldsMetadata,
@@ -852,9 +865,9 @@ export const SolidListView = (params: SolidListViewParams) => {
     };
 
     if (dynamicHeader) {
-      DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
-      if (DynamicFunctionComponent) {
-        const updatedListData: SolidListUiEventResponse = await DynamicFunctionComponent(event);
+      dynamicExtensionFunction = getExtensionFunction(dynamicHeader);
+      if (dynamicExtensionFunction) {
+        const updatedListData: SolidListUiEventResponse = await dynamicExtensionFunction(event);
         if (updatedListData && updatedListData?.filterApplied && updatedListData?.newFilter) {
           queryData = updatedListData?.newFilter
         }
@@ -1370,7 +1383,8 @@ export const SolidListView = (params: SolidListViewParams) => {
                   solidListViewMetaData?.data?.solidView?.layout?.attrs
                     .showDefaultAddButton !== false && (
                     <SolidCreateButton
-                      url={createButtonUrl}
+                      createButtonUrl={createButtonUrl}
+                      createActionQueryParams={createActionQueryParams}
                       solidListViewLayout={solidListViewLayout}
                       responsiveIconOnly={true}
                     />
@@ -1380,19 +1394,11 @@ export const SolidListView = (params: SolidListViewParams) => {
                   params.embeded == true &&
                   params.inlineCreate == true &&
                   searchParams.get("viewMode") !== "view" && (
-                    // < SolidCreateButton url={createButtonUrl} />
+
                     <Button
                       type="button"
-                      icon={
-                        solidListViewLayout?.attrs?.addButtonIcon
-                          ? solidListViewLayout?.attrs?.addButtonIcon
-                          : "pi pi-plus"
-                      }
-                      label={
-                        solidListViewLayout?.attrs?.addButtonTitle
-                          ? solidListViewLayout?.attrs?.addButtonTitle
-                          : "Add"
-                      }
+                      icon={solidListViewLayout?.attrs?.addButtonIcon ? solidListViewLayout?.attrs?.addButtonIcon : "pi pi-plus"}
+                      label={solidListViewLayout?.attrs?.addButtonTitle ? solidListViewLayout?.attrs?.addButtonTitle : "Add"}
                       className={`${solidListViewLayout?.attrs?.addButtonClassName}`}
                       size="small"
                       onClick={() => params.handlePopUpOpen("new")}
@@ -1494,6 +1500,7 @@ export const SolidListView = (params: SolidListViewParams) => {
             {isListViewEmptyWithoutFilters ? (
               <SolidEmptyListViewPlaceholder
                 createButtonUrl={createButtonUrl}
+                createActionQueryParams={createActionQueryParams}
                 actionsAllowed={actionsAllowed}
                 params={params}
                 solidListViewMetaData={solidListViewMetaData}
@@ -1569,7 +1576,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                         // sessionStorage.setItem("fromView", finalUrl);
                         sessionStorage.setItem("fromView", "list");
                       }
-                      router.push(`${editButtonUrl}/${rowData?.id}?viewMode=view`);
+                      router.push(`${editButtonUrl}/${rowData?.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`);
                     }
                   }
                   }
@@ -1668,7 +1675,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                       params.handlePopUpOpen(rowData?.id);
                                     } else {
                                       router.push(
-                                        `${editButtonUrl}/${rowData?.id}?viewMode=edit`
+                                        `${editButtonUrl}/${rowData?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
                                       );
                                     }
                                   }}
@@ -1758,7 +1765,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                               );
                                             } else {
                                               router.push(
-                                                `${editButtonUrl}/${selectedDataRef.current?.id}?viewMode=edit`
+                                                `${editButtonUrl}/${selectedDataRef.current?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
                                               );
                                             }
                                           }}

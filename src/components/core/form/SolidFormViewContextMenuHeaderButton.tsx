@@ -9,7 +9,7 @@ interface SolidFormViewContextMenuHeaderButtonProps {
     formik: any;
     solidFormViewMetaData: any;
     handleCustomButtonClick: (attrs: any, event: any) => void;
-
+    formData:any;
 }
 
 export function SolidFormViewContextMenuHeaderButton({
@@ -18,6 +18,7 @@ export function SolidFormViewContextMenuHeaderButton({
     formik,
     solidFormViewMetaData,
     handleCustomButtonClick,
+    formData
 }: SolidFormViewContextMenuHeaderButtonProps) {
     const hasRole = !button.attrs?.roles || button?.attrs?.roles.length === 0
         ? true
@@ -40,7 +41,8 @@ export function SolidFormViewContextMenuHeaderButton({
                     action: button.attrs.action,
                     params,
                     formik,
-                    solidFormViewMetaData: solidFormViewMetaData.data
+                    solidFormViewMetaData: solidFormViewMetaData.data,
+                    formData
                 }
                 handleCustomButtonClick(button.attrs, event)
             }}

@@ -462,6 +462,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [mcpUrl, setMcpUrl] = useState<string | null>(null);
     const [getMcpUrl] = useLazyGetMcpUrlQuery();
 
+    // when rendering the form view we will optionally get action params...
+    // these we can bubble up in the event that is being raised onFormLayoutLoad, onFormDataLoad & onFormLoad
+    const actionName = searchParams.get('actionName');
+    const actionType = searchParams.get('actionType');
+    const actionContext = searchParams.get('actionContext');
+
     useEffect(() => {
 
         const fetchPermissions = async () => {
@@ -482,8 +488,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
         fetchPermissions();
     }, []);
 
-
-
     const enableSolidXAiPanel = async () => {
         try {
             const queryData = {
@@ -500,8 +504,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         }
     }
-
-
 
     const op = useRef(null);
     useEffect(() => {
@@ -656,7 +658,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         if (
             isEntityCreateSuccess == true ||
             isEntityUpdateSuceess == true ||
-                isEntityDeleteSuceess == true ||
+            isEntityDeleteSuceess == true ||
             isEntityPatchSuceess == true ||
             isEntityPublishedSuccess == true ||
             isEntityUnpublishedSuccess == true
@@ -941,7 +943,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     }, [formViewDataQs])
 
     useEffect(() => {
-        const handleDynamicLayout = async () => {
+        const handleOnFormLayoutLoadEvent = async () => {
             if (solidFormViewMetaData) {
                 let formLayout = solidFormViewMetaData;
                 let customLayout = params?.customLayout;
@@ -953,7 +955,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     formData: solidFormViewData?.data,
                     type: 'onFormLayoutLoad',
                     viewMetadata: solidFormViewMetaData?.data?.solidView,
-                    formViewLayout: formViewLayout
+                    formViewLayout: formViewLayout,
+                    queryParams: {
+                        actionName,
+                        actionType,
+                        actionContext
+                    }
                 }
                 if (dynamicHeader) {
                     DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
@@ -988,7 +995,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
             }
         };
-        const handleDynamicFunction = async () => {
+        const handleOnFormDataLoadEvent = async () => {
             const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormDataLoad;
             let DynamicFunctionComponent = null;
             let formViewData = solidFormViewData?.data;
@@ -998,7 +1005,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 formData: solidFormViewData?.data,
                 type: "onFormDataLoad",
                 viewMetadata: solidFormViewMetaData?.data?.solidView,
-                formViewLayout: formViewLayout
+                formViewLayout: formViewLayout,
+                queryParams: {
+                    actionName,
+                    actionType,
+                    actionContext
+                }
             };
 
             if (dynamicHeader) {
@@ -1015,8 +1027,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
             }
         };
-
-        const handleOnFormLoad = async () => {
+        const handleOnFormLoadEvent = async () => {
             const onFormLoadHandler = solidFormViewMetaData?.data?.solidView?.layout?.onFormLoad;
             let DynamicFunctionComponent = null;
             let formLayout = solidFormViewMetaData;
@@ -1029,7 +1040,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 formData: solidFormViewData?.data,
                 type: 'onFormLoad',
                 viewMetadata: solidFormViewMetaData?.data?.solidView,
-                formViewLayout: formViewLayout
+                formViewLayout: formViewLayout,
+                queryParams: {
+                    actionName,
+                    actionType,
+                    actionContext
+                }
             };
 
             if (onFormLoadHandler) {
@@ -1069,9 +1085,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
         };
 
-        handleDynamicLayout();
-        handleDynamicFunction();
-        handleOnFormLoad();
+        handleOnFormLayoutLoadEvent();
+        handleOnFormDataLoadEvent();
+        handleOnFormLoadEvent();
     }, [solidFormViewMetaData, solidFormViewData]);
 
     useEffect(() => {
@@ -1171,7 +1187,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         // TODO: HP & OR: This will be fixed once we figure out how to get types exported from solid-core-ui
                         type: eventType,
                         viewMetadata: solidView,
-                        formViewLayout: formViewLayout
+                        formViewLayout: formViewLayout,
+                        queryParams: {
+                            actionName,
+                            actionContext,
+                            actionType
+                        }
                     }
 
                     // Invoke the dynamic change handler: 
@@ -1519,6 +1540,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     <form style={{ width: '100%' }} onSubmit={formik.handleSubmit}>
                         <SolidFormActionHeader
                             formik={formik}
+                            formData={solidFormViewData?.data}
                             params={params}
                             actionsAllowed={actionsAllowed}
                             formViewLayout={formViewLayout}

@@ -348,12 +348,12 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                 }
                 {fileDetails && (
                     <div className="solid-file-upload-wrapper mt-4">
-                        <div className="flex align-items-center gap-2">
+                        <div className="flex align-items-center md:gap-2">
                             <FileReaderExt fileDetails={fileDetails} />
                             <div className="w-full flex flex-column gap-1">
                                 <div className="flex align-items-start justify-content-between">
-                                    <p className="font-normal w-9 text-primary m-0" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails)}>{fileDetails.name}</p>
-                                    <div className="flex align-items-center gap-2">
+                                    <p className="font-normal w-9 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails)}>{fileDetails.name}</p>
+                                    <div className="flex align-items-center md:gap-2">
                                         <div>
                                             <Button
                                                 type="button"
@@ -513,12 +513,12 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
 
             {fileDetails && (
                 <div className="solid-file-view-wrapper mt-4">
-                    <div className="flex align-items-center gap-2">
+                    <div className="flex align-items-center md:gap-2">
                         <FileReaderExt fileDetails={fileDetails} />
                         <div className="w-full flex flex-column gap-1">
                             <div className="flex align-items-start justify-content-between">
-                                <p className="font-normal w-9 text-primary m-0" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails)}>{fileDetails.name}</p>
-                                <div className="flex align-items-center gap-2">
+                                <p className="font-normal w-9 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails)}>{fileDetails.name}</p>
+                                <div className="flex align-items-center md:gap-2">
                                     <div>
                                         <Button
                                             type="button"

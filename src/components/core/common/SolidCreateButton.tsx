@@ -3,11 +3,9 @@ import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from 'primereact/button';
 
-export const SolidCreateButton = ({ url, solidListViewLayout, responsiveIconOnly = false }: any) => {
+export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, solidListViewLayout, responsiveIconOnly = false }: any) => {
     const pathName = usePathname();
-    const createPath = url
-        ? url
-        : pathName.split('/').slice(0, -1).join('/') + '/form/new?viewMode=edit';
+    const createPath = createButtonUrl ? `${createButtonUrl}?${new URLSearchParams(createActionQueryParams).toString()}` : pathName.split('/').slice(0, -1).join('/') + '/form/new?viewMode=edit';
 
     const icon = solidListViewLayout?.attrs?.addButtonIcon || "pi pi-plus";
     const label = solidListViewLayout?.attrs?.addButtonTitle || "Add";

@@ -85,6 +85,8 @@ export type LayoutAttribute = {
     whereClause?: string;
     disabled?: boolean;
     readonly?: boolean;
+    editAction?: any;
+    createAction?: any;
 };
 
 // Generic representation of any node in our layout 
@@ -103,11 +105,32 @@ export type ListLayoutType = {
 };
 
 // Event type
-export type SolidUiEvents = "onFieldChange" | "onFieldBlur" | "onCustomWidgetRender" | "onFormDataLoad" | "onFormLayoutLoad" | "onFormLoad" | "onListLoad" | "onBeforeListDataLoad" | "afterLogin" | "beforeLogout" | "onApplicationMount";
+export type SolidUiEvents =
+    // Implemented
+    "onFieldChange" |
+    // Implemented
+    "onFieldBlur" |
+    // Implemented
+    "onFormDataLoad" |
+    // Implemented
+    "onFormLayoutLoad" |
+    // Implemented
+    "onFormLoad" |
+    // Implemented
+    "onListLoad" |
+    // Implemented
+    "onBeforeListDataLoad" |
+    // Not Implemented
+    "afterLogin" |
+    // Not Implemented
+    "beforeLogout" |
+    // Implemented
+    "onApplicationMount";
 export type SolidUiEvent = {
     type: SolidUiEvents;
     modifiedField?: string;
     modifiedFieldValue?: any;
+    queryParams?: any;
     // This comes from Formik...
     formData: Record<string, any>;
     viewMetadata: SolidView;
@@ -130,6 +153,7 @@ export type SolidLoadForm = {
     viewMetadata: SolidView;
     fieldsMetadata: FieldsMetadata;
     formViewLayout: LayoutNode;
+    queryParams?: any;
 }
 
 

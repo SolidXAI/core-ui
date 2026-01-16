@@ -22,6 +22,11 @@ const toTitleCase = (str: string) => {
     .replace(/\b\w/g, (char) => char.toUpperCase());
 };
 
+const truncateText = (text: string, maxLength: number = 15) => {
+  if (text.length <= maxLength) return text;
+  return `${text.substring(0, maxLength)}...`;
+};
+
 export const SolidBreadcrumb = (props: Props) => {
   const { solidFormViewMetaData, initialEntityData } = props;
   
@@ -87,15 +92,23 @@ export const SolidBreadcrumb = (props: Props) => {
     label: item.label,
     ...(item.link
       ? {
-        template: () => (
-          <Link href={item.link!}>
-          <p
-            className={`${index === 1 ? 'font-bold' : 'font-normal'}`}
-          >
-            {item.label}
-          </p>
-          </Link>
-        ),
+        template: () => {
+          const fullLabel = item.label;
+          const truncatedLabel = truncateText(fullLabel, 10);
+          const shouldTruncate = fullLabel.length > 10;
+
+          return (
+            <Link href={item.link!}>
+              <p
+                className={`${index === 1 ? 'font-bold' : 'font-normal'} ${shouldTruncate ? 'cursor-pointer' : ''
+                  }`}
+                title={shouldTruncate ? fullLabel : undefined}
+              >
+                {truncatedLabel}
+              </p>
+            </Link>
+          );
+        },
       }
       : {}),
   }));
