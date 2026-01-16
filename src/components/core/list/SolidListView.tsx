@@ -1323,7 +1323,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                     </div>
                   }
                   <p className="m-0 view-title solid-text-wrapper">
-                    {solidListViewMetaData?.data?.solidView?.displayName}
+                    {solidListViewMetaData?.data?.solidView?.action?.displayName || solidListViewMetaData?.data?.solidView?.displayName}
                   </p>
                 </div>
                 {solidListViewLayout?.attrs?.enableGlobalSearch === true &&
