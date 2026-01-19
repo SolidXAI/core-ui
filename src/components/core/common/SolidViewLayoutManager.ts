@@ -54,6 +54,24 @@ export class SolidViewLayoutManager {
         return null;
     }
 
+    private findNodes(node: LayoutNode, name: string): LayoutNode[] {
+        const nodes: LayoutNode[] = [];
+        if (node.attrs.name === name) {
+            nodes.push(node);
+        }
+        if (node.children) {
+            for (let child of node.children) {
+                nodes.push(...this.findNodes(child, name));
+            }
+        }
+        if (node.attrs?.formButtons) {
+            for (const btn of node.attrs.formButtons) {
+                nodes.push(...this.findNodes(btn, name));
+            }
+        }
+        return nodes;
+    }
+
     /**
      * Recursively removes a node from the layout tree.
      *
@@ -108,16 +126,28 @@ export class SolidViewLayoutManager {
      * @param newNode - Child layout node to add
      * @returns true if parent exists and child was added
      */
-    addChildNode(parentName: string, newNode: LayoutNode): boolean {
-        const parentNode = this.findNode(this.layout, parentName);
-        if (parentNode) {
-            if (!parentNode.children) {
-                parentNode.children = [];
-            }
-            parentNode.children.push(newNode);
+    addChildNode(parentName: string, newNode: LayoutNode, addChildrenToAll: boolean = false): boolean {
+        if (addChildrenToAll) {
+            const parentNodes = this.findNodes(this.layout, parentName);
+            parentNodes.forEach((node) => {
+                if (!node.children) {
+                    node.children = [];
+                }
+                node.children.push(newNode);
+            });
             return true;
         }
-        return false;
+        else {
+            const parentNode = this.findNode(this.layout, parentName);
+            if (parentNode) {
+                if (!parentNode.children) {
+                    parentNode.children = [];
+                }
+                parentNode.children.push(newNode);
+                return true;
+            }
+            return false;
+        }
     }
 
 
