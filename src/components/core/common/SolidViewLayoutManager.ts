@@ -124,6 +124,7 @@ export class SolidViewLayoutManager {
      *
      * @param parentName - Name of the parent node
      * @param newNode - Child layout node to add
+     * @param addChildrenToAll - If true, adds the child node to all nodes with the given parent name
      * @returns true if parent exists and child was added
      */
     addChildNode(parentName: string, newNode: LayoutNode, addChildrenToAll: boolean = false): boolean {

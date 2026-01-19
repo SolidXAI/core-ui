@@ -948,167 +948,286 @@ const SolidFormView = (params: SolidFormViewProps) => {
         }
     }, [solidFormViewMetaData]);
 
+    // useEffect(() => {
+    //     const handleOnFormLayoutLoadEvent = async () => {
+    //         if (solidFormViewMetaData) {
+    //             // let formLayout = solidFormViewMetaData;
+    //             // let customLayout = params?.customLayout;
+    //             const onFormLayoutLoadHandlerExtensionFunction = solidFormViewMetaData?.data?.solidView?.layout?.onFormLayoutLoad;
+    //             // let dynamicExtensionFunction = null;
+    //             let formLayout = solidFormViewMetaData?.data?.solidView?.layout;
+    //             if (params.customLayout) {
+    //                 formLayout = params.customLayout;
+    //             }
+    //             const event: SolidLoadForm = {
+    //                 parentData: params?.parentData,
+    //                 fieldsMetadata: solidFormViewMetaData,
+    //                 formData: solidFormViewData?.data,
+    //                 type: 'onFormLayoutLoad',
+    //                 viewMetadata: solidFormViewMetaData?.data?.solidView,
+    //                 formViewLayout: formLayout,
+    //                 queryParams: {
+    //                     actionName,
+    //                     actionType,
+    //                     actionContext
+    //                 }
+    //             }
+    //             if (onFormLayoutLoadHandlerExtensionFunction) {
+    //                 const dynamicExtensionFunction = getExtensionFunction(onFormLayoutLoadHandlerExtensionFunction);
+    //                 if (dynamicExtensionFunction) {
+    //                     try {
+    //                         const updatedFormLayout: SolidUiEventResponse = await dynamicExtensionFunction(event);
+    //                         if (updatedFormLayout && updatedFormLayout?.layoutChanged && updatedFormLayout?.newLayout) {
+    //                             setFormViewLayout(updatedFormLayout.newLayout);
+    //                             // const newFormLayout = {
+    //                             //     ...formLayout,
+    //                             //     data: {
+    //                             //         ...formLayout.data,
+    //                             //         solidView: {
+    //                             //             ...formLayout.data.solidView,
+    //                             //             layout: updatedFormLayout.newLayout
+    //                             //         }
+    //                             //     }
+    //                             // };
+    //                             // formLayout = newFormLayout;
+    //                             // customLayout = updatedFormLayout.newLayout;
+    //                         }
+    //                     } catch (error) {
+    //                         console.error(ERROR_MESSAGES.DYNAMIC_FUNCTION_ERROR, error);
+    //                     }
+    //                 }
+    //             }
+    //             // setFormViewMetaData(formLayout);
+    //             // if (params.customLayout) {
+    //             //     setFormViewLayout(customLayout);
+    //             // } else {
+    //             //     setFormViewLayout(formLayout.data.solidView.layout);
+    //             // }
+    //         }
+    //     };
+    //     const handleOnFormDataLoadEvent = async () => {
+    //         const onFormDataLoadHandlerExtensionFunction = solidFormViewMetaData?.data?.solidView?.layout?.onFormDataLoad;
+    //         // let dynamicExtensionFunction = null;
+    //         let formViewData = solidFormViewData?.data;
+
+    //         let formLayout = solidFormViewMetaData?.data?.solidView?.layout;
+    //         if (params.customLayout) {
+    //             formLayout = params.customLayout;
+    //         }
+
+    //         const event: SolidLoadForm = {
+    //             fieldsMetadata: solidFormViewMetaData,
+    //             formData: solidFormViewData?.data,
+    //             type: "onFormDataLoad",
+    //             viewMetadata: solidFormViewMetaData?.data?.solidView,
+    //             formViewLayout: formLayout,
+    //             queryParams: {
+    //                 actionName,
+    //                 actionType,
+    //                 actionContext
+    //             }
+    //         };
+    //         if (onFormDataLoadHandlerExtensionFunction) {
+    //             const dynamicExtensionFunction = getExtensionFunction(onFormDataLoadHandlerExtensionFunction);
+    //             if (dynamicExtensionFunction) {
+    //                 const updatedFormData: SolidUiEventResponse = await dynamicExtensionFunction(event);
+
+    //                 if (updatedFormData && updatedFormData?.dataChanged && updatedFormData?.newFormData) {
+    //                     formViewData = updatedFormData.newFormData;
+    //                 }
+    //             }
+    //             if (formViewData) {
+    //                 setInitialEntityData(formViewData);
+    //             }
+    //         }
+    //     };
+    //     const handleOnFormLoadEvent = async () => {
+    //         const onFormLoadHandlerExtensionFunction = solidFormViewMetaData?.data?.solidView?.layout?.onFormLoad;
+    //         // let dynamicExtensionFunction = null;
+    //         let localFormViewMetadata = solidFormViewMetaData;
+    //         // let customLayout = params?.customLayout;
+    //         let formViewData = solidFormViewData?.data;
+
+    //         let formLayout = solidFormViewMetaData?.data?.solidView?.layout;
+    //         if (params.customLayout) {
+    //             formLayout = params.customLayout;
+    //         }
+
+    //         const event: SolidLoadForm = {
+    //             parentData: params?.parentData,
+    //             fieldsMetadata: solidFormViewMetaData,
+    //             formData: solidFormViewData?.data,
+    //             type: 'onFormLoad',
+    //             viewMetadata: solidFormViewMetaData?.data?.solidView,
+    //             formViewLayout: formViewLayout,
+    //             queryParams: {
+    //                 actionName,
+    //                 actionType,
+    //                 actionContext
+    //             }
+    //         };
+
+    //         if (onFormLoadHandlerExtensionFunction) {
+    //             const dynamicExtensionFunction = getExtensionFunction(onFormLoadHandlerExtensionFunction);
+    //             if (dynamicExtensionFunction) {
+    //                 try {
+    //                     const result: SolidUiEventResponse = await dynamicExtensionFunction(event);
+    //                     if (result && result?.layoutChanged && result?.newLayout) {
+    //                         // const newLocalFormViewMetadata = {
+    //                         //     ...localFormViewMetadata,
+    //                         //     data: {
+    //                         //         ...localFormViewMetadata.data,
+    //                         //         solidView: {
+    //                         //             ...localFormViewMetadata.data.solidView,
+    //                         //             layout: result.newLayout
+    //                         //         }
+    //                         //     }
+    //                         // };
+    //                         // localFormViewMetadata = newLocalFormViewMetadata;
+    //                         // customLayout = result.newLayout;
+    //                         // setFormViewMetaData(localFormViewMetadata);
+
+    //                         setFormViewLayout(result.newLayout);
+    //                         // if (params.customLayout) {
+    //                         //     setFormViewLayout(customLayout);
+    //                         // } else {
+    //                         //     setFormViewLayout(localFormViewMetadata.data.solidView.layout);
+    //                         // }
+    //                     }
+    //                     if (result && result?.dataChanged && result?.newFormData) {
+    //                         formViewData = result.newFormData;
+    //                         setInitialEntityData(formViewData);
+    //                     }
+    //                 } catch (error) {
+    //                     console.error(ERROR_MESSAGES.ON_FORM_LOAD, error);
+    //                 }
+    //             }
+    //         }
+    //     };
+
+    //     handleOnFormLayoutLoadEvent();
+    //     handleOnFormDataLoadEvent();
+    //     handleOnFormLoadEvent();
+    // }, [solidFormViewMetaData, solidFormViewData]);
+
+
     useEffect(() => {
-        const handleOnFormLayoutLoadEvent = async () => {
-            if (solidFormViewMetaData) {
-                // let formLayout = solidFormViewMetaData;
-                // let customLayout = params?.customLayout;
-                const onFormLayoutLoadHandlerExtensionFunction = solidFormViewMetaData?.data?.solidView?.layout?.onFormLayoutLoad;
-                // let dynamicExtensionFunction = null;
-                let formLayout = solidFormViewMetaData?.data?.solidView?.layout;
-                if (params.customLayout) {
-                    formLayout = params.customLayout;
-                }
-                const event: SolidLoadForm = {
-                    parentData: params?.parentData,
-                    fieldsMetadata: solidFormViewMetaData,
-                    formData: solidFormViewData?.data,
-                    type: 'onFormLayoutLoad',
-                    viewMetadata: solidFormViewMetaData?.data?.solidView,
-                    formViewLayout: formLayout,
-                    queryParams: {
-                        actionName,
-                        actionType,
-                        actionContext
-                    }
-                }
-                if (onFormLayoutLoadHandlerExtensionFunction) {
-                    const dynamicExtensionFunction = getExtensionFunction(onFormLayoutLoadHandlerExtensionFunction);
-                    if (dynamicExtensionFunction) {
-                        try {
-                            const updatedFormLayout: SolidUiEventResponse = await dynamicExtensionFunction(event);
-                            if (updatedFormLayout && updatedFormLayout?.layoutChanged && updatedFormLayout?.newLayout) {
-                                setFormViewLayout(updatedFormLayout.newLayout);
-                                // const newFormLayout = {
-                                //     ...formLayout,
-                                //     data: {
-                                //         ...formLayout.data,
-                                //         solidView: {
-                                //             ...formLayout.data.solidView,
-                                //             layout: updatedFormLayout.newLayout
-                                //         }
-                                //     }
-                                // };
-                                // formLayout = newFormLayout;
-                                // customLayout = updatedFormLayout.newLayout;
-                            }
-                        } catch (error) {
-                            console.error(ERROR_MESSAGES.DYNAMIC_FUNCTION_ERROR, error);
-                        }
-                    }
-                }
-                // setFormViewMetaData(formLayout);
-                // if (params.customLayout) {
-                //     setFormViewLayout(customLayout);
-                // } else {
-                //     setFormViewLayout(formLayout.data.solidView.layout);
-                // }
-            }
-        };
-        const handleOnFormDataLoadEvent = async () => {
-            const onFormDataLoadHandlerExtensionFunction = solidFormViewMetaData?.data?.solidView?.layout?.onFormDataLoad;
-            // let dynamicExtensionFunction = null;
-            let formViewData = solidFormViewData?.data;
+        const runFormEvents = async () => {
+            if (!solidFormViewMetaData) return;
 
-            let formLayout = solidFormViewMetaData?.data?.solidView?.layout;
-            if (params.customLayout) {
-                formLayout = params.customLayout;
-            }
-
-            const event: SolidLoadForm = {
-                fieldsMetadata: solidFormViewMetaData,
-                formData: solidFormViewData?.data,
-                type: "onFormDataLoad",
-                viewMetadata: solidFormViewMetaData?.data?.solidView,
-                formViewLayout: formLayout,
-                queryParams: {
-                    actionName,
-                    actionType,
-                    actionContext
-                }
-            };
-            if (onFormDataLoadHandlerExtensionFunction) {
-                const dynamicExtensionFunction = getExtensionFunction(onFormDataLoadHandlerExtensionFunction);
-                if (dynamicExtensionFunction) {
-                    const updatedFormData: SolidUiEventResponse = await dynamicExtensionFunction(event);
-
-                    if (updatedFormData && updatedFormData?.dataChanged && updatedFormData?.newFormData) {
-                        formViewData = updatedFormData.newFormData;
-                    }
-                }
-                if (formViewData) {
-                    setInitialEntityData(formViewData);
-                }
-            }
-        };
-        const handleOnFormLoadEvent = async () => {
-            const onFormLoadHandlerExtensionFunction = solidFormViewMetaData?.data?.solidView?.layout?.onFormLoad;
-            // let dynamicExtensionFunction = null;
-            let localFormViewMetadata = solidFormViewMetaData;
-            // let customLayout = params?.customLayout;
-            let formViewData = solidFormViewData?.data;
-
-            let formLayout = solidFormViewMetaData?.data?.solidView?.layout;
-            if (params.customLayout) {
-                formLayout = params.customLayout;
-            }
-
-            const event: SolidLoadForm = {
+            /** ----------------------------
+             * 1. Initialize working state
+             * ----------------------------- */
+            let workingLayout = params.customLayout ?? solidFormViewMetaData?.data?.solidView?.layout;
+            let workingFormData = solidFormViewData?.data;
+            const baseEvent = {
                 parentData: params?.parentData,
                 fieldsMetadata: solidFormViewMetaData,
-                formData: solidFormViewData?.data,
-                type: 'onFormLoad',
                 viewMetadata: solidFormViewMetaData?.data?.solidView,
-                formViewLayout: formViewLayout,
                 queryParams: {
                     actionName,
                     actionType,
-                    actionContext
-                }
+                    actionContext,
+                },
             };
 
-            if (onFormLoadHandlerExtensionFunction) {
-                const dynamicExtensionFunction = getExtensionFunction(onFormLoadHandlerExtensionFunction);
-                if (dynamicExtensionFunction) {
-                    try {
-                        const result: SolidUiEventResponse = await dynamicExtensionFunction(event);
-                        if (result && result?.layoutChanged && result?.newLayout) {
-                            // const newLocalFormViewMetadata = {
-                            //     ...localFormViewMetadata,
-                            //     data: {
-                            //         ...localFormViewMetadata.data,
-                            //         solidView: {
-                            //             ...localFormViewMetadata.data.solidView,
-                            //             layout: result.newLayout
-                            //         }
-                            //     }
-                            // };
-                            // localFormViewMetadata = newLocalFormViewMetadata;
-                            // customLayout = result.newLayout;
-                            // setFormViewMetaData(localFormViewMetadata);
+            /** ----------------------------
+             * 2. onFormLayoutLoad
+             * ----------------------------- */
+            const onFormLayoutLoadFn =
+                solidFormViewMetaData?.data?.solidView?.layout?.onFormLayoutLoad;
 
-                            setFormViewLayout(result.newLayout);
-                            // if (params.customLayout) {
-                            //     setFormViewLayout(customLayout);
-                            // } else {
-                            //     setFormViewLayout(localFormViewMetadata.data.solidView.layout);
-                            // }
+            if (onFormLayoutLoadFn) {
+                const fn = getExtensionFunction(onFormLayoutLoadFn);
+                if (fn) {
+                    try {
+                        const result: SolidUiEventResponse = await fn({
+                            ...baseEvent,
+                            type: "onFormLayoutLoad",
+                            formData: workingFormData,
+                            formViewLayout: workingLayout,
+                        });
+
+                        if (result?.layoutChanged && result?.newLayout) {
+                            workingLayout = result.newLayout;
                         }
-                        if (result && result?.dataChanged && result?.newFormData) {
-                            formViewData = result.newFormData;
-                            setInitialEntityData(formViewData);
-                        }
-                    } catch (error) {
-                        console.error(ERROR_MESSAGES.ON_FORM_LOAD, error);
+                    } catch (e) {
+                        console.error(ERROR_MESSAGES.DYNAMIC_FUNCTION_ERROR, e);
                     }
                 }
             }
+
+            /** ----------------------------
+             * 3. onFormDataLoad
+             * ----------------------------- */
+            const onFormDataLoadFn =
+                solidFormViewMetaData?.data?.solidView?.layout?.onFormDataLoad;
+
+            if (onFormDataLoadFn) {
+                const fn = getExtensionFunction(onFormDataLoadFn);
+                if (fn) {
+                    try {
+                        const result: SolidUiEventResponse = await fn({
+                            ...baseEvent,
+                            type: "onFormDataLoad",
+                            formData: workingFormData,
+                            formViewLayout: workingLayout, // ✅ UPDATED layout
+                        });
+
+                        if (result?.dataChanged && result?.newFormData) {
+                            workingFormData = result.newFormData;
+                        }
+                    } catch (e) {
+                        console.error(ERROR_MESSAGES.DYNAMIC_FUNCTION_ERROR, e);
+                    }
+                }
+            }
+
+            /** ----------------------------
+             * 4. onFormLoad
+             * ----------------------------- */
+            const onFormLoadFn =
+                solidFormViewMetaData?.data?.solidView?.layout?.onFormLoad;
+
+            if (onFormLoadFn) {
+                const fn = getExtensionFunction(onFormLoadFn);
+                if (fn) {
+                    try {
+                        const result: SolidUiEventResponse = await fn({
+                            ...baseEvent,
+                            type: "onFormLoad",
+                            formData: workingFormData,
+                            formViewLayout: workingLayout, // ✅ FINAL layout
+                        });
+
+                        if (result?.layoutChanged && result?.newLayout) {
+                            workingLayout = result.newLayout;
+                        }
+
+                        if (result?.dataChanged && result?.newFormData) {
+                            workingFormData = result.newFormData;
+                        }
+                    } catch (e) {
+                        console.error(ERROR_MESSAGES.ON_FORM_LOAD, e);
+                    }
+                }
+            }
+
+            /** ----------------------------
+             * 5. Commit once to React state
+             * ----------------------------- */
+            if (workingLayout) {
+                setFormViewLayout(workingLayout);
+            }
+
+            if (workingFormData) {
+                setInitialEntityData(workingFormData);
+            }
         };
 
-        handleOnFormLayoutLoadEvent();
-        handleOnFormDataLoadEvent();
-        handleOnFormLoadEvent();
+        runFormEvents();
     }, [solidFormViewMetaData, solidFormViewData]);
+
 
     useEffect(() => {
         if (solidFormViewData) {
