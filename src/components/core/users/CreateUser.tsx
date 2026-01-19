@@ -440,10 +440,10 @@ const CreateUser = ({ data, params }: any) => {
                 {/* <Divider /> */}
                 {/* <p className="form-wrapper-heading text-base" style={{ fontSize: 16 }}>Roles</p> */}
 
-                <Panel toggleable header="Roles" className="solid-column-panel mt-5">
+                <Panel toggleable header="Roles" className="solid-column-panel mt-3 md:mt-5">
                   <div className="formgrid grid mt-4">
                     {rolesData?.data?.records && rolesData?.data?.records.map((role: any, i: number) => (
-                      <div key={role.name} className={`field col-6 flex gap-2 ${i >= 2 ? 'mt-3' : ''}`}>
+                      <div key={role.name} className={`field col-12 sm:col-6 flex gap-2 ${i >= 2 ? 'mt-3' : ''} ${i == 1 ? 'mt-3 md:mt-0' : ''} `}>
                         <Checkbox
                           inputId={role.name}
                           checked={selectedRoles.includes(role.name)}

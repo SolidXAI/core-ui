@@ -1734,6 +1734,11 @@ li.header-li-px {
   overflow-y: auto;
 }
 
+.solid-form-wrapper:has(.solid-dynamic-breadcrumb-stepper .arrow-stepper-container) .solid-form-content {
+  height: calc(100vh - 155px) !important;
+}
+
+
 
 .chatter-collapse-btn {
   position: absolute;

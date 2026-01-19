@@ -434,7 +434,7 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
                 <div className="formgrid grid">
                     {autoCompleteItems && autoCompleteItems.map((a: any, i: number) => {
                         return (
-                            <div key={a.label} className={`field col-6 flex gap-2 ${i >= 2 ? 'mt-3' : ''}`}>
+                            <div key={a.label} className={`field col-12 md:col-6 flex gap-2 ${i >= 2 ? 'mt-3' : ''} ${i == 1 ? 'mt-3 md:mt-0' : ''}`}>
                                 <Checkbox
                                     readOnly={readOnlyPermission}
                                     inputId={a.label}

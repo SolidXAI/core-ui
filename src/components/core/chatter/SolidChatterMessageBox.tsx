@@ -95,7 +95,9 @@ export const SolidChatterMessageBox = (props: Props) => {
                 </div>
             </div>
             <div className='flex align-items-center mt-1'>
-                <div style={{ width: 32 }}>
+                <div style={{ width: 32 }} className='hidden sm:flex'>
+                </div>
+                <div style={{ width: 16 }} className='sm:hidden'>
                 </div>
                 <div style={{ width: '100%' }}>
                     <p className='mb-1 text-sm font-bold' style={{ color: '#949494' }}>

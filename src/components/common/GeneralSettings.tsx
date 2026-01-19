@@ -152,6 +152,7 @@ export const GeneralSettings = () => {
 
                 if (response.statusCode === 200) {
                     showToast("success", "Updated", "Settings updated");
+                    formik.resetForm({ values })
                 }
 
             } catch (error) {
@@ -449,6 +450,8 @@ export const GeneralSettings = () => {
         (formik.values.solidXGenAiCodeBuilderConfig.availableProviders ?? []).find(
             (p: any) => p.provider === formik.values.solidXGenAiCodeBuilderConfig.defaultProvider
         ) || null;
+
+    console.log(formik,'Inside Setting =================================');
 
 
     return (

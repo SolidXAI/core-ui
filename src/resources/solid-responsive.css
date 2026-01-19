@@ -211,7 +211,7 @@
     /* ===================== Chatter Section ===================== */
 
     .chatter-section.open {
-        width: 330px;
+        width: 420px !important;
     }
 
     .solid-common-dialog {
@@ -333,9 +333,10 @@
     .solid-form-header {
         padding: 10px 16px 16px 20px !important;
     }
+
     .solid-form-wrapper .solid-form-content {
-        height: calc(100vh - 139px) !important;
-      }
+        height: calc(100vh - 140px) !important;
+    }
 
 
     .solid-text-wrapper {
@@ -415,6 +416,10 @@
         width: 40px !important;
     }
 
+    .chatter-section.open {
+        width: 400px !important;
+        max-width: 90% !important;
+    }
 
     .sidebar-toggle-button {
         left: 274px !important;
@@ -583,8 +588,12 @@
     }
 
     .solid-form-wrapper .solid-form-content {
-        height: calc(100vh - 132px) !important;
-      }
+        height: calc(100vh - 134px) !important;
+    }
+
+    .solid-form-wrapper:has(.solid-dynamic-breadcrumb-stepper .arrow-stepper-container) .solid-form-content {
+        height: calc(100vh - 175px) !important;
+    }
 
     .form-wrapper-title {
         font-size: 14px !important;
@@ -601,7 +610,7 @@
         text-overflow: ellipsis;
     }
 
-    .solid-module-mobile-text-wrapper{
+    .solid-module-mobile-text-wrapper {
         max-width: clamp(180px, 65vw, 600px);
         white-space: nowrap;
         overflow: hidden;
@@ -729,7 +738,7 @@
 
     /* ====================== SOlid Pannel =========================== */
     .p-panel .p-panel-header {
-        padding: 0.75rem;
+        padding: 0.5rem 0.75rem;
     }
 
     .solid-column-panel.p-panel .p-panel-content {
@@ -774,7 +783,7 @@
 /* For tablets (between 481px and 768px) */
 @media (min-width: 481px) and (max-width: 768px) {
     .p-panel .p-panel-header {
-        padding: 1rem;
+        padding: 0.5rem 1rem;
     }
 
     .solid-column-panel.p-panel .p-panel-content {

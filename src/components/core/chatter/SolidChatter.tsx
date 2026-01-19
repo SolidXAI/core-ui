@@ -174,8 +174,8 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                     visibleBox === 'email-message'
                         ? 'calc(100vh - 196px)'
                         : visibleBox === 'log'
-                            ? 'calc(100vh - 172px)'
-                            : 'calc(100vh - 65px)',
+                            ? 'calc(100vh - 225px)'
+                            : 'calc(100vh - 110px)',
             }}>
                 {isChatterLoading ? (
                     <div className='flex align-items-center justify-content-center h-full font-medium'>

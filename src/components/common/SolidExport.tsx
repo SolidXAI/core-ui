@@ -335,7 +335,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
   const renderSourceItem = (item: Question) => (
     <div key={item.key} className="flex justify-content-start align-items-center border-top-1 w-full p-1 SolidCustomPicklistItemWrapper SolidCustomPicklistSourceItem">
       <div className="flex items-center gap-2">
-        <svg onClick={() => moveToSelected(item)} width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
+        <svg onClick={() => moveToSelected(item)} cursor='pointer' width="16" height="16" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg">
           <g opacity="0.4">
             <rect x="0.5" y="0.5" width="15" height="15" rx="3.5" fill="white" stroke="#D9D9D9" />
             <path d="M7.42857 8.57143H4V7.42857H7.42857V4H8.57143V7.42857H12V8.57143H8.57143V12H7.42857V8.57143Z" fill="#4B4D52" />
