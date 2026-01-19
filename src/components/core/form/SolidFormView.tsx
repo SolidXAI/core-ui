@@ -1379,7 +1379,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
         };
 
-        const renderFormDynamically = (recursiveFVMD: any) => {
+        const renderFormDynamically = (recursiveFVMD: any, formViewLayout: any) => {
             if (!recursiveFVMD) {
                 return;
             }
@@ -1391,7 +1391,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
             if (!solidView || !solidFieldsMetadata) {
                 return;
             }
-
             const updatedLayout = [formViewLayout];
             const dynamicForm = updatedLayout.map((element: any) => renderFormElementDynamically(element, recursiveFVMD));
 
@@ -1583,7 +1582,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             ) : params.id !== 'new' && DynamicFormComponentEdit ? (
                                 <DynamicFormComponentEdit params={params} />
                             ) : (
-                                renderFormDynamically(solidFormViewMetaData)
+                                renderFormDynamically(solidFormViewMetaData, formViewLayout)
                             )}
                         </div>
 
