@@ -89,7 +89,7 @@ export class SolidTimeField implements ISolidField {
     }
 
     validationSchema(): Schema {
-        let schema: Yup.DateSchema = Yup.date();
+        let schema = Yup.date().nullable();
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
