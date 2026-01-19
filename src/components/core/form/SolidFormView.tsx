@@ -641,7 +641,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const formViewMetaDataQs = qs.stringify({ ...params, viewType: 'form', defaultEntityLocaleId: defaultEntityLocaleId }, {
         encodeValuesOnly: true,
     });
-    // const [formViewMetaData, setFormViewMetaData] = useState({});
+    const [formViewMetaData, setFormViewMetaData] = useState({});
     const [formViewLayout, setFormViewLayout] = useState<any>(null);
     const {
         data: solidFormViewMetaData,
@@ -944,6 +944,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 setFormViewLayout(solidFormViewMetaData?.data?.solidView?.layout);
             }
             setPublished(solidFormViewData?.data?.publishedAt);
+            setFormViewMetaData(solidFormViewMetaData);
         }
     }, [solidFormViewMetaData]);
 
@@ -1582,7 +1583,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             ) : params.id !== 'new' && DynamicFormComponentEdit ? (
                                 <DynamicFormComponentEdit params={params} />
                             ) : (
-                                renderFormDynamically(solidFormViewMetaData, formViewLayout)
+                                renderFormDynamically(formViewMetaData, formViewLayout)
                             )}
                         </div>
 
