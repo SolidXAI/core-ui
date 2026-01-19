@@ -246,6 +246,7 @@ const SolidRow = ({ children, attrs }: any) => {
         // <div>{children}</div>
     );
 };
+
 const SolidColumn = ({ children, attrs }: any) => {
     const className = attrs.className;
 
@@ -936,19 +937,34 @@ const SolidFormView = (params: SolidFormViewProps) => {
     }, [formViewDataQs])
 
     useEffect(() => {
+        if (solidFormViewMetaData) {
+            if (params.customLayout) {
+                setFormViewLayout(params.customLayout);
+            } else {
+                setFormViewLayout(solidFormViewMetaData?.data?.solidView?.layout);
+            }
+            setPublished(solidFormViewData?.data?.publishedAt);
+        }
+    }, [solidFormViewMetaData]);
+
+    useEffect(() => {
         const handleOnFormLayoutLoadEvent = async () => {
             if (solidFormViewMetaData) {
                 // let formLayout = solidFormViewMetaData;
                 // let customLayout = params?.customLayout;
                 const onFormLayoutLoadHandlerExtensionFunction = solidFormViewMetaData?.data?.solidView?.layout?.onFormLayoutLoad;
                 // let dynamicExtensionFunction = null;
+                let formLayout = solidFormViewMetaData?.data?.solidView?.layout;
+                if (params.customLayout) {
+                    formLayout = params.customLayout;
+                }
                 const event: SolidLoadForm = {
                     parentData: params?.parentData,
                     fieldsMetadata: solidFormViewMetaData,
                     formData: solidFormViewData?.data,
                     type: 'onFormLayoutLoad',
                     viewMetadata: solidFormViewMetaData?.data?.solidView,
-                    formViewLayout: formViewLayout,
+                    formViewLayout: formLayout,
                     queryParams: {
                         actionName,
                         actionType,
@@ -981,7 +997,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     }
                 }
                 // setFormViewMetaData(formLayout);
-                setPublished(solidFormViewData?.data?.publishedAt);
                 // if (params.customLayout) {
                 //     setFormViewLayout(customLayout);
                 // } else {
@@ -994,19 +1009,23 @@ const SolidFormView = (params: SolidFormViewProps) => {
             // let dynamicExtensionFunction = null;
             let formViewData = solidFormViewData?.data;
 
+            let formLayout = solidFormViewMetaData?.data?.solidView?.layout;
+            if (params.customLayout) {
+                formLayout = params.customLayout;
+            }
+
             const event: SolidLoadForm = {
                 fieldsMetadata: solidFormViewMetaData,
                 formData: solidFormViewData?.data,
                 type: "onFormDataLoad",
                 viewMetadata: solidFormViewMetaData?.data?.solidView,
-                formViewLayout: formViewLayout,
+                formViewLayout: formLayout,
                 queryParams: {
                     actionName,
                     actionType,
                     actionContext
                 }
             };
-
             if (onFormDataLoadHandlerExtensionFunction) {
                 const dynamicExtensionFunction = getExtensionFunction(onFormDataLoadHandlerExtensionFunction);
                 if (dynamicExtensionFunction) {
@@ -1027,6 +1046,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
             let localFormViewMetadata = solidFormViewMetaData;
             // let customLayout = params?.customLayout;
             let formViewData = solidFormViewData?.data;
+
+            let formLayout = solidFormViewMetaData?.data?.solidView?.layout;
+            if (params.customLayout) {
+                formLayout = params.customLayout;
+            }
 
             const event: SolidLoadForm = {
                 parentData: params?.parentData,
