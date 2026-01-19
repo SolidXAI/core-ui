@@ -641,7 +641,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const formViewMetaDataQs = qs.stringify({ ...params, viewType: 'form', defaultEntityLocaleId: defaultEntityLocaleId }, {
         encodeValuesOnly: true,
     });
-    const [formViewMetaData, setFormViewMetaData] = useState({});
+    // const [formViewMetaData, setFormViewMetaData] = useState({});
     const [formViewLayout, setFormViewLayout] = useState<any>(null);
     const {
         data: solidFormViewMetaData,
@@ -1240,19 +1240,19 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         // TODO: this will trigger a useEffect dependent on formViewMetadata that invokes setFormViewLayout, 
                         // TODO: which means that this will not work if custom layout has been injected as a prop.
                         setFormViewLayout(updatedFormInfo.newLayout);
-                        setFormViewMetaData((prevMetaData: any) => {
-                            const updatedFormViewMetadata = {
-                                ...prevMetaData,
-                                data: {
-                                    ...prevMetaData.data,
-                                    solidView: {
-                                        ...prevMetaData.data.solidView,
-                                        layout: updatedFormInfo.newLayout,
-                                    },
-                                },
-                            };
-                            return updatedFormViewMetadata;
-                        });
+                        // setFormViewMetaData((prevMetaData: any) => {
+                        //     const updatedFormViewMetadata = {
+                        //         ...prevMetaData,
+                        //         data: {
+                        //             ...prevMetaData.data,
+                        //             solidView: {
+                        //                 ...prevMetaData.data.solidView,
+                        //                 layout: updatedFormInfo.newLayout,
+                        //             },
+                        //         },
+                        //     };
+                        //     return updatedFormViewMetadata;
+                        // });
                     }
                 }
                 else {
@@ -1583,7 +1583,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             ) : params.id !== 'new' && DynamicFormComponentEdit ? (
                                 <DynamicFormComponentEdit params={params} />
                             ) : (
-                                renderFormDynamically(formViewMetaData)
+                                renderFormDynamically(solidFormViewMetaData)
                             )}
                         </div>
 
