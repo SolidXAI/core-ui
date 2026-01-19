@@ -1533,9 +1533,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const onDeleteClose = () => {
             setDeleteDialogVisible(false);
         }
-        // TODO: This was simply to demonstrate how we can use dynamic components, we will remove this and use it in a more sensible way in the layout. 
-        // TODO: to demonstrated this you can simply add the below to the layout of the book form view.
-        // TODO: "header": "BookFormViewDynamicComponent",
+
         const dynamicHeader = solidView.layout?.header;
         let DynamicHeaderComponent = null;
         if (dynamicHeader) {
