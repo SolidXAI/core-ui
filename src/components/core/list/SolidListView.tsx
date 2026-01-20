@@ -334,9 +334,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     const initialFilters: any = {};
     const toPopulate: string[] = [];
     const toPopulateMedia: string[] = [];
-    const currentLayout = params.customLayout
-      ? params.customLayout
-      : solidView?.layout;
+    const currentLayout = params.customLayout ? params.customLayout : solidView?.layout;
     for (let i = 0; i < currentLayout?.children.length; i++) {
       const column = currentLayout?.children[i];
       const fieldMetadata = solidFieldsMetadata?.[column.attrs.name];
