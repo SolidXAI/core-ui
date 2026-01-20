@@ -37,7 +37,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
     //     trigger("") // Fetch settings on mount
     // }, [trigger])
 
-    const solidSettingsData = useSelector((state: any) => state.settingsState?.authSettings);
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
 
     const [initiateLogin] = useInitateLoginMutation();
     const [activeIndex, setActiveIndex] = useState(0);
@@ -172,9 +172,9 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
     }
 
     const PasswordLessLogin = () => {
-        const validationType = solidSettingsData?.data?.passwordlessRegistrationValidateWhat || "email";
+        const validationType = solidSettingsData?.passwordlessRegistrationValidateWhat || "email";
         const [selectedAuthMethod, setSelectedAuthMethod] = useState<"email" | "mobile">("email");
-        
+
         const getFieldConfig = () => {
             if (validationType === "transactional") {
                 if (selectedAuthMethod === "mobile") {
@@ -227,24 +227,24 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                     identifier: "",
                 }}
                 validationSchema={
-                    fieldConfig.validationSchema 
-                    ? Yup.object({
-                          identifier: fieldConfig.validationSchema
-                      })
-                    : Yup.object({
-                          identifier: Yup.string().required("required"),
-                      })
-                  }
+                    fieldConfig.validationSchema
+                        ? Yup.object({
+                            identifier: fieldConfig.validationSchema
+                        })
+                        : Yup.object({
+                            identifier: Yup.string().required("required"),
+                        })
+                }
                 enableReinitialize={false}
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
                     try {
                         const RESEND_OTP_KEY = `resendOtpLogin_${values.identifier}`;
                         const RESEND_OTP_TIMER_MIN = parseFloat(process.env.NEXT_PUBLIC_RESEND_OTP_TIMER || '0.5');
                         const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
-                        
+
                         // Use selectedAuthMethod for transactional, otherwise use fieldConfig.type
                         const authType = validationType === "transactional" ? selectedAuthMethod : fieldConfig.type;
-                    
+
                         const payload = {
                             type: authType,
                             identifier: values.identifier,
@@ -379,24 +379,24 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
     return (
         <div className="">
             <Toast ref={toast} />
-            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
-                {solidSettingsData?.data?.authPagesLayout === 'center' &&
+            <div className={`auth-container ${solidSettingsData?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
+                {solidSettingsData?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
+                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.appLogoPosition}`}>
                             <Image
                                 alt="solid logo"
-                                src={solidSettingsData?.data?.appLogo || SolidLogo}
+                                src={solidSettingsData?.appLogo || SolidLogo}
                                 className="relative"
                                 fill
                             />
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>Sign In To Your Account</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>Sign In To Your Account</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
 
-                <AuthTabs passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} />
-                {solidSettingsData?.data?.iamGoogleOAuthEnabled &&
+                <AuthTabs passwordBasedAuth={solidSettingsData?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.passwordLessAuth} />
+                {solidSettingsData?.iamGoogleOAuthEnabled &&
                     <>
                         <Divider align="center">
                             <div className="inline-flex align-items-center">
@@ -407,7 +407,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                     </>
                 }
             </div>
-            {solidSettingsData?.data?.allowPublicRegistration && <div className="mt-3 md:mt-5">
+            {solidSettingsData?.allowPublicRegistration && <div className="mt-3 md:mt-5">
                 <div className="text-sm text-center text-400 secondary-dark-color">
                     Don’t have an account ? <Link className="font-bold" href="/auth/register">Sign Up</Link>
                 </div>

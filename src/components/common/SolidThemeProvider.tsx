@@ -15,13 +15,13 @@ export const SolidThemeProvider = () => {
     //     }
     // }, [pathname, trigger]);
 
-    const solidSettingsData = useSelector((state: any) => state.settingsState?.authSettings);
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
 
     const [theme, setTheme] = useState("solid-light-purple");
     useEffect(() => {
-        if (pathname.includes("/auth/") && solidSettingsData?.data?.authPagesTheme) {
+        if (pathname.includes("/auth/") && solidSettingsData?.authPagesTheme) {
             const selectedTheme =
-                solidSettingsData.data.authPagesTheme === "dark" ? "solid-dark-purple" : "solid-light-purple";
+                solidSettingsData?.authPagesTheme === "dark" ? "solid-dark-purple" : "solid-light-purple";
             setTheme(selectedTheme);
         } else {
             setTheme("solid-light-purple");

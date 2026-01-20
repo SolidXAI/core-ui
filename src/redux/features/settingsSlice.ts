@@ -14,20 +14,20 @@ export const settingsSlice = createSlice({
   name: "settingsSlice",
   initialState,
   reducers: {
-    // -------- AUTH SETTINGS --------
-    setAuthSettings: (
-      state,
-      action: PayloadAction<Record<string, any>>
-    ) => {
-      state.authSettings = action.payload;
-    },
+    // // -------- AUTH SETTINGS --------
+    // setAuthSettings: (
+    //   state,
+    //   action: PayloadAction<Record<string, any>>
+    // ) => {
+    //   state.authSettings = action.payload;
+    // },
 
-    updateAuthSetting: (
-      state,
-      action: PayloadAction<{ key: string; value: any }>
-    ) => {
-      state.authSettings[action.payload.key] = action.payload.value;
-    },
+    // updateAuthSetting: (
+    //   state,
+    //   action: PayloadAction<{ key: string; value: any }>
+    // ) => {
+    //   state.authSettings[action.payload.key] = action.payload.value;
+    // },
 
     // -------- SOLID SETTINGS --------
     setSolidSettings: (
@@ -52,8 +52,8 @@ export const settingsSlice = createSlice({
 export default settingsSlice.reducer;
 
 export const {
-  setAuthSettings,
-  updateAuthSetting,
+  // setAuthSettings,
+  // updateAuthSetting,
   setSolidSettings,
   updateSolidSetting,
   resetSettings,

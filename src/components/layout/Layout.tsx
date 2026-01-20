@@ -173,13 +173,14 @@ export const Layout = ({ children }: ChildContainerProps) => {
 
 
     const dispatch = useDispatch()
-    const { data: solidSettingsData } = useGetSolidSettingsQuery("")
+    const { data: solidSettingsDataInitialData } = useGetSolidSettingsQuery("")
 
     useEffect(() => {
-        if (solidSettingsData) {
-            dispatch(setSolidSettings(solidSettingsData?.data));
+        if (solidSettingsDataInitialData) {
+            dispatch(setSolidSettings(solidSettingsDataInitialData?.data));
         }
-    }, [solidSettingsData]);
+    }, [solidSettingsDataInitialData]);
+
 
 
 

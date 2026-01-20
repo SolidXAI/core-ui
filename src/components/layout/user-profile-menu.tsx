@@ -127,7 +127,7 @@ const UserProfileMenu = () => {
             /> */}
             <UserProfileAvatar />
             <div className="flex flex-column align">
-              {solidSettingsData?.system?.enableUsername ?
+              {solidSettingsData?.enableUsername ?
                 <span className="font-bold">{userData?.data?.username}</span>
                 :
                 <span className="mt-1">{userData?.data?.email}</span>
@@ -142,7 +142,7 @@ const UserProfileMenu = () => {
           </div>
 
           {/*  */}
-          {solidSettingsData?.system?.enableDarkMode === true &&
+          {solidSettingsData?.enableDarkMode === true &&
             <div className="p-3 flex align-items-center justify-content-between secondary-border-bottom">
               <div className="flex align-items-center gap-3">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -163,11 +163,11 @@ const UserProfileMenu = () => {
               </span>
             </Button>
           </div>
-          {solidSettingsData?.system?.contactSupportEmail &&
+          {solidSettingsData?.contactSupportEmail &&
             <div className="flex align-items-center py-1 gap-2 secondary-border-bottom">
-              <Button severity="secondary" text className="w-full flex align-items-center gap-2 px-3 ml-1" onClick={() => window.location.href = `mailto:${solidSettingsData?.system?.contactSupportEmail}`} icon={solidSettingsData?.system?.contactSupportIcon || 'pi pi-envelope'}>
+              <Button severity="secondary" text className="w-full flex align-items-center gap-2 px-3 ml-1" onClick={() => window.location.href = `mailto:${solidSettingsData?.contactSupportEmail}`} icon={solidSettingsData?.contactSupportIcon || 'pi pi-envelope'}>
                 <span className="p-button-label flex-none">
-                  {solidSettingsData?.system?.contactSupportDisplayName || "Contact Support"}
+                  {solidSettingsData?.contactSupportDisplayName || "Contact Support"}
                 </span>
               </Button>
             </div>

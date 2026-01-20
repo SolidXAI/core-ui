@@ -13,14 +13,14 @@ export const ForgotPasswordThankYou = () => {
     // }, [trigger])
 
 
-    const solidSettingsData = useSelector((state: any) => state.settingsState?.authSettings);
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
 
     const searchParams = useSearchParams();
     const email = searchParams.get('email');
     const decodedEmail = email ? decodeURIComponent(email) : '';
     return (
         <div>
-            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
+            <div className={`auth-container ${solidSettingsData?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 <h5 className='text-center font-bold'>We have sent an email to your registered email address</h5>
                 <p className='font-bold text-center'>{decodedEmail}</p>
                 <p className='text-center'>

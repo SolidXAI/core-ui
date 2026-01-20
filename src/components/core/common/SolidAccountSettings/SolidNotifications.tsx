@@ -35,7 +35,7 @@ export const SolidNotifications = () => {
     };
 
     const initialValues = {
-        enableNotification: solidSettingsData?.data?.user?.enableNotification ?? true
+        enableNotification: solidSettingsData?.enableNotification ?? true
     }
 
     const formik = useFormik({
@@ -44,7 +44,7 @@ export const SolidNotifications = () => {
         onSubmit: async (values) => {
             try {
                 const updatedSettingsArray: Array<{ key: string; value: string; type: string }> = [];
-                const currentSettings = solidSettingsData?.data?.user || {};
+                const currentSettings = solidSettingsData?.user || {};
 
                 const formData = new FormData();
 
