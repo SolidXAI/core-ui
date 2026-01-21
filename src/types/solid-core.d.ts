@@ -87,6 +87,7 @@ export type LayoutAttribute = {
     readonly?: boolean;
     editAction?: any;
     createAction?: any;
+    required?:boolean;
 };
 
 // Generic representation of any node in our layout 
