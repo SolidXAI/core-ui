@@ -108,7 +108,10 @@ export class SolidSelectionDynamicField implements ISolidField {
         // return schema;
         const isMultiSelect = fieldMetadata?.isMultiSelect;
 
-        if (!fieldMetadata.required) {
+
+        const isRequired = fieldLayoutInfo.attrs?.required ?? fieldMetadata.required;
+    
+        if (!isRequired) {
             return Yup.mixed();
         }
 
@@ -201,6 +204,8 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
     const isFormFieldValid = (formik: any, fieldName: string) =>
         (formik.touched[fieldName] || formik.submitCount > 0) && !!formik.errors[fieldName];
 
+    const isRequired = fieldLayoutInfo.attrs?.required ?? fieldMetadata.required;
+
     const selectionDynamicSearch = async (event: AutoCompleteCompleteEvent) => {
         try {
             // const query = event.query ?? "";
@@ -243,7 +248,7 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
             <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                        {isRequired && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
