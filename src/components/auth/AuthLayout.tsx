@@ -26,7 +26,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
 
     useEffect(() => {
         if (solidSettingsDataInitialData) {
-            dispatch(setSolidSettings(solidSettingsDataInitialData));
+            dispatch(setSolidSettings(solidSettingsDataInitialData?.data));
         }
     }, [solidSettingsDataInitialData]);
 
