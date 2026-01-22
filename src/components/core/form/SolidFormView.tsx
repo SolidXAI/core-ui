@@ -462,25 +462,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const actionType = searchParams.get('actionType');
     const actionContext = searchParams.get('actionContext');
 
-    useEffect(() => {
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
 
-        const fetchPermissions = async () => {
-            const permissionNames = ["SettingController.getMcpUrl"]
-            const queryData = {
-                permissionNames: permissionNames
-            };
-            const queryString = qs.stringify(queryData, {
-                encodeValuesOnly: true
-            });
-            const response = await triggerCheckIfPermissionExists(queryString);
-            if (response.data.data) {
-                if (response.data.data.includes("SettingController.getMcpUrl")) {
-                    enableSolidXAiPanel();
-                }
-            }
-        };
-        fetchPermissions();
-    }, []);
+    useEffect(() => {
+        if (solidSettingsData?.mcpEnabled && solidSettingsData?.mcpServerUrl && solidSettingsData?.mcpApiKey) {
+            enableSolidXAiPanel();
+        }
+    }, [solidSettingsData]);
+
 
     const enableSolidXAiPanel = async () => {
         try {
