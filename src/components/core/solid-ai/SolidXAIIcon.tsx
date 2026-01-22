@@ -14,18 +14,18 @@ export const SolidXAIIcon = ({ size }: any) => {
                 </g>
                 <defs>
                     <linearGradient id="paint0_linear_7125_10237" x1="7.15705" y1="1.69778" x2="29.3143" y2="31.5543" gradientUnits="userSpaceOnUse">
-                        <stop stop-color="#FF8FD3" />
-                        <stop offset="0.01" stop-color="#FF8FD3" />
-                        <stop offset="0.04" stop-color="#F870B7" />
-                        <stop offset="0.07" stop-color="#F14E9A" />
-                        <stop offset="0.08" stop-color="#EF428F" />
-                        <stop offset="0.24" stop-color="#B83291" />
-                        <stop offset="0.49" stop-color="#691D95" />
-                        <stop offset="0.66" stop-color="#380F98" />
-                        <stop offset="0.75" stop-color="#250A99" />
-                        <stop offset="0.8" stop-color="#251BA4" />
-                        <stop offset="0.91" stop-color="#2547C1" />
-                        <stop offset="1" stop-color="#256DDB" />
+                        <stop stopColor="#FF8FD3" />
+                        <stop offset="0.01" stopColor="#FF8FD3" />
+                        <stop offset="0.04" stopColor="#F870B7" />
+                        <stop offset="0.07" stopColor="#F14E9A" />
+                        <stop offset="0.08" stopColor="#EF428F" />
+                        <stop offset="0.24" stopColor="#B83291" />
+                        <stop offset="0.49" stopColor="#691D95" />
+                        <stop offset="0.66" stopColor="#380F98" />
+                        <stop offset="0.75" stopColor="#250A99" />
+                        <stop offset="0.8" stopColor="#251BA4" />
+                        <stop offset="0.91" stopColor="#2547C1" />
+                        <stop offset="1" stopColor="#256DDB" />
                     </linearGradient>
                     <clipPath id="clip0_7125_10237">
                         <rect width="34" height="34" fill="white" transform="translate(0.360352)" />

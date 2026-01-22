@@ -1,5 +1,5 @@
 "use client"
-import { ERROR_MESSAGES } from '@/constants/error-messages';
+import { ERROR_MESSAGES } from '@solid-ui/constants/error-messages';
 import { signIn } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { ProgressSpinner } from 'primereact/progressspinner';

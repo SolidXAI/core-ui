@@ -1,22 +1,21 @@
 'use client';
-import { SolidListView } from "@/components/core/list/SolidListView";
+import { SolidListView } from "@solid-ui/components/core/list/SolidListView";
 import { camelCase, capitalize } from "lodash";
 import { Dialog } from "primereact/dialog";
 import { useEffect, useState } from "react";
 import * as Yup from 'yup';
-import { Schema } from "yup";
-import SolidFormView from "../../SolidFormView";
+import SolidFormView from '@solid-ui/components/core/form/SolidFormView';
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
 import { usePathname, useRouter } from "next/navigation";
-import { getExtensionComponent } from "@/helpers/registry";
-import { SolidFormFieldWidgetProps, SolidFormWidgetProps } from "@/types/solid-core";
+import { getExtensionComponent } from "@solid-ui/helpers/registry";
+import { SolidFormFieldWidgetProps, SolidFormWidgetProps } from "@solid-ui/types/solid-core";
 import { Message } from "primereact/message";
-import FieldMetaData from "@/components/core/model/FieldMetaData";
+import FieldMetaData from "@solid-ui/components/core/model/FieldMetaData";
 import { Chip } from "primereact/chip";
-import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
+import { SolidFieldTooltip } from "@solid-ui/components/common/SolidFieldTooltip";
 import { Divider } from "primereact/divider";
 import { Button } from "primereact/button";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 
 export type FormViewParams = {
     moduleName: any;
@@ -62,7 +61,7 @@ export class SolidRelationOneToManyField implements ISolidField {
         }
     }
 
-    validationSchema(): Schema {
+    validationSchema(): Yup.Schema {
         let schema = Yup.object();
 
         const fieldMetadata = this.fieldContext.fieldMetadata;

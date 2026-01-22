@@ -1,6 +1,6 @@
 'use client';
 import React, { useState, createContext } from 'react';
-import { LayoutState, ChildContainerProps, LayoutConfig, LayoutContextProps } from '@/types';
+import { LayoutState, ChildContainerProps, LayoutConfig, LayoutContextProps } from '@solid-ui/types';
 export const LayoutContext = createContext({} as LayoutContextProps);
 
 export const LayoutProvider = ({ children }: ChildContainerProps) => {

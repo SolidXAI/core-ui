@@ -4,11 +4,11 @@ import { useFormik } from 'formik';
 import { Button } from 'primereact/button';
 import { Checkbox } from 'primereact/checkbox';
 import React, { useRef, useState } from 'react'
-import { createSolidEntityApi } from '@/redux/api/solidEntityApi';
+import { createSolidEntityApi } from '@solid-ui/redux/api/solidEntityApi';
 import { Toast } from "primereact/toast";
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import styles from './SolidListColumnSelector.module.css'
-import { ERROR_MESSAGES } from '@/constants/error-messages';
+import { ERROR_MESSAGES } from '@solid-ui/constants/error-messages';
 interface FieldMetadata {
     displayName: string;
 }

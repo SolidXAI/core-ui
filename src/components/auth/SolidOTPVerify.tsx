@@ -11,11 +11,11 @@ import { Toast } from "primereact/toast";
 import { useContext, useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { LayoutContext } from "../layout/context/layoutcontext";
-import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
-import { AppTitle } from "@/helpers/AppTitle";
+import { useLazyGetAuthSettingsQuery } from "@solid-ui/redux/api/solidSettingsApi";
+import { AppTitle } from "@solid-ui/helpers/AppTitle";
 import Image from "next/image";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import SolidLogo from '@solid-ui/resources/images/SolidXLogo.svg'
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 
 const SolidOTPVerify = () => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();

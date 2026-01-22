@@ -1,6 +1,6 @@
 "use client"
-import { ERROR_MESSAGES } from '@/constants/error-messages';
-import { useBulkUpdateSolidUserSettingsMutation, useGetSolidSettingsQuery } from '@/redux/api/solidSettingsApi';
+import { ERROR_MESSAGES } from '@solid-ui/constants/error-messages';
+import { useBulkUpdateSolidUserSettingsMutation, useGetSolidSettingsQuery } from '@solid-ui/redux/api/solidSettingsApi';
 import { useFormik } from 'formik';
 import { Button } from 'primereact/button';
 import { InputSwitch } from 'primereact/inputswitch';

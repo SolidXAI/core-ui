@@ -1,5 +1,5 @@
 "use client";
-import { useDeleteMultipleUsersMutation, useLazyGetusersQuery } from '@/redux/api/userApi';
+import { useDeleteMultipleUsersMutation, useLazyGetusersQuery } from '@solid-ui/redux/api/userApi';
 import Link from "next/link";
 import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
@@ -11,12 +11,12 @@ import {
 } from "primereact/datatable";
 import { useEffect, useRef, useState } from "react";
 
-import { CreateButton } from "@/components/common/CreateButton";
+import { CreateButton } from "@solid-ui/components/common/CreateButton";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { Dialog } from "primereact/dialog";
 import { Toast } from "primereact/toast";
 import qs from "qs";
-import { ERROR_MESSAGES } from '@/constants/error-messages';
+import { ERROR_MESSAGES } from '@solid-ui/constants/error-messages';
 
 interface Users {
     id: string;

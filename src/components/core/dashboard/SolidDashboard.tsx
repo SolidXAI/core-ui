@@ -1,6 +1,6 @@
 "use client";
-import { DashboardResponse, useGetDashboardQuery } from '@/redux/api/dashboardApi';
-import { SqlExpression } from '@/types/solid-core';
+import { DashboardResponse, useGetDashboardQuery } from '@solid-ui/redux/api/dashboardApi';
+import { SqlExpression } from '@solid-ui/types/solid-core';
 import { Button } from 'primereact/button';
 import { Tooltip } from "primereact/tooltip";
 import qs from 'qs';
@@ -14,10 +14,10 @@ import { SolidDashboardFilterRequired } from './SolidDashboardFilterRequired';
 import { SolidDashboardLoading } from './SolidDashboardLoading';
 import { SolidDashboardRenderError } from './SolidDashboardRenderError';
 import { useDispatch, useSelector } from "react-redux";
-import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
+import { showNavbar, toggleNavbar } from "@solid-ui/redux/features/navbarSlice";
 import SolidDashboardNotAvailable from './SolidDashboardNotAvailable';
-import { useLazyGetMcpUrlQuery } from '@/redux/api/solidSettingsApi';
-import { useLazyCheckIfPermissionExistsQuery } from '@/redux/api/userApi';
+import { useLazyGetMcpUrlQuery } from '@solid-ui/redux/api/solidSettingsApi';
+import { useLazyCheckIfPermissionExistsQuery } from '@solid-ui/redux/api/userApi';
 
 export enum DashboardVariableType {
   DATE = 'date',

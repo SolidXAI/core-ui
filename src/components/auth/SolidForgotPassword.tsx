@@ -1,6 +1,6 @@
 "use client";
 
-import { useInitiateChangePasswordMutation } from "@/redux/api/authApi";
+import { useInitiateChangePasswordMutation } from "@solid-ui/redux/api/authApi";
 import { useFormik } from "formik";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
@@ -11,11 +11,11 @@ import { Toast } from "primereact/toast";
 import { useContext, useEffect, useRef } from "react";
 import * as Yup from "yup";
 import { LayoutContext } from "../layout/context/layoutcontext";
-import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
-import { AppTitle } from "@/helpers/AppTitle";
+import { useLazyGetAuthSettingsQuery } from "@solid-ui/redux/api/solidSettingsApi";
+import { AppTitle } from "@solid-ui/helpers/AppTitle";
 import Image from "next/image";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import SolidLogo from '@solid-ui/resources/images/SolidXLogo.svg'
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 
 const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()

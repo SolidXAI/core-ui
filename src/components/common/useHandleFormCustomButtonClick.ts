@@ -1,9 +1,9 @@
 "usec client";
 import { useDispatch } from "react-redux";
-import { getExtensionComponent, getExtensionFunction } from "@/helpers/registry";
-import { openPopup } from "@/redux/features/popupSlice";
+import { getExtensionComponent, getExtensionFunction } from "@solid-ui/helpers/registry";
+import { openPopup } from "@solid-ui/redux/features/popupSlice";
 import React, { ComponentType } from "react";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 type CustomButtonData = {
     icon?: string,
     className?: string,

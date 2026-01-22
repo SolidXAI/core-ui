@@ -1,8 +1,8 @@
 "use client";
 
-import { AppTitle } from "@/helpers/AppTitle";
-import { useConfirmForgotPasswordMutation } from "@/redux/api/authApi";
-import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
+import { AppTitle } from "@solid-ui/helpers/AppTitle";
+import { useConfirmForgotPasswordMutation } from "@solid-ui/redux/api/authApi";
+import { useLazyGetAuthSettingsQuery } from "@solid-ui/redux/api/solidSettingsApi";
 import { useFormik } from "formik";
 import Image from "next/image";
 import Link from "next/link";
@@ -14,8 +14,8 @@ import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import SolidLogo from '@solid-ui/resources/images/SolidXLogo.svg'
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 const SolidResetPassword = () => {
     const searchParams = useSearchParams();
     const verificationToken = searchParams.get('token');

@@ -1,6 +1,6 @@
 "use client";
 
-import { SolidFormWidgetProps } from "@/types";
+import { SolidFormWidgetProps } from "@solid-ui/types";
 import parse from 'html-react-parser';
 import Handlebars from "handlebars/dist/handlebars";
 

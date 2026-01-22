@@ -1,9 +1,9 @@
 'use client';
-import { AutoCompleteField } from "@/components/common/AutoCompleteField";
-import { CancelButton } from "@/components/common/CancelButton";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
-import { useLazyGetrolesQuery } from "@/redux/api/roleApi";
-import { useCreateuserroleMutation } from "@/redux/api/userApi";
+import { AutoCompleteField } from "@solid-ui/components/common/AutoCompleteField";
+import { CancelButton } from "@solid-ui/components/common/CancelButton";
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import { useLazyGetrolesQuery } from "@solid-ui/redux/api/roleApi";
+import { useCreateuserroleMutation } from "@solid-ui/redux/api/userApi";
 import { useFormik } from "formik";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "primereact/button";

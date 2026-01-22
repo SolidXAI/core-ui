@@ -123,7 +123,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
 
   // Now render the form dynamically...
   const renderFormElementDynamically: any = (element: any, solidKanbanViewMetaData: any) => {
-    const { type, attrs, body, children } = element;
+    let { type, attrs, body, children } = element;
     // const key = attrs?.name ?? generateRandomKey();
     const key = attrs?.name;
     switch (type) {

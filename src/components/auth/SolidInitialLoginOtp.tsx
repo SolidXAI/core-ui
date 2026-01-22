@@ -1,8 +1,8 @@
 "use client";
 
-import { AppTitle } from "@/helpers/AppTitle";
-import { useConfirmOtpLoginMutation, useInitateLoginMutation } from "@/redux/api/authApi";
-import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
+import { AppTitle } from "@solid-ui/helpers/AppTitle";
+import { useConfirmOtpLoginMutation, useInitateLoginMutation } from "@solid-ui/redux/api/authApi";
+import { useLazyGetAuthSettingsQuery } from "@solid-ui/redux/api/solidSettingsApi";
 import { Form, Formik } from "formik";
 import Image from "next/image";
 import Link from "next/link";
@@ -13,9 +13,9 @@ import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
+import SolidLogo from '@solid-ui/resources/images/SolidXLogo.svg'
 import { signIn } from "next-auth/react";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 
 
 const SolidInitialLoginOtp = () => {

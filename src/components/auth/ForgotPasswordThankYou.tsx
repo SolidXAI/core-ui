@@ -4,8 +4,8 @@ import Link from "next/link";
 import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 import Image from "next/image";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
-import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
+import SolidLogo from '@solid-ui/resources/images/SolidXLogo.svg'
+import { useLazyGetAuthSettingsQuery } from "@solid-ui/redux/api/solidSettingsApi";
 
 
 export const ForgotPasswordThankYou = () => {

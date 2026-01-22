@@ -3,14 +3,13 @@ import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete
 import { Message } from "primereact/message";
 import { useMemo, useState } from "react";
 import * as Yup from 'yup';
-import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { getExtensionComponent } from "@/helpers/registry";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { getExtensionComponent } from "@solid-ui/helpers/registry";
+import { SolidFormFieldWidgetProps } from "@solid-ui/types/solid-core";
 import { RadioButton } from "primereact/radiobutton";
-import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
+import { SolidFieldTooltip } from "@solid-ui/components/common/SolidFieldTooltip";
 import { SelectButton } from "primereact/selectbutton";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 
 export class SolidSelectionStaticField implements ISolidField {
 
@@ -90,7 +89,7 @@ export class SolidSelectionStaticField implements ISolidField {
     }
 
 
-    validationSchema(): Schema {
+    validationSchema(): Yup.Schema {
 
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
@@ -100,7 +99,7 @@ export class SolidSelectionStaticField implements ISolidField {
         // let schema = Yup.object({
         //     value: Yup.string().required(`${fieldLabel} is required.`)
         // });
-        let schema: Schema;
+        let schema: Yup.Schema;
 
         if (isMultiSelect) {
             // For multi-select, create array schema

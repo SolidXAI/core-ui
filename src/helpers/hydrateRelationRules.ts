@@ -1,5 +1,5 @@
-import { FilterRule, FilterRuleType } from "@/components/core/common/FilterComponent";
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
+import { FilterRule, FilterRuleType } from "@solid-ui/components/core/common/FilterComponent";
+import { createSolidEntityApi } from "@solid-ui/redux/api/solidEntityApi";
 import axios from "axios";
 import { kebabCase } from "change-case";
 import { getSession } from "next-auth/react";

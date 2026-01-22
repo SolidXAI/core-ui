@@ -6,7 +6,7 @@ import { SolidPersonalInfo } from "./SolidPersonalInfo";
 import { SolidNotifications } from "./SolidNotifications";
 import { SolidChangePassword } from "./SolidChangePassword";
 import styles from './SolidAccountSettings.module.css'
-import { useLazyGetSolidSettingsQuery } from "@/redux/api/solidSettingsApi";
+import { useLazyGetSolidSettingsQuery } from "@solid-ui/redux/api/solidSettingsApi";
 export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfileSettingsDialog }: any) => {
     const [setting, setSetting] = useState({ key: "personal_info", label: "Persnoal Info" });
 

@@ -1,5 +1,5 @@
 "use client"
-import { getTextColor, stringToColor } from '@/helpers/getRandomColors'
+import { getTextColor, stringToColor } from '@solid-ui/helpers/getRandomColors'
 import Image from 'next/image'
 import { Avatar } from 'primereact/avatar'
 import { Dialog } from 'primereact/dialog'

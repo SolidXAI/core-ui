@@ -2,20 +2,18 @@
 import { InputTextarea } from "primereact/inputtextarea";
 import { Message } from "primereact/message";
 import * as Yup from 'yup';
-import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 // import { Editor } from "primereact/editor";
-import { useState } from "react";
-import { getExtensionComponent } from "@/helpers/registry";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
-import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
-import { useEffect, useRef } from 'react';
+import { useEffect, useRef, useState } from "react";
+import { getExtensionComponent } from "@solid-ui/helpers/registry";
+import { SolidFormFieldWidgetProps } from "@solid-ui/types/solid-core";
+import { SolidFieldTooltip } from "@solid-ui/components/common/SolidFieldTooltip";
 import Editor from '@monaco-editor/react';
 import { Calendar } from "primereact/calendar";
 import { Dropdown } from "primereact/dropdown";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 
 
 export class SolidLongTextField implements ISolidField {
@@ -42,7 +40,7 @@ export class SolidLongTextField implements ISolidField {
         return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
     }
 
-    validationSchema(): Schema {
+    validationSchema(): Yup.Schema {
         let schema: Yup.StringSchema<string | null | undefined> = Yup.string();
 
         const fieldMetadata = this.fieldContext.fieldMetadata;
@@ -617,5 +615,4 @@ export const DynamicSelectionStaticEditWidget = ({
       </div>
     );
 };
-
 

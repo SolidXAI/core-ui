@@ -1,11 +1,11 @@
 "use client";
-import { SqlExpression } from "@/types/solid-core";
+import { SqlExpression } from "@solid-ui/types/solid-core";
 import { AutoComplete, AutoCompleteChangeEvent, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { Calendar } from "primereact/calendar";
 import { Nullable } from "primereact/ts-helpers";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import styles from './SolidDashboard.module.css';
-import { useGetDashboardVariableSelectionDynamicValuesQuery } from "@/redux/api/dashboardApi";
+import { useGetDashboardVariableSelectionDynamicValuesQuery } from "@solid-ui/redux/api/dashboardApi";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { DashboardVariableRecord } from "./SolidDashboard";
 import { Button } from "primereact/button";
