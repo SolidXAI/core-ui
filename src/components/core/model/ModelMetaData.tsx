@@ -1,10 +1,10 @@
 'use client';
-import { SingleSelectAutoCompleteField } from "@/components/common/SingleSelectAutoCompleteField";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
-import { getSingularAndPlural } from "@/helpers/helpers";
-import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
-import { useLazyGetModelsQuery } from "@/redux/api/modelApi";
-import { useLazyGetmodulesQuery } from "@/redux/api/moduleApi";
+import { SingleSelectAutoCompleteField } from "@solid-ui/components/common/SingleSelectAutoCompleteField";
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import { getSingularAndPlural } from "@solid-ui/helpers/helpers";
+import { useGetFieldDefaultMetaDataQuery } from "@solid-ui/redux/api/fieldApi";
+import { useLazyGetModelsQuery } from "@solid-ui/redux/api/modelApi";
+import { useLazyGetmodulesQuery } from "@solid-ui/redux/api/moduleApi";
 import { useFormik } from "formik";
 import { snakeCase } from "lodash";
 import { usePathname, useRouter } from "next/navigation";

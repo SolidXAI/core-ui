@@ -1,5 +1,5 @@
 'use client';
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";
 // Fallback component for missing components

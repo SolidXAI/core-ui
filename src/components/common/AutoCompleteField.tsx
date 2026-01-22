@@ -2,7 +2,7 @@
 
 import { AutoComplete } from "primereact/autocomplete";
 import { useEffect, useState } from "react";
-import { getVirtualScrollerOptions } from "@/helpers/autoCompleteVirtualScroll";
+import { getVirtualScrollerOptions } from "@solid-ui/helpers/autoCompleteVirtualScroll";
 
 
 

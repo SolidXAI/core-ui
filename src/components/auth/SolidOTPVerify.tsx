@@ -10,10 +10,10 @@ import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
 import { useRef, useState } from "react";
 import * as Yup from "yup";
-import Image from "next/image";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
-import { ERROR_MESSAGES } from "@/constants/error-messages";
 import { useSelector } from "react-redux";
+import Image from "next/image";
+import SolidLogo from '@solid-ui/resources/images/SolidXLogo.svg'
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 
 const SolidOTPVerify = () => {
 

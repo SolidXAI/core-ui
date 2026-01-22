@@ -1,4 +1,4 @@
-import { SolidMediaListFieldWidgetProps } from "@/types/solid-core";
+import { SolidMediaListFieldWidgetProps } from "@solid-ui/types/solid-core";
 
 export const SolidShortTextFieldImageListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidMediaListFieldWidgetProps) => {
 

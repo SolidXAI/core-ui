@@ -2,19 +2,19 @@
 
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Dialog } from "primereact/dialog";
-import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@/components/core/common/FilterComponent";
+import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@solid-ui/components/core/common/FilterComponent";
 import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Divider } from "primereact/divider";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { queryStringToQueryObject } from "../list/SolidListView";
 import { InputText } from "primereact/inputtext";
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
+import { createSolidEntityApi } from "@solid-ui/redux/api/solidEntityApi";
 import qs from "qs";
 import { useSelector } from "react-redux";
 import { SolidSaveCustomFilterForm } from "./SolidSaveCustomFilterForm";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
-import { hydrateRelationRules } from "@/helpers/hydrateRelationRules";
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import { hydrateRelationRules } from "@solid-ui/helpers/hydrateRelationRules";
 
 const getRandomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;

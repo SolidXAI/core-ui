@@ -1,25 +1,26 @@
 "use client"
-import { AppTitle } from "@/helpers/AppTitle";
-import { useGetAuthSettingsQuery, useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
-import { toggleTheme } from "@/redux/features/themeSlice";
-import { LayoutConfig } from "@/types";
+// import { useLazyGetAuthSettingsQuery } from "@solid-ui/redux/api/solidSettingsApi";
+// import { toggleTheme } from "@solid-ui/redux/features/themeSlice";
+// import { LayoutConfig } from "@solid-ui/types";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { PrimeReactContext } from "primereact/api";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { useContext, useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { LayoutContext } from "../layout/context/layoutcontext";
 import Image from "next/image";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
+import SolidLogo from '@solid-ui/resources/images/SolidXLogo.svg'
 import { Divider } from "primereact/divider";
-import AuthScreenRightBackgroundImage from '../../resources/images/auth/solid-left-layout-bg.png';
-import AuthScreenLeftBackgroundImage from '../../resources/images/auth/solid-right-layout-bg.png';
-import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
-import { setSolidSettings } from "@/redux/features/settingsSlice";
-export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
+import AuthScreenRightBackgroundImage from '@solid-ui/resources/images/auth/solid-left-layout-bg.png';
+import AuthScreenLeftBackgroundImage from '@solid-ui/resources/images/auth/solid-right-layout-bg.png';
+import AuthScreenCenterBackgroundImage from '@solid-ui/resources/images/auth/solid-login-light.png';
+import { useGetAuthSettingsQuery } from "@solid-ui/redux/api/solidSettingsApi";
+import { setSolidSettings } from "@solid-ui/redux/features/settingsSlice";
 
+
+export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
+    const dispatch = useDispatch();
     const { data: solidSettingsDataInitialData } = useGetAuthSettingsQuery("")
     const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
 
@@ -37,24 +38,24 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     const pathname = usePathname();
     const router = useRouter();
 
-    const { changeTheme } = useContext(PrimeReactContext);
-    const { layoutConfig, setLayoutConfig } = useContext(LayoutContext);
-    const dispatch = useDispatch();
-    const _changeTheme = (theme: string, colorScheme: string) => {
-        changeTheme?.(layoutConfig.theme, theme, 'theme-css', () => {
-            setLayoutConfig((prevState: LayoutConfig) => ({ ...prevState, theme, colorScheme }));
-        });
-    };
-    useEffect(() => {
-        const theme = solidSettingsData?.authPagesTheme; // 'dark' or 'light'
-        if (theme) {
-            dispatch(toggleTheme()); // Dispatch Redux action
-            _changeTheme(
-                theme === "dark" ? "solid-dark-purple" : "solid-light-purple",
-                theme
-            );
-        }
-    }, [solidSettingsData]);
+    // const { changeTheme } = useContext(PrimeReactContext);
+    // const { layoutConfig, setLayoutConfig } = useContext(LayoutContext);
+    // const dispatch = useDispatch();
+    // const _changeTheme = (theme: string, colorScheme: string) => {
+    //     changeTheme?.(layoutConfig.theme, theme, 'theme-css', () => {
+    //         setLayoutConfig((prevState: LayoutConfig) => ({ ...prevState, theme, colorScheme }));
+    //     });
+    // };
+    // useEffect(() => {
+    //     const theme = solidSettingsData?.data?.authPagesTheme; // 'dark' or 'light'
+    //     if (theme) {
+    //         dispatch(toggleTheme()); // Dispatch Redux action
+    //         _changeTheme(
+    //             theme === "dark" ? "solid-dark-purple" : "solid-light-purple",
+    //             theme
+    //         );
+    //     }
+    // }, [solidSettingsData]);
     useEffect(() => {
         // Fetch settings if not already available
 
@@ -192,7 +193,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 {solidSettingsData?.authPagesLayout !== 'left' &&
                     <div className={solidSettingsData?.authPagesLayout !== 'center' ? 'col-6 lg:col-5  xl:col-6 flex justify-content-center' : ''}>
                         {solidSettingsData?.showLegalLinks === true &&
-                            <p className={`solid-auth-input-label text-sm m-0 ${solidSettingsData?.authPagesLayout}`}>Made with <svg className="mx-1" width="12px" height="12px" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M1.24264 8.24264L8 15L14.7574 8.24264C15.553 7.44699 16 6.36786 16 5.24264V5.05234C16 2.8143 14.1857 1 11.9477 1C10.7166 1 9.55233 1.55959 8.78331 2.52086L8 3.5L7.21669 2.52086C6.44767 1.55959 5.28338 1 4.05234 1C1.8143 1 0 2.8143 0 5.05234V5.24264C0 6.36786 0.44699 7.44699 1.24264 8.24264Z" fill="#ff0000"></path> </g></svg> in Mumbai</p>
+                            <p className={`solid-auth-input-label text-sm m-0 ${solidSettingsData?.authPagesLayout}`}>Made with <svg className="mx-1" width="12px" height="12px" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M1.24264 8.24264L8 15L14.7574 8.24264C15.553 7.44699 16 6.36786 16 5.24264V5.05234C16 2.8143 14.1857 1 11.9477 1C10.7166 1 9.55233 1.55959 8.78331 2.52086L8 3.5L7.21669 2.52086C6.44767 1.55959 5.28338 1 4.05234 1C1.8143 1 0 2.8143 0 5.05234V5.24264C0 6.36786 0.44699 7.44699 1.24264 8.24264Z" fill="#ff0000"></path> </g></svg> in Mumbai</p>
                         }
                     </div>
                 }
@@ -208,25 +209,26 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                         </div>
                     }
                 </div>
-                {solidSettingsData?.authPagesLayout === 'left' &&
+                {
+                    solidSettingsData?.authPagesLayout === 'left' &&
                     <div className={solidSettingsData?.authPagesLayout !== 'center' ? 'col-6 lg:col-5 xl:col-6  flex justify-content-center' : ''}>
                         {solidSettingsData?.showLegalLinks === true &&
-                            <p className={`solid-auth-input-label text-sm m-0 right`}>Made with <svg className="mx-1" width="12px" height="12px" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" stroke-linecap="round" stroke-linejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M1.24264 8.24264L8 15L14.7574 8.24264C15.553 7.44699 16 6.36786 16 5.24264V5.05234C16 2.8143 14.1857 1 11.9477 1C10.7166 1 9.55233 1.55959 8.78331 2.52086L8 3.5L7.21669 2.52086C6.44767 1.55959 5.28338 1 4.05234 1C1.8143 1 0 2.8143 0 5.05234V5.24264C0 6.36786 0.44699 7.44699 1.24264 8.24264Z" fill="#ff0000"></path> </g></svg> in Mumbai</p>
+                            <p className={`solid-auth-input-label text-sm m-0 right`}>Made with <svg className="mx-1" width="12px" height="12px" viewBox="0 0 16 16" fill="none" xmlns="http://www.w3.org/2000/svg"><g id="SVGRepo_bgCarrier" stroke-width="0"></g><g id="SVGRepo_tracerCarrier" strokeLinecap="round" strokeLinejoin="round"></g><g id="SVGRepo_iconCarrier"> <path d="M1.24264 8.24264L8 15L14.7574 8.24264C15.553 7.44699 16 6.36786 16 5.24264V5.05234C16 2.8143 14.1857 1 11.9477 1C10.7166 1 9.55233 1.55959 8.78331 2.52086L8 3.5L7.21669 2.52086C6.44767 1.55959 5.28338 1 4.05234 1C1.8143 1 0 2.8143 0 5.05234V5.24264C0 6.36786 0.44699 7.44699 1.24264 8.24264Z" fill="#ff0000"></path> </g></svg> in Mumbai</p>
                         }
                     </div>
                 }
-            </div>
+            </div >
             {/* } */}
-            <Dialog
+            < Dialog
                 visible={isRestricted}
                 onHide={handleRegistration}
                 header="Access Restricted"
                 headerClassName="py-2" contentClassName="px-0 pb-0"
                 className="solid-confirm-dialog "
                 footer={
-                    <div className="flex align-items-center justify-content-start">
+                    < div className="flex align-items-center justify-content-start" >
                         <Button label="Close" onClick={handleRegistration} size="small" />
-                    </div>
+                    </div >
                 }
                 draggable={false}
             >
@@ -234,7 +236,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 <div className="p-4">
                     <p>Sign-up is not available. Please contact the admin.</p>
                 </div>
-            </Dialog>
+            </Dialog >
         </div >
     )
 }

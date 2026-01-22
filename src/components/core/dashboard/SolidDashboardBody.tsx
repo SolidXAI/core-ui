@@ -3,9 +3,9 @@ import 'gridstack/dist/gridstack.min.css';
 import { GridStackOptions, GridStackWidget } from 'gridstack';
 import styles from './SolidDashboard.module.css'
 import { SolidQuestionRenderer } from './SolidQuestionRenderer';
-import { SqlExpression } from '@/types/solid-core';
+import { SqlExpression } from '@solid-ui/types/solid-core';
 import PrimeReactDatatableRenderer from './chart-renderers/PrimeReactDatatableRenderer';
-import { useGetDashboardQuestionDataByIdQuery } from '@/redux/api/dashboardQuestionApi';
+import { useGetDashboardQuestionDataByIdQuery } from '@solid-ui/redux/api/dashboardQuestionApi';
 import qs from 'qs';
 import { ProgressSpinner } from 'primereact/progressspinner';
 

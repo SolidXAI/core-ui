@@ -1,24 +1,24 @@
 "use client";
-// import { useAppSelector } from "@/redux/hooks";
+// import { useAppSelector } from "@solid-ui/redux/hooks";
 import { signOut } from "next-auth/react";
 import { PrimeReactContext } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useContext, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { LayoutContext } from "./context/layoutcontext";
-import { LayoutConfig } from "@/types";
-import { toggleTheme } from "@/redux/features/themeSlice";
+import { LayoutConfig } from "@solid-ui/types";
+import { toggleTheme } from "@solid-ui/redux/features/themeSlice";
 import { InputSwitch } from "primereact/inputswitch";
 import { Button } from "primereact/button";
 import { useRouter } from "next/navigation";
 import { Dialog } from "primereact/dialog";
 import { Divider } from "primereact/divider";
 import { Avatar } from "primereact/avatar";
-// import { useLazyGetSolidSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { SolidAccountSettings } from "../core/common/SolidAccountSettings/SolidAccountSettings";
-import { useGetUserQuery } from "@/redux/api/userApi";
-import { handleLogout } from "@/nextAuth/handleLogout";
+import { useGetUserQuery } from "@solid-ui/redux/api/userApi";
+import { handleLogout } from "@solid-ui/nextAuth/handleLogout";
 import { Toast } from "primereact/toast";
+
 const UserProfileMenu = () => {
   const toast = useRef(null);
   const [showProfileSettingsDialog, setShowProfileSettingsDialog] = useState(false);

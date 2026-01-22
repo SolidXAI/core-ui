@@ -1,26 +1,25 @@
 'use client';
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
+import { createSolidEntityApi } from "@solid-ui/redux/api/solidEntityApi";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { Message } from "primereact/message";
 import qs from "qs";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from 'yup';
-import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
 import { camelCase, capitalize } from "lodash";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import { Dialog } from "primereact/dialog";
 import { Panel } from "primereact/panel";
-import SolidFormView from "../../SolidFormView";
-import { getExtensionComponent } from "@/helpers/registry";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import SolidFormView from '@solid-ui/components/core/form/SolidFormView';
+import { getExtensionComponent } from "@solid-ui/helpers/registry";
+import { SolidFormFieldWidgetProps } from "@solid-ui/types/solid-core";
 import Handlebars from "handlebars/dist/handlebars";
 import { Toast } from "primereact/toast";
-import { SolidFormFieldRender } from "../../SolidFormFieldRender";
-import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
-import { getVirtualScrollerOptions } from "@/helpers/autoCompleteVirtualScroll";
+import { SolidFormFieldRender } from '@solid-ui/components/core/form/SolidFormFieldRender';
+import { SolidFieldTooltip } from "@solid-ui/components/common/SolidFieldTooltip";
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import { getVirtualScrollerOptions } from "@solid-ui/helpers/autoCompleteVirtualScroll";
 
 
 export type FormViewParams = {
@@ -68,7 +67,7 @@ export class SolidRelationManyToOneField implements ISolidField {
         }
     }
 
-    validationSchema(): Schema {
+    validationSchema(): Yup.Schema {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;

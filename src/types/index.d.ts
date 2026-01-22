@@ -27,6 +27,7 @@ import {
     SolidUiEvents,
     SolidUiEvent,
     SolidListUiEvent,
+    SolidLoadForm,
     SolidUiEventResponse,
     SolidListUiEventResponse,
     SolidFormWidgetProps,
@@ -63,6 +64,7 @@ export type {
     SolidUiEventResponse,
     SolidListUiEventResponse,
     SolidListUiEvent,
+    SolidLoadForm,
     SolidFormWidgetProps,
     SolidChartRendererProps
 };

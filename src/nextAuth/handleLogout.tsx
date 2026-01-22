@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES } from '@/constants/error-messages';
+import { ERROR_MESSAGES } from '@solid-ui/constants/error-messages';
 import axios, { AxiosError } from 'axios';
 import { getSession, signOut } from 'next-auth/react';
 

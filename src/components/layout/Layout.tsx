@@ -1,7 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 'use client';
 
-import { ChildContainerProps, LayoutState } from '@/types';
+import { ChildContainerProps, LayoutState } from '@solid-ui/types';
 import { usePathname, useSearchParams } from 'next/navigation';
 import { PrimeReactContext } from 'primereact/api';
 import { useEventListener, useUnmountEffect } from 'primereact/hooks';
@@ -12,13 +12,11 @@ import AppConfig from './AppConfig';
 import { LayoutContext } from './context/layoutcontext';
 import AppSidebar from './AppSidebar';
 import SolidPopupContainer from '../common/SolidPopupContainer';
-import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
-
 import { useSession } from 'next-auth/react';
-import { getExtensionFunction } from '@/helpers/registry';
-import { SolidOnApplicationMountEvent } from '@/types/solid-core';
-import { useGetSolidSettingsQuery } from '@/redux/api/solidSettingsApi';
-import { setSolidSettings } from '@/redux/features/settingsSlice';
+import { getExtensionFunction } from '@solid-ui/helpers/registry';
+import { SolidOnApplicationMountEvent } from '@solid-ui/types/solid-core';
+import { setSolidSettings } from '@solid-ui/redux/features/settingsSlice';
+import { useGetSolidSettingsQuery } from '@solid-ui/redux/api/solidSettingsApi';
 
 export const Layout = ({ children }: ChildContainerProps) => {
     const { layoutConfig, layoutState, setLayoutState } = useContext(LayoutContext);

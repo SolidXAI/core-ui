@@ -2,7 +2,6 @@
 
 import { useEffect, useState } from "react";
 import { usePathname } from "next/navigation";
-import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
 import { useSelector } from "react-redux";
 
 export const SolidThemeProvider = () => {

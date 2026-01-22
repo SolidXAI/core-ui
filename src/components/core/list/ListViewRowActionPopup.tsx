@@ -1,6 +1,6 @@
 'use client';
 import { Button } from "primereact/button"
-import { getExtensionComponent } from "@/helpers/registry";
+import { getExtensionComponent } from "@solid-ui/helpers/registry";
 
 
 export const ListViewRowActionPopup = ({ context }: any) => {
