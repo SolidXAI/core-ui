@@ -3,10 +3,12 @@ import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { FormEvent } from "primereact/ts-helpers";
 import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
-import { dateFilterMatchModeOptions } from './SolidDateColumn';
+import { dateFilterMatchModeOptions, parseIsoDate } from './SolidDateColumn';
 import SolidTableRowCell from "../SolidTableRowCell";
 import { SolidListFieldWidgetProps } from "@solid-ui/types/solid-core";
 import { getExtensionComponent } from "@solid-ui/helpers/registry";
+import { useSelector } from "react-redux";
+import dayjs from "dayjs";
 
 const SolidDatetimeColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
@@ -54,7 +56,7 @@ const SolidDatetimeColumn = ({ solidListViewMetaData, fieldMetadata, column }: S
             body={(rowData) => {
                 let viewWidget = column.attrs.viewWidget;
                 if (!viewWidget) {
-                    viewWidget = 'DefaultTextListWidget';
+                    viewWidget = 'DefaultDateTimeListWidget';
                 }
                 let DynamicWidget = getExtensionComponent(viewWidget);
                 const widgetProps: SolidListFieldWidgetProps = {
@@ -77,3 +79,27 @@ const SolidDatetimeColumn = ({ solidListViewMetaData, fieldMetadata, column }: S
 
 export default SolidDatetimeColumn;
 
+
+
+export const DefaultDateTimeListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
+    const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter;
+    let displayValue = rowData[fieldMetadata.name];
+    const parsedDate = parseIsoDate(displayValue);
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+
+    if (parsedDate) {
+        const format = column?.attrs?.format as string | undefined || solidSettingsData?.dateTimeFormat;
+        if (format) {
+            displayValue = dayjs(parsedDate).format(format);
+        }
+        else {
+            displayValue = parsedDate.toLocaleString();
+        }
+    }
+    return (
+        <SolidTableRowCell
+            value={displayValue}
+            truncateAfter={truncateAfter}
+        />
+    );
+};

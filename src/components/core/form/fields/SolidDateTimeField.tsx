@@ -9,6 +9,7 @@ import { SolidFormFieldWidgetProps } from "@solid-ui/types/solid-core";
 import { SolidFieldTooltip } from "@solid-ui/components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 import { DateFieldViewComponent } from '@solid-ui/components/core/common/DateFieldViewComponent';
+import { useSelector } from "react-redux";
 
 export class SolidDateTimeField implements ISolidField {
 
@@ -200,6 +201,9 @@ export const DefaultDateTimeFormViewWidget = ({
     formik,
     fieldContext,
 }: SolidFormFieldWidgetProps) => {
+
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
 
@@ -209,7 +213,7 @@ export const DefaultDateTimeFormViewWidget = ({
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
 
     const rawValue = formik.values[fieldName];
-    const format = fieldLayoutInfo.attrs?.format as string | undefined;
+    const format = fieldLayoutInfo.attrs?.format as string | undefined || solidSettingsData?.dateTimeFormat;
 
     return (
         <div className="mt-2 flex flex-column gap-2">

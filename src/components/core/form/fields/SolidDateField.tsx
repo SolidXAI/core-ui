@@ -11,6 +11,7 @@ import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 import { Tag } from "primereact/tag";
 import { StatusIcon } from '@solid-ui/components/core/extension/solid-core/CustomIcon/StatusIcon';
 import { DateFieldViewComponent } from '@solid-ui/components/core/common/DateFieldViewComponent';
+import { useSelector } from "react-redux";
 
 export class SolidDateField implements ISolidField {
 
@@ -206,6 +207,7 @@ export const DefaultDateFormEditWidget = ({ formik, fieldContext }: SolidFormFie
     );
 }
 export const DefaultDateFormViewWidget = ({ formik, fieldContext, }: SolidFormFieldWidgetProps) => {
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
 
@@ -215,7 +217,7 @@ export const DefaultDateFormViewWidget = ({ formik, fieldContext, }: SolidFormFi
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
 
     const rawValue = formik.values[fieldName];
-    const format = fieldLayoutInfo.attrs?.format as string | undefined;
+    const format = fieldLayoutInfo.attrs?.format as string | undefined || solidSettingsData?.dateFormat;
 
 
     return (

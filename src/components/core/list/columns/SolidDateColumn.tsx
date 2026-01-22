@@ -4,9 +4,11 @@ import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { FormEvent } from "primereact/ts-helpers";
 import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
-import SolidTableRowCell from '../SolidTableRowCell';
 import { SolidListFieldWidgetProps } from '@solid-ui/types/solid-core';
 import { getExtensionComponent } from '@solid-ui/helpers/registry';
+import SolidTableRowCell from '../SolidTableRowCell';
+import dayjs from 'dayjs';
+import { useSelector } from 'react-redux';
 
 export const dateFilterMatchModeOptions = [
     { label: 'Equals', value: FilterMatchMode.EQUALS },
@@ -66,7 +68,7 @@ const SolidDateColumn = ({ solidListViewMetaData, fieldMetadata, column }: Solid
             body={(rowData) => {
                 let viewWidget = column.attrs.viewWidget;
                 if (!viewWidget) {
-                    viewWidget = 'DefaultTextListWidget';
+                    viewWidget = 'DefaultDateListWidget';
                 }
                 let DynamicWidget = getExtensionComponent(viewWidget);
                 const widgetProps: SolidListFieldWidgetProps = {
@@ -88,3 +90,40 @@ const SolidDateColumn = ({ solidListViewMetaData, fieldMetadata, column }: Solid
 };
 
 export default SolidDateColumn;
+
+
+
+export function parseIsoDate(value: string): Date | null {
+    if (!value || typeof value !== "string") return null;
+
+    // Fast reject (avoids false positives)
+    if (!value.includes("T")) return null;
+
+    const d = new Date(value);
+    return isNaN(d.getTime()) ? null : d;
+}
+
+
+export const DefaultDateListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
+    const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter;
+    let displayValue = rowData[fieldMetadata.name];
+    const parsedDate = parseIsoDate(displayValue);
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+
+    if (parsedDate) {
+        const format = column?.attrs?.format as string | undefined || solidSettingsData?.dateFormat;
+        if (format) {
+            displayValue = dayjs(parsedDate).format(format);
+        }
+        else {
+            displayValue = parsedDate.toLocaleString();
+        }
+    }
+
+    return (
+        <SolidTableRowCell
+            value={displayValue}
+            truncateAfter={truncateAfter}
+        />
+    );
+};

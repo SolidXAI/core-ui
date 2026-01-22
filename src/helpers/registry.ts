@@ -45,6 +45,8 @@ import { SolidAiInteractionMetadataFieldFormWidget } from "@solid-ui/components/
 import { SolidAiInteractionMessageFieldFormWidget } from "@solid-ui/components/core/form/fields/widgets/SolidAiInteractionMessageFieldFormWidget";
 import { SolidS3FileViewerWidget } from "@solid-ui/components/core/form/fields/widgets/SolidS3FileViewerWidget";
 import DeleteModuleRowAction from "@solid-ui/components/core/extension/solid-core/moduleMetadata/list/DeleteModuleRowAction";
+import { DefaultDateListWidget } from "@solid-ui/components/core/list/columns/SolidDateColumn";
+import { DefaultDateTimeListWidget } from "@solid-ui/components/core/list/columns/SolidDatetimeColumn";
 
 type ExtensionComponentType = null | 'list_field_widget' | 'form_field_view_widget' | 'form_field_edit_widget' | 'list_row_action ' | 'list_header_action' | 'form_action' | 'form_widget';
 
@@ -135,7 +137,13 @@ registerExtensionComponent("SolidManyToManyRelationAvatarListWidget", SolidManyT
 // - relation.one2many
 registerExtensionComponent("DefaultRelationOneToManyListWidget", DefaultRelationOneToManyListWidget, []);
 
-// ...
+// - date
+registerExtensionComponent("DefaultDateListWidget", DefaultDateListWidget, []);
+
+// - datetime
+registerExtensionComponent("DefaultDateTimeListWidget", DefaultDateTimeListWidget, []);
+
+
 
 
 // 2. form view field edit widget 
@@ -310,7 +318,7 @@ registerExtensionComponent("ChartFormPreviewWidget", ChartFormPreviewWidget, ["c
 
 // Formview Default View widgets
 registerExtensionComponent("MaskedShortTextListViewWidget", MaskedShortTextListViewWidget, ["maskedShortTextList"]);
-registerExtensionComponent("PublishedStatusListViewWidget",PublishedStatusListViewWidget,["publishedStatus"])
+registerExtensionComponent("PublishedStatusListViewWidget", PublishedStatusListViewWidget, ["publishedStatus"])
 
 // Formview Custom view widgets
 registerExtensionComponent("SolidRelationFieldAvatarFormWidget", SolidRelationFieldAvatarFormWidget, []);

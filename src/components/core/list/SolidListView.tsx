@@ -172,7 +172,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
 
   useEffect(() => {
-    if (solidSettingsData?.mcpEnabled && solidSettingsData?.mcpServerUrl && solidSettingsData?.mcpApiKey) {
+    if (solidSettingsData?.mcpEnabled && solidSettingsData?.mcpServerUrl) {
       enableSolidXAiPanel();
     }
   }, [solidSettingsData]);
