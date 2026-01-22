@@ -143,7 +143,7 @@ export const GeneralSettings = () => {
                         } else {
                             updatedSettingsArray.push({
                                 key,
-                                value: value,
+                                value: typeof value === "string" ? value : JSON.stringify(value),
                                 type: "system",
                             });
                         }

@@ -14,7 +14,7 @@ import { SolidFormViewContextMenuHeaderButton } from "./SolidFormViewContextMenu
 import { hasAnyRole } from "@/helpers/rolesHelper";
 import { useSelector } from "react-redux";
 
-export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate }: any) => {
+export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate,formData }: any) => {
     const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
     const router = useRouter();
     const pathname = usePathname();
@@ -190,6 +190,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     button={button}
                                     params={params}
                                     formik={formik}
+                                    formData={formData}
                                     solidFormViewMetaData={solidFormViewMetaData}
                                     handleCustomButtonClick={handleCustomButtonClick}
                                 />
@@ -205,6 +206,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                         button={button}
                                         params={params}
                                         formik={formik}
+                                        formData={formData}
                                         solidFormViewMetaData={solidFormViewMetaData}
                                         handleCustomButtonClick={handleCustomButtonClick}
                                     />
@@ -247,6 +249,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                             button={button}
                                             params={params}
                                             formik={formik}
+                                            formData={formData}
                                             solidFormViewMetaData={solidFormViewMetaData}
                                             handleCustomButtonClick={handleCustomButtonClick}
                                         />
@@ -370,6 +373,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                             button={button}
                                             params={params}
                                             formik={formik}
+                                            formData={formData}
                                             solidFormViewMetaData={solidFormViewMetaData}
                                             handleCustomButtonClick={handleCustomButtonClick}
                                         />

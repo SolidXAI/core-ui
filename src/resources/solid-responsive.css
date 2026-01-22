@@ -145,10 +145,9 @@
         word-break: break-word;
     }
 
-    .solid-form-wrapper .solid-form-content {
+    /* .solid-form-wrapper .solid-form-content {
         height: calc(100vh - 120px) !important;
-        /* overflow-y: auto; */
-      }
+      } */
 
     .kanban-ungrouped-column .kanban-card-container {
         flex: 1 1 calc(33.33% - 20px);
@@ -335,7 +334,7 @@
         padding: 10px 16px 16px 20px !important;
     }
     .solid-form-wrapper .solid-form-content {
-        height: calc(100vh - 138px) !important;
+        height: calc(100vh - 139px) !important;
       }
 
 
@@ -584,7 +583,7 @@
     }
 
     .solid-form-wrapper .solid-form-content {
-        height: calc(100vh - 130px) !important;
+        height: calc(100vh - 132px) !important;
       }
 
     .form-wrapper-title {
@@ -613,6 +612,13 @@
         flex: 1 1 calc(50% - 20px);
         max-width: calc(50% - 20px);
       }
+
+      .solid-img-text-wrapper{
+        max-width: clamp(180px, 60vw, 600px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 }
 
 
@@ -686,6 +692,12 @@
         text-overflow: ellipsis;
     }
 
+    .solid-img-text-wrapper{
+        max-width: clamp(180px, 50vw, 600px);
+        white-space: nowrap;
+        overflow: hidden;
+        text-overflow: ellipsis;
+    }
 
 
 }
@@ -746,7 +758,16 @@
         overflow: hidden;
         text-overflow: ellipsis;
     }
+
+
+    .solid-img-text-wrapper{
+        max-width: clamp(170px, 40vw, 600px);
+    }
 }
+
+
+
+
 
 
 
@@ -758,5 +779,13 @@
 
     .solid-column-panel.p-panel .p-panel-content {
         padding: 1px 1rem 1rem 1rem;
+    }
+}
+
+
+@media(max-width:400px){
+    .solid-img-text-wrapper{
+        max-width: clamp(137px, 34vw, 600px);
+    
     }
 }

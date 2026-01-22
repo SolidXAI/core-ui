@@ -70,8 +70,7 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
     // Click handlers
     // -----------------------------
     const handlePrev = () => {
-        console.log("prevNav in handlePrev",prevNav);
-        
+
         if (!prevNav) return;
 
         updatePaginationInLocalStorage(prevNav.offset, prevNav.limit);
@@ -80,7 +79,6 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
     };
 
     const handleNext = () => {
-        console.log("prevNav in handleNext",nextNav);
         if (!nextNav) return;
 
         updatePaginationInLocalStorage(nextNav.offset, nextNav.limit);
@@ -92,38 +90,40 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
     // Fetch navigation data
     // -----------------------------
     useEffect(() => {
-        const fetchNavigation = async () => {
-            const listPath = window.location.pathname.replace(
-                /\/form\/[^/]+/,
-                "/list",
-            );
+        if (params.id !== "new") {
 
-            const queryObject = queryStringToQueryObjectByUrl(listPath);
+            const fetchNavigation = async () => {
+                const listPath = window.location.pathname.replace(
+                    /\/form\/[^/]+/,
+                    "/list",
+                );
 
-            const queryData = {
-                offset: queryObject.offset || 0,
-                limit: queryObject.limit || 25,
-                filters: queryObject.filters,
-                fields: ["id"],
-                modelName: params.modelName,
-                recordId: params.id,
-                sort: queryObject.sort
+                const queryObject = queryStringToQueryObjectByUrl(listPath);
+
+                const queryData = {
+                    offset: queryObject.offset || 0,
+                    limit: queryObject.limit || 25,
+                    filters: queryObject.filters,
+                    fields: ["id"],
+                    modelName: params.modelName,
+                    recordId: params.id,
+                    sort: queryObject.sort
+                };
+
+                const queryString = qs.stringify(queryData, {
+                    encodeValuesOnly: true,
+                });
+
+                const response: any = await triggerGetNavigation(queryString).unwrap();
+                console.log("response nav", response);
+                if (response.statusCode == 200) {
+                    setPrevNav(response?.data?.prev ?? null);
+                    setNextNav(response?.data?.next ?? null);
+                    setMeta(response?.data?.meta ?? null);
+                }
             };
-
-            const queryString = qs.stringify(queryData, {
-                encodeValuesOnly: true,
-            });
-
-            const response: any = await triggerGetNavigation(queryString).unwrap();
-            console.log("response nav",response);
-            if(response.statusCode == 200){
-                setPrevNav(response?.data?.prev ?? null);
-                setNextNav(response?.data?.next ?? null);
-                setMeta(response?.data?.meta ?? null);
-            }
-        };
-
-        fetchNavigation();
+            fetchNavigation();
+        }
     }, [params.id]);
 
     // -----------------------------
@@ -131,15 +131,15 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
     // -----------------------------
     return (
         <div
-            className="flex justify-content-end align-items-baseline gap-2 p-0"
+            className="flex justify-content-end align-items-center gap-2 p-1"
             style={{ borderTop: "1px solid var(--surface-border)" }}
-        >{meta && 
-            <p>{`${meta.currentIndexGlobal} of ${meta.totalRecords}`}</p>
-        }
+        >{meta &&
+            <span>{`${meta.currentIndexGlobal} of ${meta.totalRecords}`}</span>
+            }
             {prevNav && (
                 <Button
                     icon="pi pi-angle-left"
-                    className="p-button-sm p-button-text p-1"
+                    className="p-button-sm p-button-text"
                     onClick={() => handlePrev()}
                     disabled={isLoading}
                     tooltip="Previous"
@@ -150,7 +150,7 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
             {nextNav && (
                 <Button
                     icon="pi pi-angle-right"
-                    className="p-button-sm p-button-text p-1"
+                    className="p-button-sm p-button-text"
                     onClick={() => handleNext()}
                     disabled={isLoading}
                     tooltip="Next"

@@ -5,7 +5,7 @@ import { Button } from 'primereact/button'
 import { useHandleListCustomButtonClick } from '@/components/common/useHandleListCustomButtonClick'
 import { useHasAnyRole } from '@/helpers/rolesHelper'
 
-export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, actionsAllowed, params, solidListViewMetaData }: any) => {
+export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, createActionQueryParams, actionsAllowed, params, solidListViewMetaData }: any) => {
     const noDataText = solidListViewMetaData?.data?.solidView?.layout?.attrs?.listViewNoDataHelperText
         ?? (process.env.NEXT_PUBLIC_DEFAULT_LIST_VIEW_NODATA_HELPER_TEXT && solidListViewMetaData?.data?.solidView?.displayName
             ? `${process.env.NEXT_PUBLIC_DEFAULT_LIST_VIEW_NODATA_HELPER_TEXT} ${solidListViewMetaData.data.solidView.displayName}`
@@ -77,7 +77,7 @@ export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, actionsAllowed,
                     solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultAddButton !== false &&
 
                     <div className='mt-2'>
-                        <SolidCreateButton url={createButtonUrl} title={solidListViewMetaData?.data?.solidView?.displayName} />
+                        <SolidCreateButton createButtonUrl={createButtonUrl} createActionQueryParams={createActionQueryParams} title={solidListViewMetaData?.data?.solidView?.displayName} />
                     </div>
                 }
                 <CustomActionButtons />

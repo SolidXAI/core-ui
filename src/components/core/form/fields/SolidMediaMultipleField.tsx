@@ -352,12 +352,12 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
             </div>
             {fileDetails.length > 0 &&
                 <div className="solid-file-upload-wrapper">
-                    <div className="flex align-items-center gap-2">
+                    <div className="flex align-items-center md:gap-2">
                         <FileReaderExt fileDetails={fileDetails[0]} />
                         <div className="w-full flex flex-column gap-1">
                             <div className="flex align-items-center justify-content-between">
-                                <p className="font-normal w-9 text-primary m-0" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails[0])}>{fileDetails[0].name}</p>
-                                <div className="flex align-items-center gap-2">
+                                <p className="font-normal w-9 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails[0])}>{fileDetails[0].name}</p>
+                                <div className="flex align-items-center md:gap-2">
                                     <div>
                                         <Button
                                             type="button"
@@ -419,12 +419,12 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                         const fileId = `${file.name}-${file.size}`;
                         return (
                             <div key={fileId} className="solid-file-upload-wrapper">
-                                <div className="flex align-items-center gap-2">
+                                <div className="flex align-items-center md:gap-2">
                                     <FileReaderExt fileDetails={file} />
                                     <div className="w-full flex flex-column gap-1">
                                         <div className="flex align-items-center justify-content-between">
-                                            <p className="font-normal w-11 text-primary m-0" style={{ cursor: 'pointer' }} onClick={() => handleFileView(file)}>{file.name}</p>
-                                            <div className="flex align-items-center gap-2">
+                                            <p className="font-normal w-11 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(file)}>{file.name}</p>
+                                            <div className="flex align-items-center md:gap-2">
                                                 <div>
                                                     <Button
                                                         type="button"
@@ -575,12 +575,12 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
             }
             {fileDetails.length > 0 &&
                 <div className="solid-file-view-wrapper">
-                    <div className="flex align-items-center gap-2">
+                    <div className="flex align-items-center md:gap-2">
                         <FileReaderExt fileDetails={fileDetails[0]} />
                         <div className="w-full flex flex-column gap-1">
                             <div className="flex align-items-center justify-content-between">
-                                <p className="font-normal w-11 text-primary m-0" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails[0])}>{fileDetails[0].name}</p>
-                                <div className="flex align-items-center gap-2">
+                                <p className="font-normal w-11 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails[0])}>{fileDetails[0].name}</p>
+                                <div className="flex align-items-center md:gap-2">
                                     <div>
                                         <Button
                                             type="button"
@@ -627,12 +627,12 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                         const fileId = `${file.name}-${file.size}`;
                         return (
                             <div key={fileId} className="solid-file-view-wrapper">
-                                <div className="flex align-items-center gap-2">
+                                <div className="flex align-items-center md:gap-2">
                                     <FileReaderExt fileDetails={file} />
                                     <div className="w-full flex flex-column gap-1">
                                         <div className="flex align-items-center justify-content-between">
-                                            <p className="font-normal w-11" style={{ cursor: 'pointer' }} onClick={() => handleFileView(file)}>{file.name}</p>
-                                            <div className="flex align-items-center gap-2">
+                                            <p className="font-normal w-11 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(file)}>{file.name}</p>
+                                            <div className="flex align-items-center md:gap-2">
                                                 <div>
                                                     <Button
                                                         type="button"

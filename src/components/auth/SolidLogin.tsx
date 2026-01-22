@@ -179,17 +179,17 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
             if (validationType === "transactional") {
                 if (selectedAuthMethod === "mobile") {
                     return {
-                        label: "Mobile Number",
-                        placeholder: "Enter your mobile number",
+                        label: "Mobile Number / Username",
+                        placeholder: "Enter your mobile number or username",
                         type: "mobile",
-                        validationSchema: Yup.string()
-                            .matches(/^[0-9]{10}$/, ERROR_MESSAGES.FIELD_INVALID('mobile number'))
-                            .required(ERROR_MESSAGES.FIELD_REUQIRED('Mobile number'))
+                        // validationSchema: Yup.string()
+                        //     .matches(/^[0-9]{10}$/, ERROR_MESSAGES.FIELD_INVALID('mobile number'))
+                        //     .required(ERROR_MESSAGES.FIELD_REUQIRED('Mobile number'))
                     };
                 } else {
                     return {
-                        label: "Email Address",
-                        placeholder: "Enter your email",
+                        label: "Email Address / Username",
+                        placeholder: "Enter your email or username",
                         type: "email",
                         // validationSchema: Yup.string()
                         //     .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
@@ -200,18 +200,18 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
             switch (validationType) {
                 case "mobile":
                     return {
-                        label: signInValidatorLabel || "Mobile Number",
-                        placeholder: signInValidatorPlaceholder || "Enter your mobile number",
+                        label: signInValidatorLabel || "Mobile Number / Username",
+                        placeholder: signInValidatorPlaceholder || "Enter your mobile number / username",
                         type: "mobile",
-                        validationSchema: Yup.string()
-                            .matches(/^[0-9]{10}$/, ERROR_MESSAGES.FIELD_INVALID('mobile number'))
-                            .required(ERROR_MESSAGES.FIELD_REUQIRED('Mobile number'))
+                        // validationSchema: Yup.string()
+                        //     .matches(/^[0-9]{10}$/, ERROR_MESSAGES.FIELD_INVALID('mobile number'))
+                        //     .required(ERROR_MESSAGES.FIELD_REUQIRED('Mobile number'))
                     };
                 case "email":
                 default:
                     return {
-                        label: signInValidatorLabel || "Username or Email",
-                        placeholder: signInValidatorPlaceholder || "Email ID",
+                        label: signInValidatorLabel || "Email / Username",
+                        placeholder: signInValidatorPlaceholder || "Email ID / username",
                         type: "email",
                         // validationSchema: Yup.string()
                         //     .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
@@ -226,14 +226,17 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                 initialValues={{
                     identifier: "",
                 }}
+                // validationSchema={
+                //     fieldConfig.validationSchema 
+                //     ? Yup.object({
+                //           identifier: fieldConfig.validationSchema
+                //       })
+                //     : Yup.object({
+                //           identifier: Yup.string().required("required"),
+                //       })
+                //   }
                 validationSchema={
-                    fieldConfig.validationSchema
-                        ? Yup.object({
-                            identifier: fieldConfig.validationSchema
-                        })
-                        : Yup.object({
-                            identifier: Yup.string().required("required"),
-                        })
+                    Yup.object({ identifier: Yup.string().required("required") })
                 }
                 enableReinitialize={false}
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
@@ -321,7 +324,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                             }}
                                             className="mr-2"
                                         />
-                                        <label htmlFor="auth-mobile" className="solid-auth-input-label cursor-pointer">Mobile</label>
+                                        <label htmlFor="auth-mobile" className="solid-auth-input-label cursor-pointer">Mobile / Username</label>
                                     </div>
                                 </div>
                             </div>

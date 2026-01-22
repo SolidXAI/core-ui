@@ -1,6 +1,5 @@
 "use client";
 
-import { SolidCancelButton } from "@/components/common/CancelButton";
 import { permissionExpression } from "@/helpers/permissions";
 import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
@@ -14,7 +13,7 @@ import { Dialog } from "primereact/dialog";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import qs from "qs";
-import React, { ChangeEvent, useCallback, useEffect, useMemo, useRef, useState } from "react";
+import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import * as Yup from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./fields/ISolidField";
 import { SolidBooleanField } from "./fields/SolidBooleanField";
@@ -32,17 +31,12 @@ import { SolidSelectionDynamicField } from "./fields/SolidSelectionDynamicField"
 import { SolidSelectionStaticField } from "./fields/SolidSelectionStaticField";
 import { SolidShortTextField } from "./fields/SolidShortTextField";
 import { SolidTimeField } from "./fields/SolidTimeField";
-import { BackButton } from "@/components/common/BackButton";
-import { OverlayPanel } from "primereact/overlaypanel";
-import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
 import { SolidUiEvent } from "@/types";
 import { getExtensionComponent, getExtensionFunction } from "@/helpers/registry";
 import { SolidFormWidgetProps, SolidLoadForm, SolidUiEventResponse } from "@/types/solid-core";
 import { SolidPasswordField } from "./fields/SolidPasswordField";
 import { SolidEmailField } from "./fields/SolidEmailField";
 import { Panel } from "primereact/panel";
-import { SolidFormStepper } from "@/components/common/SolidFormStepper";
-import { SolidFormHeader } from "@/components/common/SolidFormHeader";
 import { SolidFormUserViewLayout } from "./SolidFormUserViewLayout";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
@@ -50,7 +44,6 @@ import Download from "yet-another-react-lightbox/plugins/download";
 import Video from "yet-another-react-lightbox/plugins/video";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
-import { SolidChatter } from "../chatter/SolidChatter";
 import { SolidFormActionHeader } from "./SolidFormActionHeader";
 import { SolidFormViewShimmerLoading } from "./SolidFormViewShimmerLoading";
 import { useSelector } from "react-redux";
@@ -253,6 +246,7 @@ const SolidRow = ({ children, attrs }: any) => {
         // <div>{children}</div>
     );
 };
+
 const SolidColumn = ({ children, attrs }: any) => {
     const className = attrs.className;
 
@@ -462,6 +456,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [mcpUrl, setMcpUrl] = useState<string | null>(null);
     const [getMcpUrl] = useLazyGetMcpUrlQuery();
 
+    // when rendering the form view we will optionally get action params...
+    // these we can bubble up in the event that is being raised onFormLayoutLoad, onFormDataLoad & onFormLoad
+    const actionName = searchParams.get('actionName');
+    const actionType = searchParams.get('actionType');
+    const actionContext = searchParams.get('actionContext');
+
     useEffect(() => {
 
         const fetchPermissions = async () => {
@@ -482,8 +482,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
         fetchPermissions();
     }, []);
 
-
-
     const enableSolidXAiPanel = async () => {
         try {
             const queryData = {
@@ -500,8 +498,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         }
     }
-
-
 
     const op = useRef(null);
     useEffect(() => {
@@ -656,7 +652,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         if (
             isEntityCreateSuccess == true ||
             isEntityUpdateSuceess == true ||
-                isEntityDeleteSuceess == true ||
+            isEntityDeleteSuceess == true ||
             isEntityPatchSuceess == true ||
             isEntityPublishedSuccess == true ||
             isEntityUnpublishedSuccess == true
@@ -941,138 +937,297 @@ const SolidFormView = (params: SolidFormViewProps) => {
     }, [formViewDataQs])
 
     useEffect(() => {
-        const handleDynamicLayout = async () => {
-            if (solidFormViewMetaData) {
-                let formLayout = solidFormViewMetaData;
-                let customLayout = params?.customLayout;
-                const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormLayoutLoad;
-                let DynamicFunctionComponent = null;
-                const event: SolidLoadForm = {
-                    parentData: params?.parentData,
-                    fieldsMetadata: solidFormViewMetaData,
-                    formData: solidFormViewData?.data,
-                    type: 'onFormLayoutLoad',
-                    viewMetadata: solidFormViewMetaData?.data?.solidView,
-                    formViewLayout: formViewLayout
-                }
-                if (dynamicHeader) {
-                    DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
-                    if (DynamicFunctionComponent) {
-                        try {
-                            const updatedFormLayout: SolidUiEventResponse = await DynamicFunctionComponent(event);
-                            if (updatedFormLayout && updatedFormLayout?.layoutChanged && updatedFormLayout?.newLayout) {
-                                const newFormLayout = {
-                                    ...formLayout,
-                                    data: {
-                                        ...formLayout.data,
-                                        solidView: {
-                                            ...formLayout.data.solidView,
-                                            layout: updatedFormLayout.newLayout
-                                        }
-                                    }
-                                };
-                                formLayout = newFormLayout;
-                                customLayout = updatedFormLayout.newLayout;
-                            }
-                        } catch (error) {
-                            console.error(ERROR_MESSAGES.DYNAMIC_FUNCTION_ERROR, error);
-                        }
-                    }
-                }
-                setFormViewMetaData(formLayout);
-                setPublished(solidFormViewData?.data?.publishedAt)
-                if (params.customLayout) {
-                    setFormViewLayout(customLayout);
-                } else {
-                    setFormViewLayout(formLayout.data.solidView.layout);
-                }
+        if (solidFormViewMetaData) {
+            if (params.customLayout) {
+                setFormViewLayout(params.customLayout);
+            } else {
+                setFormViewLayout(solidFormViewMetaData?.data?.solidView?.layout);
             }
-        };
-        const handleDynamicFunction = async () => {
-            const dynamicHeader = solidFormViewMetaData?.data?.solidView?.layout?.onFormDataLoad;
-            let DynamicFunctionComponent = null;
-            let formViewData = solidFormViewData?.data;
+            setPublished(solidFormViewData?.data?.publishedAt);
+            setFormViewMetaData(solidFormViewMetaData);
+        }
+    }, [solidFormViewMetaData]);
 
-            const event: SolidLoadForm = {
-                fieldsMetadata: solidFormViewMetaData,
-                formData: solidFormViewData?.data,
-                type: "onFormDataLoad",
-                viewMetadata: solidFormViewMetaData?.data?.solidView,
-                formViewLayout: formViewLayout
-            };
+    // useEffect(() => {
+    //     const handleOnFormLayoutLoadEvent = async () => {
+    //         if (solidFormViewMetaData) {
+    //             // let formLayout = solidFormViewMetaData;
+    //             // let customLayout = params?.customLayout;
+    //             const onFormLayoutLoadHandlerExtensionFunction = solidFormViewMetaData?.data?.solidView?.layout?.onFormLayoutLoad;
+    //             // let dynamicExtensionFunction = null;
+    //             let formLayout = solidFormViewMetaData?.data?.solidView?.layout;
+    //             if (params.customLayout) {
+    //                 formLayout = params.customLayout;
+    //             }
+    //             const event: SolidLoadForm = {
+    //                 parentData: params?.parentData,
+    //                 fieldsMetadata: solidFormViewMetaData,
+    //                 formData: solidFormViewData?.data,
+    //                 type: 'onFormLayoutLoad',
+    //                 viewMetadata: solidFormViewMetaData?.data?.solidView,
+    //                 formViewLayout: formLayout,
+    //                 queryParams: {
+    //                     actionName,
+    //                     actionType,
+    //                     actionContext
+    //                 }
+    //             }
+    //             if (onFormLayoutLoadHandlerExtensionFunction) {
+    //                 const dynamicExtensionFunction = getExtensionFunction(onFormLayoutLoadHandlerExtensionFunction);
+    //                 if (dynamicExtensionFunction) {
+    //                     try {
+    //                         const updatedFormLayout: SolidUiEventResponse = await dynamicExtensionFunction(event);
+    //                         if (updatedFormLayout && updatedFormLayout?.layoutChanged && updatedFormLayout?.newLayout) {
+    //                             setFormViewLayout(updatedFormLayout.newLayout);
+    //                             // const newFormLayout = {
+    //                             //     ...formLayout,
+    //                             //     data: {
+    //                             //         ...formLayout.data,
+    //                             //         solidView: {
+    //                             //             ...formLayout.data.solidView,
+    //                             //             layout: updatedFormLayout.newLayout
+    //                             //         }
+    //                             //     }
+    //                             // };
+    //                             // formLayout = newFormLayout;
+    //                             // customLayout = updatedFormLayout.newLayout;
+    //                         }
+    //                     } catch (error) {
+    //                         console.error(ERROR_MESSAGES.DYNAMIC_FUNCTION_ERROR, error);
+    //                     }
+    //                 }
+    //             }
+    //             // setFormViewMetaData(formLayout);
+    //             // if (params.customLayout) {
+    //             //     setFormViewLayout(customLayout);
+    //             // } else {
+    //             //     setFormViewLayout(formLayout.data.solidView.layout);
+    //             // }
+    //         }
+    //     };
+    //     const handleOnFormDataLoadEvent = async () => {
+    //         const onFormDataLoadHandlerExtensionFunction = solidFormViewMetaData?.data?.solidView?.layout?.onFormDataLoad;
+    //         // let dynamicExtensionFunction = null;
+    //         let formViewData = solidFormViewData?.data;
 
-            if (dynamicHeader) {
-                DynamicFunctionComponent = getExtensionFunction(dynamicHeader);
-                if (DynamicFunctionComponent) {
-                    const updatedFormData: SolidUiEventResponse = await DynamicFunctionComponent(event);
+    //         let formLayout = solidFormViewMetaData?.data?.solidView?.layout;
+    //         if (params.customLayout) {
+    //             formLayout = params.customLayout;
+    //         }
 
-                    if (updatedFormData && updatedFormData?.dataChanged && updatedFormData?.newFormData) {
-                        formViewData = updatedFormData.newFormData;
-                    }
-                }
-                if (formViewData) {
-                    setInitialEntityData(formViewData);
-                }
-            }
-        };
+    //         const event: SolidLoadForm = {
+    //             fieldsMetadata: solidFormViewMetaData,
+    //             formData: solidFormViewData?.data,
+    //             type: "onFormDataLoad",
+    //             viewMetadata: solidFormViewMetaData?.data?.solidView,
+    //             formViewLayout: formLayout,
+    //             queryParams: {
+    //                 actionName,
+    //                 actionType,
+    //                 actionContext
+    //             }
+    //         };
+    //         if (onFormDataLoadHandlerExtensionFunction) {
+    //             const dynamicExtensionFunction = getExtensionFunction(onFormDataLoadHandlerExtensionFunction);
+    //             if (dynamicExtensionFunction) {
+    //                 const updatedFormData: SolidUiEventResponse = await dynamicExtensionFunction(event);
 
-        const handleOnFormLoad = async () => {
-            const onFormLoadHandler = solidFormViewMetaData?.data?.solidView?.layout?.onFormLoad;
-            let DynamicFunctionComponent = null;
-            let formLayout = solidFormViewMetaData;
-            let customLayout = params?.customLayout;
-            let formViewData = solidFormViewData?.data;
+    //                 if (updatedFormData && updatedFormData?.dataChanged && updatedFormData?.newFormData) {
+    //                     formViewData = updatedFormData.newFormData;
+    //                 }
+    //             }
+    //             if (formViewData) {
+    //                 setInitialEntityData(formViewData);
+    //             }
+    //         }
+    //     };
+    //     const handleOnFormLoadEvent = async () => {
+    //         const onFormLoadHandlerExtensionFunction = solidFormViewMetaData?.data?.solidView?.layout?.onFormLoad;
+    //         // let dynamicExtensionFunction = null;
+    //         let localFormViewMetadata = solidFormViewMetaData;
+    //         // let customLayout = params?.customLayout;
+    //         let formViewData = solidFormViewData?.data;
 
-            const event: SolidLoadForm = {
+    //         let formLayout = solidFormViewMetaData?.data?.solidView?.layout;
+    //         if (params.customLayout) {
+    //             formLayout = params.customLayout;
+    //         }
+
+    //         const event: SolidLoadForm = {
+    //             parentData: params?.parentData,
+    //             fieldsMetadata: solidFormViewMetaData,
+    //             formData: solidFormViewData?.data,
+    //             type: 'onFormLoad',
+    //             viewMetadata: solidFormViewMetaData?.data?.solidView,
+    //             formViewLayout: formViewLayout,
+    //             queryParams: {
+    //                 actionName,
+    //                 actionType,
+    //                 actionContext
+    //             }
+    //         };
+
+    //         if (onFormLoadHandlerExtensionFunction) {
+    //             const dynamicExtensionFunction = getExtensionFunction(onFormLoadHandlerExtensionFunction);
+    //             if (dynamicExtensionFunction) {
+    //                 try {
+    //                     const result: SolidUiEventResponse = await dynamicExtensionFunction(event);
+    //                     if (result && result?.layoutChanged && result?.newLayout) {
+    //                         // const newLocalFormViewMetadata = {
+    //                         //     ...localFormViewMetadata,
+    //                         //     data: {
+    //                         //         ...localFormViewMetadata.data,
+    //                         //         solidView: {
+    //                         //             ...localFormViewMetadata.data.solidView,
+    //                         //             layout: result.newLayout
+    //                         //         }
+    //                         //     }
+    //                         // };
+    //                         // localFormViewMetadata = newLocalFormViewMetadata;
+    //                         // customLayout = result.newLayout;
+    //                         // setFormViewMetaData(localFormViewMetadata);
+
+    //                         setFormViewLayout(result.newLayout);
+    //                         // if (params.customLayout) {
+    //                         //     setFormViewLayout(customLayout);
+    //                         // } else {
+    //                         //     setFormViewLayout(localFormViewMetadata.data.solidView.layout);
+    //                         // }
+    //                     }
+    //                     if (result && result?.dataChanged && result?.newFormData) {
+    //                         formViewData = result.newFormData;
+    //                         setInitialEntityData(formViewData);
+    //                     }
+    //                 } catch (error) {
+    //                     console.error(ERROR_MESSAGES.ON_FORM_LOAD, error);
+    //                 }
+    //             }
+    //         }
+    //     };
+
+    //     handleOnFormLayoutLoadEvent();
+    //     handleOnFormDataLoadEvent();
+    //     handleOnFormLoadEvent();
+    // }, [solidFormViewMetaData, solidFormViewData]);
+
+
+    useEffect(() => {
+        const runFormEvents = async () => {
+            if (!solidFormViewMetaData) return;
+
+            /** ----------------------------
+             * 1. Initialize working state
+             * ----------------------------- */
+            let workingLayout = params.customLayout ?? solidFormViewMetaData?.data?.solidView?.layout;
+            let workingFormData = solidFormViewData?.data;
+            const baseEvent = {
                 parentData: params?.parentData,
                 fieldsMetadata: solidFormViewMetaData,
-                formData: solidFormViewData?.data,
-                type: 'onFormLoad',
                 viewMetadata: solidFormViewMetaData?.data?.solidView,
-                formViewLayout: formViewLayout
+                queryParams: {
+                    actionName,
+                    actionType,
+                    actionContext,
+                },
             };
 
-            if (onFormLoadHandler) {
-                DynamicFunctionComponent = getExtensionFunction(onFormLoadHandler);
-                if (DynamicFunctionComponent) {
-                    try {
-                        const result: SolidUiEventResponse = await DynamicFunctionComponent(event);
-                        if (result && result?.layoutChanged && result?.newLayout) {
-                            const newFormLayout = {
-                                ...formLayout,
-                                data: {
-                                    ...formLayout.data,
-                                    solidView: {
-                                        ...formLayout.data.solidView,
-                                        layout: result.newLayout
-                                    }
-                                }
-                            };
-                            formLayout = newFormLayout;
-                            customLayout = result.newLayout;
-                            setFormViewMetaData(formLayout);
+            /** ----------------------------
+             * 2. onFormLayoutLoad
+             * ----------------------------- */
+            const onFormLayoutLoadFn =
+                solidFormViewMetaData?.data?.solidView?.layout?.onFormLayoutLoad;
 
-                            if (params.customLayout) {
-                                setFormViewLayout(customLayout);
-                            } else {
-                                setFormViewLayout(formLayout.data.solidView.layout);
-                            }
+            if (onFormLayoutLoadFn) {
+                const fn = getExtensionFunction(onFormLayoutLoadFn);
+                if (fn) {
+                    try {
+                        const result: SolidUiEventResponse = await fn({
+                            ...baseEvent,
+                            type: "onFormLayoutLoad",
+                            formData: workingFormData,
+                            formViewLayout: workingLayout,
+                        });
+
+                        if (result?.layoutChanged && result?.newLayout) {
+                            workingLayout = result.newLayout;
                         }
-                        if (result && result?.dataChanged && result?.newFormData) {
-                            formViewData = result.newFormData;
-                            setInitialEntityData(formViewData);
-                        }
-                    } catch (error) {
-                        console.error(ERROR_MESSAGES.ON_FORM_LOAD, error);
+                    } catch (e) {
+                        console.error(ERROR_MESSAGES.DYNAMIC_FUNCTION_ERROR, e);
                     }
                 }
             }
+
+            /** ----------------------------
+             * 3. onFormDataLoad
+             * ----------------------------- */
+            const onFormDataLoadFn =
+                solidFormViewMetaData?.data?.solidView?.layout?.onFormDataLoad;
+
+            if (onFormDataLoadFn) {
+                const fn = getExtensionFunction(onFormDataLoadFn);
+                if (fn) {
+                    try {
+                        const result: SolidUiEventResponse = await fn({
+                            ...baseEvent,
+                            type: "onFormDataLoad",
+                            formData: workingFormData,
+                            formViewLayout: workingLayout, // ✅ UPDATED layout
+                        });
+
+                        if (result?.dataChanged && result?.newFormData) {
+                            workingFormData = result.newFormData;
+                        }
+                    } catch (e) {
+                        console.error(ERROR_MESSAGES.DYNAMIC_FUNCTION_ERROR, e);
+                    }
+                }
+            }
+
+            /** ----------------------------
+             * 4. onFormLoad
+             * ----------------------------- */
+            const onFormLoadFn =
+                solidFormViewMetaData?.data?.solidView?.layout?.onFormLoad;
+
+            if (onFormLoadFn) {
+                const fn = getExtensionFunction(onFormLoadFn);
+                if (fn) {
+                    try {
+                        const result: SolidUiEventResponse = await fn({
+                            ...baseEvent,
+                            type: "onFormLoad",
+                            formData: workingFormData,
+                            formViewLayout: workingLayout, // ✅ FINAL layout
+                        });
+
+                        if (result?.layoutChanged && result?.newLayout) {
+                            workingLayout = result.newLayout;
+                        }
+
+                        if (result?.dataChanged && result?.newFormData) {
+                            workingFormData = result.newFormData;
+                        }
+                    } catch (e) {
+                        console.error(ERROR_MESSAGES.ON_FORM_LOAD, e);
+                    }
+                }
+            }
+
+            /** ----------------------------
+             * 5. Commit once to React state
+             * ----------------------------- */
+            if (workingLayout) {
+                setFormViewLayout(workingLayout);
+            }
+
+            if (workingFormData) {
+                setInitialEntityData(workingFormData);
+            }
         };
 
-        handleDynamicLayout();
-        handleDynamicFunction();
-        handleOnFormLoad();
+        runFormEvents();
     }, [solidFormViewMetaData, solidFormViewData]);
+
 
     useEffect(() => {
         if (solidFormViewData) {
@@ -1171,7 +1326,12 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         // TODO: HP & OR: This will be fixed once we figure out how to get types exported from solid-core-ui
                         type: eventType,
                         viewMetadata: solidView,
-                        formViewLayout: formViewLayout
+                        formViewLayout: formViewLayout,
+                        queryParams: {
+                            actionName,
+                            actionContext,
+                            actionType
+                        }
                     }
 
                     // Invoke the dynamic change handler: 
@@ -1200,19 +1360,19 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         // TODO: this will trigger a useEffect dependent on formViewMetadata that invokes setFormViewLayout, 
                         // TODO: which means that this will not work if custom layout has been injected as a prop.
                         setFormViewLayout(updatedFormInfo.newLayout);
-                        setFormViewMetaData((prevMetaData: any) => {
-                            const updatedFormViewMetadata = {
-                                ...prevMetaData,
-                                data: {
-                                    ...prevMetaData.data,
-                                    solidView: {
-                                        ...prevMetaData.data.solidView,
-                                        layout: updatedFormInfo.newLayout,
-                                    },
-                                },
-                            };
-                            return updatedFormViewMetadata;
-                        });
+                        // setFormViewMetaData((prevMetaData: any) => {
+                        //     const updatedFormViewMetadata = {
+                        //         ...prevMetaData,
+                        //         data: {
+                        //             ...prevMetaData.data,
+                        //             solidView: {
+                        //                 ...prevMetaData.data.solidView,
+                        //                 layout: updatedFormInfo.newLayout,
+                        //             },
+                        //         },
+                        //     };
+                        //     return updatedFormViewMetadata;
+                        // });
                     }
                 }
                 else {
@@ -1223,7 +1383,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         }
 
         // Now render the form dynamically...
-        const renderFormElementDynamically: any = (element: any, solidFormViewMetaData: any) => {
+        const renderFormElementDynamically: any = (element: any, recursiveFVMD: any) => {
             let { type, attrs, body, children } = element;
 
             // const key = attrs?.name ?? generateRandomKey();
@@ -1246,11 +1406,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 case "form":
                     if (!children)
                         children = [];
-                    return <div key={key}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</div>;
+                    return <div key={key}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</div>;
                 case "div":
                     if (!children)
                         children = [];
-                    return <div key={key} {...attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</div>
+                    return <div key={key} {...attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</div>
                 case "span":
                     return <span key={key} {...attrs}>{body}</span>
                 case "p":
@@ -1262,28 +1422,28 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 case "ul":
                     if (!children)
                         children = [];
-                    return <ul key={key} {...attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</ul>
+                    return <ul key={key} {...attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</ul>
                 case "li":
                     return <li key={key} {...attrs}>{body}</li>
                 case "sheet":
-                    return <SolidSheet key={key}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</SolidSheet>;
+                    return <SolidSheet key={key}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidSheet>;
                 case "group":
                     if (visible === true) {
-                        return <SolidGroup key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</SolidGroup>;
+                        return <SolidGroup key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidGroup>;
                     }
                 case "row":
                     if (visible === true) {
-                        return <SolidRow key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</SolidRow>;
+                        return <SolidRow key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidRow>;
                     }
                 case "column":
                     if (visible === true) {
-                        return <SolidColumn key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</SolidColumn>;
+                        return <SolidColumn key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidColumn>;
                     }
                 case "field": {
                     if (visible === true) {
 
                         // const fieldMetadata = solidFieldsMetadata[attrs.name];
-                        const fieldMetadata = solidFormViewMetaData.data.solidFieldsMetadata[attrs.name];
+                        const fieldMetadata = recursiveFVMD.data.solidFieldsMetadata[attrs.name];
                         // Read only permission if there is no update permission on model and router doesnt contains new
                         const readOnlyPermission = !actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) && params.id !== "new";
                         return <SolidField
@@ -1292,7 +1452,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             formik={formik}
                             fieldMetadata={fieldMetadata}
                             initialEntityData={solidFormViewData ? solidFormViewData.data : {}}
-                            solidFormViewMetaData={solidFormViewMetaData}
+                            solidFormViewMetaData={recursiveFVMD}
                             modelName={params.modelName}
                             readOnly={readOnlyPermission}
                             viewMode={viewMode}
@@ -1307,18 +1467,18 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
                 case "notebook":
                     if (visible === true) {
-                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</SolidNotebook>;
+                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidNotebook>;
                     }
                 case "page":
                     if (visible === true) {
                         const fields = children.flatMap((child: any) => getLayoutFields(child));
-                        const pageChildren = children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData));
+                        const pageChildren = children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD));
                         return SolidPage({ children: pageChildren, attrs: attrs, key: key, formik: formik, fields });
                     }
                 case "custom":
                     if (visible === true) {
                         const widgetName = attrs?.widget;
-                        const fieldMetadata = solidFormViewMetaData.data.solidFieldsMetadata[attrs.name];
+                        const fieldMetadata = recursiveFVMD.data.solidFieldsMetadata[attrs.name];
 
                         if (widgetName) {
                             // widgetName, formik, field, fieldMetadata, solidFormViewMetaData
@@ -1328,7 +1488,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 field={element}
                                 formik={formik}
                                 fieldMetadata={fieldMetadata}
-                                solidFormViewMetaData={solidFormViewMetaData}
+                                solidFormViewMetaData={recursiveFVMD}
                                 solidFormViewData={solidFormViewData}
                             />
                         }
@@ -1339,24 +1499,20 @@ const SolidFormView = (params: SolidFormViewProps) => {
             }
         };
 
-        const renderFormDynamically = (solidFormViewMetaData: any) => {
-            if (!solidFormViewMetaData) {
+        const renderFormDynamically = (recursiveFVMD: any, formViewLayout: any) => {
+            if (!recursiveFVMD) {
                 return;
             }
-            if (!solidFormViewMetaData.data) {
+            if (!recursiveFVMD.data) {
                 return;
             }
-            const solidView = solidFormViewMetaData.data.solidView;
-            const solidFieldsMetadata = solidFormViewMetaData.data.solidFieldsMetadata;
+            const solidView = recursiveFVMD.data.solidView;
+            const solidFieldsMetadata = recursiveFVMD.data.solidFieldsMetadata;
             if (!solidView || !solidFieldsMetadata) {
                 return;
             }
-            if (!solidView || !solidFieldsMetadata) {
-                return;
-            }
-
             const updatedLayout = [formViewLayout];
-            const dynamicForm = updatedLayout.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData));
+            const dynamicForm = updatedLayout.map((element: any) => renderFormElementDynamically(element, recursiveFVMD));
 
             return dynamicForm;
         };
@@ -1377,9 +1533,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const onDeleteClose = () => {
             setDeleteDialogVisible(false);
         }
-        // TODO: This was simply to demonstrate how we can use dynamic components, we will remove this and use it in a more sensible way in the layout. 
-        // TODO: to demonstrated this you can simply add the below to the layout of the book form view.
-        // TODO: "header": "BookFormViewDynamicComponent",
+
         const dynamicHeader = solidView.layout?.header;
         let DynamicHeaderComponent = null;
         if (dynamicHeader) {
@@ -1519,6 +1673,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     <form style={{ width: '100%' }} onSubmit={formik.handleSubmit}>
                         <SolidFormActionHeader
                             formik={formik}
+                            formData={solidFormViewData?.data}
                             params={params}
                             actionsAllowed={actionsAllowed}
                             formViewLayout={formViewLayout}
@@ -1545,7 +1700,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             ) : params.id !== 'new' && DynamicFormComponentEdit ? (
                                 <DynamicFormComponentEdit params={params} />
                             ) : (
-                                renderFormDynamically(formViewMetaData)
+                                renderFormDynamically(formViewMetaData, formViewLayout)
                             )}
                         </div>
 
