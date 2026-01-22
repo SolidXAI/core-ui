@@ -1,9 +1,9 @@
 "use client";
 
-import { permissionExpression } from "@/helpers/permissions";
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
-import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
-import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
+import { permissionExpression } from "@solid-ui/helpers/permissions";
+import { createSolidEntityApi } from "@solid-ui/redux/api/solidEntityApi";
+import { useGetSolidViewLayoutQuery } from "@solid-ui/redux/api/solidViewApi";
+import { useLazyCheckIfPermissionExistsQuery } from "@solid-ui/redux/api/userApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
 import { useFormik } from "formik";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
@@ -31,9 +31,9 @@ import { SolidSelectionDynamicField } from "./fields/SolidSelectionDynamicField"
 import { SolidSelectionStaticField } from "./fields/SolidSelectionStaticField";
 import { SolidShortTextField } from "./fields/SolidShortTextField";
 import { SolidTimeField } from "./fields/SolidTimeField";
-import { SolidUiEvent } from "@/types";
-import { getExtensionComponent, getExtensionFunction } from "@/helpers/registry";
-import { SolidFormWidgetProps, SolidLoadForm, SolidUiEventResponse } from "@/types/solid-core";
+import { SolidUiEvent } from "@solid-ui/types";
+import { getExtensionComponent, getExtensionFunction } from "@solid-ui/helpers/registry";
+import { SolidFormWidgetProps, SolidLoadForm, SolidUiEventResponse } from "@solid-ui/types/solid-core";
 import { SolidPasswordField } from "./fields/SolidPasswordField";
 import { SolidEmailField } from "./fields/SolidEmailField";
 import { Panel } from "primereact/panel";
@@ -47,12 +47,12 @@ import "yet-another-react-lightbox/plugins/counter.css";
 import { SolidFormActionHeader } from "./SolidFormActionHeader";
 import { SolidFormViewShimmerLoading } from "./SolidFormViewShimmerLoading";
 import { useSelector } from "react-redux";
-import { hasAnyRole } from "@/helpers/rolesHelper";
+import { hasAnyRole } from "@solid-ui/helpers/rolesHelper";
 import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
-import { useLazyGetMcpUrlQuery } from "@/redux/api/solidSettingsApi";
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import { useLazyGetMcpUrlQuery } from "@solid-ui/redux/api/solidSettingsApi";
 import { SolidFormFooter } from "./SolidFormFooter";
 
 export type SolidFormViewProps = {
@@ -462,25 +462,14 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const actionType = searchParams.get('actionType');
     const actionContext = searchParams.get('actionContext');
 
-    useEffect(() => {
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
 
-        const fetchPermissions = async () => {
-            const permissionNames = ["SettingController.getMcpUrl"]
-            const queryData = {
-                permissionNames: permissionNames
-            };
-            const queryString = qs.stringify(queryData, {
-                encodeValuesOnly: true
-            });
-            const response = await triggerCheckIfPermissionExists(queryString);
-            if (response.data.data) {
-                if (response.data.data.includes("SettingController.getMcpUrl")) {
-                    enableSolidXAiPanel();
-                }
-            }
-        };
-        fetchPermissions();
-    }, []);
+    useEffect(() => {
+        if (solidSettingsData?.mcpEnabled && solidSettingsData?.mcpServerUrl && solidSettingsData?.mcpApiKey) {
+            enableSolidXAiPanel();
+        }
+    }, [solidSettingsData]);
+
 
     const enableSolidXAiPanel = async () => {
         try {

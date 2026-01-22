@@ -1,10 +1,10 @@
-import { authenticationReducer, dataViewReducer, navbarReducer, popupReducer, themeReducer, userReducer } from "@/index";
+import { authenticationReducer, dataViewReducer, navbarReducer, popupReducer, settingsReducer, themeReducer, userReducer } from "@solid-ui/index";
 import {
     authApi, aiInteractionApi, dashboardApi, dashboardQuestionApi, exportTemplateApi, fieldsApi,
     importTransactionApi, mediaApi, mediaStorageProviderApi, modulesApi, modelsApi, roleApi,
     solidActionsApi, solidChatterMessageApi, solidMenusApi, solidServiceApi, solidSettingsApi,
     solidViewsApi, userApi
-} from "@/index";
+} from "@solid-ui/index";
 
 // 1. Export all APIs in one array
 export const solidApiSlices = [
@@ -36,5 +36,6 @@ export const solidReducers = {
     theme: themeReducer,
     popup: popupReducer,
     navbarState: navbarReducer,
+    settingsState: settingsReducer,
     dataViewState: dataViewReducer,
 };  

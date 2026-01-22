@@ -8,20 +8,22 @@ import { Button } from "primereact/button";
 import { InputOtp } from "primereact/inputotp";
 import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import * as Yup from "yup";
-import { LayoutContext } from "../layout/context/layoutcontext";
-import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
-import { AppTitle } from "@/helpers/AppTitle";
+import { useSelector } from "react-redux";
 import Image from "next/image";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import SolidLogo from '@solid-ui/resources/images/SolidXLogo.svg'
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 
 const SolidOTPVerify = () => {
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
-    useEffect(() => {
-        trigger("")
-    }, [trigger])
+
+    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    // useEffect(() => {
+    //     trigger("") // Fetch settings on mount
+    // }, [trigger])
+
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+
     const [otp, setOTP] = useState<number | any>();
 
     const toast = useRef<Toast>(null);
@@ -42,8 +44,8 @@ const SolidOTPVerify = () => {
             summary,
             detail,
             ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+                ? { sticky: true }            // stays until user closes
+                : { life: 3000 }),
         });
     };
 
@@ -53,20 +55,20 @@ const SolidOTPVerify = () => {
     return (
         <>
             <Toast ref={toast} />
-            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`} style={{ minWidth: 480 }}>
-                {solidSettingsData?.data?.authPagesLayout === 'center' &&
+            <div className={`auth-container ${solidSettingsData?.authPagesLayout === 'center' ? 'center' : 'side'}`} style={{ minWidth: 480 }}>
+                {solidSettingsData?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
+                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.appLogoPosition}`}>
                             <Image
                                 alt="solid logo"
-                                src={solidSettingsData?.data?.appLogo || SolidLogo}
+                                src={solidSettingsData?.appLogo || SolidLogo}
                                 className="relative"
                                 fill
                             />
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>OTP Verification</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>OTP Verification</h2>
                 <p className="solid-auth-subtitle text-sm">
                     Please enter the OTP sent to your email to complete verification
                 </p>

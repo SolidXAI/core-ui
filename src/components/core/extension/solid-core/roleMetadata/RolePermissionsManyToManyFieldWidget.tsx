@@ -4,10 +4,10 @@ import { Panel } from "primereact/panel";
 import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
 import { InputSwitch } from "primereact/inputswitch";
-import { useRelationEntityHandler } from "@/components/core/form/fields/relations/widgets/helpers/useRelationEntityHandler";
-import { InlineRelationEntityDialog } from "@/components/core/form/fields/relations/widgets/helpers/InlineRelationEntityDialog";
+import { useRelationEntityHandler } from "@solid-ui/components/core/form/fields/relations/widgets/helpers/useRelationEntityHandler";
+import { InlineRelationEntityDialog } from "@solid-ui/components/core/form/fields/relations/widgets/helpers/InlineRelationEntityDialog";
 import { Checkbox } from "primereact/checkbox";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { SolidFormFieldWidgetProps } from "@solid-ui/types/solid-core";
 import qs from 'qs';
 
 const groupByController = (items: any[]) => {

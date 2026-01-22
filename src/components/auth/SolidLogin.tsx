@@ -11,18 +11,15 @@ import { Message } from "primereact/message";
 import { Password } from "primereact/password";
 import { TabPanel, TabView } from 'primereact/tabview';
 import { Toast } from "primereact/toast";
-import { classNames } from "primereact/utils";
-import { useContext, useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
-import { LayoutContext } from "../layout/context/layoutcontext";
-import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
-import { useInitateLoginMutation } from "@/redux/api/authApi";
-import { AppTitle } from "@/helpers/AppTitle";
+import { useInitateLoginMutation } from "@solid-ui/redux/api/authApi";
 import Image from "next/image";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
-import { formatTimeLeft } from "@/helpers/resendOtpHelper";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { useSelector } from "react-redux";
+import SolidLogo from '@solid-ui/resources/images/SolidXLogo.svg'
+import { formatTimeLeft } from "@solid-ui/helpers/resendOtpHelper";
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 import { RadioButton } from "primereact/radiobutton";
 // import { Checkbox } from "primereact/checkbox";
 interface AuthTabsProps {
@@ -30,13 +27,19 @@ interface AuthTabsProps {
     passwordLessAuth: boolean;
 }
 const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+
+    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    // useEffect(() => {
+    //     trigger("") // Fetch settings on mount
+    // }, [trigger])
+
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+
     const [initiateLogin] = useInitateLoginMutation();
     const [activeIndex, setActiveIndex] = useState(0);
     useEffect(() => {
-        trigger("") // Fetch settings on mount
         sessionStorage.removeItem("app-mounted");
-    }, [trigger])
+    }, [])
     const toast = useRef<Toast>(null);
     const router = useRouter();
 
@@ -165,7 +168,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
     }
 
     const PasswordLessLogin = () => {
-        const validationType = solidSettingsData?.data?.passwordlessRegistrationValidateWhat || "email";
+        const validationType = solidSettingsData?.passwordlessRegistrationValidateWhat || "email";
         const [selectedAuthMethod, setSelectedAuthMethod] = useState<"email" | "mobile">("email");
 
         const getFieldConfig = () => {
@@ -375,24 +378,24 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
     return (
         <div className="">
             <Toast ref={toast} />
-            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
-                {solidSettingsData?.data?.authPagesLayout === 'center' &&
+            <div className={`auth-container ${solidSettingsData?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
+                {solidSettingsData?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
+                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.appLogoPosition}`}>
                             <Image
                                 alt="solid logo"
-                                src={solidSettingsData?.data?.appLogo || SolidLogo}
+                                src={solidSettingsData?.appLogo || SolidLogo}
                                 className="relative"
                                 fill
                             />
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>Sign In To Your Account</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>Sign In To Your Account</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
 
-                <AuthTabs passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} />
-                {solidSettingsData?.data?.iamGoogleOAuthEnabled &&
+                <AuthTabs passwordBasedAuth={solidSettingsData?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.passwordLessAuth} />
+                {solidSettingsData?.iamGoogleOAuthEnabled &&
                     <>
                         <Divider align="center">
                             <div className="inline-flex align-items-center">
@@ -403,7 +406,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                     </>
                 }
             </div>
-            {solidSettingsData?.data?.allowPublicRegistration && <div className="mt-3 md:mt-5">
+            {solidSettingsData?.allowPublicRegistration && <div className="mt-3 md:mt-5">
                 <div className="text-sm text-center text-400 secondary-dark-color">
                     Don’t have an account ? <Link className="font-bold" href="/auth/register">Sign Up</Link>
                 </div>

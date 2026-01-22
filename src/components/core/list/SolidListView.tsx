@@ -14,28 +14,27 @@ import Link from "next/link";
 import qs from "qs";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
-import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
+import { createSolidEntityApi } from "@solid-ui/redux/api/solidEntityApi";
+import { useGetSolidViewLayoutQuery } from "@solid-ui/redux/api/solidViewApi";
 import { SolidListViewColumn } from "./SolidListViewColumn";
 // import { SolidListViewOptions } from "../common/SolidListviewOptions";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { pascalCase } from "change-case";
-import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
-import { permissionExpression } from "@/helpers/permissions";
+import { useLazyCheckIfPermissionExistsQuery } from "@solid-ui/redux/api/userApi";
+import { permissionExpression } from "@solid-ui/helpers/permissions";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
-import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@/components/core/common/FilterComponent";
+import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@solid-ui/components/core/common/FilterComponent";
 import { SolidLayoutViews } from "../common/SolidLayoutViews";
-import { FilterIcon } from "../../modelsComponents/filterIcon";
+import { FilterIcon } from '@solid-ui/components/modelsComponents/filterIcon';
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Toast } from "primereact/toast";
 import { Divider } from "primereact/divider";
-import CompactImage from "../../../resources/images/layout/images/compact.png";
-import CozyImage from "../../../resources/images/layout/images/cozy.png";
-import ComfortableImage from "../../../resources/images/layout/images/comfortable.png";
-import ListImage from "../../../resources/images/layout/images/cozy.png";
-import KanbanImage from "../../../resources/images/layout/images/kanban.png";
+import CompactImage from '@solid-ui/resources/images/layout/images/compact.png';
+import CozyImage from '@solid-ui/resources/images/layout/images/cozy.png';
+import ComfortableImage from '@solid-ui/resources/images/layout/images/comfortable.png';
+import KanbanImage from '@solid-ui/resources/images/layout/images/kanban.png';
 import { capitalize, filter, set } from "lodash";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
@@ -46,22 +45,22 @@ import "yet-another-react-lightbox/plugins/counter.css";
 import { SolidListViewConfigure } from "./SolidListViewConfigure";
 import { SolidListViewShimmerLoading } from "./SolidListViewShimmerLoading";
 import { SolidEmptyListViewPlaceholder } from "./SolidEmptyListViewPlaceholder";
-import { useHandleListCustomButtonClick } from "@/components/common/useHandleListCustomButtonClick";
-import { hasAnyRole, useHasAnyRole } from "@/helpers/rolesHelper";
+import { useHandleListCustomButtonClick } from "@solid-ui/components/common/useHandleListCustomButtonClick";
+import { hasAnyRole, useHasAnyRole } from "@solid-ui/helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { SolidListViewRowButtonContextMenu } from "./SolidListViewRowButtonContextMenu";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./SolidListViewWrapper.module.css";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
-import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from "@/types/solid-core";
-import { getExtensionFunction } from "@/helpers/registry";
+import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from "@solid-ui/types/solid-core";
+import { getExtensionFunction } from "@solid-ui/helpers/registry";
 import { useSession } from "next-auth/react";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
-import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
-import { useLazyGetMcpUrlQuery } from "@/redux/api/solidSettingsApi";
+import { showNavbar, toggleNavbar } from "@solid-ui/redux/features/navbarSlice";
+import { useLazyGetMcpUrlQuery } from "@solid-ui/redux/api/solidSettingsApi";
 import { log } from "console";
-// import { ERROR_MESSAGES } from "@/constants/error-messages";
+// import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -170,25 +169,13 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [mcpUrl, setMcpUrl] = useState<string | null>(null);
   const [getMcpUrl] = useLazyGetMcpUrlQuery();
 
-  useEffect(() => {
+  const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
 
-    const fetchPermissions = async () => {
-      const permissionNames = ["SettingController.getMcpUrl"]
-      const queryData = {
-        permissionNames: permissionNames
-      };
-      const queryString = qs.stringify(queryData, {
-        encodeValuesOnly: true
-      });
-      const response = await triggerCheckIfPermissionExists(queryString);
-      if (response.data.data) {
-        if (response.data.data.includes("SettingController.getMcpUrl")) {
-          enableSolidXAiPanel();
-        }
-      }
-    };
-    fetchPermissions();
-  }, []);
+  useEffect(() => {
+    if (solidSettingsData?.mcpEnabled && solidSettingsData?.mcpServerUrl && solidSettingsData?.mcpApiKey) {
+      enableSolidXAiPanel();
+    }
+  }, [solidSettingsData]);
 
   const enableSolidXAiPanel = async () => {
     try {
@@ -295,10 +282,10 @@ export const SolidListView = (params: SolidListViewParams) => {
     useRecoverSolidEntityMutation,
   } = entityApi;
 
-  const menuItemId = searchParams.get("menuItemId"),
-  const menuItemName = searchParams.get("menuItemName"),
-  const actionId = searchParams.get("actionId"),
-  const actionName = searchParams.get("actionName"),
+  const menuItemId = searchParams.get("menuItemId");
+  const menuItemName = searchParams.get("menuItemName");
+  const actionId = searchParams.get("actionId");
+  const actionName = searchParams.get("actionName");
   // Get the list view layout & metadata first.
   const listViewMetaDataQs = qs.stringify(
     {
@@ -499,7 +486,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(solidListViewLayout?.attrs?.defaultPageSize ? solidListViewLayout?.attrs?.defaultPageSize : 10);
   const [totalRecords, setTotalRecords] = useState(0);
-  const [sortField, setSortField] = useState("id");
+  let [sortField, setSortField] = useState("id");
   const [sortOrder, setSortOrder] = useState(-1);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
   const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>([]);

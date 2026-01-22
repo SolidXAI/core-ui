@@ -1,5 +1,5 @@
-import { ERROR_MESSAGES } from "@/constants/error-messages";
-import { LayoutAttribute, LayoutNode } from "@/types/solid-core";
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import { LayoutAttribute, LayoutNode } from "@solid-ui/types/solid-core";
 
 /**
  * SolidViewLayoutManager

@@ -3,15 +3,14 @@ import { Calendar } from "primereact/calendar";
 import { Message } from "primereact/message";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from 'yup';
-import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { getExtensionComponent } from "@/helpers/registry";
-import { SolidFormFieldWidgetProps, SolidListFieldWidgetProps } from "@/types/solid-core";
-import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { getExtensionComponent } from "@solid-ui/helpers/registry";
+import { SolidFormFieldWidgetProps, SolidListFieldWidgetProps } from "@solid-ui/types/solid-core";
+import { SolidFieldTooltip } from "@solid-ui/components/common/SolidFieldTooltip";
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 import { Tag } from "primereact/tag";
-import { StatusIcon } from "../../extension/solid-core/CustomIcon/StatusIcon";
-import { DateFieldViewComponent } from "../../common/DateFieldViewComponent";
+import { StatusIcon } from '@solid-ui/components/core/extension/solid-core/CustomIcon/StatusIcon';
+import { DateFieldViewComponent } from '@solid-ui/components/core/common/DateFieldViewComponent';
 
 export class SolidDateField implements ISolidField {
 
@@ -44,7 +43,7 @@ export class SolidDateField implements ISolidField {
         return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
     }
 
-    validationSchema(): Schema {
+    validationSchema(): Yup.Schema {
         let schema: Yup.DateSchema<Date | null | undefined> = Yup.date();
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;

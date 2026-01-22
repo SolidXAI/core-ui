@@ -2,11 +2,11 @@
 import { Button } from 'primereact/button'
 import { OverlayPanel } from 'primereact/overlaypanel';
 import React, { useEffect, useRef, useState } from 'react'
-import { createSolidEntityApi } from '@/redux/api/solidEntityApi';
+import { createSolidEntityApi } from '@solid-ui/redux/api/solidEntityApi';
 import { useFormik } from 'formik';
 import { Toast } from 'primereact/toast';
 import { useSearchParams } from 'next/navigation';
-import { ERROR_MESSAGES } from '@/constants/error-messages';
+import { ERROR_MESSAGES } from '@solid-ui/constants/error-messages';
 
 interface Props {
     solidFormViewMetaData?: any;

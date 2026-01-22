@@ -2,15 +2,14 @@
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import * as Yup from 'yup';
-import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { getExtensionComponent } from "@/helpers/registry";
-import { SolidFormFieldWidgetProps, SolidListFieldWidgetProps } from "@/types/solid-core";
-import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
+import { getExtensionComponent } from "@solid-ui/helpers/registry";
+import { SolidFormFieldWidgetProps, SolidListFieldWidgetProps } from "@solid-ui/types/solid-core";
+import { SolidFieldTooltip } from "@solid-ui/components/common/SolidFieldTooltip";
 import { Button } from "primereact/button";
 import { useState } from "react";
 import { Password } from "primereact/password";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 
 export class SolidShortTextField implements ISolidField {
 
@@ -63,7 +62,7 @@ export class SolidShortTextField implements ISolidField {
         return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
     }
 
-    validationSchema(): Schema {
+    validationSchema(): Yup.Schema {
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo?.attrs?.label ?? fieldMetadata.displayName;

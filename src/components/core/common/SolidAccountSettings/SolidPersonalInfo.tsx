@@ -1,7 +1,7 @@
 "use client"
 
-import { useDeleteMediaMutation } from "@/redux/api/mediaApi";
-import { useGetUserQuery, useUpdateUserProfileMutation } from "@/redux/api/userApi";
+import { useDeleteMediaMutation } from "@solid-ui/redux/api/mediaApi";
+import { useGetUserQuery, useUpdateUserProfileMutation } from "@solid-ui/redux/api/userApi";
 import { useFormik } from "formik";
 import { AutoComplete } from "primereact/autocomplete";
 import { Avatar } from "primereact/avatar";
@@ -12,7 +12,7 @@ import { Toast } from "primereact/toast";
 import { useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import styles from './SolidAccountSettings.module.css'
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 
 export const SolidPersonalInfo = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);

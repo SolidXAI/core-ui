@@ -3,12 +3,12 @@ import { useState } from 'react';
 import { SolidKanbanViewFieldsParams } from '../SolidKanbanViewFields';
 import { Dialog } from 'primereact/dialog';
 import { Document, Page } from "react-pdf";
-import { PDFSvg } from '@/components/Svg/PDFSvg';
-import MP3Image from '../../../../resources/images/fileTypes/Mp3.png'
-import MP4Image from '../../../../resources/images/fileTypes/Mp4.png'
-import FileImage from '../../../../resources/images/fileTypes/File.png'
+import { PDFSvg } from '@solid-ui/components/Svg/PDFSvg';
+import MP3Image from '@solid-ui/resources/images/fileTypes/Mp3.png'
+import MP4Image from '@solid-ui/resources/images/fileTypes/Mp4.png'
+import FileImage from '@solid-ui/resources/images/fileTypes/File.png'
 import Image from 'next/image';
-import { ExcelSvg } from '@/components/Svg/ExcelSvg';
+import { ExcelSvg } from '@solid-ui/components/Svg/ExcelSvg';
 const SolidShortTextKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data, setLightboxUrls, setOpenLightbox, groupedView }: SolidKanbanViewFieldsParams) => {
     const [visible, setVisible] = useState(false);
     const widget = fieldLayout?.attrs?.widget ? fieldLayout?.attrs?.widget : "text";

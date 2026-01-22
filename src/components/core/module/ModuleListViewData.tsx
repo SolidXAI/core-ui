@@ -1,7 +1,7 @@
 "use client";
-import { CreateButton } from "@/components/common/CreateButton";
-import { handleError, handleSuccess } from "@/helpers/ToastContainer";
-import { useDeleteMultiplemodulesMutation, useGenerateCodeFormoduleMutation, useLazyGetmodulesQuery, useRefreshPermissionsMutation } from "@/redux/api/moduleApi";
+import { CreateButton } from "@solid-ui/components/common/CreateButton";
+import { handleError, handleSuccess } from "@solid-ui/helpers/ToastContainer";
+import { useDeleteMultiplemodulesMutation, useGenerateCodeFormoduleMutation, useLazyGetmodulesQuery, useRefreshPermissionsMutation } from "@solid-ui/redux/api/moduleApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
 import Link from "next/link";
 import { FilterMatchMode } from "primereact/api";

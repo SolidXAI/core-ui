@@ -10,7 +10,7 @@ export const ActiveArrowStep = () => {
                     <polygon fill={"var(--primary-color)"} points="36,62 65,12 7,12" />
                 </g>
                 <g id="line">
-                    <polyline fill="none" stroke="" stroke-miterlimit="10" stroke-width="1.5" points="36,62 65,12 7,12" />
+                    <polyline fill="none" stroke="" strokeMiterlimit="10" strokeWidth="1.5" points="36,62 65,12 7,12" />
                 </g>
             </g>
         </svg>
