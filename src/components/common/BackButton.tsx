@@ -1,7 +1,6 @@
 "use client"
 
-import { useRouter } from 'next/navigation';
-import { usePathname } from 'next/navigation';
+import { usePathname, useRouter } from 'next/navigation';
 import { Button } from 'primereact/button';
 import { useEffect, useState } from 'react';
 export const BackButton = () => {

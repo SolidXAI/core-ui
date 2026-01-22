@@ -5,8 +5,8 @@ import { classNames } from "primereact/utils";
 import { SelectButton } from "primereact/selectbutton";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { RadioButton } from "primereact/radiobutton";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
-import { AvatarWidget } from "@/components/core/common/AvatarWidget";
+import { SolidFormFieldWidgetProps } from "@solid-ui/types/solid-core";
+import { AvatarWidget } from "@solid-ui/components/core/common/AvatarWidget";
 
 export const SolidRelationFieldAvatarFormWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
 

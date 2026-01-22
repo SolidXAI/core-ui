@@ -5,8 +5,8 @@ import { FormEvent } from "primereact/ts-helpers";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 import SolidTableRowCell from '../SolidTableRowCell';
-import { getExtensionComponent } from '@/helpers/registry';
-import { SolidListFieldWidgetProps } from '@/types/solid-core';
+import { getExtensionComponent } from '@solid-ui/helpers/registry';
+import { SolidListFieldWidgetProps } from '@solid-ui/types/solid-core';
 
 const SolidSelectionDynamicColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;
