@@ -852,9 +852,13 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (dynamicHeader) {
       dynamicExtensionFunction = getExtensionFunction(dynamicHeader);
       if (dynamicExtensionFunction) {
-        const updatedListData: SolidListUiEventResponse = await dynamicExtensionFunction(event);
-        if (updatedListData && updatedListData?.filterApplied && updatedListData?.newFilter) {
-          queryData = updatedListData?.newFilter
+        try {
+          const updatedListData: SolidListUiEventResponse = await dynamicExtensionFunction(event);
+          if (updatedListData && updatedListData?.filterApplied && updatedListData?.newFilter) {
+            queryData = updatedListData?.newFilter;
+          }
+        } catch (err) {
+          console.error("Error executing onBeforeListDataLoad extension:", err);
         }
       }
     }
@@ -1556,10 +1560,15 @@ export const SolidListView = (params: SolidListViewParams) => {
                       params.handlePopUpOpen(rowData?.id);
                     } else {
                       if (typeof window !== "undefined") {
-                        // const queryString = searchParams.toString();
-                        // const finalUrl = queryString ? `${pathname}?${queryString}` : pathname;
-                        // sessionStorage.setItem("fromView", finalUrl);
-                        sessionStorage.setItem("fromView", "list");
+                        // store a simple marker for the caller
+                        
+                        // also store the full current URL so Back can restore exact state (including action params)
+                        try {
+                          sessionStorage.setItem("fromView", "list");
+                          sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
+                        } catch (e) {
+                          // ignore storage errors
+                        }
                       }
                       router.push(`${editButtonUrl}/${rowData?.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`);
                     }
@@ -1659,6 +1668,12 @@ export const SolidListView = (params: SolidListViewParams) => {
                                     if (params.embeded == true) {
                                       params.handlePopUpOpen(rowData?.id);
                                     } else {
+                                      if (typeof window !== "undefined") {
+                                        try {
+                                          sessionStorage.setItem("fromView", "list");
+                                          sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
+                                        } catch (e) {}
+                                      }
                                       router.push(
                                         `${editButtonUrl}/${rowData?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
                                       );
@@ -1749,6 +1764,10 @@ export const SolidListView = (params: SolidListViewParams) => {
                                                 selectedDataRef.current?.id
                                               );
                                             } else {
+                                              try {
+                                                sessionStorage.setItem("fromView", "list");
+                                                sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
+                                              } catch (e) {}
                                               router.push(
                                                 `${editButtonUrl}/${selectedDataRef.current?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
                                               );

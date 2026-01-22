@@ -35,6 +35,15 @@ export const BackButton = () => {
         if (segments.length >= 4 && segments[0] === "admin" && segments[1] === "core") {
             const moduleName = segments[2];
             const modelName = segments[3];
+            // Prefer a fully qualified stored return URL (preserves query params like actionId/actionName)
+            if (typeof window !== "undefined") {
+                const storedFullUrl = sessionStorage.getItem("fromViewUrl");
+                if (storedFullUrl) {
+                    router.push(storedFullUrl);
+                    return;
+                }
+            }
+
             const storedView = sessionStorage.getItem("fromView");
             let fromView = "list"
             if (storedView === "list" || storedView === "kanban") {
