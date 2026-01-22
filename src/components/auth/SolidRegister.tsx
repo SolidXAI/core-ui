@@ -1,7 +1,6 @@
 "use client";
 
 import { useInitateRegisterMutation, useRegisterMutation } from "@solid-ui/redux/api/authApi";
-import { useLazyGetAuthSettingsQuery } from "@solid-ui/redux/api/solidSettingsApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import { Form, Formik } from "formik";
 import Link from "next/link";
@@ -13,16 +12,14 @@ import { Message } from "primereact/message";
 import { Password } from "primereact/password";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
-import { classNames } from "primereact/utils";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
-import { AppTitle } from "@solid-ui/helpers/AppTitle";
 import Image from "next/image";
 import SolidLogo from '@solid-ui/resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "@solid-ui/helpers/resendOtpHelper";
 import { ProgressSpinner } from "primereact/progressspinner";
-import { SolidPasswordHelperText } from "../core/common/SolidPasswordHelperText";
+import { useSelector } from "react-redux";
 import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 
 interface AuthTabsProps {
@@ -34,11 +31,16 @@ interface AuthTabsProps {
 const SolidRegister = () => {
     const envPasswordHelperText = process.env.NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC;
     const [activeIndex, setActiveIndex] = useState(0);
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+
+    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    // useEffect(() => {
+    //     trigger("") // Fetch settings on mount
+    // }, [trigger])
+
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+
     const [showOverlay, setShowOverlay] = useState(false);
-    useEffect(() => {
-        trigger("")
-    }, [trigger])
+
     const toast = useRef<Toast>(null);
 
     const router = useRouter();
@@ -68,7 +70,7 @@ const SolidRegister = () => {
                 const serializedError = error as Error;
                 toast.current?.show({
                     severity: "error",
-                    summary: ERROR_MESSAGES.ERROR ,
+                    summary: ERROR_MESSAGES.ERROR,
                     detail: serializedError.message || ERROR_MESSAGES.ERROR_OCCURED,
                     sticky: true
                 });
@@ -93,8 +95,8 @@ const SolidRegister = () => {
             summary,
             detail,
             ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+                ? { sticky: true }            // stays until user closes
+                : { life: 3000 }),
         });
     };
 
@@ -132,7 +134,7 @@ const SolidRegister = () => {
                         .matches(/[a-z]/, ERROR_MESSAGES.PASSWORD_CONTAIN('lowercase'))
                         .matches(/[A-Z]/, ERROR_MESSAGES.PASSWORD_CONTAIN('uppercase'))
                         .matches(/\d/, ERROR_MESSAGES.PASSWORD_CONTAIN('one', 'number'))
-                        .matches(/[@$!%*?&#^(){}[\]|\\/~`+=<>:;'"_,.-]/, ERROR_MESSAGES.PASSWORD_CONTAIN('special','character')),
+                        .matches(/[@$!%*?&#^(){}[\]|\\/~`+=<>:;'"_,.-]/, ERROR_MESSAGES.PASSWORD_CONTAIN('special', 'character')),
                 })}
 
                 onSubmit={async (values, { setSubmitting }) => {
@@ -168,7 +170,7 @@ const SolidRegister = () => {
                             showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                         }
                     } catch (err: any) {
-                        showToast("error", ERROR_MESSAGES.EMAIL_ALREADY_TAKEN , err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                        showToast("error", ERROR_MESSAGES.EMAIL_ALREADY_TAKEN, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                     } finally {
                         setSubmitting(false);
                     }
@@ -267,7 +269,7 @@ const SolidRegister = () => {
                             {isFormFieldValid(formik, "password") &&
                                 <Message severity="error" text={formik.errors.password?.toString()} />}
                         </div>
-                        {/* <SolidPasswordHelperText text={solidSettingsData?.data?.authenticationPasswordComplexityDescription} /> */}
+                        {/* <SolidPasswordHelperText text={solidSettingsData?.authenticationPasswordComplexityDescription} /> */}
                         <div className="mt-4">
                             <Button className="w-full font-light auth-submit-button" label="Sign Up" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
                         </div>
@@ -405,7 +407,7 @@ const SolidRegister = () => {
         <div className="">
             <Toast ref={toast} />
             {/* 🔹 Overlay UI */}
-            <div className={`auth-container position-relative ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
+            <div className={`auth-container position-relative ${solidSettingsData?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 {showOverlay && (
                     <div className="absolute top-0 left-0 w-full h-full flex align-items-center justify-content-center register-success-popup">
                         <div className="inline-flex flex-column align-items-center justify-content-center text-center">
@@ -416,22 +418,22 @@ const SolidRegister = () => {
                         </div>
                     </div>
                 )}
-                {solidSettingsData?.data?.authPagesLayout === 'center' &&
+                {solidSettingsData?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
+                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.appLogoPosition}`}>
                             <Image
                                 alt="solid logo"
-                                src={solidSettingsData?.data?.appLogo || SolidLogo}
+                                src={solidSettingsData?.appLogo || SolidLogo}
                                 className="relative"
                                 fill
                             />
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>Sign Up</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>Sign Up</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
-                <AuthTabs passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} showNameFieldsForRegistration={solidSettingsData?.data?.showNameFieldsForRegistration} />
-                {solidSettingsData?.data?.iamGoogleOAuthEnabled &&
+                <AuthTabs passwordBasedAuth={solidSettingsData?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.passwordLessAuth} showNameFieldsForRegistration={solidSettingsData?.showNameFieldsForRegistration} />
+                {solidSettingsData?.iamGoogleOAuthEnabled &&
                     <>
                         <Divider align="center">
                             <div className="inline-flex align-items-center">

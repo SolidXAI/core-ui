@@ -1,11 +1,8 @@
 "use client";
 
-import { AppTitle } from "@solid-ui/helpers/AppTitle";
 import { useConfirmOtpRegisterMutation, useInitateRegisterMutation } from "@solid-ui/redux/api/authApi";
-import { useLazyGetAuthSettingsQuery } from "@solid-ui/redux/api/solidSettingsApi";
 import { Form, Formik } from "formik";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "primereact/button";
 import { InputOtp } from "primereact/inputotp";
@@ -13,6 +10,7 @@ import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
+import { useSelector } from "react-redux";
 import SolidLogo from '@solid-ui/resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
 
@@ -24,7 +22,14 @@ const SolidInitiateRegisterOtp = () => {
     const RESEND_OTP_TIMER_MIN = parseFloat(process.env.NEXT_PUBLIC_RESEND_OTP_TIMER || '0.5');
     const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
     const username = searchParams.get('username') || '';
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    // useEffect(() => {
+    //     trigger("") // Fetch settings on mount
+    // }, [trigger])
+
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+
+
     const [initiateResendOTP] = useInitateRegisterMutation();
     const [initiateOtpRegister] = useConfirmOtpRegisterMutation();
     const toast = useRef<Toast>(null);
@@ -33,7 +38,6 @@ const SolidInitiateRegisterOtp = () => {
     const [resendEnabled, setResendEnabled] = useState(false);
 
     useEffect(() => {
-        trigger("");
 
         // Set timer if not already set (e.g., after login)
         const storedTime = localStorage.getItem(RESEND_OTP_KEY);
@@ -52,7 +56,7 @@ const SolidInitiateRegisterOtp = () => {
             setTimeLeft(0);
             setResendEnabled(true);
         }
-    }, [trigger, email]);
+    }, [email]);
 
     useEffect(() => {
         if (resendEnabled || timeLeft <= 0) return;
@@ -83,8 +87,8 @@ const SolidInitiateRegisterOtp = () => {
             summary,
             detail,
             ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+                ? { sticky: true }            // stays until user closes
+                : { life: 3000 }),
         });
     };
 
@@ -117,20 +121,20 @@ const SolidInitiateRegisterOtp = () => {
     return (
         <>
             <Toast ref={toast} />
-            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`} style={{ minWidth: 480 }}>
-                {solidSettingsData?.data?.authPagesLayout === 'center' &&
+            <div className={`auth-container ${solidSettingsData?.authPagesLayout === 'center' ? 'center' : 'side'}`} style={{ minWidth: 480 }}>
+                {solidSettingsData?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
+                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.appLogoPosition}`}>
                             <Image
                                 alt="solid logo"
-                                src={solidSettingsData?.data?.appLogo || SolidLogo}
+                                src={solidSettingsData?.appLogo || SolidLogo}
                                 className="relative"
                                 fill
                             />
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>OTP Verification</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>OTP Verification</h2>
                 <p className="solid-auth-subtitle text-sm">
                     Please enter the OTP sent to your email to complete verification
                 </p>

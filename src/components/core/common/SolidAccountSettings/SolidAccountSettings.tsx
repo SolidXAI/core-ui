@@ -1,19 +1,23 @@
 "use client"
 
 import { Dialog } from "primereact/dialog";
-import { useEffect, useMemo, useState } from "react";
+import { useMemo, useState } from "react";
 import { SolidPersonalInfo } from "./SolidPersonalInfo";
-import { SolidNotifications } from "./SolidNotifications";
 import { SolidChangePassword } from "./SolidChangePassword";
 import styles from './SolidAccountSettings.module.css'
-import { useLazyGetSolidSettingsQuery } from "@solid-ui/redux/api/solidSettingsApi";
+import { useSelector } from "react-redux";
+
 export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfileSettingsDialog }: any) => {
     const [setting, setSetting] = useState({ key: "personal_info", label: "Persnoal Info" });
 
-    const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
-    useEffect(() => {
-        trigger("") // Fetch settings on mount
-    }, [])
+    // const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
+
+
+    // useEffect(() => {
+    //     trigger("") // Fetch settings on mount
+    // }, [])
+
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
     const settings = [
         {
             label: "Persnoal Info",
@@ -66,8 +70,8 @@ export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfile
                                 className={`w-full flex align-items-center gap-2 text-start ${styles.SolidSettingTab} ${option.key === setting.key ? styles.SolidActiveSetting : styles.SolidDeActiveSetting}`}
                                 onClick={() => setSetting(option)}
                             >
-                                 <span className={option.icon}></span>
-                                 <span className="hidden sm:inline">{option.label}</span>
+                                <span className={option.icon}></span>
+                                <span className="hidden sm:inline">{option.label}</span>
                             </div>
                         ))}
                     </div>

@@ -23,8 +23,8 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
             summary,
             detail,
             ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+                ? { sticky: true }            // stays until user closes
+                : { life: 3000 }),
         });
     };
 
@@ -33,7 +33,7 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
     // Try backend regex first, then env, then fallback
     const effectiveRegex = useMemo(() => {
         try {
-            const backendRegex = solidSettingsData?.data?.system?.authenticationPasswordRegex;
+            const backendRegex = solidSettingsData?.authenticationPasswordRegex;
             if (backendRegex) {
                 // const unescaped = JSON.parse(`"${backendRegex}"`);
                 return new RegExp(backendRegex);
@@ -53,8 +53,8 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
             ? Yup.string()
                 .matches(
                     effectiveRegex,
-                    solidSettingsData?.data?.system?.authenticationPasswordRegexErrorMessage ||
-                   ERROR_MESSAGES.PASSWORD_DO_NOT_MEET
+                    solidSettingsData?.authenticationPasswordRegexErrorMessage ||
+                    ERROR_MESSAGES.PASSWORD_DO_NOT_MEET
                 )
                 .required(ERROR_MESSAGES.FIELD_REUQIRED('New password'))
             : Yup.string()
@@ -178,7 +178,7 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
                         </div>
                     </div>
                 </div>
-                <SolidPasswordHelperText text={solidSettingsData?.data?.system?.authenticationPasswordComplexityDescription} />
+                <SolidPasswordHelperText text={solidSettingsData?.authenticationPasswordComplexityDescription} />
             </div>
             <div>
                 <Button type='submit' size='small' label="Change Password" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
