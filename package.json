@@ -7,7 +7,7 @@
     "clean": "rm -rf dist",
     "prepare": "npm run build",
     "copy-resources": "copyfiles -u 1 \"src/resources/**/*\" dist",
-    "copy-styles": "copyfiles -u 1 \"src/**/*\" dist/",
+    "copy-styles": "copyfiles -u 1 -e \"**/*.ts\" -e \"**/*.tsx\" \"src/**/*\" dist/",
     "publish:patch": "node publish.js patch",
     "publish:minor": "node publish.js minor",
     "publish:major": "node publish.js major"
