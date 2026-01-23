@@ -14,12 +14,12 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
-import { useInitateLoginMutation } from "@solid-ui/redux/api/authApi";
+import { useInitateLoginMutation } from "../../redux/api/authApi";
 import Image from "next/image";
 import { useSelector } from "react-redux";
-import SolidLogo from '@solid-ui/resources/images/SolidXLogo.svg'
-import { formatTimeLeft } from "@solid-ui/helpers/resendOtpHelper";
-import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
+import { formatTimeLeft } from "../../helpers/resendOtpHelper";
+import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { RadioButton } from "primereact/radiobutton";
 // import { Checkbox } from "primereact/checkbox";
 interface AuthTabsProps {

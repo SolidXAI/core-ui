@@ -1,6 +1,6 @@
 "use client"
-import { handleLogout } from '@solid-ui/nextAuth/handleLogout';
-import { useChangePasswordMutation } from '@solid-ui/redux/api/authApi';
+import { handleLogout } from '../../../../nextAuth/handleLogout';
+import { useChangePasswordMutation } from '../../../../redux/api/authApi';
 import { useFormik } from 'formik';
 import { useSession } from 'next-auth/react';
 import { Button } from 'primereact/button';
@@ -10,7 +10,7 @@ import { Toast } from 'primereact/toast';
 import { useMemo, useRef } from 'react';
 import * as Yup from 'yup';
 import { SolidPasswordHelperText } from '../SolidPasswordHelperText';
-import { ERROR_MESSAGES } from '@solid-ui/constants/error-messages';
+import { ERROR_MESSAGES } from '../../../../constants/error-messages';
 
 export const SolidChangePassword = ({ solidSettingsData }: any) => {
     const toast = useRef<Toast>(null);

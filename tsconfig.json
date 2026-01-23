@@ -27,10 +27,7 @@
         "name": "next"
       }
     ],
-    "baseUrl": "./",
-    "paths": {
-      "@solid-ui/*": ["src/*"]
-    }
+    "baseUrl": "./"
   },
   "include": [
     "./src/**/*",

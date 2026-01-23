@@ -1,5 +1,5 @@
 'use client';
-import { useLazyGetSelectionDynamicValuesQuery } from "@solid-ui/redux/api/fieldApi";
+import { useLazyGetSelectionDynamicValuesQuery } from "../../../redux/api/fieldApi";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import qs from "qs";
 import { useState } from "react";

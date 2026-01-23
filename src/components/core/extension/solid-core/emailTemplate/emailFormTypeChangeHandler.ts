@@ -1,4 +1,4 @@
-import { SolidViewLayoutManager } from "@solid-ui/components/core/common/SolidViewLayoutManager";
+import { SolidViewLayoutManager } from "../../../../../components/core/common/SolidViewLayoutManager";
 
 const hanldeEmailFormTypeChange = (event: any) => {
 

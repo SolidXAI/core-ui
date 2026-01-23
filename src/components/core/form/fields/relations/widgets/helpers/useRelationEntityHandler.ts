@@ -1,6 +1,6 @@
 import { useState } from "react";
 import qs from "qs";
-import { createSolidEntityApi } from "@solid-ui/redux/api/solidEntityApi";
+import { createSolidEntityApi } from "../../../../../../../redux/api/solidEntityApi";
 
 export const useRelationEntityHandler = ({ fieldContext, formik, autoCompleteLimit = 1000 }: any) => {
   const fieldMetadata = fieldContext.fieldMetadata;

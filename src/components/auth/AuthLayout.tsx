@@ -1,7 +1,7 @@
 "use client"
-// import { useLazyGetAuthSettingsQuery } from "@solid-ui/redux/api/solidSettingsApi";
-// import { toggleTheme } from "@solid-ui/redux/features/themeSlice";
-// import { LayoutConfig } from "@solid-ui/types";
+// import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
+// import { toggleTheme } from "../../redux/features/themeSlice";
+// import { LayoutConfig } from "../../types";
 import Link from "next/link";
 import { usePathname, useRouter } from "next/navigation";
 import { PrimeReactContext } from "primereact/api";
@@ -10,13 +10,13 @@ import { Dialog } from "primereact/dialog";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import Image from "next/image";
-import SolidLogo from '@solid-ui/resources/images/SolidXLogo.svg'
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { Divider } from "primereact/divider";
-import AuthScreenRightBackgroundImage from '@solid-ui/resources/images/auth/solid-left-layout-bg.png';
-import AuthScreenLeftBackgroundImage from '@solid-ui/resources/images/auth/solid-right-layout-bg.png';
-import AuthScreenCenterBackgroundImage from '@solid-ui/resources/images/auth/solid-login-light.png';
-import { useGetAuthSettingsQuery } from "@solid-ui/redux/api/solidSettingsApi";
-import { setSolidSettings } from "@solid-ui/redux/features/settingsSlice";
+import AuthScreenRightBackgroundImage from '../../resources/images/auth/solid-left-layout-bg.png';
+import AuthScreenLeftBackgroundImage from '../../resources/images/auth/solid-right-layout-bg.png';
+import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
+import { useGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
+import { setSolidSettings } from "../../redux/features/settingsSlice";
 
 
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
@@ -92,6 +92,8 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
             src = solidSettingsData?.authScreenLeftBackgroundImage || (AuthScreenLeftBackgroundImage as any).src || AuthScreenLeftBackgroundImage;
         } else if (layout === 'right') {
             src = solidSettingsData?.authScreenRightBackgroundImage || (AuthScreenRightBackgroundImage as any).src || AuthScreenRightBackgroundImage;
+        } else if (layout === 'center') {
+            src = solidSettingsData?.authScreenCenterBackgroundImage || (AuthScreenCenterBackgroundImage as any).src || AuthScreenCenterBackgroundImage;
         }
 
         // Normalize image path if coming from API
@@ -106,14 +108,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     return (
         <div className={`solid-auth-theme-wrapper ${solidSettingsData?.authPagesLayout || 'center'}`}
             style={
-                solidSettingsData?.authPagesLayout === 'center'
-                    ? {
-                        backgroundImage: `url(${solidSettingsData?.authScreenCenterBackgroundImage ||
-                            (AuthScreenCenterBackgroundImage as any)?.src ||
-                            AuthScreenCenterBackgroundImage
-                            })`
-                    }
-                    : {}
+                solidSettingsData?.authPagesLayout === 'center' ? { backgroundImage: `url(${solidSettingsData?.authScreenCenterBackgroundImage || (AuthScreenCenterBackgroundImage as any)?.src || AuthScreenCenterBackgroundImage})` } : {}
             }
         >
             <div className={`${solidSettingsData?.authPagesLayout !== 'center' ? 'grid w-full h-full m-0' : ''}`}>

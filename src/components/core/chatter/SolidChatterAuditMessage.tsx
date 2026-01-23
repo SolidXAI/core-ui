@@ -1,6 +1,6 @@
 "use client"
 import React from 'react'
-import { RightArrowSvg } from '@solid-ui/components/Svg/RightArrowSvg'
+import { RightArrowSvg } from '../../../components/Svg/RightArrowSvg'
 
 interface AuditRecord {
     field: string;

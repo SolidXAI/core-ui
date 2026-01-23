@@ -1,8 +1,8 @@
 "use client";
-import { useLazyGetfieldsQuery } from "@solid-ui/redux/api/fieldApi";
+import { useLazyGetfieldsQuery } from "../../../redux/api/fieldApi";
 import {
   useDeleteMultipleModelsMutation,
-} from "@solid-ui/redux/api/modelApi";
+} from "../../../redux/api/modelApi";
 import Link from "next/link";
 import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";

@@ -1,6 +1,6 @@
 "use client"
 
-import { handleError } from "@solid-ui/helpers/ToastContainer";
+import { handleError } from "../../helpers/ToastContainer";
 import { signOut, useSession } from "next-auth/react";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -8,7 +8,7 @@ import { Layout } from "./Layout";
 import { Dialog } from "primereact/dialog";
 import { Divider } from "primereact/divider";
 import SolidChangeForcePassword from "../auth/SolidChangeForcePassword";
-import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import { ERROR_MESSAGES } from "../../constants/error-messages";
 
 export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     // const theme = useSelector((state: any) => state.theme.mode);

@@ -3,10 +3,10 @@ import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { getExtensionComponent } from "@solid-ui/helpers/registry";
-import { SolidFormFieldWidgetProps } from "@solid-ui/types/solid-core";
-import { SolidFieldTooltip } from "@solid-ui/components/common/SolidFieldTooltip";
-import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import { getExtensionComponent } from "../../../../helpers/registry";
+import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
+import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
+import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 
 export class SolidEmailField implements ISolidField {
 

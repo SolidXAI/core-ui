@@ -1,6 +1,6 @@
 "use client";
 
-import { useInitateRegisterMutation, useRegisterMutation } from "@solid-ui/redux/api/authApi";
+import { useInitateRegisterMutation, useRegisterMutation } from "../../redux/api/authApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import { Form, Formik } from "formik";
 import Link from "next/link";
@@ -16,11 +16,11 @@ import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import Image from "next/image";
-import SolidLogo from '@solid-ui/resources/images/SolidXLogo.svg'
-import { formatTimeLeft } from "@solid-ui/helpers/resendOtpHelper";
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
+import { formatTimeLeft } from "../../helpers/resendOtpHelper";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { useSelector } from "react-redux";
-import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import { ERROR_MESSAGES } from "../../constants/error-messages";
 
 interface AuthTabsProps {
     passwordBasedAuth: boolean;

@@ -1,5 +1,5 @@
 "use client"
-// import { useBulkUpdateSolidSettingsMutation, useCreateSolidSettingsMutation, useLazyGetSolidSettingsQuery, useUpdateSolidSettingsMutation } from '@solid-ui/redux/api/solidSettingsApi';
+// import { useBulkUpdateSolidSettingsMutation, useCreateSolidSettingsMutation, useLazyGetSolidSettingsQuery, useUpdateSolidSettingsMutation } from '../../redux/api/solidSettingsApi';
 import { useFormik } from 'formik';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
@@ -10,10 +10,10 @@ import { InputSwitch } from 'primereact/inputswitch';
 import { RadioButton } from 'primereact/radiobutton';
 import { usePathname } from 'next/navigation';
 import { InputTextarea } from 'primereact/inputtextarea';
-import SolidLogo from '@solid-ui/resources/images/SolidXLogo.svg'
-import AuthScreenRightBackgroundImage from '@solid-ui/resources/images/auth/solid-left-layout-bg.png';
-import AuthScreenLeftBackgroundImage from '@solid-ui/resources/images/auth/solid-right-layout-bg.png';
-import AuthScreenCenterBackgroundImage from '@solid-ui/resources/images/auth/solid-login-light.png';
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
+import AuthScreenRightBackgroundImage from '../../resources/images/auth/solid-left-layout-bg.png';
+import AuthScreenLeftBackgroundImage from '../../resources/images/auth/solid-right-layout-bg.png';
+import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
 import { useDropzone } from 'react-dropzone';
 import { Divider } from 'primereact/divider';
 import { SettingDropzoneActivePlaceholder } from './SolidSettings/SettingDropzoneActivePlaceholder';
@@ -23,10 +23,10 @@ import { Dropdown } from 'primereact/dropdown';
 import { OpenAiProviderComponent } from './SolidSettings/LlmSettings/OpenAiProviderComponent';
 import { AnthropicProviderComponent } from './SolidSettings/LlmSettings/AnthropicProviderComponent';
 import { useDispatch, useSelector } from 'react-redux';
-import { handleError } from '@solid-ui/helpers/ToastContainer';
-import { ERROR_MESSAGES } from '@solid-ui/constants/error-messages';
-import { useBulkUpdateSolidSettingsMutation, useLazyGetSolidSettingsQuery } from '@solid-ui/redux/api/solidSettingsApi';
-import { setSolidSettings } from '@solid-ui/redux/features/settingsSlice';
+import { handleError } from '../../helpers/ToastContainer';
+import { ERROR_MESSAGES } from '../../constants/error-messages';
+import { useBulkUpdateSolidSettingsMutation, useLazyGetSolidSettingsQuery } from '../../redux/api/solidSettingsApi';
+import { setSolidSettings } from '../../redux/features/settingsSlice';
 
 
 export const GeneralSettings = () => {

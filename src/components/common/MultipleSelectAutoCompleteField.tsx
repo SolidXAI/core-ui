@@ -1,7 +1,7 @@
 'use client';
 import { AutoComplete } from "primereact/autocomplete";
 import { useEffect, useState } from "react";
-import { getVirtualScrollerOptions } from "@solid-ui/helpers/autoCompleteVirtualScroll";
+import { getVirtualScrollerOptions } from "../../helpers/autoCompleteVirtualScroll";
 
 
 // UsesCases

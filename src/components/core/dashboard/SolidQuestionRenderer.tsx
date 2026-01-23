@@ -1,6 +1,6 @@
 "use client"
-import { useGetDashboardQuestionDataByIdQuery } from '@solid-ui/redux/api/dashboardQuestionApi';
-import { SqlExpression } from '@solid-ui/types/solid-core';
+import { useGetDashboardQuestionDataByIdQuery } from '../../../redux/api/dashboardQuestionApi';
+import { SqlExpression } from '../../../types/solid-core';
 import { Message } from 'primereact/message';
 import { MeterGroup } from 'primereact/metergroup';
 import { ProgressSpinner } from 'primereact/progressspinner';

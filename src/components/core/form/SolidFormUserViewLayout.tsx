@@ -3,12 +3,12 @@ import { useFormik } from "formik";
 import { Button } from "primereact/button";
 import { useSelector } from "react-redux";
 import React, { useRef } from "react";
-import { createSolidEntityApi } from "@solid-ui/redux/api/solidEntityApi";
+import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { javascript } from "@codemirror/lang-javascript";
 import { oneDark } from "@codemirror/theme-one-dark";
 import CodeMirror, { EditorView } from "@uiw/react-codemirror";
 import { Toast } from "primereact/toast";
-import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import { ERROR_MESSAGES } from "../../../constants/error-messages";
 export const SolidFormUserViewLayout = ({ solidFormViewMetaData, setLayoutDialogVisible }: any) => {
     const toast = useRef<Toast>(null);
     const entityApi = createSolidEntityApi("userViewMetadata");

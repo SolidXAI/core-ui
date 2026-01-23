@@ -2,10 +2,10 @@
 import { FilterMatchMode } from 'primereact/api';
 import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { FormEvent } from "primereact/ts-helpers";
-import { SolidListViewColumnParams } from '@solid-ui/components/core/list/SolidListViewColumn';
-import { InputTypes, SolidVarInputsFilterElement } from '@solid-ui/components/core/list/SolidVarInputsFilterElement';
-import { getExtensionComponent } from '@solid-ui/helpers/registry';
-import { SolidListFieldWidgetProps } from '@solid-ui/types/solid-core';
+import { SolidListViewColumnParams } from '../../../../../components/core/list/SolidListViewColumn';
+import { InputTypes, SolidVarInputsFilterElement } from '../../../../../components/core/list/SolidVarInputsFilterElement';
+import { getExtensionComponent } from '../../../../../helpers/registry';
+import { SolidListFieldWidgetProps } from '../../../../../types/solid-core';
 import { Button } from 'primereact/button';
 import { useRouter } from 'next/navigation';
 import { kebabCase } from 'change-case';

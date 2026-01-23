@@ -1,6 +1,6 @@
 'use client';
 
-import { AppConfigProps, LayoutConfig, LayoutState } from '@solid-ui/types';
+import { AppConfigProps, LayoutConfig, LayoutState } from '../../types';
 import { PrimeReactContext } from 'primereact/api';
 import { Button } from 'primereact/button';
 import { RadioButton, RadioButtonChangeEvent } from 'primereact/radiobutton';

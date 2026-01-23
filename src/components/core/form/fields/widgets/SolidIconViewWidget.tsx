@@ -1,4 +1,4 @@
-import { SolidFormFieldWidgetProps } from "@solid-ui/types/solid-core";
+import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
 
 export const SolidIconViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;

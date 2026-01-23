@@ -12,8 +12,8 @@ import { useRef, useState } from "react";
 import * as Yup from "yup";
 import { useSelector } from "react-redux";
 import Image from "next/image";
-import SolidLogo from '@solid-ui/resources/images/SolidXLogo.svg'
-import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
+import { ERROR_MESSAGES } from "../../constants/error-messages";
 
 const SolidOTPVerify = () => {
 

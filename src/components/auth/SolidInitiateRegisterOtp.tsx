@@ -1,6 +1,6 @@
 "use client";
 
-import { useConfirmOtpRegisterMutation, useInitateRegisterMutation } from "@solid-ui/redux/api/authApi";
+import { useConfirmOtpRegisterMutation, useInitateRegisterMutation } from "../../redux/api/authApi";
 import { Form, Formik } from "formik";
 import Image from "next/image";
 import { useRouter, useSearchParams } from "next/navigation";
@@ -11,8 +11,8 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { useSelector } from "react-redux";
-import SolidLogo from '@solid-ui/resources/images/SolidXLogo.svg'
-import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import SolidLogo from '../../resources/images/SolidXLogo.svg'
+import { ERROR_MESSAGES } from "../../constants/error-messages";
 
 const SolidInitiateRegisterOtp = () => {
     const searchParams = useSearchParams();

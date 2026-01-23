@@ -1,6 +1,6 @@
 "use client";
 
-import { useHasAnyRole } from "@solid-ui/helpers/rolesHelper";
+import { useHasAnyRole } from "../../../helpers/rolesHelper";
 import { Button } from "primereact/button";
 
 export const SolidListViewRowButtonContextMenu = ({ button, params, getSelectedSolidViewData, solidListViewMetaData, handleCustomButtonClick }: any) => {

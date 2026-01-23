@@ -1,5 +1,5 @@
-import { SolidListFieldWidgetProps } from "@solid-ui/types/solid-core";
-import { AvatarWidget } from '@solid-ui/components/core/common/AvatarWidget';
+import { SolidListFieldWidgetProps } from "../../../../types/solid-core";
+import { AvatarWidget } from '../../../../components/core/common/AvatarWidget';
 
 
 export const SolidManyToManyRelationAvatarListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {

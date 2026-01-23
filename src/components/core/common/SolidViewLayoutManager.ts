@@ -1,5 +1,5 @@
-import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
-import { LayoutAttribute, LayoutNode } from "@solid-ui/types/solid-core";
+import { ERROR_MESSAGES } from "../../../constants/error-messages";
+import { LayoutAttribute, LayoutNode } from "../../../types/solid-core";
 
 /**
  * SolidViewLayoutManager
@@ -128,6 +128,8 @@ export class SolidViewLayoutManager {
      * @returns true if parent exists and child was added
      */
     addChildNode(parentName: string, newNode: LayoutNode, addChildrenToAll: boolean = false): boolean {
+        console.log(`timepass....`);
+        
         if (addChildrenToAll) {
             const parentNodes = this.findNodes(this.layout, parentName);
             parentNodes.forEach((node) => {

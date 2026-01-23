@@ -7,7 +7,7 @@ import { OverlayPanel } from 'primereact/overlaypanel';
 import { RadioButton } from 'primereact/radiobutton';
 import React, { useEffect, useRef, useState } from 'react'
 import { useDispatch, useSelector } from "react-redux";
-import { showNavbar, toggleNavbar } from "@solid-ui/redux/features/navbarSlice";
+import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 
 export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllowed, setLayoutDialogVisible, viewModes, setShowSaveFilterPopup }: any) => {
     const op = useRef(null);

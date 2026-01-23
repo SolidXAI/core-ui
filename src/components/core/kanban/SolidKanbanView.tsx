@@ -1,10 +1,10 @@
 // @ts-nocheck
 
 "use client";
-import { permissionExpression } from "@solid-ui/helpers/permissions";
-import { createSolidEntityApi } from "@solid-ui/redux/api/solidEntityApi";
-import { useGetSolidViewLayoutQuery } from "@solid-ui/redux/api/solidViewApi";
-import { useLazyCheckIfPermissionExistsQuery } from "@solid-ui/redux/api/userApi";
+import { permissionExpression } from "../../../helpers/permissions";
+import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
+import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
+import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { DropResult } from "@hello-pangea/dnd";
 import Link from "next/link";
 import { FilterMatchMode } from "primereact/api";
@@ -15,10 +15,10 @@ import { useEffect, useRef, useState } from "react";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import KanbanBoard from "./KanbanBoard";
-import CompactImage from '@solid-ui/resources/images/layout/images/compact.png';
-import CozyImage from '@solid-ui/resources/images/layout/images/cozy.png';
-import ComfortableImage from '@solid-ui/resources/images/layout/images/comfortable.png';
-import KanbanImage from '@solid-ui/resources/images/layout/images/kanban.png';
+import CompactImage from '../../../resources/images/layout/images/compact.png';
+import CozyImage from '../../../resources/images/layout/images/cozy.png';
+import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
+import KanbanImage from '../../../resources/images/layout/images/kanban.png';
 import { capitalize } from "lodash";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
@@ -31,8 +31,8 @@ import { KanbanUserViewLayout } from "./KanbanUserViewLayout";
 import { useDispatch, useSelector } from "react-redux";
 import { queryObjectToQueryString, queryStringToQueryObject } from "../list/SolidListView";
 import { Toast } from "primereact/toast";
-import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
-import { showNavbar, toggleNavbar } from "@solid-ui/redux/features/navbarSlice";
+import { ERROR_MESSAGES } from "../../../constants/error-messages";
+import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 
 
 type SolidKanbanViewParams = {

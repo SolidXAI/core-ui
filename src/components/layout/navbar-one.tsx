@@ -1,9 +1,9 @@
 "use client";
-import { ToastContainer } from "@solid-ui/helpers/ToastContainer";
-import { useGetSolidMenuBasedOnRoleQuery } from "@solid-ui/redux/api/solidMenuApi";
-import { setIsAuthenticated, setUser } from "@solid-ui/redux/features/userSlice";
-// import { useAppDispatch } from "@solid-ui/redux/hooks";
-// import { RootState } from "@solid-ui/redux/store.js";
+import { ToastContainer } from "../../helpers/ToastContainer";
+import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
+import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
+// import { useAppDispatch } from "../../redux/hooks";
+// import { RootState } from "../../redux/store.js";
 import { signOut, useSession } from "next-auth/react";
 import { Button } from "primereact/button";
 import { IconField } from "primereact/iconfield";
@@ -13,7 +13,7 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import NavbarTwoMenu from "./navbar-two-menu";
 import UserProfileMenu from "./user-profile-menu";
-// import menu from "@solid-ui/helpers/menu";
+// import menu from "../../helpers/menu";
 
 const NavbarOne = () => {
     const dispatch = useDispatch();

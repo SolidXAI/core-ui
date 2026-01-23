@@ -9,7 +9,7 @@ import { Messages } from "primereact/messages";
 import { Toast } from "primereact/toast";
 import { useRef, useState } from "react";
 import FieldMetaDataForm from "./FieldMetaDataForm";
-import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
 
 const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaData, deleteModelFunction, nextTab, formikFieldsMetadataRef, params }: any) => {

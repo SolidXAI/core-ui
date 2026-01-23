@@ -1,16 +1,16 @@
 'use client';
-import { useLazyGetSelectionDynamicValuesQuery } from "@solid-ui/redux/api/fieldApi";
+import { useLazyGetSelectionDynamicValuesQuery } from "../../../../redux/api/fieldApi";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { Message } from "primereact/message";
 import qs from "qs";
 import { useState } from "react";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { getExtensionComponent } from "@solid-ui/helpers/registry";
-import { SolidFormFieldWidgetProps } from "@solid-ui/types/solid-core";
-import { SolidFieldTooltip } from "@solid-ui/components/common/SolidFieldTooltip";
-import { formikValuestoQueryString } from "@solid-ui/helpers/helpers";
-import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import { getExtensionComponent } from "../../../../helpers/registry";
+import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
+import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
+import { formikValuestoQueryString } from "../../../../helpers/helpers";
+import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 
 
 export class SolidSelectionDynamicField implements ISolidField {

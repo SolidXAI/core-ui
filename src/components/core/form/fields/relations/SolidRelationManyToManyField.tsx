@@ -3,19 +3,20 @@ import { Message } from "primereact/message";
 import { useEffect, useState } from "react";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
-import { getExtensionComponent } from "@solid-ui/helpers/registry";
+import { getExtensionComponent } from "../../../../../helpers/registry";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { Button } from "primereact/button";
-import { SolidFormFieldWidgetProps } from "@solid-ui/types/solid-core";
+import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
 import { useRelationEntityHandler } from "./widgets/helpers/useRelationEntityHandler";
 import { InlineRelationEntityDialog } from "./widgets/helpers/InlineRelationEntityDialog";
 import { capitalize } from "lodash";
 import { Checkbox } from "primereact/checkbox";
 import { Panel } from "primereact/panel";
-import { SolidFieldTooltip } from "@solid-ui/components/common/SolidFieldTooltip";
+import { SolidFieldTooltip } from "../../../../../components/common/SolidFieldTooltip";
 import qs from 'qs';
-import Handlebars from "handlebars/dist/handlebars";
-import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+// import Handlebars from "handlebars/dist/handlebars";
+import * as Handlebars from "handlebars";
+import { ERROR_MESSAGES } from "../../../../../constants/error-messages";
 
 
 

@@ -4,16 +4,16 @@ import { Message } from "primereact/message";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { Password } from "primereact/password";
-import { getExtensionComponent } from "@solid-ui/helpers/registry";
-import { SolidFormFieldWidgetProps } from "@solid-ui/types/solid-core";
+import { getExtensionComponent } from "../../../../helpers/registry";
+import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { useState } from "react";
-import { SolidFieldTooltip } from "@solid-ui/components/common/SolidFieldTooltip";
+import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { Formik, useFormik } from "formik";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
 import { usePathname, useSearchParams } from "next/navigation";
-import { updatePasswordField } from "@solid-ui/helpers/updatePasswordField";
-import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import { updatePasswordField } from "../../../../helpers/updatePasswordField";
+import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 
 export class SolidPasswordField implements ISolidField {
 

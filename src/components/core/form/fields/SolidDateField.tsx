@@ -4,13 +4,13 @@ import { Message } from "primereact/message";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { getExtensionComponent } from "@solid-ui/helpers/registry";
-import { SolidFormFieldWidgetProps, SolidListFieldWidgetProps } from "@solid-ui/types/solid-core";
-import { SolidFieldTooltip } from "@solid-ui/components/common/SolidFieldTooltip";
-import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import { getExtensionComponent } from "../../../../helpers/registry";
+import { SolidFormFieldWidgetProps, SolidListFieldWidgetProps } from "../../../../types/solid-core";
+import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
+import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { Tag } from "primereact/tag";
-import { StatusIcon } from '@solid-ui/components/core/extension/solid-core/CustomIcon/StatusIcon';
-import { DateFieldViewComponent } from '@solid-ui/components/core/common/DateFieldViewComponent';
+import { StatusIcon } from '../../../../components/core/extension/solid-core/CustomIcon/StatusIcon';
+import { DateFieldViewComponent } from '../../../../components/core/common/DateFieldViewComponent';
 
 export class SolidDateField implements ISolidField {
 

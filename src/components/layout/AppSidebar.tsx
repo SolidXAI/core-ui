@@ -1,19 +1,19 @@
-import { ToastContainer } from "@solid-ui/helpers/ToastContainer";
-import { useGetSolidMenuBasedOnRoleQuery } from "@solid-ui/redux/api/solidMenuApi";
-import { showNavbar, toggleNavbar, hideNavbar } from "@solid-ui/redux/features/navbarSlice";
-import { setIsAuthenticated, setUser } from "@solid-ui/redux/features/userSlice";
+import { ToastContainer } from "../../helpers/ToastContainer";
+import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
+import { showNavbar, toggleNavbar, hideNavbar } from "../../redux/features/navbarSlice";
+import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import NavbarTwoMenu from "./navbar-two-menu";
 import UserProfileMenu from "./user-profile-menu";
 import Image from "next/image";
-import AppBuilderSvg from '@solid-ui/resources/images/menu/app-builder.svg'
-import SettingImage from '@solid-ui/resources/images/Navigation/SolidSettinsIcon.svg'
+import AppBuilderSvg from '../../resources/images/menu/app-builder.svg'
+import SettingImage from '../../resources/images/Navigation/SolidSettinsIcon.svg'
 import { Avatar } from "primereact/avatar";
 import { usePathname } from "next/navigation";
 
-// import menu from "@solid-ui/helpers/menu";
+// import menu from "../../helpers/menu";
 
 const AppSidebar = () => {
     const dispatch = useDispatch();

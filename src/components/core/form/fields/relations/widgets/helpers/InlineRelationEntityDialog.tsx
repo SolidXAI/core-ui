@@ -1,6 +1,6 @@
 import { Dialog } from "primereact/dialog";
 import { camelCase } from "lodash";
-import SolidFormView from "@solid-ui/components/core/form/SolidFormView";
+import SolidFormView from "../../../../../../../components/core/form/SolidFormView";
 
 export const InlineRelationEntityDialog = ({ visible, setVisible, fieldContext, onCreate }: any) => {
   const fieldLayoutInfo = fieldContext.field;

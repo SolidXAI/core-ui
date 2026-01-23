@@ -1,15 +1,15 @@
 'use client';
-import CodeEditor from "@solid-ui/components/common/CodeEditor";
+import CodeEditor from "../../../../components/common/CodeEditor";
 import { Message } from "primereact/message";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { getExtensionComponent } from "@solid-ui/helpers/registry";
-import { SolidFormFieldWidgetProps } from "@solid-ui/types/solid-core";
+import { getExtensionComponent } from "../../../../helpers/registry";
+import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct import
-import { SolidFieldTooltip } from "@solid-ui/components/common/SolidFieldTooltip";
-import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
+import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
+import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 export class SolidJsonField implements ISolidField {
 
     private fieldContext: SolidFieldProps;

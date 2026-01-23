@@ -1,6 +1,6 @@
 "use client";
-import { solidIcons } from "@solid-ui/helpers/solidIcons";
-import { SolidFormFieldWidgetProps } from "@solid-ui/types/solid-core";
+import { solidIcons } from "../../../../../helpers/solidIcons";
+import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";

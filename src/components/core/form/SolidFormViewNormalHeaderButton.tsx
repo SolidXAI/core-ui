@@ -1,7 +1,7 @@
 "use client";
 
 import { Button } from 'primereact/button';
-import { useHasAnyRole } from '@solid-ui/helpers/rolesHelper';
+import { useHasAnyRole } from '../../../helpers/rolesHelper';
 
 interface SolidFormViewNormalHeaderButtonProps {
     button: any;

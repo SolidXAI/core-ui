@@ -1,5 +1,5 @@
 "use client"
-import "@solid-ui/components/core/dashboard/chart-renderers/init-chartjs";
+import "../../../../components/core/dashboard/chart-renderers/init-chartjs";
 import { Bar, Line, Pie } from "react-chartjs-2";
 
 type ChartJsRendererProps = {

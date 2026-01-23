@@ -4,11 +4,11 @@ import { Message } from "primereact/message";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { getExtensionComponent } from "@solid-ui/helpers/registry";
-import { SolidFormFieldWidgetProps } from "@solid-ui/types/solid-core";
-import { SolidFieldTooltip } from "@solid-ui/components/common/SolidFieldTooltip";
-import { ERROR_MESSAGES } from "@solid-ui/constants/error-messages";
-import { DateFieldViewComponent } from '@solid-ui/components/core/common/DateFieldViewComponent';
+import { getExtensionComponent } from "../../../../helpers/registry";
+import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
+import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
+import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import { DateFieldViewComponent } from '../../../../components/core/common/DateFieldViewComponent';
 
 export class SolidDateTimeField implements ISolidField {
 
