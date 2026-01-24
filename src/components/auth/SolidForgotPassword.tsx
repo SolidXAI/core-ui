@@ -2,7 +2,7 @@
 
 import { useInitiateChangePasswordMutation } from "../../redux/api/authApi";
 import { useFormik } from "formik";
-import { useRouter } from "next/navigation";
+import { useRouter } from "../../hooks/solid/navigation";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
@@ -10,7 +10,7 @@ import { Toast } from "primereact/toast";
 import { useRef } from "react";
 import * as Yup from "yup";
 import { useSelector } from "react-redux";
-import Image from "next/image";
+import Image from "../../hooks/solid/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 

@@ -1,8 +1,8 @@
 "use client"
 
 import { handleError } from "../../helpers/ToastContainer";
-import { signOut, useSession } from "next-auth/react";
-import { useRouter } from "next/navigation";
+import { signOut, useSession } from "../../hooks/solid/auth";
+import { useRouter } from "../../hooks/solid/navigation";
 import { useEffect, useState } from "react";
 import { Layout } from "./Layout";
 import { Dialog } from "primereact/dialog";

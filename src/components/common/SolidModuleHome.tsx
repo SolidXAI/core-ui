@@ -1,13 +1,13 @@
 "use client"
 
-import { useSession } from 'next-auth/react'
+import { useSession } from '../../hooks/solid/auth'
 import styles from './solidModuleHome.module.css'
 import { Button } from 'primereact/button';
 import { DocsSvg } from '../Svg/DocsSvg';
 import { SettingsSvg } from '../Svg/SettingsSvg';
 import { DevDocs } from '../Svg/DevDocs';
 import { HomePageModuleSvg } from '../Svg/HomePageModuleSvg';
-import Link from 'next/link';
+import Link from '../../hooks/solid/link';
 import { useState } from 'react';
 import { SolidAccountSettings } from '../core/common/SolidAccountSettings/SolidAccountSettings';
 import { useDispatch, useSelector } from "react-redux";
@@ -36,14 +36,14 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
     return (
         <div className="h-screen surface-0 overflow-y-auto">
             <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
-            <div className='flex align-items-center gap-2'>
-            <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
-                <i className="pi pi-th-large"></i>
-            </div>
-                <p className="m-0 view-title solid-text-wrapper">
-                    {moduleName}
-                </p>
-            </div>
+                <div className='flex align-items-center gap-2'>
+                    <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                        <i className="pi pi-th-large"></i>
+                    </div>
+                    <p className="m-0 view-title solid-text-wrapper">
+                        {moduleName}
+                    </p>
+                </div>
             </div>
             <div className="p-4 md:p-5 flex flex-column gap-4">
                 <div className={styles.solidModuleWelcomeSection}>

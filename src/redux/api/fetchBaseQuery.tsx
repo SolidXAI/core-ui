@@ -1,5 +1,5 @@
 import { fetchBaseQuery } from "@reduxjs/toolkit/dist/query";
-import { getSession } from "next-auth/react";
+import { getSession } from "../../hooks/solid/auth";
 
 const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api`; // Base URL for the API endpoints
 // Updated fetchBaseQuery to include accessToken in headers
@@ -7,7 +7,7 @@ export const baseQueryWithAuth = fetchBaseQuery({
     baseUrl,
     prepareHeaders: async (headers) => {
         const session = await getSession(); // Fetch session data
-        if (session?.user.accessToken) {
+        if (session?.user?.accessToken) {
             headers.set('authorization', `Bearer ${session?.user?.accessToken}`); // Add access token to headers
         }
         return headers;
@@ -18,7 +18,7 @@ export const baseQueryWithAuth = fetchBaseQuery({
 // import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
 // import type { FetchBaseQueryError, BaseQueryFn } from "@reduxjs/toolkit/query";
 // import type { FetchArgs } from "@reduxjs/toolkit/query";
-// import { getSession } from "next-auth/react";
+// import { getSession } from "../../hooks/solid/auth";
 
 // const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api`;
 

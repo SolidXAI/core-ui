@@ -1,16 +1,16 @@
 import { ERROR_MESSAGES } from '../constants/error-messages';
 import axios, { AxiosError } from 'axios';
-import { getSession, signOut } from 'next-auth/react';
+import { getSession, signOut } from '../hooks/solid/auth';
 
 export async function handleLogout({ toast }: any) {
     const session = await getSession();
     // const token = session?.user?.accessToken;
-    const refreshToken = session?.user?.refreshToken; 
+    const refreshToken = session?.user?.refreshToken;
     try {
-        const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/iam/logout`, 
-        {
-            refreshToken: refreshToken, // Pass refresh token in body
-        }
+        const response = await axios.post(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/iam/logout`,
+            {
+                refreshToken: refreshToken, // Pass refresh token in body
+            }
         );
         console.log("logout response", response);
 

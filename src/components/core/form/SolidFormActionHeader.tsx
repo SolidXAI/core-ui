@@ -5,7 +5,7 @@ import { SolidFormHeader } from "../../../components/common/SolidFormHeader";
 import { useHandleFormCustomButtonClickaction } from "../../../components/common/useHandleFormCustomButtonClick";
 import { permissionExpression } from "../../../helpers/permissions";
 import { getExtensionFunction } from "../../../helpers/registry";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "../../../hooks/solid/navigation";
 import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { useEffect, useRef, useState } from "react";
@@ -14,7 +14,7 @@ import { SolidFormViewContextMenuHeaderButton } from "./SolidFormViewContextMenu
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { useSelector } from "react-redux";
 
-export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate,formData }: any) => {
+export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate, formData }: any) => {
     const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
     const router = useRouter();
     const pathname = usePathname();
@@ -72,7 +72,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
         setViewMode(newMode);
         const params = new URLSearchParams(searchParams.toString());
         params.set("viewMode", newMode);
-        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+        router.push(`${pathname}?${params.toString()}`);
         // const router = useRouter();
         // const pathname = usePathname();
         // const params = new URLSearchParams(searchParams?.toString() || "");
@@ -103,7 +103,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             op.current.toggle(e)
                         }
                     />
-                       <Button
+                    <Button
                         outlined
                         type="button"
                         icon={'pi pi-cog'}
@@ -269,7 +269,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                         type="submit"
                                         className="hidden lg:flex"
                                     />
-                                      <Button
+                                    <Button
                                         size="small"
                                         type="submit"
                                         className="lg:hidden solid-icon-button"
@@ -318,9 +318,9 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             {params.embeded == true &&
                                 <>
                                     <div className="hidden lg:flex">
-                                    <div>
-                                        <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse ' style={{ minWidth: 66 }} />
-                                  </div>
+                                        <div>
+                                            <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse ' style={{ minWidth: 66 }} />
+                                        </div>
                                     </div>
                                     <div className="lg:hidden">
                                         <Button outlined size="small" type="button" icon="pi pi-times" onClick={() => params.handlePopupClose()} className='bg-primary-reverse solid-icon-button' />
@@ -389,9 +389,9 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
                                 <>
                                     <div className="hidden lg:flex">
-                                    <div>
-                                        <Button type="button" label="Add" size='small' onClick={() => router.replace('new?viewMode=edit')} />
-                                    </div>
+                                        <div>
+                                            <Button type="button" label="Add" size='small' onClick={() => router.replace('new?viewMode=edit')} />
+                                        </div>
                                     </div>
                                     <div className="lg:hidden">
                                         <Button type="button" icon="pi pi-plus" size='small' onClick={() => router.replace('new?viewMode=edit')} className="p-button-sm solid-icon-button" />
@@ -408,11 +408,11 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 <>
                                     <div className="hidden lg:flex">
                                         <div>
-                                        <Button label="Edit" size="small" onClick={() => updateViewMode("edit")} type="button" />
+                                            <Button label="Edit" size="small" onClick={() => updateViewMode("edit")} type="button" />
                                         </div>
                                     </div>
                                     <div className="lg:hidden">
-                                        <Button icon="pi pi-pencil" size="small"  onClick={() => updateViewMode("edit")} type="button" className="p-button-sm solid-icon-button "/>
+                                        <Button icon="pi pi-pencil" size="small" onClick={() => updateViewMode("edit")} type="button" className="p-button-sm solid-icon-button " />
                                     </div>
                                 </>
                             }
@@ -424,8 +424,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 formik.dirty &&
 
                                 <div>
-                                    <Button label="Save" size="small" type="submit"  className="hidden lg:flex"/>
-                                    <Button  size="small" type="submit" className="lg:hidden solid-icon-button" icon="pi pi-check" />
+                                    <Button label="Save" size="small" type="submit" className="hidden lg:flex" />
+                                    <Button size="small" type="submit" className="lg:hidden solid-icon-button" icon="pi pi-check" />
                                 </div>
                             }
 
@@ -437,8 +437,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 formik.dirty &&
 
                                 <div>
-                                    <Button label="Save" size="small" type="submit"  className="hidden lg:flex"/>
-                                    <Button  size="small" type="submit" className="lg:hidden solid-icon-button" icon="pi pi-check" />
+                                    <Button label="Save" size="small" type="submit" className="hidden lg:flex" />
+                                    <Button size="small" type="submit" className="lg:hidden solid-icon-button" icon="pi pi-check" />
 
                                 </div>
                             }
@@ -456,12 +456,12 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 params.embeded == true &&
                                 <>
                                     <div className="hidden lg:flex">
-                                    <div>
-                                        <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse ' style={{ minWidth: 66 }} />
-                                   </div>
+                                        <div>
+                                            <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse ' style={{ minWidth: 66 }} />
+                                        </div>
                                     </div>
                                     <div className="lg:hidden">
-                                        <Button outlined size="small"  type="button" icon="pi pi-times" onClick={() => params.handlePopupClose()} className='bg-primary-reverse solid-icon-button' />
+                                        <Button outlined size="small" type="button" icon="pi pi-times" onClick={() => params.handlePopupClose()} className='bg-primary-reverse solid-icon-button' />
                                     </div>
                                 </>
                             }

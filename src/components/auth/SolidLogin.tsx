@@ -1,9 +1,9 @@
 "use client";
 
 import { Form, Formik } from "formik";
-import { signIn } from "next-auth/react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { signIn } from "../../hooks/solid/auth";
+import Link from "../../hooks/solid/link";
+import { useRouter } from "../../hooks/solid/navigation";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
@@ -15,7 +15,7 @@ import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import { useInitateLoginMutation } from "../../redux/api/authApi";
-import Image from "next/image";
+import Image from "../../hooks/solid/image";
 import { useSelector } from "react-redux";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "../../helpers/resendOtpHelper";

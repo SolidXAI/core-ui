@@ -1,9 +1,9 @@
 "use client";
 
 import { Form, Formik } from "formik";
-import { signIn } from "next-auth/react";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import { signIn } from "../../hooks/solid/auth";
+import Link from "../../hooks/solid/link";
+import { useRouter } from "../../hooks/solid/navigation";
 import { Button } from "primereact/button";
 import { InputOtp } from "primereact/inputotp";
 import { Message } from "primereact/message";
@@ -11,7 +11,7 @@ import { Toast } from "primereact/toast";
 import { useRef, useState } from "react";
 import * as Yup from "yup";
 import { useSelector } from "react-redux";
-import Image from "next/image";
+import Image from "../../hooks/solid/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 

@@ -2,7 +2,7 @@
 import { handleLogout } from '../../../../nextAuth/handleLogout';
 import { useChangePasswordMutation } from '../../../../redux/api/authApi';
 import { useFormik } from 'formik';
-import { useSession } from 'next-auth/react';
+import { useSession } from '../../../../hooks/solid/auth';
 import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
 import { Password } from 'primereact/password';

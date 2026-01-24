@@ -1,5 +1,5 @@
 "use client";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "../../hooks/solid/navigation";
 import { useState } from "react";
 
 const NavbarTwo = () => {

@@ -1,5 +1,5 @@
 import { ERROR_MESSAGES } from "../constants/error-messages";
-import { getSession } from "next-auth/react";
+import { getSession } from "../hooks/solid/auth";
 
 export async function updatePasswordField({
   url,

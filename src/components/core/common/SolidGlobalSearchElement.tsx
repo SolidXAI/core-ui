@@ -6,7 +6,7 @@ import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "../
 import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Divider } from "primereact/divider";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "../../../hooks/solid/navigation";
 import { queryStringToQueryObject } from "../list/SolidListView";
 import { InputText } from "primereact/inputtext";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";

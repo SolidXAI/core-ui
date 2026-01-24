@@ -8,7 +8,7 @@ import { FilterMatchMode } from 'primereact/api';
 import { Document, Page, pdfjs } from "react-pdf";
 import { Dialog } from "primereact/dialog";
 import { PDFSvg } from '../../../../components/Svg/PDFSvg';
-import Image from 'next/image';
+import Image from '../../../../hooks/solid/image';
 import FileImage from '../../../../resources/images/fileTypes/File.png'
 import { ExcelSvg } from '../../../../components/Svg/ExcelSvg';
 import MP3Image from '../../../../resources/images/fileTypes/Mp3.png'

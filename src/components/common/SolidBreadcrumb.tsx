@@ -1,7 +1,6 @@
 "use client";
 
-import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "../../hooks/solid/navigation";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { useEffect, useState } from "react";
 
@@ -29,7 +28,7 @@ const truncateText = (text: string, maxLength: number = 15) => {
 
 export const SolidBreadcrumb = (props: Props) => {
   const { solidFormViewMetaData, initialEntityData } = props;
-  
+
   const modelMetadata = solidFormViewMetaData?.data?.solidView?.model;
   const pathname = usePathname();
   const router = useRouter();
@@ -53,7 +52,7 @@ export const SolidBreadcrumb = (props: Props) => {
       const params = new URLSearchParams(searchParams.toString());
       params.set("userKeyField", userKeyFieldValue);
       const newUrl = `${pathname}?${params.toString()}`;
-      router.push(newUrl, { scroll: false });
+      router.push(newUrl);
     }
   }, [pathname, userKeyFieldValue, queryUserKeyField, isNewForm, router]);
 

@@ -1,6 +1,6 @@
 import { permissionExpression } from '../../../helpers/permissions'
 import { SolidCreateButton } from '../common/SolidCreateButton'
-import Image from 'next/image'
+import Image from '../../../hooks/solid/image'
 import { Button } from 'primereact/button'
 import { useHandleListCustomButtonClick } from '../../../components/common/useHandleListCustomButtonClick'
 import { useHasAnyRole } from '../../../helpers/rolesHelper'
@@ -25,9 +25,9 @@ export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, createActionQue
                         if (!hasRole) return null;
                         return (
                             <Button
-                                text={button?.attrs?.showText ?? true }
+                                text={button?.attrs?.showText ?? true}
                                 type="button"
-                                className={`w-full text-left ${button?.attrs?.className ?? 'gap-2' } `}
+                                className={`w-full text-left ${button?.attrs?.className ?? 'gap-2'} `}
                                 label={button.attrs.label}
                                 size="small"
                                 iconPos="left"

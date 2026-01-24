@@ -2,8 +2,8 @@
 
 import { useConfirmOtpRegisterMutation, useInitateRegisterMutation } from "../../redux/api/authApi";
 import { Form, Formik } from "formik";
-import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import Image from "../../hooks/solid/image";
+import { useRouter, useSearchParams } from "../../hooks/solid/navigation";
 import { Button } from "primereact/button";
 import { InputOtp } from "primereact/inputotp";
 import { Message } from "primereact/message";

@@ -1,5 +1,5 @@
 import { ERROR_MESSAGES } from "../constants/error-messages";
-import { getSession } from "next-auth/react";
+import { getSession } from "../hooks/solid/auth";
 
 export async function downloadFileWithProgress(
   url: string,
@@ -7,7 +7,7 @@ export async function downloadFileWithProgress(
     onProgress?: (progress: number) => void;
     onStatusChange?: (status: "In Progress" | "success" | "error", message: string, submessage: string) => void;
   },
-  filters:any,
+  filters: any,
   checkApplyFilter: boolean,
   updateDto: any
 ): Promise<{ fileName: string; blob: Blob }> {
@@ -30,7 +30,7 @@ export async function downloadFileWithProgress(
       method: "POST",
       headers,
       body: JSON.stringify(requestBody)
-    }); 
+    });
     if (!response.ok || !response.body) {
       throw new Error(ERROR_MESSAGES.FAILED_TO_FETCH_FILE);
     }
@@ -42,8 +42,8 @@ export async function downloadFileWithProgress(
     const extension = contentType.includes("excel")
       ? ".xlsx"
       : contentType.includes("csv")
-      ? ".csv"
-      : "";
+        ? ".csv"
+        : "";
 
     const contentLength = response.headers.get("content-length");
     const total = contentLength ? parseInt(contentLength) : 2130;
@@ -57,13 +57,13 @@ export async function downloadFileWithProgress(
     while (true) {
       const { done, value } = await reader.read();
       if (done) break;
-  
+
       if (value) {
         chunks.push(value);
         const interval = setInterval(() => {
           progress += 1;
           handlers.onProgress?.(progress);
-    
+
           if (progress >= 100) {
             clearInterval(interval);
           }

@@ -2,16 +2,16 @@ import { ToastContainer } from "../../helpers/ToastContainer";
 import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
 import { showNavbar, toggleNavbar, hideNavbar } from "../../redux/features/navbarSlice";
 import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
-import { signOut, useSession } from "next-auth/react";
+import { signOut, useSession } from "../../hooks/solid/auth";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import NavbarTwoMenu from "./navbar-two-menu";
 import UserProfileMenu from "./user-profile-menu";
-import Image from "next/image";
+import Image from "../../hooks/solid/image";
 import AppBuilderSvg from '../../resources/images/menu/app-builder.svg'
 import SettingImage from '../../resources/images/Navigation/SolidSettinsIcon.svg'
 import { Avatar } from "primereact/avatar";
-import { usePathname } from "next/navigation";
+import { usePathname } from "../../hooks/solid/navigation";
 
 // import menu from "../../helpers/menu";
 
@@ -28,7 +28,7 @@ const AppSidebar = () => {
     const [currentMenu, setCurrentMenu] = useState();
     const [currentMainMenu, setCurrentMainMenu] = useState();
     const [searchTerm, setSearchTerm] = useState("");
-   
+
     useEffect(() => {
         if (menu) {
             setCurrentMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === process.env.NEXT_PUBLIC_DEFAULT_MENU_KEY)[0]?.children);
@@ -127,13 +127,13 @@ const AppSidebar = () => {
             ? [additionalMenu]
             : [];
 
-            
+
 
     return (
         <>
             <ToastContainer />
             {visibleNavbar && (
-                <div 
+                <div
                     className="sidebar-backdrop"
                     onClick={handleToggle}
                 />
@@ -141,7 +141,7 @@ const AppSidebar = () => {
             {/* commented this as this is not working properly @Jenendar to figure this out... */}
             {(visibleNavbar || currentMainMenu) && (
                 <div
-                    className={`sidebar-toggle-button  ${!visibleNavbar || !currentMainMenu  ? "s-collapsed hidden md:flex" : ""}`}
+                    className={`sidebar-toggle-button  ${!visibleNavbar || !currentMainMenu ? "s-collapsed hidden md:flex" : ""}`}
                     onClick={handleToggle}
                 // severity="secondary"
                 >
@@ -168,7 +168,7 @@ const AppSidebar = () => {
                                 key={m.title}
                                 className={`flex align-items-center menu-item ${currentMainMenu === m.title ? "active-menu-image" : ""}`}
                                 onClick={() => handleMenu(m)}
-                                style={{cursor:'pointer'}}
+                                style={{ cursor: 'pointer' }}
                             >
                                 {m.icon ?
                                     <Image

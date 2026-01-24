@@ -1,5 +1,5 @@
 'use client';
-import { usePathname } from 'next/navigation';
+import { usePathname } from '../../../hooks/solid/navigation';
 import { plural } from "pluralize";
 import { } from "react";
 

@@ -4,7 +4,7 @@ import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 // import { RootState } from "../../redux/store";
 import { gridView, listView } from "../../redux/features/dataViewSlice";
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter } from '../../hooks/solid/navigation';
 import { HeaderDynamicTitles } from "../common/HeaderDynamicTitles";
 import FilterMenu from "./FilterMenu";
 

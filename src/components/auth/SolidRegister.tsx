@@ -3,8 +3,8 @@
 import { useInitateRegisterMutation, useRegisterMutation } from "../../redux/api/authApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import { Form, Formik } from "formik";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import Link from "../../hooks/solid/link";
+import { useRouter } from "../../hooks/solid/navigation";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
@@ -15,7 +15,7 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
-import Image from "next/image";
+import Image from "../../hooks/solid/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "../../helpers/resendOtpHelper";
 import { ProgressSpinner } from "primereact/progressspinner";

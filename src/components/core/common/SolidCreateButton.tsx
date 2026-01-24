@@ -1,6 +1,6 @@
 'use client';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Link from '../../../hooks/solid/link';
+import { usePathname } from '../../../hooks/solid/navigation';
 import { Button } from 'primereact/button';
 
 export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, solidListViewLayout, responsiveIconOnly = false }: any) => {

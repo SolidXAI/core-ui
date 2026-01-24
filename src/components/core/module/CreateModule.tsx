@@ -15,7 +15,7 @@ import { useGetFieldDefaultMetaDataQuery } from "../../../redux/api/fieldApi";
 import { useDeleteMediaMutation } from "../../../redux/api/mediaApi";
 import { useCreatemoduleMutation, useDeletemoduleMutation, useUpdatemoduleMutation } from "../../../redux/api/moduleApi";
 import { useFormik } from "formik";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "../../../hooks/solid/navigation";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import { Divider } from "primereact/divider";
@@ -107,7 +107,7 @@ const CreateModule = ({ data }: any) => {
       //   /^[a-z]+(-[a-z]+)*$/,
       //   "Invalid format. Use lowercase letters and hyphens only."
       // )
-    .required(ERROR_MESSAGES.FIELD_REUQIRED('Name')),
+      .required(ERROR_MESSAGES.FIELD_REUQIRED('Name')),
     displayName: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Display Name")),
     description: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Description Name")),
     defaultDataSource: Yup.string(),
@@ -472,7 +472,7 @@ const CreateModule = ({ data }: any) => {
               </div>
             </div>
             <div className="formgrid grid mt-4">
-              <div className="field col-12 pb-3 ld:pb-0 lg:col-6 flex flex-column gap-2"> 
+              <div className="field col-12 pb-3 ld:pb-0 lg:col-6 flex flex-column gap-2">
                 <label htmlFor="description" className="form-field-label">
                   Menu Sequence Number
                 </label>

@@ -1,7 +1,7 @@
 "use client"
 
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
-import { getSession } from 'next-auth/react';
+import { getSession } from '../../../../hooks/solid/auth';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { Divider } from 'primereact/divider';

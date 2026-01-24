@@ -2,14 +2,14 @@
 // import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 // import { toggleTheme } from "../../redux/features/themeSlice";
 // import { LayoutConfig } from "../../types";
-import Link from "next/link";
-import { usePathname, useRouter } from "next/navigation";
+import Link from "../../hooks/solid/link";
+import { usePathname, useRouter } from "../../hooks/solid/navigation";
 import { PrimeReactContext } from "primereact/api";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import Image from "next/image";
+import Image from "../../hooks/solid/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { Divider } from "primereact/divider";
 import AuthScreenRightBackgroundImage from '../../resources/images/auth/solid-left-layout-bg.png';

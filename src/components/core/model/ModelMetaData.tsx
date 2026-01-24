@@ -7,7 +7,7 @@ import { useLazyGetModelsQuery } from "../../../redux/api/modelApi";
 import { useLazyGetmodulesQuery } from "../../../redux/api/moduleApi";
 import { useFormik } from "formik";
 import { snakeCase } from "lodash";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "../../../hooks/solid/navigation";
 import { Checkbox } from "primereact/checkbox";
 import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";

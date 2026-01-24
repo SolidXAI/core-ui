@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { createSolidEntityApi } from '../../redux/api/solidEntityApi';
 import { useFormik } from 'formik';
 import { Toast } from 'primereact/toast';
-import { useSearchParams } from 'next/navigation';
+import { useSearchParams } from '../../hooks/solid/navigation';
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 
 interface Props {
@@ -41,19 +41,19 @@ export const SolidFormStepper = (props: Props) => {
     useEffect(() => {
         const calculateVisibleSteps = () => {
             if (!containerRef.current || !solidFormViewWorkflowData || solidFormViewWorkflowData.length === 0) return;
-            
+
             const containerWidth = containerRef.current.offsetWidth;
             const overflowButtonWidth = 50;
             const arrowWidth = 30; // Width for arrow between buttons
             const spacing = 0; // No gap needed as arrows connect buttons
-            
+
             const tempContainer = document.createElement('div');
             tempContainer.style.visibility = 'hidden';
             tempContainer.style.position = 'absolute';
             document.body.appendChild(tempContainer);
 
             const buttonWidths: number[] = [];
-            
+
             solidFormViewWorkflowData.forEach((step: any) => {
                 const tempButton = document.createElement('button');
                 tempButton.className = 'arrow-step-button';
@@ -74,7 +74,7 @@ export const SolidFormStepper = (props: Props) => {
                 const arrowSpace = i > 0 ? arrowWidth : 0;
                 const needsOverflow = i < buttonWidths.length - 1;
                 const requiredWidth = totalWidth + buttonWidth + arrowSpace + (needsOverflow ? overflowButtonWidth : 0);
-                
+
                 if (requiredWidth <= containerWidth) {
                     totalWidth += buttonWidth + arrowSpace;
                     count++;
@@ -88,7 +88,7 @@ export const SolidFormStepper = (props: Props) => {
         };
 
         calculateVisibleSteps();
-        
+
         const resizeObserver = new ResizeObserver(calculateVisibleSteps);
         if (containerRef.current) {
             resizeObserver.observe(containerRef.current);
@@ -147,8 +147,8 @@ export const SolidFormStepper = (props: Props) => {
             summary,
             detail,
             ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+                ? { sticky: true }            // stays until user closes
+                : { life: 3000 }),
         });
     };
 
@@ -216,10 +216,10 @@ export const SolidFormStepper = (props: Props) => {
     }
 
     const hasPreviousSteps =
-    previousSteps.length > 0 && !isSingleVisibleStep;
+        previousSteps.length > 0 && !isSingleVisibleStep;
 
     const hasNextSteps =
-    nextSteps.length > 0 || (isSingleVisibleStep && previousSteps.length > 0);
+        nextSteps.length > 0 || (isSingleVisibleStep && previousSteps.length > 0);
 
     return (
         <>
@@ -280,15 +280,13 @@ export const SolidFormStepper = (props: Props) => {
                         <button
                             key={step.value}
                             type="button"
-                            className={`arrow-step-button ${
-                                isSingleButton ? 'single-button' : ''
-                            } ${
-                                isActive
+                            className={`arrow-step-button ${isSingleButton ? 'single-button' : ''
+                                } ${isActive
                                     ? 'arrow-step-active'
                                     : isBeforeActive
-                                    ? 'arrow-step-completed'
-                                    : 'arrow-step-future'
-                            }`}
+                                        ? 'arrow-step-completed'
+                                        : 'arrow-step-future'
+                                }`}
                             onClick={() => handleButtonClick(step.value)}
                             title={step.label}
                         >
@@ -314,32 +312,32 @@ export const SolidFormStepper = (props: Props) => {
                             className="solid-custom-overlay solid-form-stepper-overlay"
                         >
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', padding: '0.5rem' }}>
-                            {(isSingleVisibleStep
-                                ? [...previousSteps, ...nextSteps]
-                                : nextSteps).map((step: any) => {
+                                {(isSingleVisibleStep
+                                    ? [...previousSteps, ...nextSteps]
+                                    : nextSteps).map((step: any) => {
 
-                                    const stepIndex = solidFormViewWorkflowData.findIndex(
-                                        (s: any) => s.value === step.value
-                                    );
-                                    
-                                    const isStepActive = stepIndex === activeIndex;
-                                    const isStepBeforeActive = stepIndex < activeIndex;
+                                        const stepIndex = solidFormViewWorkflowData.findIndex(
+                                            (s: any) => s.value === step.value
+                                        );
 
-                                    return (
-                                        <button
-                                            key={stepIndex}
-                                            type='button'
-                                            className={`overlay-step-button ${isStepActive ? 'active' : ''} ${isStepBeforeActive ? 'completed' : ''}`}
-                                            onClick={() => {
-                                                handleButtonClick(step.value);
-                                                // @ts-ignore
-                                                formStepperOverlay.current.hide();
-                                            }}
-                                        >
-                                            {step.label}
-                                        </button>
-                                    )
-                                })}
+                                        const isStepActive = stepIndex === activeIndex;
+                                        const isStepBeforeActive = stepIndex < activeIndex;
+
+                                        return (
+                                            <button
+                                                key={stepIndex}
+                                                type='button'
+                                                className={`overlay-step-button ${isStepActive ? 'active' : ''} ${isStepBeforeActive ? 'completed' : ''}`}
+                                                onClick={() => {
+                                                    handleButtonClick(step.value);
+                                                    // @ts-ignore
+                                                    formStepperOverlay.current.hide();
+                                                }}
+                                            >
+                                                {step.label}
+                                            </button>
+                                        )
+                                    })}
                             </div>
                         </OverlayPanel>
                     </div>

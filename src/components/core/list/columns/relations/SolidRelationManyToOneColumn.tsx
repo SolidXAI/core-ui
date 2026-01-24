@@ -7,7 +7,7 @@ import { InputTypes, SolidVarInputsFilterElement } from '../../../../../componen
 import { getExtensionComponent } from '../../../../../helpers/registry';
 import { SolidListFieldWidgetProps } from '../../../../../types/solid-core';
 import { Button } from 'primereact/button';
-import { useRouter } from 'next/navigation';
+import { useRouter } from '../../../../../hooks/solid/navigation';
 import { kebabCase } from 'change-case';
 
 const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
