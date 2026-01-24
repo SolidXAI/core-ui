@@ -10,7 +10,7 @@ import { useGetrolesQuery } from "../../../redux/api/roleApi";
 import { useDeleteUserMutation } from "../../../redux/api/userApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
 import { useFormik } from "formik";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "../../../hooks/solid/navigation";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import { Divider } from "primereact/divider";
@@ -95,30 +95,30 @@ const CreateUser = ({ data, params }: any) => {
     fullName: Yup.string().required(),
     username: Yup.string()
       .required('Username is required.'), // Must be provided
-      // .min(3, 'Username must be at least 3 characters long.') // Minimum length
-      // .max(20, 'Username cannot be longer than 20 characters.') // Maximum length
-      // .matches(
-      //   /^[a-zA-Z0-9_.-]*$/,
-      //   'Username can only contain letters, numbers, underscores, periods, and hyphens.'
-      // ) // Allowed characters
-      // .matches(
-      //   /^[a-zA-Z]/,
-      //   'Username must start with a letter.'
-      // ),
+    // .min(3, 'Username must be at least 3 characters long.') // Minimum length
+    // .max(20, 'Username cannot be longer than 20 characters.') // Maximum length
+    // .matches(
+    //   /^[a-zA-Z0-9_.-]*$/,
+    //   'Username can only contain letters, numbers, underscores, periods, and hyphens.'
+    // ) // Allowed characters
+    // .matches(
+    //   /^[a-zA-Z]/,
+    //   'Username must start with a letter.'
+    // ),
     email: Yup
       .string()
       .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
       .required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
     password: Yup.string().min(6, ERROR_MESSAGES.PASSWORD_CHARACTER(6)).nullable(),
     confirmPassword: Yup.string()
-    .when('password', {
-      is: (val:any) => !!val, // only validate if password is filled
-      then: (schema) =>
-        schema
-          .oneOf([Yup.ref('password')], ERROR_MESSAGES.FIELD_MUST_MATCH('Password'))
-          .nullable(),
-      otherwise: (schema) => schema.notRequired().nullable(),
-    }),
+      .when('password', {
+        is: (val: any) => !!val, // only validate if password is filled
+        then: (schema) =>
+          schema
+            .oneOf([Yup.ref('password')], ERROR_MESSAGES.FIELD_MUST_MATCH('Password'))
+            .nullable(),
+        otherwise: (schema) => schema.notRequired().nullable(),
+      }),
     mobile: Yup.number().required(ERROR_MESSAGES.FIELD_REUQIRED('Mobile')),
   });
 

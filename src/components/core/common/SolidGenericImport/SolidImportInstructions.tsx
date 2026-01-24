@@ -3,7 +3,7 @@ import { Button } from 'primereact/button'
 import styles from './SolidImport.module.css'
 import { useLazyGetImportInstructionsQuery } from '../../../../redux/api/importTransactionApi';
 import { useEffect } from 'react';
-import { getSession } from 'next-auth/react';
+import { getSession } from '../../../../hooks/solid/auth';
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
 export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any) => {
     const [getImportInstructions, { data: importInstructionsData, isLoading, isError }] =
@@ -85,7 +85,7 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
                                                             {count}. {titleCaseKey}:
                                                         </p>
                                                         <div className='flex flex-wrap'>
-                                                            {values.map((item:any, i) => (
+                                                            {values.map((item: any, i) => (
                                                                 <span key={i} className='mr-2'>
                                                                     {typeof item === 'string'
                                                                         ? item

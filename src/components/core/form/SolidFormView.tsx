@@ -6,7 +6,7 @@ import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
 import { useFormik } from "formik";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "../../../hooks/solid/navigation";
 import "primeflex/primeflex.css";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -551,7 +551,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         setViewMode(newMode);
         const params = new URLSearchParams(searchParams.toString());
         params.set("viewMode", newMode);
-        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+        router.push(`${pathname}?${params.toString()}`);
     };
 
     useEffect(() => {
@@ -1587,7 +1587,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 defaultEntityLocaleId,
             });
 
-            router.push(`${updatedPath}?${queryParams.toString()}`, { scroll: false });
+            router.push(`${updatedPath}?${queryParams.toString()}`);
         };
 
         const handleConfirmAccept = () => {

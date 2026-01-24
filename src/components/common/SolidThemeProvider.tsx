@@ -1,7 +1,7 @@
 
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname } from "../../hooks/solid/navigation";
 import { useSelector } from "react-redux";
 
 export const SolidThemeProvider = () => {

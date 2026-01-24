@@ -4,7 +4,7 @@ import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
 import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
 // import { useAppDispatch } from "../../redux/hooks";
 // import { RootState } from "../../redux/store.js";
-import { signOut, useSession } from "next-auth/react";
+import { signOut, useSession } from "../../hooks/solid/auth";
 import { Button } from "primereact/button";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";

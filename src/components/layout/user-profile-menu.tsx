@@ -1,6 +1,6 @@
 
 // import { useAppSelector } from "../../redux/hooks";
-import { signOut } from "next-auth/react";
+import { signOut } from "../../hooks/solid/auth";
 import { PrimeReactContext } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { useContext, useRef, useState } from "react";
@@ -10,7 +10,7 @@ import { LayoutConfig } from "../../types";
 import { toggleTheme } from "../../redux/features/themeSlice";
 import { InputSwitch } from "primereact/inputswitch";
 import { Button } from "primereact/button";
-import { useRouter } from "next/navigation";
+import { useRouter } from "../../hooks/solid/navigation";
 import { Dialog } from "primereact/dialog";
 import { Divider } from "primereact/divider";
 import { Avatar } from "primereact/avatar";

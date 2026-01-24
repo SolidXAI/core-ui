@@ -1,6 +1,6 @@
 // 
 
-// import { useRouter, useSearchParams } from "next/navigation";
+// import { useRouter, useSearchParams } from "../../hooks/solid/navigation";
 // import Pagination from "react-js-pagination";
 
 // interface Props {

@@ -5,7 +5,7 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { useLazyGetrolesQuery } from "../../../redux/api/roleApi";
 import { useCreateuserroleMutation } from "../../../redux/api/userApi";
 import { useFormik } from "formik";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname, useRouter } from "../../../hooks/solid/navigation";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
@@ -34,11 +34,11 @@ const CreateUserRole = ({ data }: any) => {
     username: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('User Name')),
     roleName: Yup.lazy((value) => {
       if (typeof value === 'object' && value !== null && !Array.isArray(value)) {
-          return Yup.object().required(ERROR_MESSAGES.FIELD_REUQIRED('Role Name'));
+        return Yup.object().required(ERROR_MESSAGES.FIELD_REUQIRED('Role Name'));
       } else if (typeof value === 'string') {
-          return Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Role Name')); 
+        return Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Role Name'));
       } else {
-          return Yup.mixed().required(ERROR_MESSAGES.FIELD_REUQIRED('Role Name'));
+        return Yup.mixed().required(ERROR_MESSAGES.FIELD_REUQIRED('Role Name'));
       }
     })
   });
@@ -137,7 +137,7 @@ const CreateUserRole = ({ data }: any) => {
               <div className="form-wrapper-title"> Create User Role</div>
               <div className="gap-3 flex">
                 <div>
-                  <Button label="Save" size="small" onClick={() => showError()} type="submit"  className='small-button'/>
+                  <Button label="Save" size="small" onClick={() => showError()} type="submit" className='small-button' />
                 </div>
                 <CancelButton />
               </div>
@@ -146,7 +146,7 @@ const CreateUserRole = ({ data }: any) => {
                 <h1 className="m-0"> Edit User</h1>
                 <div className="gap-3 flex">
                   <div>
-                    <Button label="Save" onClick={() => showError()} type="submit"  size="small" className='small-button'/>
+                    <Button label="Save" onClick={() => showError()} type="submit" size="small" className='small-button' />
                   </div>
                   <div>
                     {/* <Button label="Delete" severity="danger" type="button" /> */}
@@ -183,7 +183,7 @@ const CreateUserRole = ({ data }: any) => {
                       Role Name
                     </label>
                     <div>
-                    <AutoCompleteField
+                      <AutoCompleteField
                         multiple={false}
                         isFormFieldValid={isFormFieldValid}
                         formik={formik}
@@ -193,10 +193,10 @@ const CreateUserRole = ({ data }: any) => {
                         existingDataTitle={data?.parentCategory?.title}
                         existingDataId={data?.parentCategory?.id}
                         className="solid-standard-autocomplete"
-                    ></AutoCompleteField>
-                    {isFormFieldValid(formik, "roleName") && (
+                      ></AutoCompleteField>
+                      {isFormFieldValid(formik, "roleName") && (
                         <Message severity="error" text={formik?.errors?.roleName?.toString()} />
-                    )}
+                      )}
                     </div>
                   </div>
                 </div>

@@ -1,7 +1,7 @@
 
 import { ERROR_MESSAGES } from '../../constants/error-messages';
-import { signIn } from 'next-auth/react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { signIn } from '../../hooks/solid/auth';
+import { useRouter, useSearchParams } from '../../hooks/solid/navigation';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Toast } from 'primereact/toast';
 import React, { useEffect, useRef, useState } from 'react'
@@ -18,8 +18,8 @@ export const GoogleAuthChecking = () => {
             summary,
             detail,
             ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+                ? { sticky: true }            // stays until user closes
+                : { life: 3000 }),
         });
     };
     useEffect(() => {

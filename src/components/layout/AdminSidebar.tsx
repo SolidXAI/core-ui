@@ -1,7 +1,7 @@
 
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Link from "../../hooks/solid/link";
+import { usePathname } from "../../hooks/solid/navigation";
 import { useState } from "react";
 
 const AdminSidebar = () => {
@@ -47,9 +47,8 @@ const AdminSidebar = () => {
         <Link
           key={index}
           href={menuItem.url}
-          className={`fw-bold list-group-item list-group-item-action ${
-            activeMenuItem.includes(menuItem.url) ? "active" : ""
-          }`}
+          className={`fw-bold list-group-item list-group-item-action ${activeMenuItem.includes(menuItem.url) ? "active" : ""
+            }`}
           onClick={() => handleMenuItemClick(menuItem.url)}
           aria-current={
             activeMenuItem.includes(menuItem.url) ? "true" : "false"

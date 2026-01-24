@@ -8,7 +8,7 @@ import { useLazyGetModelsQuery, useUpdateUserKeyMutation } from "../../../redux/
 import { useLazyGetmodulesQuery } from "../../../redux/api/moduleApi";
 import { useFormik } from "formik";
 import { capitalize } from "lodash";
-import { usePathname } from "next/navigation";
+import { usePathname } from "../../../hooks/solid/navigation";
 import { AutoComplete } from "primereact/autocomplete";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -2358,7 +2358,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
 
                           {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse && !formik.values.relationCoModelSingularName && (
                             <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
-                              <Message  text="Please select Co-model" />
+                              <Message text="Please select Co-model" />
                             </div>
                           )}
                           {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse && formik.values.relationCoModelSingularName && (
@@ -2384,13 +2384,13 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 })}
                               />
                               {formik.values.relationType === "one-to-many" &&
-                                <p className="fieldSubTitle">This is a field that is created in the child model. In this case a <span style={{fontWeight: "700"}}>{formik.values.relationCoModelFieldName ?? formik.values.relationCoModelSingularName}</span> field will be created in the {formik.values.relationCoModelSingularName} when setting create inverse true.</p>
+                                <p className="fieldSubTitle">This is a field that is created in the child model. In this case a <span style={{ fontWeight: "700" }}>{formik.values.relationCoModelFieldName ?? formik.values.relationCoModelSingularName}</span> field will be created in the {formik.values.relationCoModelSingularName} when setting create inverse true.</p>
                               }
                               {formik.values.relationType === "many-to-one" &&
-                                <p className="fieldSubTitle">This is a field that is created in the parent model. In this case a <span style={{fontWeight: "700"}}>{formik.values.relationCoModelFieldName ?? `${formik.values.relationCoModelSingularName}s`}</span> field will be created in the {formik.values.relationCoModelSingularName} when setting create inverse true.</p>
+                                <p className="fieldSubTitle">This is a field that is created in the parent model. In this case a <span style={{ fontWeight: "700" }}>{formik.values.relationCoModelFieldName ?? `${formik.values.relationCoModelSingularName}s`}</span> field will be created in the {formik.values.relationCoModelSingularName} when setting create inverse true.</p>
                               }
                               {formik.values.relationType === "many-to-many" &&
-                                <p className="fieldSubTitle">In this case a {formik.values.relationCoModelFieldName} field will be created in the <span style={{fontWeight: "700"}}>{formik.values.relationCoModelSingularName ?? '{{}}'}</span> when setting create inverse true.</p>
+                                <p className="fieldSubTitle">In this case a {formik.values.relationCoModelFieldName} field will be created in the <span style={{ fontWeight: "700" }}>{formik.values.relationCoModelSingularName ?? '{{}}'}</span> when setting create inverse true.</p>
                               }
                               {isFormFieldValid(formik, "relationCoModelFieldName") && (
                                 <Message

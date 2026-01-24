@@ -2,7 +2,7 @@
 
 
 import { ChildContainerProps, LayoutState } from '../../types';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname, useSearchParams } from '../../hooks/solid/navigation';
 import { PrimeReactContext } from 'primereact/api';
 import { useEventListener, useUnmountEffect } from 'primereact/hooks';
 import { classNames } from 'primereact/utils';
@@ -12,7 +12,7 @@ import AppConfig from './AppConfig';
 import { LayoutContext } from './context/layoutcontext';
 import AppSidebar from './AppSidebar';
 import SolidPopupContainer from '../common/SolidPopupContainer';
-import { useSession } from 'next-auth/react';
+import { useSession } from '../../hooks/solid/auth';
 import { getExtensionFunction } from '../../helpers/registry';
 import { SolidOnApplicationMountEvent } from '../../types/solid-core';
 import { setSolidSettings } from '../../redux/features/settingsSlice';

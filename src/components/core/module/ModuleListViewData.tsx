@@ -3,7 +3,7 @@ import { CreateButton } from "../../../components/common/CreateButton";
 import { handleError, handleSuccess } from "../../../helpers/ToastContainer";
 import { useDeleteMultiplemodulesMutation, useGenerateCodeFormoduleMutation, useLazyGetmodulesQuery, useRefreshPermissionsMutation } from "../../../redux/api/moduleApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
-import Link from "next/link";
+import Link from "../../../hooks/solid/link";
 import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";

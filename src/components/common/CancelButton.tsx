@@ -1,6 +1,6 @@
 
 
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter } from '../../hooks/solid/navigation';
 import { Button } from 'primereact/button';
 
 

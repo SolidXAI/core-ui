@@ -3,7 +3,7 @@ import { useLazyGetfieldsQuery } from "../../../redux/api/fieldApi";
 import {
   useDeleteMultipleModelsMutation,
 } from "../../../redux/api/modelApi";
-import Link from "next/link";
+import Link from "../../../hooks/solid/link";
 import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";

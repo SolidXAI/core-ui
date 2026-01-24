@@ -2,8 +2,8 @@
 
 import { useConfirmOtpLoginMutation, useInitateLoginMutation } from "../../redux/api/authApi";
 import { Form, Formik } from "formik";
-import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import Image from "../../hooks/solid/image";
+import { useRouter, useSearchParams } from "../../hooks/solid/navigation";
 import { Button } from "primereact/button";
 import { InputOtp } from "primereact/inputotp";
 import { Message } from "primereact/message";
@@ -11,7 +11,7 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
-import { signIn } from "next-auth/react";
+import { signIn } from "../../hooks/solid/auth";
 import { useSelector } from "react-redux";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 

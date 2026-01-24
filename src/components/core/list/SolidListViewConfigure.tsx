@@ -1,7 +1,7 @@
 
 import { permissionExpression } from "../../../helpers/permissions";
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import Image from "../../../hooks/solid/image";
+import { usePathname, useRouter } from "../../../hooks/solid/navigation";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";

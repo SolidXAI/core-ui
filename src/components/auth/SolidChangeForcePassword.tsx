@@ -2,7 +2,7 @@
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { useChangePasswordMutation } from '../../redux/api/authApi';
 import { useFormik } from 'formik';
-import { signOut, useSession } from 'next-auth/react';
+import { signOut, useSession } from '../../hooks/solid/auth';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
 import { Message } from 'primereact/message';
@@ -22,8 +22,8 @@ const SolidChangeForcePassword = () => {
             summary,
             detail,
             ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+                ? { sticky: true }            // stays until user closes
+                : { life: 3000 }),
         });
     };
 
@@ -42,7 +42,7 @@ const SolidChangeForcePassword = () => {
     const newPasswordValidation = passwordRegex
         ? Yup.string()
             .matches(passwordRegex, ERROR_MESSAGES.PASSWORD_DO_NOT_MEET)
-            .required(ERROR_MESSAGES.FIELD_REUQIRED('New password'))        
+            .required(ERROR_MESSAGES.FIELD_REUQIRED('New password'))
         : Yup.string().min(6, ERROR_MESSAGES.PASSWORD_CHARACTER(6))
             .required(ERROR_MESSAGES.FIELD_REUQIRED('New password'));
 
@@ -88,7 +88,7 @@ const SolidChangeForcePassword = () => {
                     signOut({ callbackUrl: "/auth/login" })
                 }
             } catch (err: any) {
-                showToast("error",ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message);
+                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message);
                 // setErrors({
                 //     currentPassword: "Incorrect Current Password",
                 // })

@@ -1,7 +1,7 @@
 
 
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
+import Link from "../../hooks/solid/link";
+import { useSearchParams } from "../../hooks/solid/navigation";
 import { useSelector } from "react-redux";
 
 

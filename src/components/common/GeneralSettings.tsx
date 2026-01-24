@@ -8,7 +8,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { CancelButton } from './CancelButton';
 import { InputSwitch } from 'primereact/inputswitch';
 import { RadioButton } from 'primereact/radiobutton';
-import { usePathname } from 'next/navigation';
+import { usePathname } from '../../hooks/solid/navigation';
 import { InputTextarea } from 'primereact/inputtextarea';
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import AuthScreenRightBackgroundImage from '../../resources/images/auth/solid-left-layout-bg.png';

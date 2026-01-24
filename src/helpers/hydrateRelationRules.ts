@@ -2,7 +2,7 @@ import { FilterRule, FilterRuleType } from "../components/core/common/FilterComp
 import { createSolidEntityApi } from "../redux/api/solidEntityApi";
 import axios from "axios";
 import { kebabCase } from "change-case";
-import { getSession } from "next-auth/react";
+import { getSession } from "../hooks/solid/auth";
 
 interface RelationHydrationBucket {
   meta: any;

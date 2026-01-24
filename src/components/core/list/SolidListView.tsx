@@ -10,7 +10,7 @@ import {
 } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { FilterMatchMode } from "primereact/api";
-import Link from "next/link";
+import Link from "../../../hooks/solid/link";
 import qs from "qs";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -23,7 +23,7 @@ import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { pascalCase } from "change-case";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { permissionExpression } from "../../../helpers/permissions";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname, useRouter, useSearchParams } from "../../../hooks/solid/navigation";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "../../../components/core/common/FilterComponent";
 import { SolidLayoutViews } from "../common/SolidLayoutViews";
@@ -54,7 +54,7 @@ import styles from "./SolidListViewWrapper.module.css";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
 import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from "../../../types/solid-core";
 import { getExtensionFunction } from "../../../helpers/registry";
-import { useSession } from "next-auth/react";
+import { useSession } from "../../../hooks/solid/auth";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
@@ -1561,7 +1561,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                     } else {
                       if (typeof window !== "undefined") {
                         // store a simple marker for the caller
-                        
+
                         // also store the full current URL so Back can restore exact state (including action params)
                         try {
                           sessionStorage.setItem("fromView", "list");
@@ -1672,7 +1672,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                         try {
                                           sessionStorage.setItem("fromView", "list");
                                           sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-                                        } catch (e) {}
+                                        } catch (e) { }
                                       }
                                       router.push(
                                         `${editButtonUrl}/${rowData?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
@@ -1767,7 +1767,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                               try {
                                                 sessionStorage.setItem("fromView", "list");
                                                 sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-                                              } catch (e) {}
+                                              } catch (e) { }
                                               router.push(
                                                 `${editButtonUrl}/${selectedDataRef.current?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
                                               );

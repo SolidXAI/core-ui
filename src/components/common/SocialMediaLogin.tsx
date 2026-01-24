@@ -1,8 +1,5 @@
-
-import { signIn } from 'next-auth/react'
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname, useRouter } from '../../hooks/solid/navigation';
 import { Button } from 'primereact/button'
-import React from 'react'
 
 export const SocialMediaLogin = () => {
     const router = useRouter();

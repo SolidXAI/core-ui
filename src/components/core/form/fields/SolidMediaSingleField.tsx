@@ -10,7 +10,6 @@ import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { FileReaderExt } from "../../../../components/common/FileReaderExt";
 import { ProgressBar } from "primereact/progressbar";
-import Link from "next/link";
 import getAcceptedFileTypes from "../../../../helpers/getAcceptedFileTypes";
 import { downloadMediaFile } from "../../../../helpers/downloadMediaFile";
 import { getExtensionComponent } from "../../../../helpers/registry";

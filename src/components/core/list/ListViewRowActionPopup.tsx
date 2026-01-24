@@ -23,7 +23,6 @@ export const ListViewRowActionPopup = ({ context }: any) => {
             {
                 context?.rowAction?.action ?
                     DynamicWidget && <DynamicWidget {...widgetProps} />
-                    // <LoadDynamicJsxComponent context={context}></LoadDynamicJsxComponent>
                     :
                     <>
                         <h1>{context?.modelName}</h1>
