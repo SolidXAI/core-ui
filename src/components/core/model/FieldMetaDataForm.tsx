@@ -1,4 +1,4 @@
-'use client';
+
 import CodeEditor from "../../../components/common/CodeEditor";
 import { SingleSelectAutoCompleteField } from "../../../components/common/SingleSelectAutoCompleteField";
 import { getSingularAndPlural } from "../../../helpers/helpers";

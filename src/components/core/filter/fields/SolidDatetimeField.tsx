@@ -1,4 +1,4 @@
-"use client";
+
 import React, { useEffect, useState } from 'react';
 import { dateFilterMatchModeOptions } from './SolidDateField';
 import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';

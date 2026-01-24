@@ -1,4 +1,4 @@
-"use client";
+
 
 import { useLazyNavigationQuery } from "../../../redux/api/modelApi";
 import { useEffect, useState } from "react";

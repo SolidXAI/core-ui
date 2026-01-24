@@ -1,4 +1,4 @@
-'use client';
+
 import { AutoCompleteField } from "../../../components/common/AutoCompleteField";
 import { CancelButton } from "../../../components/common/CancelButton";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";

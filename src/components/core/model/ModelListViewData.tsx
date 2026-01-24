@@ -1,4 +1,4 @@
-"use client";
+
 import { CreateButton } from "../../../components/common/CreateButton";
 import {
   useDeleteMultipleModelsMutation,

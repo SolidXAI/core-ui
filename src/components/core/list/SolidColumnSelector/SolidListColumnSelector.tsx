@@ -1,5 +1,5 @@
 // @ts-nocheck
-"use client"
+
 import { useFormik } from 'formik';
 import { Button } from 'primereact/button';
 import { Checkbox } from 'primereact/checkbox';

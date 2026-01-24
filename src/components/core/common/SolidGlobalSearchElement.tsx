@@ -1,4 +1,4 @@
-"use client"
+
 
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Dialog } from "primereact/dialog";

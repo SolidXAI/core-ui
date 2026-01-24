@@ -1,4 +1,4 @@
-"use client"
+
 import { SolidBreadcrumb } from './SolidBreadcrumb';
 import { SolidFormStepper } from './SolidFormStepper';
 

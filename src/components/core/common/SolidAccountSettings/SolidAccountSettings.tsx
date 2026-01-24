@@ -1,4 +1,4 @@
-"use client"
+
 
 import { Dialog } from "primereact/dialog";
 import { useMemo, useState } from "react";

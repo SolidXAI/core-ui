@@ -1,4 +1,4 @@
-"use client"
+
 
 import { useDeleteMediaMutation } from "../../../../redux/api/mediaApi";
 import { useGetUserQuery, useUpdateUserProfileMutation } from "../../../../redux/api/userApi";

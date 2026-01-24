@@ -1,4 +1,4 @@
-'use client';
+
 import React, { useState } from 'react';
 import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";

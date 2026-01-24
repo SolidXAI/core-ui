@@ -1,4 +1,4 @@
-"use client";
+
 import { useLazyGetfieldsQuery } from "../../../redux/api/fieldApi";
 import {
   useDeleteMultipleModelsMutation,

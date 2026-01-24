@@ -1,4 +1,4 @@
-"use client"
+
 
 import { handleError } from "../../helpers/ToastContainer";
 import { signOut, useSession } from "next-auth/react";

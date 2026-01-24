@@ -1,4 +1,4 @@
-'use client';
+
 
 import dayjs from "dayjs";
 

@@ -1,4 +1,4 @@
-'use client';
+
 
 import { Checkbox } from "primereact/checkbox";
 import { SolidKanbanViewFieldsParams } from "../SolidKanbanViewFields";

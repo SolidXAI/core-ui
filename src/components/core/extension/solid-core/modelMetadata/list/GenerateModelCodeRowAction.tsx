@@ -1,4 +1,4 @@
-'use client';
+
 import { useGenerateCodeForModelMutation } from "../../../../../../redux/api/modelApi";
 import { useSeederMutation } from "../../../../../../redux/api/solidServiceApi";
 import { closePopup } from "../../../../../../redux/features/popupSlice";

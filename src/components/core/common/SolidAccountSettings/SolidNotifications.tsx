@@ -1,4 +1,4 @@
-"use client"
+
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
 import { useBulkUpdateSolidUserSettingsMutation, useGetSolidSettingsQuery } from '../../../../redux/api/solidSettingsApi';
 import { useFormik } from 'formik';

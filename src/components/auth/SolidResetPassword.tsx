@@ -1,4 +1,4 @@
-"use client";
+
 
 import { useConfirmForgotPasswordMutation } from "../../redux/api/authApi";
 import { useFormik } from "formik";

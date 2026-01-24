@@ -1,4 +1,4 @@
-'use client';
+
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { Message } from "primereact/message";
 import { useMemo, useState } from "react";

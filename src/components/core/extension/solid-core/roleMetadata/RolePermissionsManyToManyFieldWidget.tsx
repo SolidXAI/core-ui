@@ -1,4 +1,4 @@
-"use client";
+
 import { capitalize } from "lodash";
 import { Panel } from "primereact/panel";
 import { useEffect, useState } from "react";

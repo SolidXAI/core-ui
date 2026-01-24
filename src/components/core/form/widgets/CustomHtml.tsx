@@ -1,4 +1,4 @@
-"use client";
+
 
 import { SolidFormWidgetProps } from "../../../../types";
 import parse from 'html-react-parser';

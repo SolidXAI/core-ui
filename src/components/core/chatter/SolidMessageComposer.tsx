@@ -1,4 +1,4 @@
-"use client"
+
 import { InputText } from 'primereact/inputtext'
 import styles from './chatter.module.css'
 import { Button } from 'primereact/button'

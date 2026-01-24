@@ -1,4 +1,4 @@
-'use client';
+
 import { useState } from 'react';
 import { SolidKanbanViewFieldsParams } from '../SolidKanbanViewFields';
 import { Dialog } from 'primereact/dialog';

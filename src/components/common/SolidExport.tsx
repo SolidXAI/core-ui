@@ -1,4 +1,4 @@
-"use client";
+
 import { useFormik } from "formik";
 import './solid-export.css';
 import { Button } from "primereact/button";

@@ -1,4 +1,4 @@
-'use client';
+
 import { DropzonePlaceholder } from "../../../../components/common/DropzonePlaceholder";
 import { useDeleteMediaMutation } from "../../../../redux/api/mediaApi";
 import { Button } from "primereact/button";

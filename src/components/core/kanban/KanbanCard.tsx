@@ -1,5 +1,5 @@
 // @ts-nocheck
-'use client';
+
 import React, { useRef } from "react";
 import { SolidKanbanViewFields } from "./SolidKanbanViewFields";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";

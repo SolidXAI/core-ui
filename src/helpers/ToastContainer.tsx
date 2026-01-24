@@ -1,4 +1,4 @@
-"use client";
+
 import { ERROR_MESSAGES } from '../constants/error-messages';
 import { FetchBaseQueryError } from '@reduxjs/toolkit/dist/query';
 import { Toast } from 'primereact/toast';

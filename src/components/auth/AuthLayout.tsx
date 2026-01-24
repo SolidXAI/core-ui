@@ -1,4 +1,4 @@
-"use client"
+
 // import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 // import { toggleTheme } from "../../redux/features/themeSlice";
 // import { LayoutConfig } from "../../types";

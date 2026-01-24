@@ -1,4 +1,4 @@
-"use client"
+
 import React, { useState, useEffect } from 'react'
 import { SolidChatterHeader } from './SolidChatterHeader'
 import { SolidChatterDateDivider } from './SolidChatterDateDivider'

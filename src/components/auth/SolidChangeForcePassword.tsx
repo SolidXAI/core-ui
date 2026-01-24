@@ -1,4 +1,4 @@
-"use client"
+
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { useChangePasswordMutation } from '../../redux/api/authApi';
 import { useFormik } from 'formik';

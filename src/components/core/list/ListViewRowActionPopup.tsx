@@ -1,4 +1,4 @@
-'use client';
+
 import { Button } from "primereact/button"
 import { getExtensionComponent } from "../../../helpers/registry";
 

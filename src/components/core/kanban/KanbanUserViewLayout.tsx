@@ -1,4 +1,4 @@
-"use client";
+
 import { useFormik } from "formik";
 import { Button } from "primereact/button";
 import { useSelector } from "react-redux";

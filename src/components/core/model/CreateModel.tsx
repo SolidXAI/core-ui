@@ -1,4 +1,4 @@
-"use client"
+
 
 import { CancelButton, SolidCancelButton } from "../../../components/common/CancelButton";
 import { handleError } from "../../../helpers/ToastContainer";

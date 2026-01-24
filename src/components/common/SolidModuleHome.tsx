@@ -1,4 +1,4 @@
-"use client"
+
 
 import { useSession } from 'next-auth/react'
 import styles from './solidModuleHome.module.css'

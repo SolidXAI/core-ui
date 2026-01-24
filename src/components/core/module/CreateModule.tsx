@@ -1,4 +1,4 @@
-"use client"
+
 import { BackButton } from "../../../components/common/BackButton";
 import { CancelButton } from "../../../components/common/CancelButton";
 import { DropzonePlaceholder } from "../../../components/common/DropzonePlaceholder";

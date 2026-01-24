@@ -1,4 +1,4 @@
-"use client"
+
 import { getTextColor, stringToColor } from '../../../helpers/getRandomColors'
 import Image from 'next/image'
 import { Avatar } from 'primereact/avatar'

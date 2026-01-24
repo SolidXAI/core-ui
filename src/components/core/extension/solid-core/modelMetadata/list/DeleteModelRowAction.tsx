@@ -1,4 +1,4 @@
-'use client';
+
 import { useGenerateCodeForModelMutation } from "../../../../../../redux/api/modelApi";
 import { closePopup } from "../../../../../../redux/features/popupSlice";
 import { SolidListRowdataDynamicFunctionProps } from "../../../../../../types/solid-core";

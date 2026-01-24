@@ -1,5 +1,5 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-'use client';
+
 
 import { ChildContainerProps, LayoutState } from '../../types';
 import { usePathname, useSearchParams } from 'next/navigation';

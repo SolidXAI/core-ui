@@ -1,4 +1,4 @@
-"use client"
+
 import { Button } from 'primereact/button'
 import styles from './SolidImport.module.css'
 import { useCreateImportSyncMutation, useLazyGetImportMappingInfoQuery, usePatchUpdateImportTransactionMutation } from '../../../../redux/api/importTransactionApi';

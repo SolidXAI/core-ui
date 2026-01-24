@@ -1,4 +1,4 @@
-"use client"
+
 import { Button } from 'primereact/button'
 import { OverlayPanel } from 'primereact/overlaypanel';
 import React, { useEffect, useRef, useState } from 'react'

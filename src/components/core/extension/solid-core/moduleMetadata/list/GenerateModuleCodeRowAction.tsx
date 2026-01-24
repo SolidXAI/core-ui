@@ -1,4 +1,4 @@
-'use client';
+
 import { SolidCircularLoader } from "../../../../../../components/core/common/SolidLoaders/SolidCircularLoader";
 import { ERROR_MESSAGES } from "../../../../../../constants/error-messages";
 import { useGenerateCodeFormoduleMutation } from "../../../../../../redux/api/moduleApi";

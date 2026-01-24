@@ -1,4 +1,4 @@
-"use client";
+
 
 import { useConfirmOtpRegisterMutation, useInitateRegisterMutation } from "../../redux/api/authApi";
 import { Form, Formik } from "formik";

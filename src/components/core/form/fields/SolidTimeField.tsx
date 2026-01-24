@@ -1,4 +1,4 @@
-'use client';
+
 import { Calendar } from "primereact/calendar";
 import { Message } from "primereact/message";
 import { useRef } from "react";

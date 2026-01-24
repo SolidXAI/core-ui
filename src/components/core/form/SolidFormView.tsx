@@ -1,4 +1,4 @@
-"use client";
+
 
 import { permissionExpression } from "../../../helpers/permissions";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";

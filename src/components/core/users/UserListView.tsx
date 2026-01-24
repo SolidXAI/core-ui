@@ -1,4 +1,4 @@
-"use client";
+
 import { useDeleteMultipleUsersMutation, useLazyGetusersQuery } from '../../../redux/api/userApi';
 import Link from "next/link";
 import { FilterMatchMode } from "primereact/api";

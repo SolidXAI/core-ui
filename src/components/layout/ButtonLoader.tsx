@@ -1,4 +1,4 @@
-"use client";
+
 
 const ButtonLoader = () => {
   return <div className="lds-dual-ring"></div>;

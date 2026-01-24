@@ -1,4 +1,4 @@
-"use client"
+
 import { useCallback, useRef, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from 'primereact/button'

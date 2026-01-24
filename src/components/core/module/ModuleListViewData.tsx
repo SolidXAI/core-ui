@@ -1,4 +1,4 @@
-"use client";
+
 import { CreateButton } from "../../../components/common/CreateButton";
 import { handleError, handleSuccess } from "../../../helpers/ToastContainer";
 import { useDeleteMultiplemodulesMutation, useGenerateCodeFormoduleMutation, useLazyGetmodulesQuery, useRefreshPermissionsMutation } from "../../../redux/api/moduleApi";

@@ -1,5 +1,5 @@
 // @ts-nocheck
-"use client";
+
 
 import { Calendar } from 'primereact/calendar';
 import { Dropdown } from 'primereact/dropdown';

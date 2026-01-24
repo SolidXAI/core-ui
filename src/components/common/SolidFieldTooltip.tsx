@@ -1,4 +1,4 @@
-"use client"
+
 import { Tooltip } from 'primereact/tooltip';
 import React from 'react'
 

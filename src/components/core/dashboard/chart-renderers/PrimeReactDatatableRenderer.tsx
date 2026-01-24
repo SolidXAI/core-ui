@@ -1,4 +1,4 @@
-"use client";
+
 // import "../../../../components/core/dashboard/chart-renderers/init-chartjs";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";

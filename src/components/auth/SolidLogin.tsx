@@ -1,4 +1,4 @@
-"use client";
+
 
 import { Form, Formik } from "formik";
 import { signIn } from "next-auth/react";

@@ -1,4 +1,4 @@
-'use client';
+
 import { usePathname } from 'next/navigation';
 import { plural } from "pluralize";
 import { } from "react";

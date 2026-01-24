@@ -1,4 +1,4 @@
-'use client';
+
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import dynamic from "next/dynamic";
 import { useState, useEffect } from "react";

@@ -1,4 +1,4 @@
-'use client';
+
 import { usePathname } from "next/navigation";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
