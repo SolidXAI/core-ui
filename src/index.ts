@@ -403,11 +403,14 @@ export type {
     SolidUiEvents,
     SolidUiEvent,
     SolidUiEventResponse,
+    SolidLoadList,
     SolidListUiEventResponse,
     SolidListUiEvent,
     SolidLoadForm,
     SolidFormWidgetProps,
-    SolidChartRendererProps
+    SolidFormFieldWidgetProps,
+    SolidChartRendererProps,
+    SolidBeforeListDataLoad
 } from './types';
 
 export { GeneralSettings } from './components/common/GeneralSettings';
