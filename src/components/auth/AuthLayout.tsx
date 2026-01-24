@@ -25,7 +25,11 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     const dispatch = useDispatch();
 
     console.log(`AuthLayout about to trigger useGetAuthSettingsQuery()...`);
-    const { data: solidSettingsDataInitialData } = useGetAuthSettingsQuery("")
+    const {
+        data: solidSettingsDataInitialData,
+        isError: isSolidSettingsError,
+        error: solidSettingsError,
+    } = useGetAuthSettingsQuery("");
     const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
 
     useEffect(() => {
@@ -33,7 +37,13 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
             console.log(`AuthLayout useEffect() received settings initial data: ${JSON.stringify(solidSettingsDataInitialData)}`);
             dispatch(setSolidSettings(solidSettingsDataInitialData?.data));
         }
-    }, [solidSettingsDataInitialData]);
+    }, [dispatch, solidSettingsDataInitialData]);
+
+    useEffect(() => {
+        if (isSolidSettingsError) {
+            console.error("AuthLayout failed to load settings", solidSettingsError);
+        }
+    }, [isSolidSettingsError, solidSettingsError]);
 
     const [allowRegistration, setAllowRegistration] = useState<boolean | null>(null);
     const [isRestricted, setIsRestricted] = useState(false);
@@ -76,8 +86,8 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     }, [solidSettingsData, pathname]);
 
 
-    if (allowRegistration === null) {
-        console.log(`AuthLayout returning null because allowRegistration is null`);
+    if (allowRegistration === null && pathname === "/auth/register") {
+        console.log(`AuthLayout returning null because allowRegistration is null for register route`);
         return null;
     }
 
