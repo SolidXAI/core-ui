@@ -8,7 +8,7 @@ import { PrimeReactContext } from "primereact/api";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
+import { useDispatch, useSelector, useStore } from "react-redux";
 import Image from "next/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { Divider } from "primereact/divider";
@@ -23,6 +23,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     console.log(`AuthLayout about to start rendering...`);
 
     const dispatch = useDispatch();
+    const store = useStore();
 
     console.log(`AuthLayout about to trigger useGetAuthSettingsQuery()...`);
     const {
@@ -49,6 +50,17 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     }, [isSolidSettingsError, solidSettingsError]);
 
     useEffect(() => {
+        const win = typeof window !== "undefined" ? (window as any) : null;
+        const storeMatches = win?.__solidStore ? store === win.__solidStore : undefined;
+        const stateKeys = Object.keys((store.getState() as any) || {});
+        console.log("[AuthLayout] store identity", {
+            storeMatchesProvider: storeMatches,
+            hasSolidSettingsApiSlice: Boolean((store.getState() as any)?.solidSettingsApi),
+            stateKeyCount: stateKeys.length,
+        });
+    }, [store]);
+
+    useEffect(() => {
         console.log("[AuthLayout] RTKQ state", {
             isUninitialized: isSolidSettingsUninitialized,
             isLoading: isSolidSettingsLoading,
@@ -65,6 +77,9 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         solidSettingsError,
         solidSettingsDataInitialData,
     ]);
+
+    const buildId =
+        typeof window !== "undefined" ? (window as any).__NEXT_DATA__?.buildId : undefined;
 
     const [allowRegistration, setAllowRegistration] = useState<boolean | null>(null);
     const [isRestricted, setIsRestricted] = useState(false);
@@ -248,6 +263,22 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                     </div>
                 }
             </div >
+            {buildId && (
+                <div
+                    style={{
+                        position: "fixed",
+                        right: 8,
+                        bottom: 6,
+                        fontSize: 10,
+                        opacity: 0.7,
+                        zIndex: 9999,
+                        pointerEvents: "none",
+                        fontFamily: "monospace",
+                    }}
+                >
+                    build: {buildId}
+                </div>
+            )}
             {/* } */}
             < Dialog
                 visible={isRestricted}
