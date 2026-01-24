@@ -1,8 +1,8 @@
 "use client";
 
-import { getExtensionComponent } from "@/helpers/registry";
+import { getExtensionComponent } from "../../../helpers/registry";
 import { FormikObject, SolidFieldProps } from "./fields/ISolidField";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { SolidFormFieldWidgetProps } from "../../../types/solid-core";
 
 
 export type SolidFormFieldRenderExtensionType ={

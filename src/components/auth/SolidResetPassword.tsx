@@ -1,30 +1,33 @@
 "use client";
 
-import { AppTitle } from "@/helpers/AppTitle";
-import { useConfirmForgotPasswordMutation } from "@/redux/api/authApi";
-import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
+import { useConfirmForgotPasswordMutation } from "../../redux/api/authApi";
 import { useFormik } from "formik";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "primereact/button";
 import { Message } from "primereact/message";
 import { Password } from "primereact/password";
 import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
-import { useEffect, useRef } from "react";
+import { useRef } from "react";
 import * as Yup from "yup";
+import { useSelector } from "react-redux";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { ERROR_MESSAGES } from "../../constants/error-messages";
 const SolidResetPassword = () => {
     const searchParams = useSearchParams();
     const verificationToken = searchParams.get('token');
     // const decodedUsername = searchParams.get('username');
     // const username = decodedUsername ? decodeURIComponent(decodedUsername) : '';
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
-    useEffect(() => {
-        trigger("")
-    }, [trigger])
+
+    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    // useEffect(() => {
+    //     trigger("") // Fetch settings on mount
+    // }, [trigger])
+
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+
+
     const toast = useRef<Toast>(null);
     const router = useRouter();
 
@@ -35,8 +38,8 @@ const SolidResetPassword = () => {
             summary,
             detail,
             ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+                ? { sticky: true }            // stays until user closes
+                : { life: 3000 }),
         });
     };
 
@@ -87,7 +90,7 @@ const SolidResetPassword = () => {
                     showToast("error", ERROR_MESSAGES.ERROR, response.error)
                 )
             } catch (err: any) {
-                showToast("error", err?.data?.message, err?.data?.data?.message? err?.data?.data?.message : err?.data?.message);
+                showToast("error", err?.data?.message, err?.data?.data?.message ? err?.data?.data?.message : err?.data?.message);
             }
         },
     });
@@ -98,20 +101,20 @@ const SolidResetPassword = () => {
     return (
         <>
             <Toast ref={toast} />
-            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
-                {solidSettingsData?.data?.authPagesLayout === 'center' &&
+            <div className={`auth-container ${solidSettingsData?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
+                {solidSettingsData?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
+                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.appLogoPosition}`}>
                             <Image
                                 alt="solid logo"
-                                src={solidSettingsData?.data?.appLogo || SolidLogo}
+                                src={solidSettingsData?.appLogo || SolidLogo}
                                 className="relative"
                                 fill
                             />
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>Create New Password</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>Create New Password</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
                 <form onSubmit={formik.handleSubmit}>
                     <div className="flex flex-column gap-2">

@@ -2,12 +2,11 @@
 import { InputNumber } from "primereact/inputnumber";
 import { Message } from "primereact/message";
 import * as Yup from 'yup';
-import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { getExtensionComponent } from "@/helpers/registry";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
-import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { getExtensionComponent } from "../../../../helpers/registry";
+import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
+import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
+import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 
 export class SolidDecimalField implements ISolidField {
 
@@ -33,7 +32,7 @@ export class SolidDecimalField implements ISolidField {
         return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
     }
 
-    validationSchema(): Schema {
+    validationSchema(): Yup.Schema {
         let schema: Yup.NumberSchema<number | null | undefined> = Yup.number();
 
         const fieldMetadata = this.fieldContext.fieldMetadata;

@@ -1,7 +1,7 @@
 "use client";
-import { InputTypes, SolidVarInputsFilterElement } from '@/components/core/filter/SolidVarInputsFilterElement';
+import { InputTypes, SolidVarInputsFilterElement } from '../../../../../components/core/filter/SolidVarInputsFilterElement';
 import { Dropdown } from 'primereact/dropdown';
-import { getNumberOfInputs, SolidFilterFieldsParams } from '../../SolidFilterFields';
+import { getNumberOfInputs, SolidFilterFieldsParams } from '../../../../../components/core/filter/SolidFilterFields';
 
 const SolidRelationManyToOneField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFieldsParams) => {
     // const filterable = column.attrs.filterable;

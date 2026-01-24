@@ -1,7 +1,7 @@
 "use client"
-import { useGetmodelByIdQuery } from "@/redux/api/modelApi";
-import { useGetmoduleByIdQuery } from "@/redux/api/moduleApi";
-import { useGetusersByIdQuery } from "@/redux/api/userApi";
+import { useGetmodelByIdQuery } from "../../../redux/api/modelApi";
+import { useGetmoduleByIdQuery } from "../../../redux/api/moduleApi";
+import { useGetusersByIdQuery } from "../../../redux/api/userApi";
 import { useEffect } from "react";
 import CreateModel from "../model/CreateModel";
 import CreateModule from "../module/CreateModule";

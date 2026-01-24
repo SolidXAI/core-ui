@@ -1,16 +1,15 @@
 'use client';
-import CodeEditor from "@/components/common/CodeEditor";
+import CodeEditor from "../../../../components/common/CodeEditor";
 import { Message } from "primereact/message";
 import * as Yup from 'yup';
-import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { getExtensionComponent } from "@/helpers/registry";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { getExtensionComponent } from "../../../../helpers/registry";
+import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct import
-import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
+import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 export class SolidJsonField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
@@ -30,7 +29,7 @@ export class SolidJsonField implements ISolidField {
         return this.fieldContext.data[this.fieldContext.field.attrs.name] ?? '';
     }
 
-    validationSchema(): Schema {
+    validationSchema(): Yup.Schema {
         let schema: Yup.StringSchema<string | null | undefined> = Yup.string();
 
         const fieldMetadata = this.fieldContext.fieldMetadata;

@@ -14,28 +14,27 @@ import Link from "next/link";
 import qs from "qs";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
-import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
+import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
+import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { SolidListViewColumn } from "./SolidListViewColumn";
 // import { SolidListViewOptions } from "../common/SolidListviewOptions";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { pascalCase } from "change-case";
-import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
-import { permissionExpression } from "@/helpers/permissions";
+import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
+import { permissionExpression } from "../../../helpers/permissions";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
-import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@/components/core/common/FilterComponent";
+import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "../../../components/core/common/FilterComponent";
 import { SolidLayoutViews } from "../common/SolidLayoutViews";
-import { FilterIcon } from "../../modelsComponents/filterIcon";
+import { FilterIcon } from '../../../components/modelsComponents/filterIcon';
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Toast } from "primereact/toast";
 import { Divider } from "primereact/divider";
-import CompactImage from "../../../resources/images/layout/images/compact.png";
-import CozyImage from "../../../resources/images/layout/images/cozy.png";
-import ComfortableImage from "../../../resources/images/layout/images/comfortable.png";
-import ListImage from "../../../resources/images/layout/images/cozy.png";
-import KanbanImage from "../../../resources/images/layout/images/kanban.png";
+import CompactImage from '../../../resources/images/layout/images/compact.png';
+import CozyImage from '../../../resources/images/layout/images/cozy.png';
+import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
+import KanbanImage from '../../../resources/images/layout/images/kanban.png';
 import { capitalize, filter, set } from "lodash";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
@@ -46,22 +45,22 @@ import "yet-another-react-lightbox/plugins/counter.css";
 import { SolidListViewConfigure } from "./SolidListViewConfigure";
 import { SolidListViewShimmerLoading } from "./SolidListViewShimmerLoading";
 import { SolidEmptyListViewPlaceholder } from "./SolidEmptyListViewPlaceholder";
-import { useHandleListCustomButtonClick } from "@/components/common/useHandleListCustomButtonClick";
-import { hasAnyRole, useHasAnyRole } from "@/helpers/rolesHelper";
+import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
+import { hasAnyRole, useHasAnyRole } from "../../../helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { SolidListViewRowButtonContextMenu } from "./SolidListViewRowButtonContextMenu";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./SolidListViewWrapper.module.css";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
-import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from "@/types/solid-core";
-import { getExtensionFunction } from "@/helpers/registry";
+import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from "../../../types/solid-core";
+import { getExtensionFunction } from "../../../helpers/registry";
 import { useSession } from "next-auth/react";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
-import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
-import { useLazyGetMcpUrlQuery } from "@/redux/api/solidSettingsApi";
+import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
+import { useLazyGetMcpUrlQuery } from "../../../redux/api/solidSettingsApi";
 import { log } from "console";
-// import { ERROR_MESSAGES } from "@/constants/error-messages";
+// import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -170,25 +169,13 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [mcpUrl, setMcpUrl] = useState<string | null>(null);
   const [getMcpUrl] = useLazyGetMcpUrlQuery();
 
-  useEffect(() => {
+  const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
 
-    const fetchPermissions = async () => {
-      const permissionNames = ["SettingController.getMcpUrl"]
-      const queryData = {
-        permissionNames: permissionNames
-      };
-      const queryString = qs.stringify(queryData, {
-        encodeValuesOnly: true
-      });
-      const response = await triggerCheckIfPermissionExists(queryString);
-      if (response.data.data) {
-        if (response.data.data.includes("SettingController.getMcpUrl")) {
-          enableSolidXAiPanel();
-        }
-      }
-    };
-    fetchPermissions();
-  }, []);
+  useEffect(() => {
+    if (solidSettingsData?.mcpEnabled && solidSettingsData?.mcpServerUrl && solidSettingsData?.mcpApiKey) {
+      enableSolidXAiPanel();
+    }
+  }, [solidSettingsData]);
 
   const enableSolidXAiPanel = async () => {
     try {
@@ -295,10 +282,10 @@ export const SolidListView = (params: SolidListViewParams) => {
     useRecoverSolidEntityMutation,
   } = entityApi;
 
-  const menuItemId = searchParams.get("menuItemId"),
-  const menuItemName = searchParams.get("menuItemName"),
-  const actionId = searchParams.get("actionId"),
-  const actionName = searchParams.get("actionName"),
+  const menuItemId = searchParams.get("menuItemId");
+  const menuItemName = searchParams.get("menuItemName");
+  const actionId = searchParams.get("actionId");
+  const actionName = searchParams.get("actionName");
   // Get the list view layout & metadata first.
   const listViewMetaDataQs = qs.stringify(
     {
@@ -334,9 +321,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     const initialFilters: any = {};
     const toPopulate: string[] = [];
     const toPopulateMedia: string[] = [];
-    const currentLayout = params.customLayout
-      ? params.customLayout
-      : solidView?.layout;
+    const currentLayout = params.customLayout ? params.customLayout : solidView?.layout;
     for (let i = 0; i < currentLayout?.children.length; i++) {
       const column = currentLayout?.children[i];
       const fieldMetadata = solidFieldsMetadata?.[column.attrs.name];
@@ -501,7 +486,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(solidListViewLayout?.attrs?.defaultPageSize ? solidListViewLayout?.attrs?.defaultPageSize : 10);
   const [totalRecords, setTotalRecords] = useState(0);
-  const [sortField, setSortField] = useState("id");
+  let [sortField, setSortField] = useState("id");
   const [sortOrder, setSortOrder] = useState(-1);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
   const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>([]);
@@ -867,9 +852,13 @@ export const SolidListView = (params: SolidListViewParams) => {
     if (dynamicHeader) {
       dynamicExtensionFunction = getExtensionFunction(dynamicHeader);
       if (dynamicExtensionFunction) {
-        const updatedListData: SolidListUiEventResponse = await dynamicExtensionFunction(event);
-        if (updatedListData && updatedListData?.filterApplied && updatedListData?.newFilter) {
-          queryData = updatedListData?.newFilter
+        try {
+          const updatedListData: SolidListUiEventResponse = await dynamicExtensionFunction(event);
+          if (updatedListData && updatedListData?.filterApplied && updatedListData?.newFilter) {
+            queryData = updatedListData?.newFilter;
+          }
+        } catch (err) {
+          console.error("Error executing onBeforeListDataLoad extension:", err);
         }
       }
     }
@@ -1323,7 +1312,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                     </div>
                   }
                   <p className="m-0 view-title solid-text-wrapper">
-                    {solidListViewMetaData?.data?.solidView?.displayName}
+                    {solidListViewMetaData?.data?.solidView?.action?.displayName || solidListViewMetaData?.data?.solidView?.displayName}
                   </p>
                 </div>
                 {solidListViewLayout?.attrs?.enableGlobalSearch === true &&
@@ -1571,10 +1560,15 @@ export const SolidListView = (params: SolidListViewParams) => {
                       params.handlePopUpOpen(rowData?.id);
                     } else {
                       if (typeof window !== "undefined") {
-                        // const queryString = searchParams.toString();
-                        // const finalUrl = queryString ? `${pathname}?${queryString}` : pathname;
-                        // sessionStorage.setItem("fromView", finalUrl);
-                        sessionStorage.setItem("fromView", "list");
+                        // store a simple marker for the caller
+                        
+                        // also store the full current URL so Back can restore exact state (including action params)
+                        try {
+                          sessionStorage.setItem("fromView", "list");
+                          sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
+                        } catch (e) {
+                          // ignore storage errors
+                        }
                       }
                       router.push(`${editButtonUrl}/${rowData?.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`);
                     }
@@ -1674,6 +1668,12 @@ export const SolidListView = (params: SolidListViewParams) => {
                                     if (params.embeded == true) {
                                       params.handlePopUpOpen(rowData?.id);
                                     } else {
+                                      if (typeof window !== "undefined") {
+                                        try {
+                                          sessionStorage.setItem("fromView", "list");
+                                          sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
+                                        } catch (e) {}
+                                      }
                                       router.push(
                                         `${editButtonUrl}/${rowData?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
                                       );
@@ -1764,6 +1764,10 @@ export const SolidListView = (params: SolidListViewParams) => {
                                                 selectedDataRef.current?.id
                                               );
                                             } else {
+                                              try {
+                                                sessionStorage.setItem("fromView", "list");
+                                                sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
+                                              } catch (e) {}
                                               router.push(
                                                 `${editButtonUrl}/${selectedDataRef.current?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
                                               );

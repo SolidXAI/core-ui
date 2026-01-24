@@ -6,8 +6,8 @@ import { AutoComplete } from 'primereact/autocomplete'
 import { useEffect, useState } from 'react'
 import styles from './chatter.module.css'
 import { SolidMessageComposer } from './SolidMessageComposer'
-import { useLazyGetusersQuery } from '@/redux/api/userApi'
-import { ERROR_MESSAGES } from '@/constants/error-messages'
+import { useLazyGetusersQuery } from '../../../redux/api/userApi'
+import { ERROR_MESSAGES } from '../../../constants/error-messages'
 interface FilterState {
     name: string;
     startDate: Date | null;

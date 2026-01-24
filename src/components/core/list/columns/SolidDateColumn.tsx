@@ -5,8 +5,8 @@ import { FormEvent } from "primereact/ts-helpers";
 import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewColumn';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 import SolidTableRowCell from '../SolidTableRowCell';
-import { SolidListFieldWidgetProps } from '@/types/solid-core';
-import { getExtensionComponent } from '@/helpers/registry';
+import { SolidListFieldWidgetProps } from '../../../../types/solid-core';
+import { getExtensionComponent } from '../../../../helpers/registry';
 
 export const dateFilterMatchModeOptions = [
     { label: 'Equals', value: FilterMatchMode.EQUALS },

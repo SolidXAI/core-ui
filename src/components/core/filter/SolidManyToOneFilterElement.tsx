@@ -1,5 +1,5 @@
 "use client";
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
+import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { useState } from "react";
 import qs from "qs";

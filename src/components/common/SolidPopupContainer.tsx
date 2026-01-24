@@ -1,11 +1,11 @@
 "use client"
 // components/PopupContainer.tsx
 import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '@/types/solid-core';
-import { closePopup } from '@/redux/features/popupSlice';
+import { RootState } from '../../types/solid-core';
+import { closePopup } from '../../redux/features/popupSlice';
 import { Dialog } from 'primereact/dialog';
 import { get } from 'lodash';
-import { getExtensionComponent } from '@/helpers/registry';
+import { getExtensionComponent } from '../../helpers/registry';
 import { Button } from 'primereact/button';
 
 

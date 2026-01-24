@@ -4,9 +4,9 @@ import { useDropzone } from 'react-dropzone';
 import { Button } from 'primereact/button'
 import styles from './SolidImport.module.css'
 import { DocumentSvg } from './DocumentSvg';
-import { useCreateImportTransactionMutation } from '@/redux/api/importTransactionApi';
+import { useCreateImportTransactionMutation } from '../../../../redux/api/importTransactionApi';
 import { Toast } from 'primereact/toast';
-import { ERROR_MESSAGES } from '@/constants/error-messages';
+import { ERROR_MESSAGES } from '../../../../constants/error-messages';
 export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMetadataId }: any) => {
     const toast = useRef<Toast>(null);
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {

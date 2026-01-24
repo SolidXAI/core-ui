@@ -3,13 +3,12 @@ import { Calendar } from "primereact/calendar";
 import { Message } from "primereact/message";
 import { useRef } from "react";
 import * as Yup from 'yup';
-import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { getExtensionComponent } from "@/helpers/registry";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
-import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
-import { DateFieldViewComponent } from "../../common/DateFieldViewComponent";
+import { getExtensionComponent } from "../../../../helpers/registry";
+import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
+import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
+import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import { DateFieldViewComponent } from '../../../../components/core/common/DateFieldViewComponent';
 
 
 // Converts multiple time formats into a JavaScript Date object
@@ -88,8 +87,8 @@ export class SolidTimeField implements ISolidField {
         return fieldDefaultValue ? new Date(fieldDefaultValue) : null;
     }
 
-    validationSchema(): Schema {
-        let schema: Yup.DateSchema = Yup.date();
+    validationSchema(): Yup.Schema {
+        let schema = Yup.date().nullable();
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;

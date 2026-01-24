@@ -6,8 +6,8 @@ import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { FormEvent } from "primereact/ts-helpers";
 import { FilterMatchMode } from 'primereact/api';
 import SolidTableRowCell from '../SolidTableRowCell';
-import { SolidListFieldWidgetProps } from '@/types/solid-core';
-import { getExtensionComponent } from '@/helpers/registry';
+import { SolidListFieldWidgetProps } from '../../../../types/solid-core';
+import { getExtensionComponent } from '../../../../helpers/registry';
 
 const SolidExternalIdColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;

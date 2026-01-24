@@ -1,11 +1,11 @@
 "use client"
 import { Button } from 'primereact/button'
 import styles from './SolidImport.module.css'
-import { useCreateImportSyncMutation, useLazyGetImportMappingInfoQuery, usePatchUpdateImportTransactionMutation } from '@/redux/api/importTransactionApi';
+import { useCreateImportSyncMutation, useLazyGetImportMappingInfoQuery, usePatchUpdateImportTransactionMutation } from '../../../../redux/api/importTransactionApi';
 import React, { useEffect, useRef, useState } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { Toast } from 'primereact/toast';
-import { ERROR_MESSAGES } from '@/constants/error-messages';
+import { ERROR_MESSAGES } from '../../../../constants/error-messages';
 export const SolidImportTransaction = ({ setImportStatusResult, transactionId, setImportStep }: any) => {
     // console.log("get transaction id", transactionId);
 

@@ -1,9 +1,9 @@
 "use client"
 
-import { CancelButton, SolidCancelButton } from "@/components/common/CancelButton";
-import { handleError } from "@/helpers/ToastContainer";
-import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
-import { useCreatemodelMutation, useDeletemodelMutation, useLazyGetModelsQuery, useUpdatemodelMutation } from "@/redux/api/modelApi";
+import { CancelButton, SolidCancelButton } from "../../../components/common/CancelButton";
+import { handleError } from "../../../helpers/ToastContainer";
+import { useGetFieldDefaultMetaDataQuery } from "../../../redux/api/fieldApi";
+import { useCreatemodelMutation, useDeletemodelMutation, useLazyGetModelsQuery, useUpdatemodelMutation } from "../../../redux/api/modelApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
 import { usePathname, useRouter } from "next/navigation";
 import { Button } from "primereact/button";
@@ -13,14 +13,14 @@ import qs from "qs";
 import { useEffect, useRef, useState } from "react";
 import FieldMetaData from "./FieldMetaData";
 import ModelMetaData from "./ModelMetaData";
-import { BackButton } from "@/components/common/BackButton";
-import { SolidFormStepper } from "@/components/common/SolidFormStepper";
+import { BackButton } from "../../../components/common/BackButton";
+import { SolidFormStepper } from "../../../components/common/SolidFormStepper";
 import { Dialog } from "primereact/dialog";
 import { Divider } from "primereact/divider";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { SolidBreadcrumb } from "@/components/common/SolidBreadcrumb";
-import { SolidFormHeader } from "@/components/common/SolidFormHeader";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { SolidBreadcrumb } from "../../../components/common/SolidBreadcrumb";
+import { SolidFormHeader } from "../../../components/common/SolidFormHeader";
+import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
 interface ErrorResponseData {
   message: string;

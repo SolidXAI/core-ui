@@ -3,10 +3,10 @@ import React, { useState } from 'react';
 import { Column } from "primereact/column";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { Button } from 'primereact/button';
-import { SolidMediaListFieldWidgetProps } from '@/types/solid-core';
-import { getExtensionComponent } from '@/helpers/registry';
+import { SolidMediaListFieldWidgetProps } from '../../../../types/solid-core';
+import { getExtensionComponent } from '../../../../helpers/registry';
 import { classNames } from 'primereact/utils';
-import { FileReaderExt } from '@/components/common/FileReaderExt';
+import { FileReaderExt } from '../../../../components/common/FileReaderExt';
 import { Dialog } from 'primereact/dialog';
 
 // Helpers

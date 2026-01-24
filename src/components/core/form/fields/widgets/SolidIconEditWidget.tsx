@@ -1,5 +1,6 @@
-import { solidIcons } from "@/helpers/solidIcons";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+"use client";
+import { solidIcons } from "../../../../../helpers/solidIcons";
+import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Dropdown } from "primereact/dropdown";

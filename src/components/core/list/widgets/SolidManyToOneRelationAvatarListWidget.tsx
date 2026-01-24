@@ -1,5 +1,5 @@
-import { SolidListFieldWidgetProps } from "@/types/solid-core";
-import { AvatarWidget } from "../../common/AvatarWidget";
+import { SolidListFieldWidgetProps } from "../../../../types/solid-core";
+import { AvatarWidget } from '../../../../components/core/common/AvatarWidget';
 
 export const SolidManyToOneRelationAvatarListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
     const manyToOneFieldData = rowData[column.attrs.name];

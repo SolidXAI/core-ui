@@ -3,13 +3,12 @@ import { Calendar } from "primereact/calendar";
 import { Message } from "primereact/message";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from 'yup';
-import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { getExtensionComponent } from "@/helpers/registry";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
-import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
-import { DateFieldViewComponent } from "../../common/DateFieldViewComponent";
+import { getExtensionComponent } from "../../../../helpers/registry";
+import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
+import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
+import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import { DateFieldViewComponent } from '../../../../components/core/common/DateFieldViewComponent';
 
 export class SolidDateTimeField implements ISolidField {
 
@@ -35,7 +34,7 @@ export class SolidDateTimeField implements ISolidField {
         return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
     }
 
-    validationSchema(): Schema {
+    validationSchema(): Yup.Schema {
         let schema: Yup.DateSchema<Date | null | undefined> = Yup.date();
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;

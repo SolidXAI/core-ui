@@ -2,12 +2,12 @@
 import { InputText } from 'primereact/inputtext'
 import styles from './chatter.module.css'
 import { Button } from 'primereact/button'
-import { useCreateChatterMessageMutation } from '@/redux/api/solidChatterMessageApi'
+import { useCreateChatterMessageMutation } from '../../../redux/api/solidChatterMessageApi'
 import { useEffect, useState, useRef } from 'react'
-import { useGetSolidViewLayoutQuery } from '@/redux/api/solidViewApi'
+import { useGetSolidViewLayoutQuery } from '../../../redux/api/solidViewApi'
 import { useSelector } from 'react-redux'
 import { FileUpload } from 'primereact/fileupload';
-import { ERROR_MESSAGES } from '@/constants/error-messages'
+import { ERROR_MESSAGES } from '../../../constants/error-messages'
 export const SolidMessageComposer = ({ type, modelSingularName, refetch, id }: { type?: string, modelSingularName?: any, refetch?: any, id?: any }) => {
     const [message, setMessage] = useState('');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);

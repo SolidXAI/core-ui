@@ -27,10 +27,14 @@ import {
     SolidUiEvents,
     SolidUiEvent,
     SolidListUiEvent,
+    SolidLoadForm,
     SolidUiEventResponse,
+    SolidLoadList,
     SolidListUiEventResponse,
     SolidFormWidgetProps,
-    SolidChartRendererProps
+    SolidFormFieldWidgetProps,
+    SolidChartRendererProps,
+    SolidBeforeListDataLoad
 } from './solid-core';
 
 type ChildContainerProps = {
@@ -60,9 +64,13 @@ export type {
     LayoutNodeType,
     SolidUiEvents,
     SolidUiEvent,
+    SolidLoadList,
     SolidUiEventResponse,
     SolidListUiEventResponse,
     SolidListUiEvent,
+    SolidLoadForm,
     SolidFormWidgetProps,
-    SolidChartRendererProps
+    SolidChartRendererProps,
+    SolidFormFieldWidgetProps,
+    SolidBeforeListDataLoad
 };

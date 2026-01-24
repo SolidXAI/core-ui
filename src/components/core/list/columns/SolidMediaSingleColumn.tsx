@@ -3,8 +3,8 @@ import React, { useState } from 'react';
 import { Column } from "primereact/column";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { classNames } from 'primereact/utils';
-import { SolidMediaListFieldWidgetProps } from '@/types/solid-core';
-import { getExtensionComponent } from '@/helpers/registry';
+import { SolidMediaListFieldWidgetProps } from '../../../../types/solid-core';
+import { getExtensionComponent } from '../../../../helpers/registry';
 
 // Helpers for file type detection
 const isImageFile = (url: string) => /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);

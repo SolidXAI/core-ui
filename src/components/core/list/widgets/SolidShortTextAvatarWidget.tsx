@@ -1,4 +1,4 @@
-import { SolidListFieldWidgetProps } from "@/types/solid-core";
+import { SolidListFieldWidgetProps } from "../../../../types/solid-core";
 
 
 export const SolidShortTextAvatarWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {

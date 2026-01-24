@@ -3,8 +3,8 @@
 import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { Dropdown } from 'primereact/dropdown';
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
-import { SolidListFieldWidgetProps } from "@/types/solid-core";
-import { getExtensionComponent } from "@/helpers/registry";
+import { SolidListFieldWidgetProps } from "../../../../types/solid-core";
+import { getExtensionComponent } from "../../../../helpers/registry";
 import { log } from "console";
 
 const SolidBooleanColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {

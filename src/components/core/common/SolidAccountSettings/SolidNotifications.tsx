@@ -1,21 +1,25 @@
 "use client"
-import { ERROR_MESSAGES } from '@/constants/error-messages';
-import { useBulkUpdateSolidUserSettingsMutation, useGetSolidSettingsQuery } from '@/redux/api/solidSettingsApi';
+import { ERROR_MESSAGES } from '../../../../constants/error-messages';
+import { useBulkUpdateSolidUserSettingsMutation, useGetSolidSettingsQuery } from '../../../../redux/api/solidSettingsApi';
 import { useFormik } from 'formik';
 import { Button } from 'primereact/button';
 import { InputSwitch } from 'primereact/inputswitch';
 import { Toast } from 'primereact/toast';
 import React, { useEffect, useRef } from 'react'
+import { useSelector } from 'react-redux';
 export const SolidNotifications = () => {
-    const {
-        data: solidSettingsData,
-        isLoading,
-        error,
-        refetch,
-    } = useGetSolidSettingsQuery(undefined);
-    useEffect(() => {
-        refetch();
-    }, []);
+    // const {
+    //     data: solidSettingsData,
+    //     isLoading,
+    //     error,
+    //     refetch,
+    // } = useGetSolidSettingsQuery(undefined);
+
+    // useEffect(() => {
+    //     refetch();
+    // }, []);
+
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
     const toast = useRef<Toast>(null);
     const [bulkUpdateSolidSettings] = useBulkUpdateSolidUserSettingsMutation();
 
@@ -25,13 +29,13 @@ export const SolidNotifications = () => {
             summary,
             detail,
             ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+                ? { sticky: true }            // stays until user closes
+                : { life: 3000 }),
         });
     };
 
     const initialValues = {
-        enableNotification: solidSettingsData?.data?.user?.enableNotification ?? true
+        enableNotification: solidSettingsData?.enableNotification ?? true
     }
 
     const formik = useFormik({
@@ -40,7 +44,7 @@ export const SolidNotifications = () => {
         onSubmit: async (values) => {
             try {
                 const updatedSettingsArray: Array<{ key: string; value: string; type: string }> = [];
-                const currentSettings = solidSettingsData?.data?.user || {};
+                const currentSettings = solidSettingsData?.user || {};
 
                 const formData = new FormData();
 
@@ -56,14 +60,14 @@ export const SolidNotifications = () => {
                             formData.append(key, value);
                             updatedSettingsArray.push({
                                 key,
-                                value: "", 
-                                type: "user", 
+                                value: "",
+                                type: "user",
                             });
                         } else {
                             updatedSettingsArray.push({
                                 key,
                                 value: value,
-                                type: "user", 
+                                type: "user",
                             });
                         }
                     }

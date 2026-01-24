@@ -1,11 +1,11 @@
 'use client';
-import CodeEditor from "@/components/common/CodeEditor";
-import { SingleSelectAutoCompleteField } from "@/components/common/SingleSelectAutoCompleteField";
-import { getSingularAndPlural } from "@/helpers/helpers";
-import { useGetFieldDefaultMetaDataQuery } from "@/redux/api/fieldApi";
-import { useLazyGetMediaStorageProvidersQuery } from "@/redux/api/mediaStorageProviderApi";
-import { useLazyGetModelsQuery, useUpdateUserKeyMutation } from "@/redux/api/modelApi";
-import { useLazyGetmodulesQuery } from "@/redux/api/moduleApi";
+import CodeEditor from "../../../components/common/CodeEditor";
+import { SingleSelectAutoCompleteField } from "../../../components/common/SingleSelectAutoCompleteField";
+import { getSingularAndPlural } from "../../../helpers/helpers";
+import { useGetFieldDefaultMetaDataQuery } from "../../../redux/api/fieldApi";
+import { useLazyGetMediaStorageProvidersQuery } from "../../../redux/api/mediaStorageProviderApi";
+import { useLazyGetModelsQuery, useUpdateUserKeyMutation } from "../../../redux/api/modelApi";
+import { useLazyGetmodulesQuery } from "../../../redux/api/moduleApi";
 import { useFormik } from "formik";
 import { capitalize } from "lodash";
 import { usePathname } from "next/navigation";
@@ -29,8 +29,8 @@ import qs from "qs";
 import React, { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import * as Yup from "yup";
 import FieldSelector from "./FieldSelector";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
-import { getVirtualScrollerOptions } from "@/helpers/autoCompleteVirtualScroll";
+import { ERROR_MESSAGES } from "../../../constants/error-messages";
+import { getVirtualScrollerOptions } from "../../../helpers/autoCompleteVirtualScroll";
 
 
 

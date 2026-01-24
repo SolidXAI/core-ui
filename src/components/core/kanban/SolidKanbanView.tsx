@@ -1,10 +1,10 @@
 // @ts-nocheck
 
 "use client";
-import { permissionExpression } from "@/helpers/permissions";
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
-import { useGetSolidViewLayoutQuery } from "@/redux/api/solidViewApi";
-import { useLazyCheckIfPermissionExistsQuery } from "@/redux/api/userApi";
+import { permissionExpression } from "../../../helpers/permissions";
+import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
+import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
+import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { DropResult } from "@hello-pangea/dnd";
 import Link from "next/link";
 import { FilterMatchMode } from "primereact/api";
@@ -18,7 +18,6 @@ import KanbanBoard from "./KanbanBoard";
 import CompactImage from '../../../resources/images/layout/images/compact.png';
 import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
-import ListImage from '../../../resources/images/layout/images/cozy.png';
 import KanbanImage from '../../../resources/images/layout/images/kanban.png';
 import { capitalize } from "lodash";
 import Lightbox from "yet-another-react-lightbox";
@@ -31,13 +30,9 @@ import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
 import { KanbanUserViewLayout } from "./KanbanUserViewLayout";
 import { useDispatch, useSelector } from "react-redux";
 import { queryObjectToQueryString, queryStringToQueryObject } from "../list/SolidListView";
-
-
 import { Toast } from "primereact/toast";
-import { useSelector } from "react-redux";
-import { queryObjectToQueryString, queryStringToQueryObject } from "../list/SolidListView";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
-import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
+import { ERROR_MESSAGES } from "../../../constants/error-messages";
+import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 
 
 type SolidKanbanViewParams = {
@@ -897,4 +892,3 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     </div>
   );
 };
-

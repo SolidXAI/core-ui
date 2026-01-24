@@ -2,19 +2,19 @@
 
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Dialog } from "primereact/dialog";
-import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "@/components/core/common/FilterComponent";
+import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "../../../components/core/common/FilterComponent";
 import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Divider } from "primereact/divider";
 import { usePathname, useRouter, useSearchParams } from "next/navigation";
 import { queryStringToQueryObject } from "../list/SolidListView";
 import { InputText } from "primereact/inputtext";
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
+import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import qs from "qs";
 import { useSelector } from "react-redux";
 import { SolidSaveCustomFilterForm } from "./SolidSaveCustomFilterForm";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
-import { hydrateRelationRules } from "@/helpers/hydrateRelationRules";
+import { ERROR_MESSAGES } from "../../../constants/error-messages";
+import { hydrateRelationRules } from "../../../helpers/hydrateRelationRules";
 
 const getRandomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -744,14 +744,18 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         if (inputValue?.trim()) {
             const fallbackField = searchableFields[0]; // guaranteed object
             if (!fallbackField) return;
-            const newChip = {
-                columnName: columnName || fallbackField.fieldName,
-                value: inputValue.trim(),
+            // Support comma-separated values: split, trim and add as separate chips
+            const values = inputValue.split(",").map(v => v.trim()).filter(v => v !== "");
+            const fieldName = columnName || fallbackField.fieldName;
+            const chipsToAdd = values.map(v => ({
+                columnName: fieldName,
+                value: v,
                 columnDisplayName: fallbackField.displayName,
                 searchField: fallbackField.searchField,
                 matchMode: fallbackField.matchMode
-            };
-            setSearchChips((prev) => [...prev, newChip]);
+            }));
+
+            setSearchChips((prev) => [...prev, ...chipsToAdd]);
             setInputValue("");
             setHasSearched(true)
             setRefreshKey((prev) => prev + 1)
@@ -1328,13 +1332,15 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                                                         e.preventDefault();
                                                         const currentValue = inputValue?.trim();
                                                         if (currentValue) {
-                                                            setSearchChips((prev) => [...prev, {
+                                                            const values = currentValue.split(",").map((v) => v.trim()).filter((v) => v !== "");
+                                                            const chipsToAdd = values.map(v => ({
                                                                 columnName: value.fieldName,
-                                                                value: currentValue,
+                                                                value: v,
                                                                 columnDisplayName: value.displayName,
                                                                 searchField: value.searchField,
                                                                 matchMode: value.matchMode
-                                                            }]);
+                                                            }));
+                                                            setSearchChips((prev) => [...prev, ...chipsToAdd]);
                                                             setInputValue("");
                                                             setHasSearched(true);
                                                             setRefreshKey((prev) => prev + 1)

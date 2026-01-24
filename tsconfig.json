@@ -1,6 +1,6 @@
 {
   "compilerOptions": {
-    "target": "es5",
+    "target": "ES2020",
     "lib": ["dom", "dom.iterable", "esnext"],
     "allowJs": true,
     "skipLibCheck": true,
@@ -18,17 +18,16 @@
     "declaration": true,              // Generate TypeScript declaration files (.d.ts)
     "declarationMap": true,           // Generate declaration maps for debugging
     "emitDeclarationOnly": false,
-    "declarationDir": "dist",
+    "declarationDir": "./dist",
     "sourceMap": true,                // Generate source maps for debugging
+    "inlineSources": true,
+    "sourceRoot": "./",
     "plugins": [
       {
         "name": "next"
       }
     ],
-    "baseUrl": "./",
-    "paths": {
-      "@/*": ["src/*"]
-    }
+    "baseUrl": "./"
   },
   "include": [
     "./src/**/*",

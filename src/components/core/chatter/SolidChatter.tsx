@@ -3,10 +3,10 @@ import React, { useState, useEffect } from 'react'
 import { SolidChatterHeader } from './SolidChatterHeader'
 import { SolidChatterDateDivider } from './SolidChatterDateDivider'
 import { SolidChatterMessageBox } from './SolidChatterMessageBox'
-import { useLazyGetchatterMessageQuery } from '@/redux/api/solidChatterMessageApi'
+import { useLazyGetchatterMessageQuery } from '../../../redux/api/solidChatterMessageApi'
 import qs from "qs";
-import { ERROR_MESSAGES } from '@/constants/error-messages'
-import { permissionExpression } from '@/helpers/permissions'
+import { ERROR_MESSAGES } from '../../../constants/error-messages'
+import { permissionExpression } from '../../../helpers/permissions'
 
 interface FilterState {
     name: string;

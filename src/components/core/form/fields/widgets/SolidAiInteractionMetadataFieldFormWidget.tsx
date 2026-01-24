@@ -1,6 +1,6 @@
 "use client";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
-import MarkdownViewer from "@/components/common/MarkdownViewer";
+import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
+import MarkdownViewer from "../../../../../components/common/MarkdownViewer";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
 import { TabView, TabPanel } from "primereact/tabview";

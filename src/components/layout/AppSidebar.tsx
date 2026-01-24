@@ -1,7 +1,7 @@
-import { ToastContainer } from "@/helpers/ToastContainer";
-import { useGetSolidMenuBasedOnRoleQuery } from "@/redux/api/solidMenuApi";
-import { showNavbar, toggleNavbar, hideNavbar } from "@/redux/features/navbarSlice";
-import { setIsAuthenticated, setUser } from "@/redux/features/userSlice";
+import { ToastContainer } from "../../helpers/ToastContainer";
+import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
+import { showNavbar, toggleNavbar, hideNavbar } from "../../redux/features/navbarSlice";
+import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
 import { signOut, useSession } from "next-auth/react";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -13,7 +13,7 @@ import SettingImage from '../../resources/images/Navigation/SolidSettinsIcon.svg
 import { Avatar } from "primereact/avatar";
 import { usePathname } from "next/navigation";
 
-// import menu from "@/helpers/menu";
+// import menu from "../../helpers/menu";
 
 const AppSidebar = () => {
     const dispatch = useDispatch();
@@ -147,7 +147,7 @@ const AppSidebar = () => {
                 >
                     <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
                         <rect x="0.3" y="0.3" width="23.4" height="23.4" rx="2.1" fill="white" />
-                        <rect x="0.3" y="0.3" width="23.4" height="23.4" rx="2.1" stroke="#D8E2EA" stroke-width="0.6" />
+                        <rect x="0.3" y="0.3" width="23.4" height="23.4" rx="2.1" stroke="#D8E2EA" strokeWidth="0.6" />
                         <path d="M5.09735 16V14.6667H13.5929V16H5.09735ZM5.09735 12.6667V11.3333H11.6324V12.6667H5.09735ZM5.09735 9.33333V8H13.5929V9.33333H5.09735Z" fill="#8D9199" />
                         <path d="M16.2621 12L18.9026 14.3L18.099 15L14.6549 12L18.099 9L18.9026 9.7L16.2621 12Z" fill="#8D9199" />
                     </svg>

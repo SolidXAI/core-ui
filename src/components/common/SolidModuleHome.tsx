@@ -11,7 +11,7 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { SolidAccountSettings } from '../core/common/SolidAccountSettings/SolidAccountSettings';
 import { useDispatch, useSelector } from "react-redux";
-import { showNavbar, toggleNavbar } from "@/redux/features/navbarSlice";
+import { showNavbar, toggleNavbar } from "../../redux/features/navbarSlice";
 
 type SolidModuleHomeProps = {
     moduleName?: string;

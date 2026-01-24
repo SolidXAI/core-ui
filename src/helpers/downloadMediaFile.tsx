@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { ERROR_MESSAGES } from "../constants/error-messages";
 
 export const downloadMediaFile = async (fileUrl: string, fileName: string) => {
     try {

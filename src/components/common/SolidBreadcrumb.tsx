@@ -97,16 +97,28 @@ export const SolidBreadcrumb = (props: Props) => {
           const truncatedLabel = truncateText(fullLabel, 10);
           const shouldTruncate = fullLabel.length > 10;
 
+          const handleClick = (e: any) => {
+            e.preventDefault();
+            // prefer stored full return url which preserves query params (action/menu)
+            if (typeof window !== "undefined") {
+              const storedFullUrl = sessionStorage.getItem("fromViewUrl");
+              if (storedFullUrl) {
+                router.push(storedFullUrl);
+                return;
+              }
+            }
+            router.push(item.link!);
+          };
+
           return (
-            <Link href={item.link!}>
+            <a onClick={handleClick}>
               <p
-                className={`${index === 1 ? 'font-bold' : 'font-normal'} ${shouldTruncate ? 'cursor-pointer' : ''
-                  }`}
+                className={`${index === 1 ? 'font-bold' : 'font-normal'} ${shouldTruncate ? 'cursor-pointer' : ''}`}
                 title={shouldTruncate ? fullLabel : undefined}
               >
                 {truncatedLabel}
               </p>
-            </Link>
+            </a>
           );
         },
       }

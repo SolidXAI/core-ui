@@ -1,23 +1,22 @@
 'use client';
-import { DropzonePlaceholder } from "@/components/common/DropzonePlaceholder";
-import { useDeleteMediaMutation } from "@/redux/api/mediaApi";
+import { DropzonePlaceholder } from "../../../../components/common/DropzonePlaceholder";
+import { useDeleteMediaMutation } from "../../../../redux/api/mediaApi";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Message } from "primereact/message";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import * as Yup from 'yup';
-import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { FileReaderExt } from "@/components/common/FileReaderExt";
+import { FileReaderExt } from "../../../../components/common/FileReaderExt";
 import { ProgressBar } from "primereact/progressbar";
 import Link from "next/link";
-import getAcceptedFileTypes from "@/helpers/getAcceptedFileTypes";
-import { downloadMediaFile } from "@/helpers/downloadMediaFile";
-import { getExtensionComponent } from "@/helpers/registry";
-import { SolidMediaFormFieldWidgetProps } from "@/types/solid-core";
-import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import getAcceptedFileTypes from "../../../../helpers/getAcceptedFileTypes";
+import { downloadMediaFile } from "../../../../helpers/downloadMediaFile";
+import { getExtensionComponent } from "../../../../helpers/registry";
+import { SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
+import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
+import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 
 export class SolidMediaSingleField implements ISolidField {
 
@@ -43,7 +42,7 @@ export class SolidMediaSingleField implements ISolidField {
         return mediaUrls;
     }
 
-    validationSchema(): Schema {
+    validationSchema(): Yup.Schema {
         // let schema: Yup.StringSchema = Yup.object();
 
         const fieldMetadata = this.fieldContext.fieldMetadata;

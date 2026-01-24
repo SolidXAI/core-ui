@@ -1,14 +1,14 @@
 'use client';
-import { useGenerateCodeForModelMutation } from "@/redux/api/modelApi";
-import { useSeederMutation } from "@/redux/api/solidServiceApi";
-import { closePopup } from "@/redux/features/popupSlice";
-import { SolidListRowdataDynamicFunctionProps } from "@/types/solid-core";
+import { useGenerateCodeForModelMutation } from "../../../../../../redux/api/modelApi";
+import { useSeederMutation } from "../../../../../../redux/api/solidServiceApi";
+import { closePopup } from "../../../../../../redux/features/popupSlice";
+import { SolidListRowdataDynamicFunctionProps } from "../../../../../../types/solid-core";
 import { Button } from "primereact/button";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import { Toast } from 'primereact/toast';
-import { SolidCircularLoader } from '@/components/core/common/SolidLoaders/SolidCircularLoader';
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { SolidCircularLoader } from '../../../../../../components/core/common/SolidLoaders/SolidCircularLoader';
+import { ERROR_MESSAGES } from "../../../../../../constants/error-messages";
 
 
 const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps) => {

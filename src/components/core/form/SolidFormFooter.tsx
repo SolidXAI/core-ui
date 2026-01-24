@@ -1,6 +1,6 @@
 "use client";
 
-import { useLazyNavigationQuery } from "@/redux/api/modelApi";
+import { useLazyNavigationQuery } from "../../../redux/api/modelApi";
 import { useEffect, useState } from "react";
 import qs from "qs";
 import { queryObjectToQueryStringByUrl, queryStringToQueryObjectByUrl } from "../list/SolidListView";

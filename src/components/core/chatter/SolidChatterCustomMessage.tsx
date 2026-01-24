@@ -1,6 +1,6 @@
 "use client"
 import React from 'react'
-import MarkdownViewer from '@/components/common/MarkdownViewer'
+import MarkdownViewer from '../../../components/common/MarkdownViewer'
 
 interface SolidChatterCustomMessageProps {
     message: string;

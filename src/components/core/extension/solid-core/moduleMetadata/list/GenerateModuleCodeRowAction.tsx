@@ -1,10 +1,10 @@
 'use client';
-import { SolidCircularLoader } from "@/components/core/common/SolidLoaders/SolidCircularLoader";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
-import { useGenerateCodeFormoduleMutation } from "@/redux/api/moduleApi";
-import { useSeederMutation } from "@/redux/api/solidServiceApi";
-import { closePopup } from "@/redux/features/popupSlice";
-import { SolidListRowdataDynamicFunctionProps } from "@/types/solid-core";
+import { SolidCircularLoader } from "../../../../../../components/core/common/SolidLoaders/SolidCircularLoader";
+import { ERROR_MESSAGES } from "../../../../../../constants/error-messages";
+import { useGenerateCodeFormoduleMutation } from "../../../../../../redux/api/moduleApi";
+import { useSeederMutation } from "../../../../../../redux/api/solidServiceApi";
+import { closePopup } from "../../../../../../redux/features/popupSlice";
+import { SolidListRowdataDynamicFunctionProps } from "../../../../../../types/solid-core";
 import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";

@@ -7,10 +7,10 @@ import { FormEvent } from "primereact/ts-helpers";
 import { FilterMatchMode } from 'primereact/api';
 import { Document, Page, pdfjs } from "react-pdf";
 import { Dialog } from "primereact/dialog";
-import { PDFSvg } from '@/components/Svg/PDFSvg';
+import { PDFSvg } from '../../../../components/Svg/PDFSvg';
 import Image from 'next/image';
 import FileImage from '../../../../resources/images/fileTypes/File.png'
-import { ExcelSvg } from '@/components/Svg/ExcelSvg';
+import { ExcelSvg } from '../../../../components/Svg/ExcelSvg';
 import MP3Image from '../../../../resources/images/fileTypes/Mp3.png'
 import MP4Image from '../../../../resources/images/fileTypes/Mp4.png'
 

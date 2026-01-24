@@ -1,6 +1,6 @@
 "use client"
 
-import { ERROR_MESSAGES } from '@/constants/error-messages';
+import { ERROR_MESSAGES } from '../../../../constants/error-messages';
 import { getSession } from 'next-auth/react';
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';

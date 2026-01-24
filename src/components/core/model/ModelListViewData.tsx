@@ -1,10 +1,10 @@
 "use client";
-import { CreateButton } from "@/components/common/CreateButton";
+import { CreateButton } from "../../../components/common/CreateButton";
 import {
   useDeleteMultipleModelsMutation,
   useGenerateCodeForModelMutation,
   useLazyGetModelsQuery,
-} from "@/redux/api/modelApi";
+} from "../../../redux/api/modelApi";
 import Link from "next/link";
 import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";

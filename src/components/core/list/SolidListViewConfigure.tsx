@@ -1,5 +1,5 @@
 "use client"
-import { permissionExpression } from "@/helpers/permissions";
+import { permissionExpression } from "../../../helpers/permissions";
 import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import { Accordion, AccordionTab } from "primereact/accordion";
@@ -10,13 +10,13 @@ import { OverlayPanel } from "primereact/overlaypanel";
 import { RadioButton } from "primereact/radiobutton";
 import { useEffect, useRef, useState } from "react";
 import { SolidListColumnSelector } from "./SolidColumnSelector/SolidListColumnSelector";
-import { SolidExport } from "@/components/common/SolidExport";
+import { SolidExport } from "../../../components/common/SolidExport";
 import { Dialog } from "primereact/dialog";
-import { useHandleListCustomButtonClick } from "@/components/common/useHandleListCustomButtonClick";
+import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
 import { SolidListViewHeaderContextMenuButton } from "./SolidListViewHeaderContextMenuButton";
 import "../../common/solid-export.css";
 import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
-import { useHasAnyRole } from "@/helpers/rolesHelper";
+import { useHasAnyRole } from "../../../helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 
 export const SolidListViewConfigure = (

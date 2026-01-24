@@ -1,9 +1,9 @@
 "use client";
 import { useEffect, useRef, useState } from "react";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { useResolveS3UrlMutation } from "@/redux/api/fieldApi";
+import { useResolveS3UrlMutation } from "../../../../../redux/api/fieldApi";
 import Viewer from "viewerjs";
 import "viewerjs/dist/viewer.css";
 

@@ -3,11 +3,11 @@
   "version": "1.1.210",
   "scripts": {
     "prebuild": "npm run copy-resources && npm run copy-styles",
-    "build": "tsc && tsc-alias",
+    "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
     "clean": "rm -rf dist",
     "prepare": "npm run build",
     "copy-resources": "copyfiles -u 1 \"src/resources/**/*\" dist",
-    "copy-styles": "copyfiles -u 1 \"src/**/*\" dist/",
+    "copy-styles": "copyfiles -u 1 -e \"**/*.ts\" -e \"**/*.tsx\" \"src/**/*\" dist/",
     "publish:patch": "node publish.js patch",
     "publish:minor": "node publish.js minor",
     "publish:major": "node publish.js major"
@@ -17,7 +17,6 @@
   "license": "ISC",
   "description": "",
   "main": "dist/index.js",
-  "module": "dist/index.esm.js",
   "types": "dist/index.d.ts",
   "private": false,
   "publishConfig": {
@@ -128,5 +127,12 @@
     "react-transition-group": "^4.4.5",
     "tsc-alias": "^1.8.10",
     "typescript": "5.2.2"
-  }
+  },
+  "files": [
+    "dist/**/*",
+    "src/**/*",
+    "types/**/*",
+    "README.md",
+    "LICENSE"
+  ]
 }

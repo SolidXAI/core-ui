@@ -2,16 +2,15 @@
 import { InputNumber } from "primereact/inputnumber";
 import { Message } from "primereact/message";
 import * as Yup from 'yup';
-import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { getExtensionComponent } from "@/helpers/registry";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { getExtensionComponent } from "../../../../helpers/registry";
+import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { Slider } from "primereact/slider";
 import styles from './solidFields.module.css'
 import { useState } from "react";
-import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
+import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { Range } from "react-range";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 
 export class SolidIntegerField implements ISolidField {
 
@@ -43,7 +42,7 @@ export class SolidIntegerField implements ISolidField {
         return existingValue !== undefined && existingValue !== null ? existingValue : fieldDefaultValue || '';
     }
 
-    validationSchema(): Schema {
+    validationSchema(): Yup.Schema {
         let schema: Yup.NumberSchema<number | null | undefined> = Yup.number();
 
 

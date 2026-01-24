@@ -1,17 +1,16 @@
 'use client';
-import { useLazyGetSelectionDynamicValuesQuery } from "@/redux/api/fieldApi";
+import { useLazyGetSelectionDynamicValuesQuery } from "../../../../redux/api/fieldApi";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { Message } from "primereact/message";
 import qs from "qs";
 import { useState } from "react";
 import * as Yup from 'yup';
-import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { getExtensionComponent } from "@/helpers/registry";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
-import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
-import { formikValuestoQueryString } from "@/helpers/helpers";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { getExtensionComponent } from "../../../../helpers/registry";
+import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
+import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
+import { formikValuestoQueryString } from "../../../../helpers/helpers";
+import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 
 
 export class SolidSelectionDynamicField implements ISolidField {
@@ -93,7 +92,7 @@ export class SolidSelectionDynamicField implements ISolidField {
         // }
     }
 
-    validationSchema(): Schema {
+    validationSchema(): Yup.Schema {
         let schema = Yup.object();
 
         const fieldMetadata = this.fieldContext.fieldMetadata;

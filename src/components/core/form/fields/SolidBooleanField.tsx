@@ -1,17 +1,16 @@
 'use client';
-import { getExtensionComponent } from "@/helpers/registry";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
+import { getExtensionComponent } from "../../../../helpers/registry";
+import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { Message } from "primereact/message";
 import { SelectButton } from "primereact/selectbutton";
 import { classNames } from "primereact/utils";
 import { useEffect, useState } from "react";
 import * as Yup from 'yup';
-import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { Checkbox, CheckboxChangeEvent } from "primereact/checkbox";
-import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
+import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { InputSwitch } from "primereact/inputswitch";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 
 type BooleanOption = {
     label: string;
@@ -52,7 +51,7 @@ export class SolidBooleanField implements ISolidField {
         return fieldDefaultValue === true || fieldDefaultValue === "true";
     }
 
-    validationSchema(): Schema {
+    validationSchema(): Yup.Schema {
         let schema: Yup.BooleanSchema<boolean | null | undefined> = Yup.boolean();
 
         const fieldMetadata = this.fieldContext.fieldMetadata;

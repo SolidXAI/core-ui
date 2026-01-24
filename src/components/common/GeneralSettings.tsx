@@ -1,5 +1,5 @@
 "use client"
-import { useBulkUpdateSolidSettingsMutation, useCreateSolidSettingsMutation, useLazyGetSolidSettingsQuery, useUpdateSolidSettingsMutation } from '@/redux/api/solidSettingsApi';
+// import { useBulkUpdateSolidSettingsMutation, useCreateSolidSettingsMutation, useLazyGetSolidSettingsQuery, useUpdateSolidSettingsMutation } from '../../redux/api/solidSettingsApi';
 import { useFormik } from 'formik';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
@@ -8,7 +8,6 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { CancelButton } from './CancelButton';
 import { InputSwitch } from 'primereact/inputswitch';
 import { RadioButton } from 'primereact/radiobutton';
-import { handleError } from '@/helpers/ToastContainer';
 import { usePathname } from 'next/navigation';
 import { InputTextarea } from 'primereact/inputtextarea';
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
@@ -23,7 +22,11 @@ import { SettingsImageRemoveButton } from './SolidSettings/SettingsImageRemoveBu
 import { Dropdown } from 'primereact/dropdown';
 import { OpenAiProviderComponent } from './SolidSettings/LlmSettings/OpenAiProviderComponent';
 import { AnthropicProviderComponent } from './SolidSettings/LlmSettings/AnthropicProviderComponent';
-import { ERROR_MESSAGES } from '@/constants/error-messages';
+import { useDispatch, useSelector } from 'react-redux';
+import { handleError } from '../../helpers/ToastContainer';
+import { ERROR_MESSAGES } from '../../constants/error-messages';
+import { useBulkUpdateSolidSettingsMutation, useLazyGetSolidSettingsQuery } from '../../redux/api/solidSettingsApi';
+import { setSolidSettings } from '../../redux/features/settingsSlice';
 
 
 export const GeneralSettings = () => {
@@ -32,8 +35,17 @@ export const GeneralSettings = () => {
     const [authScreenRightBackgroundImagePreview, setAuthScreenRightBackgroundImagePreview] = useState<string | null>(null);
     const [authScreenLeftBackgroundImagePreview, setAuthScreenLeftBackgroundImagePreview] = useState<string | null>(null);
     const [authScreenCenterBackgroundImagePreview, setAuthScreenCenterBackgroundImagePreview] = useState<string | null>(null);
+    const dispatch = useDispatch()
 
-    const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery()
+    const [trigger, { data: solidSettingsDataInitialData }] = useLazyGetSolidSettingsQuery();
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+    useEffect(() => {
+        if (solidSettingsDataInitialData) {
+            dispatch(setSolidSettings(solidSettingsDataInitialData?.data));
+        }
+    }, [solidSettingsDataInitialData]);
+
+
     useEffect(() => {
         trigger("") // Fetch settings on mount
     }, [trigger])
@@ -53,45 +65,45 @@ export const GeneralSettings = () => {
     };
 
     const initialValues = {
-        appLogo: solidSettingsData?.data?.system?.appLogo ?? null,
-        companylogo: solidSettingsData?.data?.system?.companylogo ?? null,
-        passwordlessRegistrationValidateWhat: solidSettingsData?.data?.system?.passwordlessRegistrationValidateWhat ?? "email",
-        allowPublicRegistration: solidSettingsData?.data?.system?.allowPublicRegistration ?? false,
-        passwordBasedAuth: solidSettingsData?.data?.system?.passwordBasedAuth ?? false,
-        passwordLessAuth: solidSettingsData?.data?.system?.passwordLessAuth ?? false,
-        activateUserOnRegistration: solidSettingsData?.data?.system?.activateUserOnRegistration ?? false,
-        iamGoogleOAuthEnabled: solidSettingsData?.data?.system?.iamGoogleOAuthEnabled ?? false,
-        shouldQueueEmails: solidSettingsData?.data?.system?.shouldQueueEmails ?? false,
-        shouldQueueSms: solidSettingsData?.data?.system?.shouldQueueSms ?? false,
-        authPagesTheme: solidSettingsData?.data?.system?.authPagesTheme ?? "light",
-        authPagesLayout: solidSettingsData?.data?.system?.authPagesLayout ?? "center",
-        defaultRole: solidSettingsData?.data?.system?.defaultRole ?? "Admin",
-        appLogoPosition: solidSettingsData?.data?.system?.appLogoPosition ?? "in_form_view",
-        showAuthContent: solidSettingsData?.data?.system?.showAuthContent ?? false,
-        appTitle: solidSettingsData?.data?.system?.appTitle ?? "SolidX",
-        appSubtitle: solidSettingsData?.data?.system?.appSubtitle ?? "Welcome To",
-        appDescription: solidSettingsData?.data?.system?.appDescription ?? "appDescription",
-        showLegalLinks: solidSettingsData?.data?.system?.showLegalLinks ?? false,
-        appTnc: solidSettingsData?.data?.system?.appTnc ?? null,
-        appPrivacyPolicy: solidSettingsData?.data?.system?.appPrivacyPolicy ?? null,
-        enableDarkMode: solidSettingsData?.data?.system?.enableDarkMode ?? false,
-        copyright: solidSettingsData?.data?.system?.copyright ?? null,
-        forceChangePasswordOnFirstLogin: solidSettingsData?.data?.system?.forceChangePasswordOnFirstLogin ?? false,
-        contactSupportEmail: solidSettingsData?.data?.system?.contactSupportEmail ?? null,
-        contactSupportDisplayName: solidSettingsData?.data?.system?.contactSupportDisplayName ?? null,
-        contactSupportIcon: solidSettingsData?.data?.system?.contactSupportIcon ?? null,
-        authScreenRightBackgroundImage: solidSettingsData?.data?.system?.authScreenRightBackgroundImage ?? null,
-        authScreenLeftBackgroundImage: solidSettingsData?.data?.system?.authScreenLeftBackgroundImage ?? null,
-        authScreenCenterBackgroundImage: solidSettingsData?.data?.system?.authScreenCenterBackgroundImage ?? null,
-        solidXGenAiCodeBuilderConfig: solidSettingsData?.data?.system?.solidXGenAiCodeBuilderConfig ?? {
+        appLogo: solidSettingsData?.appLogo ?? null,
+        companylogo: solidSettingsData?.companylogo ?? null,
+        passwordlessRegistrationValidateWhat: solidSettingsData?.passwordlessRegistrationValidateWhat ?? "email",
+        allowPublicRegistration: solidSettingsData?.allowPublicRegistration ?? false,
+        passwordBasedAuth: solidSettingsData?.passwordBasedAuth ?? false,
+        passwordLessAuth: solidSettingsData?.passwordLessAuth ?? false,
+        activateUserOnRegistration: solidSettingsData?.activateUserOnRegistration ?? false,
+        iamGoogleOAuthEnabled: solidSettingsData?.iamGoogleOAuthEnabled ?? false,
+        shouldQueueEmails: solidSettingsData?.shouldQueueEmails ?? false,
+        shouldQueueSms: solidSettingsData?.shouldQueueSms ?? false,
+        authPagesTheme: solidSettingsData?.authPagesTheme ?? "light",
+        authPagesLayout: solidSettingsData?.authPagesLayout ?? "center",
+        defaultRole: solidSettingsData?.defaultRole ?? "Admin",
+        appLogoPosition: solidSettingsData?.appLogoPosition ?? "in_form_view",
+        showAuthContent: solidSettingsData?.showAuthContent ?? false,
+        appTitle: solidSettingsData?.appTitle ?? "SolidX",
+        appSubtitle: solidSettingsData?.appSubtitle ?? "Welcome To",
+        appDescription: solidSettingsData?.appDescription ?? "appDescription",
+        showLegalLinks: solidSettingsData?.showLegalLinks ?? false,
+        appTnc: solidSettingsData?.appTnc ?? null,
+        appPrivacyPolicy: solidSettingsData?.appPrivacyPolicy ?? null,
+        enableDarkMode: solidSettingsData?.enableDarkMode ?? false,
+        copyright: solidSettingsData?.copyright ?? null,
+        forceChangePasswordOnFirstLogin: solidSettingsData?.forceChangePasswordOnFirstLogin ?? false,
+        contactSupportEmail: solidSettingsData?.contactSupportEmail ?? null,
+        contactSupportDisplayName: solidSettingsData?.contactSupportDisplayName ?? null,
+        contactSupportIcon: solidSettingsData?.contactSupportIcon ?? null,
+        authScreenRightBackgroundImage: solidSettingsData?.authScreenRightBackgroundImage ?? null,
+        authScreenLeftBackgroundImage: solidSettingsData?.authScreenLeftBackgroundImage ?? null,
+        authScreenCenterBackgroundImage: solidSettingsData?.authScreenCenterBackgroundImage ?? null,
+        solidXGenAiCodeBuilderConfig: solidSettingsData?.solidXGenAiCodeBuilderConfig ?? {
             defaultProvider: "",
             availableProviders: []
         }
-        // llmProvider: solidSettingsData?.data?.system?.llmProvider ?? null,
-        // llModelName: solidSettingsData?.data?.system?.llModelName ?? null,
-        // llmProviderApiKey: solidSettingsData?.data?.system?.llmProviderApiKey ?? null,
-        // llmProviderBaseURL: solidSettingsData?.data?.system?.llmProviderBaseURL ?? null,
-        // llmModelIdentifier: solidSettingsData?.data?.system?.llmModelIdentifier ?? null
+        // llmProvider: solidSettingsData?.llmProvider ?? null,
+        // llModelName: solidSettingsData?.llModelName ?? null,
+        // llmProviderApiKey: solidSettingsData?.llmProviderApiKey ?? null,
+        // llmProviderBaseURL: solidSettingsData?.llmProviderBaseURL ?? null,
+        // llmModelIdentifier: solidSettingsData?.llmModelIdentifier ?? null
 
 
     };
@@ -109,7 +121,7 @@ export const GeneralSettings = () => {
                 }
 
                 const updatedSettingsArray: Array<{ key: string; value: string; type: string }> = [];
-                const currentSettings = solidSettingsData?.data?.system || {};
+                const currentSettings = solidSettingsData || {};
 
                 const formData = new FormData();
 
@@ -132,7 +144,7 @@ export const GeneralSettings = () => {
                         } else {
                             updatedSettingsArray.push({
                                 key,
-                                value: value,
+                                value: typeof value === "string" ? value : JSON.stringify(value),
                                 type: "system",
                             });
                         }
@@ -152,6 +164,7 @@ export const GeneralSettings = () => {
 
                 if (response.statusCode === 200) {
                     showToast("success", "Updated", "Settings updated");
+                    trigger("")
                 }
 
             } catch (error) {
@@ -833,50 +846,50 @@ export const GeneralSettings = () => {
                                                     </div>
                                                 </div>
                                                 {formik.values.passwordLessAuth === true &&
-                                                <div className="col-12 mt-3">
-                                                    <div className="formgrid grid align-items-center">
-                                                        <div className="col-12 sm:col-12 lg:col-5 xl:col-5">
-                                                            <label className="form-field-label">Password Less Authentication Method</label>
-                                                        </div>
-                                                        <div className='col-12 sm:col-12 lg:col-6 xl:col-6'>
-                                                            <div className="flex align-items-center gap-3 mt-3 lg:mt-0">
-                                                                <div className="flex align-items-center">
-                                                                    <RadioButton
-                                                                        inputId="passwordlessRegistrationValidateWhat-email"
-                                                                        name="passwordlessRegistrationValidateWhat"
-                                                                        value="email"
-                                                                        checked={formik.values.passwordlessRegistrationValidateWhat === "email"}
-                                                                        onChange={(e) => formik.setFieldValue("passwordlessRegistrationValidateWhat", e.value)}
-                                                                    />
-                                                                    <label htmlFor="passwordlessRegistrationValidateWhat-email" className="ml-2">Email</label>
-                                                                </div>
-                                                                <div className="flex align-items-center">
-                                                                    <RadioButton
-                                                                        inputId="passwordlessRegistrationValidateWhat-mobile"
-                                                                        name="passwordlessRegistrationValidateWhat"
-                                                                        value="mobile"
-                                                                        checked={formik.values.passwordlessRegistrationValidateWhat === "mobile"}
-                                                                        onChange={(e) => formik.setFieldValue("passwordlessRegistrationValidateWhat", e.value)}
-                                                                    />
-                                                                    <label htmlFor="passwordlessRegistrationValidateWhat-mobile" className="ml-2">Mobile</label>
-                                                                </div>
-                                                                <div className="flex align-items-center">
-                                                                    <RadioButton
-                                                                        inputId="passwordlessRegistrationValidateWhat-transactional"
-                                                                        name="passwordlessRegistrationValidateWhat"
-                                                                        value="transactional"
-                                                                        checked={formik.values.passwordlessRegistrationValidateWhat === "transactional"}
-                                                                        onChange={(e) => formik.setFieldValue("passwordlessRegistrationValidateWhat", e.value)}
-                                                                    />
-                                                                    <label htmlFor="passwordlessRegistrationValidateWhat-transactional" className="ml-2">Transactional</label>
+                                                    <div className="col-12 mt-3">
+                                                        <div className="formgrid grid align-items-center">
+                                                            <div className="col-12 sm:col-12 lg:col-5 xl:col-5">
+                                                                <label className="form-field-label">Password Less Authentication Method</label>
+                                                            </div>
+                                                            <div className='col-12 sm:col-12 lg:col-6 xl:col-6'>
+                                                                <div className="flex align-items-center gap-3 mt-3 lg:mt-0">
+                                                                    <div className="flex align-items-center">
+                                                                        <RadioButton
+                                                                            inputId="passwordlessRegistrationValidateWhat-email"
+                                                                            name="passwordlessRegistrationValidateWhat"
+                                                                            value="email"
+                                                                            checked={formik.values.passwordlessRegistrationValidateWhat === "email"}
+                                                                            onChange={(e) => formik.setFieldValue("passwordlessRegistrationValidateWhat", e.value)}
+                                                                        />
+                                                                        <label htmlFor="passwordlessRegistrationValidateWhat-email" className="ml-2">Email</label>
+                                                                    </div>
+                                                                    <div className="flex align-items-center">
+                                                                        <RadioButton
+                                                                            inputId="passwordlessRegistrationValidateWhat-mobile"
+                                                                            name="passwordlessRegistrationValidateWhat"
+                                                                            value="mobile"
+                                                                            checked={formik.values.passwordlessRegistrationValidateWhat === "mobile"}
+                                                                            onChange={(e) => formik.setFieldValue("passwordlessRegistrationValidateWhat", e.value)}
+                                                                        />
+                                                                        <label htmlFor="passwordlessRegistrationValidateWhat-mobile" className="ml-2">Mobile</label>
+                                                                    </div>
+                                                                    <div className="flex align-items-center">
+                                                                        <RadioButton
+                                                                            inputId="passwordlessRegistrationValidateWhat-transactional"
+                                                                            name="passwordlessRegistrationValidateWhat"
+                                                                            value="transactional"
+                                                                            checked={formik.values.passwordlessRegistrationValidateWhat === "transactional"}
+                                                                            onChange={(e) => formik.setFieldValue("passwordlessRegistrationValidateWhat", e.value)}
+                                                                        />
+                                                                        <label htmlFor="passwordlessRegistrationValidateWhat-transactional" className="ml-2">Transactional</label>
+                                                                    </div>
                                                                 </div>
                                                             </div>
                                                         </div>
+                                                        {formik.values.passwordlessRegistrationValidateWhat === "transactional" &&
+                                                            <p className="mt-3 text-sm font-bold">Note : In this method, you can pass the authentication method from the ui with possible values being either email or mobile. You can also pass both the values here</p>
+                                                        }
                                                     </div>
-                                                    {formik.values.passwordlessRegistrationValidateWhat === "transactional" &&
-                                                        <p className="mt-3 text-sm font-bold">Note : In this method, you can pass the authentication method from the ui with possible values being either email or mobile. You can also pass both the values here</p>
-                                                    }
-                                                </div>
                                                 }
                                             </div>
                                         </div>
@@ -1028,7 +1041,7 @@ export const GeneralSettings = () => {
                                         </div>
                                     </div>
                                     <div className='mt-2 lg:mt-4' style={{ borderBottom: '1px dashed #D8E2EA' }}></div>
-                                    {solidSettingsData?.data?.system?.enableDarkMode === true &&
+                                    {solidSettingsData?.enableDarkMode === true &&
                                         <>
                                             <p className='font-bold mt-3 lg:mt-4' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Authentication Screen Theme</p>
                                             <div className='formgrid grid'>

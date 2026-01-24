@@ -1,4 +1,4 @@
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { ERROR_MESSAGES } from "../constants/error-messages";
 import { getSession } from "next-auth/react";
 
 export async function updatePasswordField({

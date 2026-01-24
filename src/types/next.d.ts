@@ -1,4 +1,4 @@
-import { IUser } from "@/backend/models/user";
+import { IUser } from "../backend/models/user";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import { NextRequest } from "next/server";
 import NextAuth, { DefaultSession, DefaultUser } from 'next-auth';

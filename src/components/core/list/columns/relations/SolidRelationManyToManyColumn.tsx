@@ -2,12 +2,12 @@
 import { FilterMatchMode } from 'primereact/api';
 import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { FormEvent } from "primereact/ts-helpers";
-import { SolidListViewColumnParams } from '../../SolidListViewColumn';
-import { InputTypes, SolidVarInputsFilterElement } from "../../SolidVarInputsFilterElement";
+import { SolidListViewColumnParams } from '../../../../../components/core/list/SolidListViewColumn';
+import { InputTypes, SolidVarInputsFilterElement } from '../../../../../components/core/list/SolidVarInputsFilterElement';
 import { Button } from 'primereact/button';
-import { getExtensionComponent } from '@/helpers/registry';
+import { getExtensionComponent } from '../../../../../helpers/registry';
 import { Chip } from 'primereact/chip';
-import { SolidListFieldWidgetProps } from '@/types/solid-core';
+import { SolidListFieldWidgetProps } from '../../../../../types/solid-core';
 
 
 const SolidRelationManyToManyColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {

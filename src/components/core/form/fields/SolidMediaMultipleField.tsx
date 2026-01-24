@@ -1,24 +1,23 @@
 'use client';
-import { DropzonePlaceholder } from "@/components/common/DropzonePlaceholder";
-import { DropzoneUpload } from "@/components/common/DropzoneUpload";
-import { useDeleteMediaMutation } from "@/redux/api/mediaApi";
+import { DropzonePlaceholder } from "../../../../components/common/DropzonePlaceholder";
+import { DropzoneUpload } from "../../../../components/common/DropzoneUpload";
+import { useDeleteMediaMutation } from "../../../../redux/api/mediaApi";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { Message } from "primereact/message";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import * as Yup from 'yup';
-import { Schema } from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-import { FileReaderExt } from "@/components/common/FileReaderExt";
+import { FileReaderExt } from "../../../../components/common/FileReaderExt";
 import { ProgressBar } from "primereact/progressbar";
-import getAcceptedFileTypes from "@/helpers/getAcceptedFileTypes";
+import getAcceptedFileTypes from "../../../../helpers/getAcceptedFileTypes";
 import Link from "next/link";
-import { downloadMediaFile } from "@/helpers/downloadMediaFile";
-import { getExtensionComponent } from "@/helpers/registry";
-import { SolidFormFieldWidgetProps, SolidMediaFormFieldWidgetProps } from "@/types/solid-core";
-import { SolidFieldTooltip } from "@/components/common/SolidFieldTooltip";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { downloadMediaFile } from "../../../../helpers/downloadMediaFile";
+import { getExtensionComponent } from "../../../../helpers/registry";
+import { SolidFormFieldWidgetProps, SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
+import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
+import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 export class SolidMediaMultipleField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
@@ -48,7 +47,7 @@ export class SolidMediaMultipleField implements ISolidField {
         return mediaUrls;
     }
 
-    validationSchema(): Schema {
+    validationSchema(): Yup.Schema {
 
         const fieldMetadata = this.fieldContext.fieldMetadata;
         const fieldLayoutInfo = this.fieldContext.field;

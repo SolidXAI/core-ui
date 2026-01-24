@@ -1,6 +1,5 @@
 import * as React from "react"
-import { SVGProps } from "react"
-const FileSvg = (props: SVGProps<SVGSVGElement>) => (
+const FileSvg = (props: React.SVGProps<SVGSVGElement>) => (
   <svg
     xmlns="http://www.w3.org/2000/svg"
     width={64}

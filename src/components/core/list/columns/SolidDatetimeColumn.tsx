@@ -5,8 +5,8 @@ import { getNumberOfInputs, SolidListViewColumnParams } from '../SolidListViewCo
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
 import { dateFilterMatchModeOptions } from './SolidDateColumn';
 import SolidTableRowCell from "../SolidTableRowCell";
-import { SolidListFieldWidgetProps } from "@/types/solid-core";
-import { getExtensionComponent } from "@/helpers/registry";
+import { SolidListFieldWidgetProps } from "../../../../types/solid-core";
+import { getExtensionComponent } from "../../../../helpers/registry";
 
 const SolidDatetimeColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const filterable = column.attrs.filterable;

@@ -1,11 +1,8 @@
 "use client";
 
-import { AppTitle } from "@/helpers/AppTitle";
-import { useConfirmOtpLoginMutation, useInitateLoginMutation } from "@/redux/api/authApi";
-import { useLazyGetAuthSettingsQuery } from "@/redux/api/solidSettingsApi";
+import { useConfirmOtpLoginMutation, useInitateLoginMutation } from "../../redux/api/authApi";
 import { Form, Formik } from "formik";
 import Image from "next/image";
-import Link from "next/link";
 import { useRouter, useSearchParams } from "next/navigation";
 import { Button } from "primereact/button";
 import { InputOtp } from "primereact/inputotp";
@@ -15,7 +12,8 @@ import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { signIn } from "next-auth/react";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { useSelector } from "react-redux";
+import { ERROR_MESSAGES } from "../../constants/error-messages";
 
 
 const SolidInitialLoginOtp = () => {
@@ -23,11 +21,17 @@ const SolidInitialLoginOtp = () => {
     const tempIdentifier = searchParams.get('identifier');
     const type = searchParams.get('type') || 'email';
     const identifier = tempIdentifier ? decodeURIComponent(tempIdentifier) : '';
-    
+
     const RESEND_OTP_KEY = `resendOtpLogin_${identifier}`;
     const RESEND_OTP_TIMER_MIN = parseFloat(process.env.NEXT_PUBLIC_RESEND_OTP_TIMER || '0.5');
     const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
-    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    // useEffect(() => {
+    //     trigger("") // Fetch settings on mount
+    // }, [trigger])
+
+    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+
     const [initiateResendOTP] = useInitateLoginMutation();
     const [initiateOtpLogin] = useConfirmOtpLoginMutation();
     const toast = useRef<Toast>(null);
@@ -59,18 +63,17 @@ const SolidInitialLoginOtp = () => {
     const displayText = getDisplayText();
 
     useEffect(() => {
-        trigger("");
-    
+
         // Set timer if not already set (e.g., after login)
         const storedTime = localStorage.getItem(RESEND_OTP_KEY);
         if (!storedTime) {
             localStorage.setItem(RESEND_OTP_KEY, Date.now().toString());
         }
-    
+
         const lastSent = storedTime ? parseInt(storedTime, 10) : Date.now();
         const elapsed = Math.floor((Date.now() - lastSent) / 1000);
         const remaining = RESEND_OTP_TIMER - elapsed;
-    
+
         if (remaining > 0) {
             setTimeLeft(remaining);
             setResendEnabled(false);
@@ -78,7 +81,7 @@ const SolidInitialLoginOtp = () => {
             setTimeLeft(0);
             setResendEnabled(true);
         }
-    }, [trigger, identifier]);    
+    }, [identifier]);
 
     useEffect(() => {
         if (resendEnabled || timeLeft <= 0) return;
@@ -96,7 +99,7 @@ const SolidInitialLoginOtp = () => {
 
         return () => clearInterval(interval);
     }, [resendEnabled, timeLeft]);
-    
+
     const validationSchema = Yup.object({
         otp: Yup.string()
             .matches(/^\d{6}$/, ERROR_MESSAGES.OTP_CHARACTER(6))
@@ -109,8 +112,8 @@ const SolidInitialLoginOtp = () => {
             summary,
             detail,
             ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+                ? { sticky: true }            // stays until user closes
+                : { life: 3000 }),
         });
     };
 
@@ -133,7 +136,7 @@ const SolidInitialLoginOtp = () => {
                 setTimeLeft(RESEND_OTP_TIMER);
                 setResendEnabled(false);
             } else {
-                showToast("error",ERROR_MESSAGES.LOGIN_ERROR , response.error);
+                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
             }
         } catch (err: any) {
             showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
@@ -143,20 +146,20 @@ const SolidInitialLoginOtp = () => {
     return (
         <>
             <Toast ref={toast} />
-            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`} style={{ minWidth: 480 }}>
-                {solidSettingsData?.data?.authPagesLayout === 'center' &&
+            <div className={`auth-container ${solidSettingsData?.authPagesLayout === 'center' ? 'center' : 'side'}`} style={{ minWidth: 480 }}>
+                {solidSettingsData?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
+                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.appLogoPosition}`}>
                             <Image
                                 alt="solid logo"
-                                src={solidSettingsData?.data?.appLogo || SolidLogo}
+                                src={solidSettingsData?.appLogo || SolidLogo}
                                 className="relative"
                                 fill
                             />
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>OTP Verification</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>OTP Verification</h2>
                 <p className="solid-auth-subtitle text-sm">
                     Please enter the OTP sent to your email to complete verification
                 </p>
@@ -168,7 +171,7 @@ const SolidInitialLoginOtp = () => {
                         validationSchema={validationSchema}
                         onSubmit={async (values, { setSubmitting, setErrors }) => {
                             try {
-                               const payload = {
+                                const payload = {
                                     type: type,
                                     identifier: identifier,
                                     otp: values.otp
@@ -182,8 +185,8 @@ const SolidInitialLoginOtp = () => {
                                         accessToken: response?.data?.accessToken,
                                     };
 
-                                     // Pass both email and mobile if available
-                                     if (response?.data?.user?.email) {
+                                    // Pass both email and mobile if available
+                                    if (response?.data?.user?.email) {
                                         credentials.email = response?.data?.user?.email;
                                     }
                                     if (response?.data?.user?.mobile) {
@@ -200,7 +203,7 @@ const SolidInitialLoginOtp = () => {
                                     }
 
                                     const otpResponse = await signIn("credentials", credentials);
-                                    
+
                                     if (otpResponse?.error) {
                                         showToast("error", ERROR_MESSAGES.LOGIN_ERROR, otpResponse.error);
                                     } else {

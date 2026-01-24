@@ -1,7 +1,7 @@
 'use client';
-import { useGenerateCodeForModelMutation } from "@/redux/api/modelApi";
-import { closePopup } from "@/redux/features/popupSlice";
-import { SolidListRowdataDynamicFunctionProps } from "@/types/solid-core";
+import { useGenerateCodeForModelMutation } from "../../../../../../redux/api/modelApi";
+import { closePopup } from "../../../../../../redux/features/popupSlice";
+import { SolidListRowdataDynamicFunctionProps } from "../../../../../../types/solid-core";
 import { Button } from "primereact/button";
 import { useRef, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -10,8 +10,8 @@ import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Checkbox } from "primereact/checkbox";
 import { kebabCase } from "lodash";
-import { createSolidEntityApi } from "@/redux/api/solidEntityApi";
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { createSolidEntityApi } from "../../../../../../redux/api/solidEntityApi";
+import { ERROR_MESSAGES } from "../../../../../../constants/error-messages";
 
 
 const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {

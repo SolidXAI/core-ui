@@ -1,11 +1,10 @@
 "use client";
-import { SolidFormFieldWidgetProps } from "@/types/solid-core";
-import MarkdownViewer from "@/components/common/MarkdownViewer";
-import ReactCodeMirror from "@uiw/react-codemirror";
+import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
+import MarkdownViewer from "../../../../../components/common/MarkdownViewer";
+import ReactCodeMirror, { EditorView } from "@uiw/react-codemirror";
 import { javascript } from '@codemirror/lang-javascript';
 import { oneDark } from '@codemirror/theme-one-dark';
-import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct import
-import { ERROR_MESSAGES } from "@/constants/error-messages";
+import { ERROR_MESSAGES } from "../../../../../constants/error-messages";
 
 
 export const SolidAiInteractionMessageFieldFormWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {

@@ -1,8 +1,8 @@
 "use client";
 
-import { SolidFormWidgetProps } from "@/types";
+import { SolidFormWidgetProps } from "../../../../../types";
 import { Message } from 'primereact/message';
-import { SolidQuestionRenderer } from "@/components/core/dashboard/SolidQuestionRenderer";
+import { SolidQuestionRenderer } from "../../../../../components/core/dashboard/SolidQuestionRenderer";
 
 const ChartFormPreviewWidget = ({ formData, field, fieldsMetadata, viewMetadata, formViewData }: SolidFormWidgetProps) => {
     console.log(`formData: `);
