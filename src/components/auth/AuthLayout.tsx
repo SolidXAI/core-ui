@@ -17,6 +17,7 @@ import AuthScreenLeftBackgroundImage from '../../resources/images/auth/solid-rig
 import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
 import { useGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { setSolidSettings } from "../../redux/features/settingsSlice";
+import { solidSettingsApi } from "../../redux/api/solidSettingsApi";
 
 
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
@@ -58,6 +59,12 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
             hasSolidSettingsApiSlice: Boolean((store.getState() as any)?.solidSettingsApi),
             stateKeyCount: stateKeys.length,
         });
+        if (win?.__solidSettingsApi) {
+            console.log("[AuthLayout] solidSettingsApi identity", {
+                matchesWindow: solidSettingsApi === win.__solidSettingsApi,
+                reducerPath: solidSettingsApi.reducerPath,
+            });
+        }
     }, [store]);
 
     useEffect(() => {

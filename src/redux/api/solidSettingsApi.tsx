@@ -63,6 +63,10 @@ export const solidSettingsApi = createApi({
     })
 });
 
+if (typeof window !== "undefined") {
+    (window as any).__solidSettingsApi = solidSettingsApi;
+}
+
 export const {
     useCreateSolidSettingsMutation,
     useGetSolidSettingsByIdQuery,
