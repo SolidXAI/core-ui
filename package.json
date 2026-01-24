@@ -7,7 +7,7 @@
     "clean": "rm -rf dist",
     "prepare": "npm run build",
     "copy-resources": "copyfiles -u 1 \"src/resources/**/*\" dist",
-    "copy-styles": "copyfiles -u 1 -e \"**/*.ts\" -e \"**/*.tsx\" \"src/**/*\" dist/",
+    "copy-styles": "copyfiles -u 1 \"src/**/*\" dist/",
     "publish:patch": "node publish.js patch",
     "publish:minor": "node publish.js minor",
     "publish:major": "node publish.js major"
@@ -91,7 +91,9 @@
     "react-quill": "^0.0.2",
     "react-redux": "^8.1.2",
     "react-star-ratings": "^2.3.0",
-    "react-transition-group": "^4.4.5"
+    "react-transition-group": "^4.4.5",
+    "react-syntax-highlighter": "^15.6.6",
+    "@types/react-syntax-highlighter": "^15.5.13"
   },
   "devDependencies": {
     "@codemirror/lang-javascript": "^6.2.2",
@@ -104,6 +106,7 @@
     "@types/react": "18.3.18",
     "@types/react-dom": "18.3.5",
     "@types/react-js-pagination": "^3.0.7",
+    "react-syntax-highlighter": "^15.6.6",
     "@types/react-syntax-highlighter": "^15.5.13",
     "@types/uuid": "^10.0.0",
     "@uiw/react-codemirror": "^4.23.3",
