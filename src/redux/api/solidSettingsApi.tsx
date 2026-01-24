@@ -19,7 +19,8 @@ export const solidSettingsApi = createApi({
         }),
         getAuthSettings: builder.query({
             query: () => {
-                return `/setting/wrapped`
+                console.log(`builder.query running for endpoint /setting/wrapped`);
+                return `/setting/wrapped`;
             },
         }),
         getSolidSettingsById: builder.query({

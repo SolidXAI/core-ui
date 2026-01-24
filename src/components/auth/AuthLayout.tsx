@@ -20,18 +20,20 @@ import { setSolidSettings } from "../../redux/features/settingsSlice";
 
 
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
+    console.log(`AuthLayout about to start rendering...`);
+
     const dispatch = useDispatch();
+
+    console.log(`AuthLayout about to trigger useGetAuthSettingsQuery()...`);
     const { data: solidSettingsDataInitialData } = useGetAuthSettingsQuery("")
     const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
 
     useEffect(() => {
         if (solidSettingsDataInitialData) {
+            console.log(`AuthLayout useEffect() received settings initial data: ${JSON.stringify(solidSettingsDataInitialData)}`);
             dispatch(setSolidSettings(solidSettingsDataInitialData?.data));
         }
     }, [solidSettingsDataInitialData]);
-
-
-
 
     const [allowRegistration, setAllowRegistration] = useState<boolean | null>(null);
     const [isRestricted, setIsRestricted] = useState(false);
@@ -58,9 +60,8 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     // }, [solidSettingsData]);
     useEffect(() => {
         // Fetch settings if not already available
-
+        console.log(`Examining solid settings data for allowPublicRegistrations... ${JSON.stringify(solidSettingsData)}`);
         const allowPublicRegistration = solidSettingsData?.allowPublicRegistration;
-
         if (allowPublicRegistration === false) {
             setAllowRegistration(false);
             if (pathname === "/auth/register") {
@@ -75,7 +76,10 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     }, [solidSettingsData, pathname]);
 
 
-    if (allowRegistration === null) return null;
+    if (allowRegistration === null) {
+        console.log(`AuthLayout returning null because allowRegistration is null`);
+        return null;
+    }
 
     const authChildren = allowRegistration || pathname !== "/auth/register" ? children : null;
     const handleRegistration = () => {
