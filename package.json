@@ -1,6 +1,6 @@
 {
   "name": "@solidstarters/solid-core-ui",
-  "version": "1.1.210",
+  "version": "1.1.211",
   "scripts": {
     "prebuild": "npm run copy-resources && npm run copy-styles",
     "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
