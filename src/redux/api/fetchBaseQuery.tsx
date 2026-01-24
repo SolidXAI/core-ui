@@ -8,15 +8,28 @@ console.log(`fetchBaseQuery resolved baseUrl to ${baseUrl}`);
 export const baseQueryWithAuth = fetchBaseQuery({
     baseUrl,
     prepareHeaders: async (headers) => {
-        const session = await getSession(); // Fetch session data
-        
-        if (session?.user.accessToken) {
-            console.log(`baseQueryWithAuth has resolved session returning after setting authorization header...`);
-            headers.set('authorization', `Bearer ${session?.user?.accessToken}`); // Add access token to headers
+        console.log("[prepareHeaders] start");
+        let session: any = null;
+        try {
+            session = await Promise.race([
+                getSession(),
+                new Promise((_, reject) =>
+                    setTimeout(() => reject(new Error("getSession timeout")), 2000)
+                ),
+            ]);
+            console.log("[prepareHeaders] session", session);
+        } catch (err) {
+            console.error("[prepareHeaders] getSession failed", err);
         }
-        else {
-            console.log(`baseQueryWithAuth has not resolved session yet returning without setting authorization header...`);
+
+        if (session?.user?.accessToken) {
+            headers.set("authorization", `Bearer ${session.user.accessToken}`);
+            console.log("[prepareHeaders] set auth header");
+        } else {
+            console.log("[prepareHeaders] no access token");
         }
+
+        console.log("[prepareHeaders] end");
         return headers;
     },
 });
