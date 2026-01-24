@@ -27,6 +27,9 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     console.log(`AuthLayout about to trigger useGetAuthSettingsQuery()...`);
     const {
         data: solidSettingsDataInitialData,
+        isUninitialized: isSolidSettingsUninitialized,
+        isLoading: isSolidSettingsLoading,
+        isFetching: isSolidSettingsFetching,
         isError: isSolidSettingsError,
         error: solidSettingsError,
     } = useGetAuthSettingsQuery("");
@@ -44,6 +47,24 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
             console.error("AuthLayout failed to load settings", solidSettingsError);
         }
     }, [isSolidSettingsError, solidSettingsError]);
+
+    useEffect(() => {
+        console.log("[AuthLayout] RTKQ state", {
+            isUninitialized: isSolidSettingsUninitialized,
+            isLoading: isSolidSettingsLoading,
+            isFetching: isSolidSettingsFetching,
+            isError: isSolidSettingsError,
+            error: solidSettingsError,
+            hasData: Boolean(solidSettingsDataInitialData),
+        });
+    }, [
+        isSolidSettingsUninitialized,
+        isSolidSettingsLoading,
+        isSolidSettingsFetching,
+        isSolidSettingsError,
+        solidSettingsError,
+        solidSettingsDataInitialData,
+    ]);
 
     const [allowRegistration, setAllowRegistration] = useState<boolean | null>(null);
     const [isRestricted, setIsRestricted] = useState(false);
