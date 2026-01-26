@@ -26,7 +26,6 @@ import { useDispatch, useSelector } from 'react-redux';
 import { handleError } from '../../helpers/ToastContainer';
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { useBulkUpdateSolidSettingsMutation, useLazyGetSolidSettingsQuery } from '../../redux/api/solidSettingsApi';
-import { setSolidSettings } from '../../redux/features/settingsSlice';
 
 
 export const GeneralSettings = () => {
@@ -37,14 +36,7 @@ export const GeneralSettings = () => {
     const [authScreenCenterBackgroundImagePreview, setAuthScreenCenterBackgroundImagePreview] = useState<string | null>(null);
     const dispatch = useDispatch()
 
-    const [trigger, { data: solidSettingsDataInitialData }] = useLazyGetSolidSettingsQuery();
-    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
-    useEffect(() => {
-        if (solidSettingsDataInitialData) {
-            dispatch(setSolidSettings(solidSettingsDataInitialData?.data));
-        }
-    }, [solidSettingsDataInitialData]);
-
+    const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
 
     useEffect(() => {
         trigger("") // Fetch settings on mount
@@ -65,45 +57,45 @@ export const GeneralSettings = () => {
     };
 
     const initialValues = {
-        appLogo: solidSettingsData?.appLogo ?? null,
-        companylogo: solidSettingsData?.companylogo ?? null,
-        passwordlessRegistrationValidateWhat: solidSettingsData?.passwordlessRegistrationValidateWhat ?? "email",
-        allowPublicRegistration: solidSettingsData?.allowPublicRegistration ?? false,
-        passwordBasedAuth: solidSettingsData?.passwordBasedAuth ?? false,
-        passwordLessAuth: solidSettingsData?.passwordLessAuth ?? false,
-        activateUserOnRegistration: solidSettingsData?.activateUserOnRegistration ?? false,
-        iamGoogleOAuthEnabled: solidSettingsData?.iamGoogleOAuthEnabled ?? false,
-        shouldQueueEmails: solidSettingsData?.shouldQueueEmails ?? false,
-        shouldQueueSms: solidSettingsData?.shouldQueueSms ?? false,
-        authPagesTheme: solidSettingsData?.authPagesTheme ?? "light",
-        authPagesLayout: solidSettingsData?.authPagesLayout ?? "center",
-        defaultRole: solidSettingsData?.defaultRole ?? "Admin",
-        appLogoPosition: solidSettingsData?.appLogoPosition ?? "in_form_view",
-        showAuthContent: solidSettingsData?.showAuthContent ?? false,
-        appTitle: solidSettingsData?.appTitle ?? "SolidX",
-        appSubtitle: solidSettingsData?.appSubtitle ?? "Welcome To",
-        appDescription: solidSettingsData?.appDescription ?? "appDescription",
-        showLegalLinks: solidSettingsData?.showLegalLinks ?? false,
-        appTnc: solidSettingsData?.appTnc ?? null,
-        appPrivacyPolicy: solidSettingsData?.appPrivacyPolicy ?? null,
-        enableDarkMode: solidSettingsData?.enableDarkMode ?? false,
-        copyright: solidSettingsData?.copyright ?? null,
-        forceChangePasswordOnFirstLogin: solidSettingsData?.forceChangePasswordOnFirstLogin ?? false,
-        contactSupportEmail: solidSettingsData?.contactSupportEmail ?? null,
-        contactSupportDisplayName: solidSettingsData?.contactSupportDisplayName ?? null,
-        contactSupportIcon: solidSettingsData?.contactSupportIcon ?? null,
-        authScreenRightBackgroundImage: solidSettingsData?.authScreenRightBackgroundImage ?? null,
-        authScreenLeftBackgroundImage: solidSettingsData?.authScreenLeftBackgroundImage ?? null,
-        authScreenCenterBackgroundImage: solidSettingsData?.authScreenCenterBackgroundImage ?? null,
-        solidXGenAiCodeBuilderConfig: solidSettingsData?.solidXGenAiCodeBuilderConfig ?? {
+        appLogo: solidSettingsData?.data?.appLogo ?? null,
+        companylogo: solidSettingsData?.data?.companylogo ?? null,
+        passwordlessRegistrationValidateWhat: solidSettingsData?.data?.passwordlessRegistrationValidateWhat ?? "email",
+        allowPublicRegistration: solidSettingsData?.data?.allowPublicRegistration ?? false,
+        passwordBasedAuth: solidSettingsData?.data?.passwordBasedAuth ?? false,
+        passwordLessAuth: solidSettingsData?.data?.passwordLessAuth ?? false,
+        activateUserOnRegistration: solidSettingsData?.data?.activateUserOnRegistration ?? false,
+        iamGoogleOAuthEnabled: solidSettingsData?.data?.iamGoogleOAuthEnabled ?? false,
+        shouldQueueEmails: solidSettingsData?.data?.shouldQueueEmails ?? false,
+        shouldQueueSms: solidSettingsData?.data?.shouldQueueSms ?? false,
+        authPagesTheme: solidSettingsData?.data?.authPagesTheme ?? "light",
+        authPagesLayout: solidSettingsData?.data?.authPagesLayout ?? "center",
+        defaultRole: solidSettingsData?.data?.defaultRole ?? "Admin",
+        appLogoPosition: solidSettingsData?.data?.appLogoPosition ?? "in_form_view",
+        showAuthContent: solidSettingsData?.data?.showAuthContent ?? false,
+        appTitle: solidSettingsData?.data?.appTitle ?? "SolidX",
+        appSubtitle: solidSettingsData?.data?.appSubtitle ?? "Welcome To",
+        appDescription: solidSettingsData?.data?.appDescription ?? "appDescription",
+        showLegalLinks: solidSettingsData?.data?.showLegalLinks ?? false,
+        appTnc: solidSettingsData?.data?.appTnc ?? null,
+        appPrivacyPolicy: solidSettingsData?.data?.appPrivacyPolicy ?? null,
+        enableDarkMode: solidSettingsData?.data?.enableDarkMode ?? false,
+        copyright: solidSettingsData?.data?.copyright ?? null,
+        forceChangePasswordOnFirstLogin: solidSettingsData?.data?.forceChangePasswordOnFirstLogin ?? false,
+        contactSupportEmail: solidSettingsData?.data?.contactSupportEmail ?? null,
+        contactSupportDisplayName: solidSettingsData?.data?.contactSupportDisplayName ?? null,
+        contactSupportIcon: solidSettingsData?.data?.contactSupportIcon ?? null,
+        authScreenRightBackgroundImage: solidSettingsData?.data?.authScreenRightBackgroundImage ?? null,
+        authScreenLeftBackgroundImage: solidSettingsData?.data?.authScreenLeftBackgroundImage ?? null,
+        authScreenCenterBackgroundImage: solidSettingsData?.data?.authScreenCenterBackgroundImage ?? null,
+        solidXGenAiCodeBuilderConfig: solidSettingsData?.data?.solidXGenAiCodeBuilderConfig ?? {
             defaultProvider: "",
             availableProviders: []
         }
-        // llmProvider: solidSettingsData?.llmProvider ?? null,
-        // llModelName: solidSettingsData?.llModelName ?? null,
-        // llmProviderApiKey: solidSettingsData?.llmProviderApiKey ?? null,
-        // llmProviderBaseURL: solidSettingsData?.llmProviderBaseURL ?? null,
-        // llmModelIdentifier: solidSettingsData?.llmModelIdentifier ?? null
+        // llmProvider: solidSettingsData?.data?.llmProvider ?? null,
+        // llModelName: solidSettingsData?.data?.llModelName ?? null,
+        // llmProviderApiKey: solidSettingsData?.data?.llmProviderApiKey ?? null,
+        // llmProviderBaseURL: solidSettingsData?.data?.llmProviderBaseURL ?? null,
+        // llmModelIdentifier: solidSettingsData?.data?.llmModelIdentifier ?? null
 
 
     };
@@ -1041,7 +1033,7 @@ export const GeneralSettings = () => {
                                         </div>
                                     </div>
                                     <div className='mt-2 lg:mt-4' style={{ borderBottom: '1px dashed #D8E2EA' }}></div>
-                                    {solidSettingsData?.enableDarkMode === true &&
+                                    {solidSettingsData?.data?.enableDarkMode === true &&
                                         <>
                                             <p className='font-bold mt-3 lg:mt-4' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Authentication Screen Theme</p>
                                             <div className='formgrid grid'>

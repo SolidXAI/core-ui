@@ -7,7 +7,7 @@ import { PrimeReactContext } from 'primereact/api';
 import { useEventListener, useUnmountEffect } from 'primereact/hooks';
 import { classNames } from 'primereact/utils';
 import React, { useContext, useEffect, useRef } from 'react';
-import { useSelector, useDispatch } from 'react-redux';
+import { useSelector } from 'react-redux';
 import AppConfig from './AppConfig';
 import { LayoutContext } from './context/layoutcontext';
 import AppSidebar from './AppSidebar';
@@ -15,8 +15,6 @@ import SolidPopupContainer from '../common/SolidPopupContainer';
 import { useSession } from 'next-auth/react';
 import { getExtensionFunction } from '../../helpers/registry';
 import { SolidOnApplicationMountEvent } from '../../types/solid-core';
-import { setSolidSettings } from '../../redux/features/settingsSlice';
-import { useGetSolidSettingsQuery } from '../../redux/api/solidSettingsApi';
 
 export const Layout = ({ children }: ChildContainerProps) => {
     const { layoutConfig, layoutState, setLayoutState } = useContext(LayoutContext);
@@ -170,17 +168,13 @@ export const Layout = ({ children }: ChildContainerProps) => {
     }, [session, session?.data, user]);
 
 
-    const dispatch = useDispatch()
-    const { data: solidSettingsDataInitialData } = useGetSolidSettingsQuery("")
-
-    useEffect(() => {
-        if (solidSettingsDataInitialData) {
-            dispatch(setSolidSettings(solidSettingsDataInitialData?.data));
-        }
-    }, [solidSettingsDataInitialData]);
-
-
-
+    // const dispatch = useDispatch()
+    // const { data: solidSettingsDataInitialData } = useGetSolidSettingsQuery("")
+    // useEffect(() => {
+    //     if (solidSettingsDataInitialData) {
+    //         dispatch(setSolidSettings(solidSettingsDataInitialData?.data));
+    //     }
+    // }, [solidSettingsDataInitialData]);
 
     // const toggleBothSidebars = () => {
     //     if (visibleNavbar) {

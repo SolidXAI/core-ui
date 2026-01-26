@@ -3,7 +3,6 @@ import {
     dataViewReducer,
     navbarReducer,
     popupReducer,
-    settingsReducer,
     themeReducer,
     userReducer
 } from "../../index";
@@ -59,6 +58,5 @@ export const solidReducers = {
     theme: themeReducer,
     popup: popupReducer,
     navbarState: navbarReducer,
-    settingsState: settingsReducer,
     dataViewState: dataViewReducer,
 };  

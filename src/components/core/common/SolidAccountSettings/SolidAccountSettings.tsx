@@ -1,23 +1,21 @@
 "use client"
 
 import { Dialog } from "primereact/dialog";
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { SolidPersonalInfo } from "./SolidPersonalInfo";
 import { SolidChangePassword } from "./SolidChangePassword";
 import styles from './SolidAccountSettings.module.css'
 import { useSelector } from "react-redux";
+import { useLazyGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi";
 
 export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfileSettingsDialog }: any) => {
     const [setting, setSetting] = useState({ key: "personal_info", label: "Persnoal Info" });
 
-    // const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
+    const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
+    useEffect(() => {
+        trigger("") // Fetch settings on mount
+    }, [])
 
-
-    // useEffect(() => {
-    //     trigger("") // Fetch settings on mount
-    // }, [])
-
-    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
     const settings = [
         {
             label: "Persnoal Info",
