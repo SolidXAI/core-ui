@@ -19,6 +19,7 @@ import { formatTimeLeft } from "../../helpers/resendOtpHelper";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { RadioButton } from "primereact/radiobutton";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
+import { env } from "../../hooks/solid/env";
 
 interface AuthTabsProps {
     passwordBasedAuth: boolean;
@@ -91,7 +92,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                             });
                         } else {
                             showToast("success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
-                            router.push(`${process.env.NEXT_PUBLIC_LOGIN_REDIRECT_URL}`);
+                            router.push(`${env("NEXT_PUBLIC_LOGIN_REDIRECT_URL")}`);
                         }
                     } catch (error: any) {
                         showToast("error", ERROR_MESSAGES.LOGIN_ERROR, error?.data ? error?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
@@ -234,7 +235,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
                     try {
                         const RESEND_OTP_KEY = `resendOtpLogin_${values.identifier}`;
-                        const RESEND_OTP_TIMER_MIN = parseFloat(process.env.NEXT_PUBLIC_RESEND_OTP_TIMER || '0.5');
+                        const RESEND_OTP_TIMER_MIN = parseFloat(env("NEXT_PUBLIC_RESEND_OTP_TIMER") || '0.5');
                         const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
 
                         // Use selectedAuthMethod for transactional, otherwise use fieldConfig.type

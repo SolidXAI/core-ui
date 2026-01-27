@@ -1,7 +1,8 @@
 import { fetchBaseQuery } from "@reduxjs/toolkit/dist/query";
 import { getSession } from "../../hooks/solid/auth";
+import { env } from "../../hooks/solid/env";
 
-const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api`; // Base URL for the API endpoints
+const baseUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api`; // Base URL for the API endpoints
 console.log(`fetchBaseQuery resolved baseUrl to ${baseUrl}`);
 
 // Updated fetchBaseQuery to include accessToken in headers
@@ -31,7 +32,7 @@ export const baseQueryWithAuth = fetchBaseQuery({
 // import type { FetchArgs } from "@reduxjs/toolkit/query";
 // import { getSession } from "../../hooks/solid/auth";
 
-// const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api`;
+// const baseUrl = `${getEnv("NEXT_PUBLIC_BACKEND_API_URL")}/api`;
 
 // const rawBaseQuery = fetchBaseQuery({
 //     baseUrl,

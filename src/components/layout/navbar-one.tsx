@@ -1,9 +1,7 @@
-
 import { ToastContainer } from "../../helpers/ToastContainer";
 import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
 import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
-// import { useAppDispatch } from "../../redux/hooks";
-// import { RootState } from "../../redux/store.js";
+import { env } from "../../hooks/solid/env";
 import { signOut, useSession } from "../../hooks/solid/auth";
 import { Button } from "primereact/button";
 import { IconField } from "primereact/iconfield";
@@ -13,7 +11,6 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import NavbarTwoMenu from "./navbar-two-menu";
 import UserProfileMenu from "./user-profile-menu";
-// import menu from "../../helpers/menu";
 
 const NavbarOne = () => {
     const dispatch = useDispatch();
@@ -34,8 +31,8 @@ const NavbarOne = () => {
 
     useEffect(() => {
         if (menu) {
-            setCurrentMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === process.env.NEXT_PUBLIC_DEFAULT_MENU_KEY)[0]?.children);
-            setCurrentMainMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === process.env.NEXT_PUBLIC_DEFAULT_MENU_KEY)[0]?.title)
+            setCurrentMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === env("NEXT_PUBLIC_DEFAULT_MENU_KEY"))[0]?.children);
+            setCurrentMainMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === env("NEXT_PUBLIC_DEFAULT_MENU_KEY"))[0]?.title)
         }
     }, [menu])
 
@@ -137,7 +134,7 @@ const NavbarOne = () => {
                                             style={{ cursor: "pointer", width: '30px' }}
                                             // src={currentMainMenu === m.title ? `/images/${m.title.toLocaleLowerCase()}-active.svg` : `/images/${m.title.toLocaleLowerCase()}.svg`}
                                             // src={`/images/menu/${m.title}.svg`}
-                                            src={m.icon.startsWith("/") ? m.icon : `${process.env.API_URL}/${m.icon}`}
+                                            src={m.icon.startsWith("/") ? m.icon : `${env("API_URL")}/${m.icon}`}
                                             // src={`/images/menu/app-builder.svg`}
                                             alt="Solid"
                                         />

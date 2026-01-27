@@ -8,12 +8,10 @@ import { useDispatch, useSelector } from "react-redux";
 import NavbarTwoMenu from "./navbar-two-menu";
 import UserProfileMenu from "./user-profile-menu";
 import Image from "../../hooks/solid/image";
-import AppBuilderSvg from '../../resources/images/menu/app-builder.svg'
 import SettingImage from '../../resources/images/Navigation/SolidSettinsIcon.svg'
 import { Avatar } from "primereact/avatar";
 import { usePathname } from "../../hooks/solid/navigation";
-
-// import menu from "../../helpers/menu";
+import { env } from "../../hooks/solid/env";
 
 const AppSidebar = () => {
     const dispatch = useDispatch();
@@ -31,8 +29,8 @@ const AppSidebar = () => {
 
     useEffect(() => {
         if (menu) {
-            setCurrentMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === process.env.NEXT_PUBLIC_DEFAULT_MENU_KEY)[0]?.children);
-            setCurrentMainMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === process.env.NEXT_PUBLIC_DEFAULT_MENU_KEY)[0]?.title)
+            setCurrentMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === env("NEXT_PUBLIC_DEFAULT_MENU_KEY"))[0]?.children);
+            setCurrentMainMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === env("NEXT_PUBLIC_DEFAULT_MENU_KEY"))[0]?.title)
         }
     }, [menu])
 
@@ -119,11 +117,11 @@ const AppSidebar = () => {
                 ]
             }
         ],
-        icon: process.env.NEXT_PUBLIC_SETTINGS_ICON ? process.env.NEXT_PUBLIC_SETTINGS_ICON : SettingImage
+        icon: env("NEXT_PUBLIC_SETTINGS_ICON") ? env("NEXT_PUBLIC_SETTINGS_ICON") : SettingImage
     };
     const updatedMenuData = menu?.data
-        ? [...menu.data, ...(process.env.NEXT_PUBLIC_SHOW_SETTINGS === "true" ? [additionalMenu] : [])]
-        : process.env.NEXT_PUBLIC_SHOW_SETTINGS === "true"
+        ? [...menu.data, ...(env("NEXT_PUBLIC_SHOW_SETTINGS") === "true" ? [additionalMenu] : [])]
+        : env("NEXT_PUBLIC_SHOW_SETTINGS") === "true"
             ? [additionalMenu]
             : [];
 
@@ -172,7 +170,7 @@ const AppSidebar = () => {
                             >
                                 {m.icon ?
                                     <Image
-                                        src={iconSrc.startsWith("/") ? iconSrc : `${process.env.API_URL}/${iconSrc}`}
+                                        src={iconSrc.startsWith("/") ? iconSrc : `${env("API_URL")}/${iconSrc}`}
                                         alt={m.title}
                                         height={30}
                                         width={30}

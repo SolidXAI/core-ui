@@ -9,6 +9,7 @@ import { useDispatch } from "react-redux";
 import { Toast } from 'primereact/toast';
 import { SolidCircularLoader } from '../../../../../../components/core/common/SolidLoaders/SolidCircularLoader';
 import { ERROR_MESSAGES } from "../../../../../../constants/error-messages";
+import { env } from "../../../../../../hooks/solid/env";
 
 
 const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
@@ -98,7 +99,7 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
     const pingBackendWithRetry = async (retries = 30, delay = 500): Promise<boolean> => {
         for (let i = 0; i < retries; i++) {
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ping`);
+                const res = await fetch(`${env("NEXT_PUBLIC_BACKEND_API_URL")}/api/ping`);
                 console.log("ping response", res);
 
                 if (res.ok)

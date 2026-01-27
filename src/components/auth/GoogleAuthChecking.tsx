@@ -1,10 +1,11 @@
-
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { signIn } from '../../hooks/solid/auth';
 import { useRouter, useSearchParams } from '../../hooks/solid/navigation';
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Toast } from 'primereact/toast';
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { env } from "../../hooks/solid/env";
+
 export const GoogleAuthChecking = () => {
     const searchParams = useSearchParams();
     const accessCode = searchParams.get("accessCode");
@@ -37,7 +38,7 @@ export const GoogleAuthChecking = () => {
                     setError(ERROR_MESSAGES.AUTHENICATION__FAILED)
                 } else {
                     showToast("success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
-                    router.push(`${process.env.NEXT_PUBLIC_LOGIN_REDIRECT_URL}`);
+                    router.push(`${env("NEXT_PUBLIC_LOGIN_REDIRECT_URL")}`);
                 }
             } catch (err: any) {
                 showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.AUTHENICATION__FAILED);

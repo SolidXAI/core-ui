@@ -1,16 +1,15 @@
-
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { useChangePasswordMutation } from '../../redux/api/authApi';
 import { useFormik } from 'formik';
 import { signOut, useSession } from '../../hooks/solid/auth';
 import { Button } from 'primereact/button';
-import { InputText } from 'primereact/inputtext';
 import { Message } from 'primereact/message';
 import { Password } from 'primereact/password';
 import { Toast } from 'primereact/toast';
-import { classNames } from 'primereact/utils';
 import { useRef } from 'react';
 import * as Yup from 'yup';
+import { env } from "../../hooks/solid/env";
+
 const SolidChangeForcePassword = () => {
     const toast = useRef<Toast>(null);
     const [changePassword] = useChangePasswordMutation();
@@ -27,8 +26,8 @@ const SolidChangeForcePassword = () => {
         });
     };
 
-    const envPasswordRegex = process.env.NEXT_PUBLIC_PASSWORD_REGEX;
-    const envPasswordHelperText = process.env.NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC;
+    const envPasswordRegex = env("NEXT_PUBLIC_PASSWORD_REGEX");
+    const envPasswordHelperText = env("NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC");
     let passwordRegex: RegExp | null = null;
     try {
         if (envPasswordRegex) {

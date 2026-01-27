@@ -1,5 +1,6 @@
 import { ERROR_MESSAGES } from "../constants/error-messages";
 import { getSession } from "../hooks/solid/auth";
+import { env } from "../hooks/solid/env";
 
 export async function downloadFileWithProgress(
   url: string,
@@ -11,7 +12,7 @@ export async function downloadFileWithProgress(
   checkApplyFilter: boolean,
   updateDto: any
 ): Promise<{ fileName: string; blob: Blob }> {
-  const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api`;
+  const baseUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api`;
 
   try {
     handlers.onStatusChange?.("In Progress", "Downloading File", "Please wait...");

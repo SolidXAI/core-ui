@@ -1423,15 +1423,18 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     if (visible === true) {
                         return <SolidGroup key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidGroup>;
                     }
+                    break;
                 case "row":
                     if (visible === true) {
                         return <SolidRow key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidRow>;
                     }
+                    break;
                 case "column":
                     if (visible === true) {
                         return <SolidColumn key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidColumn>;
                     }
-                case "field": {
+                    break;
+                case "field": 
                     if (visible === true) {
 
                         // const fieldMetadata = solidFieldsMetadata[attrs.name];
@@ -1456,17 +1459,20 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             onEmbeddedFormSave={() => setRefreshChatterMessage(true)}
                         />;
                     }
-                }
+                    break;
+                
                 case "notebook":
                     if (visible === true) {
                         return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidNotebook>;
                     }
+                    break;
                 case "page":
                     if (visible === true) {
                         const fields = children.flatMap((child: any) => getLayoutFields(child));
                         const pageChildren = children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD));
                         return SolidPage({ children: pageChildren, attrs: attrs, key: key, formik: formik, fields });
                     }
+                    break;
                 case "custom":
                     if (visible === true) {
                         const widgetName = attrs?.widget;
@@ -1485,6 +1491,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             />
                         }
                     }
+                    break;
 
                 default:
                     return null;

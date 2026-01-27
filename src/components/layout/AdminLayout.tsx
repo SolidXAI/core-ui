@@ -1,5 +1,3 @@
-
-
 import { handleError } from "../../helpers/ToastContainer";
 import { signOut, useSession } from "../../hooks/solid/auth";
 import { useRouter } from "../../hooks/solid/navigation";
@@ -35,7 +33,7 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
 
     return (
         <Layout>
-            {/* <div className={`${process.env.NEXT_PUBLIC_ENABLE_CUSTOM_HEADER_FOOTER == "true" && 'header-margin-top'}`} style={{ minHeight: `${process.env.NEXT_PUBLIC_ENABLE_CUSTOM_HEADER_FOOTER == "true" ? 'calc(100vh - 70px)' : 'calc(100vh)'}` }}> */}
+            {/* <div className={`${getEnv("NEXT_PUBLIC_ENABLE_CUSTOM_HEADER_FOOTER") == "true" && 'header-margin-top'}`} style={{ minHeight: `${getEnv("NEXT_PUBLIC_ENABLE_CUSTOM_HEADER_FOOTER") == "true" ? 'calc(100vh - 70px)' : 'calc(100vh)'}` }}> */}
 
             {/* <div className="min-h-full max-h-full flex flex-column relative flex-auto overflow-x-auto"> */}
             {/* <DashboardHeader /> */}

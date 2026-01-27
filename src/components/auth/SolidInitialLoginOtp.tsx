@@ -12,6 +12,7 @@ import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { signIn } from "../../hooks/solid/auth";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
+import { env } from "../../hooks/solid/env";
 
 
 const SolidInitialLoginOtp = () => {
@@ -21,7 +22,7 @@ const SolidInitialLoginOtp = () => {
     const identifier = tempIdentifier ? decodeURIComponent(tempIdentifier) : '';
 
     const RESEND_OTP_KEY = `resendOtpLogin_${identifier}`;
-    const RESEND_OTP_TIMER_MIN = parseFloat(process.env.NEXT_PUBLIC_RESEND_OTP_TIMER || '0.5');
+    const RESEND_OTP_TIMER_MIN = parseFloat(env("NEXT_PUBLIC_RESEND_OTP_TIMER") || '0.5');
     const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
     useEffect(() => {
@@ -205,7 +206,7 @@ const SolidInitialLoginOtp = () => {
                                     } else {
                                         localStorage.removeItem(`resendOtpLogin_${identifier}`);
                                         showToast("success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
-                                        router.push(`${process.env.NEXT_PUBLIC_LOGIN_REDIRECT_URL}`);
+                                        router.push(`${env("NEXT_PUBLIC_LOGIN_REDIRECT_URL")}`);
                                     }
                                 } else {
                                     showToast("error", ERROR_MESSAGES.INAVLID_OTP, response.error);

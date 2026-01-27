@@ -1,5 +1,3 @@
-
-
 import { useConfirmForgotPasswordMutation } from "../../redux/api/authApi";
 import { useFormik } from "formik";
 import Image from "../../hooks/solid/image";
@@ -14,6 +12,8 @@ import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
+import { env } from "../../hooks/solid/env";
+
 const SolidResetPassword = () => {
     const searchParams = useSearchParams();
     const verificationToken = searchParams.get('token');
@@ -41,8 +41,8 @@ const SolidResetPassword = () => {
         });
     };
 
-    const envPasswordRegex = process.env.NEXT_PUBLIC_PASSWORD_REGEX;
-    const envPasswordHelperText = process.env.NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC;
+    const envPasswordRegex = env("NEXT_PUBLIC_PASSWORD_REGEX");
+    const envPasswordHelperText = env("NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC");
     let passwordRegex: RegExp | null = null;
     try {
         if (envPasswordRegex) {

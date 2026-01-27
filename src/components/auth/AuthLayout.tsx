@@ -12,6 +12,7 @@ import AuthScreenRightBackgroundImage from '../../resources/images/auth/solid-le
 import AuthScreenLeftBackgroundImage from '../../resources/images/auth/solid-right-layout-bg.png';
 import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
+import { env } from "../../hooks/solid/env";
 
 
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
@@ -85,7 +86,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         // Normalize image path if coming from API
         const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
         if (!isBlobOrAbsolute && !src?.startsWith("/")) {
-            src = `${process.env.API_URL}/${src}`;
+            src = `${env("API_URL")}/${src}`;
         }
 
         return src;

@@ -1,5 +1,3 @@
-
-
 import { useInitateRegisterMutation, useRegisterMutation } from "../../redux/api/authApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import { Form, Formik } from "formik";
@@ -21,6 +19,7 @@ import { formatTimeLeft } from "../../helpers/resendOtpHelper";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
+import { env } from "../../hooks/solid/env";
 
 interface AuthTabsProps {
     passwordBasedAuth: boolean;
@@ -29,7 +28,7 @@ interface AuthTabsProps {
 }
 
 const SolidRegister = () => {
-    const envPasswordHelperText = process.env.NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC;
+    const envPasswordHelperText = env("NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC");
     const [activeIndex, setActiveIndex] = useState(0);
 
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
@@ -293,7 +292,7 @@ const SolidRegister = () => {
                 onSubmit={async (values, { setSubmitting }) => {
                     try {
                         const RESEND_OTP_KEY = `resendOtpRegister_${values.email}`;
-                        const RESEND_OTP_TIMER_MIN = parseFloat(process.env.NEXT_PUBLIC_RESEND_OTP_TIMER || '0.5');
+                        const RESEND_OTP_TIMER_MIN = parseFloat(env("NEXT_PUBLIC_RESEND_OTP_TIMER") || '0.5');
                         const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
                         const payload = {
                             username: values.username,

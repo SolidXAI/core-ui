@@ -1,11 +1,12 @@
 import { ERROR_MESSAGES } from "../constants/error-messages";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
+import { env } from "../hooks/solid/env";
 
 export async function refreshAccessToken(token: any) {
     try {
       const response = await axios.post(
-        `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/iam/refresh-tokens`,
+        `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api/iam/refresh-tokens`,
         { refreshToken: token.refreshToken }
       );
   

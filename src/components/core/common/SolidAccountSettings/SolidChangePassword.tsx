@@ -1,4 +1,3 @@
-
 import { handleLogout } from '../../../../nextAuth/handleLogout';
 import { useChangePasswordMutation } from '../../../../redux/api/authApi';
 import { useFormik } from 'formik';
@@ -11,6 +10,7 @@ import { useMemo, useRef } from 'react';
 import * as Yup from 'yup';
 import { SolidPasswordHelperText } from '../SolidPasswordHelperText';
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
+import { env } from "../../../../hooks/solid/env";
 
 export const SolidChangePassword = ({ solidSettingsData }: any) => {
     const toast = useRef<Toast>(null);
@@ -28,7 +28,7 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
         });
     };
 
-    const envPasswordRegex = process.env.NEXT_PUBLIC_PASSWORD_REGEX;
+    const envPasswordRegex = env("NEXT_PUBLIC_PASSWORD_REGEX");
 
     // Try backend regex first, then env, then fallback
     const effectiveRegex = useMemo(() => {

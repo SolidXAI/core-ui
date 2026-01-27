@@ -1,5 +1,6 @@
 import { usePathname, useRouter } from '../../hooks/solid/navigation';
 import { Button } from 'primereact/button'
+import { env } from "../../hooks/solid/env";
 
 export const SocialMediaLogin = () => {
     const router = useRouter();
@@ -10,7 +11,7 @@ export const SocialMediaLogin = () => {
                 className='flex justify-content-center gap-3 w-full google-auth-button'
                 outlined
                 severity="secondary"
-                onClick={() => router.push(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/iam/google/connect`)}
+                onClick={() => router.push(`${env("NEXT_PUBLIC_BACKEND_API_URL")}/api/iam/google/connect`)}
             // onClick={()=>signIn('google', {callbackUrl :'https://uat-api.lm.solidxai.com/api/iam/google/connect'})}
             >
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">

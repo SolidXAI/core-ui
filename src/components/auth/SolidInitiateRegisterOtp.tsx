@@ -1,5 +1,3 @@
-
-
 import { useConfirmOtpRegisterMutation, useInitateRegisterMutation } from "../../redux/api/authApi";
 import { Form, Formik } from "formik";
 import Image from "../../hooks/solid/image";
@@ -13,13 +11,14 @@ import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
+import { env } from "../../hooks/solid/env";
 
 const SolidInitiateRegisterOtp = () => {
     const searchParams = useSearchParams();
     const tempEmail = searchParams.get('email');
     const email = tempEmail ? decodeURIComponent(tempEmail) : '';
     const RESEND_OTP_KEY = `resendOtpRegister_${email}`;
-    const RESEND_OTP_TIMER_MIN = parseFloat(process.env.NEXT_PUBLIC_RESEND_OTP_TIMER || '0.5');
+    const RESEND_OTP_TIMER_MIN = parseFloat(env("NEXT_PUBLIC_RESEND_OTP_TIMER") || '0.5');
     const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
     const username = searchParams.get('username') || '';
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();

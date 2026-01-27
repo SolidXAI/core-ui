@@ -1,5 +1,3 @@
-
-// import { useBulkUpdateSolidSettingsMutation, useCreateSolidSettingsMutation, useLazyGetSolidSettingsQuery, useUpdateSolidSettingsMutation } from '../../redux/api/solidSettingsApi';
 import { useFormik } from 'formik';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
@@ -26,6 +24,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { handleError } from '../../helpers/ToastContainer';
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { useBulkUpdateSolidSettingsMutation, useLazyGetSolidSettingsQuery } from '../../redux/api/solidSettingsApi';
+import { env } from "../../hooks/solid/env";
 
 
 export const GeneralSettings = () => {
@@ -499,7 +498,7 @@ export const GeneralSettings = () => {
                                                                 const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
 
                                                                 if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                                                    src = `${process.env.API_URL}/${src}`;
+                                                                    src = `${env("API_URL")}/${src}`;
                                                                 }
                                                                 return (
                                                                     <SolidUploadedImage src={src} className='solid-app-logo' />
@@ -533,7 +532,7 @@ export const GeneralSettings = () => {
                                                                 const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
 
                                                                 if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                                                    src = `${process.env.API_URL}/${src}`;
+                                                                    src = `${env("API_URL")}/${src}`;
                                                                 }
 
                                                                 return (
@@ -952,7 +951,7 @@ export const GeneralSettings = () => {
                                                                     const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
 
                                                                     if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                                                        src = `${process.env.API_URL}/${src}`;
+                                                                        src = `${env("API_URL")}/${src}`;
                                                                     }
                                                                     return (
                                                                         <SolidUploadedImage src={src} height={400} width={400} maxHeight={400} />
@@ -985,7 +984,7 @@ export const GeneralSettings = () => {
                                                                     const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
 
                                                                     if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                                                        src = `${process.env.API_URL}/${src}`;
+                                                                        src = `${env("API_URL")}/${src}`;
                                                                     }
                                                                     return (
                                                                         <SolidUploadedImage src={src} height={400} width={400} maxHeight={400} />
@@ -1016,7 +1015,7 @@ export const GeneralSettings = () => {
                                                                     const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
 
                                                                     if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                                                        src = `${process.env.API_URL}/${src}`;
+                                                                        src = `${env("API_URL")}/${src}`;
                                                                     }
                                                                     return (
                                                                         <SolidUploadedImage src={src} height={300} width={600} maxHeight={300} />

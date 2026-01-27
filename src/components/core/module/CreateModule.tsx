@@ -1,13 +1,9 @@
-
 import { BackButton } from "../../../components/common/BackButton";
 import { CancelButton } from "../../../components/common/CancelButton";
 import { DropzonePlaceholder } from "../../../components/common/DropzonePlaceholder";
-import { DropzoneUpload } from "../../../components/common/DropzoneUpload";
 import { FileReaderExt } from "../../../components/common/FileReaderExt";
 import { SingleSelectAutoCompleteField } from "../../../components/common/SingleSelectAutoCompleteField";
-import { SolidBreadcrumb } from "../../../components/common/SolidBreadcrumb";
 import { SolidFormHeader } from "../../../components/common/SolidFormHeader";
-import { SolidFormStepper } from "../../../components/common/SolidFormStepper";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { getSingularAndPlural } from "../../../helpers/helpers";
 import { handleError } from "../../../helpers/ToastContainer";
@@ -17,7 +13,6 @@ import { useCreatemoduleMutation, useDeletemoduleMutation, useUpdatemoduleMutati
 import { useFormik } from "formik";
 import { usePathname, useRouter } from "../../../hooks/solid/navigation";
 import { Button } from "primereact/button";
-import { Checkbox } from "primereact/checkbox";
 import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -29,8 +24,8 @@ import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
 import React, { useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { useSelector } from "react-redux";
 import * as Yup from "yup";
+import { env } from "../../../hooks/solid/env";
 
 const footer = (
   <>
@@ -207,7 +202,7 @@ const CreateModule = ({ data }: any) => {
 
   useEffect(() => {
     if (data) {
-      setmenuIconPreview(`${process.env.API_URL}/${data.menuIconUrl}`);
+      setmenuIconPreview(`${env("API_URL")}/${data.menuIconUrl}`);
 
       const fileName = data?.menuIconUrl?.split("/").pop(); // Extract filename from URL
       setFileDetails({ name: fileName || "Unknown File", type: "Uploaded File" });

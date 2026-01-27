@@ -4,11 +4,12 @@ import Image from '../../../hooks/solid/image'
 import { Button } from 'primereact/button'
 import { useHandleListCustomButtonClick } from '../../../components/common/useHandleListCustomButtonClick'
 import { useHasAnyRole } from '../../../helpers/rolesHelper'
+import { env } from "../../../hooks/solid/env";
 
 export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, createActionQueryParams, actionsAllowed, params, solidListViewMetaData }: any) => {
     const noDataText = solidListViewMetaData?.data?.solidView?.layout?.attrs?.listViewNoDataHelperText
-        ?? (process.env.NEXT_PUBLIC_DEFAULT_LIST_VIEW_NODATA_HELPER_TEXT && solidListViewMetaData?.data?.solidView?.displayName
-            ? `${process.env.NEXT_PUBLIC_DEFAULT_LIST_VIEW_NODATA_HELPER_TEXT} ${solidListViewMetaData.data.solidView.displayName}`
+        ?? (env("NEXT_PUBLIC_DEFAULT_LIST_VIEW_NODATA_HELPER_TEXT") && solidListViewMetaData?.data?.solidView?.displayName
+            ? `${env("NEXT_PUBLIC_DEFAULT_LIST_VIEW_NODATA_HELPER_TEXT")} ${solidListViewMetaData.data.solidView.displayName}`
             : null)
 
     const handleCustomButtonClick = useHandleListCustomButtonClick()
@@ -53,10 +54,10 @@ export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, createActionQue
                 <p className="m-0 view-title">{solidListViewMetaData?.data?.solidView?.layout?.displayName}</p>
             </div> */}
             <div className='solid-empty-listview-placeholder-container'>
-                {process.env.NEXT_PUBLIC_DEFAULT_LIST_VIEW_NODATA_IMAGE &&
+                {env("NEXT_PUBLIC_DEFAULT_LIST_VIEW_NODATA_IMAGE") &&
                     <Image
                         alt={solidListViewMetaData?.data?.solidView?.displayName}
-                        src={process.env.NEXT_PUBLIC_DEFAULT_LIST_VIEW_NODATA_IMAGE}
+                        src={env("NEXT_PUBLIC_DEFAULT_LIST_VIEW_NODATA_IMAGE")}
                         className='relative'
                         height={385}
                         width={617}

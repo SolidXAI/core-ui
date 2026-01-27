@@ -12,6 +12,7 @@ import Image from "../../hooks/solid/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
+import { env } from "../../hooks/solid/env";
 
 const SolidOTPVerify = () => {
 
@@ -89,7 +90,7 @@ const SolidOTPVerify = () => {
                                 showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                             } else {
                                 showToast("success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
-                                router.push(`${process.env.NEXT_PUBLIC_LOGIN_REDIRECT_URL}`);
+                                router.push(`${env("NEXT_PUBLIC_LOGIN_REDIRECT_URL")}`);
                             }
 
                         }}

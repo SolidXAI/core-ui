@@ -3,6 +3,7 @@ import { createSolidEntityApi } from "../redux/api/solidEntityApi";
 import axios from "axios";
 import { kebabCase } from "change-case";
 import { getSession } from "../hooks/solid/auth";
+import { env } from "../hooks/solid/env";
 
 interface RelationHydrationBucket {
   meta: any;
@@ -10,7 +11,7 @@ interface RelationHydrationBucket {
   ids: Set<number>;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL;
+const API_URL = env("NEXT_PUBLIC_BACKEND_API_URL");
 
 export async function hydrateRelationRules(
   rootRules: FilterRule[],
