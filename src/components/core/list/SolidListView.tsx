@@ -58,7 +58,7 @@ import { useSession } from "../../../hooks/solid/auth";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
-import { useLazyGetMcpUrlQuery } from "../../../redux/api/solidSettingsApi";
+import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 import { log } from "console";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
@@ -169,10 +169,13 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [mcpUrl, setMcpUrl] = useState<string | null>(null);
   const [getMcpUrl] = useLazyGetMcpUrlQuery();
 
-  const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+  const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
+  useEffect(() => {
+    trigger("") // Fetch settings on mount
+  }, [])
 
   useEffect(() => {
-    if (solidSettingsData?.mcpEnabled && solidSettingsData?.mcpServerUrl && solidSettingsData?.mcpApiKey) {
+    if (solidSettingsData?.data?.mcpEnabled && solidSettingsData?.data?.mcpServerUrl && solidSettingsData?.data?.mcpApiKey) {
       enableSolidXAiPanel();
     }
   }, [solidSettingsData]);

@@ -8,18 +8,17 @@ import { Toast } from 'primereact/toast';
 import React, { useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux';
 export const SolidNotifications = () => {
-    // const {
-    //     data: solidSettingsData,
-    //     isLoading,
-    //     error,
-    //     refetch,
-    // } = useGetSolidSettingsQuery(undefined);
+    const {
+        data: solidSettingsData,
+        isLoading,
+        error,
+        refetch,
+    } = useGetSolidSettingsQuery(undefined);
 
-    // useEffect(() => {
-    //     refetch();
-    // }, []);
+    useEffect(() => {
+        refetch();
+    }, []);
 
-    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
     const toast = useRef<Toast>(null);
     const [bulkUpdateSolidSettings] = useBulkUpdateSolidUserSettingsMutation();
 
@@ -35,7 +34,7 @@ export const SolidNotifications = () => {
     };
 
     const initialValues = {
-        enableNotification: solidSettingsData?.enableNotification ?? true
+        enableNotification: solidSettingsData?.data?.enableNotification ?? true
     }
 
     const formik = useFormik({
@@ -44,7 +43,7 @@ export const SolidNotifications = () => {
         onSubmit: async (values) => {
             try {
                 const updatedSettingsArray: Array<{ key: string; value: string; type: string }> = [];
-                const currentSettings = solidSettingsData?.user || {};
+                const currentSettings = solidSettingsData?.data?.user || {};
 
                 const formData = new FormData();
 

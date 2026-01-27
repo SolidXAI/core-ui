@@ -3,7 +3,7 @@
 import { signOut } from "../../hooks/solid/auth";
 import { PrimeReactContext } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { useContext, useRef, useState } from "react";
+import { useContext, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { LayoutContext } from "./context/layoutcontext";
 import { LayoutConfig } from "../../types";
@@ -18,17 +18,17 @@ import { SolidAccountSettings } from "../core/common/SolidAccountSettings/SolidA
 import { useGetUserQuery } from "../../redux/api/userApi";
 import { handleLogout } from "../../nextAuth/handleLogout";
 import { Toast } from "primereact/toast";
+import { useLazyGetSolidSettingsQuery } from "../../redux/api/solidSettingsApi";
 
 const UserProfileMenu = () => {
   const toast = useRef(null);
   const [showProfileSettingsDialog, setShowProfileSettingsDialog] = useState(false);
   const router = useRouter();
-  // const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
+  const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
 
-  // useEffect(() => {
-  //   trigger("") // Fetch settings on mount
-  // }, [trigger])
-  const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+  useEffect(() => {
+    trigger("") // Fetch settings on mount
+  }, [trigger])
 
   // const { user } = useAppSelector((state) => state.auth);
   const { changeTheme } = useContext(PrimeReactContext);
@@ -127,7 +127,7 @@ const UserProfileMenu = () => {
             /> */}
             <UserProfileAvatar />
             <div className="flex flex-column align">
-              {solidSettingsData?.enableUsername ?
+              {solidSettingsData?.data?.enableUsername ?
                 <span className="font-bold">{userData?.data?.username}</span>
                 :
                 <span className="mt-1">{userData?.data?.email}</span>
@@ -142,7 +142,7 @@ const UserProfileMenu = () => {
           </div>
 
           {/*  */}
-          {solidSettingsData?.enableDarkMode === true &&
+          {solidSettingsData?.data?.enableDarkMode === true &&
             <div className="p-3 flex align-items-center justify-content-between secondary-border-bottom">
               <div className="flex align-items-center gap-3">
                 <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
@@ -163,11 +163,11 @@ const UserProfileMenu = () => {
               </span>
             </Button>
           </div>
-          {solidSettingsData?.contactSupportEmail &&
+          {solidSettingsData?.data?.contactSupportEmail &&
             <div className="flex align-items-center py-1 gap-2 secondary-border-bottom">
-              <Button severity="secondary" text className="w-full flex align-items-center gap-2 px-3 ml-1" onClick={() => window.location.href = `mailto:${solidSettingsData?.contactSupportEmail}`} icon={solidSettingsData?.contactSupportIcon || 'pi pi-envelope'}>
+              <Button severity="secondary" text className="w-full flex align-items-center gap-2 px-3 ml-1" onClick={() => window.location.href = `mailto:${solidSettingsData?.data?.contactSupportEmail}`} icon={solidSettingsData?.data?.contactSupportIcon || 'pi pi-envelope'}>
                 <span className="p-button-label flex-none">
-                  {solidSettingsData?.contactSupportDisplayName || "Contact Support"}
+                  {solidSettingsData?.data?.contactSupportDisplayName || "Contact Support"}
                 </span>
               </Button>
             </div>

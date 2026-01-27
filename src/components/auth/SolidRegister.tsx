@@ -19,8 +19,8 @@ import Image from "../../hooks/solid/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "../../helpers/resendOtpHelper";
 import { ProgressSpinner } from "primereact/progressspinner";
-import { useSelector } from "react-redux";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
+import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 
 interface AuthTabsProps {
     passwordBasedAuth: boolean;
@@ -32,12 +32,10 @@ const SolidRegister = () => {
     const envPasswordHelperText = process.env.NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC;
     const [activeIndex, setActiveIndex] = useState(0);
 
-    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
-    // useEffect(() => {
-    //     trigger("") // Fetch settings on mount
-    // }, [trigger])
-
-    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    useEffect(() => {
+        trigger("") // Fetch settings on mount
+    }, [trigger])
 
     const [showOverlay, setShowOverlay] = useState(false);
 
@@ -269,7 +267,7 @@ const SolidRegister = () => {
                             {isFormFieldValid(formik, "password") &&
                                 <Message severity="error" text={formik.errors.password?.toString()} />}
                         </div>
-                        {/* <SolidPasswordHelperText text={solidSettingsData?.authenticationPasswordComplexityDescription} /> */}
+                        {/* <SolidPasswordHelperText text={solidSettingsData?.data?.authenticationPasswordComplexityDescription} /> */}
                         <div className="mt-4">
                             <Button className="w-full font-light auth-submit-button" label="Sign Up" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
                         </div>
@@ -407,7 +405,7 @@ const SolidRegister = () => {
         <div className="">
             <Toast ref={toast} />
             {/* 🔹 Overlay UI */}
-            <div className={`auth-container position-relative ${solidSettingsData?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
+            <div className={`auth-container position-relative ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 {showOverlay && (
                     <div className="absolute top-0 left-0 w-full h-full flex align-items-center justify-content-center register-success-popup">
                         <div className="inline-flex flex-column align-items-center justify-content-center text-center">
@@ -418,22 +416,22 @@ const SolidRegister = () => {
                         </div>
                     </div>
                 )}
-                {solidSettingsData?.authPagesLayout === 'center' &&
+                {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.appLogoPosition}`}>
+                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
                             <Image
                                 alt="solid logo"
-                                src={solidSettingsData?.appLogo || SolidLogo}
+                                src={solidSettingsData?.data?.appLogo || SolidLogo}
                                 className="relative"
                                 fill
                             />
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${solidSettingsData?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>Sign Up</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>Sign Up</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
-                <AuthTabs passwordBasedAuth={solidSettingsData?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.passwordLessAuth} showNameFieldsForRegistration={solidSettingsData?.showNameFieldsForRegistration} />
-                {solidSettingsData?.iamGoogleOAuthEnabled &&
+                <AuthTabs passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} showNameFieldsForRegistration={solidSettingsData?.data?.showNameFieldsForRegistration} />
+                {solidSettingsData?.data?.iamGoogleOAuthEnabled &&
                     <>
                         <Divider align="center">
                             <div className="inline-flex align-items-center">

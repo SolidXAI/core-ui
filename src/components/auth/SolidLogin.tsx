@@ -1,5 +1,3 @@
-
-
 import { Form, Formik } from "formik";
 import { signIn } from "../../hooks/solid/auth";
 import Link from "../../hooks/solid/link";
@@ -16,24 +14,22 @@ import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import { useInitateLoginMutation } from "../../redux/api/authApi";
 import Image from "../../hooks/solid/image";
-import { useSelector } from "react-redux";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "../../helpers/resendOtpHelper";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { RadioButton } from "primereact/radiobutton";
-// import { Checkbox } from "primereact/checkbox";
+import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
+
 interface AuthTabsProps {
     passwordBasedAuth: boolean;
     passwordLessAuth: boolean;
 }
 const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
 
-    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
-    // useEffect(() => {
-    //     trigger("") // Fetch settings on mount
-    // }, [trigger])
-
-    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    useEffect(() => {
+        trigger("") // Fetch settings on mount
+    }, [trigger])
 
     const [initiateLogin] = useInitateLoginMutation();
     const [activeIndex, setActiveIndex] = useState(0);
@@ -168,7 +164,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
     }
 
     const PasswordLessLogin = () => {
-        const validationType = solidSettingsData?.passwordlessRegistrationValidateWhat || "email";
+        const validationType = solidSettingsData?.data?.passwordlessRegistrationValidateWhat || "email";
         const [selectedAuthMethod, setSelectedAuthMethod] = useState<"email" | "mobile">("email");
 
         const getFieldConfig = () => {
@@ -378,24 +374,24 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
     return (
         <div className="">
             <Toast ref={toast} />
-            <div className={`auth-container ${solidSettingsData?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
-                {solidSettingsData?.authPagesLayout === 'center' &&
+            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
+                {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.appLogoPosition}`}>
+                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
                             <Image
                                 alt="solid logo"
-                                src={solidSettingsData?.appLogo || SolidLogo}
+                                src={solidSettingsData?.data?.appLogo || SolidLogo}
                                 className="relative"
                                 fill
                             />
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${solidSettingsData?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>Sign In To Your Account</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>Sign In To Your Account</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
 
-                <AuthTabs passwordBasedAuth={solidSettingsData?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.passwordLessAuth} />
-                {solidSettingsData?.iamGoogleOAuthEnabled &&
+                <AuthTabs passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} />
+                {solidSettingsData?.data?.iamGoogleOAuthEnabled &&
                     <>
                         <Divider align="center">
                             <div className="inline-flex align-items-center">
@@ -406,7 +402,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                     </>
                 }
             </div>
-            {solidSettingsData?.allowPublicRegistration && <div className="mt-3 md:mt-5">
+            {solidSettingsData?.data?.allowPublicRegistration && <div className="mt-3 md:mt-5">
                 <div className="text-sm text-center text-400 secondary-dark-color">
                     Don’t have an account ? <Link className="font-bold" href="/auth/register">Sign Up</Link>
                 </div>

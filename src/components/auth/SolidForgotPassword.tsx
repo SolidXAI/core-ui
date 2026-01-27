@@ -7,21 +7,21 @@ import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
-import { useRef } from "react";
+import { useEffect, useRef } from "react";
 import * as Yup from "yup";
 import { useSelector } from "react-redux";
 import Image from "../../hooks/solid/image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "../../constants/error-messages";
+import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 
 const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
-    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
+    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
 
-    // useEffect(() => {
-    //     trigger("") // Fetch settings on mount
-    // }, [trigger])
+    useEffect(() => {
+        trigger("") // Fetch settings on mount
+    }, [trigger])
 
-    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
     const toast = useRef<Toast>(null);
     const router = useRouter();
     const showToast = (severity: "success" | "error", summary: string, detail: string) => {
@@ -77,20 +77,20 @@ const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder 
     return (
         <>
             <Toast ref={toast} />
-            <div className={`auth-container ${solidSettingsData?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
-                {solidSettingsData?.authPagesLayout === 'center' &&
+            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
+                {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.appLogoPosition}`}>
+                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
                             <Image
                                 alt="solid logo"
-                                src={solidSettingsData?.appLogo || SolidLogo}
+                                src={solidSettingsData?.data?.appLogo || SolidLogo}
                                 className="relative"
                                 fill
                             />
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${solidSettingsData?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>Forgot Password</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>Forgot Password</h2>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
                 <form onSubmit={formik.handleSubmit}>
                     <div className="flex flex-column gap-2">

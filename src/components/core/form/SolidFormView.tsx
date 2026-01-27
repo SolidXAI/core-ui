@@ -52,7 +52,7 @@ import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
-import { useLazyGetMcpUrlQuery } from "../../../redux/api/solidSettingsApi";
+import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 import { SolidFormFooter } from "./SolidFormFooter";
 
 export type SolidFormViewProps = {
@@ -462,10 +462,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const actionType = searchParams.get('actionType');
     const actionContext = searchParams.get('actionContext');
 
-    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+    const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
+    useEffect(() => {
+        trigger("") // Fetch settings on mount
+    }, [])
 
     useEffect(() => {
-        if (solidSettingsData?.mcpEnabled && solidSettingsData?.mcpServerUrl && solidSettingsData?.mcpApiKey) {
+        if (solidSettingsData?.data?.mcpEnabled && solidSettingsData?.data?.mcpServerUrl && solidSettingsData?.data?.mcpApiKey) {
             enableSolidXAiPanel();
         }
     }, [solidSettingsData]);

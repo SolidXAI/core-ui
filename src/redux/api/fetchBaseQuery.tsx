@@ -2,6 +2,8 @@ import { fetchBaseQuery } from "@reduxjs/toolkit/dist/query";
 import { getSession } from "../../hooks/solid/auth";
 
 const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api`; // Base URL for the API endpoints
+console.log(`fetchBaseQuery resolved baseUrl to ${baseUrl}`);
+
 // Updated fetchBaseQuery to include accessToken in headers
 export const baseQueryWithAuth = fetchBaseQuery({
     baseUrl,
@@ -10,6 +12,15 @@ export const baseQueryWithAuth = fetchBaseQuery({
         if (session?.user?.accessToken) {
             headers.set('authorization', `Bearer ${session?.user?.accessToken}`); // Add access token to headers
         }
+
+        if (session?.user?.accessToken) {
+            headers.set("authorization", `Bearer ${session.user.accessToken}`);
+            console.log("[prepareHeaders] set auth header");
+        } else {
+            console.log("[prepareHeaders] no access token");
+        }
+
+        console.log("[prepareHeaders] end");
         return headers;
     },
 });
