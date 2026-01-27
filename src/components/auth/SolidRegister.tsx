@@ -53,10 +53,8 @@ const SolidRegister = () => {
         if (error) {
             if ("data" in error) {
                 const apiError = error as FetchBaseQueryError;
-                const errorMessages = Array.isArray(apiError.data?.message)
-                    ? apiError.data?.message
-                    : [apiError.data?.message];
-
+                // @ts-ignore
+                const errorMessages = Array.isArray(apiError.data?.message) ? apiError.data?.message : [apiError.data?.message];
                 toast.current?.show({
                     severity: "error",
                     summary: ERROR_MESSAGES.ERROR,

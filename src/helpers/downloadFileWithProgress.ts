@@ -40,16 +40,12 @@ export async function downloadFileWithProgress(
     const fileName = fileNameMatch?.[1] || "exported-file";
 
     const contentType = response.headers.get("content-type") || "application/octet-stream";
-    const extension = contentType.includes("excel")
-      ? ".xlsx"
-      : contentType.includes("csv")
-        ? ".csv"
-        : "";
+    const extension = contentType.includes("excel") ? ".xlsx" : contentType.includes("csv") ? ".csv" : "";
 
     const contentLength = response.headers.get("content-length");
     const total = contentLength ? parseInt(contentLength) : 2130;
     const reader = response.body.getReader();
-    const chunks: Uint8Array[] = [];
+    const chunks: BlobPart[] = [];
     let received = 0;
     let progress = 0;
     const totalDuration = 500; // 1 seconds
@@ -77,9 +73,7 @@ export async function downloadFileWithProgress(
 
     const link = document.createElement("a");
     link.href = downloadUrl;
-    link.download = fileName.endsWith(".csv") || fileName.endsWith(".xlsx")
-      ? fileName
-      : `${fileName}${extension}`;
+    link.download = fileName.endsWith(".csv") || fileName.endsWith(".xlsx") ? fileName : `${fileName}${extension}`;
     link.click();
     URL.revokeObjectURL(link.href);
     handlers.onStatusChange?.("success", `${fileName}`, ERROR_MESSAGES.EXPORT_SUCCESSFULLY);

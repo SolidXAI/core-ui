@@ -18,9 +18,10 @@ export function env(key: string, fallback = ""): string {
     }
   }
 
-  if (typeof process !== "undefined" && process.env) {
+  const maybeProcess = (globalThis as { process?: { env?: Record<string, string | undefined> } }).process;
+  if (maybeProcess?.env) {
     for (const candidate of candidates) {
-      const value = process.env[candidate];
+      const value = maybeProcess.env[candidate];
       if (typeof value === "string") return value;
     }
   }
