@@ -9,7 +9,6 @@ export function env(key: string, fallback = ""): string {
     candidates.push(`VITE_${key}`, `NEXT_PUBLIC_${key}`, key);
   }
 
-  // Prefer Vite env when available
   const metaEnv = typeof import.meta !== "undefined" ? (import.meta as any).env : undefined;
   if (metaEnv) {
     for (const candidate of candidates) {

@@ -1,4 +1,4 @@
-import { env } from "../hooks/solid/env";
+import { env } from "../adapters/env";
 
 export const revalidateTag = async (tag: string) => {
   await fetch(

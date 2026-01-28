@@ -10,7 +10,7 @@ import {
 } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { FilterMatchMode } from "primereact/api";
-import Link from "../../../hooks/solid/link";
+import Link from "../../common/Link";
 import qs from "qs";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -23,7 +23,9 @@ import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { pascalCase } from "change-case";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { permissionExpression } from "../../../helpers/permissions";
-import { usePathname, useRouter, useSearchParams } from "../../../hooks/solid/navigation";
+import { usePathname } from "../../../hooks/usePathname";
+import { useRouter } from "../../../hooks/useRouter";
+import { useSearchParams } from "../../../hooks/useSearchParams";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "../../../components/core/common/FilterComponent";
 import { SolidLayoutViews } from "../common/SolidLayoutViews";
@@ -54,7 +56,7 @@ import styles from "./SolidListViewWrapper.module.css";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
 import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from "../../../types/solid-core";
 import { getExtensionFunction } from "../../../helpers/registry";
-import { useSession } from "../../../hooks/solid/auth";
+import { useSession } from "../../../hooks/useSession";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
@@ -1518,7 +1520,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                   dataKey="id"
                   emptyMessage={
                     solidListViewMetaData?.data?.solidView?.model?.description ||
-                    "No Entities found."
+                    "No Entities found"
                   }
                   filterDisplay="menu"
                   totalRecords={totalRecords}

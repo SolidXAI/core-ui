@@ -2,16 +2,17 @@ import { ToastContainer } from "../../helpers/ToastContainer";
 import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
 import { showNavbar, toggleNavbar, hideNavbar } from "../../redux/features/navbarSlice";
 import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
-import { signOut, useSession } from "../../hooks/solid/auth";
+import { signOut } from "../../adapters/auth/index";
+import { useSession } from "../../hooks/useSession";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import NavbarTwoMenu from "./navbar-two-menu";
 import UserProfileMenu from "./user-profile-menu";
-import Image from "../../hooks/solid/image";
+import Image from "../common/Image";
 import SettingImage from '../../resources/images/Navigation/SolidSettinsIcon.svg'
 import { Avatar } from "primereact/avatar";
-import { usePathname } from "../../hooks/solid/navigation";
-import { env } from "../../hooks/solid/env";
+import { usePathname } from "../../hooks/usePathname";
+import { env } from "../../adapters/env";
 
 const AppSidebar = () => {
     const dispatch = useDispatch();

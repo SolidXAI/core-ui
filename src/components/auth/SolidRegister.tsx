@@ -1,8 +1,8 @@
 import { useInitateRegisterMutation, useRegisterMutation } from "../../redux/api/authApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import { Form, Formik } from "formik";
-import Link from "../../hooks/solid/link";
-import { useRouter } from "../../hooks/solid/navigation";
+import Link from "../common/Link";
+import { useRouter } from "../../hooks/useRouter";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
@@ -13,13 +13,13 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
-import Image from "../../hooks/solid/image";
+import Image from "../common/Image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "../../helpers/resendOtpHelper";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
-import { env } from "../../hooks/solid/env";
+import { env } from "../../adapters/env";
 
 interface AuthTabsProps {
     passwordBasedAuth: boolean;

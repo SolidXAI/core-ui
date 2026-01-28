@@ -1,5 +1,5 @@
 import React from "react";
-import { env } from "../../../hooks/solid/env";
+import { env } from "../../../adapters/env";
 
 interface PasswordHelperTextProps {
   text?: any;

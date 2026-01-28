@@ -1,4 +1,4 @@
-import { usePathname } from '../../hooks/solid/navigation';
+import { usePathname } from "../../hooks/usePathname";
 import { IconField } from 'primereact/iconfield';
 import { InputIcon } from 'primereact/inputicon';
 import { InputText } from 'primereact/inputtext';

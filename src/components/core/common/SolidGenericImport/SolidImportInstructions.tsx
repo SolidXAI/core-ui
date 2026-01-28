@@ -2,9 +2,9 @@ import { Button } from 'primereact/button'
 import styles from './SolidImport.module.css'
 import { useLazyGetImportInstructionsQuery } from '../../../../redux/api/importTransactionApi';
 import { useEffect } from 'react';
-import { getSession } from '../../../../hooks/solid/auth';
+import { getSession } from "../../../../adapters/auth/index";
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
-import { env } from "../../../../hooks/solid/env";
+import { env } from "../../../../adapters/env";
 
 export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any) => {
     const [getImportInstructions, { data: importInstructionsData, isLoading, isError }] =

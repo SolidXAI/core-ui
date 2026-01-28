@@ -1,5 +1,5 @@
 import { ERROR_MESSAGES } from "../constants/error-messages";
-import { env } from "../hooks/solid/env";
+import { env } from "../adapters/env";
 
 export const downloadMediaFile = async (fileUrl: string, fileName: string) => {
     try {

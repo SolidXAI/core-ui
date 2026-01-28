@@ -11,7 +11,7 @@ export const SettingDropzoneActivePlaceholder = ({note}:any) => {
                 Drag and Drop or <span className='text-primary'> Logo</span> to upload
             </div>
             <p className='text-center'>Supported format:PNG, JPG, JPEG, SVG, WEBP | Max size: 2 MB</p>
-            <small className='mb-2 text-center'>Note: {note ? note : "200px image width is ideal."}</small>
+            <small className='mb-2 text-center'>Note: {note ? note : "200px image width is ideal"}</small>
             <div>
                 <Button outlined size='small' severity='secondary' label='Click to Browse' type="button" />
             </div>

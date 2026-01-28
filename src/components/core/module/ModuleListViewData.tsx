@@ -3,7 +3,7 @@ import { CreateButton } from "../../../components/common/CreateButton";
 import { handleError, handleSuccess } from "../../../helpers/ToastContainer";
 import { useDeleteMultiplemodulesMutation, useGenerateCodeFormoduleMutation, useLazyGetmodulesQuery, useRefreshPermissionsMutation } from "../../../redux/api/moduleApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
-import Link from "../../../hooks/solid/link";
+import Link from "../../common/Link";
 import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
@@ -359,7 +359,7 @@ export const ModuleListViewData = () => {
         rowsPerPageOptions={[10, 25, 50]}
         dataKey="id"
         filters={filters}
-        emptyMessage="No Modules found."
+        emptyMessage="No Modules found"
         onFilter={onFilter}
         filterDisplay="row"
         totalRecords={totalRecords}

@@ -1,6 +1,7 @@
 
 
-import { usePathname, useRouter } from '../../hooks/solid/navigation';
+import { usePathname } from "../../hooks/usePathname";
+import { useRouter } from "../../hooks/useRouter";
 import { Button } from 'primereact/button';
 import { useEffect, useState } from 'react';
 export const BackButton = () => {

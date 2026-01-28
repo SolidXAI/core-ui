@@ -6,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { CancelButton } from './CancelButton';
 import { InputSwitch } from 'primereact/inputswitch';
 import { RadioButton } from 'primereact/radiobutton';
-import { usePathname } from '../../hooks/solid/navigation';
+import { usePathname } from "../../hooks/usePathname";
 import { InputTextarea } from 'primereact/inputtextarea';
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import AuthScreenRightBackgroundImage from '../../resources/images/auth/solid-left-layout-bg.png';
@@ -24,7 +24,7 @@ import { useDispatch, useSelector } from 'react-redux';
 import { handleError } from '../../helpers/ToastContainer';
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { useBulkUpdateSolidSettingsMutation, useLazyGetSolidSettingsQuery } from '../../redux/api/solidSettingsApi';
-import { env } from "../../hooks/solid/env";
+import { env } from "../../adapters/env";
 
 
 export const GeneralSettings = () => {
@@ -179,9 +179,9 @@ export const GeneralSettings = () => {
     }, [pathname])
 
     const positionMap: Record<'left' | 'center' | 'right', string> = {
-        left: 'The form will appear on the left side of the screen, while the banner will be positioned on the right side.',
-        center: 'The form will be centered in the middle of the screen for balanced alignment.',
-        right: 'The form will appear on the right side of the screen, and the banner will be positioned on the left side.'
+        left: 'The form will appear on the left side of the screen, while the banner will be positioned on the right side',
+        center: 'The form will be centered in the middle of the screen for balanced alignment',
+        right: 'The form will appear on the right side of the screen, and the banner will be positioned on the left side'
     };
 
     const onAppLogoDrop = useCallback(

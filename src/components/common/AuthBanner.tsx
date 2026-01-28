@@ -1,4 +1,4 @@
-import { env } from "../../hooks/solid/env";
+import { env } from "../../adapters/env";
 
 const AuthBanner = () => {
   return (

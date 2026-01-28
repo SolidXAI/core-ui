@@ -1,9 +1,9 @@
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
-import { getSession } from '../../../../hooks/solid/auth';
+import { getSession } from "../../../../adapters/auth/index";
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
 import { useState } from 'react';
-import { env } from "../../../../hooks/solid/env";
+import { env } from "../../../../adapters/env";
 
 export const SolidImportTransactionStatus = ({ importStatusResult, transactionId, setOpenImportDialog, handleFetchUpdatedRecords }: any) => {
 

@@ -10,7 +10,8 @@ import { useGetrolesQuery } from "../../../redux/api/roleApi";
 import { useDeleteUserMutation } from "../../../redux/api/userApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
 import { useFormik } from "formik";
-import { usePathname, useRouter } from "../../../hooks/solid/navigation";
+import { usePathname } from "../../../hooks/usePathname";
+import { useRouter } from "../../../hooks/useRouter";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
 import { Divider } from "primereact/divider";
@@ -94,16 +95,16 @@ const CreateUser = ({ data, params }: any) => {
   const validationSchema = Yup.object({
     fullName: Yup.string().required(),
     username: Yup.string()
-      .required('Username is required.'), // Must be provided
-    // .min(3, 'Username must be at least 3 characters long.') // Minimum length
-    // .max(20, 'Username cannot be longer than 20 characters.') // Maximum length
+      .required('Username is required'), // Must be provided
+    // .min(3, 'Username must be at least 3 characters long') // Minimum length
+    // .max(20, 'Username cannot be longer than 20 characters') // Maximum length
     // .matches(
     //   /^[a-zA-Z0-9_.-]*$/,
-    //   'Username can only contain letters, numbers, underscores, periods, and hyphens.'
+    //   'Username can only contain letters, numbers, underscores, periods, and hyphens'
     // ) // Allowed characters
     // .matches(
     //   /^[a-zA-Z]/,
-    //   'Username must start with a letter.'
+    //   'Username must start with a letter'
     // ),
     email: Yup
       .string()

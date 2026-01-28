@@ -1,7 +1,7 @@
 import { handleLogout } from '../../../../nextAuth/handleLogout';
 import { useChangePasswordMutation } from '../../../../redux/api/authApi';
 import { useFormik } from 'formik';
-import { useSession } from '../../../../hooks/solid/auth';
+import { useSession } from "../../../../hooks/useSession";
 import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
 import { Password } from 'primereact/password';
@@ -10,7 +10,7 @@ import { useMemo, useRef } from 'react';
 import * as Yup from 'yup';
 import { SolidPasswordHelperText } from '../SolidPasswordHelperText';
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
-import { env } from "../../../../hooks/solid/env";
+import { env } from "../../../../adapters/env";
 
 export const SolidChangePassword = ({ solidSettingsData }: any) => {
     const toast = useRef<Toast>(null);

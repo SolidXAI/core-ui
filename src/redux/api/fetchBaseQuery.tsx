@@ -1,6 +1,6 @@
 import { fetchBaseQuery } from "@reduxjs/toolkit/dist/query";
-import { getSession } from "../../hooks/solid/auth";
-import { env } from "../../hooks/solid/env";
+import { getSession } from "../../adapters/auth/index";
+import { env } from "../../adapters/env";
 import { logger } from "../../helpers/logger";
 
 const baseUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api`; // Base URL for the API endpoints

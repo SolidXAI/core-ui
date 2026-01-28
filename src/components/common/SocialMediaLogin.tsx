@@ -1,6 +1,7 @@
-import { usePathname, useRouter } from '../../hooks/solid/navigation';
+import { usePathname } from "../../hooks/usePathname";
+import { useRouter } from "../../hooks/useRouter";
 import { Button } from 'primereact/button'
-import { env } from "../../hooks/solid/env";
+import { env } from "../../adapters/env";
 
 export const SocialMediaLogin = () => {
     const router = useRouter();

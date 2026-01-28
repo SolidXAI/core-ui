@@ -1,4 +1,4 @@
-import { usePathname } from '../../../hooks/solid/navigation';
+import { usePathname } from "../../../hooks/usePathname";
 import { plural } from "pluralize";
 import { } from "react";
 

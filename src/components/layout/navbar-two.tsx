@@ -1,4 +1,5 @@
-import { usePathname, useRouter } from "../../hooks/solid/navigation";
+import { usePathname } from "../../hooks/usePathname";
+import { useRouter } from "../../hooks/useRouter";
 import { useState } from "react";
 
 const NavbarTwo = () => {

@@ -2,7 +2,9 @@
 
 import React, { useRef } from "react";
 import { SolidKanbanViewFields } from "./SolidKanbanViewFields";
-import { usePathname, useRouter, useSearchParams } from "../../../hooks/solid/navigation";
+import { usePathname } from "../../../hooks/usePathname";
+import { useRouter } from "../../../hooks/useRouter";
+import { useSearchParams } from "../../../hooks/useSearchParams";
 import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Draggable, DraggableProvided } from "@hello-pangea/dnd";

@@ -1,6 +1,6 @@
 import { ERROR_MESSAGES } from "../constants/error-messages";
-import { getSession } from "../hooks/solid/auth";
-import { env } from "../hooks/solid/env";
+import { getSession } from "../adapters/auth/index";
+import { env } from "../adapters/env";
 
 export async function downloadFileWithProgress(
   url: string,
@@ -15,7 +15,7 @@ export async function downloadFileWithProgress(
   const baseUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api`;
 
   try {
-    handlers.onStatusChange?.("In Progress", "Downloading File", "Please wait...");
+    handlers.onStatusChange?.("In Progress", "Downloading File", "Please wait.");
     const session = await getSession();
     const headers = new Headers();
     if (session?.user?.accessToken) {

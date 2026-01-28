@@ -68,7 +68,10 @@
     "viewerjs": "^1.11.7",
     "xlsx": "^0.18.5",
     "yet-another-react-lightbox": "^3.21.8",
-    "yup": "^1.4.0"
+    "yup": "^1.4.0",
+    "@types/lodash": "^4.17.23",
+    "@types/qs": "^6.14.0",
+    "@types/pluralize": "^0.0.33"
   },
   "peerDependencies": {
     "@codemirror/lang-javascript": "^6.2.2",
@@ -91,16 +94,16 @@
     "react-redux": "^8.1.2",
     "react-star-ratings": "^2.3.0",
     "react-syntax-highlighter": "^15.6.6",
-    "react-transition-group": "^4.4.5"
+    "react-transition-group": "^4.4.5",
+    "@types/lodash": "^4.17.23",
+    "@types/qs": "^6.14.0",
+    "@types/pluralize": "^0.0.33"
   },
   "devDependencies": {
     "@codemirror/lang-javascript": "^6.2.2",
     "@codemirror/theme-one-dark": "^6.1.2",
     "@reduxjs/toolkit": "^1.9.5",
-    "@types/lodash": "^4.17.9",
     "@types/node": "20.5.9",
-    "@types/pluralize": "^0.0.33",
-    "@types/qs": "^6.9.15",
     "@types/react": "18.3.18",
     "@types/react-dom": "18.3.5",
     "@types/react-js-pagination": "^3.0.7",

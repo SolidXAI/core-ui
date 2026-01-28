@@ -1,10 +1,10 @@
 import { permissionExpression } from '../../../helpers/permissions'
 import { SolidCreateButton } from '../common/SolidCreateButton'
-import Image from '../../../hooks/solid/image'
+import Image from "../../common/Image"
 import { Button } from 'primereact/button'
 import { useHandleListCustomButtonClick } from '../../../components/common/useHandleListCustomButtonClick'
 import { useHasAnyRole } from '../../../helpers/rolesHelper'
-import { env } from "../../../hooks/solid/env";
+import { env } from "../../../adapters/env";
 
 export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, createActionQueryParams, actionsAllowed, params, solidListViewMetaData }: any) => {
     const noDataText = solidListViewMetaData?.data?.solidView?.layout?.attrs?.listViewNoDataHelperText

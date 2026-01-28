@@ -5,7 +5,7 @@ import React, { useEffect, useRef, useState } from 'react'
 import { createSolidEntityApi } from '../../redux/api/solidEntityApi';
 import { useFormik } from 'formik';
 import { Toast } from 'primereact/toast';
-import { useSearchParams } from '../../hooks/solid/navigation';
+import { useSearchParams } from "../../hooks/useSearchParams";
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 
 interface Props {

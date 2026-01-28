@@ -81,8 +81,8 @@ const DeleteModuleRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     }
 
     const rows = [
-        { file: `${kebabCase(event.rowData.name)}.module.ts`, description: 'Delete the module file.', intervention: 'Automatic'},
-        { file: `${kebabCase(event.rowData.name)}-metadata.json`, description: 'Remove the module metadata json file.', intervention: 'Automatic' },
+        { file: `${kebabCase(event.rowData.name)}.module.ts`, description: 'Delete the module file', intervention: 'Automatic'},
+        { file: `${kebabCase(event.rowData.name)}-metadata.json`, description: 'Remove the module metadata json file', intervention: 'Automatic' },
     ];
 
     return (
@@ -98,7 +98,7 @@ const DeleteModuleRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
                         {allowDelete === true ?
                             "Deleting a module should be done carefully. The below files will be impacted as part of deleting a model:"
                             :
-                            "This module still has models associated with it. Please delete those models before deleting the module."
+                            "This module still has models associated with it. Please delete those models before deleting the module"
                         }
                     </p>
                     {/* {allowDelete === true && */}

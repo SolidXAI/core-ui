@@ -1,18 +1,19 @@
-import Link from "../../hooks/solid/link";
-import { usePathname, useRouter } from "../../hooks/solid/navigation";
+import Link from "../common/Link";
+import { usePathname } from "../../hooks/usePathname";
+import { useRouter } from "../../hooks/useRouter";
 import { PrimeReactContext } from "primereact/api";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { useEffect, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import Image from "../../hooks/solid/image";
+import Image from "../common/Image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { Divider } from "primereact/divider";
 import AuthScreenRightBackgroundImage from '../../resources/images/auth/solid-left-layout-bg.png';
 import AuthScreenLeftBackgroundImage from '../../resources/images/auth/solid-right-layout-bg.png';
 import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
-import { env } from "../../hooks/solid/env";
+import { env } from "../../adapters/env";
 
 
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {

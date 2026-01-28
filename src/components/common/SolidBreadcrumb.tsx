@@ -1,6 +1,8 @@
 
 
-import { usePathname, useRouter, useSearchParams } from "../../hooks/solid/navigation";
+import { usePathname } from "../../hooks/usePathname";
+import { useRouter } from "../../hooks/useRouter";
+import { useSearchParams } from "../../hooks/useSearchParams";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { useEffect, useState } from "react";
 

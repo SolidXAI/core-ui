@@ -1,6 +1,6 @@
 
 
-import Link from "../../hooks/solid/link";
+import Link from "./Link";
 
 export const NotFound = () => {
   return (

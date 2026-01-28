@@ -1,8 +1,9 @@
 import { ToastContainer } from "../../helpers/ToastContainer";
 import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
 import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
-import { env } from "../../hooks/solid/env";
-import { signOut, useSession } from "../../hooks/solid/auth";
+import { env } from "../../adapters/env";
+import { signOut } from "../../adapters/auth/index";
+import { useSession } from "../../hooks/useSession";
 import { Button } from "primereact/button";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
@@ -175,7 +176,7 @@ const NavbarOne = () => {
                             <i className="pi pi-search " style={{ color: '#8D9199' }}></i>
                             <input
                                 type="text"
-                                placeholder="Jump to..."
+                                placeholder="Jump to."
                                 name="lastName"
                                 id="lastName"
                                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -222,7 +223,7 @@ const NavbarOne = () => {
               <i className="pi pi-search " style={{ color: '#8D9199' }}></i>
               <input
                 type="text"
-                placeholder="Jump to..."
+                placeholder="Jump to."
                 name="lastName"
                 id="lastName"
                 onChange={(e) => setSearchTerm(e.target.value)}

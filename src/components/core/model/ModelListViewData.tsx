@@ -5,7 +5,7 @@ import {
   useGenerateCodeForModelMutation,
   useLazyGetModelsQuery,
 } from "../../../redux/api/modelApi";
-import Link from "../../../hooks/solid/link";
+import Link from "../../common/Link";
 import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
@@ -292,7 +292,7 @@ export const ModelListViewData = () => {
         rowsPerPageOptions={[10, 25, 50]}
         dataKey="id"
         filters={filters}
-        emptyMessage="No Models found."
+        emptyMessage="No Models found"
         onFilter={onFilter}
         filterDisplay="row"
         totalRecords={totalRecords}

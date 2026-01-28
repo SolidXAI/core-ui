@@ -1,5 +1,5 @@
-import Link from "../../hooks/solid/link";
-import { usePathname } from "../../hooks/solid/navigation";
+import Link from "../common/Link";
+import { usePathname } from "../../hooks/usePathname";
 import { PanelMenu } from "primereact/panelmenu";
 import { useState } from "react";
 

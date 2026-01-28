@@ -5,7 +5,9 @@ import { useEffect, useState } from "react";
 import qs from "qs";
 import { queryObjectToQueryStringByUrl, queryStringToQueryObjectByUrl } from "../list/SolidListView";
 import { SolidFormViewProps } from "./SolidFormView";
-import { usePathname, useSearchParams, useRouter } from "../../../hooks/solid/navigation";
+import { usePathname } from "../../../hooks/usePathname";
+import { useSearchParams } from "../../../hooks/useSearchParams";
+import { useRouter } from "../../../hooks/useRouter";
 import { Button } from "primereact/button";
 
 export type SolidFormFooterProps = {

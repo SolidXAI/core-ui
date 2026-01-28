@@ -7,7 +7,8 @@ import { useLazyGetModelsQuery } from "../../../redux/api/modelApi";
 import { useLazyGetmodulesQuery } from "../../../redux/api/moduleApi";
 import { useFormik } from "formik";
 import { snakeCase } from "lodash";
-import { usePathname, useRouter } from "../../../hooks/solid/navigation";
+import { usePathname } from "../../../hooks/usePathname";
+import { useRouter } from "../../../hooks/useRouter";
 import { Checkbox } from "primereact/checkbox";
 import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
@@ -86,14 +87,14 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     singularName: Yup.string()
       // .matches(
       //   /^[a-z]+(-[a-z]+)*$/,
-      //   "Invalid format. Use lowercase letters and hyphens only."
+      //   "Invalid format. Use lowercase letters and hyphens only"
       // )
       .notOneOf(allModelsNames, ERROR_MESSAGES.FIELD_ALREADY_USE('Name', 'name'))
       .required(ERROR_MESSAGES.FIELD_REUQIRED('Singular Name')),
     pluralName: Yup.string()
       // .matches(
       //   /^[a-z]+(-[a-z]+)*$/,
-      //   "Invalid format. Use lowercase letters and hyphens only."
+      //   "Invalid format. Use lowercase letters and hyphens only"
       // )
       .required(ERROR_MESSAGES.FIELD_REUQIRED('Plural Name')),
     // tableName: Yup.string().required().matches(/^[a-z0-9_]+$/, ERROR_MESSAGES.SNAKE_CASE('Tabale')),

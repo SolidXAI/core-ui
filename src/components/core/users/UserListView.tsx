@@ -1,6 +1,6 @@
 
 import { useDeleteMultipleUsersMutation, useLazyGetusersQuery } from '../../../redux/api/userApi';
-import Link from "../../../hooks/solid/link";
+import Link from "../../common/Link";
 import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
@@ -297,7 +297,7 @@ export const UserListView = () => {
                 rowsPerPageOptions={[10, 25, 50]}
                 dataKey="id"
                 filters={filters}
-                emptyMessage="No users found."
+                emptyMessage="No users found"
                 onFilter={onFilter}
                 filterDisplay="row"
                 totalRecords={totalRecords}

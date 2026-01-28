@@ -9,7 +9,7 @@ import { useDispatch } from "react-redux";
 import { Toast } from 'primereact/toast';
 import { SolidCircularLoader } from '../../../../../../components/core/common/SolidLoaders/SolidCircularLoader';
 import { ERROR_MESSAGES } from "../../../../../../constants/error-messages";
-import { env } from "../../../../../../hooks/solid/env";
+import { env } from "../../../../../../adapters/env";
 
 
 const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps) => {

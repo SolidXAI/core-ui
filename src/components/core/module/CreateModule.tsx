@@ -11,7 +11,8 @@ import { useGetFieldDefaultMetaDataQuery } from "../../../redux/api/fieldApi";
 import { useDeleteMediaMutation } from "../../../redux/api/mediaApi";
 import { useCreatemoduleMutation, useDeletemoduleMutation, useUpdatemoduleMutation } from "../../../redux/api/moduleApi";
 import { useFormik } from "formik";
-import { usePathname, useRouter } from "../../../hooks/solid/navigation";
+import { usePathname } from "../../../hooks/usePathname";
+import { useRouter } from "../../../hooks/useRouter";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
@@ -25,7 +26,7 @@ import { classNames } from "primereact/utils";
 import React, { useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import * as Yup from "yup";
-import { env } from "../../../hooks/solid/env";
+import { env } from "../../../adapters/env";
 
 const footer = (
   <>
@@ -100,7 +101,7 @@ const CreateModule = ({ data }: any) => {
     name: Yup.string()
       // .matches(
       //   /^[a-z]+(-[a-z]+)*$/,
-      //   "Invalid format. Use lowercase letters and hyphens only."
+      //   "Invalid format. Use lowercase letters and hyphens only"
       // )
       .required(ERROR_MESSAGES.FIELD_REUQIRED('Name')),
     displayName: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Display Name")),

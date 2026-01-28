@@ -6,7 +6,9 @@ import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "../
 import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Divider } from "primereact/divider";
-import { usePathname, useRouter, useSearchParams } from "../../../hooks/solid/navigation";
+import { usePathname } from "../../../hooks/usePathname";
+import { useRouter } from "../../../hooks/useRouter";
+import { useSearchParams } from "../../../hooks/useSearchParams";
 import { queryStringToQueryObject } from "../list/SolidListView";
 import { InputText } from "primereact/inputtext";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
@@ -1284,7 +1286,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                             <div className="relative solid-global-search-element-wrapper">
                                 <InputText
                                     value={inputValue || ""}
-                                    placeholder="Search..."
+                                    placeholder="Search."
                                     onChange={(e) => {
                                         setInputValue(e.target.value);
                                         setShowOverlay(true);

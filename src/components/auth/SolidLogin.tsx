@@ -1,7 +1,7 @@
 import { Form, Formik } from "formik";
-import { signIn } from "../../hooks/solid/auth";
-import Link from "../../hooks/solid/link";
-import { useRouter } from "../../hooks/solid/navigation";
+import { signIn } from "../../adapters/auth/index";
+import Link from "../common/Link";
+import { useRouter } from "../../hooks/useRouter";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
@@ -13,13 +13,13 @@ import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import { useInitateLoginMutation } from "../../redux/api/authApi";
-import Image from "../../hooks/solid/image";
+import Image from "../common/Image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "../../helpers/resendOtpHelper";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { RadioButton } from "primereact/radiobutton";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
-import { env } from "../../hooks/solid/env";
+import { env } from "../../adapters/env";
 
 interface AuthTabsProps {
     passwordBasedAuth: boolean;

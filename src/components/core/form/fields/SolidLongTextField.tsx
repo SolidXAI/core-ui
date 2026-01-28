@@ -202,7 +202,7 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
     // };
     const fieldJsonSchema = fieldLayoutInfo.attrs?.jsonSchema;
     if (!fieldJsonSchema) {
-        return <Message severity="error" text="Field Layout Attributes are missing jsonSchema, cannot render with widget jsonEditor without specifying the schema." />
+        return <Message severity="error" text="Field Layout Attributes are missing jsonSchema, cannot render with widget jsonEditor without specifying the schema" />
     }
     const [data, setData] = useState(JSON.parse(value || '[]'));
 
@@ -239,7 +239,7 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
                     value={value}
                     // @ts-ignore
                     options={meta.allowedValues.map((v) => ({ label: v, value: v }))}
-                    placeholder="Select..."
+                    placeholder="Select."
                     readOnly
                     disabled
                 />
@@ -324,7 +324,7 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
     // };
     const fieldJsonSchema = fieldLayoutInfo.attrs?.jsonSchema;
     if (!fieldJsonSchema) {
-        return <Message severity="error" text="Field Layout Attributes are missing jsonSchema, cannot render with widget jsonEditor without specifying the schema." />
+        return <Message severity="error" text="Field Layout Attributes are missing jsonSchema, cannot render with widget jsonEditor without specifying the schema" />
     }
     const [data, setData] = useState(JSON.parse(value || '[]'));
 
@@ -403,7 +403,7 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                     // @ts-ignore
                     options={meta.allowedValues.map((v) => ({ label: v, value: v }))}
                     onChange={(e) => handleChange(index, key, e.value)}
-                    placeholder="Select..."
+                    placeholder="Select."
                     disabled={!!disabled}
                     readOnly={!!readOnly}
                 />
@@ -561,7 +561,7 @@ export const DynamicSelectionStaticEditWidget = ({
                         value: v,
                     }))}
                     onChange={(e) => handleChange(key, e.value)}
-                    placeholder={meta.placeHolder || "Select..."}
+                    placeholder={meta.placeHolder || "Select."}
                     disabled={!!disabled}
                     readOnly={!!readOnly}
                     className="w-full"

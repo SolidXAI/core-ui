@@ -1,6 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
 import { ChildContainerProps, LayoutState } from '../../types';
-import { usePathname, useSearchParams } from '../../hooks/solid/navigation';
+import { usePathname } from "../../hooks/usePathname";
+import { useSearchParams } from "../../hooks/useSearchParams";
 import { PrimeReactContext } from 'primereact/api';
 import { useEventListener, useUnmountEffect } from 'primereact/hooks';
 import { classNames } from 'primereact/utils';
@@ -10,10 +11,10 @@ import AppConfig from './AppConfig';
 import { LayoutContext } from './context/layoutcontext';
 import AppSidebar from './AppSidebar';
 import SolidPopupContainer from '../common/SolidPopupContainer';
-import { useSession } from '../../hooks/solid/auth';
+import { useSession } from "../../hooks/useSession";
 import { getExtensionFunction } from '../../helpers/registry';
 import { SolidOnApplicationMountEvent } from '../../types/solid-core';
-import { env } from "../../hooks/solid/env";
+import { env } from "../../adapters/env";
 
 export const Layout = ({ children }: ChildContainerProps) => {
     const { layoutConfig, layoutState, setLayoutState } = useContext(LayoutContext);

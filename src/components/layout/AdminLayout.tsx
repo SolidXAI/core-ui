@@ -1,6 +1,7 @@
 import { handleError } from "../../helpers/ToastContainer";
-import { signOut, useSession } from "../../hooks/solid/auth";
-import { useRouter } from "../../hooks/solid/navigation";
+import { signOut } from "../../adapters/auth/index";
+import { useSession } from "../../hooks/useSession";
+import { useRouter } from "../../hooks/useRouter";
 import { useEffect, useState } from "react";
 import { Layout } from "./Layout";
 import { Dialog } from "primereact/dialog";

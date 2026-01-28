@@ -1,10 +1,11 @@
 import { ERROR_MESSAGES } from '../../constants/error-messages';
-import { signIn } from '../../hooks/solid/auth';
-import { useRouter, useSearchParams } from '../../hooks/solid/navigation';
+import { signIn } from "../../adapters/auth/index";
+import { useRouter } from "../../hooks/useRouter";
+import { useSearchParams } from "../../hooks/useSearchParams";
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Toast } from 'primereact/toast';
 import { useEffect, useRef, useState } from 'react'
-import { env } from "../../hooks/solid/env";
+import { env } from "../../adapters/env";
 
 export const GoogleAuthChecking = () => {
     const searchParams = useSearchParams();

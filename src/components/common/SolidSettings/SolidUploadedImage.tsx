@@ -1,4 +1,4 @@
-import Image from '../../../hooks/solid/image'
+import Image from "../Image"
 import React from 'react'
 
 export const SolidUploadedImage = ({ src, height, width, maxHeight, className }: any) => {

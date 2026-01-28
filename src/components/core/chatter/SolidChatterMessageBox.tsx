@@ -1,6 +1,6 @@
 
 import { getTextColor, stringToColor } from '../../../helpers/getRandomColors'
-import Image from '../../../hooks/solid/image'
+import Image from "../../common/Image"
 import { Avatar } from 'primereact/avatar'
 import { Dialog } from 'primereact/dialog'
 import { useMemo, useState } from 'react'

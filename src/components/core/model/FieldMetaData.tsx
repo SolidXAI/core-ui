@@ -1,4 +1,4 @@
-import { usePathname } from "../../../hooks/solid/navigation";
+import { usePathname } from "../../../hooks/usePathname";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";

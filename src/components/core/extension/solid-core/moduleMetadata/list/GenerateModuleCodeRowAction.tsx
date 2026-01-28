@@ -9,7 +9,7 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
-import { env } from "../../../../../../hooks/solid/env";
+import { env } from "../../../../../../adapters/env";
 
 const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     const dispatch = useDispatch()
@@ -75,7 +75,7 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
             setIsGenerating(false);
             dispatch(closePopup());
             console.log("error",error);
-            showToast("error", "Something went wrong.", ERROR_MESSAGES.API_ERROR);
+            showToast("error", "Something went wrong", ERROR_MESSAGES.API_ERROR);
         }
     }
 

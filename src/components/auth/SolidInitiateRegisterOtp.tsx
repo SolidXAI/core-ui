@@ -1,7 +1,8 @@
 import { useConfirmOtpRegisterMutation, useInitateRegisterMutation } from "../../redux/api/authApi";
 import { Form, Formik } from "formik";
-import Image from "../../hooks/solid/image";
-import { useRouter, useSearchParams } from "../../hooks/solid/navigation";
+import Image from "../common/Image";
+import { useRouter } from "../../hooks/useRouter";
+import { useSearchParams } from "../../hooks/useSearchParams";
 import { Button } from "primereact/button";
 import { InputOtp } from "primereact/inputotp";
 import { Message } from "primereact/message";
@@ -11,7 +12,7 @@ import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
-import { env } from "../../hooks/solid/env";
+import { env } from "../../adapters/env";
 
 const SolidInitiateRegisterOtp = () => {
     const searchParams = useSearchParams();

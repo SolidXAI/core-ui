@@ -11,7 +11,8 @@ import { SolidFieldTooltip } from "../../../../components/common/SolidFieldToolt
 import { Formik, useFormik } from "formik";
 import { Dialog } from "primereact/dialog";
 import { Button } from "primereact/button";
-import { usePathname, useSearchParams } from "../../../../hooks/solid/navigation";
+import { usePathname } from "../../../../hooks/usePathname";
+import { useSearchParams } from "../../../../hooks/useSearchParams";
 import { updatePasswordField } from "../../../../helpers/updatePasswordField";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 

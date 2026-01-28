@@ -1,14 +1,15 @@
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { useChangePasswordMutation } from '../../redux/api/authApi';
 import { useFormik } from 'formik';
-import { signOut, useSession } from '../../hooks/solid/auth';
+import { signOut } from "../../adapters/auth/index";
+import { useSession } from "../../hooks/useSession";
 import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
 import { Password } from 'primereact/password';
 import { Toast } from 'primereact/toast';
 import { useRef } from 'react';
 import * as Yup from 'yup';
-import { env } from "../../hooks/solid/env";
+import { env } from "../../adapters/env";
 
 const SolidChangeForcePassword = () => {
     const toast = useRef<Toast>(null);
@@ -99,7 +100,7 @@ const SolidChangeForcePassword = () => {
 
     const passwordPolicies = [
         {
-            policy: "8 characters minimum."
+            policy: "8 characters minimum"
         },
         {
             policy: "No Spaces Allowed"

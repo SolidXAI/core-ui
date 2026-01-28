@@ -8,7 +8,7 @@ import { useLazyGetModelsQuery, useUpdateUserKeyMutation } from "../../../redux/
 import { useLazyGetmodulesQuery } from "../../../redux/api/moduleApi";
 import { useFormik } from "formik";
 import { capitalize } from "lodash";
-import { usePathname } from "../../../hooks/solid/navigation";
+import { usePathname } from "../../../hooks/usePathname";
 import { AutoComplete } from "primereact/autocomplete";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -419,7 +419,7 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
 
   const schema = {
     name: Yup.string()
-      // .matches(/^[a-z]+(-[a-z]+)*$/,"Invalid format. Use lowercase letters and hyphens only.")
+      // .matches(/^[a-z]+(-[a-z]+)*$/,"Invalid format. Use lowercase letters and hyphens only")
       .notOneOf(reservedNames, ERROR_MESSAGES.FIELD_ALREADY_USE('Name', 'name'))
       .required(ERROR_MESSAGES.FIELD_REUQIRED('Name')),
     displayName: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Display Name')),

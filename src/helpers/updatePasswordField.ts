@@ -1,6 +1,6 @@
 import { ERROR_MESSAGES } from "../constants/error-messages";
-import { getSession } from "../hooks/solid/auth";
-import { env } from "../hooks/solid/env";
+import { getSession } from "../adapters/auth/index";
+import { env } from "../adapters/env";
 
 export async function updatePasswordField({
   url,

@@ -2,8 +2,8 @@ import { FilterRule, FilterRuleType } from "../components/core/common/FilterComp
 import { createSolidEntityApi } from "../redux/api/solidEntityApi";
 import axios from "axios";
 import { kebabCase } from "change-case";
-import { getSession } from "../hooks/solid/auth";
-import { env } from "../hooks/solid/env";
+import { getSession } from "../adapters/auth/index";
+import { env } from "../adapters/env";
 
 interface RelationHydrationBucket {
   meta: any;
