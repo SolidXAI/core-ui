@@ -34,6 +34,7 @@ import { queryObjectToQueryString, queryStringToQueryObject } from "../list/Soli
 import { Toast } from "primereact/toast";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
+import { normalizeSolidListKanbanActionPath } from "../../../helpers/routePaths";
 
 
 type SolidKanbanViewParams = {
@@ -241,6 +242,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
   const [maxSwimLanesCount, setMaxSwimLanesCount] = useState<number>(0);
+  const editBaseUrl = normalizeSolidListKanbanActionPath(pathname, editButtonUrl || "form");
 
 
   const showToast = (severity: "success" | "error", summary: string, detail: string) => {
@@ -424,7 +426,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   // clickable link allowing one to open the detail / form view.
   const detailsBodyTemplate = (solidViewData: any) => {
     return (
-      <Link href={`${editButtonUrl}/${solidViewData.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`} rel="noopener noreferrer" className="text-sm font-bold p-0" style={{ color: "#12415D" }}>
+      <Link href={`${editBaseUrl}/${solidViewData.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`} rel="noopener noreferrer" className="text-sm font-bold p-0" style={{ color: "#12415D" }}>
         <i className="pi pi-pencil" style={{ fontSize: "1rem" }}></i>
       </Link>
     );
@@ -848,7 +850,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
       <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
       {solidKanbanViewMetaData && kanbanViewData &&
-        <KanbanBoard groupByFieldName={groupByFieldName} groupedView={groupedView} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl}></KanbanBoard>
+        <KanbanBoard groupByFieldName={groupByFieldName} groupedView={groupedView} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl}></KanbanBoard>
       }
 
       <Dialog

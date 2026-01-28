@@ -8,6 +8,7 @@ import { getExtensionFunction } from "../../../helpers/registry";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
+import { normalizeSolidFormActionPath } from "../../../helpers/routePaths";
 import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { useEffect, useRef, useState } from "react";
@@ -72,9 +73,12 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
 
     const updateViewMode = (newMode: "view" | "edit") => {
         setViewMode(newMode);
-        const params = new URLSearchParams(searchParams.toString());
-        params.set("viewMode", newMode);
-        router.push(`${pathname}?${params.toString()}`);
+        const queryParams = new URLSearchParams(searchParams.toString());
+        queryParams.set("viewMode", newMode);
+        const basePath = params?.id
+            ? normalizeSolidFormActionPath(pathname, `form/${params.id}`)
+            : pathname;
+        router.push(`${basePath}?${queryParams.toString()}`);
         // const router = useRouter();
         // const pathname = usePathname();
         // const params = new URLSearchParams(searchParams?.toString() || "");
@@ -392,11 +396,11 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 <>
                                     <div className="hidden lg:flex">
                                         <div>
-                                            <Button type="button" label="Add" size='small' onClick={() => router.replace('new?viewMode=edit')} />
+                                            <Button type="button" label="Add" size='small' onClick={() => router.replace(`${normalizeSolidFormActionPath(pathname, "form")}/new?viewMode=edit`)} />
                                         </div>
                                     </div>
                                     <div className="lg:hidden">
-                                        <Button type="button" icon="pi pi-plus" size='small' onClick={() => router.replace('new?viewMode=edit')} className="p-button-sm solid-icon-button" />
+                                        <Button type="button" icon="pi pi-plus" size='small' onClick={() => router.replace(`${normalizeSolidFormActionPath(pathname, "form")}/new?viewMode=edit`)} className="p-button-sm solid-icon-button" />
                                     </div>
                                 </>
                             }

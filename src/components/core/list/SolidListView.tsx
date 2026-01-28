@@ -62,7 +62,7 @@ import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 import { log } from "console";
-import { normalizeSolidActionPath } from "../../../helpers/routePaths";
+import { normalizeSolidListKanbanActionPath } from "../../../helpers/routePaths";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -153,7 +153,6 @@ export const SolidListView = (params: SolidListViewParams) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const localeName = searchParams.get("locale");
-  // The initial filter state will be created based on the fields which are present on this list view.
   const [filters, setFilters] = useState<any>(params.customFilter || null);
 
   // const [customFilter, setCustomFilter] = useState<FilterRule[]>(initialState);
@@ -178,7 +177,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   }, [])
 
   const editBaseUrl = useMemo(
-    () => normalizeSolidActionPath(pathname, editButtonUrl || "form"),
+    () => normalizeSolidListKanbanActionPath(pathname, editButtonUrl || "form"),
     [editButtonUrl, pathname]
   );
 

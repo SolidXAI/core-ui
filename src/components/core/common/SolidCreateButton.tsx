@@ -1,19 +1,19 @@
 import Link from "../../common/Link";
 import { usePathname } from "../../../hooks/usePathname";
 import { Button } from 'primereact/button';
-import { normalizeSolidActionPath } from "../../../helpers/routePaths";
+import { normalizeSolidListKanbanActionPath } from "../../../helpers/routePaths";
 
 export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, solidListViewLayout, responsiveIconOnly = false }: any) => {
     const pathName = usePathname();
 
     const resolveCreatePath = () => {
         if (createButtonUrl) {
-            const normalizedUrl = normalizeSolidActionPath(pathName, createButtonUrl);
+            const normalizedUrl = normalizeSolidListKanbanActionPath(pathName, createButtonUrl);
             const query = new URLSearchParams(createActionQueryParams).toString();
             return query ? `${normalizedUrl}?${query}` : normalizedUrl;
         }
 
-        return `${normalizeSolidActionPath(pathName, "form")}/new?viewMode=edit`;
+        return `${normalizeSolidListKanbanActionPath(pathName, "form")}/new?viewMode=edit`;
     };
 
     const createPath = resolveCreatePath();
