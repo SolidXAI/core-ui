@@ -413,6 +413,8 @@ export type {
 } from './types';
 
 export { GeneralSettings } from './components/common/GeneralSettings';
+export { SolidErrorPage } from './components/common/SolidErrorPage';
+export { SolidNotFoundPage } from './components/common/SolidNotFoundPage';
 
 // export { default as authProviders } from './nextAuth/authProviders';
 export { SolidThemeLink } from './components/common/SolidThemeLink';

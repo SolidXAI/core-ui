@@ -36,4 +36,5 @@ export const eventBus = new EventBus();
 export const AppEvents = {
   SessionUpdated: "session:updated",
   SessionCleared: "session:cleared",
+  GlobalError: "error:global",
 } as const;
