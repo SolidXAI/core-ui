@@ -62,6 +62,7 @@ import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 import { log } from "console";
+import { normalizeSolidActionPath } from "../../../helpers/routePaths";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -152,7 +153,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const localeName = searchParams.get("locale");
-  // TODO: The initial filter state will be created based on the fields which are present on this list view.
+  // The initial filter state will be created based on the fields which are present on this list view.
   const [filters, setFilters] = useState<any>(params.customFilter || null);
 
   // const [customFilter, setCustomFilter] = useState<FilterRule[]>(initialState);
@@ -175,6 +176,11 @@ export const SolidListView = (params: SolidListViewParams) => {
   useEffect(() => {
     trigger("") // Fetch settings on mount
   }, [])
+
+  const editBaseUrl = useMemo(
+    () => normalizeSolidActionPath(pathname, editButtonUrl || "form"),
+    [editButtonUrl, pathname]
+  );
 
   useEffect(() => {
     if (solidSettingsData?.data?.mcpEnabled && solidSettingsData?.data?.mcpServerUrl && solidSettingsData?.data?.mcpApiKey) {
@@ -1575,7 +1581,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                           // ignore storage errors
                         }
                       }
-                      router.push(`${editButtonUrl}/${rowData?.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`);
+                      router.push(`${editBaseUrl}/${rowData?.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`);
                     }
                   }
                   }
@@ -1680,7 +1686,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                         } catch (e) { }
                                       }
                                       router.push(
-                                        `${editButtonUrl}/${rowData?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
+                                        `${editBaseUrl}/${rowData?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
                                       );
                                     }
                                   }}
@@ -1774,7 +1780,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                                 sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
                                               } catch (e) { }
                                               router.push(
-                                                `${editButtonUrl}/${selectedDataRef.current?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
+                                                `${editBaseUrl}/${selectedDataRef.current?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
                                               );
                                             }
                                           }}
