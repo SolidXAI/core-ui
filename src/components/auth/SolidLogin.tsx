@@ -92,7 +92,8 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                             });
                         } else {
                             showToast("success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
-                            router.push(`${env("NEXT_PUBLIC_LOGIN_REDIRECT_URL")}`);
+                            const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin";
+                            router.push(redirectUrl);
                         }
                     } catch (error: any) {
                         showToast("error", ERROR_MESSAGES.LOGIN_ERROR, error?.data ? error?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);

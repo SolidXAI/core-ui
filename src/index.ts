@@ -418,5 +418,10 @@ export { GeneralSettings } from './components/common/GeneralSettings';
 export { SolidThemeLink } from './components/common/SolidThemeLink';
 export { SolidThemeProvider } from './components/common/SolidThemeProvider';
 export { eventBus, AppEvents } from './helpers/eventBus';
+export { useSession } from './hooks/useSession';
+export { useRouter } from './hooks/useRouter';
+export { usePathname } from './hooks/usePathname';
+export { useSearchParams } from './hooks/useSearchParams';
+export { signIn, signOut, getSession, handleLogout, refreshAccessToken, loadSession, saveSession, clearSession } from './adapters/auth';
 
 export * from "./styles";
