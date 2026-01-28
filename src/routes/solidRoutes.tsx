@@ -23,50 +23,54 @@ import { InitiateLoginPage } from "./pages/auth/InitiateLoginPage";
 import { InitiateRegisterPage } from "./pages/auth/InitiateRegisterPage";
 import { InitiateGoogleOauthPage } from "./pages/auth/InitiateGoogleOauthPage";
 import { SsoPage } from "./pages/auth/SsoPage";
-import type { SolidRoutesOptions } from "./types";
+import type { SolidRoutesOptions, SolidRouteKey } from "./types";
 
 export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] {
   const {
     extraAuthRoutes = [],
     extraAdminRoutes = [],
     extraRoutes = [],
+    elementOverrides = {},
   } = options;
 
+  const pick = (key: SolidRouteKey, fallback: JSX.Element) =>
+    (elementOverrides[key] as JSX.Element) || fallback;
+
   const authChildren: RouteObject[] = [
-    { path: "/auth/login", element: <LoginPage /> },
-    { path: "/auth/register", element: <RegisterPage /> },
-    { path: "/auth/forgot-password", element: <ForgotPasswordPage /> },
-    { path: "/auth/initiate-forgot-password", element: <InitiateForgotPasswordPage /> },
-    { path: "/auth/initiate-forgot-password-thank-you", element: <InitiateForgotPasswordThankYouPage /> },
-    { path: "/auth/confirm-forgot-password", element: <ConfirmForgotPasswordPage /> },
-    { path: "/auth/reset-password", element: <ResetPasswordPage /> },
-    { path: "/auth/otp-verify", element: <OtpVerifyPage /> },
-    { path: "/auth/initiate-login", element: <InitiateLoginPage /> },
-    { path: "/auth/initiate-register", element: <InitiateRegisterPage /> },
-    { path: "/auth/initiate-google-oauth", element: <InitiateGoogleOauthPage /> },
-    { path: "/auth/sso", element: <SsoPage /> },
+    { path: "/auth/login", element: pick("login", <LoginPage />) },
+    { path: "/auth/register", element: pick("register", <RegisterPage />) },
+    { path: "/auth/forgot-password", element: pick("forgotPassword", <ForgotPasswordPage />) },
+    { path: "/auth/initiate-forgot-password", element: pick("initiateForgotPassword", <InitiateForgotPasswordPage />) },
+    { path: "/auth/initiate-forgot-password-thank-you", element: pick("initiateForgotPasswordThankYou", <InitiateForgotPasswordThankYouPage />) },
+    { path: "/auth/confirm-forgot-password", element: pick("confirmForgotPassword", <ConfirmForgotPasswordPage />) },
+    { path: "/auth/reset-password", element: pick("resetPassword", <ResetPasswordPage />) },
+    { path: "/auth/otp-verify", element: pick("otpVerify", <OtpVerifyPage />) },
+    { path: "/auth/initiate-login", element: pick("initiateLogin", <InitiateLoginPage />) },
+    { path: "/auth/initiate-register", element: pick("initiateRegister", <InitiateRegisterPage />) },
+    { path: "/auth/initiate-google-oauth", element: pick("initiateGoogleOauth", <InitiateGoogleOauthPage />) },
+    { path: "/auth/sso", element: pick("sso", <SsoPage />) },
     ...extraAuthRoutes,
   ];
 
   const adminChildren: RouteObject[] = [
-    { path: "/admin", element: <AdminPage /> },
-    { path: "/admin/core/:moduleName/home", element: <ModuleHomePage /> },
-    { path: "/admin/core/:moduleName/:modelName/list", element: <ListPage /> },
-    { path: "/admin/core/:moduleName/:modelName/kanban", element: <KanbanPage /> },
-    { path: "/admin/core/:moduleName/:modelName/form/:id", element: <FormPage /> },
-    { path: "/admin/core/:moduleName/settings/:settings", element: <SettingsPage /> },
+    { path: "/admin", element: pick("admin", <AdminPage />) },
+    { path: "/admin/core/:moduleName/home", element: pick("moduleHome", <ModuleHomePage />) },
+    { path: "/admin/core/:moduleName/:modelName/list", element: pick("list", <ListPage />) },
+    { path: "/admin/core/:moduleName/:modelName/kanban", element: pick("kanban", <KanbanPage />) },
+    { path: "/admin/core/:moduleName/:modelName/form/:id", element: pick("form", <FormPage />) },
+    { path: "/admin/core/:moduleName/settings/:settings", element: pick("settings", <SettingsPage />) },
     ...extraAdminRoutes,
   ];
 
   return [
-    { path: "/error", element: <ErrorPage /> },
-    { path: "/not-found", element: <NotFoundPage /> },
-    { element: <AuthLayoutWrapper />, children: authChildren },
+    { path: "/error", element: pick("error", <ErrorPage />) },
+    { path: "/not-found", element: pick("notFound", <NotFoundPage />) },
+    { element: pick("authLayout", <AuthLayoutWrapper />), children: authChildren },
     {
-      element: <AuthGuard />,
+      element: pick("authGuard", <AuthGuard />),
       children: [
         {
-          element: <AdminLayoutWrapper />,
+          element: pick("adminLayout", <AdminLayoutWrapper />),
           children: adminChildren,
         },
       ],
