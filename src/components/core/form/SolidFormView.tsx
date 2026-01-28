@@ -303,6 +303,8 @@ const SolidNotebook = ({ children, activeTab, embeded }: any) => {
     const childrenArray = React.Children.toArray(children).filter(child => !!child);
 
     const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
 
     // Local state to manage active tab in embedded context
     const [localActiveTab, setLocalActiveTab] = useState(activeTab);
@@ -319,10 +321,9 @@ const SolidNotebook = ({ children, activeTab, embeded }: any) => {
 
         if (newTabLabel) {
             if (!embeded) {
-                const currentUrl = new URL(window.location.href);
-                currentUrl.searchParams.set('activeTab', newTabLabel);
-                const updatedPath = currentUrl.toString();
-                router.push(updatedPath);
+                const queryParams = new URLSearchParams(searchParams.toString());
+                queryParams.set('activeTab', newTabLabel);
+                router.push(`${pathname}?${queryParams.toString()}`);
             } else {
                 // Update the active tab state locally for embedded view
                 setLocalActiveTab(newTabLabel);
