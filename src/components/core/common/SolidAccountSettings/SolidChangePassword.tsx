@@ -1,4 +1,4 @@
-import { handleLogout } from '../../../../nextAuth/handleLogout';
+import { handleLogout } from "../../../../adapters/auth/handleLogout";
 import { useChangePasswordMutation } from '../../../../redux/api/authApi';
 import { useFormik } from 'formik';
 import { useSession } from "../../../../hooks/useSession";

@@ -1,7 +1,7 @@
-import { ERROR_MESSAGES } from '../constants/error-messages';
-import axios from 'axios';
-import { getSession, signOut } from "../adapters/auth/index";
-import { env } from "../adapters/env";
+import { ERROR_MESSAGES } from "../../constants/error-messages";
+import axios from "axios";
+import { getSession, signOut } from "./index";
+import { env } from "../env";
 
 export async function handleLogout({ toast }: any) {
     const session = await getSession();

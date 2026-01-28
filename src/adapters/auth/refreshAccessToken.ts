@@ -1,7 +1,7 @@
-import { ERROR_MESSAGES } from "../constants/error-messages";
+import { ERROR_MESSAGES } from "../../constants/error-messages";
 import axios from "axios";
 import { jwtDecode } from "jwt-decode";
-import { env } from "../adapters/env";
+import { env } from "../env";
 
 export async function refreshAccessToken(token: any) {
     try {

@@ -16,7 +16,7 @@ import { Divider } from "primereact/divider";
 import { Avatar } from "primereact/avatar";
 import { SolidAccountSettings } from "../core/common/SolidAccountSettings/SolidAccountSettings";
 import { useGetUserQuery } from "../../redux/api/userApi";
-import { handleLogout } from "../../nextAuth/handleLogout";
+import { handleLogout } from "../../adapters/auth/handleLogout";
 import { Toast } from "primereact/toast";
 import { useLazyGetSolidSettingsQuery } from "../../redux/api/solidSettingsApi";
 
