@@ -56,6 +56,7 @@ import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 import { SolidFormFooter } from "./SolidFormFooter";
+import { normalizeSolidFormActionPath } from "../../../helpers/routePaths";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -837,11 +838,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     //     setViewMode("view")
                     // }
                     if (!params.embeded) {
-                        const currentUrl = new URL(window.location.href);
-                        currentUrl.pathname = currentUrl.pathname.replace(/new$/, result?.data?.id);
-                        currentUrl.searchParams.set('viewMode', 'view');
-                        const updatedUrl = currentUrl.toString();
-                        router.push(updatedUrl);
+                        const baseFormPath = normalizeSolidFormActionPath(pathname, "form");
+                        const queryParams = new URLSearchParams(searchParams.toString());
+                        queryParams.set("viewMode", "view");
+                        router.push(`${baseFormPath}/${result?.data?.id}?${queryParams.toString()}`);
                         setViewMode("view")
                     }
                     return result;
