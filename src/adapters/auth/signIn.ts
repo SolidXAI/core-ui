@@ -2,6 +2,7 @@ import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { env } from "../env";
 import { saveSession } from "./storage";
+import { eventBus, AppEvents } from "../../helpers/eventBus";
 
 type SignInResponse = {
   ok: boolean;
@@ -49,7 +50,7 @@ export async function signIn(provider: string, options: any = {}): Promise<SignI
     const decoded = jwtDecode<{ exp?: number }>(accessToken);
     const accessTokenExpires = decoded.exp ? decoded.exp * 1000 : undefined;
 
-    saveSession({
+    const session = {
       user: {
         ...user,
         accessToken,
@@ -57,7 +58,9 @@ export async function signIn(provider: string, options: any = {}): Promise<SignI
         accessTokenExpires,
       },
       error: null,
-    });
+    };
+    saveSession(session);
+    eventBus.emit(AppEvents.SessionUpdated, session);
 
     return { ok: true, error: null, status: response.status || 200, url: null };
   } catch (error: any) {

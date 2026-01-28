@@ -1,5 +1,6 @@
 import { loadSession, saveSession, clearSession } from "./storage";
 import { refreshAccessToken } from "./refreshAccessToken";
+import { eventBus, AppEvents } from "../../helpers/eventBus";
 import type { Session } from "./types";
 
 export async function getSession(): Promise<Session> {
@@ -26,6 +27,7 @@ export async function getSession(): Promise<Session> {
       error: null,
     };
     saveSession(nextSession);
+    eventBus.emit(AppEvents.SessionUpdated, nextSession);
     return nextSession;
   }
 

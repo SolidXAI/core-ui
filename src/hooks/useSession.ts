@@ -2,6 +2,7 @@ import { useEffect, useState } from "react";
 import { loadSession } from "../adapters/auth/storage";
 import { getSession } from "../adapters/auth/getSession";
 import type { Session } from "../adapters/auth/types";
+import { eventBus, AppEvents } from "../helpers/eventBus";
 
 type UseSessionResult = {
   data: Session;
@@ -25,6 +26,14 @@ export function useSession(): UseSessionResult {
 
   useEffect(() => {
     update();
+    const offUpdate = eventBus.on<Session>(AppEvents.SessionUpdated, (session) => {
+      setData(session || null);
+      setStatus(session?.user?.accessToken ? "authenticated" : "unauthenticated");
+    });
+    const offClear = eventBus.on(AppEvents.SessionCleared, () => {
+      setData(null);
+      setStatus("unauthenticated");
+    });
     const onStorage = (e: StorageEvent) => {
       if (e.key && e.key !== "solidx.session") return;
       const session = loadSession();
@@ -32,7 +41,11 @@ export function useSession(): UseSessionResult {
       setStatus(session?.user?.accessToken ? "authenticated" : "unauthenticated");
     };
     window.addEventListener("storage", onStorage);
-    return () => window.removeEventListener("storage", onStorage);
+    return () => {
+      window.removeEventListener("storage", onStorage);
+      offUpdate();
+      offClear();
+    };
   }, []);
 
   return { data, status, update };

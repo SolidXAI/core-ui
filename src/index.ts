@@ -417,5 +417,6 @@ export { GeneralSettings } from './components/common/GeneralSettings';
 // export { default as authProviders } from './nextAuth/authProviders';
 export { SolidThemeLink } from './components/common/SolidThemeLink';
 export { SolidThemeProvider } from './components/common/SolidThemeProvider';
+export { eventBus, AppEvents } from './helpers/eventBus';
 
 export * from "./styles";
