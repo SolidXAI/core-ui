@@ -1,6 +1,5 @@
 import Link from "../common/Link";
 import { useSearchParams } from "../../hooks/useSearchParams";
-import { useSelector } from "react-redux";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { useEffect } from "react";
 
