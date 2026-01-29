@@ -1,14 +1,13 @@
 import { ERROR_MESSAGES } from "../../constants/error-messages";
-import axios from "axios";
 import { getSession, signOut } from "./index";
-import { env } from "../env";
+import { solidPost } from "../../http/solidHttp";
 
 export async function handleLogout({ toast }: any) {
     const session = await getSession();
-    // const token = session?.user?.accessToken;
     const refreshToken = session?.user?.refreshToken;
     try {
-        const response = await axios.post(`${env("NEXT_PUBLIC_BACKEND_API_URL")}/api/iam/logout`,
+        const response = await solidPost(
+            "/iam/logout",
             {
                 refreshToken: refreshToken, // Pass refresh token in body
             }

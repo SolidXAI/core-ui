@@ -26,36 +26,6 @@ export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, max
     // State to manage the folded status of each column
     const [foldedStates, setFoldedStates] = useState<Record<string, boolean>>({});
 
-    // Fetch data from the API
-    // useEffect(() => {
-    //     const fetchData = async (): Promise<void> => {
-    //         try {
-    //             setLoading(true);
-    //             // const response = await axios.get<ApiResponse>(
-    //             //     "http://localhost:3000/api/blog/group-kanban/status",
-    //             //     {
-    //             //         headers: { accept: "*/*" },
-    //             //     }
-    //             // );
-    //             // setGroupedData(response.data.data.groupedData);
-    //             setGroupedData({});
-    //         } catch (error) {
-    //             console.error("Error fetching data:", error);
-    //         } finally {
-    //             setLoading(false);
-    //         }
-    //     };
-
-    //     fetchData();
-    // }, []);
-
-    // if (loading) {
-    //     return <div>Loading...</div>;
-    // }
-
-
-
-
     // Toggle fold (not yet implemented)
     const toggleFold = (status: string): void => {
         setFoldedStates((prevFoldedStates) => ({

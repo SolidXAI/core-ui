@@ -37,16 +37,26 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     (elementOverrides[key] as JSX.Element) || fallback;
 
   const authChildren: RouteObject[] = [
+    // Password based login, Passwordless login initiate otp
     { path: "/auth/login", element: pick("login", <LoginPage />) },
+    // Password based registration, Passwordless registration initiate otp
     { path: "/auth/register", element: pick("register", <RegisterPage />) },
+    // Passwordless login confirm otp
+    { path: "/auth/initiate-login", element: pick("initiateLogin", <InitiateLoginPage />) },
+    // Passwordless registration confirm otp
+    { path: "/auth/initiate-register", element: pick("initiateRegister", <InitiateRegisterPage />) },
+    // ??? not used ???
+    { path: "/auth/otp-verify", element: pick("otpVerify", <OtpVerifyPage />) },
+
+    // Forgot password flow
     { path: "/auth/forgot-password", element: pick("forgotPassword", <ForgotPasswordPage />) },
     { path: "/auth/initiate-forgot-password", element: pick("initiateForgotPassword", <InitiateForgotPasswordPage />) },
     { path: "/auth/initiate-forgot-password-thank-you", element: pick("initiateForgotPasswordThankYou", <InitiateForgotPasswordThankYouPage />) },
     { path: "/auth/confirm-forgot-password", element: pick("confirmForgotPassword", <ConfirmForgotPasswordPage />) },
+    
+    // ??? not used ???
     { path: "/auth/reset-password", element: pick("resetPassword", <ResetPasswordPage />) },
-    { path: "/auth/otp-verify", element: pick("otpVerify", <OtpVerifyPage />) },
-    { path: "/auth/initiate-login", element: pick("initiateLogin", <InitiateLoginPage />) },
-    { path: "/auth/initiate-register", element: pick("initiateRegister", <InitiateRegisterPage />) },
+
     { path: "/auth/initiate-google-oauth", element: pick("initiateGoogleOauth", <InitiateGoogleOauthPage />) },
     { path: "/auth/sso", element: pick("sso", <SsoPage />) },
     ...extraAuthRoutes,

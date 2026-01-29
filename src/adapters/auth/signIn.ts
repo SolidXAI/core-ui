@@ -1,8 +1,8 @@
-import axios from "axios";
 import { jwtDecode } from "jwt-decode";
 import { env } from "../env";
 import { saveSession } from "./storage";
 import { eventBus, AppEvents } from "../../helpers/eventBus";
+import { solidPost } from "../..//http/solidHttp";
 
 type SignInResponse = {
   ok: boolean;
@@ -24,7 +24,7 @@ export async function signIn(provider: string, options: any = {}): Promise<SignI
   }
 
   try {
-    const response = await axios.post(
+    const response = await solidPost(
       `${apiUrl}/api/iam/authenticate`,
       {
         username,

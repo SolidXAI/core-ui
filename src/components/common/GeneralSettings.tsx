@@ -54,8 +54,8 @@ export const GeneralSettings = () => {
         passwordLessAuth: solidSettingsData?.data?.passwordLessAuth ?? false,
         activateUserOnRegistration: solidSettingsData?.data?.activateUserOnRegistration ?? false,
         iamGoogleOAuthEnabled: solidSettingsData?.data?.iamGoogleOAuthEnabled ?? false,
-        shouldQueueEmails: solidSettingsData?.data?.shouldQueueEmails ?? false,
-        shouldQueueSms: solidSettingsData?.data?.shouldQueueSms ?? false,
+        // shouldQueueEmails: solidSettingsData?.data?.shouldQueueEmails ?? false,
+        // shouldQueueSms: solidSettingsData?.data?.shouldQueueSms ?? false,
         authPagesTheme: solidSettingsData?.data?.authPagesTheme ?? "light",
         authPagesLayout: solidSettingsData?.data?.authPagesLayout ?? "center",
         defaultRole: solidSettingsData?.data?.defaultRole ?? "Admin",
@@ -1057,6 +1057,7 @@ export const GeneralSettings = () => {
 
                             {pathname.includes("misc-settings") &&
                                 <>
+                                {/* 
                                     <p className='font-bold' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Misc Details</p>
                                     <div className='formgrid grid'>
                                         <div className='col-12 lg:col-10 xl:col-8'>
@@ -1093,6 +1094,7 @@ export const GeneralSettings = () => {
                                         </div>
                                     </div>
                                     <Divider />
+                                 */}
                                     <p className='font-bold' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Contact Support</p>
                                     <div className='formgrid grid'>
                                         <div className="col-12 lg:col-10 xl:col-8">

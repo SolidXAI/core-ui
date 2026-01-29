@@ -17,6 +17,7 @@ import { useGetUserQuery } from "../../redux/api/userApi";
 import { handleLogout } from "../../adapters/auth/handleLogout";
 import { Toast } from "primereact/toast";
 import { useLazyGetSolidSettingsQuery } from "../../redux/api/solidSettingsApi";
+import { useSession } from "../../hooks/useSession";
 
 const UserProfileMenu = () => {
   const toast = useRef(null);
@@ -31,7 +32,11 @@ const UserProfileMenu = () => {
   const { changeTheme } = useContext(PrimeReactContext);
   const { layoutConfig, setLayoutConfig } = useContext(LayoutContext);
   const { theme } = useSelector((state: any) => state.theme); // Get current theme from Redux
-  const userId = useSelector((state: any) => state.auth?.user?.user?.id);
+
+  // const userId = useSelector((state: any) => state.auth?.user?.user?.id);
+  const session = useSession();
+  const userId = session?.data?.user?.id;
+
   const { data: userData } = useGetUserQuery(userId, {
     skip: !userId,
   });
@@ -135,7 +140,8 @@ const UserProfileMenu = () => {
             </div>
           </div>
 
-          {/*  */}
+          {/* Disabled the dark mode toggle for now */}
+          {/* 
           {solidSettingsData?.data?.enableDarkMode === true &&
             <div className="p-3 flex align-items-center justify-content-between secondary-border-bottom">
               <div className="flex align-items-center gap-3">
@@ -147,6 +153,7 @@ const UserProfileMenu = () => {
               <InputSwitch checked={checked} onChange={handleThemeToggle} />
             </div>
           }
+          */}
           <div className="flex align-items-center py-1 gap-2 secondary-border-bottom">
             <Button severity="secondary" text className="w-full flex align-items-center gap-2 px-3" onClick={() => setShowProfileSettingsDialog(true)}>
               <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 18 18" fill="none">
