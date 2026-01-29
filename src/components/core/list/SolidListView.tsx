@@ -559,6 +559,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   // After data is fetched populate the list view state so as to be able to render the data.
   useEffect(() => {
     if (solidEntityListViewData) {
+      setLoading(true);
       const cleanedRecords = solidEntityListViewData.records.map((record) => {
         const newRecord = { ...record };
 
