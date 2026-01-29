@@ -2,6 +2,7 @@ import { loadSession, saveSession, clearSession } from "./storage";
 import { refreshAccessToken } from "./refreshAccessToken";
 import { eventBus, AppEvents } from "../../helpers/eventBus";
 import type { Session } from "./types";
+import { signOut } from "./signOut";
 
 export async function getSession(): Promise<Session> {
   const session = loadSession();
@@ -12,8 +13,9 @@ export async function getSession(): Promise<Session> {
   if (expiresAt && Date.now() >= expiresAt - bufferMs) {
     const refreshed = await refreshAccessToken({ refreshToken: session.user.refreshToken });
     if ((refreshed as any)?.error) {
-      clearSession();
-      return { ...session, error: "RefreshAccessTokenError" };
+      // clearSession();
+      // return { ...session, error: "RefreshAccessTokenError" };
+      await signOut({ callbackUrl: '/auth/login' });
     }
 
     const nextSession: Session = {
