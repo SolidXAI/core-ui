@@ -472,7 +472,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     }, [])
 
     useEffect(() => {
-        if (solidSettingsData?.data?.mcpEnabled && solidSettingsData?.data?.mcpServerUrl && solidSettingsData?.data?.mcpApiKey) {
+        if (solidSettingsData?.data?.mcpEnabled && solidSettingsData?.data?.mcpServerUrl) {
             enableSolidXAiPanel();
         }
     }, [solidSettingsData]);
@@ -1437,7 +1437,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         return <SolidColumn key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidColumn>;
                     }
                     break;
-                case "field": 
+                case "field":
                     if (visible === true) {
 
                         // const fieldMetadata = solidFieldsMetadata[attrs.name];
@@ -1463,7 +1463,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         />;
                     }
                     break;
-                
+
                 case "notebook":
                     if (visible === true) {
                         return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidNotebook>;
