@@ -20,6 +20,7 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
+import showToast from "../../helpers/showToast";
 
 interface AuthTabsProps {
     passwordBasedAuth: boolean;
@@ -84,16 +85,6 @@ const SolidRegister = () => {
     //             router.replace("/auth/login");
     //     }
     // }, [isSuccess])
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
 
     const PasswordSignup = ({ showNameFieldsForRegistration }: { showNameFieldsForRegistration?: boolean }) => {
         console.log("showNameFieldsForRegistration", showNameFieldsForRegistration);
@@ -156,16 +147,16 @@ const SolidRegister = () => {
                         const response = await register(userData).unwrap();
 
                         if (response?.statusCode === 200) {
-                            showToast("success", ERROR_MESSAGES.USER_REGISTER, response?.data?.message);
+                            showToast(toast, "success", ERROR_MESSAGES.USER_REGISTER, response?.data?.message);
                             setShowOverlay(true);
                             setTimeout(() => {
                                 router.push(`/auth/login`);
                             }, 3000);
                         } else {
-                            showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                            showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                         }
                     } catch (err: any) {
-                        showToast("error", ERROR_MESSAGES.EMAIL_ALREADY_TAKEN, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                        showToast(toast, "error", ERROR_MESSAGES.EMAIL_ALREADY_TAKEN, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                     } finally {
                         setSubmitting(false);
                     }
@@ -306,7 +297,7 @@ const SolidRegister = () => {
 
                             if (remaining > 0) {
                                 const formatted = formatTimeLeft(remaining);
-                                showToast(
+                                showToast(toast, 
                                     "error",
                                     ERROR_MESSAGES.PLEASE_WAIT,
                                     ERROR_MESSAGES.OPT_FORMAT(formatted)
@@ -318,15 +309,15 @@ const SolidRegister = () => {
                         const response = await initiateRegister(payload).unwrap(); // Call mutation trigger
 
                         if (response?.statusCode === 200) {
-                            showToast("success", ERROR_MESSAGES.OPT_SEND, response?.data?.message);
+                            showToast(toast, "success", ERROR_MESSAGES.OPT_SEND, response?.data?.message);
                             const email = values.email;
                             localStorage.setItem(`resendOtpRegister_${email}`, Date.now().toString());
                             router.push(`/auth/initiate-register?email=${email}&username=${values.username}`);
                         } else {
-                            showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                            showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                         }
                     } catch (err: any) {
-                        showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                        showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                     } finally {
                         setSubmitting(false);
                     }

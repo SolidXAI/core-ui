@@ -10,22 +10,13 @@ import { Toast } from 'primereact/toast';
 import { useRef } from 'react';
 import * as Yup from 'yup';
 import { env } from "../../adapters/env";
+import showToast from "../../helpers/showToast";
 
 const SolidChangeForcePassword = () => {
     const toast = useRef<Toast>(null);
     const [changePassword] = useChangePasswordMutation();
 
     const session: any = useSession();
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
 
     const envPasswordRegex = env("NEXT_PUBLIC_PASSWORD_REGEX");
     const envPasswordHelperText = env("NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC");
@@ -77,18 +68,18 @@ const SolidChangeForcePassword = () => {
                 // Call the mutation and handle the response
                 const response = await changePassword(payload).unwrap(); // Await the API call and unwrap to handle errors.
                 if (response?.error) {
-                    showToast("error", ERROR_MESSAGES.ERROR, response.error)
+                    showToast(toast, "error", ERROR_MESSAGES.ERROR, response.error)
                     setErrors({
                         currentPassword: ERROR_MESSAGES.INCORRECT_CURRENT,
                         newPassword: ERROR_MESSAGES.MUST_MATCH,
                         confirmPassword: ERROR_MESSAGES.MUST_MATCH,
                     })
                 } else {
-                    showToast("success", ERROR_MESSAGES.FORCE_PASSWORD_CHANGE, ERROR_MESSAGES.PASSWORD_CHANGE);
+                    showToast(toast, "success", ERROR_MESSAGES.FORCE_PASSWORD_CHANGE, ERROR_MESSAGES.PASSWORD_CHANGE);
                     signOut({ callbackUrl: "/auth/login" })
                 }
             } catch (err: any) {
-                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message);
+                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message);
                 // setErrors({
                 //     currentPassword: "Incorrect Current Password",
                 // })

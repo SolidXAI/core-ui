@@ -13,6 +13,7 @@ import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
+import showToast from "../../helpers/showToast";
 
 const SolidOTPVerify = () => {
 
@@ -34,17 +35,6 @@ const SolidOTPVerify = () => {
             .email(ERROR_MESSAGES.FIELD_INVALID(' email address'))
             .required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
     });
-
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
 
     const isFormFieldValid = (formik: any, fieldName: string) =>
         formik.touched[fieldName] && formik.errors[fieldName];
@@ -87,9 +77,9 @@ const SolidOTPVerify = () => {
                                 password,
                             });
                             if (response?.error) {
-                                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                             } else {
-                                showToast("success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
+                                showToast(toast, "success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
                                 router.push(`${env("NEXT_PUBLIC_LOGIN_REDIRECT_URL")}`);
                             }
 

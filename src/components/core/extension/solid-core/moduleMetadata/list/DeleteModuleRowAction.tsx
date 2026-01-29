@@ -15,6 +15,7 @@ import { DataTable } from "primereact/datatable";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
+import showToast from "../../../../../../helpers/showToast";
 
 const DeleteModuleRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
 
@@ -43,14 +44,6 @@ const DeleteModuleRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     }, [models]);
 
     const toast = useRef<Toast>(null);
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            life: 3000,
-        });
-    };
 
     const deleteModuleHandler = async () => {
         setIsDeleting(true);
@@ -66,15 +59,15 @@ const DeleteModuleRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
                     res.error?.error ||
                     ERROR_MESSAGES.ERROR_OCCURED;
                 setErrorState(message);
-                showToast('error', ERROR_MESSAGES.DELETE_FAIELD, message);
+                showToast(toast, 'error', ERROR_MESSAGES.DELETE_FAIELD, message);
             } else {
-                showToast('success', ERROR_MESSAGES.MODEL_DELETE, ERROR_MESSAGES.MODEL_DELETE_SUCCESSFULLY(event.rowData.singularName));
+                showToast(toast, 'success', ERROR_MESSAGES.MODEL_DELETE, ERROR_MESSAGES.MODEL_DELETE_SUCCESSFULLY(event.rowData.singularName));
                 dispatch(closePopup());
             }
         } catch (err: any) {
             console.error(ERROR_MESSAGES.DELETE_ERROR, err);
             setErrorState(err.message || ERROR_MESSAGES.NETWORK_ERROR);
-            showToast('error', ERROR_MESSAGES.ERROR, ERROR_MESSAGES.NETWORK_OR_SERVER_ERROR);
+            showToast(toast, 'error', ERROR_MESSAGES.ERROR, ERROR_MESSAGES.NETWORK_OR_SERVER_ERROR);
         } finally {
             setIsDeleting(false);
         }

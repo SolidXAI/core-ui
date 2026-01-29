@@ -12,6 +12,7 @@ import { Checkbox } from "primereact/checkbox";
 import { kebabCase } from "lodash";
 import { createSolidEntityApi } from "../../../../../../redux/api/solidEntityApi";
 import { ERROR_MESSAGES } from "../../../../../../constants/error-messages";
+import showToast from "../../../../../../helpers/showToast";
 
 
 const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
@@ -24,16 +25,6 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     }] = useDeleteSolidEntityMutation()
 
     const toast = useRef<Toast>(null);
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
-        });
-    };
 
     const deleteModelHandler = async () => {
         try {
@@ -46,14 +37,14 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
                     res.error?.data?.message ||
                     res.error?.error ||
                     ERROR_MESSAGES.ERROR_OCCURED;
-                showToast('error', ERROR_MESSAGES.DELETE_FAIELD, message);
+                showToast(toast, 'error', ERROR_MESSAGES.DELETE_FAIELD, message);
             } else {
-                showToast('success', ERROR_MESSAGES.MODEL_DELETE, ERROR_MESSAGES.MODEL_DELETE_SUCCESSFULLY(event.rowData.singularName));
+                showToast(toast, 'success', ERROR_MESSAGES.MODEL_DELETE, ERROR_MESSAGES.MODEL_DELETE_SUCCESSFULLY(event.rowData.singularName));
                 dispatch(closePopup());
             }
         } catch (err: any) {
             console.error("catch error", err);
-            showToast('error', ERROR_MESSAGES.ERROR, ERROR_MESSAGES.NETWORK_OR_SERVER_ERROR);
+            showToast(toast, 'error', ERROR_MESSAGES.ERROR, ERROR_MESSAGES.NETWORK_OR_SERVER_ERROR);
         }
     }
 

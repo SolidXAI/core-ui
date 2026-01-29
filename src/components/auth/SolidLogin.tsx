@@ -20,6 +20,7 @@ import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { RadioButton } from "primereact/radiobutton";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
+import showToast from "../../helpers/showToast";
 
 interface AuthTabsProps {
     passwordBasedAuth: boolean;
@@ -39,17 +40,6 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
     }, [])
     const toast = useRef<Toast>(null);
     const router = useRouter();
-
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
 
     const isFormFieldValid = (formik: any, fieldName: string) =>
         formik.touched[fieldName] && formik.errors[fieldName];
@@ -85,18 +75,18 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         });
 
                         if (response?.error) {
-                            showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                            showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                             setErrors({
                                 email: ERROR_MESSAGES.INVALID_CREDENTIALS,
                                 password: ERROR_MESSAGES.INVALID_CREDENTIALS,
                             });
                         } else {
-                            showToast("success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
+                            showToast(toast, "success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
                             const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin";
                             router.push(redirectUrl);
                         }
                     } catch (error: any) {
-                        showToast("error", ERROR_MESSAGES.LOGIN_ERROR, error?.data ? error?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                        showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, error?.data ? error?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                     } finally {
                         setSubmitting(false); // Re-enable the button after submission
                     }
@@ -256,7 +246,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
 
                             if (remaining > 0) {
                                 const formatted = formatTimeLeft(remaining);
-                                showToast(
+                                showToast(toast, 
                                     "error",
                                     ERROR_MESSAGES.PLEASE_WAIT,
                                     ERROR_MESSAGES.OPT_FORMAT(formatted)
@@ -268,15 +258,15 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         const response = await initiateLogin(payload).unwrap(); // Call mutation trigger
 
                         if (response?.statusCode === 200) {
-                            showToast("success", ERROR_MESSAGES.OPT_RESEND, response?.data?.message);
+                            showToast(toast, "success", ERROR_MESSAGES.OPT_RESEND, response?.data?.message);
                             const identifier = values.identifier;
                             localStorage.setItem(`resendOtpLogin_${identifier}`, Date.now().toString());
                             router.push(`/auth/initiate-login?identifier=${encodeURIComponent(identifier)}&type=${authType}`);
                         } else {
-                            showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                            showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                         }
                     } catch (err: any) {
-                        showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                        showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                         setErrors({
                             identifier: "Invalid Credentials",
                         });

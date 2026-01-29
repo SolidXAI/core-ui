@@ -1,7 +1,3 @@
-// @ts-nocheck
-
-
-
 import React, { useRef } from "react";
 import { Droppable, DroppableProvided } from "@hello-pangea/dnd";
 import { Button } from "primereact/button";
@@ -34,6 +30,7 @@ interface KanbanColumnProps {
   setOpenLightbox: any
 }
 
+// @ts-ignore
 const KanbanColumn = ({ groupedView, groupByField, solidKanbanViewMetaData, group, groupData, toggleFold, handleLoadMore, setLightboxUrls, setOpenLightbox, editButtonUrl }: KanbanColumnProps) => {
   const op = useRef<any>(null);
 
@@ -110,15 +107,17 @@ const KanbanColumn = ({ groupedView, groupByField, solidKanbanViewMetaData, grou
         </div>
       }
       {!group.folded && (
-        <Droppable droppableId={groupByField} isDropDisable={!groupedView}>
+        <Droppable droppableId={groupByField} isDropDisabled={!groupedView}>
           {(provided: DroppableProvided) => (
             <div
               ref={provided.innerRef}
               {...provided.droppableProps}
               style={{ minHeight: "100px" }}
+              // @ts-ignore
               className={groupedView === false && "kanban-ungrouped-column-content"}
             >
               {groupData.map((data, index) => (
+                // @ts-ignore
                 <KanbanCard groupedView={groupedView} key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl} />
               ))}
               {provided.placeholder}

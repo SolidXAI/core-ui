@@ -6,20 +6,11 @@ import React, { useEffect, useRef, useState } from 'react';
 import { Dropdown } from 'primereact/dropdown';
 import { Toast } from 'primereact/toast';
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
+import showToast from "../../../../helpers/showToast";
 export const SolidImportTransaction = ({ setImportStatusResult, transactionId, setImportStep }: any) => {
     // console.log("get transaction id", transactionId);
 
     const toast = useRef<Toast>(null);
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
-        });
-    };
     const [trigger, { data: mappingInfo, isLoading, isError }] = useLazyGetImportMappingInfoQuery();
     const [patchUpdateImportTransaction] = usePatchUpdateImportTransactionMutation();
     const [createImportSync, { isLoading: isImporting }] = useCreateImportSyncMutation();
@@ -95,14 +86,14 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
                         setImportStep(4);
                     }
                 } catch (importError: any) {
-                    showToast("error", ERROR_MESSAGES.IMPORT_ERROR, importError?.data?.error);
+                    showToast(toast, "error", ERROR_MESSAGES.IMPORT_ERROR, importError?.data?.error);
                 }
 
                 // Async
             }
         } catch (error: any) {
             const errorMessage = error?.data?.error || ERROR_MESSAGES.SOMETHING_WRONG;
-            showToast("error", ERROR_MESSAGES.ERROR, errorMessage);
+            showToast(toast, "error", ERROR_MESSAGES.ERROR, errorMessage);
         }
     };
 

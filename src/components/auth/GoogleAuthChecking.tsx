@@ -6,6 +6,7 @@ import { ProgressSpinner } from 'primereact/progressspinner';
 import { Toast } from 'primereact/toast';
 import { useEffect, useRef, useState } from 'react'
 import { env } from "../../adapters/env";
+import showToast from "../../helpers/showToast";
 
 export const GoogleAuthChecking = () => {
     const searchParams = useSearchParams();
@@ -14,16 +15,6 @@ export const GoogleAuthChecking = () => {
     const router = useRouter();
     const [error, setError] = useState<string | null>(null);
     const toast = useRef<Toast>(null);
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
     useEffect(() => {
         const handleOAuthAuthentication = async () => {
             try {
@@ -35,14 +26,14 @@ export const GoogleAuthChecking = () => {
                 });
 
                 if (response?.error) {
-                    showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                    showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                     setError(ERROR_MESSAGES.AUTHENICATION__FAILED)
                 } else {
-                    showToast("success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
+                    showToast(toast, "success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
                     router.push(`${env("NEXT_PUBLIC_LOGIN_REDIRECT_URL")}`);
                 }
             } catch (err: any) {
-                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.AUTHENICATION__FAILED);
+                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.AUTHENICATION__FAILED);
             }
         };
 

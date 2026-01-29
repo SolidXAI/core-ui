@@ -11,22 +11,13 @@ import * as Yup from 'yup';
 import { SolidPasswordHelperText } from '../SolidPasswordHelperText';
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
 import { env } from "../../../../adapters/env";
+import showToast from "../../../../helpers/showToast";
 
 export const SolidChangePassword = ({ solidSettingsData }: any) => {
     const toast = useRef<Toast>(null);
     const [changePassword] = useChangePasswordMutation();
 
     const session: any = useSession();
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
 
     const envPasswordRegex = env("NEXT_PUBLIC_PASSWORD_REGEX");
 
@@ -94,19 +85,19 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
 
                 const response = await changePassword(payload).unwrap();
                 if (response?.error) {
-                    showToast("error", ERROR_MESSAGES.ERROR, response.error)
+                    showToast(toast, "error", ERROR_MESSAGES.ERROR, response.error)
                     setErrors({
                         currentPassword: ERROR_MESSAGES.INCORRECT_CURRENT,
                         newPassword: ERROR_MESSAGES.MUST_MATCH,
                         confirmPassword: ERROR_MESSAGES.MUST_MATCH,
                     })
                 } else {
-                    showToast("success", ERROR_MESSAGES.PASSWORD_CHANGE, ERROR_MESSAGES.PASSWORD_CHANGE);
+                    showToast(toast, "success", ERROR_MESSAGES.PASSWORD_CHANGE, ERROR_MESSAGES.PASSWORD_CHANGE);
                     handleLogout(toast)
                     resetForm();
                 }
             } catch (err: any) {
-                showToast("error", err?.data?.message, err?.data?.data?.message ? err?.data?.data?.message : err?.data?.message);
+                showToast(toast, "error", err?.data?.message, err?.data?.data?.message ? err?.data?.data?.message : err?.data?.message);
             }
         },
     });

@@ -1,11 +1,7 @@
 // @ts-nocheck
-
-
-import React, { useState, useEffect } from "react";
-import { DragDropContext, DropResult } from "@hello-pangea/dnd";
-import axios from "axios";
+import { useState } from "react";
+import { DragDropContext } from "@hello-pangea/dnd";
 import KanbanColumn from "./KanbanColumn";
-import { Button } from "primereact/button";
 
 // Define types for groupData and Grouped Data
 interface Post {
@@ -92,7 +88,7 @@ export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, max
                         />
                     );
                 })} */}
-                    {kanbanViewData.map((data) => {
+                    {kanbanViewData.map((data: any) => {
                         // Find the displayName for the groupName from solidKanbanViewMetaData.solidFieldsMetadata
                         let label = data.groupName;
                         const fieldMeta = solidKanbanViewMetaData?.solidFieldsMetadata?.[groupByFieldName];

@@ -13,6 +13,7 @@ import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
+import showToast from "../../helpers/showToast";
 
 const SolidInitiateRegisterOtp = () => {
     const searchParams = useSearchParams();
@@ -79,17 +80,6 @@ const SolidInitiateRegisterOtp = () => {
             .required(ERROR_MESSAGES.FIELD_REUQIRED('OTP')),
     });
 
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
-
     const isFormFieldValid = (formik: any, fieldName: string) =>
         formik.touched[fieldName] && formik.errors[fieldName];
 
@@ -104,15 +94,15 @@ const SolidInitiateRegisterOtp = () => {
             const response = await initiateResendOTP(payload).unwrap();
 
             if (response?.statusCode === 200) {
-                showToast("success", ERROR_MESSAGES.OPT_RESEND, response?.data?.message);
+                showToast(toast, "success", ERROR_MESSAGES.OPT_RESEND, response?.data?.message);
                 localStorage.setItem(RESEND_OTP_KEY, Date.now().toString());
                 setTimeLeft(RESEND_OTP_TIMER);
                 setResendEnabled(false);
             } else {
-                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
             }
         } catch (err: any) {
-            showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
+            showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
         }
     };
 
@@ -154,16 +144,16 @@ const SolidInitiateRegisterOtp = () => {
 
                                 if (response?.statusCode === 200) {
                                     localStorage.removeItem(`resendOtpRegister_${email}`);
-                                    showToast("success", ERROR_MESSAGES.LOGIN_SUCCESSFULLY, "Login");
+                                    showToast(toast, "success", ERROR_MESSAGES.LOGIN_SUCCESSFULLY, "Login");
                                     router.push(`/auth/login`);
                                 } else {
-                                    showToast("error", ERROR_MESSAGES.INAVLID_OTP, response.error);
+                                    showToast(toast, "error", ERROR_MESSAGES.INAVLID_OTP, response.error);
                                     setErrors({
                                         otp: ERROR_MESSAGES.INAVLID_OTP,
                                     });
                                 }
                             } catch (err: any) {
-                                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                             } finally {
                                 setSubmitting(false);
                             }

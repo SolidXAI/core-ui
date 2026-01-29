@@ -7,18 +7,9 @@ import { DocumentSvg } from './DocumentSvg';
 import { useCreateImportTransactionMutation } from '../../../../redux/api/importTransactionApi';
 import { Toast } from 'primereact/toast';
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
+import showToast from "../../../../helpers/showToast";
 export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMetadataId }: any) => {
     const toast = useRef<Toast>(null);
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
-        });
-    };
 
     const [file, setFile] = useState<File | null>(null);
     const [createImportTransaction, { isLoading }] = useCreateImportTransactionMutation();
@@ -34,14 +25,14 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
             console.log('Upload success:', response);
             if (response?.statusCode === 200) {
                 setFile(uploadFile);
-                showToast("success", ERROR_MESSAGES.FILE_UPLOAD, ERROR_MESSAGES.FILE_UPLOAD_SUCCESSFULLY);
+                showToast(toast, "success", ERROR_MESSAGES.FILE_UPLOAD, ERROR_MESSAGES.FILE_UPLOAD_SUCCESSFULLY);
                 setTransactionId?.(response?.data?.id);
             } else {
-                showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_UPLOAD_FILE)
+                showToast(toast, "error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_UPLOAD_FILE)
             }
         } catch (error) {
             console.error(ERROR_MESSAGES.FAILED_UPLOAD_FILE, error);
-            showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_UPLOAD_FILE)
+            showToast(toast, "error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_UPLOAD_FILE)
         }
     };
 
@@ -112,7 +103,7 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
                     size='small'
                     onClick={() => {
                         if (!file) {
-                            showToast("error", ERROR_MESSAGES.MISSING_FILE, ERROR_MESSAGES.FAILED_UPLOAD_FILE);
+                            showToast(toast, "error", ERROR_MESSAGES.MISSING_FILE, ERROR_MESSAGES.FAILED_UPLOAD_FILE);
                             return;
                         }
                         setImportStep(3);
