@@ -1,4 +1,4 @@
-import { useConfirmOtpLoginMutation, useInitateLoginMutation } from "../../redux/api/authApi";
+import { useInitateLoginMutation } from "../../redux/api/authApi";
 import { Form, Formik } from "formik";
 import Image from "../common/Image";
 import { useRouter } from "../../hooks/useRouter";
@@ -10,7 +10,7 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
-import { signIn } from "../../adapters/auth/index";
+import { signInWithOtp } from "../../adapters/auth/index";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
@@ -32,7 +32,6 @@ const SolidInitialLoginOtp = () => {
     }, [trigger])
 
     const [initiateResendOTP] = useInitateLoginMutation();
-    const [initiateOtpLogin] = useConfirmOtpLoginMutation();
     const toast = useRef<Toast>(null);
     const router = useRouter();
     const [timeLeft, setTimeLeft] = useState(RESEND_OTP_TIMER);
@@ -159,51 +158,22 @@ const SolidInitialLoginOtp = () => {
                         validationSchema={validationSchema}
                         onSubmit={async (values, { setSubmitting, setErrors }) => {
                             try {
-                                const payload = {
+                                const response = await signInWithOtp({
                                     type: type,
                                     identifier: identifier,
-                                    otp: values.otp
-                                };
+                                    otp: values.otp,
+                                });
 
-                                const response = await initiateOtpLogin(payload).unwrap(); // Call mutation trigger
-
-                                if (response?.statusCode === 200) {
-                                    const credentials: any = {
-                                        redirect: false,
-                                        accessToken: response?.data?.accessToken,
-                                    };
-
-                                    // Pass both email and mobile if available
-                                    if (response?.data?.user?.email) {
-                                        credentials.email = response?.data?.user?.email;
-                                    }
-                                    if (response?.data?.user?.mobile) {
-                                        credentials.mobile = response?.data?.user?.mobile;
-                                    }
-
-                                    // Fallback: if neither exists in response, use the identifier based on type
-                                    if (!credentials.email && !credentials.mobile) {
-                                        if (type === "mobile") {
-                                            credentials.mobile = identifier;
-                                        } else if (type === "email") {
-                                            credentials.email = identifier;
-                                        }
-                                    }
-
-                                    const otpResponse = await signIn("credentials", credentials);
-
-                                    if (otpResponse?.error) {
-                                        showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, otpResponse.error);
-                                    } else {
-                                        localStorage.removeItem(`resendOtpLogin_${identifier}`);
-                                        showToast(toast, "success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
-                                        router.push(`${env("NEXT_PUBLIC_LOGIN_REDIRECT_URL")}`);
-                                    }
-                                } else {
+                                if (response?.error) {
                                     showToast(toast, "error", ERROR_MESSAGES.INAVLID_OTP, response.error);
                                     setErrors({
                                         otp: ERROR_MESSAGES.INAVLID_OTP,
                                     });
+                                } else {
+                                    localStorage.removeItem(`resendOtpLogin_${identifier}`);
+                                    showToast(toast, "success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
+                                    const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin";
+                                    router.push(redirectUrl);
                                 }
                             } catch (err: any) {
                                 showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);

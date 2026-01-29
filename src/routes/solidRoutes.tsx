@@ -18,7 +18,6 @@ import { InitiateForgotPasswordPage } from "./pages/auth/InitiateForgotPasswordP
 import { InitiateForgotPasswordThankYouPage } from "./pages/auth/InitiateForgotPasswordThankYouPage";
 import { ConfirmForgotPasswordPage } from "./pages/auth/ConfirmForgotPasswordPage";
 import { ResetPasswordPage } from "./pages/auth/ResetPasswordPage";
-import { OtpVerifyPage } from "./pages/auth/OtpVerifyPage";
 import { InitiateLoginPage } from "./pages/auth/InitiateLoginPage";
 import { InitiateRegisterPage } from "./pages/auth/InitiateRegisterPage";
 import { InitiateGoogleOauthPage } from "./pages/auth/InitiateGoogleOauthPage";
@@ -45,8 +44,6 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     { path: "/auth/initiate-login", element: pick("initiateLogin", <InitiateLoginPage />) },
     // Passwordless registration confirm otp
     { path: "/auth/initiate-register", element: pick("initiateRegister", <InitiateRegisterPage />) },
-    // ??? not used ???
-    { path: "/auth/otp-verify", element: pick("otpVerify", <OtpVerifyPage />) },
 
     // Forgot password flow
     { path: "/auth/forgot-password", element: pick("forgotPassword", <ForgotPasswordPage />) },

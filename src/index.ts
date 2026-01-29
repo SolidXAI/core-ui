@@ -365,7 +365,6 @@ export { default as SolidPopupContainer } from './components/common/SolidPopupCo
 export { AuthLayout } from './components/auth/AuthLayout';
 export { default as SolidForgotPassword } from './components/auth/SolidForgotPassword';
 export { default as SolidLogin } from './components/auth/SolidLogin';
-export { default as SolidOTPVerify } from './components/auth/SolidOTPVerify';
 export { default as SolidRegister } from './components/auth/SolidRegister';
 export { default as SolidResetPassword } from './components/auth/SolidResetPassword';
 export { default as SolidChangeForcePassword } from './components/auth/SolidChangeForcePassword';
@@ -447,7 +446,6 @@ export { InitiateForgotPasswordPage as AuthInitiateForgotPasswordPage } from './
 export { InitiateForgotPasswordThankYouPage as AuthInitiateForgotPasswordThankYouPage } from './routes/pages/auth/InitiateForgotPasswordThankYouPage';
 export { ConfirmForgotPasswordPage as AuthConfirmForgotPasswordPage } from './routes/pages/auth/ConfirmForgotPasswordPage';
 export { ResetPasswordPage as AuthResetPasswordPage } from './routes/pages/auth/ResetPasswordPage';
-export { OtpVerifyPage as AuthOtpVerifyPage } from './routes/pages/auth/OtpVerifyPage';
 export { InitiateLoginPage as AuthInitiateLoginPage } from './routes/pages/auth/InitiateLoginPage';
 export { InitiateRegisterPage as AuthInitiateRegisterPage } from './routes/pages/auth/InitiateRegisterPage';
 export { InitiateGoogleOauthPage as AuthInitiateGoogleOauthPage } from './routes/pages/auth/InitiateGoogleOauthPage';

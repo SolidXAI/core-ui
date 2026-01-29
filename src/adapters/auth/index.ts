@@ -1,6 +1,7 @@
 export { SessionProvider } from "./sessionProvider";
 export { getSession } from "./getSession";
 export { signIn } from "./signIn";
+export { signInWithOtp } from "./signInWithOtp";
 export { signOut } from "./signOut";
 export { loadSession, saveSession, clearSession } from "./storage";
 export { refreshAccessToken } from "./refreshAccessToken";
