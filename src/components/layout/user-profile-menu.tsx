@@ -1,6 +1,5 @@
 
 // import { useAppSelector } from "../../redux/hooks";
-import { signOut } from "../../adapters/auth/index";
 import { PrimeReactContext } from "primereact/api";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { useContext, useEffect, useRef, useState } from "react";
@@ -10,7 +9,6 @@ import { LayoutConfig } from "../../types";
 import { toggleTheme } from "../../redux/features/themeSlice";
 import { InputSwitch } from "primereact/inputswitch";
 import { Button } from "primereact/button";
-import { useRouter } from "../../hooks/useRouter";
 import { Dialog } from "primereact/dialog";
 import { Divider } from "primereact/divider";
 import { Avatar } from "primereact/avatar";
@@ -23,7 +21,6 @@ import { useLazyGetSolidSettingsQuery } from "../../redux/api/solidSettingsApi";
 const UserProfileMenu = () => {
   const toast = useRef(null);
   const [showProfileSettingsDialog, setShowProfileSettingsDialog] = useState(false);
-  const router = useRouter();
   const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
 
   useEffect(() => {
@@ -42,9 +39,6 @@ const UserProfileMenu = () => {
   const [confirmLogout, setConfirmLogout] = useState(false);
   const dispatch = useDispatch();
   const op = useRef(null);
-  const logoutHandler = () => {
-    signOut();
-  };
   const _changeTheme = (theme: string, colorScheme: string) => {
     changeTheme?.(layoutConfig.theme, theme, 'theme-css', () => {
       setLayoutConfig((prevState: LayoutConfig) => ({ ...prevState, theme, colorScheme }));

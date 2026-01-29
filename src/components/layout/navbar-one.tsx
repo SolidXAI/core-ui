@@ -2,7 +2,6 @@ import { ToastContainer } from "../../helpers/ToastContainer";
 import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
 import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
 import { env } from "../../adapters/env";
-import { signOut } from "../../adapters/auth/index";
 import { useSession } from "../../hooks/useSession";
 import { Button } from "primereact/button";
 import { IconField } from "primereact/iconfield";
@@ -54,15 +53,6 @@ const NavbarOne = () => {
             dispatch(setIsAuthenticated(true));
         }
     }, [data]);
-
-    const logoutHandler = () => {
-        signOut();
-    };
-
-    const handleSearch = () => {
-        // TODO: Handle the search logic here
-
-    };
 
     const [isSearchShow, setSearchShow] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
