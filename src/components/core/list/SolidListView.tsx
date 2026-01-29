@@ -490,10 +490,12 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   // All list view state.
   const [listViewData, setListViewData] = useState<any[]>([]);
+
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(solidListViewLayout?.attrs?.defaultPageSize ? solidListViewLayout?.attrs?.defaultPageSize : 10);
   const [totalRecords, setTotalRecords] = useState(0);
-  let [sortField, setSortField] = useState("id");
+
+  const [sortField, setSortField] = useState("id");
   const [sortOrder, setSortOrder] = useState(-1);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
   const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>([]);
@@ -667,7 +669,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         setQueryDataLoaded(true);
         setToPopulate(populate);
         setToPopulateMedia(populateMedia);
-
+        setFirst(0);
       }
       setSelectedRecords([]);
       setSelectedRecoverRecords([]);
@@ -750,10 +752,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
 
   useEffect(() => {
-    console.log(
-      "useEffect: [first, rows, sortField, sortOrder, showArchived, toPopulate, toPopulateMedia, queryDataLoaded]"
-    );
-
+    console.log(`useEffect: [first- ${first}, rows- ${rows}, sortField- ${sortField}, sortOrder- ${sortOrder}, showArchived- ${showArchived}, toPopulate- ${toPopulate}, toPopulateMedia- ${toPopulateMedia}, queryDataLoaded- ${queryDataLoaded}]`);
     if (queryDataLoaded && filters) {
       setQueryString();
     }
