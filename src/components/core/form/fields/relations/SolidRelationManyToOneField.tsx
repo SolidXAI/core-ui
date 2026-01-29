@@ -12,6 +12,7 @@ import { Dialog } from "primereact/dialog";
 import SolidFormView from '../../../../../components/core/form/SolidFormView';
 import { getExtensionComponent } from "../../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
+import showToast from "../../../../../helpers/showToast";
 // import Handlebars from "handlebars/dist/handlebars";
 import * as Handlebars from "handlebars";
 import { Toast } from "primereact/toast";
@@ -193,17 +194,6 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
     const readOnlyPermission = fieldContext.readOnly;
     const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
     const [formViewParams, setformViewParams] = useState<FormViewParams>()
-
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
-        });
-    };
     // auto complete specific code. 
     const entityApi = createSolidEntityApi(fieldMetadata.relationCoModelSingularName);
     const { useLazyGetSolidEntitiesQuery } = entityApi;
@@ -305,7 +295,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 
 
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
-            showToast("error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
+            showToast(toast, "error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
 
         } else {
             try {
@@ -400,7 +390,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 
         const autocompleteQs = qs.stringify(queryData, { encodeValuesOnly: true });
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
-            showToast("error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
+            showToast(toast, "error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
 
         } else {
             try {
@@ -612,17 +602,6 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
 
 
     const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
-
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
-        });
-    };
     // auto complete specific code. 
     const entityApi = createSolidEntityApi(parentModelName || "userViewMetadata");
     const { useLazyGetSolidEntitiesQuery } = entityApi;
@@ -768,7 +747,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
 
 
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
-            showToast("error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
+            showToast(toast, "error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
 
         } else {
             try {
@@ -878,7 +857,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
 
         const autocompleteQs = qs.stringify(queryData, { encodeValuesOnly: true });
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
-            showToast("error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
+            showToast(toast, "error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
 
         } else {
             try {

@@ -1,5 +1,4 @@
 // @ts-nocheck
-
 import React, { useRef } from "react";
 import { SolidKanbanViewFields } from "./SolidKanbanViewFields";
 import { usePathname } from "../../../hooks/usePathname";

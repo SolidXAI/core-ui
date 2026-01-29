@@ -1,7 +1,4 @@
 // @ts-nocheck
-
-
-
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   DataTable,

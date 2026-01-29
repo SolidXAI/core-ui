@@ -2,7 +2,6 @@ import { ToastContainer } from "../../helpers/ToastContainer";
 import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
 import { showNavbar, toggleNavbar, hideNavbar } from "../../redux/features/navbarSlice";
 import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
-import { signOut } from "../../adapters/auth/index";
 import { useSession } from "../../hooks/useSession";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
@@ -61,15 +60,6 @@ const AppSidebar = () => {
         }
     }, [data]);
 
-    const logoutHandler = () => {
-        signOut();
-    };
-
-    const handleSearch = () => {
-        // TODO: Handle the search logic here
-
-    };
-
     const [isSearchShow, setSearchShow] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
 
@@ -120,11 +110,6 @@ const AppSidebar = () => {
         ],
         icon: env("NEXT_PUBLIC_SETTINGS_ICON") ? env("NEXT_PUBLIC_SETTINGS_ICON") : SettingImage
     };
-    const updatedMenuData = menu?.data
-        ? [...menu.data, ...(env("NEXT_PUBLIC_SHOW_SETTINGS") === "true" ? [additionalMenu] : [])]
-        : env("NEXT_PUBLIC_SHOW_SETTINGS") === "true"
-            ? [additionalMenu]
-            : [];
 
 
 

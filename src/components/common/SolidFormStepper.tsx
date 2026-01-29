@@ -1,12 +1,11 @@
-
-import { Button } from 'primereact/button'
 import { OverlayPanel } from 'primereact/overlaypanel';
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
 import { createSolidEntityApi } from '../../redux/api/solidEntityApi';
 import { useFormik } from 'formik';
 import { Toast } from 'primereact/toast';
 import { useSearchParams } from "../../hooks/useSearchParams";
 import { ERROR_MESSAGES } from '../../constants/error-messages';
+import showToast from "../../helpers/showToast";
 
 interface Props {
     solidFormViewMetaData?: any;
@@ -141,22 +140,11 @@ export const SolidFormStepper = (props: Props) => {
         { isSuccess: isStepperUpdateSuccessfull, isError: isStepperUpdateError, error: stepperUpdateError },
     ] = usePatchUpdateSolidEntityMutation();
 
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
-
     const handleStepChange = async (values: any) => {
         try {
             const result = await updateStepper({ id: values.id, data: { [solidWorkflowFieldKey]: values[solidWorkflowFieldKey] } }).unwrap();
             if (result?.statusCode === 200) {
-                showToast("success", ERROR_MESSAGES.FIELD_UPDATE(defaultWorkflowFieldDisplayName), ERROR_MESSAGES.FIELD_UPDATE_SUCCESSFULLY(defaultWorkflowFieldDisplayName));
+                showToast(toast, "success", ERROR_MESSAGES.FIELD_UPDATE(defaultWorkflowFieldDisplayName), ERROR_MESSAGES.FIELD_UPDATE_SUCCESSFULLY(defaultWorkflowFieldDisplayName));
                 if (result?.data?.[solidWorkflowFieldKey]) {
                     setSolidWorkflowFieldValue(result.data[solidWorkflowFieldKey]);
                 }
@@ -166,7 +154,7 @@ export const SolidFormStepper = (props: Props) => {
             }
         } catch (error) {
             console.error(ERROR_MESSAGES.UPDATING_STEPPER, error);
-            showToast("error", ERROR_MESSAGES.UPDATE_FAILED, ERROR_MESSAGES.FAILED_UPDATE_FROM);
+            showToast(toast, "error", ERROR_MESSAGES.UPDATE_FAILED, ERROR_MESSAGES.FAILED_UPDATE_FROM);
         }
     }
 

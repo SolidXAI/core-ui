@@ -57,6 +57,7 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 import { SolidFormFooter } from "./SolidFormFooter";
 import { normalizeSolidFormActionPath } from "../../../helpers/routePaths";
+import showToast from "../../../helpers/showToast";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -748,17 +749,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
         isEntityUnpublishedError
     ]);
 
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
-
     const confirmDialogWithPromise = () => {
         return new Promise<boolean>((resolve) => {
             confirmResolveRef.current = resolve;
@@ -826,7 +816,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 if (params.id === 'new') {
                     // default locale
                     const result = await createEntity(formData).unwrap();
-                    showToast("success", ERROR_MESSAGES.FORM_SAVED, ERROR_MESSAGES.FORM_SAVED_SUCCESSFULLY);
+                    showToast(toast, "success", ERROR_MESSAGES.FORM_SAVED, ERROR_MESSAGES.FORM_SAVED_SUCCESSFULLY);
                     // if (!params.embeded && result?.data?.id) {
                     //     const newPathname = pathname.replace(/new$/, result.data.id);
 
@@ -852,7 +842,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
                     // const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
                     if (!params.embeded) {
-                        showToast("success", ERROR_MESSAGES.FORM_UPDATE, ERROR_MESSAGES.FORM_UPDATE_SUCCESSFULLY);
+                        showToast(toast, "success", ERROR_MESSAGES.FORM_UPDATE, ERROR_MESSAGES.FORM_UPDATE_SUCCESSFULLY);
                         if (result?.statusCode === 200) {
                             updateViewMode("view")
                         }
@@ -1628,10 +1618,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
             if (type === "publish") {
                 result = await publishSolidEntity(params.id).unwrap();
-                showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_PUBLISH);
+                showToast(toast, "success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_PUBLISH);
             } else {
                 result = await unpublishSolidEntity(params.id).unwrap();
-                showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_UNPUBLISH);
+                showToast(toast, "success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_UNPUBLISH);
             }
 
             console.log("publish/unpublish result", result);

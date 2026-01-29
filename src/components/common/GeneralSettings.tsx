@@ -25,6 +25,7 @@ import { handleError } from '../../helpers/ToastContainer';
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { useBulkUpdateSolidSettingsMutation, useLazyGetSolidSettingsQuery } from '../../redux/api/solidSettingsApi';
 import { env } from "../../adapters/env";
+import showToast from "../../helpers/showToast";
 
 
 export const GeneralSettings = () => {
@@ -43,17 +44,6 @@ export const GeneralSettings = () => {
     const pathname = usePathname();
     const [bulkUpdateSolidSettings] = useBulkUpdateSolidSettingsMutation();
     const toast = useRef<Toast>(null);
-
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
 
     const initialValues = {
         appLogo: solidSettingsData?.data?.appLogo ?? null,
@@ -143,7 +133,7 @@ export const GeneralSettings = () => {
                 });
 
                 if (updatedSettingsArray.length === 0) {
-                    showToast("success", "No Changes", "No settings were updated");
+                    showToast(toast, "success", "No Changes", "No settings were updated");
                     return;
                 }
 
@@ -154,17 +144,16 @@ export const GeneralSettings = () => {
                 const response = await bulkUpdateSolidSettings({ data: formData }).unwrap();
 
                 if (response.statusCode === 200) {
-                    showToast("success", "Updated", "Settings updated");
+                    showToast(toast, "success", "Updated", "Settings updated");
                     trigger("")
                 }
 
-            } catch (error) {
+            } catch (error: any) {
                 console.log("Error updating settings:", error);
-                showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
+                showToast(toast, "error", ERROR_MESSAGES.FAILED, error?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
             }
         },
     });
-
 
     const showError = async () => {
         const errors = await formik.validateForm();

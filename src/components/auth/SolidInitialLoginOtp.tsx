@@ -14,6 +14,7 @@ import { signIn } from "../../adapters/auth/index";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
+import showToast from "../../helpers/showToast";
 
 
 const SolidInitialLoginOtp = () => {
@@ -104,17 +105,6 @@ const SolidInitialLoginOtp = () => {
             .required(ERROR_MESSAGES.FIELD_REUQIRED('OTP')),
     });
 
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
-
     const isFormFieldValid = (formik: any, fieldName: string) =>
         formik.touched[fieldName] && formik.errors[fieldName];
 
@@ -129,15 +119,15 @@ const SolidInitialLoginOtp = () => {
             const response = await initiateResendOTP(payload).unwrap();
 
             if (response?.statusCode === 200) {
-                showToast("success", ERROR_MESSAGES.OPT_RESEND, response?.data?.message);
+                showToast(toast, "success", ERROR_MESSAGES.OPT_RESEND, response?.data?.message);
                 localStorage.setItem(RESEND_OTP_KEY, Date.now().toString());
                 setTimeLeft(RESEND_OTP_TIMER);
                 setResendEnabled(false);
             } else {
-                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
             }
         } catch (err: any) {
-            showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
+            showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
         }
     };
 
@@ -203,20 +193,20 @@ const SolidInitialLoginOtp = () => {
                                     const otpResponse = await signIn("credentials", credentials);
 
                                     if (otpResponse?.error) {
-                                        showToast("error", ERROR_MESSAGES.LOGIN_ERROR, otpResponse.error);
+                                        showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, otpResponse.error);
                                     } else {
                                         localStorage.removeItem(`resendOtpLogin_${identifier}`);
-                                        showToast("success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
+                                        showToast(toast, "success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
                                         router.push(`${env("NEXT_PUBLIC_LOGIN_REDIRECT_URL")}`);
                                     }
                                 } else {
-                                    showToast("error", ERROR_MESSAGES.INAVLID_OTP, response.error);
+                                    showToast(toast, "error", ERROR_MESSAGES.INAVLID_OTP, response.error);
                                     setErrors({
                                         otp: ERROR_MESSAGES.INAVLID_OTP,
                                     });
                                 }
                             } catch (err: any) {
-                                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                             } finally {
                                 setSubmitting(false);
                             }
