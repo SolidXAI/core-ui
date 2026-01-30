@@ -12,6 +12,7 @@ type Credentials = {
     username: string,
     email: string,
     password: string,
+    identifier:string,
     accessToken: string,
     accessCode: string,
 };
@@ -30,7 +31,10 @@ const authProviders: NextAuthOptions = {
             async authorize(credentials: Credentials, req: any) {
                 const userAgent = req.headers['user-agent'];
 
-                const { username, email, password, accessToken, accessCode } = credentials;
+                const { username, email, password, identifier, accessToken, accessCode } = credentials;
+
+                console.log(credentials , '=========================');
+                
                 try {
                     if (accessCode) {
                         let config = {
@@ -62,8 +66,8 @@ const authProviders: NextAuthOptions = {
                     } else {
                         if (accessToken) {
                             let data = JSON.stringify({
-                                username: email,
-                                email: email,
+                                username: identifier,
+                                email: identifier.includes('@')? identifier : null,
                                 password: password
                             });
 
@@ -101,8 +105,8 @@ const authProviders: NextAuthOptions = {
                         } else {
 
                             let data = JSON.stringify({
-                                username: username,
-                                email: email,
+                                username: identifier,
+                                email: identifier.includes('@')? identifier : null,
                                 password: password
                             });
 
