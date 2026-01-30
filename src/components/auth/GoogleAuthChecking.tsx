@@ -1,5 +1,5 @@
 import { ERROR_MESSAGES } from '../../constants/error-messages';
-import { signIn } from "../../adapters/auth/index";
+import { signInWithOAuthAccessCode } from "../../adapters/auth/index";
 import { useRouter } from "../../hooks/useRouter";
 import { useSearchParams } from "../../hooks/useSearchParams";
 import { ProgressSpinner } from 'primereact/progressspinner';
@@ -17,12 +17,15 @@ export const GoogleAuthChecking = () => {
     const toast = useRef<Toast>(null);
     useEffect(() => {
         const handleOAuthAuthentication = async () => {
+            if (!accessCode) {
+                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, ERROR_MESSAGES.AUTHENICATION__FAILED);
+                setError(ERROR_MESSAGES.AUTHENICATION__FAILED);
+                return;
+            }
+
             try {
-                const response = await signIn("credentials", {
-                    redirect: false,
-                    accessCode: accessCode
-                    // accessToken: accessToken?.accessToken,
-                    // refreshToken: accessToken?.refreshToken
+                const response = await signInWithOAuthAccessCode({
+                    accessCode: accessCode,
                 });
 
                 if (response?.error) {
@@ -30,7 +33,8 @@ export const GoogleAuthChecking = () => {
                     setError(ERROR_MESSAGES.AUTHENICATION__FAILED)
                 } else {
                     showToast(toast, "success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
-                    router.push(`${env("NEXT_PUBLIC_LOGIN_REDIRECT_URL")}`);
+                    const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin";
+                    router.push(redirectUrl);
                 }
             } catch (err: any) {
                 showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.AUTHENICATION__FAILED);
@@ -38,7 +42,7 @@ export const GoogleAuthChecking = () => {
         };
 
         handleOAuthAuthentication();
-    }, [router]);
+    }, [accessCode, router]);
 
     if (error) {
         return (
