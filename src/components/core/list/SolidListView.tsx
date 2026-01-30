@@ -175,7 +175,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   }, [])
 
   useEffect(() => {
-    if (solidSettingsData?.data?.mcpEnabled && solidSettingsData?.data?.mcpServerUrl && solidSettingsData?.data?.mcpApiKey) {
+    if (solidSettingsData?.data?.mcpEnabled && solidSettingsData?.data?.mcpServerUrl) {
       enableSolidXAiPanel();
     }
   }, [solidSettingsData]);
@@ -1564,7 +1564,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                     } else {
                       if (typeof window !== "undefined") {
                         // store a simple marker for the caller
-                        
+
                         // also store the full current URL so Back can restore exact state (including action params)
                         try {
                           sessionStorage.setItem("fromView", "list");
@@ -1675,7 +1675,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                         try {
                                           sessionStorage.setItem("fromView", "list");
                                           sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-                                        } catch (e) {}
+                                        } catch (e) { }
                                       }
                                       router.push(
                                         `${editButtonUrl}/${rowData?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
@@ -1770,7 +1770,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                                               try {
                                                 sessionStorage.setItem("fromView", "list");
                                                 sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-                                              } catch (e) {}
+                                              } catch (e) { }
                                               router.push(
                                                 `${editButtonUrl}/${selectedDataRef.current?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
                                               );

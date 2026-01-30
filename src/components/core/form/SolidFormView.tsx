@@ -468,7 +468,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     }, [])
 
     useEffect(() => {
-        if (solidSettingsData?.data?.mcpEnabled && solidSettingsData?.data?.mcpServerUrl && solidSettingsData?.data?.mcpApiKey) {
+        if (solidSettingsData?.data?.mcpEnabled && solidSettingsData?.data?.mcpServerUrl) {
             enableSolidXAiPanel();
         }
     }, [solidSettingsData]);
