@@ -54,22 +54,34 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
 
     const isFormFieldValid = (formik: any, fieldName: string) =>
         formik.touched[fieldName] && formik.errors[fieldName];
+    const emailOrUsernameRegex = /^[a-zA-Z0-9._]{3,30}$/;
 
     const PasswordLogin = () => {
         return (
             <Formik
                 initialValues={{
-                    email: "",
+                    identifier: "",
                     // email: initialEmail,
                     password: "",
                     // rememberMe: rememberMe,
                 }}
                 enableReinitialize={false}
                 validationSchema={Yup.object({
-                    email: Yup.string()
-                        .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
-                        .required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
-                    password: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Password')),
+                    identifier: Yup.string()
+                        .required(ERROR_MESSAGES.FIELD_REUQIRED("Email or Username"))
+                        .test(
+                            "email-or-username",
+                            ERROR_MESSAGES.FIELD_INVALID("email or username"),
+                            (value) => {
+                                // if (!value) return false;
+
+                                const isEmail = Yup.string().email().isValidSync(value);
+                                const isUsername = emailOrUsernameRegex.test(value);
+
+                                return isEmail || isUsername;
+                            }
+                        ),
+                    password: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Password")),
                 })}
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
                     try {
@@ -81,14 +93,14 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         // }
                         const response = await signIn("credentials", {
                             redirect: false,
-                            email: values.email,
+                            identifier: values.identifier,
                             password: values.password,
                         });
 
                         if (response?.error) {
                             showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                             setErrors({
-                                email: ERROR_MESSAGES.INVALID_CREDENTIALS,
+                                identifier: ERROR_MESSAGES.INVALID_CREDENTIALS,
                                 password: ERROR_MESSAGES.INVALID_CREDENTIALS,
                             });
                         } else {
@@ -107,18 +119,18 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         <div className="flex flex-column gap-2 mt-3">
                             <label htmlFor="email" className="solid-auth-input-label">{signInValidatorLabel ? signInValidatorLabel : "Username or Email"}</label>
                             <InputText
-                                id="email"
-                                name="email"
-                                placeholder={signInValidatorPlaceholder ? signInValidatorPlaceholder : "Email ID"}
+                                id="identifier"
+                                name="identifier"
+                                placeholder={signInValidatorPlaceholder ? signInValidatorPlaceholder : "Email or Username"}
                                 onChange={formik.handleChange}
-                                value={formik.values.email}
-                                invalid={!!formik.errors.email}
+                                value={formik.values.identifier}
+                                invalid={!!formik.errors.identifier}
                                 onBlur={formik.handleBlur}
                             />
-                            {isFormFieldValid(formik, "email") && <Message
+                            {isFormFieldValid(formik, "identifier") && <Message
                                 className="text-red-500 text-sm"
                                 severity="error"
-                                text={formik?.errors?.email?.toString()}
+                                text={formik?.errors?.identifier?.toString()}
                             />}
                         </div>
                         <div className="flex flex-column gap-1 mt-4" style={{}}>
