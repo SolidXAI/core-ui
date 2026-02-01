@@ -27,7 +27,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
 
     const { user } = useSelector((state: any) => state.auth);
 
-    const isPublished = publish !== null;   // record is published if publish has value
+    const isPublished = publish && publish !== 'null';   // record is published if publish has value
 
     useEffect(() => {
         if (solidView) {
