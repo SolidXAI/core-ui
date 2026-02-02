@@ -95,6 +95,9 @@ export { permissionExpression } from './helpers/permissions';
 export { revalidateTag } from './helpers/revalidate';
 export { useHasAllRoles, useHasAnyRole, hasAnyRole } from './helpers/rolesHelper';
 export { registerExtensionComponent, registerExtensionFunction } from './helpers/registry';
+export { env } from './adapters/env';
+export { logger } from './helpers/logger';
+
 
 export {
     authApi,
@@ -423,6 +426,7 @@ export { useRouter } from './hooks/useRouter';
 export { usePathname } from './hooks/usePathname';
 export { useSearchParams } from './hooks/useSearchParams';
 export { signIn, signOut, getSession, handleLogout, refreshAccessToken, loadSession, saveSession, clearSession } from './adapters/auth';
+export type { Session } from './adapters/auth';
 export { createSolidStore } from './redux/store/createSolidStore';
 export type { SolidStore, SolidRootState, SolidDispatch, CreateSolidStoreOptions } from './redux/store/createSolidStore';
 export { StoreProvider } from './redux/store/StoreProvider';

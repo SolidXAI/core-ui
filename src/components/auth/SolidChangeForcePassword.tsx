@@ -49,18 +49,18 @@ const SolidChangeForcePassword = () => {
 
     const formik = useFormik({
         initialValues: {
-            email: session?.data?.user?.user?.email,
+            email: session?.data?.user?.email,
             currentPassword: "",
             newPassword: "",
             confirmPassword: "",
-            id: session?.data?.user?.user?.id,
+            id: session?.data?.user?.id,
         },
         validationSchema,
         onSubmit: async (values, { setErrors }) => {
             try {
                 const payload = {
                     id: values.id,
-                    email: session?.data?.user?.user?.email,
+                    email: session?.data?.user?.email,
                     currentPassword: values.currentPassword,
                     newPassword: values.newPassword,
                 };

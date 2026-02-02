@@ -14,7 +14,7 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     const { data: session, status } = useSession();
     const [isForcePasswordChange, setIsForcePasswordChange] = useState(false)
     useEffect(() => {
-        if (session?.user?.user?.forcePasswordChange === true) {
+        if (session?.user?.forcePasswordChange === true) {
             setIsForcePasswordChange(true)
         } else {
             setIsForcePasswordChange(false)
