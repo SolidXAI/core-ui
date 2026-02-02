@@ -12,6 +12,7 @@ export type SolidFieldProps = {
     viewMode?: any
     onChange?: any,
     onBlur?: any,
+    parentFieldName?: string,
     parentData?: any,
     onEmbeddedFormSave?: () => void,
 };
