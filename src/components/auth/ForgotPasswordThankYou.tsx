@@ -1,8 +1,6 @@
-"use client"
-
+import Link from "../common/Link";
+import { useSearchParams } from "../../hooks/useSearchParams";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
-import Link from "next/link";
-import { useSearchParams } from "next/navigation";
 import { useEffect } from "react";
 
 

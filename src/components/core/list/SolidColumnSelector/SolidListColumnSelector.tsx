@@ -1,5 +1,3 @@
-// @ts-nocheck
-"use client"
 import { useFormik } from 'formik';
 import { Button } from 'primereact/button';
 import { Checkbox } from 'primereact/checkbox';
@@ -9,6 +7,8 @@ import { Toast } from "primereact/toast";
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import styles from './SolidListColumnSelector.module.css'
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
+import showToast from "../../../../helpers/showToast";
+
 interface FieldMetadata {
     displayName: string;
 }
@@ -29,16 +29,6 @@ export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: a
     } = entityApi;
 
     const [upsertUserView, { isLoading, error: viewCreateError, isSuccess, data: data }] = useUpsertSolidEntityMutation();
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
-        });
-    };
 
     if (!listViewMetaData) {
         return;
@@ -116,6 +106,7 @@ export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: a
                     const existingChild = currentChildren.find((child: any) => child.attrs.name === key);
                     if (existingChild) return existingChild;
                 
+                    // @ts-ignore
                     const fieldType = allFieldMeta[key]?.type;
                     const isTextType = fieldType === "shortText" || fieldType === "longText" || fieldType ==="selectionStatic" || fieldType ==="selectionDynamic";
                 
@@ -145,7 +136,7 @@ export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: a
                         layout: JSON.stringify(updatedView.layout),
                     }).unwrap();
                     if (response.statusCode === 200) {
-                        showToast("success", ERROR_MESSAGES.LAYOUT, ERROR_MESSAGES.FORM_LAYOUT_UPDATE);
+                        showToast(toast, "success", ERROR_MESSAGES.LAYOUT, ERROR_MESSAGES.FORM_LAYOUT_UPDATE);
                         window.location.reload();
                     }
                 }

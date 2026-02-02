@@ -1,4 +1,4 @@
-"use client";
+
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
 import MarkdownViewer from "../../../../../components/common/MarkdownViewer";
 import ReactCodeMirror, { EditorView } from "@uiw/react-codemirror";

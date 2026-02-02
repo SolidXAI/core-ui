@@ -1,11 +1,12 @@
-"use client"
+
 
 import { CancelButton, SolidCancelButton } from "../../../components/common/CancelButton";
 import { handleError } from "../../../helpers/ToastContainer";
 import { useGetFieldDefaultMetaDataQuery } from "../../../redux/api/fieldApi";
 import { useCreatemodelMutation, useDeletemodelMutation, useLazyGetModelsQuery, useUpdatemodelMutation } from "../../../redux/api/modelApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "../../../hooks/usePathname";
+import { useRouter } from "../../../hooks/useRouter";
 import { Button } from "primereact/button";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
@@ -328,7 +329,7 @@ const CreateModel = ({ data, params }: any) => {
             op.current.toggle(e)
           }
         />
-          <Button
+        <Button
           outlined
           type="button"
           icon={'pi pi-cog'}
@@ -405,10 +406,10 @@ const CreateModel = ({ data, params }: any) => {
                   <>
                     <div>
                       {isDirty &&
-                      <>
-                        <Button label="Save" size="small" type="submit" className="hidden lg:flex" onClick={handleSubmit} />
-                        <Button  icon="pi pi-check" size="small" type="submit"  className=" lg:hidden solid-icon-button" onClick={handleSubmit} />
-                      </>
+                        <>
+                          <Button label="Save" size="small" type="submit" className="hidden lg:flex" onClick={handleSubmit} />
+                          <Button icon="pi pi-check" size="small" type="submit" className=" lg:hidden solid-icon-button" onClick={handleSubmit} />
+                        </>
                       }
                     </div>
                     {/* <div>
@@ -417,7 +418,7 @@ const CreateModel = ({ data, params }: any) => {
                   </>
                 }
                 {/* <CancelButton /> */}
-                <SolidCancelButton/>
+                <SolidCancelButton />
                 {formActionDropdown()}
               </div>
             </>

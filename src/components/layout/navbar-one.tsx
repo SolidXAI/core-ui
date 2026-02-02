@@ -1,10 +1,8 @@
-"use client";
 import { ToastContainer } from "../../helpers/ToastContainer";
 import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
 import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
-// import { useAppDispatch } from "../../redux/hooks";
-// import { RootState } from "../../redux/store.js";
-import { signOut, useSession } from "next-auth/react";
+import { env } from "../../adapters/env";
+import { useSession } from "../../hooks/useSession";
 import { Button } from "primereact/button";
 import { IconField } from "primereact/iconfield";
 import { InputIcon } from "primereact/inputicon";
@@ -13,7 +11,6 @@ import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import NavbarTwoMenu from "./navbar-two-menu";
 import UserProfileMenu from "./user-profile-menu";
-// import menu from "../../helpers/menu";
 
 const NavbarOne = () => {
     const dispatch = useDispatch();
@@ -34,8 +31,8 @@ const NavbarOne = () => {
 
     useEffect(() => {
         if (menu) {
-            setCurrentMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === process.env.NEXT_PUBLIC_DEFAULT_MENU_KEY)[0]?.children);
-            setCurrentMainMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === process.env.NEXT_PUBLIC_DEFAULT_MENU_KEY)[0]?.title)
+            setCurrentMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === env("NEXT_PUBLIC_DEFAULT_MENU_KEY"))[0]?.children);
+            setCurrentMainMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === env("NEXT_PUBLIC_DEFAULT_MENU_KEY"))[0]?.title)
         }
     }, [menu])
 
@@ -56,15 +53,6 @@ const NavbarOne = () => {
             dispatch(setIsAuthenticated(true));
         }
     }, [data]);
-
-    const logoutHandler = () => {
-        signOut();
-    };
-
-    const handleSearch = () => {
-        // TODO: Handle the search logic here
-
-    };
 
     const [isSearchShow, setSearchShow] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
@@ -137,7 +125,7 @@ const NavbarOne = () => {
                                             style={{ cursor: "pointer", width: '30px' }}
                                             // src={currentMainMenu === m.title ? `/images/${m.title.toLocaleLowerCase()}-active.svg` : `/images/${m.title.toLocaleLowerCase()}.svg`}
                                             // src={`/images/menu/${m.title}.svg`}
-                                            src={m.icon.startsWith("/") ? m.icon : `${process.env.API_URL}/${m.icon}`}
+                                            src={m.icon.startsWith("/") ? m.icon : `${env("API_URL")}/${m.icon}`}
                                             // src={`/images/menu/app-builder.svg`}
                                             alt="Solid"
                                         />
@@ -178,7 +166,7 @@ const NavbarOne = () => {
                             <i className="pi pi-search " style={{ color: '#8D9199' }}></i>
                             <input
                                 type="text"
-                                placeholder="Jump to..."
+                                placeholder="Jump to."
                                 name="lastName"
                                 id="lastName"
                                 onChange={(e) => setSearchTerm(e.target.value)}
@@ -225,7 +213,7 @@ const NavbarOne = () => {
               <i className="pi pi-search " style={{ color: '#8D9199' }}></i>
               <input
                 type="text"
-                placeholder="Jump to..."
+                placeholder="Jump to."
                 name="lastName"
                 id="lastName"
                 onChange={(e) => setSearchTerm(e.target.value)}

@@ -1,4 +1,4 @@
-"use client";
+
 import { useFormik } from "formik";
 import { Button } from "primereact/button";
 import { useSelector } from "react-redux";
@@ -9,6 +9,8 @@ import { oneDark } from "@codemirror/theme-one-dark";
 import CodeMirror, { EditorView } from "@uiw/react-codemirror";
 import { Toast } from "primereact/toast";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
+import showToast from "../../../helpers/showToast";
+
 export const SolidFormUserViewLayout = ({ solidFormViewMetaData, setLayoutDialogVisible }: any) => {
     const toast = useRef<Toast>(null);
     const entityApi = createSolidEntityApi("userViewMetadata");
@@ -18,17 +20,6 @@ export const SolidFormUserViewLayout = ({ solidFormViewMetaData, setLayoutDialog
     if (!solidFormViewMetaData?.data?.solidView) return null;
 
     const solidView = solidFormViewMetaData.data.solidView;
-
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
-        });
-    };
 
     const formik = useFormik({
         initialValues: {
@@ -43,7 +34,7 @@ export const SolidFormUserViewLayout = ({ solidFormViewMetaData, setLayoutDialog
                         layout: JSON.stringify(parsedLayout)
                     }).unwrap();
                     if (response.statusCode === 200) {
-                        showToast("success", ERROR_MESSAGES.LAYOUT, ERROR_MESSAGES.FORM_LAYOUT_UPDATE);
+                        showToast(toast, "success", ERROR_MESSAGES.LAYOUT, ERROR_MESSAGES.FORM_LAYOUT_UPDATE);
                         setLayoutDialogVisible(false);
                         window.location.reload();
                     }

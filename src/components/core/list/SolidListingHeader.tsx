@@ -1,5 +1,4 @@
-'use client';
-import { usePathname } from 'next/navigation';
+import { usePathname } from "../../../hooks/usePathname";
 import { plural } from "pluralize";
 import { } from "react";
 

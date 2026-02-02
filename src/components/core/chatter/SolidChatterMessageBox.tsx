@@ -1,6 +1,6 @@
-"use client"
+
 import { getTextColor, stringToColor } from '../../../helpers/getRandomColors'
-import Image from 'next/image'
+import Image from "../../common/Image"
 import { Avatar } from 'primereact/avatar'
 import { Dialog } from 'primereact/dialog'
 import { useMemo, useState } from 'react'
@@ -85,13 +85,13 @@ export const SolidChatterMessageBox = (props: Props) => {
                         <span className='font-bold'>{user}</span>
                         <span className='ml-2' style={{ color: '#949494' }}>
                             {messageType === 'audit' ? messageSubType === "audit_update"
-                                    ? <>Updated {modelUserKey && <span style={{fontStyle: 'italic', fontWeight: '600'}}>({modelUserKey})</span>}</>
-                                    : messageSubType === "audit_insert"
-                                        ? <>Inserted {modelUserKey && <span style={{fontStyle: 'italic', fontWeight: '600'}}>({modelUserKey})</span>}</>
-                                        : "Custom" : "Custom"}
+                                ? <>Updated {modelUserKey && <span style={{ fontStyle: 'italic', fontWeight: '600' }}>({modelUserKey})</span>}</>
+                                : messageSubType === "audit_insert"
+                                    ? <>Inserted {modelUserKey && <span style={{ fontStyle: 'italic', fontWeight: '600' }}>({modelUserKey})</span>}</>
+                                    : "Custom" : "Custom"}
                         </span>
                     </div>
-                    {modelDisplayName && <span style={{fontStyle: 'italic', fontWeight: '600'}}>{modelDisplayName}</span>}
+                    {modelDisplayName && <span style={{ fontStyle: 'italic', fontWeight: '600' }}>{modelDisplayName}</span>}
                 </div>
             </div>
             <div className='flex align-items-center mt-1'>
@@ -111,7 +111,7 @@ export const SolidChatterMessageBox = (props: Props) => {
                                 return (
                                     <div key={attachment.id} className='flex align-items-center gap-2 bg-gray-100 p-2 rounded'>
                                         {isImage ? (
-                                            <div 
+                                            <div
                                                 className='cursor-pointer'
                                                 onClick={() => handleImageClick(attachment._full_url)}
                                             >
@@ -125,7 +125,7 @@ export const SolidChatterMessageBox = (props: Props) => {
                                                 />
                                             </div>
                                         ) : (
-                                            <a 
+                                            <a
                                                 href={encodeURI(attachment._full_url)}
                                                 target="_blank"
                                                 rel="noopener noreferrer"

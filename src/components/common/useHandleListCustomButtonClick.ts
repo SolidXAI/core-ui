@@ -1,5 +1,3 @@
-"usec client";
-
 import { useDispatch } from "react-redux";
 import { getExtensionComponent, getExtensionFunction } from "../../helpers/registry";
 import { openPopup } from "../../redux/features/popupSlice";

@@ -2,18 +2,16 @@ import { ToastContainer } from "../../helpers/ToastContainer";
 import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
 import { showNavbar, toggleNavbar, hideNavbar } from "../../redux/features/navbarSlice";
 import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
-import { signOut, useSession } from "next-auth/react";
+import { useSession } from "../../hooks/useSession";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import NavbarTwoMenu from "./navbar-two-menu";
 import UserProfileMenu from "./user-profile-menu";
-import Image from "next/image";
-import AppBuilderSvg from '../../resources/images/menu/app-builder.svg'
+import Image from "../common/Image";
 import SettingImage from '../../resources/images/Navigation/SolidSettinsIcon.svg'
 import { Avatar } from "primereact/avatar";
-import { usePathname } from "next/navigation";
-
-// import menu from "../../helpers/menu";
+import { usePathname } from "../../hooks/usePathname";
+import { env } from "../../adapters/env";
 
 const AppSidebar = () => {
     const dispatch = useDispatch();
@@ -28,11 +26,11 @@ const AppSidebar = () => {
     const [currentMenu, setCurrentMenu] = useState();
     const [currentMainMenu, setCurrentMainMenu] = useState();
     const [searchTerm, setSearchTerm] = useState("");
-   
+
     useEffect(() => {
         if (menu) {
-            setCurrentMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === process.env.NEXT_PUBLIC_DEFAULT_MENU_KEY)[0]?.children);
-            setCurrentMainMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === process.env.NEXT_PUBLIC_DEFAULT_MENU_KEY)[0]?.title)
+            setCurrentMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === env("NEXT_PUBLIC_DEFAULT_MENU_KEY"))[0]?.children);
+            setCurrentMainMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === env("NEXT_PUBLIC_DEFAULT_MENU_KEY"))[0]?.title)
         }
     }, [menu])
 
@@ -61,15 +59,6 @@ const AppSidebar = () => {
             dispatch(setIsAuthenticated(true));
         }
     }, [data]);
-
-    const logoutHandler = () => {
-        signOut();
-    };
-
-    const handleSearch = () => {
-        // TODO: Handle the search logic here
-
-    };
 
     const [isSearchShow, setSearchShow] = useState(false);
     const searchRef = useRef<HTMLDivElement>(null);
@@ -119,21 +108,16 @@ const AppSidebar = () => {
                 ]
             }
         ],
-        icon: process.env.NEXT_PUBLIC_SETTINGS_ICON ? process.env.NEXT_PUBLIC_SETTINGS_ICON : SettingImage
+        icon: env("NEXT_PUBLIC_SETTINGS_ICON") ? env("NEXT_PUBLIC_SETTINGS_ICON") : SettingImage
     };
-    const updatedMenuData = menu?.data
-        ? [...menu.data, ...(process.env.NEXT_PUBLIC_SHOW_SETTINGS === "true" ? [additionalMenu] : [])]
-        : process.env.NEXT_PUBLIC_SHOW_SETTINGS === "true"
-            ? [additionalMenu]
-            : [];
 
-            
+
 
     return (
         <>
             <ToastContainer />
             {visibleNavbar && (
-                <div 
+                <div
                     className="sidebar-backdrop"
                     onClick={handleToggle}
                 />
@@ -141,7 +125,7 @@ const AppSidebar = () => {
             {/* commented this as this is not working properly @Jenendar to figure this out... */}
             {(visibleNavbar || currentMainMenu) && (
                 <div
-                    className={`sidebar-toggle-button  ${!visibleNavbar || !currentMainMenu  ? "s-collapsed hidden md:flex" : ""}`}
+                    className={`sidebar-toggle-button  ${!visibleNavbar || !currentMainMenu ? "s-collapsed hidden md:flex" : ""}`}
                     onClick={handleToggle}
                 // severity="secondary"
                 >
@@ -168,11 +152,11 @@ const AppSidebar = () => {
                                 key={m.title}
                                 className={`flex align-items-center menu-item ${currentMainMenu === m.title ? "active-menu-image" : ""}`}
                                 onClick={() => handleMenu(m)}
-                                style={{cursor:'pointer'}}
+                                style={{ cursor: 'pointer' }}
                             >
                                 {m.icon ?
                                     <Image
-                                        src={iconSrc.startsWith("/") ? iconSrc : `${process.env.API_URL}/${iconSrc}`}
+                                        src={iconSrc.startsWith("/") ? iconSrc : `${env("API_URL")}/${iconSrc}`}
                                         alt={m.title}
                                         height={30}
                                         width={30}

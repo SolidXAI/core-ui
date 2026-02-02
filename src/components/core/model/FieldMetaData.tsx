@@ -1,5 +1,4 @@
-'use client';
-import { usePathname } from "next/navigation";
+import { usePathname } from "../../../hooks/usePathname";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import { DataTable } from "primereact/datatable";
@@ -68,7 +67,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
             <p>{rowData.displayName}
               {rowData.isMarkedForRemoval === true &&
                 <>
-                  <br></br>  <span style={{fontSize: '11px', color: 'red'}}>This field will be removed next time you generate code for this model.</span>
+                  <br></br>  <span style={{ fontSize: '11px', color: 'red' }}>This field will be removed next time you generate code for this model.</span>
                 </>
               }
             </p>
@@ -94,7 +93,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
     return (
       <>
         {(pathname.includes('create') || (rowData.isSystem !== true && rowData.isMarkedForRemoval !== true)) &&
-          <Button icon="pi pi-trash" text severity="danger" onClick={() => {setRowToDelete(rowData);setDeleteAlertPopup(true)}} size="small" />
+          <Button icon="pi pi-trash" text severity="danger" onClick={() => { setRowToDelete(rowData); setDeleteAlertPopup(true) }} size="small" />
 
         }
       </>
@@ -209,47 +208,47 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
               <Button label="Ok" className='small-button' onClick={() => setIsRequiredPopUp(false)} />
             </div>
           </Dialog>
-         <Dialog
-          visible={deleteAlertPopup}
-          header={(
-            <div className="flex align-items-center justify-content-center">
-              <i className="pi pi-exclamation-triangle text-yellow-500 text-xl mr-2"></i>
-              <span>Warning</span>
+          <Dialog
+            visible={deleteAlertPopup}
+            header={(
+              <div className="flex align-items-center justify-content-center">
+                <i className="pi pi-exclamation-triangle text-yellow-500 text-xl mr-2"></i>
+                <span>Warning</span>
+              </div>
+            )}
+            headerClassName="text-center warning-header-popup"
+            modal
+            style={{ width: '20vw' }}
+            onHide={() => {
+              setDeleteAlertPopup(false);
+              setRowToDelete(null);
+            }}
+            className="solid-dialog solid-confirm-dialog"
+          >
+            <p className="p-3 mb-0 text-center">Are you sure you want to delete this field?</p>
+            <div className="flex justify-content-start p-3 align-items-center justify-content-center gap-3">
+              <Button
+                label="Ok"
+                className='small-button'
+                onClick={() => {
+                  if (rowToDelete) {
+                    deleteRow(rowToDelete);
+                  }
+                  setDeleteAlertPopup(false);
+                  setRowToDelete(null);
+                }}
+              />
+              <Button
+                label="Cancel"
+                className='small-button'
+                outlined
+                severity="danger"
+                onClick={() => {
+                  setDeleteAlertPopup(false);
+                  setRowToDelete(null);
+                }}
+              />
             </div>
-          )}
-          headerClassName="text-center warning-header-popup"
-          modal
-          style={{ width: '20vw' }}
-          onHide={() => {
-            setDeleteAlertPopup(false);
-            setRowToDelete(null);
-          }}
-          className="solid-dialog solid-confirm-dialog"
-        >
-          <p className="p-3 mb-0 text-center">Are you sure you want to delete this field?</p>
-          <div className="flex justify-content-start p-3 align-items-center justify-content-center gap-3">
-            <Button
-              label="Ok"
-              className='small-button'
-              onClick={() => {
-                if (rowToDelete) {
-                  deleteRow(rowToDelete);
-                }
-                setDeleteAlertPopup(false);
-                setRowToDelete(null);
-              }}
-            />
-            <Button
-              label="Cancel"
-              className='small-button'
-              outlined
-              severity="danger"
-              onClick={() => {
-                setDeleteAlertPopup(false);
-                setRowToDelete(null);
-              }}
-            />
-          </div>
           </Dialog>
 
         </>

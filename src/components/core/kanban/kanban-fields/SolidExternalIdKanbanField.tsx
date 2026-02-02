@@ -1,4 +1,4 @@
-'use client';
+
 import { SolidKanbanViewFieldsParams } from '../SolidKanbanViewFields';
 
 const SolidExternalIdKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data }: SolidKanbanViewFieldsParams) => {

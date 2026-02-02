@@ -1,4 +1,4 @@
-'use client';
+import { env } from "../../adapters/env";
 
 const AuthBanner = () => {
   return (
@@ -10,17 +10,17 @@ const AuthBanner = () => {
         background: 'url(/images/loginhero.png)',
         // background: 'url(/images/LoginBanner.png)',
         backgroundSize: 'cover',
-        marginTop: process.env.ENABLE_CUSTOM_HEADER_FOOTER === "true" ? 70 : 0
+        marginTop: env("ENABLE_CUSTOM_HEADER_FOOTER") === "true" ? 70 : 0
       }}
       className="flex align-items-center"
     >
       <div className="grid m-0">
         <div className="col-8 mx-auto">
           <div className="text-5xl text-white font-semibold line-height-3">
-            {process.env.SOLID_APP_TITLE}
+            {env("SOLID_APP_TITLE")}
           </div>
           <div className="text-sm text-white line-height-3">
-            {process.env.NEXT_PUBLIC_SOLID_APP_DESCRIPTION}
+            {env("NEXT_PUBLIC_SOLID_APP_DESCRIPTION")}
           </div>
           <div className="mt-5">
             {/* <AvatarGroup>

@@ -1,4 +1,4 @@
-"use client"
+
 import { InputText } from 'primereact/inputtext'
 import styles from './chatter.module.css'
 import { Button } from 'primereact/button'
@@ -89,7 +89,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id }: {
                     type="text"
                     value={message}
                     onChange={(e) => setMessage(e.target.value)}
-                    placeholder={type === 'email' ? 'Send a message to followers' : 'Log an internal note...'}
+                    placeholder={type === 'email' ? 'Send a message to followers' : 'Log an internal note.'}
                     className={`p-inputtext-sm w-full p-2 ${styles.chatterMessageInput}`}
                 />
                 <input

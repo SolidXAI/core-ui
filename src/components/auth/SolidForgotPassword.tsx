@@ -1,8 +1,6 @@
-"use client";
-
 import { useInitiateChangePasswordMutation } from "../../redux/api/authApi";
 import { useFormik } from "formik";
-import { useRouter } from "next/navigation";
+import { useRouter } from "../../hooks/useRouter";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
@@ -10,10 +8,11 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
 import { useSelector } from "react-redux";
-import Image from "next/image";
+import Image from "../common/Image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
+import showToast from "../../helpers/showToast";
 
 const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
@@ -24,16 +23,6 @@ const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder 
 
     const toast = useRef<Toast>(null);
     const router = useRouter();
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
     const [initiateChangePassword] = useInitiateChangePasswordMutation();
     const validationSchema = Yup.object({
         email: Yup.string()
@@ -63,10 +52,10 @@ const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder 
                     const maskedEmail = maskEmail(email);
                     router.push(`/auth/initiate-forgot-password-thank-you?email=${maskedEmail}`)
                 } else (
-                    showToast("error", ERROR_MESSAGES.ERROR, response.error)
+                    showToast(toast, "error", ERROR_MESSAGES.ERROR, response.error)
                 )
             } catch (err: any) {
-                showToast("error", ERROR_MESSAGES.ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                showToast(toast, "error", ERROR_MESSAGES.ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
             }
         },
     });

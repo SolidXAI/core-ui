@@ -1,4 +1,4 @@
-'use client';
+
 import { SolidCircularLoader } from "../../../../../../components/core/common/SolidLoaders/SolidCircularLoader";
 import { ERROR_MESSAGES } from "../../../../../../constants/error-messages";
 import { useGetModelsQuery, useLazyGetModelsQuery } from "../../../../../../redux/api/modelApi";
@@ -15,6 +15,7 @@ import { DataTable } from "primereact/datatable";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
+import showToast from "../../../../../../helpers/showToast";
 
 const DeleteModuleRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
 
@@ -43,14 +44,6 @@ const DeleteModuleRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     }, [models]);
 
     const toast = useRef<Toast>(null);
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            life: 3000,
-        });
-    };
 
     const deleteModuleHandler = async () => {
         setIsDeleting(true);
@@ -66,23 +59,23 @@ const DeleteModuleRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
                     res.error?.error ||
                     ERROR_MESSAGES.ERROR_OCCURED;
                 setErrorState(message);
-                showToast('error', ERROR_MESSAGES.DELETE_FAIELD, message);
+                showToast(toast, 'error', ERROR_MESSAGES.DELETE_FAIELD, message);
             } else {
-                showToast('success', ERROR_MESSAGES.MODEL_DELETE, ERROR_MESSAGES.MODEL_DELETE_SUCCESSFULLY(event.rowData.singularName));
+                showToast(toast, 'success', ERROR_MESSAGES.MODEL_DELETE, ERROR_MESSAGES.MODEL_DELETE_SUCCESSFULLY(event.rowData.singularName));
                 dispatch(closePopup());
             }
         } catch (err: any) {
             console.error(ERROR_MESSAGES.DELETE_ERROR, err);
             setErrorState(err.message || ERROR_MESSAGES.NETWORK_ERROR);
-            showToast('error', ERROR_MESSAGES.ERROR, ERROR_MESSAGES.NETWORK_OR_SERVER_ERROR);
+            showToast(toast, 'error', ERROR_MESSAGES.ERROR, ERROR_MESSAGES.NETWORK_OR_SERVER_ERROR);
         } finally {
             setIsDeleting(false);
         }
     }
 
     const rows = [
-        { file: `${kebabCase(event.rowData.name)}.module.ts`, description: 'Delete the module file.', intervention: 'Automatic'},
-        { file: `${kebabCase(event.rowData.name)}-metadata.json`, description: 'Remove the module metadata json file.', intervention: 'Automatic' },
+        { file: `${kebabCase(event.rowData.name)}.module.ts`, description: 'Delete the module file', intervention: 'Automatic'},
+        { file: `${kebabCase(event.rowData.name)}-metadata.json`, description: 'Remove the module metadata json file', intervention: 'Automatic' },
     ];
 
     return (
@@ -98,7 +91,7 @@ const DeleteModuleRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
                         {allowDelete === true ?
                             "Deleting a module should be done carefully. The below files will be impacted as part of deleting a model:"
                             :
-                            "This module still has models associated with it. Please delete those models before deleting the module."
+                            "This module still has models associated with it. Please delete those models before deleting the module"
                         }
                     </p>
                     {/* {allowDelete === true && */}

@@ -1,9 +1,8 @@
-"use client";
-
 import { useConfirmForgotPasswordMutation } from "../../redux/api/authApi";
 import { useFormik } from "formik";
-import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import Image from "../common/Image";
+import { useRouter } from "../../hooks/useRouter";
+import { useSearchParams } from "../../hooks/useSearchParams";
 import { Button } from "primereact/button";
 import { Message } from "primereact/message";
 import { Password } from "primereact/password";
@@ -14,6 +13,9 @@ import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
+import { env } from "../../adapters/env";
+import showToast from "../../helpers/showToast";
+
 const SolidResetPassword = () => {
     const searchParams = useSearchParams();
     const verificationToken = searchParams.get('token');
@@ -30,19 +32,9 @@ const SolidResetPassword = () => {
     const router = useRouter();
 
     const [confirmForgotPassword] = useConfirmForgotPasswordMutation();
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
 
-    const envPasswordRegex = process.env.NEXT_PUBLIC_PASSWORD_REGEX;
-    const envPasswordHelperText = process.env.NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC;
+    const envPasswordRegex = env("NEXT_PUBLIC_PASSWORD_REGEX");
+    const envPasswordHelperText = env("NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC");
     let passwordRegex: RegExp | null = null;
     try {
         if (envPasswordRegex) {
@@ -82,13 +74,13 @@ const SolidResetPassword = () => {
                 };
                 const response = await confirmForgotPassword(payload).unwrap();
                 if (response?.statusCode === 200) {
-                    showToast("success", ERROR_MESSAGES.FIELD_UPDATE('Password'), ERROR_MESSAGES.FIELD_UPDATE_SUCCESSFULLY('Password'))
+                    showToast(toast, "success", ERROR_MESSAGES.FIELD_UPDATE('Password'), ERROR_MESSAGES.FIELD_UPDATE_SUCCESSFULLY('Password'))
                     router.push('/auth/login');
                 } else (
-                    showToast("error", ERROR_MESSAGES.ERROR, response.error)
+                    showToast(toast, "error", ERROR_MESSAGES.ERROR, response.error)
                 )
             } catch (err: any) {
-                showToast("error", err?.data?.message, err?.data?.data?.message ? err?.data?.data?.message : err?.data?.message);
+                showToast(toast, "error", err?.data?.message, err?.data?.data?.message ? err?.data?.data?.message : err?.data?.message);
             }
         },
     });

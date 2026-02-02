@@ -1,4 +1,4 @@
-"use client";
+
 import { Button } from "primereact/button";
 import { Menu } from "primereact/menu";
 import { useRef } from "react";

@@ -1,4 +1,4 @@
-"use client";
+
 import { useEffect, useState } from "react";
 import { Message } from "primereact/message";
 import { classNames } from "primereact/utils";

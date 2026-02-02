@@ -1,11 +1,22 @@
-'use client';
-import Link from 'next/link';
-import { usePathname } from 'next/navigation';
+import Link from "../../common/Link";
+import { usePathname } from "../../../hooks/usePathname";
 import { Button } from 'primereact/button';
+import { normalizeSolidListKanbanActionPath } from "../../../helpers/routePaths";
 
 export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, solidListViewLayout, responsiveIconOnly = false }: any) => {
     const pathName = usePathname();
-    const createPath = createButtonUrl ? `${createButtonUrl}?${new URLSearchParams(createActionQueryParams).toString()}` : pathName.split('/').slice(0, -1).join('/') + '/form/new?viewMode=edit';
+
+    const resolveCreatePath = () => {
+        if (createButtonUrl) {
+            const normalizedUrl = normalizeSolidListKanbanActionPath(pathName, createButtonUrl);
+            const query = new URLSearchParams(createActionQueryParams).toString();
+            return query ? `${normalizedUrl}?${query}` : normalizedUrl;
+        }
+
+        return `${normalizeSolidListKanbanActionPath(pathName, "form")}/new?viewMode=edit`;
+    };
+
+    const createPath = resolveCreatePath();
 
     const icon = solidListViewLayout?.attrs?.addButtonIcon || "pi pi-plus";
     const label = solidListViewLayout?.attrs?.addButtonTitle || "Add";

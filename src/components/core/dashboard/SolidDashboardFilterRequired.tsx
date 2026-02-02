@@ -1,4 +1,4 @@
-"use client";
+
 export const SolidDashboardFilterRequired = () => {
   return (
     <div className="flex align-items-center justify-content-center" style={{ minHeight: '400px', padding: '2rem' }}>

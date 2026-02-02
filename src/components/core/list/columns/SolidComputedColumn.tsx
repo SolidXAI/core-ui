@@ -1,4 +1,4 @@
-'use client';
+
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import SolidBooleanColumn from './SolidBooleanColumn';
 import SolidDateColumn from './SolidDateColumn';

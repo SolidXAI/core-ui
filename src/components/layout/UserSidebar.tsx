@@ -1,7 +1,7 @@
-"use client";
 
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+
+import Link from "../common/Link";
+import { usePathname } from "../../hooks/usePathname";
 import { useState } from "react";
 
 const UserSidebar = () => {
@@ -37,9 +37,8 @@ const UserSidebar = () => {
         <Link
           key={index}
           href={menuItem.url}
-          className={`fw-bold list-group-item list-group-item-action ${
-            activeMenuItem === menuItem.url ? "active" : ""
-          }`}
+          className={`fw-bold list-group-item list-group-item-action ${activeMenuItem === menuItem.url ? "active" : ""
+            }`}
           onClick={() => handleMenuItemClick(menuItem.url)}
           aria-current={activeMenuItem === menuItem.url ? "true" : "false"}
         >

@@ -1,4 +1,4 @@
-"use client"; // Error components must be Client Components
+ // Error components must be Client Components
 
 interface CustomError extends Error {
   errMessage: string;

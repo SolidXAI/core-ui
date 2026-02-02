@@ -1,4 +1,4 @@
-'use client';
+
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { Message } from "primereact/message";

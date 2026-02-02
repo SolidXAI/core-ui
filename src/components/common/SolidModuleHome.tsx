@@ -1,13 +1,13 @@
-"use client"
 
-import { useSession } from 'next-auth/react'
+
+import { useSession } from "../../hooks/useSession";
 import styles from './solidModuleHome.module.css'
 import { Button } from 'primereact/button';
 import { DocsSvg } from '../Svg/DocsSvg';
 import { SettingsSvg } from '../Svg/SettingsSvg';
 import { DevDocs } from '../Svg/DevDocs';
 import { HomePageModuleSvg } from '../Svg/HomePageModuleSvg';
-import Link from 'next/link';
+import Link from "./Link";
 import { useState } from 'react';
 import { SolidAccountSettings } from '../core/common/SolidAccountSettings/SolidAccountSettings';
 import { useDispatch, useSelector } from "react-redux";
@@ -36,20 +36,20 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
     return (
         <div className="h-screen surface-0 overflow-y-auto">
             <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
-            <div className='flex align-items-center gap-2'>
-            <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
-                <i className="pi pi-th-large"></i>
-            </div>
-                <p className="m-0 view-title solid-text-wrapper">
-                    {moduleName}
-                </p>
-            </div>
+                <div className='flex align-items-center gap-2'>
+                    <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                        <i className="pi pi-th-large"></i>
+                    </div>
+                    <p className="m-0 view-title solid-text-wrapper">
+                        {moduleName}
+                    </p>
+                </div>
             </div>
             <div className="p-4 md:p-5 flex flex-column gap-4">
                 <div className={styles.solidModuleWelcomeSection}>
                     <div className='flex flex-column gap-2 pr-3 lg:pr-0'>
                         <h3 className={styles.solidModuleHomeTitle1}>
-                            Welcome, {status === "loading" ? "..." : user}
+                            Welcome, {status === "loading" ? "." : user}
                         </h3>
                         <p className='m-0 w-35rem text-sl'>
                             This is the home page for the {moduleName} module. You can find documentation and settings below.
@@ -65,19 +65,19 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
                     {[{
                         icon: <DocsSvg />,
                         title: 'Admin Docs',
-                        description: 'Explore the administrator documentation to manage and configure your system.',
+                        description: 'Explore the administrator documentation to manage and configure your system',
                         class: styles.dashboardCardOne,
                         url: 'https://docs.solidxai.com/docs/admin-docs/'
                     }, {
                         icon: <DevDocs />,
                         title: 'Dev Docs',
-                        description: 'Dive into the developer documentation to build, extend, and integrate with the platform.',
+                        description: 'Dive into the developer documentation to build, extend, and integrate with the platform',
                         class: styles.dashboardCardTwo,
                         url: 'https://docs.solidxai.com/docs/developer-docs/'
                     }, {
                         icon: <SettingsSvg />,
                         title: 'Settings',
-                        description: 'Access and update your account settings, preferences, and profile information.',
+                        description: 'Access and update your account settings, preferences, and profile information',
                         class: styles.dashboardCardThree,
                         type: 'popup'
                     }].map((card, i) => (

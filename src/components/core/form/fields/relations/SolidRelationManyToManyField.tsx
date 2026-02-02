@@ -1,4 +1,4 @@
-'use client';
+
 import { Message } from "primereact/message";
 import { useEffect, useState } from "react";
 import * as Yup from 'yup';

@@ -1,4 +1,4 @@
-'use client';
+
 import { SolidCircularLoader } from "../../../../../../components/core/common/SolidLoaders/SolidCircularLoader";
 import { ERROR_MESSAGES } from "../../../../../../constants/error-messages";
 import { useGenerateCodeFormoduleMutation } from "../../../../../../redux/api/moduleApi";
@@ -9,6 +9,8 @@ import { Button } from "primereact/button";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
+import { env } from "../../../../../../adapters/env";
+import showToast from "../../../../../../helpers/showToast";
 
 const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     const dispatch = useDispatch()
@@ -74,7 +76,7 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
             setIsGenerating(false);
             dispatch(closePopup());
             console.log("error",error);
-            showToast("error", "Something went wrong.", ERROR_MESSAGES.API_ERROR);
+            showToast(toast, "error", "Something went wrong", ERROR_MESSAGES.API_ERROR);
         }
     }
 
@@ -92,7 +94,7 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
     const pingBackendWithRetry = async (retries = 30, delay = 500): Promise<boolean> => {
         for (let i = 0; i < retries; i++) {
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ping`);
+                const res = await fetch(`${env("NEXT_PUBLIC_BACKEND_API_URL")}/api/ping`);
                 console.log("ping response", res);
 
                 if (res.ok)
@@ -106,16 +108,6 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
     };
 
     const toast = useRef<Toast>(null);
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
 
     useEffect(() => {
         const runSeederIfBackendAlive = async () => {
@@ -133,7 +125,7 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
                 } else {
                     dispatch(closePopup());
                     console.log(ERROR_MESSAGES.BACKEND_NOT_ALIVE);
-                    showToast("error", ERROR_MESSAGES.BACKEND_UNAVAILABLE, ERROR_MESSAGES.SEEDER_NOT_TRIGGERED);
+                    showToast(toast, "error", ERROR_MESSAGES.BACKEND_UNAVAILABLE, ERROR_MESSAGES.SEEDER_NOT_TRIGGERED);
                 }
             }
         };
@@ -145,14 +137,14 @@ const GenerateModuleCodeRowAction = (event: SolidListRowdataDynamicFunctionProps
     useEffect(() => {
         if (isSeederSuccess) {
             console.log(ERROR_MESSAGES.IS_SEEDER_SUCCESS, data);
-            showToast("success", ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY, ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY);
+            showToast(toast, "success", ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY, ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY);
             setIsGenerating(false);
             dispatch(closePopup());
             window.location.reload();
         }
         if (isSeederError) {
             console.log(ERROR_MESSAGES.IS_SEEDER_ERROR, isSeederError);
-            showToast("error", ERROR_MESSAGES.SEEDER_ERROR, ERROR_MESSAGES.SEEDER_NOT_RUN);
+            showToast(toast, "error", ERROR_MESSAGES.SEEDER_ERROR, ERROR_MESSAGES.SEEDER_NOT_RUN);
             setIsGenerating(false);
         }
     }, [isSeederSuccess])

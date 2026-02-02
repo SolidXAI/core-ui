@@ -1,13 +1,12 @@
-"use client";
-
 import React from "react";
+import { env } from "../../../adapters/env";
 
 interface PasswordHelperTextProps {
   text?: any;
 }
 
 export const SolidPasswordHelperText: React.FC<PasswordHelperTextProps> = ({ text }) => {
-  const envPasswordHelperText = process.env.NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC ?? "";
+  const envPasswordHelperText = env("NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC") ?? "";
 
   if (!text && !envPasswordHelperText) return null;
 

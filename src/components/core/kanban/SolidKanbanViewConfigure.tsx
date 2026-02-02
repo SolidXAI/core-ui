@@ -1,13 +1,11 @@
-"use client"
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from "../../../hooks/usePathname";
+import { useRouter } from "../../../hooks/useRouter";
 import { Accordion, AccordionTab } from 'primereact/accordion';
 import { Button } from 'primereact/button';
 import { Divider } from 'primereact/divider';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { RadioButton } from 'primereact/radiobutton';
-import React, { useEffect, useRef, useState } from 'react'
-import { useDispatch, useSelector } from "react-redux";
-import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
+import { useEffect, useRef, useState } from 'react'
 
 export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllowed, setLayoutDialogVisible, viewModes, setShowSaveFilterPopup }: any) => {
     const op = useRef(null);

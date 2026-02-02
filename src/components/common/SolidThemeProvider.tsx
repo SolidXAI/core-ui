@@ -1,7 +1,7 @@
-"use client";
+
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname } from "../../hooks/usePathname";
 import { useSelector } from "react-redux";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 

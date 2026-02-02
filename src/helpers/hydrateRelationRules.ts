@@ -1,8 +1,10 @@
 import { FilterRule, FilterRuleType } from "../components/core/common/FilterComponent";
 import { createSolidEntityApi } from "../redux/api/solidEntityApi";
-import axios from "axios";
 import { kebabCase } from "change-case";
-import { getSession } from "next-auth/react";
+import { getSession } from "../adapters/auth/index";
+import { env } from "../adapters/env";
+import { solidGet } from "../http/solidHttp";
+
 
 interface RelationHydrationBucket {
   meta: any;
@@ -10,7 +12,7 @@ interface RelationHydrationBucket {
   ids: Set<number>;
 }
 
-const API_URL = process.env.NEXT_PUBLIC_BACKEND_API_URL;
+const API_URL = env("NEXT_PUBLIC_BACKEND_API_URL");
 
 export async function hydrateRelationRules(
   rootRules: FilterRule[],
@@ -82,7 +84,7 @@ export async function hydrateRelationRules(
     // });
     const kebabEntityName = kebabCase(meta.relationCoModelSingularName);
 
-    const resp = await axios.get(`${API_URL}/api/${kebabEntityName}`,
+    const resp = await solidGet(`${API_URL}/api/${kebabEntityName}`,
       {
         params: {
           offset: 0,

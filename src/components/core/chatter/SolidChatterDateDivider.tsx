@@ -1,4 +1,4 @@
-"use client"
+
 import styles from './chatter.module.css';
 
 interface Props {

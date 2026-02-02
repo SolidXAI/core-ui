@@ -1,4 +1,4 @@
-'use client';
+
 import 'gridstack/dist/gridstack.min.css';
 import { GridStackOptions, GridStackWidget } from 'gridstack';
 import styles from './SolidDashboard.module.css'

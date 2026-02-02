@@ -1,4 +1,4 @@
-'use client';
+
 import { DropzonePlaceholder } from "../../../../components/common/DropzonePlaceholder";
 import { DropzoneUpload } from "../../../../components/common/DropzoneUpload";
 import { useDeleteMediaMutation } from "../../../../redux/api/mediaApi";
@@ -12,7 +12,6 @@ import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { FileReaderExt } from "../../../../components/common/FileReaderExt";
 import { ProgressBar } from "primereact/progressbar";
 import getAcceptedFileTypes from "../../../../helpers/getAcceptedFileTypes";
-import Link from "next/link";
 import { downloadMediaFile } from "../../../../helpers/downloadMediaFile";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps, SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";

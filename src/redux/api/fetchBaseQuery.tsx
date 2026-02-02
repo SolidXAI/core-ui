@@ -1,118 +1,65 @@
-import { fetchBaseQuery } from "@reduxjs/toolkit/dist/query";
-import { getSession } from "next-auth/react";
+import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
+import type { BaseQueryFn, FetchArgs, FetchBaseQueryError, FetchBaseQueryMeta } from "@reduxjs/toolkit/query/react";
+import { getSession } from "../../adapters/auth/index";
+import { env } from "../../adapters/env";
+import { logger } from "../../helpers/logger";
+import { eventBus, AppEvents } from "../../helpers/eventBus";
 
-const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api`; // Base URL for the API endpoints
-console.log(`fetchBaseQuery resolved baseUrl to ${baseUrl}`);
+// Base URL for the API endpoints
+const baseUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api`;
+logger.debug(`fetchBaseQuery resolved baseUrl to ${baseUrl}`);
 
-// Updated fetchBaseQuery to include accessToken in headers
-export const baseQueryWithAuth = fetchBaseQuery({
-    baseUrl,
-    prepareHeaders: async (headers) => {
-        console.log("[prepareHeaders] start");
-        let session: any = null;
-        try {
-            session = await Promise.race([
-                getSession(),
-                new Promise((_, reject) =>
-                    setTimeout(() => reject(new Error("getSession timeout")), 2000)
-                ),
-            ]);
-            console.log("[prepareHeaders] session", session);
-        } catch (err) {
-            console.error("[prepareHeaders] getSession failed", err);
-        }
 
-        if (session?.user?.accessToken) {
-            headers.set("authorization", `Bearer ${session.user.accessToken}`);
-            console.log("[prepareHeaders] set auth header");
-        } else {
-            console.log("[prepareHeaders] no access token");
-        }
+const rawBaseQuery = fetchBaseQuery({
+  baseUrl,
+  prepareHeaders: async (headers) => {
+    // Fetch session data
+    const session = await getSession();
+    if (session?.user?.accessToken) {
+      // Add access token to headers
+      headers.set('authorization', `Bearer ${session?.user?.accessToken}`);
+    }
 
-        console.log("[prepareHeaders] end");
-        return headers;
-    },
+    if (session?.user?.accessToken) {
+      headers.set("authorization", `Bearer ${session.user.accessToken}`);
+      logger.debug("[prepareHeaders] set auth header");
+    } else {
+      logger.debug("[prepareHeaders] no access token");
+    }
+
+    logger.debug("[prepareHeaders] end");
+    return headers;
+  },
 });
 
-// @ts-nocheck
-// import { fetchBaseQuery } from "@reduxjs/toolkit/query/react";
-// import type { FetchBaseQueryError, BaseQueryFn } from "@reduxjs/toolkit/query";
-// import type { FetchArgs } from "@reduxjs/toolkit/query";
-// import { getSession } from "next-auth/react";
+export const baseQueryWithAuth: BaseQueryFn<
+  string | FetchArgs,
+  unknown,
+  FetchBaseQueryError,
+  {},
+  FetchBaseQueryMeta
+> = async (
+  args,
+  api,
+  extraOptions
+) => {
+  const result = await rawBaseQuery(args, api, extraOptions);
 
-// const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api`;
+  if (result.error) {
+    const status = (result.error as any).status;
+    const isNetwork =
+      status === "FETCH_ERROR" ||
+      status === "PARSING_ERROR" ||
+      (typeof status === "number" && status >= 500);
 
-// const rawBaseQuery = fetchBaseQuery({
-//     baseUrl,
-//     prepareHeaders: async (headers) => {
-//         const session = await getSession();
-//         if (session?.user.accessToken) {
-//             headers.set('authorization', `Bearer ${session?.user?.accessToken}`);
-//         }
-//         return headers;
-//     },
-// });
+    if (isNetwork) {
+      eventBus.emit(AppEvents.GlobalError, {
+        status,
+        message: "Unable to reach the server. Please try again later.",
+        error: result.error,
+      });
+    }
+  }
 
-// // Wrapper with error handling
-// export const baseQueryWithAuth: BaseQueryFn<string | FetchArgs, unknown, FetchBaseQueryError, {}, {}> = async (args, api, extraOptions) => {
-//     const result = await rawBaseQuery(args, api, extraOptions);
-
-//     if (result.error) {
-//         const status = result.error.status;
-//         const isFetchError = typeof status === 'string' && status === 'FETCH_ERROR';
-
-//         if (typeof window !== 'undefined') {
-//             switch (true) {
-//                 case isFetchError:
-//                     window.location.href = '/offline';
-//                     break;
-//                 case typeof status === 'number' && status >= 500:
-//                     window.location.href = '/server-error';
-//                     break;
-//                 case typeof status === 'number' && status >= 400:
-//                     window.location.href = '/client-error';
-//                     break;
-//             }
-//         }
-//     }
-
-//     return result;
-// };
-
-// // Wrapper fetch to include authentication and error handling
-// export async function baseFetchWithAuth(input: RequestInfo, init: RequestInit = {}) {
-//     const session = await getSession();
-
-//     const headers = new Headers(init.headers || {});
-//     if (session?.user?.accessToken) {
-//         headers.set("Authorization", `Bearer ${session.user.accessToken}`);
-//     }
-
-//     try {
-//         const response = await fetch(input, { ...init, headers });
-
-//         if (!response.ok) {
-//             const status = response.status;
-//             if (typeof window !== 'undefined') {
-//                 if (status >= 500) {
-//                     window.location.href = "/server-error";
-//                 } else if (status >= 400) {
-//                     window.location.href = "/client-error";
-//                 }
-//             }
-//             throw new Error(`HTTP error! status: ${status}`);
-//         }
-
-//         return response;
-//     } catch (error: any) {
-//         console.error('Fetch failed:', error);
-
-//         // You could redirect or render a fallback error here
-//         if (typeof window !== 'undefined') {
-//             window.location.href = "/offline"; // Create this route
-//         }
-
-//         // Re-throw for potential higher-level handling
-//         // throw new Error(`Network error: ${error.message}`);
-//     }
-// }
+  return result;
+};

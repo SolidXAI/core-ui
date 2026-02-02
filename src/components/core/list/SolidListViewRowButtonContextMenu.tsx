@@ -1,4 +1,4 @@
-"use client";
+
 
 import { useHasAnyRole } from "../../../helpers/rolesHelper";
 import { Button } from "primereact/button";

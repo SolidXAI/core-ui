@@ -1,4 +1,4 @@
-"use client";
+
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { InputTypes } from "./SolidVarInputsFilterElement"
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";

@@ -1,11 +1,10 @@
-"use client"
-
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
-import { getSession } from 'next-auth/react';
+import { getSession } from "../../../../adapters/auth/index";
 import { Button } from 'primereact/button';
 import { Dialog } from 'primereact/dialog';
-import { Divider } from 'primereact/divider';
 import { useState } from 'react';
+import { env } from "../../../../adapters/env";
+
 export const SolidImportTransactionStatus = ({ importStatusResult, transactionId, setOpenImportDialog, handleFetchUpdatedRecords }: any) => {
 
   const [showPartialDialog, setShowPartialDialog] = useState(false);
@@ -18,7 +17,7 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
         throw new Error(ERROR_MESSAGES.NO_AUTH_TOKEN_FOUND);
       }
       const response = await fetch(
-        `${process.env.API_URL}/api/import-transaction/${transactionId}/export-failed-import-records`,
+        `${env("API_URL")}/api/import-transaction/${transactionId}/export-failed-import-records`,
         {
           method: 'GET',
           headers: {

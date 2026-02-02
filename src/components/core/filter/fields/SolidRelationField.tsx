@@ -1,4 +1,4 @@
-"use client";
+
 import { SolidFilterFieldsParams } from '../SolidFilterFields';
 import SolidRelationManyToManyField from './relations/SolidRelationManyToManyField';
 import SolidRelationManyToOneField from './relations/SolidRelationManyToOneField';

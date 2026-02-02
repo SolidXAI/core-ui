@@ -365,7 +365,6 @@ export { default as SolidPopupContainer } from './components/common/SolidPopupCo
 export { AuthLayout } from './components/auth/AuthLayout';
 export { default as SolidForgotPassword } from './components/auth/SolidForgotPassword';
 export { default as SolidLogin } from './components/auth/SolidLogin';
-export { default as SolidOTPVerify } from './components/auth/SolidOTPVerify';
 export { default as SolidRegister } from './components/auth/SolidRegister';
 export { default as SolidResetPassword } from './components/auth/SolidResetPassword';
 export { default as SolidChangeForcePassword } from './components/auth/SolidChangeForcePassword';
@@ -413,9 +412,45 @@ export type {
 } from './types';
 
 export { GeneralSettings } from './components/common/GeneralSettings';
+export { SolidErrorPage } from './components/common/SolidErrorPage';
+export { SolidNotFoundPage } from './components/common/SolidNotFoundPage';
 
-export { default as authProviders } from './nextAuth/authProviders';
 export { SolidThemeLink } from './components/common/SolidThemeLink';
 export { SolidThemeProvider } from './components/common/SolidThemeProvider';
+export { eventBus, AppEvents } from './helpers/eventBus';
+export { useSession } from './hooks/useSession';
+export { useRouter } from './hooks/useRouter';
+export { usePathname } from './hooks/usePathname';
+export { useSearchParams } from './hooks/useSearchParams';
+export { signIn, signOut, getSession, handleLogout, refreshAccessToken, loadSession, saveSession, clearSession } from './adapters/auth';
+export { createSolidStore } from './redux/store/createSolidStore';
+export type { SolidStore, SolidRootState, SolidDispatch, CreateSolidStoreOptions } from './redux/store/createSolidStore';
+export { StoreProvider } from './redux/store/StoreProvider';
+export { solidAxios, solidGet, solidPost, solidPut, solidPatch, solidDelete } from './http/solidHttp';
+export { AuthGuard } from './routes/guards/AuthGuard';
+export { AdminLayoutWrapper } from './layouts/AdminLayoutWrapper';
+export { AuthLayoutWrapper } from './layouts/AuthLayoutWrapper';
+export { AppEventListener } from './routes/AppEventListener';
+export { getSolidRoutes } from './routes/solidRoutes';
+export type { SolidRoutesOptions } from './routes/types';
+export { AdminPage } from './routes/pages/admin/AdminPage';
+export { ModuleHomePage } from './routes/pages/admin/core/ModuleHomePage';
+export { ListPage as AdminListPage } from './routes/pages/admin/core/ListPage';
+export { KanbanPage as AdminKanbanPage } from './routes/pages/admin/core/KanbanPage';
+export { FormPage as AdminFormPage } from './routes/pages/admin/core/FormPage';
+export { SettingsPage as AdminSettingsPage } from './routes/pages/admin/core/SettingsPage';
+export { LoginPage as AuthLoginPage } from './routes/pages/auth/LoginPage';
+export { RegisterPage as AuthRegisterPage } from './routes/pages/auth/RegisterPage';
+export { ForgotPasswordPage as AuthForgotPasswordPage } from './routes/pages/auth/ForgotPasswordPage';
+export { InitiateForgotPasswordPage as AuthInitiateForgotPasswordPage } from './routes/pages/auth/InitiateForgotPasswordPage';
+export { InitiateForgotPasswordThankYouPage as AuthInitiateForgotPasswordThankYouPage } from './routes/pages/auth/InitiateForgotPasswordThankYouPage';
+export { ConfirmForgotPasswordPage as AuthConfirmForgotPasswordPage } from './routes/pages/auth/ConfirmForgotPasswordPage';
+export { ResetPasswordPage as AuthResetPasswordPage } from './routes/pages/auth/ResetPasswordPage';
+export { InitiateLoginPage as AuthInitiateLoginPage } from './routes/pages/auth/InitiateLoginPage';
+export { InitiateRegisterPage as AuthInitiateRegisterPage } from './routes/pages/auth/InitiateRegisterPage';
+export { InitiateGoogleOauthPage as AuthInitiateGoogleOauthPage } from './routes/pages/auth/InitiateGoogleOauthPage';
+export { SsoPage as AuthSsoPage } from './routes/pages/auth/SsoPage';
+export { ErrorPage } from './routes/pages/ErrorPage';
+export { NotFoundPage } from './routes/pages/NotFoundPage';
 
 export * from "./styles";
