@@ -131,9 +131,12 @@ export class SolidRelationManyToOneField implements ISolidField {
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
 
-        const isVisible = this.fieldContext.parentData
-            ? fieldLayoutInfo.attrs?.visible === true
-            : fieldLayoutInfo.attrs?.visible !== false;
+        let isVisible = fieldLayoutInfo.attrs?.visible || true;
+        if (this.fieldContext.parentData && this.fieldContext.parentFieldName === fieldLayoutInfo.attrs.name) {
+            isVisible = false;
+        }
+
+        // const isVisible = this.fieldContext.parentData ? fieldLayoutInfo.attrs?.visible === true : fieldLayoutInfo.attrs?.visible !== false;
 
         if (!isVisible) {
             return null;
@@ -151,18 +154,8 @@ export class SolidRelationManyToOneField implements ISolidField {
         return (
             <>
                 <div className={className}>
-
-                    {viewMode === "view" &&
-                        this.renderExtensionRenderMode(viewWidget, formik)
-                    }
-                    {viewMode === "edit" && (
-                        <>
-                            {editWidget &&
-                                this.renderExtensionRenderMode(editWidget, formik)
-                            }
-                        </>
-                    )
-                    }
+                    {viewMode === "view" && this.renderExtensionRenderMode(viewWidget, formik)}
+                    {viewMode === "edit" && (<>{editWidget && this.renderExtensionRenderMode(editWidget, formik)}</>)}
                 </div>
             </>
         );
@@ -461,7 +454,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                             itemsLength: autoCompleteItems.length,
                             lazy: true,
                             onLazyLoad,
-                          })}
+                        })}
                     />
                     {fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false && formViewParams &&
                         <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} customCreateHandler={customCreateHandler} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams}></RenderSolidFormEmbededView>
@@ -532,7 +525,7 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
                 }}
                 className="solid-dialog"
                 breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
-                
+
             >
                 <SolidFormView {...params} />
 
@@ -633,7 +626,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                         $and: [
                             {
                                 [parentFieldName]: {
-                                    [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$eqi']:  fieldContext.data[fieldLayoutInfo.attrs.name] ?? formik.values[fieldLayoutInfo.attrs.name] 
+                                    [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$eqi']: fieldContext.data[fieldLayoutInfo.attrs.name] ?? formik.values[fieldLayoutInfo.attrs.name]
                                 }
                             }
                         ]
@@ -706,7 +699,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                 parentFieldLabels?.length > 0
                     ? parentFieldLabels.map((l: string) => record[l]).join(" - ")
                     : record[parentFieldName];
-            console.log("Final View Label",label, record[parentFieldName])
+            console.log("Final View Label", label, record[parentFieldName])
             setViewDisplayValue({
                 solidManyToOneLabel: label,
                 solidManyToOneValue: record[parentFieldName],
@@ -733,7 +726,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                     ...(parentSearchFields?.length > 0
                         ? [
                             {
-                                $or: parentSearchFields.map((field:any) => ({
+                                $or: parentSearchFields.map((field: any) => ({
                                     [field]: {
                                         [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']:
                                             event.query
@@ -850,10 +843,11 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                     ...(parentSearchFields?.length > 0
                         ? [
                             {
-                                $or: parentSearchFields.map((field:any) => ({
+                                $or: parentSearchFields.map((field: any) => ({
                                     [field]: {
                                         [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']:
-                                            currentQuery                                    }
+                                            currentQuery
+                                    }
                                 }))
                             }
                         ]
@@ -994,7 +988,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                             itemsLength: autoCompleteItems.length,
                             lazy: true,
                             onLazyLoad,
-                          })}
+                        })}
                     />
                     {
                         fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false && formViewParams && viewMode !== "view" &&

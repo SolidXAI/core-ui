@@ -68,6 +68,7 @@ export type SolidFormViewProps = {
     customCreateHandler?: any
     inlineCreateAutoSave?: boolean,
     customLayout?: any,
+    parentFieldName?: string,
     parentData?: any,
     redirectToPath?: string,
     onEmbeddedFormSave?: () => void,
@@ -177,7 +178,7 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps, setLightboxUr
 }
 
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
-const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, parentData, setLightboxUrls, setOpenLightbox, onEmbeddedFormSave }: any) => {
+const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, parentFieldName, parentData, setLightboxUrls, setOpenLightbox, onEmbeddedFormSave }: any) => {
     const fieldContext: SolidFieldProps = {
         // field metadata - coming from the field-metadata table.
         fieldMetadata: fieldMetadata,
@@ -195,6 +196,9 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
     }
     if (parentData) {
         fieldContext.parentData = parentData;
+    }
+    if (parentFieldName) {
+        fieldContext.parentFieldName = parentFieldName;
     }
     if (onEmbeddedFormSave) {
         fieldContext.onEmbeddedFormSave = onEmbeddedFormSave;
@@ -1452,6 +1456,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             onBlur={formFieldOnXXX}
                             setLightboxUrls={setLightboxUrls}
                             setOpenLightbox={setOpenLightbox}
+                            parentFieldName={params.parentFieldName}
                             parentData={params.parentData}
                             onEmbeddedFormSave={() => setRefreshChatterMessage(true)}
                         />;
