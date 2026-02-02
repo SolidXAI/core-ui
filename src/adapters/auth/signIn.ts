@@ -16,7 +16,7 @@ export async function signIn(provider: string, options: any = {}): Promise<SignI
     return { ok: false, error: `Unsupported provider: ${provider}`, status: 400, url: null };
   }
 
-  const { username, email, password } = options;
+  const { identifier, password } = options;
   const apiUrl = env("API_URL");
 
   if (!apiUrl) {
@@ -27,8 +27,8 @@ export async function signIn(provider: string, options: any = {}): Promise<SignI
     const response = await solidPost(
       `${apiUrl}/api/iam/authenticate`,
       {
-        username,
-        email,
+        username: identifier,
+        email: identifier.includes('@') ? identifier : null,
         password,
       },
       {
