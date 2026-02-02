@@ -1,4 +1,4 @@
-"use client"
+
 
 import { useDeleteMediaMutation } from "../../../../redux/api/mediaApi";
 import { useGetUserQuery, useUpdateUserProfileMutation } from "../../../../redux/api/userApi";
@@ -13,6 +13,7 @@ import { useRef, useState } from "react";
 import { useSelector } from "react-redux";
 import styles from './SolidAccountSettings.module.css'
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import showToast from "../../../../helpers/showToast";
 
 export const SolidPersonalInfo = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -30,17 +31,6 @@ export const SolidPersonalInfo = () => {
         deleteMedia,
     ] = useDeleteMediaMutation();
     const [updateUser] = useUpdateUserProfileMutation();
-
-    const showToast = (severity: "success" | "error" | "info", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
-        });
-    };
 
     const initialValues = {
         fullName: userData?.data?.fullName ?? "",
@@ -62,21 +52,21 @@ export const SolidPersonalInfo = () => {
                 }
 
                 if (!formData.has("fullName") && !formData.has("profilePicture")) {
-                    showToast("info", ERROR_MESSAGES.NO_CHANGE, ERROR_MESSAGES.NO_UPDATE_MADE);
+                    showToast(toast, "info", ERROR_MESSAGES.NO_CHANGE, ERROR_MESSAGES.NO_UPDATE_MADE);
                     return;
                 }
 
                 const response = await updateUser({ data: formData }).unwrap();
                 if (response?.statusCode === 200) {
-                    showToast("success", ERROR_MESSAGES.PROFILE_SAVED, ERROR_MESSAGES.PROFILE_SAVED_SUCCESSFULLY);
+                    showToast(toast, "success", ERROR_MESSAGES.PROFILE_SAVED, ERROR_MESSAGES.PROFILE_SAVED_SUCCESSFULLY);
                     refetch();
                     formik.resetForm();
                     setPreviewImage(null);
                 } else {
-                    showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_UPDATED_PROFILE);
+                    showToast(toast, "error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_UPDATED_PROFILE);
                 }
             } catch (error) {
-                showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
+                showToast(toast, "error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
             }
         },
     });
@@ -137,7 +127,7 @@ export const SolidPersonalInfo = () => {
             }
 
         } catch (error) {
-            showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_DELETED_IMAGE);
+            showToast(toast, "error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_DELETED_IMAGE);
         }
 
         setReplaceDialogVisible(false);
@@ -149,10 +139,10 @@ export const SolidPersonalInfo = () => {
         if (existing?.id) {
             try {
                 await deleteMedia(existing.id).unwrap();
-                showToast("success", ERROR_MESSAGES.DELETED, ERROR_MESSAGES.PROFILE_PICTURE_REMOVE);
+                showToast(toast, "success", ERROR_MESSAGES.DELETED, ERROR_MESSAGES.PROFILE_PICTURE_REMOVE);
                 refetch();
             } catch {
-                showToast("error", ERROR_MESSAGES.ERROR, ERROR_MESSAGES.FAILED_DELETED_IMAGE);
+                showToast(toast, "error", ERROR_MESSAGES.ERROR, ERROR_MESSAGES.FAILED_DELETED_IMAGE);
             }
         }
 

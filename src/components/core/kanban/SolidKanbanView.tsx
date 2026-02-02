@@ -1,12 +1,9 @@
-// @ts-nocheck
-
-"use client";
 import { permissionExpression } from "../../../helpers/permissions";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { DropResult } from "@hello-pangea/dnd";
-import Link from "next/link";
+import Link from "../../common/Link";
 import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -25,7 +22,8 @@ import Counter from "yet-another-react-lightbox/plugins/counter";
 import Download from "yet-another-react-lightbox/plugins/download";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
-import { useRouter, useSearchParams } from "next/navigation";
+import { useRouter } from "../../../hooks/useRouter";
+import { useSearchParams } from "../../../hooks/useSearchParams";
 import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
 import { KanbanUserViewLayout } from "./KanbanUserViewLayout";
 import { useDispatch, useSelector } from "react-redux";
@@ -33,6 +31,8 @@ import { queryObjectToQueryString, queryStringToQueryObject } from "../list/Soli
 import { Toast } from "primereact/toast";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
+import { normalizeSolidListKanbanActionPath } from "../../../helpers/routePaths";
+import showToast from "../../../helpers/showToast";
 
 
 type SolidKanbanViewParams = {
@@ -74,6 +74,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const toast = useRef<Toast>(null);
 
   const pushFiltersToRouter = (filterQueryString: any) => {
+    // @ts-ignore
     router.push(`?${filterQueryString}`, undefined, { shallow: true });
   };
 
@@ -240,18 +241,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
   const [maxSwimLanesCount, setMaxSwimLanesCount] = useState<number>(0);
-
-
-  const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-    toast.current?.show({
-      severity,
-      summary,
-      detail,
-      ...(severity === "error"
-        ? { sticky: true }            // stays until user closes
-        : { life: 3000 }),
-    });
-  };
+  // @ts-ignore
+  const editBaseUrl = normalizeSolidListKanbanActionPath(pathname, editButtonUrl || "form");
   // Get the kanban view data.
   // const [triggerGetSolidEntitiesForKanban, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidKanbanEntitiesQuery();
   const [triggerGetSolidEntities, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidEntitiesQuery();
@@ -343,9 +334,11 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             $and: []
           }
           if (queryObject.custom_filter_predicate) {
+            // @ts-ignore
             filters.$and.push(queryObject.custom_filter_predicate);
           }
           if (queryObject.search_predicate) {
+            // @ts-ignore
             filters.$and.push(queryObject.search_predicate);
           }
           // if (queryObject.saved_filter_predicate) {
@@ -360,13 +353,16 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             limit: Number(queryObject.limit) + Number(queryObject.offset),
             // fields: queryObject.fields || [`${groupByFieldName}`, `count(${groupByFieldName})`],
             groupBy: queryObject.groupBy || groupByFieldName,
+            // @ts-ignore
             populateMedia: queryObject.populateMedia || toPopulateMedia,
             populateGroup: queryObject.populateGroup || true,
             groupFilter: {
               limit: Number(queryObject.groupFilter.limit) + Number(queryObject.groupFilter.offset) || kanbanViewMetaData?.data?.solidView?.layout?.attrs?.recordsInSwimlane,
               offset: 0,
               filters: filters,
+              // @ts-ignore
               populate: queryObject.groupFilter.populate || toPopulate,
+              // @ts-ignore
               populateMedia: queryObject.groupFilter.populateMedia || toPopulateMedia
             }
             // sort: [`id:desc`],
@@ -423,7 +419,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   // clickable link allowing one to open the detail / form view.
   const detailsBodyTemplate = (solidViewData: any) => {
     return (
-      <Link href={`${editButtonUrl}/${solidViewData.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`} rel="noopener noreferrer" className="text-sm font-bold p-0" style={{ color: "#12415D" }}>
+      <Link href={`${editBaseUrl}/${solidViewData.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`} rel="noopener noreferrer" className="text-sm font-bold p-0" style={{ color: "#12415D" }}>
         <i className="pi pi-pencil" style={{ fontSize: "1rem" }}></i>
       </Link>
     );
@@ -523,6 +519,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
 
   // Handle drag-and-drop functionality
+  // @ts-ignore
   const onDragEnd = async (result: DropResult): void => {
     const { source, destination } = result;
     if (!destination) return;
@@ -600,16 +597,16 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       const kanbanUpdateResponse = await patchKanbanView({ id: +movedItem.id, data: formData }).unwrap();
 
       if (kanbanUpdateResponse?.statusCode === 200) {
-        showToast("success", ERROR_MESSAGES.IS_SUCCESS, ERROR_MESSAGES.KANBAN_UPDATED);
+        showToast(toast, "success", ERROR_MESSAGES.IS_SUCCESS, ERROR_MESSAGES.KANBAN_UPDATED);
       } else {
-        showToast("error", ERROR_MESSAGES.DUPLICATE_KEY, kanbanUpdateResponse?.error);
+        showToast(toast, "error", ERROR_MESSAGES.DUPLICATE_KEY, kanbanUpdateResponse?.error);
         // Update the kanbanViewData state
         setKanbanViewData(oldkanbanViewData);
       }
     } catch (error: any) {
       // 6. Handle 500 or network errors
       console.error(ERROR_MESSAGES.API_ERROR, error);
-      showToast("error", ERROR_MESSAGES.SOMETHING_WRONG, error?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
+      showToast(toast, "error", ERROR_MESSAGES.SOMETHING_WRONG, error?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
       setKanbanViewData(oldkanbanViewData);
     }
   };
@@ -671,15 +668,19 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
 
       if (transformedFilter.custom_filter_predicate) {
+        // @ts-ignore
         queryfilter.$and.push(transformedFilter.custom_filter_predicate);
       }
       if (transformedFilter.search_predicate) {
+        // @ts-ignore
         queryfilter.$and.push(transformedFilter.search_predicate);
       }
       if (transformedFilter.saved_filter_predicate) {
+        // @ts-ignore
         queryfilter.$and.push(transformedFilter.saved_filter_predicate);
       }
       if (transformedFilter.predefined_search_predicate) {
+        // @ts-ignore
         queryfilter.$and.push(transformedFilter.predefined_search_predicate);
       }
 
@@ -717,11 +718,15 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       if (customFilter) {
         let url
         const urlData = structuredClone(queryData);
+        // @ts-ignore
         delete urlData.filters;
         // urlData.s_filter = customFilter.s_filter || {};
         // urlData.c_filter = customFilter.c_filter || {};
+        // @ts-ignore
         urlData.custom_filter_predicate = customFilter.custom_filter_predicate || {};
+        // @ts-ignore
         urlData.search_predicate = customFilter.search_predicate || {};
+        // @ts-ignore
         queryObjectToQueryString(urlData);
       }
 
@@ -847,7 +852,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
       <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
       {solidKanbanViewMetaData && kanbanViewData &&
-        <KanbanBoard groupByFieldName={groupByFieldName} groupedView={groupedView} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl}></KanbanBoard>
+        <KanbanBoard groupByFieldName={groupByFieldName} groupedView={groupedView} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl}></KanbanBoard>
       }
 
       <Dialog
@@ -870,6 +875,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           open={openLightbox}
           plugins={[Counter, Download]}
           close={() => setOpenLightbox(false)}
+          // @ts-ignore
           slides={lightboxUrls}
         />
       }

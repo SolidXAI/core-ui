@@ -1,4 +1,4 @@
-"use client";
+
 import { pascalCase } from "change-case";
 
 //Dynamic permission expression

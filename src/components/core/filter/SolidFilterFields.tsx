@@ -1,4 +1,4 @@
-"use client";
+
 import SolidBigintField from "./fields/SolidBigintField";
 import SolidFloatField from "./fields/SolidFloatField";
 import SolidDecimalField from "./fields/SolidDecimalField";

@@ -1,4 +1,4 @@
-"use client";
+
 import { useFormik } from "formik";
 import './solid-export.css';
 import { Button } from "primereact/button";
@@ -430,7 +430,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
                 onChange={(e) => setSelectedFormat(e.value)}
                 options={formatOptions}
                 optionLabel="name"
-                placeholder="Format ..."
+                placeholder="Format ."
                 className="p-dropdown p-outlined"
 
                 // 👇 Render icon + text for dropdown list options
@@ -447,7 +447,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
 
                 // 👇 Render icon + text for selected value display
                 valueTemplate={(option) => {
-                  if (!option) return "Format ...";
+                  if (!option) return "Format .";
                   return (
                     <div className="flex items-center gap-2 h-1rem">
                       {React.cloneElement(option.icon, { fill: "#722ED1" })}

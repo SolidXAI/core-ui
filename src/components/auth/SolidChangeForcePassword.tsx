@@ -1,34 +1,25 @@
-"use client"
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { useChangePasswordMutation } from '../../redux/api/authApi';
 import { useFormik } from 'formik';
-import { signOut, useSession } from 'next-auth/react';
+import { signOut } from "../../adapters/auth/index";
+import { useSession } from "../../hooks/useSession";
 import { Button } from 'primereact/button';
-import { InputText } from 'primereact/inputtext';
 import { Message } from 'primereact/message';
 import { Password } from 'primereact/password';
 import { Toast } from 'primereact/toast';
-import { classNames } from 'primereact/utils';
 import { useRef } from 'react';
 import * as Yup from 'yup';
+import { env } from "../../adapters/env";
+import showToast from "../../helpers/showToast";
+
 const SolidChangeForcePassword = () => {
     const toast = useRef<Toast>(null);
     const [changePassword] = useChangePasswordMutation();
 
     const session: any = useSession();
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
-        });
-    };
 
-    const envPasswordRegex = process.env.NEXT_PUBLIC_PASSWORD_REGEX;
-    const envPasswordHelperText = process.env.NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC;
+    const envPasswordRegex = env("NEXT_PUBLIC_PASSWORD_REGEX");
+    const envPasswordHelperText = env("NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC");
     let passwordRegex: RegExp | null = null;
     try {
         if (envPasswordRegex) {
@@ -42,7 +33,7 @@ const SolidChangeForcePassword = () => {
     const newPasswordValidation = passwordRegex
         ? Yup.string()
             .matches(passwordRegex, ERROR_MESSAGES.PASSWORD_DO_NOT_MEET)
-            .required(ERROR_MESSAGES.FIELD_REUQIRED('New password'))        
+            .required(ERROR_MESSAGES.FIELD_REUQIRED('New password'))
         : Yup.string().min(6, ERROR_MESSAGES.PASSWORD_CHARACTER(6))
             .required(ERROR_MESSAGES.FIELD_REUQIRED('New password'));
 
@@ -77,18 +68,18 @@ const SolidChangeForcePassword = () => {
                 // Call the mutation and handle the response
                 const response = await changePassword(payload).unwrap(); // Await the API call and unwrap to handle errors.
                 if (response?.error) {
-                    showToast("error", ERROR_MESSAGES.ERROR, response.error)
+                    showToast(toast, "error", ERROR_MESSAGES.ERROR, response.error)
                     setErrors({
                         currentPassword: ERROR_MESSAGES.INCORRECT_CURRENT,
                         newPassword: ERROR_MESSAGES.MUST_MATCH,
                         confirmPassword: ERROR_MESSAGES.MUST_MATCH,
                     })
                 } else {
-                    showToast("success", ERROR_MESSAGES.FORCE_PASSWORD_CHANGE, ERROR_MESSAGES.PASSWORD_CHANGE);
+                    showToast(toast, "success", ERROR_MESSAGES.FORCE_PASSWORD_CHANGE, ERROR_MESSAGES.PASSWORD_CHANGE);
                     signOut({ callbackUrl: "/auth/login" })
                 }
             } catch (err: any) {
-                showToast("error",ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message);
+                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message);
                 // setErrors({
                 //     currentPassword: "Incorrect Current Password",
                 // })
@@ -100,7 +91,7 @@ const SolidChangeForcePassword = () => {
 
     const passwordPolicies = [
         {
-            policy: "8 characters minimum."
+            policy: "8 characters minimum"
         },
         {
             policy: "No Spaces Allowed"

@@ -1,4 +1,4 @@
-'use client';
+
 import { SolidListView } from "../../../../../components/core/list/SolidListView";
 import { camelCase, capitalize } from "lodash";
 import { Dialog } from "primereact/dialog";
@@ -6,7 +6,8 @@ import { useEffect, useState } from "react";
 import * as Yup from 'yup';
 import SolidFormView from '../../../../../components/core/form/SolidFormView';
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "../../../../../hooks/usePathname";
+import { useRouter } from "../../../../../hooks/useRouter";
 import { getExtensionComponent } from "../../../../../helpers/registry";
 import { SolidFormFieldWidgetProps, SolidFormWidgetProps } from "../../../../../types/solid-core";
 import { Message } from "primereact/message";
@@ -484,7 +485,7 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
                     if (!visibleCreateRelationEntity) return;
                     setvisibleCreateRelationEntity(false);
                 }}
-              breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
+                breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
 
             >
                 {params &&
@@ -555,9 +556,9 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
                     }
                 }
                 : {
-                    id :{
-                        $eq:-1
-                    } 
+                    id: {
+                        $eq: -1
+                    }
                 }
         }
         setListViewParams(lisviewparams)
@@ -579,9 +580,9 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
                     }
                 }
                 : {
-                    id :{
-                        $eq:-1
-                    } 
+                    id: {
+                        $eq: -1
+                    }
                 }
         }
 

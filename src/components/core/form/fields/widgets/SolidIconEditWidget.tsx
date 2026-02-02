@@ -1,4 +1,4 @@
-"use client";
+
 import { solidIcons } from "../../../../../helpers/solidIcons";
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
 import { Button } from "primereact/button";

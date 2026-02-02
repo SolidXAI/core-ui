@@ -1,4 +1,4 @@
-"use client"
+
 import React, { useState } from 'react'
 import { SolidImportDropzone } from './SolidImportDropzone'
 import { SolidImportTransaction } from './SolidImportTransaction'

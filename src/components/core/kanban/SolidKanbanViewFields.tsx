@@ -1,4 +1,4 @@
-"use client";
+
 import SolidBigintKanbanField from "./kanban-fields/SolidBigintKanbanField";
 import SolidBooleanKanbanField from "./kanban-fields/SolidBooleanKanbanField";
 import SolidComputedKanbanField from "./kanban-fields/SolidComputedKanbanField";

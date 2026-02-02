@@ -1,5 +1,3 @@
-"use client"
-// import { useBulkUpdateSolidSettingsMutation, useCreateSolidSettingsMutation, useLazyGetSolidSettingsQuery, useUpdateSolidSettingsMutation } from '../../redux/api/solidSettingsApi';
 import { useFormik } from 'formik';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
@@ -8,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { CancelButton } from './CancelButton';
 import { InputSwitch } from 'primereact/inputswitch';
 import { RadioButton } from 'primereact/radiobutton';
-import { usePathname } from 'next/navigation';
+import { usePathname } from "../../hooks/usePathname";
 import { InputTextarea } from 'primereact/inputtextarea';
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import AuthScreenRightBackgroundImage from '../../resources/images/auth/solid-left-layout-bg.png';
@@ -26,6 +24,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { handleError } from '../../helpers/ToastContainer';
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { useBulkUpdateSolidSettingsMutation, useLazyGetSolidSettingsQuery } from '../../redux/api/solidSettingsApi';
+import { env } from "../../adapters/env";
+import showToast from "../../helpers/showToast";
 
 
 export const GeneralSettings = () => {
@@ -45,17 +45,6 @@ export const GeneralSettings = () => {
     const [bulkUpdateSolidSettings] = useBulkUpdateSolidSettingsMutation();
     const toast = useRef<Toast>(null);
 
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
-
     const initialValues = {
         appLogo: solidSettingsData?.data?.appLogo ?? null,
         companylogo: solidSettingsData?.data?.companylogo ?? null,
@@ -65,8 +54,8 @@ export const GeneralSettings = () => {
         passwordLessAuth: solidSettingsData?.data?.passwordLessAuth ?? false,
         activateUserOnRegistration: solidSettingsData?.data?.activateUserOnRegistration ?? false,
         iamGoogleOAuthEnabled: solidSettingsData?.data?.iamGoogleOAuthEnabled ?? false,
-        shouldQueueEmails: solidSettingsData?.data?.shouldQueueEmails ?? false,
-        shouldQueueSms: solidSettingsData?.data?.shouldQueueSms ?? false,
+        // shouldQueueEmails: solidSettingsData?.data?.shouldQueueEmails ?? false,
+        // shouldQueueSms: solidSettingsData?.data?.shouldQueueSms ?? false,
         authPagesTheme: solidSettingsData?.data?.authPagesTheme ?? "light",
         authPagesLayout: solidSettingsData?.data?.authPagesLayout ?? "center",
         defaultRole: solidSettingsData?.data?.defaultRole ?? "Admin",
@@ -144,7 +133,7 @@ export const GeneralSettings = () => {
                 });
 
                 if (updatedSettingsArray.length === 0) {
-                    showToast("success", "No Changes", "No settings were updated");
+                    showToast(toast, "success", "No Changes", "No settings were updated");
                     return;
                 }
 
@@ -155,17 +144,16 @@ export const GeneralSettings = () => {
                 const response = await bulkUpdateSolidSettings({ data: formData }).unwrap();
 
                 if (response.statusCode === 200) {
-                    showToast("success", "Updated", "Settings updated");
+                    showToast(toast, "success", "Updated", "Settings updated");
                     trigger("")
                 }
 
-            } catch (error) {
+            } catch (error: any) {
                 console.log("Error updating settings:", error);
-                showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
+                showToast(toast, "error", ERROR_MESSAGES.FAILED, error?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
             }
         },
     });
-
 
     const showError = async () => {
         const errors = await formik.validateForm();
@@ -180,9 +168,9 @@ export const GeneralSettings = () => {
     }, [pathname])
 
     const positionMap: Record<'left' | 'center' | 'right', string> = {
-        left: 'The form will appear on the left side of the screen, while the banner will be positioned on the right side.',
-        center: 'The form will be centered in the middle of the screen for balanced alignment.',
-        right: 'The form will appear on the right side of the screen, and the banner will be positioned on the left side.'
+        left: 'The form will appear on the left side of the screen, while the banner will be positioned on the right side',
+        center: 'The form will be centered in the middle of the screen for balanced alignment',
+        right: 'The form will appear on the right side of the screen, and the banner will be positioned on the left side'
     };
 
     const onAppLogoDrop = useCallback(
@@ -499,7 +487,7 @@ export const GeneralSettings = () => {
                                                                 const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
 
                                                                 if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                                                    src = `${process.env.API_URL}/${src}`;
+                                                                    src = `${env("API_URL")}/${src}`;
                                                                 }
                                                                 return (
                                                                     <SolidUploadedImage src={src} className='solid-app-logo' />
@@ -533,7 +521,7 @@ export const GeneralSettings = () => {
                                                                 const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
 
                                                                 if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                                                    src = `${process.env.API_URL}/${src}`;
+                                                                    src = `${env("API_URL")}/${src}`;
                                                                 }
 
                                                                 return (
@@ -952,7 +940,7 @@ export const GeneralSettings = () => {
                                                                     const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
 
                                                                     if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                                                        src = `${process.env.API_URL}/${src}`;
+                                                                        src = `${env("API_URL")}/${src}`;
                                                                     }
                                                                     return (
                                                                         <SolidUploadedImage src={src} height={400} width={400} maxHeight={400} />
@@ -985,7 +973,7 @@ export const GeneralSettings = () => {
                                                                     const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
 
                                                                     if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                                                        src = `${process.env.API_URL}/${src}`;
+                                                                        src = `${env("API_URL")}/${src}`;
                                                                     }
                                                                     return (
                                                                         <SolidUploadedImage src={src} height={400} width={400} maxHeight={400} />
@@ -1016,7 +1004,7 @@ export const GeneralSettings = () => {
                                                                     const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
 
                                                                     if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                                                        src = `${process.env.API_URL}/${src}`;
+                                                                        src = `${env("API_URL")}/${src}`;
                                                                     }
                                                                     return (
                                                                         <SolidUploadedImage src={src} height={300} width={600} maxHeight={300} />
@@ -1069,6 +1057,7 @@ export const GeneralSettings = () => {
 
                             {pathname.includes("misc-settings") &&
                                 <>
+                                {/* 
                                     <p className='font-bold' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Misc Details</p>
                                     <div className='formgrid grid'>
                                         <div className='col-12 lg:col-10 xl:col-8'>
@@ -1105,6 +1094,7 @@ export const GeneralSettings = () => {
                                         </div>
                                     </div>
                                     <Divider />
+                                 */}
                                     <p className='font-bold' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Contact Support</p>
                                     <div className='formgrid grid'>
                                         <div className="col-12 lg:col-10 xl:col-8">

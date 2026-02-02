@@ -1,4 +1,4 @@
-'use client';
+
 import { useState } from 'react';
 import { SolidKanbanViewFieldsParams } from '../SolidKanbanViewFields';
 import { Dialog } from 'primereact/dialog';
@@ -7,7 +7,7 @@ import { PDFSvg } from '../../../../components/Svg/PDFSvg';
 import MP3Image from '../../../../resources/images/fileTypes/Mp3.png'
 import MP4Image from '../../../../resources/images/fileTypes/Mp4.png'
 import FileImage from '../../../../resources/images/fileTypes/File.png'
-import Image from 'next/image';
+import Image from "../../../common/Image";
 import { ExcelSvg } from '../../../../components/Svg/ExcelSvg';
 const SolidShortTextKanbanField = ({ solidKanbanViewMetaData, fieldMetadata, fieldLayout, data, setLightboxUrls, setOpenLightbox, groupedView }: SolidKanbanViewFieldsParams) => {
     const [visible, setVisible] = useState(false);

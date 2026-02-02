@@ -1,10 +1,13 @@
-"use client"
 import { ERROR_MESSAGES } from '../../constants/error-messages';
-import { signIn } from 'next-auth/react';
-import { useRouter, useSearchParams } from 'next/navigation';
+import { signInWithOAuthAccessCode } from "../../adapters/auth/index";
+import { useRouter } from "../../hooks/useRouter";
+import { useSearchParams } from "../../hooks/useSearchParams";
 import { ProgressSpinner } from 'primereact/progressspinner';
 import { Toast } from 'primereact/toast';
-import React, { useEffect, useRef, useState } from 'react'
+import { useEffect, useRef, useState } from 'react'
+import { env } from "../../adapters/env";
+import showToast from "../../helpers/showToast";
+
 export const GoogleAuthChecking = () => {
     const searchParams = useSearchParams();
     const accessCode = searchParams.get("accessCode");
@@ -12,40 +15,34 @@ export const GoogleAuthChecking = () => {
     const router = useRouter();
     const [error, setError] = useState<string | null>(null);
     const toast = useRef<Toast>(null);
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
-        });
-    };
     useEffect(() => {
         const handleOAuthAuthentication = async () => {
+            if (!accessCode) {
+                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, ERROR_MESSAGES.AUTHENICATION__FAILED);
+                setError(ERROR_MESSAGES.AUTHENICATION__FAILED);
+                return;
+            }
+
             try {
-                const response = await signIn("credentials", {
-                    redirect: false,
-                    accessCode: accessCode
-                    // accessToken: accessToken?.accessToken,
-                    // refreshToken: accessToken?.refreshToken
+                const response = await signInWithOAuthAccessCode({
+                    accessCode: accessCode,
                 });
 
                 if (response?.error) {
-                    showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                    showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                     setError(ERROR_MESSAGES.AUTHENICATION__FAILED)
                 } else {
-                    showToast("success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
-                    router.push(`${process.env.NEXT_PUBLIC_LOGIN_REDIRECT_URL}`);
+                    showToast(toast, "success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
+                    const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin";
+                    router.push(redirectUrl);
                 }
             } catch (err: any) {
-                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.AUTHENICATION__FAILED);
+                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.AUTHENICATION__FAILED);
             }
         };
 
         handleOAuthAuthentication();
-    }, [router]);
+    }, [accessCode, router]);
 
     if (error) {
         return (

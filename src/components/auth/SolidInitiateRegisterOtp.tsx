@@ -1,9 +1,8 @@
-"use client";
-
 import { useConfirmOtpRegisterMutation, useInitateRegisterMutation } from "../../redux/api/authApi";
 import { Form, Formik } from "formik";
-import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import Image from "../common/Image";
+import { useRouter } from "../../hooks/useRouter";
+import { useSearchParams } from "../../hooks/useSearchParams";
 import { Button } from "primereact/button";
 import { InputOtp } from "primereact/inputotp";
 import { Message } from "primereact/message";
@@ -13,13 +12,15 @@ import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
+import { env } from "../../adapters/env";
+import showToast from "../../helpers/showToast";
 
 const SolidInitiateRegisterOtp = () => {
     const searchParams = useSearchParams();
     const tempEmail = searchParams.get('email');
     const email = tempEmail ? decodeURIComponent(tempEmail) : '';
     const RESEND_OTP_KEY = `resendOtpRegister_${email}`;
-    const RESEND_OTP_TIMER_MIN = parseFloat(process.env.NEXT_PUBLIC_RESEND_OTP_TIMER || '0.5');
+    const RESEND_OTP_TIMER_MIN = parseFloat(env("NEXT_PUBLIC_RESEND_OTP_TIMER") || '0.5');
     const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
     const username = searchParams.get('username') || '';
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
@@ -79,17 +80,6 @@ const SolidInitiateRegisterOtp = () => {
             .required(ERROR_MESSAGES.FIELD_REUQIRED('OTP')),
     });
 
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
-
     const isFormFieldValid = (formik: any, fieldName: string) =>
         formik.touched[fieldName] && formik.errors[fieldName];
 
@@ -104,15 +94,15 @@ const SolidInitiateRegisterOtp = () => {
             const response = await initiateResendOTP(payload).unwrap();
 
             if (response?.statusCode === 200) {
-                showToast("success", ERROR_MESSAGES.OPT_RESEND, response?.data?.message);
+                showToast(toast, "success", ERROR_MESSAGES.OPT_RESEND, response?.data?.message);
                 localStorage.setItem(RESEND_OTP_KEY, Date.now().toString());
                 setTimeLeft(RESEND_OTP_TIMER);
                 setResendEnabled(false);
             } else {
-                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
             }
         } catch (err: any) {
-            showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
+            showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
         }
     };
 
@@ -154,16 +144,16 @@ const SolidInitiateRegisterOtp = () => {
 
                                 if (response?.statusCode === 200) {
                                     localStorage.removeItem(`resendOtpRegister_${email}`);
-                                    showToast("success", ERROR_MESSAGES.LOGIN_SUCCESSFULLY, "Login");
+                                    showToast(toast, "success", ERROR_MESSAGES.LOGIN_SUCCESSFULLY, "Login");
                                     router.push(`/auth/login`);
                                 } else {
-                                    showToast("error", ERROR_MESSAGES.INAVLID_OTP, response.error);
+                                    showToast(toast, "error", ERROR_MESSAGES.INAVLID_OTP, response.error);
                                     setErrors({
                                         otp: ERROR_MESSAGES.INAVLID_OTP,
                                     });
                                 }
                             } catch (err: any) {
-                                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                             } finally {
                                 setSubmitting(false);
                             }

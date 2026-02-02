@@ -1,4 +1,4 @@
-"use client"
+
 import { Dialog } from 'primereact/dialog';
 import React, { useState } from 'react'
 import { SolidImportStepper } from './SolidImportStepper';

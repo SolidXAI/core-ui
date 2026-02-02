@@ -1,4 +1,4 @@
-"use client";
+
 const countries = [
     { name: "+93 Afghanistan", code: "AF", numberCode: "+93" },
     { name: "Albania", code: "AL", numberCode: "+355" },
@@ -251,7 +251,7 @@ const countries = [
     { name: "Venezuela", code: "VE", numberCode: "+58" },
     { name: "Viet Nam", code: "VN", numberCode: "+84" },
     { name: "Virgin Islands, British", code: "VG", numberCode: "+1-284" },
-    { name: "Virgin Islands, U.s.", code: "VI", numberCode: "+1-340" },
+    { name: "Virgin Islands, U.s", code: "VI", numberCode: "+1-340" },
     { name: "Wallis and Futuna", code: "WF", numberCode: "+681" },
     { name: "Western Sahara", code: "EH", numberCode: "+212" },
     { name: "Yemen", code: "YE", numberCode: "+967" },

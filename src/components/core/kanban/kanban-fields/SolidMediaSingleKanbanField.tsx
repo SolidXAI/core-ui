@@ -1,4 +1,4 @@
-'use client';
+
 import React, { useState } from 'react';
 import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";
@@ -8,7 +8,7 @@ import { FilterMatchMode } from 'primereact/api';
 import { Document, Page, pdfjs } from "react-pdf";
 import { Dialog } from "primereact/dialog";
 import { PDFSvg } from '../../../../components/Svg/PDFSvg';
-import Image from 'next/image';
+import Image from "../../../common/Image";
 import FileImage from '../../../../resources/images/fileTypes/File.png'
 import { ExcelSvg } from '../../../../components/Svg/ExcelSvg';
 import MP3Image from '../../../../resources/images/fileTypes/Mp3.png'

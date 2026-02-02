@@ -1,4 +1,4 @@
-"use client";
+
 import { camelCase, kebabCase, snakeCase } from "lodash";
 import moment from "moment";
 import pluralize from "pluralize";

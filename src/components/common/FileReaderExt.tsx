@@ -1,4 +1,4 @@
-"use client"
+
 import FileSvg from '../Svg/FileSvg'
 
 export const FileReaderExt = ({ fileDetails }: { fileDetails: any }) => {

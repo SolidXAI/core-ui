@@ -1,4 +1,4 @@
-'use client';
+
 import { FilterMatchMode } from 'primereact/api';
 import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
 import { FormEvent } from "primereact/ts-helpers";
@@ -7,7 +7,7 @@ import { InputTypes, SolidVarInputsFilterElement } from '../../../../../componen
 import { getExtensionComponent } from '../../../../../helpers/registry';
 import { SolidListFieldWidgetProps } from '../../../../../types/solid-core';
 import { Button } from 'primereact/button';
-import { useRouter } from 'next/navigation';
+import { useRouter } from "../../../../../hooks/useRouter";
 import { kebabCase } from 'change-case';
 
 const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {

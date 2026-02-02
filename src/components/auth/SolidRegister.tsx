@@ -1,10 +1,8 @@
-"use client";
-
 import { useInitateRegisterMutation, useRegisterMutation } from "../../redux/api/authApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import { Form, Formik } from "formik";
-import Link from "next/link";
-import { useRouter } from "next/navigation";
+import Link from "../common/Link";
+import { useRouter } from "../../hooks/useRouter";
 import { Button } from "primereact/button";
 import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
@@ -15,12 +13,14 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
-import Image from "next/image";
+import Image from "../common/Image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "../../helpers/resendOtpHelper";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
+import { env } from "../../adapters/env";
+import showToast from "../../helpers/showToast";
 
 interface AuthTabsProps {
     passwordBasedAuth: boolean;
@@ -29,7 +29,7 @@ interface AuthTabsProps {
 }
 
 const SolidRegister = () => {
-    const envPasswordHelperText = process.env.NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC;
+    const envPasswordHelperText = env("NEXT_PUBLIC_PASSWORD_COMPLEXITY_DESC");
     const [activeIndex, setActiveIndex] = useState(0);
 
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
@@ -54,10 +54,8 @@ const SolidRegister = () => {
         if (error) {
             if ("data" in error) {
                 const apiError = error as FetchBaseQueryError;
-                const errorMessages = Array.isArray(apiError.data?.message)
-                    ? apiError.data?.message
-                    : [apiError.data?.message];
-
+                // @ts-ignore
+                const errorMessages = Array.isArray(apiError.data?.message) ? apiError.data?.message : [apiError.data?.message];
                 toast.current?.show({
                     severity: "error",
                     summary: ERROR_MESSAGES.ERROR,
@@ -87,16 +85,6 @@ const SolidRegister = () => {
     //             router.replace("/auth/login");
     //     }
     // }, [isSuccess])
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
 
     const PasswordSignup = ({ showNameFieldsForRegistration }: { showNameFieldsForRegistration?: boolean }) => {
         console.log("showNameFieldsForRegistration", showNameFieldsForRegistration);
@@ -159,16 +147,16 @@ const SolidRegister = () => {
                         const response = await register(userData).unwrap();
 
                         if (response?.statusCode === 200) {
-                            showToast("success", ERROR_MESSAGES.USER_REGISTER, response?.data?.message);
+                            showToast(toast, "success", ERROR_MESSAGES.USER_REGISTER, response?.data?.message);
                             setShowOverlay(true);
                             setTimeout(() => {
                                 router.push(`/auth/login`);
                             }, 3000);
                         } else {
-                            showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                            showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                         }
                     } catch (err: any) {
-                        showToast("error", ERROR_MESSAGES.EMAIL_ALREADY_TAKEN, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                        showToast(toast, "error", ERROR_MESSAGES.EMAIL_ALREADY_TAKEN, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                     } finally {
                         setSubmitting(false);
                     }
@@ -293,7 +281,7 @@ const SolidRegister = () => {
                 onSubmit={async (values, { setSubmitting }) => {
                     try {
                         const RESEND_OTP_KEY = `resendOtpRegister_${values.email}`;
-                        const RESEND_OTP_TIMER_MIN = parseFloat(process.env.NEXT_PUBLIC_RESEND_OTP_TIMER || '0.5');
+                        const RESEND_OTP_TIMER_MIN = parseFloat(env("NEXT_PUBLIC_RESEND_OTP_TIMER") || '0.5');
                         const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
                         const payload = {
                             username: values.username,
@@ -309,7 +297,7 @@ const SolidRegister = () => {
 
                             if (remaining > 0) {
                                 const formatted = formatTimeLeft(remaining);
-                                showToast(
+                                showToast(toast, 
                                     "error",
                                     ERROR_MESSAGES.PLEASE_WAIT,
                                     ERROR_MESSAGES.OPT_FORMAT(formatted)
@@ -321,15 +309,15 @@ const SolidRegister = () => {
                         const response = await initiateRegister(payload).unwrap(); // Call mutation trigger
 
                         if (response?.statusCode === 200) {
-                            showToast("success", ERROR_MESSAGES.OPT_SEND, response?.data?.message);
+                            showToast(toast, "success", ERROR_MESSAGES.OPT_SEND, response?.data?.message);
                             const email = values.email;
                             localStorage.setItem(`resendOtpRegister_${email}`, Date.now().toString());
                             router.push(`/auth/initiate-register?email=${email}&username=${values.username}`);
                         } else {
-                            showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                            showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                         }
                     } catch (err: any) {
-                        showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                        showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                     } finally {
                         setSubmitting(false);
                     }

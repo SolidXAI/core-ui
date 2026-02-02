@@ -1,8 +1,7 @@
 /* eslint-disable react-hooks/exhaustive-deps */
-'use client';
-
 import { ChildContainerProps, LayoutState } from '../../types';
-import { usePathname, useSearchParams } from 'next/navigation';
+import { usePathname } from "../../hooks/usePathname";
+import { useSearchParams } from "../../hooks/useSearchParams";
 import { PrimeReactContext } from 'primereact/api';
 import { useEventListener, useUnmountEffect } from 'primereact/hooks';
 import { classNames } from 'primereact/utils';
@@ -12,9 +11,10 @@ import AppConfig from './AppConfig';
 import { LayoutContext } from './context/layoutcontext';
 import AppSidebar from './AppSidebar';
 import SolidPopupContainer from '../common/SolidPopupContainer';
-import { useSession } from 'next-auth/react';
+import { useSession } from "../../hooks/useSession";
 import { getExtensionFunction } from '../../helpers/registry';
 import { SolidOnApplicationMountEvent } from '../../types/solid-core';
+import { env } from "../../adapters/env";
 
 export const Layout = ({ children }: ChildContainerProps) => {
     const { layoutConfig, layoutState, setLayoutState } = useContext(LayoutContext);
@@ -148,7 +148,7 @@ export const Layout = ({ children }: ChildContainerProps) => {
         hasRunRef.current = true;
 
         const handleDynamicFunction = async () => {
-            const dynamicHeader = process.env.SOLIDX_ON_APPLICATION_MOUNT_HANDLER;
+            const dynamicHeader = env("SOLIDX_ON_APPLICATION_MOUNT_HANDLER");
 
             const event: SolidOnApplicationMountEvent = {
                 type: "onApplicationMount",
@@ -187,7 +187,7 @@ export const Layout = ({ children }: ChildContainerProps) => {
     return (
         <React.Fragment>
             <div className={containerClass}>
-                {/* {process.env.NEXT_PUBLIC_ENABLE_CUSTOM_HEADER_FOOTER == "true" && <CustomHeader />} */}
+                {/* {getEnv("NEXT_PUBLIC_ENABLE_CUSTOM_HEADER_FOOTER") == "true" && <CustomHeader />} */}
                 <AppSidebar />
                 {/* <div className="apps-icon block md:hidden" onClick={toggleBothSidebars}>
                     <i className="pi pi-th-large"></i>
@@ -195,7 +195,7 @@ export const Layout = ({ children }: ChildContainerProps) => {
                 <SolidPopupContainer></SolidPopupContainer>
                 <div className={`main-content ${visibleNavbar ? "shifted" : ""}`}>
                     {children}
-                    {/* {process.env.NEXT_PUBLIC_ENABLE_CUSTOM_HEADER_FOOTER == "true" && <CustomFooter />} */}
+                    {/* {getEnv("NEXT_PUBLIC_ENABLE_CUSTOM_HEADER_FOOTER") == "true" && <CustomFooter />} */}
                 </div>
                 <AppConfig />
                 <div className="layout-mask"></div>

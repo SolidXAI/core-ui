@@ -1,4 +1,4 @@
-'use client';
+
 import { useState } from 'react';
 
 const FieldSelector = ({ handleTypeSelect, modelMetaData }: any) => {

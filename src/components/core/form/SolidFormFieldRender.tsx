@@ -1,4 +1,4 @@
-"use client";
+
 
 import { Message } from "primereact/message";
 import { FormikObject, SolidFieldProps } from "./fields/ISolidField";

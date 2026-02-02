@@ -1,6 +1,5 @@
-'use client';
-import Link from "next/link";
-import { usePathname } from "next/navigation";
+import Link from "../common/Link";
+import { usePathname } from "../../hooks/usePathname";
 import { PanelMenu } from "primereact/panelmenu";
 import { useState } from "react";
 
@@ -12,7 +11,7 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
         return (
             <div key={item?.key} className={`flex align-items-center cursor-pointer menuHead px-3 ${isSelected ? ' p-highlight' : ''}`} onClick={options.onClick}>
                 <Link href={item?.url ? item?.url : '#'} className="w-full flex justify-content-between font-normal">
-                    <div className="flex align-items-center" style={{gap: 10}}>
+                    <div className="flex align-items-center" style={{ gap: 10 }}>
                         {item.icon && (
                             // material-symbols-${item.iconVariant ?? 'outlined'}
                             <span className={`material-symbols-outlined`} style={{ fontSize: 18 }}>

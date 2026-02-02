@@ -1,4 +1,4 @@
-'use client';
+
 import CodeEditor from "../../../../components/common/CodeEditor";
 import { Message } from "primereact/message";
 import * as Yup from 'yup';

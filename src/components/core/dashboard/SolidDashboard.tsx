@@ -1,4 +1,4 @@
-"use client";
+
 import { DashboardResponse, useGetDashboardQuery } from '../../../redux/api/dashboardApi';
 import { SqlExpression } from '../../../types/solid-core';
 import { Button } from 'primereact/button';
