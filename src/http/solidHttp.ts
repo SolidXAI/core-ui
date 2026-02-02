@@ -20,6 +20,10 @@ export const solidAxios = axios.create({
 });
 
 solidAxios.interceptors.request.use(async (config) => {
+  if (config.url && config.url.startsWith("/api")) {
+    const stripped = config.url.replace(/^\/api(\/|$)/, "/");
+    config.url = stripped === "" ? "/" : stripped;
+  }
   const session = await getSession();
   if (session?.user?.accessToken) {
     config.headers = config.headers || {};
