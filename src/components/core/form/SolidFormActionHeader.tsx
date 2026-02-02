@@ -14,7 +14,7 @@ import { SolidFormViewContextMenuHeaderButton } from "./SolidFormViewContextMenu
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { useSelector } from "react-redux";
 
-export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate,formData }: any) => {
+export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate,formData, isSubmitting }: any) => {
     const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
     const router = useRouter();
     const pathname = usePathname();
@@ -22,6 +22,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     const op = useRef(null);
     const [contextMenuHeaderButtons, setContextMenuHeaderButtons] = useState<any>([]);
     const [normalHeaderButtons, setNormalHeaderButtons] = useState<any>([]);
+    const [isNavigating, setIsNavigating] = useState(false);
     const createHeaderTitle = `Create ${solidView.model.displayName}`;
     const editHeaderTitle = `Edit ${solidView.model.displayName}`;
 
@@ -268,12 +269,16 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                         size="small"
                                         type="submit"
                                         className="hidden lg:flex"
+                                        loading={isSubmitting}
+                                        disabled={isSubmitting}
                                     />
                                       <Button
                                         size="small"
                                         type="submit"
                                         className="lg:hidden solid-icon-button"
                                         icon="pi pi-check"
+                                        loading={isSubmitting}
+                                        disabled={isSubmitting}
                                     />
                                 </div>
                             }
@@ -303,6 +308,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                         }}
                                         type="submit"
                                         className="hidden lg:flex"
+                                        loading={isSubmitting}
+                                        disabled={isSubmitting}
                                     />
                                     <Button
                                         size="small"
@@ -312,6 +319,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                         type="submit"
                                         className="lg:hidden solid-icon-button"
                                         icon="pi pi-check"
+                                        loading={isSubmitting}
+                                        disabled={isSubmitting}
                                     />
                                 </div>
                             }
@@ -390,11 +399,17 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 <>
                                     <div className="hidden lg:flex">
                                     <div>
-                                        <Button type="button" label="Add" size='small' onClick={() => router.replace('new?viewMode=edit')} />
+                                        <Button type="button" label="Add" size='small' onClick={() => {
+                                            setIsNavigating(true);
+                                            router.replace('new?viewMode=edit');
+                                        }} loading={isNavigating} disabled={isNavigating} />
                                     </div>
                                     </div>
                                     <div className="lg:hidden">
-                                        <Button type="button" icon="pi pi-plus" size='small' onClick={() => router.replace('new?viewMode=edit')} className="p-button-sm solid-icon-button" />
+                                        <Button type="button" icon="pi pi-plus" size='small' onClick={() => {
+                                            setIsNavigating(true);
+                                            router.replace('new?viewMode=edit');
+                                        }} className="p-button-sm solid-icon-button" loading={isNavigating} disabled={isNavigating} />
                                     </div>
                                 </>
                             }
@@ -424,8 +439,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 formik.dirty &&
 
                                 <div>
-                                    <Button label="Save" size="small" type="submit"  className="hidden lg:flex"/>
-                                    <Button  size="small" type="submit" className="lg:hidden solid-icon-button" icon="pi pi-check" />
+                                    <Button label="Save" size="small" type="submit"  className="hidden lg:flex" loading={isSubmitting} disabled={isSubmitting}/>
+                                    <Button  size="small" type="submit" className="lg:hidden solid-icon-button" icon="pi pi-check" loading={isSubmitting} disabled={isSubmitting}/>
                                 </div>
                             }
 
