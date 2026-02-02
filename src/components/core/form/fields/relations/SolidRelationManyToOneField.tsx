@@ -620,6 +620,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
     const [currentQuery, setCurrentQuery] = useState("");
     const LIMIT = 50;
     const [loading, setLoading] = useState(false);
+    const [viewDisplayValue, setViewDisplayValue] = useState<any>(null);
 
 
     useEffect(() => {
@@ -661,6 +662,63 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
         }
         fn()
     }, [])
+
+    // Add this NEW useEffect - only for view mode refresh
+    useEffect(() => {
+        const fn = async () => {
+            if (viewMode !== "view") {
+                setViewDisplayValue(null);
+                return;
+            }
+
+            const rawValue =
+                fieldContext.data[fieldLayoutInfo.attrs.name] ??
+                formik.values[fieldLayoutInfo.attrs.name];
+
+            if (!rawValue) return;
+
+            const searchValue =
+                typeof rawValue === "object"
+                    ? rawValue[parentFieldName]
+                    : rawValue;
+
+            const queryData = {
+                offset: 0,
+                limit: 1,
+                filters: {
+                    $and: [
+                        {
+                            [parentFieldName]: {
+                                [fieldLayoutInfo?.attrs?.autocompleteMatchMode || "$eqi"]:
+                                    searchValue,
+                            },
+                        },
+                    ],
+                },
+            };
+
+            const qsStr = qs.stringify(queryData, { encodeValuesOnly: true });
+            const res = await triggerGetSolidEntities(qsStr);
+            const record = res.data?.records?.[0];
+            if (!record) return;
+
+            const label =
+                parentFieldLabels?.length > 0
+                    ? parentFieldLabels.map((l: string) => record[l]).join(" - ")
+                    : record[parentFieldName];
+            console.log("Final View Label",label, record[parentFieldName])
+            setViewDisplayValue({
+                solidManyToOneLabel: label,
+                solidManyToOneValue: record[parentFieldName],
+                ...record,
+            });
+        };
+
+        fn();
+    }, [viewMode, formik.values[fieldLayoutInfo.attrs.name]]);
+
+
+    const resolvedValue = viewMode === "view" ? viewDisplayValue : formik.values[fieldLayoutInfo.attrs.name];
 
     const autoCompleteSearch = async (event: AutoCompleteCompleteEvent) => {
         setOffset(0);
@@ -918,10 +976,9 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                         readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                         disabled={formDisabled || fieldDisabled || readOnlyPermission || viewMode === "view"}
                         field="solidManyToOneLabel"
-                        vale
                         {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                         id={fieldLayoutInfo.attrs.name}
-                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                        value={resolvedValue || null}
                         dropdown={!readOnlyPermission}
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}

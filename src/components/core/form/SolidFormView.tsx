@@ -451,6 +451,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [isShowChatter, setShowChatter] = useState(false);
     const [chatterLocaleWidth, setChatterLocaleWidth] = useState(380); // default width
     const [isResizingChatterLocale, setIsResizingChatterLocale] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [solidWorkflowFieldValue, setSolidWorkflowFieldValue] = useState<string>("");
     const [defaultTabViewOptionIndex, setDefaultTabViewOptionIndex] = useState<number>(1);
@@ -760,6 +761,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const solidView = solidFormViewMetaData.data.solidView;
         const solidFieldsMetadata = solidFormViewMetaData.data.solidFieldsMetadata;
         const layoutFieldsObj = getLayoutFieldsAsObject([formViewLayout]);
+        setIsSubmitting(true);
         try {
             let formData = new FormData();
 
@@ -854,6 +856,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         } catch (err) {
             console.error(ERROR_MESSAGES.ENTITY_FAILED, err);
+        } finally {
+            setIsSubmitting(false);
         }
     }
 
@@ -1684,6 +1688,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             internationalisationEnabled={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}
                             handleDraftPublishWorkFlow={handleDraftPublishWorkFlow}
                             onStepperUpdate={() => setRefreshChatterMessage(true)}
+                            isSubmitting={isSubmitting}
                         />
                         <div className={`px-4 py-3 md:p-4 solid-form-content ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}

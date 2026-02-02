@@ -74,7 +74,7 @@ export const SolidBreadcrumb = (props: Props) => {
   if (segments.length >= 4 && segments[0] === "admin" && segments[1] === "core") {
     const moduleName = segments[2];
     const modelName = segments[3];
-    const modelDisplayName = toTitleCase(modelName);
+    const modelDisplayName = modelMetadata?.displayName || toTitleCase(modelName);
 
     // Link to model list or kanban view based on stored view
     breadcrumbItems.push({
