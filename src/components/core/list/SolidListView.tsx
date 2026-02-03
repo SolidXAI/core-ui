@@ -45,7 +45,7 @@ import { SolidListViewConfigure } from "./SolidListViewConfigure";
 import { SolidListViewShimmerLoading } from "./SolidListViewShimmerLoading";
 import { SolidEmptyListViewPlaceholder } from "./SolidEmptyListViewPlaceholder";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
-import { hasAnyRole, useHasAnyRole } from "../../../helpers/rolesHelper";
+import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { SolidListViewRowButtonContextMenu } from "./SolidListViewRowButtonContextMenu";
 import { useDispatch, useSelector } from "react-redux";
@@ -139,8 +139,8 @@ type SolidListViewParams = {
 };
 
 export const SolidListView = (params: SolidListViewParams) => {
-  const { user } = useSelector((state: any) => state.auth);
   const session = useSession();
+  const user = session?.data?.user;
   const dispatch = useDispatch();
   const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
 
@@ -1141,7 +1141,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       const visibleToRole = column?.attrs?.roles || [];
 
       if (visibleToRole.length > 0) {
-        if (hasAnyRole(user?.user?.roles, visibleToRole)) {
+        if (hasAnyRole(user?.roles, visibleToRole)) {
           return SolidListViewColumn({
             solidListViewMetaData,
             fieldMetadata,
@@ -1599,15 +1599,13 @@ export const SolidListView = (params: SolidListViewParams) => {
                         // Only check hasAnyRole if roles are provided
                         const isAllowed =
                           roles.length === 0 ||
-                          hasAnyRole(user?.user?.roles, roles);
+                          hasAnyRole(user?.roles, roles);
 
                         const isVisible = rb?.attrs?.visible !== false;
 
                         return !isInContextMenu && isAllowed && isVisible;
                       })
                       .map((button: any, index: number) => {
-                        // const hasRole = button.attrs.roles && button.attrs.roles.length > 0 ? useHasAnyRole(button.attrs.roles) : true;
-                        // if (!hasRole) return null;
 
                         return (
                           <Column

@@ -1,10 +1,7 @@
-
 import { BackButton } from "../../../components/common/BackButton";
-import { SolidCancelButton } from "../../../components/common/CancelButton";
 import { SolidFormHeader } from "../../../components/common/SolidFormHeader";
 import { useHandleFormCustomButtonClickaction } from "../../../components/common/useHandleFormCustomButtonClick";
 import { permissionExpression } from "../../../helpers/permissions";
-import { getExtensionFunction } from "../../../helpers/registry";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
@@ -15,7 +12,7 @@ import { useEffect, useRef, useState } from "react";
 import { SolidFormViewNormalHeaderButton } from "./SolidFormViewNormalHeaderButton";
 import { SolidFormViewContextMenuHeaderButton } from "./SolidFormViewContextMenuHeaderButton";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
-import { useSelector } from "react-redux";
+import { useSession } from '../../../hooks/useSession'
 
 export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate,formData, isSubmitting }: any) => {
     const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
@@ -29,7 +26,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     const createHeaderTitle = `Create ${solidView.model.displayName}`;
     const editHeaderTitle = `Edit ${solidView.model.displayName}`;
 
-    const { user } = useSelector((state: any) => state.auth);
+    const { data: session, status } = useSession();
+    const user = session?.user;
 
     const isPublished = publish && publish !== 'null';   // record is published if publish has value
 
@@ -48,7 +46,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                         return false;
                     }
                     if (visibleToRole.length > 0) {
-                        if (!hasAnyRole(user?.user?.roles, visibleToRole)) {
+                        if (!hasAnyRole(user?.roles, visibleToRole)) {
                             return false;
                         }
                     }
@@ -60,7 +58,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                 normalHeaderButtonsData = formHeaderButtons.filter((button: any) => {
                     const visibleToRole = button.attrs?.roles || [];
                     if (visibleToRole.length > 0) {
-                        if (!hasAnyRole(user?.user?.roles, visibleToRole)) {
+                        if (!hasAnyRole(user?.roles, visibleToRole)) {
                             return false;
                         }
                     }

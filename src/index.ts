@@ -93,7 +93,7 @@ export { AppTitle } from './helpers/AppTitle';
 export { addCommasToAmount, calculateDaysOfStay, getSingularAndPlural } from './helpers/helpers';
 export { permissionExpression } from './helpers/permissions';
 export { revalidateTag } from './helpers/revalidate';
-export { useHasAllRoles, useHasAnyRole, hasAnyRole } from './helpers/rolesHelper';
+export { hasAnyRole } from './helpers/rolesHelper';
 export { registerExtensionComponent, registerExtensionFunction } from './helpers/registry';
 export { env } from './adapters/env';
 export { logger } from './helpers/logger';

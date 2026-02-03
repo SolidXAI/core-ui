@@ -3,8 +3,9 @@ import { SolidCreateButton } from '../common/SolidCreateButton'
 import Image from "../../common/Image"
 import { Button } from 'primereact/button'
 import { useHandleListCustomButtonClick } from '../../../components/common/useHandleListCustomButtonClick'
-import { useHasAnyRole } from '../../../helpers/rolesHelper'
+import { hasAnyRole } from '../../../helpers/rolesHelper'
 import { env } from "../../../adapters/env";
+import { useSession } from "../../../hooks/useSession";
 
 export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, createActionQueryParams, actionsAllowed, params, solidListViewMetaData }: any) => {
     const noDataText = solidListViewMetaData?.data?.solidView?.layout?.attrs?.listViewNoDataHelperText
@@ -19,9 +20,11 @@ export const SolidEmptyListViewPlaceholder = ({ createButtonUrl, createActionQue
             <div>
                 {solidListViewMetaData?.data?.solidView?.layout?.attrs.showDefaultAddButton === false && solidListViewMetaData?.data?.solidView?.layout?.attrs?.headerButtons &&
                     solidListViewMetaData?.data?.solidView?.layout?.attrs?.headerButtons.map((button: any) => {
-                        const hasRole = !button?.attrs?.roles || button?.attrs?.roles.length === 0
-                            ? true
-                            : useHasAnyRole(button?.attrs?.roles);
+
+                        const { data: session, status } = useSession();
+                        const user = session?.user;
+
+                        const hasRole = !button?.attrs?.roles || button?.attrs?.roles.length === 0 ? true : hasAnyRole(user?.roles, button?.attrs?.roles);
 
                         if (!hasRole) return null;
                         return (
