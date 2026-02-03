@@ -10,10 +10,10 @@ import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
 import { Toast } from "primereact/toast";
 import { useRef, useState } from "react";
-import { useSelector } from "react-redux";
 import styles from './SolidAccountSettings.module.css'
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import showToast from "../../../../helpers/showToast";
+import { useSession } from '../../../../hooks/useSession'
 
 export const SolidPersonalInfo = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
@@ -24,7 +24,10 @@ export const SolidPersonalInfo = () => {
     const [replaceDialogVisible, setReplaceDialogVisible] = useState(false);
     const [pendingFile, setPendingFile] = useState<File | null>(null);
 
-    const userId = useSelector((state: any) => state.auth?.user?.user?.id);
+    const { data: session, status } = useSession();
+    const user = session?.user;
+    const userId = user?.id;
+
     const { data: userData, refetch } = useGetUserQuery(userId);
 
     const [

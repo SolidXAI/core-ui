@@ -1,17 +1,17 @@
-
 import { InputText } from 'primereact/inputtext'
 import styles from './chatter.module.css'
 import { Button } from 'primereact/button'
 import { useCreateChatterMessageMutation } from '../../../redux/api/solidChatterMessageApi'
 import { useEffect, useState, useRef } from 'react'
-import { useGetSolidViewLayoutQuery } from '../../../redux/api/solidViewApi'
-import { useSelector } from 'react-redux'
-import { FileUpload } from 'primereact/fileupload';
 import { ERROR_MESSAGES } from '../../../constants/error-messages'
+import { useSession } from '../../../hooks/useSession'
+
 export const SolidMessageComposer = ({ type, modelSingularName, refetch, id }: { type?: string, modelSingularName?: any, refetch?: any, id?: any }) => {
     const [message, setMessage] = useState('');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
-    const { user } = useSelector((state: any) => state.auth);
+
+    const { data: session, status } = useSession();
+    const user = session?.user;
     const fileInputRef = useRef<HTMLInputElement>(null);
 
     // const { data: viewLayoutData } = useGetSolidViewLayoutQuery(null);
@@ -41,7 +41,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id }: {
             formData.append('messageBody', message);
             formData.append('coModelEntityId', id);
             formData.append('coModelName', modelSingularName);
-            formData.append('userId', user?.user?.id || 1);
+            formData.append('userId', user?.id || 1);
 
             selectedFiles.forEach((file, index) => {
                 formData.append(`messageAttachments`, file);

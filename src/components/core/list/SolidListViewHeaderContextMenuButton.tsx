@@ -1,11 +1,13 @@
-
-import { useHasAnyRole } from "../../../helpers/rolesHelper";
+import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { Button } from "primereact/button";
+import { useSession } from "../../../hooks/useSession";
 
 export const SolidListViewHeaderContextMenuButton = ({ button, params, solidListViewMetaData, handleCustomButtonClick }: any) => {
-    const hasRole = !button?.attrs?.roles || button?.attrs?.roles.length === 0
-        ? true
-        : useHasAnyRole(button?.attrs?.roles);
+
+    const { data: session, status } = useSession();
+    const user = session?.user;
+
+    const hasRole = !button?.attrs?.roles || button?.attrs?.roles.length === 0 ? true : hasAnyRole(user?.roles, button?.attrs?.roles);
 
     if (!hasRole) return null;
 

@@ -1,10 +1,7 @@
-
-
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Dialog } from "primereact/dialog";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "../../../components/core/common/FilterComponent";
 import { Button } from "primereact/button";
-import { OverlayPanel } from "primereact/overlaypanel";
 import { Divider } from "primereact/divider";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
@@ -13,10 +10,10 @@ import { queryStringToQueryObject } from "../list/SolidListView";
 import { InputText } from "primereact/inputtext";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import qs from "qs";
-import { useSelector } from "react-redux";
 import { SolidSaveCustomFilterForm } from "./SolidSaveCustomFilterForm";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { hydrateRelationRules } from "../../../helpers/hydrateRelationRules";
+import { useSession } from '../../../hooks/useSession'
 
 const getRandomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -509,9 +506,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     const [savedFilterQueryString, setSavedFilterQueryString] = useState<string>();
     const [showOverlay, setShowOverlay] = useState(false);
     const overlayRef = useRef<HTMLDivElement | null>(null);
-    const { user } = useSelector((state: any) => state.auth);
 
-
+    const { data: session, status } = useSession();
+    const user = session?.user;
 
     const [refreshKey, setRefreshKey] = useState(0);
 
@@ -557,7 +554,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                         $and: [
                             { model: { $in: [viewData?.data?.solidView?.model?.id] } },
                             { view: { $in: [viewData?.solidView?.id] } },
-                            { user: { $in: [user?.user?.id] } },
+                            { user: { $in: [user?.id] } },
                             { isPrivate: { $eq: true } }
                         ]
                     },
@@ -934,7 +931,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 formData.append("modelId", viewData?.data?.solidView?.model?.id);
                 formData.append("viewId", viewData?.data?.solidView?.id);
                 formData.append("isPrivate", formValues.isPrivate);
-                formData.append("userId", user?.user?.id);
+                formData.append("userId", user?.id);
 
                 await updateEntity({ id: +formValues.id, data: formData }).unwrap();
 
@@ -959,7 +956,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 formData.append("modelId", viewData?.data?.solidView?.model?.id);
                 formData.append("viewId", viewData?.data?.solidView?.id);
                 formData.append("isPrivate", formValues.isPrivate);
-                formData.append("userId", user?.user?.id);
+                formData.append("userId", user?.id);
                 const result = await createEntity(formData).unwrap();
 
                 setSearchChips([]);

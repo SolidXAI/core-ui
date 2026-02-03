@@ -28,12 +28,10 @@ const UserProfileMenu = () => {
     trigger("") // Fetch settings on mount
   }, [trigger])
 
-  // const { user } = useAppSelector((state) => state.auth);
   const { changeTheme } = useContext(PrimeReactContext);
   const { layoutConfig, setLayoutConfig } = useContext(LayoutContext);
   const { theme } = useSelector((state: any) => state.theme); // Get current theme from Redux
 
-  // const userId = useSelector((state: any) => state.auth?.user?.user?.id);
   const session = useSession();
   const userId = session?.data?.user?.id;
 

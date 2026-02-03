@@ -14,16 +14,9 @@ import UserProfileMenu from "./user-profile-menu";
 
 const NavbarOne = () => {
     const dispatch = useDispatch();
-
-    // const { user, isAuthenticated } = useAppSelector((state) => state.auth);
-    // const [show, setShow] = useState(false);
-    // const visibleNavbar = useSelector(
-    //     (state: any) => state.navbarState.visibleNavbar
-    // );
     const [visibleNavbar, setVisibleNavbar] = useState(false);
 
     const { data: menu } = useGetSolidMenuBasedOnRoleQuery("");
-
 
     const [currentMenu, setCurrentMenu] = useState();
     const [currentMainMenu, setCurrentMainMenu] = useState();

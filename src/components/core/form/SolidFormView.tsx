@@ -1,5 +1,4 @@
-
-
+import { useSession } from '../../../hooks/useSession'
 import { permissionExpression } from "../../../helpers/permissions";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
@@ -35,7 +34,7 @@ import { SolidShortTextField } from "./fields/SolidShortTextField";
 import { SolidTimeField } from "./fields/SolidTimeField";
 import { SolidUiEvent } from "../../../types";
 import { getExtensionComponent, getExtensionFunction } from "../../../helpers/registry";
-import { SolidFormWidgetProps, SolidLoadForm, SolidUiEventResponse } from "../../../types/solid-core";
+import { SolidFormWidgetProps, SolidUiEventResponse } from "../../../types/solid-core";
 import { SolidPasswordField } from "./fields/SolidPasswordField";
 import { SolidEmailField } from "./fields/SolidEmailField";
 import { Panel } from "primereact/panel";
@@ -48,7 +47,6 @@ import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 import { SolidFormActionHeader } from "./SolidFormActionHeader";
 import { SolidFormViewShimmerLoading } from "./SolidFormViewShimmerLoading";
-import { useSelector } from "react-redux";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 import { ConfirmDialog } from "primereact/confirmdialog";
@@ -434,7 +432,10 @@ const SolidPage = ({ attrs, children, key, formik, fields }: any) => {
 // };
 
 const SolidFormView = (params: SolidFormViewProps) => {
-    const { user } = useSelector((state: any) => state.auth);
+
+    const { data: session, status } = useSession();
+    const user = session?.user;
+
     const pathname = usePathname();
     const router = useRouter();
     const toast = useRef<Toast>(null);
@@ -1390,7 +1391,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             const visibleToRole = attrs?.roles || [];
 
             if (visibleToRole.length > 0) {
-                if (!hasAnyRole(user?.user?.roles, visibleToRole)) {
+                if (!hasAnyRole(user?.roles, visibleToRole)) {
                     return <></>
                 }
             }

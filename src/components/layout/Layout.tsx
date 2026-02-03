@@ -122,8 +122,9 @@ export const Layout = ({ children }: ChildContainerProps) => {
     const { visibleNavbar } = useSelector((state: any) => state.navbarState); // Get the visibility state of sidebar-two
 
 
-    const { user } = useSelector((state: any) => state.auth);
     const session = useSession();
+    const user = session?.data?.user;
+
     const hasRunRef = useRef(false);
 
     useEffect(() => {
@@ -166,7 +167,6 @@ export const Layout = ({ children }: ChildContainerProps) => {
 
         handleDynamicFunction();
     }, [session, session?.data, user]);
-
 
     // const dispatch = useDispatch()
     // const { data: solidSettingsDataInitialData } = useGetSolidSettingsQuery("")

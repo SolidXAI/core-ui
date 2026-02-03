@@ -3,7 +3,6 @@ import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { DropResult } from "@hello-pangea/dnd";
-import Link from "../../common/Link";
 import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -15,7 +14,6 @@ import KanbanBoard from "./KanbanBoard";
 import CompactImage from '../../../resources/images/layout/images/compact.png';
 import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
-import KanbanImage from '../../../resources/images/layout/images/kanban.png';
 import { capitalize } from "lodash";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
@@ -23,7 +21,6 @@ import Download from "yet-another-react-lightbox/plugins/download";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 import { useRouter } from "../../../hooks/useRouter";
-import { useSearchParams } from "../../../hooks/useSearchParams";
 import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
 import { KanbanUserViewLayout } from "./KanbanUserViewLayout";
 import { useDispatch, useSelector } from "react-redux";
@@ -43,12 +40,11 @@ type SolidKanbanViewParams = {
 
 
 export const SolidKanbanView = (params: SolidKanbanViewParams) => {
-  const { user } = useSelector((state: any) => state.auth);
+
   const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
   const dispatch = useDispatch()
 
   const solidGlobalSearchElementRef = useRef();
-  const searchParams = useSearchParams().toString(); // Converts the query params to a string
   const router = useRouter();
   // TODO: The initial filter state will be created based on the fields which are present on this kanban view. 
   const [filters, setFilters] = useState<any>();
@@ -107,22 +103,12 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     fetchPermissions();
   }, [params.modelName]);
 
-  const isFilterApplied = filters ? true : false;
 
   // Create the RTK slices for this entity
   const entityApi = createSolidEntityApi(params.modelName);
   const {
-    useCreateSolidEntityMutation,
     useDeleteMultipleSolidEntitiesMutation,
-    useDeleteSolidEntityMutation,
-    useGetSolidEntitiesQuery,
-    useGetSolidEntityByIdQuery,
     useLazyGetSolidEntitiesQuery,
-    useGetSolidKanbanEntitiesQuery,
-    useLazyGetSolidKanbanEntitiesQuery,
-    useLazyGetSolidEntityByIdQuery,
-    usePrefetch,
-    useUpdateSolidEntityMutation,
     usePatchUpdateSolidEntityMutation
   } = entityApi;
 
@@ -133,11 +119,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [kanbanViewMetaData, setKanbanViewMetaData] = useState<any>({});
 
   const {
-    data: solidKanbanViewMetaData,
-    error: solidKanbanViewMetaDataError,
-    isLoading: solidKanbanViewMetaDataIsLoading,
-    isError: solidKanbanViewMetaDataIsError
-  } = useGetSolidViewLayoutQuery(kanbanViewMetaDataQs);
+    data: solidKanbanViewMetaData  } = useGetSolidViewLayoutQuery(kanbanViewMetaDataQs);
 
 
 
@@ -159,7 +141,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       return result;
     }
 
-    const data = { /* Your JSON object here */ };
     const layoutFields = extractFields(solidView.layout);
 
     for (let i = 0; i < layoutFields.length; i++) {
@@ -245,22 +226,17 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const editBaseUrl = normalizeSolidListKanbanActionPath(pathname, editButtonUrl || "form");
   // Get the kanban view data.
   // const [triggerGetSolidEntitiesForKanban, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidKanbanEntitiesQuery();
-  const [triggerGetSolidEntities, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidEntitiesQuery();
+  const [triggerGetSolidEntities, { data: solidEntityKanbanViewData }] = useLazyGetSolidEntitiesQuery();
 
   // Delete mutation 
   const [
     deleteManySolidEntities,
     {
-      isLoading: isSolidEntitiesDeleted,
       isSuccess: isDeleteSolidEntitiesSucess,
-      isError: isSolidEntitiesDeleteError,
-      error: SolidEntitiesDeleteError,
-      data: DeletedSolidEntities,
     },
   ] = useDeleteMultipleSolidEntitiesMutation();
   const [
     patchKanbanView,
-    { isSuccess: isKanbanUpdateSuccessfull, isError: isKanbanUpdateError, error: kanbanUpdateError },
   ] = usePatchUpdateSolidEntityMutation();
 
   // After data is fetched populate the kanban view state so as to be able to render the data. 
@@ -275,7 +251,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       });
       const latestKanbanGroupData = Array.from(groupMap.values());
       setKanbanViewData(latestKanbanGroupData);
-      const loadmoredata = Object.entries(latestKanbanGroupData).reduce((acc: any, [key, value]: any) => {
+      const loadmoredata = Object.entries(latestKanbanGroupData).reduce((acc: any, [, value]: any) => {
         acc[value.groupName] = {
           offset: (value.groupData.meta.currentPage - 1) * value.groupData.meta.perPage,
           limit: value.groupData.meta.perPage,
@@ -417,13 +393,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   }, [isDeleteSolidEntitiesSucess, groupByFieldName, solidKanbanViewMetaData]);
 
   // clickable link allowing one to open the detail / form view.
-  const detailsBodyTemplate = (solidViewData: any) => {
-    return (
-      <Link href={`${editBaseUrl}/${solidViewData.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`} rel="noopener noreferrer" className="text-sm font-bold p-0" style={{ color: "#12415D" }}>
-        <i className="pi pi-pencil" style={{ fontSize: "1rem" }}></i>
-      </Link>
-    );
-  };
 
   // handle bulk deletion
   const deleteBulk = () => {
@@ -444,8 +413,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
   // Individual Swimlane Load More
   const handleLoadMore = async (groupByField: string) => {
-    const { offset, limit, records } = kanbanLoadMoreData[groupByField];
-    const newLoadMoreData = kanbanLoadMoreData;
+    const { offset, limit } = kanbanLoadMoreData[groupByField];
     kanbanLoadMoreData[groupByField].offset = offset + limit;
     try {
       const queryData = {
@@ -469,7 +437,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       // router.push(`?${queryString}`);
       const data: any = await triggerGetSolidEntities(queryString);
       const newRecords = data.data.records;
-      const currentData = kanbanViewData;
       const mergeData = (
         kanbanViewData: any[],
         newRecords: any[],
@@ -502,7 +469,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
       const updatedData = mergeData(kanbanViewData, newRecords, groupByField);
       setKanbanViewData(updatedData);
-      const loadmoredata = Object.entries(updatedData).reduce((acc: any, [key, value]: any) => {
+      const loadmoredata = Object.entries(updatedData).reduce((acc: any, [, value]: any) => {
         acc[value.groupName] = {
           offset: (value.groupData.meta.currentPage - 1) * value.groupData.meta.perPage,
           limit: value.groupData.meta.perPage,
@@ -716,7 +683,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       // s_filter and c_filter format that needs to be passed to the router
       // only present if handleCustomFilter is applied
       if (customFilter) {
-        let url
         const urlData = structuredClone(queryData);
         // @ts-ignore
         delete urlData.filters;
