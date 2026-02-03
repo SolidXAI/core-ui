@@ -22,7 +22,7 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
     const dispatch = useDispatch();
     const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
     //@ts-ignore
-    const user = session?.user?.user?.username;
+    const user = session?.user?.username;
     const [showAccountSettings, setShowAccountSettings] = useState(false);
 
     const toggleBothSidebars = () => {

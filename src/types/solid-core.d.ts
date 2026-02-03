@@ -1,3 +1,5 @@
+import { Session } from "../adapters/auth";
+
 // Base type of all Solid entities
 export type CommonEntity = {
     id: number;
@@ -87,7 +89,7 @@ export type LayoutAttribute = {
     readonly?: boolean;
     editAction?: any;
     createAction?: any;
-    required?:boolean;
+    required?: boolean;
 };
 
 // Generic representation of any node in our layout 
@@ -166,7 +168,7 @@ export type SolidListUiEvent = {
     viewMetadata: SolidView;
     listViewLayout: ListLayoutType;
     user: any;
-    session: any
+    session: Session
 };
 
 export type SolidLoadList = {
@@ -178,7 +180,7 @@ export type SolidLoadList = {
     listViewLayout: ListLayoutType;
     queryParams?: any,
     user: any,
-    session: any,
+    session: Session,
     params?: SolidListViewParams
 }
 
@@ -190,7 +192,7 @@ export type SolidBeforeListDataLoad = {
     filter?: any,
     queryParams?: any,
     user: any,
-    session: any,
+    session: Session,
     params?: SolidListViewParams
 }
 
@@ -211,11 +213,8 @@ export type SolidAfterLoginEvent = {
 export type SolidOnApplicationMountEvent = {
     type: SolidUiEvents;
     user: any,
-    session: any
+    session: Session
 }
-
-
-
 
 export enum SqlExpressionOperator {
     EQUALS = '$equals',

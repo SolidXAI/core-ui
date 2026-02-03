@@ -153,7 +153,7 @@ export const Layout = ({ children }: ChildContainerProps) => {
             const event: SolidOnApplicationMountEvent = {
                 type: "onApplicationMount",
                 user,
-                session
+                session: session.data
             };
 
             if (dynamicHeader) {
