@@ -72,8 +72,10 @@ const CreateModel = ({ data, params }: any) => {
 
   useEffect(() => {
     if (data) {
+      const isLegacyTable =  data.isLegacyTableWithId || data.isLegacyTable
+      const isLegacyTableWithId = data.isLegacyTable ;
       const modelData = {
-        ...data, moduleId: data?.module?.id, parentModelId: data?.parentModel
+        ...data, moduleId: data?.module?.id, parentModelId: data?.parentModel,isLegacyTable,isLegacyTableWithId
       }
 
       setIsLoadingData(false);
@@ -171,8 +173,30 @@ const CreateModel = ({ data, params }: any) => {
 
 
   const handleFormSubmit = async () => {
-    if (modelMetaData?.isLegacyTable || modelMetaData?.isLegacyTableWithId
-    ) {
+
+      let legacyTableConfig = {};
+  
+      if (modelMetaData?.isLegacyTable && modelMetaData?.isLegacyTableWithId) {
+        // UI: Both checked → Backend: both true
+        legacyTableConfig = {
+          isLegacyTable: true,
+          isLegacyTableWithId: false
+        };
+      } else if (modelMetaData?.isLegacyTable && !modelMetaData?.isLegacyTableWithId) {
+        // UI: Only isLegacyTable checked → Backend: only isLegacyTableWithId true
+        legacyTableConfig = {
+          isLegacyTable: false,
+          isLegacyTableWithId: true
+        };
+      } else {
+        // UI: Neither checked → Backend: both false
+        legacyTableConfig = {
+          isLegacyTable: false,
+          isLegacyTableWithId: false
+        };
+      }
+
+    if (modelMetaData?.isLegacyTable || modelMetaData?.isLegacyTableWithId) {
       const hasPrimaryKey = fieldMetaData.some(
         (field: any) => field.isPrimaryKey === true
       );
@@ -196,7 +220,7 @@ const CreateModel = ({ data, params }: any) => {
         return rest
       });
       const { module, parentModel, createdAt, updatedAt, id, deletedAt, ...modelData } = modelMetaData;
-      const updateData = { ...modelData, displayName: modelData.displayName.trim(), fields: fieldData };
+      const updateData = { ...modelData, displayName: modelData.displayName.trim(), fields: fieldData, ...legacyTableConfig };
       updateModel({ id: data.id, data: updateData });
     }
     else {
@@ -208,7 +232,7 @@ const CreateModel = ({ data, params }: any) => {
           return rest
         });
         const { module, parentModel, ...modelData } = modelMetaData;
-        const data = { ...modelData, displayName: modelData.displayName.trim(), fields: fieldData };
+        const data = { ...modelData, displayName: modelData.displayName.trim(), fields: fieldData, ...legacyTableConfig };
         createModel(data);
         if (isCreateModelSuccess) {
 

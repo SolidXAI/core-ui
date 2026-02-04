@@ -63,6 +63,19 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     parentModel: modelMetaData ? modelMetaData?.parentModel : "",
     isLegacyTable: modelMetaData ? modelMetaData?.isLegacyTable : false,
     isLegacyTableWithId: modelMetaData ? modelMetaData?.isLegacyTableWithId : false,
+  //   isLegacyTable: modelMetaData 
+  //   ? (modelMetaData.isLegacyTable && modelMetaData.isLegacyTableWithId && params.id !== 'new') 
+  //     ? true  
+  //     : modelMetaData.isLegacyTableWithId 
+  //       ? true  
+  //       : false 
+  //   : false,
+    
+  // isLegacyTableWithId: modelMetaData 
+  //   ? (modelMetaData.isLegacyTable && modelMetaData.isLegacyTableWithId &&  params.id !== 'new') 
+  //     ? true  
+  //     : false  
+  //   : false,
   };
 
   const [showTableName, setShowTableName] = useState<any>(false);
@@ -140,26 +153,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     innerRef: formikModelMetadataRef,
     onSubmit: async (values) => {
       const tableName = generateTableName(values.module.displayName, values.singularName);
-      let legacyTableConfig = {};
-      if (values.isLegacyTable && values.isLegacyTableWithId) {
-        // Both checked: send only isLegacyTable as true
-        legacyTableConfig = {
-          isLegacyTable: true,
-          isLegacyTableWithId: false
-        };
-      } else if (values.isLegacyTable && !values.isLegacyTableWithId) {
-        // Only isLegacyTable checked: send only isLegacyTableWithId as true
-        legacyTableConfig = {
-          isLegacyTable: false,
-          isLegacyTableWithId: true
-        };
-      } else {
-        // Neither checked: send both as false
-        legacyTableConfig = {
-          isLegacyTable: false,
-          isLegacyTableWithId: false
-        };
-      }
+
       try {
         const modelData = {
           ...modelMetaData,
@@ -182,7 +176,9 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
             parentModelId: values.parentModelId,
             parentModel: values.parentModel,
           }),
-          ...legacyTableConfig 
+          isLegacyTable:values.isLegacyTable === true ? true : false,
+          isLegacyTableWithId:values.isLegacyTableWithId === true ? true :false
+           
         };
         setModelMetaData(modelData);
         nextTab()
@@ -608,12 +604,6 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     Is Legacy Table
                   </label>
                 </div>
-                {(isFormFieldValid(formik, "isLegacyTable") || (formErrors["isLegacyTable"])) && (
-                    <Message
-                      severity="error"
-                      text={formik?.errors?.isLegacyTable?.toString()}
-                    />
-                  )}
                  {/* Conditionally show "Has existing Id" when "Is Legacy Table" is checked */}
                 {formik.values.isLegacyTable && (
                   <div className="flex align-items-center gap-2 mt-2 ml-4">
