@@ -714,7 +714,29 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
     // ...(currentFields.includes("columnName") && { columnName: Yup.string().nullable().matches(/^[a-z0-9_]+$/, ERROR_MESSAGES.SNAKE_CASE('column')), }),
     ...(currentFields.includes("isPrimaryKey") && { isPrimaryKey: Yup.boolean(), }),
 
+    ...(currentFields.includes("required") && {
+      required: Yup.boolean().when("isPrimaryKey", (isPrimaryKey: any, schema) => {
+        if (isPrimaryKey.length > 0 && isPrimaryKey[0] === true) {
+          return schema.oneOf([true], "Required must be true when field is marked as Primary Key");
+        }
+        return schema;
+      }),
+    }),
 
+    ...(currentFields.includes("unique") && {
+      unique: Yup.boolean().when("isPrimaryKey", (isPrimaryKey: any, schema) => {
+        if (isPrimaryKey.length > 0 && isPrimaryKey[0] === true) {
+          return schema.oneOf([true], "Unique must be true when field is marked as Primary Key");
+        }
+        return schema;
+      }).when("required", (required: any, schema) => {
+        // Disallow unique field that is not required
+        if (required.length > 0 && required[0] === false) {
+          return schema.oneOf([false], "Unique fields must also be marked as Required");
+        }
+        return schema;
+      }),
+    }),
 
 
     // ...(currentFields.includes("externalIdProvider") && {
@@ -1237,17 +1259,20 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
           const newFieldData = { ...values, isSystem: values.isSystem == true ? true : '' }
           const formtatedFieldPayload = fieldBasedPayloadFormating(newFieldData, currentFields, fieldMetaData);
           const existingIndex = prevItems.findIndex((item: any) => item.identifier === formtatedFieldPayload.identifier);
+          let updatedItems;
           if (existingIndex !== -1) {
-            const updatedItems = [...prevItems];
+            updatedItems = [...prevItems];
             updatedItems[existingIndex] = formtatedFieldPayload;
             return updatedItems
           }
           else {
+            updatedItems = [...prevItems, formtatedFieldPayload];
             if (params?.id !== 'new' && formtatedFieldPayload?.required && !formtatedFieldPayload?.defaultValue) {
               setIsRequiredPopUp(true);
             }
-            return [...prevItems, formtatedFieldPayload]
+            // return [...prevItems, formtatedFieldPayload]
           }
+          return updatedItems;
         });
         if (values.userKey) {
           const data = {
@@ -3135,12 +3160,16 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               <Checkbox
                                 name="required"
                                 onChange={(e) => {
-                                  formik.setFieldValue("required", e.checked);
+                                  if (!formik.values.isPrimaryKey && !formik.values.unique) {
+                                    formik.setFieldValue("required", e.checked);
+                                  }
                                 }}
                                 checked={formik.values.required}
+                                disabled={formik.values.isPrimaryKey || formik.values.unique}
                               ></Checkbox>
                               <label htmlFor="ingredient1" className="form-field-label ml-2">
-                                Required
+                                Required {formik.values.isPrimaryKey && "(Auto-enabled for Primary Key)"}
+                                 {!formik.values.isPrimaryKey && formik.values.unique && "(Auto-enabled for Unique)"}
                               </label>
                             </div>
                             <p className="text-xs mt-2">You won't be able to create an entry if this field is empty</p>
@@ -3159,13 +3188,23 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               <Checkbox
                                 name="unique"
                                 onChange={(e) => {
-                                  formik.setFieldValue("unique", e.checked);
-                                  formik.setFieldValue("isUserKey", false);
+                                  // Prevent unchecking if isPrimaryKey is true
+                                  if (!formik.values.isPrimaryKey) {
+                                    formik.setFieldValue("unique", e.checked);
+                                    formik.setFieldValue("isUserKey", false);
+                                    // Auto-enable required when unique is checked
+                                    if (e.checked) {
+                                      formik.setFieldValue("required", true);
+                                    }else{
+                                      formik.setFieldValue("required", false);
+                                    }
+                                  }
                                 }}
                                 checked={formik.values.unique}
+                                disabled={formik.values.isPrimaryKey}
                               ></Checkbox>
                               <label htmlFor="ingredient1" className="form-field-label ml-2">
-                                Unique
+                                Unique {formik.values.isPrimaryKey && "(Auto-enabled for Primary Key)"}
                               </label>
                             </div>
                             <p className="text-xs mt-2">You won't be able to create an entry if there is an existing entry with identical content</p>
@@ -3349,6 +3388,11 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 name="isPrimaryKey"
                                 onChange={(e) => {
                                   formik.setFieldValue("isPrimaryKey", e.checked);
+                                  // Auto-set required and unique when isPrimaryKey is checked
+                                  if (e.checked) {
+                                    formik.setFieldValue("required", true);
+                                    formik.setFieldValue("unique", true);
+                                  }
                                 }}
                                 checked={formik.values.isPrimaryKey}
                               ></Checkbox>
