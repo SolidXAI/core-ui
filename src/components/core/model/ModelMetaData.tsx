@@ -123,9 +123,8 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
         return schema.notRequired().nullable();
       }
     }),
-    isLegacyTable: Yup.boolean()
-    .test('is-true', ERROR_MESSAGES.FIELD_REUQIRED("Legacy Table"), value => value === true),
-  isLegacyTableWithId: Yup.boolean(),
+    isLegacyTable: Yup.boolean(),
+    isLegacyTableWithId: Yup.boolean(),
   });
 
 
