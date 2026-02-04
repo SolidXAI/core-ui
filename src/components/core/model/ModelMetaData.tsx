@@ -123,8 +123,9 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
         return schema.notRequired().nullable();
       }
     }),
-    isLegacyTable: Yup.boolean(),
-    isLegacyTableWithId: Yup.boolean(),
+    isLegacyTable: Yup.boolean()
+    .test('is-true', ERROR_MESSAGES.FIELD_REUQIRED("Legacy Table"), value => value === true),
+  isLegacyTableWithId: Yup.boolean(),
   });
 
 
@@ -141,20 +142,18 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     onSubmit: async (values) => {
       const tableName = generateTableName(values.module.displayName, values.singularName);
       let legacyTableConfig = {};
-      if (values.isLegacyTable) {
-        if (values.isLegacyTableWithId) {
-          // Both checked: send only isLegacyTable
-          legacyTableConfig = {
-            isLegacyTable: true,
-            isLegacyTableWithId: false
-          };
-        } else {
-          // Only isLegacyTable checked: send only isLegacyTableWithId
-          legacyTableConfig = {
-            isLegacyTable: false,
-            isLegacyTableWithId: true
-          };
-        }
+      if (values.isLegacyTable && values.isLegacyTableWithId) {
+        // Both checked: send only isLegacyTable as true
+        legacyTableConfig = {
+          isLegacyTable: true,
+          isLegacyTableWithId: false
+        };
+      } else if (values.isLegacyTable && !values.isLegacyTableWithId) {
+        // Only isLegacyTable checked: send only isLegacyTableWithId as true
+        legacyTableConfig = {
+          isLegacyTable: false,
+          isLegacyTableWithId: true
+        };
       } else {
         // Neither checked: send both as false
         legacyTableConfig = {
@@ -610,6 +609,12 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     Is Legacy Table
                   </label>
                 </div>
+                {(isFormFieldValid(formik, "isLegacyTable") || (formErrors["isLegacyTable"])) && (
+                    <Message
+                      severity="error"
+                      text={formik?.errors?.isLegacyTable?.toString()}
+                    />
+                  )}
                  {/* Conditionally show "Has existing Id" when "Is Legacy Table" is checked */}
                 {formik.values.isLegacyTable && (
                   <div className="flex align-items-center gap-2 mt-2 ml-4">

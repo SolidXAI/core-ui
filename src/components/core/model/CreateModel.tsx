@@ -171,6 +171,22 @@ const CreateModel = ({ data, params }: any) => {
 
 
   const handleFormSubmit = async () => {
+    if (modelMetaData?.isLegacyTable || modelMetaData?.isLegacyTableWithId
+    ) {
+      const hasPrimaryKey = fieldMetaData.some(
+        (field: any) => field.isPrimaryKey === true
+      );
+  
+      if (!hasPrimaryKey) {
+        toast?.current?.show({
+          severity: "error",
+          summary: "Primary Key Required",
+           detail: "Legacy tables set at least one field marked as Primary Key. Please mark a field as Primary Key before proceeding.",
+            life: 5000,
+        });
+        return; 
+      }
+    }
 
     if (data) {
       const fieldData = fieldMetaData.map(({ createdAt, updatedAt, deletedAt, mediaStorageProvider, identifier, ...rest }: any) => {

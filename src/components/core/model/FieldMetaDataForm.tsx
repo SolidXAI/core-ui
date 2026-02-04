@@ -1266,17 +1266,17 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
           }
           else {
             updatedItems = [...prevItems, formtatedFieldPayload];
-            if ((modelMetaData?.isLegacyTable || modelMetaData?.isLegacyTableWithId) && params?.id === 'new') {
-              const hasPrimaryKey = updatedItems.some((field: any) => field.isPrimaryKey === true);
-              if (!hasPrimaryKey) {
-                toast?.current?.show({
-                  severity: "warn",
-                  summary: "Primary Key Required",
-                  detail: "Legacy tables require at least one field marked as Primary Key. Please mark a field as Primary Key before proceeding.",
-                  life: 5000,
-                });
-              }
-            }
+            // if ((modelMetaData?.isLegacyTable || modelMetaData?.isLegacyTableWithId) && params?.id === 'new') {
+            //   const hasPrimaryKey = updatedItems.some((field: any) => field.isPrimaryKey === true);
+            //   if (!hasPrimaryKey) {
+            //     toast?.current?.show({
+            //       severity: "warn",
+            //       summary: "Primary Key Required",
+            //       detail: "Legacy tables require at least one field marked as Primary Key. Please mark a field as Primary Key before proceeding.",
+            //       life: 5000,
+            //     });
+            //   }
+            // }
             if (params?.id !== 'new' && formtatedFieldPayload?.required && !formtatedFieldPayload?.defaultValue) {
               setIsRequiredPopUp(true);
             }
