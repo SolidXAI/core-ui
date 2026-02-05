@@ -13,7 +13,7 @@ export type CreateSolidStoreOptions = {
  * createSolidStore builds the default SolidX store and lets consumers extend it.
  *
  * To add custom slices/middlewares in a consuming app:
- *   import { createSolidStore } from "@solidstarters/solid-core-ui";
+ *   import { createSolidStore } from "@solidxai/core-ui";
  *   import myReducer from "./myReducer";
  *   import myMiddleware from "./myMiddleware";
  *

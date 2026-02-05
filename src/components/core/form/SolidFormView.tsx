@@ -1317,7 +1317,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         modifiedField: fieldName,
                         modifiedFieldValue: value,
                         // @ts-ignore
-                        // TODO: HP & OR: This will be fixed once we figure out how to get types exported from solid-core-ui
+                        // TODO: HP & OR: This will be fixed once we figure out how to get types exported from core-ui
                         type: eventType,
                         viewMetadata: solidView,
                         formViewLayout: formViewLayout,
