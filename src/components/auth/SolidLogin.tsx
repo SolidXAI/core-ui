@@ -50,28 +50,12 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
             <Formik
                 initialValues={{
                     identifier: "",
-                    identifier: "",
                     // email: initialEmail,
                     password: "",
                     // rememberMe: rememberMe,
                 }}
                 enableReinitialize={false}
                 validationSchema={Yup.object({
-                    identifier: Yup.string()
-                        .required(ERROR_MESSAGES.FIELD_REUQIRED("Email or Username"))
-                        .test(
-                            "email-or-username",
-                            ERROR_MESSAGES.FIELD_INVALID("email or username"),
-                            (value) => {
-                                // if (!value) return false;
-
-                                const isEmail = Yup.string().email().isValidSync(value);
-                                const isUsername = emailOrUsernameRegex.test(value);
-
-                                return isEmail || isUsername;
-                            }
-                        ),
-                    password: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Password")),
                     identifier: Yup.string()
                         .required(ERROR_MESSAGES.FIELD_REUQIRED("Email or Username"))
                         .test(
@@ -99,14 +83,12 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         const response = await signIn("credentials", {
                             redirect: false,
                             identifier: values.identifier,
-                            identifier: values.identifier,
                             password: values.password,
                         });
 
                         if (response?.error) {
                             showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
                             setErrors({
-                                identifier: ERROR_MESSAGES.INVALID_CREDENTIALS,
                                 identifier: ERROR_MESSAGES.INVALID_CREDENTIALS,
                                 password: ERROR_MESSAGES.INVALID_CREDENTIALS,
                             });
@@ -133,15 +115,11 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 onChange={formik.handleChange}
                                 value={formik.values.identifier}
                                 invalid={!!formik.errors.identifier}
-                                value={formik.values.identifier}
-                                invalid={!!formik.errors.identifier}
                                 onBlur={formik.handleBlur}
                             />
                             {isFormFieldValid(formik, "identifier") && <Message
-                            {isFormFieldValid(formik, "identifier") && <Message
                                 className="text-red-500 text-sm"
                                 severity="error"
-                                text={formik?.errors?.identifier?.toString()}
                                 text={formik?.errors?.identifier?.toString()}
                             />}
                         </div>
