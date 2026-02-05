@@ -1,9 +1,8 @@
-"use client";
-
-import { useConfirmOtpLoginMutation, useInitateLoginMutation } from "../../redux/api/authApi";
+import { useInitateLoginMutation } from "../../redux/api/authApi";
 import { Form, Formik } from "formik";
-import Image from "next/image";
-import { useRouter, useSearchParams } from "next/navigation";
+import Image from "../common/Image";
+import { useRouter } from "../../hooks/useRouter";
+import { useSearchParams } from "../../hooks/useSearchParams";
 import { Button } from "primereact/button";
 import { InputOtp } from "primereact/inputotp";
 import { Message } from "primereact/message";
@@ -11,9 +10,11 @@ import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
-import { signIn } from "next-auth/react";
-import { useSelector } from "react-redux";
+import { signInWithOtp } from "../../adapters/auth/index";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
+import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
+import { env } from "../../adapters/env";
+import showToast from "../../helpers/showToast";
 
 
 const SolidInitialLoginOtp = () => {
@@ -23,17 +24,14 @@ const SolidInitialLoginOtp = () => {
     const identifier = tempIdentifier ? decodeURIComponent(tempIdentifier) : '';
 
     const RESEND_OTP_KEY = `resendOtpLogin_${identifier}`;
-    const RESEND_OTP_TIMER_MIN = parseFloat(process.env.NEXT_PUBLIC_RESEND_OTP_TIMER || '0.5');
+    const RESEND_OTP_TIMER_MIN = parseFloat(env("NEXT_PUBLIC_RESEND_OTP_TIMER") || '0.5');
     const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
-    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
-    // useEffect(() => {
-    //     trigger("") // Fetch settings on mount
-    // }, [trigger])
-
-    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery();
+    useEffect(() => {
+        trigger("") // Fetch settings on mount
+    }, [trigger])
 
     const [initiateResendOTP] = useInitateLoginMutation();
-    const [initiateOtpLogin] = useConfirmOtpLoginMutation();
     const toast = useRef<Toast>(null);
     const router = useRouter();
     const [timeLeft, setTimeLeft] = useState(RESEND_OTP_TIMER);
@@ -106,17 +104,6 @@ const SolidInitialLoginOtp = () => {
             .required(ERROR_MESSAGES.FIELD_REUQIRED('OTP')),
     });
 
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
-
     const isFormFieldValid = (formik: any, fieldName: string) =>
         formik.touched[fieldName] && formik.errors[fieldName];
 
@@ -131,35 +118,35 @@ const SolidInitialLoginOtp = () => {
             const response = await initiateResendOTP(payload).unwrap();
 
             if (response?.statusCode === 200) {
-                showToast("success", ERROR_MESSAGES.OPT_RESEND, response?.data?.message);
+                showToast(toast, "success", ERROR_MESSAGES.OPT_RESEND, response?.data?.message);
                 localStorage.setItem(RESEND_OTP_KEY, Date.now().toString());
                 setTimeLeft(RESEND_OTP_TIMER);
                 setResendEnabled(false);
             } else {
-                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
             }
         } catch (err: any) {
-            showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
+            showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
         }
     };
 
     return (
         <>
             <Toast ref={toast} />
-            <div className={`auth-container ${solidSettingsData?.authPagesLayout === 'center' ? 'center' : 'side'}`} style={{ minWidth: 480 }}>
-                {solidSettingsData?.authPagesLayout === 'center' &&
+            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`} style={{ minWidth: 480 }}>
+                {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.appLogoPosition}`}>
+                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
                             <Image
                                 alt="solid logo"
-                                src={solidSettingsData?.appLogo || SolidLogo}
+                                src={solidSettingsData?.data?.appLogo || SolidLogo}
                                 className="relative"
                                 fill
                             />
                         </div>
                     </div>
                 }
-                <h2 className={`solid-auth-title ${solidSettingsData?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>OTP Verification</h2>
+                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>OTP Verification</h2>
                 <p className="solid-auth-subtitle text-sm">
                     Please enter the OTP sent to your email to complete verification
                 </p>
@@ -171,54 +158,25 @@ const SolidInitialLoginOtp = () => {
                         validationSchema={validationSchema}
                         onSubmit={async (values, { setSubmitting, setErrors }) => {
                             try {
-                                const payload = {
+                                const response = await signInWithOtp({
                                     type: type,
                                     identifier: identifier,
-                                    otp: values.otp
-                                };
+                                    otp: values.otp,
+                                });
 
-                                const response = await initiateOtpLogin(payload).unwrap(); // Call mutation trigger
-
-                                if (response?.statusCode === 200) {
-                                    const credentials: any = {
-                                        redirect: false,
-                                        accessToken: response?.data?.accessToken,
-                                    };
-
-                                    // Pass both email and mobile if available
-                                    if (response?.data?.user?.email) {
-                                        credentials.email = response?.data?.user?.email;
-                                    }
-                                    if (response?.data?.user?.mobile) {
-                                        credentials.mobile = response?.data?.user?.mobile;
-                                    }
-
-                                    // Fallback: if neither exists in response, use the identifier based on type
-                                    if (!credentials.email && !credentials.mobile) {
-                                        if (type === "mobile") {
-                                            credentials.mobile = identifier;
-                                        } else if (type === "email") {
-                                            credentials.email = identifier;
-                                        }
-                                    }
-
-                                    const otpResponse = await signIn("credentials", credentials);
-
-                                    if (otpResponse?.error) {
-                                        showToast("error", ERROR_MESSAGES.LOGIN_ERROR, otpResponse.error);
-                                    } else {
-                                        localStorage.removeItem(`resendOtpLogin_${identifier}`);
-                                        showToast("success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
-                                        router.push(`${process.env.NEXT_PUBLIC_LOGIN_REDIRECT_URL}`);
-                                    }
-                                } else {
-                                    showToast("error", ERROR_MESSAGES.INAVLID_OTP, response.error);
+                                if (response?.error) {
+                                    showToast(toast, "error", ERROR_MESSAGES.INAVLID_OTP, response.error);
                                     setErrors({
                                         otp: ERROR_MESSAGES.INAVLID_OTP,
                                     });
+                                } else {
+                                    localStorage.removeItem(`resendOtpLogin_${identifier}`);
+                                    showToast(toast, "success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
+                                    const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin";
+                                    router.push(redirectUrl);
                                 }
                             } catch (err: any) {
-                                showToast("error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
                             } finally {
                                 setSubmitting(false);
                             }

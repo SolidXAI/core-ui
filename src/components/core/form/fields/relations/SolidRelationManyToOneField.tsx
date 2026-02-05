@@ -1,4 +1,4 @@
-'use client';
+
 import { createSolidEntityApi } from "../../../../../redux/api/solidEntityApi";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { Message } from "primereact/message";
@@ -12,6 +12,7 @@ import { Dialog } from "primereact/dialog";
 import SolidFormView from '../../../../../components/core/form/SolidFormView';
 import { getExtensionComponent } from "../../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
+import showToast from "../../../../../helpers/showToast";
 // import Handlebars from "handlebars/dist/handlebars";
 import * as Handlebars from "handlebars";
 import { Toast } from "primereact/toast";
@@ -130,9 +131,12 @@ export class SolidRelationManyToOneField implements ISolidField {
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
 
-        const isVisible = this.fieldContext.parentData
-            ? fieldLayoutInfo.attrs?.visible === true
-            : fieldLayoutInfo.attrs?.visible !== false;
+        let isVisible = fieldLayoutInfo.attrs?.visible || true;
+        if (this.fieldContext.parentData && this.fieldContext.parentFieldName === fieldLayoutInfo.attrs.name) {
+            isVisible = false;
+        }
+
+        // const isVisible = this.fieldContext.parentData ? fieldLayoutInfo.attrs?.visible === true : fieldLayoutInfo.attrs?.visible !== false;
 
         if (!isVisible) {
             return null;
@@ -150,18 +154,8 @@ export class SolidRelationManyToOneField implements ISolidField {
         return (
             <>
                 <div className={className}>
-
-                    {viewMode === "view" &&
-                        this.renderExtensionRenderMode(viewWidget, formik)
-                    }
-                    {viewMode === "edit" && (
-                        <>
-                            {editWidget &&
-                                this.renderExtensionRenderMode(editWidget, formik)
-                            }
-                        </>
-                    )
-                    }
+                    {viewMode === "view" && this.renderExtensionRenderMode(viewWidget, formik)}
+                    {viewMode === "edit" && (<>{editWidget && this.renderExtensionRenderMode(editWidget, formik)}</>)}
                 </div>
             </>
         );
@@ -193,17 +187,6 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
     const readOnlyPermission = fieldContext.readOnly;
     const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
     const [formViewParams, setformViewParams] = useState<FormViewParams>()
-
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
-        });
-    };
     // auto complete specific code. 
     const entityApi = createSolidEntityApi(fieldMetadata.relationCoModelSingularName);
     const { useLazyGetSolidEntitiesQuery } = entityApi;
@@ -305,7 +288,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 
 
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
-            showToast("error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
+            showToast(toast, "error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
 
         } else {
             try {
@@ -400,7 +383,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 
         const autocompleteQs = qs.stringify(queryData, { encodeValuesOnly: true });
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
-            showToast("error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
+            showToast(toast, "error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
 
         } else {
             try {
@@ -471,7 +454,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                             itemsLength: autoCompleteItems.length,
                             lazy: true,
                             onLazyLoad,
-                          })}
+                        })}
                     />
                     {fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false && formViewParams &&
                         <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} customCreateHandler={customCreateHandler} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams}></RenderSolidFormEmbededView>
@@ -542,7 +525,7 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
                 }}
                 className="solid-dialog"
                 breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
-                
+
             >
                 <SolidFormView {...params} />
 
@@ -612,17 +595,6 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
 
 
     const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
-
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
-        });
-    };
     // auto complete specific code. 
     const entityApi = createSolidEntityApi(parentModelName || "userViewMetadata");
     const { useLazyGetSolidEntitiesQuery } = entityApi;
@@ -641,6 +613,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
     const [currentQuery, setCurrentQuery] = useState("");
     const LIMIT = 50;
     const [loading, setLoading] = useState(false);
+    const [viewDisplayValue, setViewDisplayValue] = useState<any>(null);
 
 
     useEffect(() => {
@@ -653,7 +626,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                         $and: [
                             {
                                 [parentFieldName]: {
-                                    [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$eqi']:  fieldContext.data[fieldLayoutInfo.attrs.name] ?? formik.values[fieldLayoutInfo.attrs.name] 
+                                    [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$eqi']: fieldContext.data[fieldLayoutInfo.attrs.name] ?? formik.values[fieldLayoutInfo.attrs.name]
                                 }
                             }
                         ]
@@ -683,6 +656,63 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
         fn()
     }, [])
 
+    // Add this NEW useEffect - only for view mode refresh
+    useEffect(() => {
+        const fn = async () => {
+            if (viewMode !== "view") {
+                setViewDisplayValue(null);
+                return;
+            }
+
+            const rawValue =
+                fieldContext.data[fieldLayoutInfo.attrs.name] ??
+                formik.values[fieldLayoutInfo.attrs.name];
+
+            if (!rawValue) return;
+
+            const searchValue =
+                typeof rawValue === "object"
+                    ? rawValue[parentFieldName]
+                    : rawValue;
+
+            const queryData = {
+                offset: 0,
+                limit: 1,
+                filters: {
+                    $and: [
+                        {
+                            [parentFieldName]: {
+                                [fieldLayoutInfo?.attrs?.autocompleteMatchMode || "$eqi"]:
+                                    searchValue,
+                            },
+                        },
+                    ],
+                },
+            };
+
+            const qsStr = qs.stringify(queryData, { encodeValuesOnly: true });
+            const res = await triggerGetSolidEntities(qsStr);
+            const record = res.data?.records?.[0];
+            if (!record) return;
+
+            const label =
+                parentFieldLabels?.length > 0
+                    ? parentFieldLabels.map((l: string) => record[l]).join(" - ")
+                    : record[parentFieldName];
+            console.log("Final View Label", label, record[parentFieldName])
+            setViewDisplayValue({
+                solidManyToOneLabel: label,
+                solidManyToOneValue: record[parentFieldName],
+                ...record,
+            });
+        };
+
+        fn();
+    }, [viewMode, formik.values[fieldLayoutInfo.attrs.name]]);
+
+
+    const resolvedValue = viewMode === "view" ? viewDisplayValue : formik.values[fieldLayoutInfo.attrs.name];
+
     const autoCompleteSearch = async (event: AutoCompleteCompleteEvent) => {
         setOffset(0);
         setCurrentQuery(event.query || "");
@@ -696,7 +726,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                     ...(parentSearchFields?.length > 0
                         ? [
                             {
-                                $or: parentSearchFields.map((field:any) => ({
+                                $or: parentSearchFields.map((field: any) => ({
                                     [field]: {
                                         [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']:
                                             event.query
@@ -768,7 +798,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
 
 
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
-            showToast("error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
+            showToast(toast, "error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
 
         } else {
             try {
@@ -813,10 +843,11 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                     ...(parentSearchFields?.length > 0
                         ? [
                             {
-                                $or: parentSearchFields.map((field:any) => ({
+                                $or: parentSearchFields.map((field: any) => ({
                                     [field]: {
                                         [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']:
-                                            currentQuery                                    }
+                                            currentQuery
+                                    }
                                 }))
                             }
                         ]
@@ -878,7 +909,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
 
         const autocompleteQs = qs.stringify(queryData, { encodeValuesOnly: true });
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
-            showToast("error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
+            showToast(toast, "error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
 
         } else {
             try {
@@ -939,10 +970,9 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                         readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                         disabled={formDisabled || fieldDisabled || readOnlyPermission || viewMode === "view"}
                         field="solidManyToOneLabel"
-                        vale
                         {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                         id={fieldLayoutInfo.attrs.name}
-                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                        value={resolvedValue || null}
                         dropdown={!readOnlyPermission}
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}
@@ -958,7 +988,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                             itemsLength: autoCompleteItems.length,
                             lazy: true,
                             onLazyLoad,
-                          })}
+                        })}
                     />
                     {
                         fieldLayoutInfo.attrs.inlineCreate === "true" && readOnlyPermission === false && formViewParams && viewMode !== "view" &&

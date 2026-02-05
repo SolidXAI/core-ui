@@ -1,4 +1,4 @@
-'use client';
+
 import { Calendar } from 'primereact/calendar';
 import { SolidKanbanViewFieldsParams } from '../SolidKanbanViewFields';
 

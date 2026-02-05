@@ -1,4 +1,4 @@
-"use client"
+
 import React, { useState, useEffect } from 'react'
 import { SolidChatterHeader } from './SolidChatterHeader'
 import { SolidChatterDateDivider } from './SolidChatterDateDivider'
@@ -78,15 +78,17 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                 queryData.filters = queryData.filters || {};
                 queryData.filters['user'] = { fullName: { $containsi: filters.name }};
             }
-            if (filters.startDate) {
+            if (filters.startDate && filters.endDate) {
                 queryData.filters = queryData.filters || {};
-                queryData.filters.createdAt = queryData.filters.createdAt || {};
-                queryData.filters.createdAt.$gte = filters.startDate.toISOString();
-            }
-            if (filters.endDate) {
+                queryData.filters.createdAt = {
+                    $between: [filters.startDate.toISOString(), filters.endDate.toISOString()]
+                };
+            } else if (filters.startDate) {
                 queryData.filters = queryData.filters || {};
-                queryData.filters.createdAt = queryData.filters.createdAt || {};
-                queryData.filters.createdAt.$lte = filters.endDate.toISOString();
+                queryData.filters.createdAt = { $gte: filters.startDate.toISOString() };
+            } else if (filters.endDate) {
+                queryData.filters = queryData.filters || {};
+                queryData.filters.createdAt = { $lte: filters.endDate.toISOString() };
             }
 
             const queryString = qs.stringify(queryData, {

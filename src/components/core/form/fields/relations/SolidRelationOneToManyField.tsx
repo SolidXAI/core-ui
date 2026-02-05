@@ -1,4 +1,4 @@
-'use client';
+
 import { SolidListView } from "../../../../../components/core/list/SolidListView";
 import { camelCase, capitalize } from "lodash";
 import { Dialog } from "primereact/dialog";
@@ -6,7 +6,8 @@ import { useEffect, useState } from "react";
 import * as Yup from 'yup';
 import SolidFormView from '../../../../../components/core/form/SolidFormView';
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "../../../../../hooks/usePathname";
+import { useRouter } from "../../../../../hooks/useRouter";
 import { getExtensionComponent } from "../../../../../helpers/registry";
 import { SolidFormFieldWidgetProps, SolidFormWidgetProps } from "../../../../../types/solid-core";
 import { Message } from "primereact/message";
@@ -24,6 +25,7 @@ export type FormViewParams = {
     isCustomCreate: any;
     customLayout: any;
     modelName: any;
+    parentFieldName?: any;
     parentData: any;
     onEmbeddedFormSave: any;
     inlineCreateAutoSave: any;
@@ -182,6 +184,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
                 isCustomCreate: false,
                 customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
                 modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+                parentFieldName: fieldContext.fieldMetadata.relationCoModelFieldName,
                 parentData: userKeyField ? { [userKeyField]: { solidManyToOneLabel: fieldContext.data[userKeyField], solidManyToOneValue: fieldContext.data['id'] } } : {},
                 onEmbeddedFormSave: fieldContext.onEmbeddedFormSave,
                 inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
@@ -240,6 +243,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
         const formviewparams: FormViewParams = {
             moduleName: fieldContext.fieldMetadata.relationModelModuleName,
             modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+            parentFieldName: fieldContext.fieldMetadata.relationCoModelFieldName,
             id: "new",
             embeded: true,
             isCustomCreate: false,
@@ -343,6 +347,7 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
             isCustomCreate: false,
             customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
             modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+            parentFieldName: fieldContext.fieldMetadata.relationCoModelFieldName,
             parentData: userKeyField ? { [userKeyField]: { solidManyToOneLabel: fieldContext.data[userKeyField], solidManyToOneValue: fieldContext.data['id'] } } : {},
             onEmbeddedFormSave: fieldContext.onEmbeddedFormSave,
             inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
@@ -402,6 +407,7 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
             inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
             customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
             modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+            parentFieldName: fieldContext.fieldMetadata.relationCoModelFieldName,
             parentData: userKeyField ? { [userKeyField]: { solidManyToOneLabel: fieldContext.data[userKeyField], solidManyToOneValue: fieldContext.data['id'] } } : {},
             onEmbeddedFormSave: fieldContext.onEmbeddedFormSave,
             isCustomCreate: false
@@ -457,6 +463,7 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
         }),
         inlineCreateAutoSave: formViewParams.inlineCreateAutoSave,
         handlePopupClose: handlePopupClose,
+        parentFieldName: formViewParams.parentFieldName,
         parentData: formViewParams.parentData,
         onEmbeddedFormSave: formViewParams.onEmbeddedFormSave,
         isCustomCreate: formViewParams.isCustomCreate
@@ -484,7 +491,7 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
                     if (!visibleCreateRelationEntity) return;
                     setvisibleCreateRelationEntity(false);
                 }}
-              breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
+                breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
 
             >
                 {params &&
@@ -528,6 +535,7 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
             isCustomCreate: false,
             inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
             customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
+            parentFieldName: parentFieldName,
             parentData: childFieldName && formViewData?.data && formViewData?.data[parentFieldName] ? { [childFieldName]: formViewData.data[parentFieldName] } : {},
             onEmbeddedFormSave: fieldLayoutInfo.onEmbeddedFormSave ? fieldLayoutInfo : false
         }
@@ -555,9 +563,9 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
                     }
                 }
                 : {
-                    id :{
-                        $eq:-1
-                    } 
+                    id: {
+                        $eq: -1
+                    }
                 }
         }
         setListViewParams(lisviewparams)
@@ -579,9 +587,9 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
                     }
                 }
                 : {
-                    id :{
-                        $eq:-1
-                    } 
+                    id: {
+                        $eq: -1
+                    }
                 }
         }
 
@@ -594,6 +602,7 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
             isCustomCreate: false,
             inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
             customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
+            parentFieldName: parentFieldName,
             parentData: childFieldName && formViewData && formViewData?.data && formViewData?.data[parentFieldName] ? { [childFieldName]: formViewData.data[parentFieldName] } : {},
             onEmbeddedFormSave: formViewData && formViewData.onEmbeddedFormSave
 

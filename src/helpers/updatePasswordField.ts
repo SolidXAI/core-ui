@@ -1,5 +1,6 @@
 import { ERROR_MESSAGES } from "../constants/error-messages";
-import { getSession } from "next-auth/react";
+import { getSession } from "../adapters/auth/index";
+import { env } from "../adapters/env";
 
 export async function updatePasswordField({
   url,
@@ -16,7 +17,7 @@ export async function updatePasswordField({
   confirmFieldName: string;
   confirmFieldValue: string;
 }): Promise<void> {
-  const baseUrl = `${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api`;
+  const baseUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api`;
   const session = await getSession();
 
   const headers = new Headers();

@@ -1,4 +1,4 @@
-"use client";
+
 
 import { SolidFilterFieldsParams, getNumberOfInputs } from '../../../../../components/core/filter/SolidFilterFields';
 import { SolidVarInputsFilterElement, InputTypes } from '../../../../../components/core/filter/SolidVarInputsFilterElement';

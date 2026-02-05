@@ -1,5 +1,3 @@
-"use client"
-// import { useBulkUpdateSolidSettingsMutation, useCreateSolidSettingsMutation, useLazyGetSolidSettingsQuery, useUpdateSolidSettingsMutation } from '../../redux/api/solidSettingsApi';
 import { useFormik } from 'formik';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
@@ -8,7 +6,7 @@ import { useCallback, useEffect, useRef, useState } from 'react'
 import { CancelButton } from './CancelButton';
 import { InputSwitch } from 'primereact/inputswitch';
 import { RadioButton } from 'primereact/radiobutton';
-import { usePathname } from 'next/navigation';
+import { usePathname } from "../../hooks/usePathname";
 import { InputTextarea } from 'primereact/inputtextarea';
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import AuthScreenRightBackgroundImage from '../../resources/images/auth/solid-left-layout-bg.png';
@@ -26,7 +24,8 @@ import { useDispatch, useSelector } from 'react-redux';
 import { handleError } from '../../helpers/ToastContainer';
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { useBulkUpdateSolidSettingsMutation, useLazyGetSolidSettingsQuery } from '../../redux/api/solidSettingsApi';
-import { setSolidSettings } from '../../redux/features/settingsSlice';
+import { env } from "../../adapters/env";
+import showToast from "../../helpers/showToast";
 
 
 export const GeneralSettings = () => {
@@ -37,14 +36,7 @@ export const GeneralSettings = () => {
     const [authScreenCenterBackgroundImagePreview, setAuthScreenCenterBackgroundImagePreview] = useState<string | null>(null);
     const dispatch = useDispatch()
 
-    const [trigger, { data: solidSettingsDataInitialData }] = useLazyGetSolidSettingsQuery();
-    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
-    useEffect(() => {
-        if (solidSettingsDataInitialData) {
-            dispatch(setSolidSettings(solidSettingsDataInitialData?.data));
-        }
-    }, [solidSettingsDataInitialData]);
-
+    const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
 
     useEffect(() => {
         trigger("") // Fetch settings on mount
@@ -53,57 +45,46 @@ export const GeneralSettings = () => {
     const [bulkUpdateSolidSettings] = useBulkUpdateSolidSettingsMutation();
     const toast = useRef<Toast>(null);
 
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
-
     const initialValues = {
-        appLogo: solidSettingsData?.appLogo ?? null,
-        companylogo: solidSettingsData?.companylogo ?? null,
-        passwordlessRegistrationValidateWhat: solidSettingsData?.passwordlessRegistrationValidateWhat ?? "email",
-        allowPublicRegistration: solidSettingsData?.allowPublicRegistration ?? false,
-        passwordBasedAuth: solidSettingsData?.passwordBasedAuth ?? false,
-        passwordLessAuth: solidSettingsData?.passwordLessAuth ?? false,
-        activateUserOnRegistration: solidSettingsData?.activateUserOnRegistration ?? false,
-        iamGoogleOAuthEnabled: solidSettingsData?.iamGoogleOAuthEnabled ?? false,
-        shouldQueueEmails: solidSettingsData?.shouldQueueEmails ?? false,
-        shouldQueueSms: solidSettingsData?.shouldQueueSms ?? false,
-        authPagesTheme: solidSettingsData?.authPagesTheme ?? "light",
-        authPagesLayout: solidSettingsData?.authPagesLayout ?? "center",
-        defaultRole: solidSettingsData?.defaultRole ?? "Admin",
-        appLogoPosition: solidSettingsData?.appLogoPosition ?? "in_form_view",
-        showAuthContent: solidSettingsData?.showAuthContent ?? false,
-        appTitle: solidSettingsData?.appTitle ?? "SolidX",
-        appSubtitle: solidSettingsData?.appSubtitle ?? "Welcome To",
-        appDescription: solidSettingsData?.appDescription ?? "appDescription",
-        showLegalLinks: solidSettingsData?.showLegalLinks ?? false,
-        appTnc: solidSettingsData?.appTnc ?? null,
-        appPrivacyPolicy: solidSettingsData?.appPrivacyPolicy ?? null,
-        enableDarkMode: solidSettingsData?.enableDarkMode ?? false,
-        copyright: solidSettingsData?.copyright ?? null,
-        forceChangePasswordOnFirstLogin: solidSettingsData?.forceChangePasswordOnFirstLogin ?? false,
-        contactSupportEmail: solidSettingsData?.contactSupportEmail ?? null,
-        contactSupportDisplayName: solidSettingsData?.contactSupportDisplayName ?? null,
-        contactSupportIcon: solidSettingsData?.contactSupportIcon ?? null,
-        authScreenRightBackgroundImage: solidSettingsData?.authScreenRightBackgroundImage ?? null,
-        authScreenLeftBackgroundImage: solidSettingsData?.authScreenLeftBackgroundImage ?? null,
-        authScreenCenterBackgroundImage: solidSettingsData?.authScreenCenterBackgroundImage ?? null,
-        solidXGenAiCodeBuilderConfig: solidSettingsData?.solidXGenAiCodeBuilderConfig ?? {
+        appLogo: solidSettingsData?.data?.appLogo ?? null,
+        companylogo: solidSettingsData?.data?.companylogo ?? null,
+        passwordlessRegistrationValidateWhat: solidSettingsData?.data?.passwordlessRegistrationValidateWhat ?? "email",
+        allowPublicRegistration: solidSettingsData?.data?.allowPublicRegistration ?? false,
+        passwordBasedAuth: solidSettingsData?.data?.passwordBasedAuth ?? false,
+        passwordLessAuth: solidSettingsData?.data?.passwordLessAuth ?? false,
+        activateUserOnRegistration: solidSettingsData?.data?.activateUserOnRegistration ?? false,
+        iamGoogleOAuthEnabled: solidSettingsData?.data?.iamGoogleOAuthEnabled ?? false,
+        // shouldQueueEmails: solidSettingsData?.data?.shouldQueueEmails ?? false,
+        // shouldQueueSms: solidSettingsData?.data?.shouldQueueSms ?? false,
+        authPagesTheme: solidSettingsData?.data?.authPagesTheme ?? "light",
+        authPagesLayout: solidSettingsData?.data?.authPagesLayout ?? "center",
+        defaultRole: solidSettingsData?.data?.defaultRole ?? "Admin",
+        appLogoPosition: solidSettingsData?.data?.appLogoPosition ?? "in_form_view",
+        showAuthContent: solidSettingsData?.data?.showAuthContent ?? false,
+        appTitle: solidSettingsData?.data?.appTitle ?? "SolidX",
+        appSubtitle: solidSettingsData?.data?.appSubtitle ?? "Welcome To",
+        appDescription: solidSettingsData?.data?.appDescription ?? "appDescription",
+        showLegalLinks: solidSettingsData?.data?.showLegalLinks ?? false,
+        appTnc: solidSettingsData?.data?.appTnc ?? null,
+        appPrivacyPolicy: solidSettingsData?.data?.appPrivacyPolicy ?? null,
+        enableDarkMode: solidSettingsData?.data?.enableDarkMode ?? false,
+        copyright: solidSettingsData?.data?.copyright ?? null,
+        forceChangePasswordOnFirstLogin: solidSettingsData?.data?.forceChangePasswordOnFirstLogin ?? false,
+        contactSupportEmail: solidSettingsData?.data?.contactSupportEmail ?? null,
+        contactSupportDisplayName: solidSettingsData?.data?.contactSupportDisplayName ?? null,
+        contactSupportIcon: solidSettingsData?.data?.contactSupportIcon ?? null,
+        authScreenRightBackgroundImage: solidSettingsData?.data?.authScreenRightBackgroundImage ?? null,
+        authScreenLeftBackgroundImage: solidSettingsData?.data?.authScreenLeftBackgroundImage ?? null,
+        authScreenCenterBackgroundImage: solidSettingsData?.data?.authScreenCenterBackgroundImage ?? null,
+        solidXGenAiCodeBuilderConfig: solidSettingsData?.data?.solidXGenAiCodeBuilderConfig ?? {
             defaultProvider: "",
             availableProviders: []
         }
-        // llmProvider: solidSettingsData?.llmProvider ?? null,
-        // llModelName: solidSettingsData?.llModelName ?? null,
-        // llmProviderApiKey: solidSettingsData?.llmProviderApiKey ?? null,
-        // llmProviderBaseURL: solidSettingsData?.llmProviderBaseURL ?? null,
-        // llmModelIdentifier: solidSettingsData?.llmModelIdentifier ?? null
+        // llmProvider: solidSettingsData?.data?.llmProvider ?? null,
+        // llModelName: solidSettingsData?.data?.llModelName ?? null,
+        // llmProviderApiKey: solidSettingsData?.data?.llmProviderApiKey ?? null,
+        // llmProviderBaseURL: solidSettingsData?.data?.llmProviderBaseURL ?? null,
+        // llmModelIdentifier: solidSettingsData?.data?.llmModelIdentifier ?? null
 
 
     };
@@ -152,7 +133,7 @@ export const GeneralSettings = () => {
                 });
 
                 if (updatedSettingsArray.length === 0) {
-                    showToast("success", "No Changes", "No settings were updated");
+                    showToast(toast, "success", "No Changes", "No settings were updated");
                     return;
                 }
 
@@ -163,17 +144,16 @@ export const GeneralSettings = () => {
                 const response = await bulkUpdateSolidSettings({ data: formData }).unwrap();
 
                 if (response.statusCode === 200) {
-                    showToast("success", "Updated", "Settings updated");
+                    showToast(toast, "success", "Updated", "Settings updated");
                     trigger("")
                 }
 
-            } catch (error) {
+            } catch (error: any) {
                 console.log("Error updating settings:", error);
-                showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
+                showToast(toast, "error", ERROR_MESSAGES.FAILED, error?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
             }
         },
     });
-
 
     const showError = async () => {
         const errors = await formik.validateForm();
@@ -188,9 +168,9 @@ export const GeneralSettings = () => {
     }, [pathname])
 
     const positionMap: Record<'left' | 'center' | 'right', string> = {
-        left: 'The form will appear on the left side of the screen, while the banner will be positioned on the right side.',
-        center: 'The form will be centered in the middle of the screen for balanced alignment.',
-        right: 'The form will appear on the right side of the screen, and the banner will be positioned on the left side.'
+        left: 'The form will appear on the left side of the screen, while the banner will be positioned on the right side',
+        center: 'The form will be centered in the middle of the screen for balanced alignment',
+        right: 'The form will appear on the right side of the screen, and the banner will be positioned on the left side'
     };
 
     const onAppLogoDrop = useCallback(
@@ -507,7 +487,7 @@ export const GeneralSettings = () => {
                                                                 const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
 
                                                                 if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                                                    src = `${process.env.API_URL}/${src}`;
+                                                                    src = `${env("API_URL")}/${src}`;
                                                                 }
                                                                 return (
                                                                     <SolidUploadedImage src={src} className='solid-app-logo' />
@@ -541,7 +521,7 @@ export const GeneralSettings = () => {
                                                                 const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
 
                                                                 if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                                                    src = `${process.env.API_URL}/${src}`;
+                                                                    src = `${env("API_URL")}/${src}`;
                                                                 }
 
                                                                 return (
@@ -960,7 +940,7 @@ export const GeneralSettings = () => {
                                                                     const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
 
                                                                     if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                                                        src = `${process.env.API_URL}/${src}`;
+                                                                        src = `${env("API_URL")}/${src}`;
                                                                     }
                                                                     return (
                                                                         <SolidUploadedImage src={src} height={400} width={400} maxHeight={400} />
@@ -993,7 +973,7 @@ export const GeneralSettings = () => {
                                                                     const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
 
                                                                     if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                                                        src = `${process.env.API_URL}/${src}`;
+                                                                        src = `${env("API_URL")}/${src}`;
                                                                     }
                                                                     return (
                                                                         <SolidUploadedImage src={src} height={400} width={400} maxHeight={400} />
@@ -1024,7 +1004,7 @@ export const GeneralSettings = () => {
                                                                     const isBlobOrAbsolute = src?.startsWith("blob:") || src?.startsWith("http");
 
                                                                     if (!isBlobOrAbsolute && !src.startsWith("/")) {
-                                                                        src = `${process.env.API_URL}/${src}`;
+                                                                        src = `${env("API_URL")}/${src}`;
                                                                     }
                                                                     return (
                                                                         <SolidUploadedImage src={src} height={300} width={600} maxHeight={300} />
@@ -1041,7 +1021,7 @@ export const GeneralSettings = () => {
                                         </div>
                                     </div>
                                     <div className='mt-2 lg:mt-4' style={{ borderBottom: '1px dashed #D8E2EA' }}></div>
-                                    {solidSettingsData?.enableDarkMode === true &&
+                                    {solidSettingsData?.data?.enableDarkMode === true &&
                                         <>
                                             <p className='font-bold mt-3 lg:mt-4' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Authentication Screen Theme</p>
                                             <div className='formgrid grid'>
@@ -1077,6 +1057,7 @@ export const GeneralSettings = () => {
 
                             {pathname.includes("misc-settings") &&
                                 <>
+                                {/* 
                                     <p className='font-bold' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Misc Details</p>
                                     <div className='formgrid grid'>
                                         <div className='col-12 lg:col-10 xl:col-8'>
@@ -1113,6 +1094,7 @@ export const GeneralSettings = () => {
                                         </div>
                                     </div>
                                     <Divider />
+                                 */}
                                     <p className='font-bold' style={{ fontSize: 16, color: 'var(--solid-setting-title)' }}>Contact Support</p>
                                     <div className='formgrid grid'>
                                         <div className="col-12 lg:col-10 xl:col-8">

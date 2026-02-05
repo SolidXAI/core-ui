@@ -1,5 +1,4 @@
-"use client";
-import { usePathname } from 'next/navigation';
+import { usePathname } from "../../hooks/usePathname";
 import { IconField } from 'primereact/iconfield';
 import { InputIcon } from 'primereact/inputicon';
 import { InputText } from 'primereact/inputtext';
@@ -22,7 +21,7 @@ export const GlobalSearch = () => {
         return `Search ${dynamicSegment.replace(/-/g, ' ').replace(/\b\w/g, char => char.toUpperCase())}`;
     };
     return (
-        <div className='absolute left-50' style={{transform:'translateX(-50%)'}}>
+        <div className='absolute left-50' style={{ transform: 'translateX(-50%)' }}>
             <IconField iconPosition="left">
                 <InputIcon className="pi pi-search"></InputIcon>
                 <InputText

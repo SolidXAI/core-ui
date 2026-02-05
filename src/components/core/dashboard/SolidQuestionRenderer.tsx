@@ -1,4 +1,4 @@
-"use client"
+
 import { useGetDashboardQuestionDataByIdQuery } from '../../../redux/api/dashboardQuestionApi';
 import { SqlExpression } from '../../../types/solid-core';
 import { Message } from 'primereact/message';

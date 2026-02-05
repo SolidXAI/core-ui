@@ -1,4 +1,4 @@
-'use client';
+
 import { useGenerateCodeForModelMutation } from "../../../../../../redux/api/modelApi";
 import { useSeederMutation } from "../../../../../../redux/api/solidServiceApi";
 import { closePopup } from "../../../../../../redux/features/popupSlice";
@@ -9,6 +9,8 @@ import { useDispatch } from "react-redux";
 import { Toast } from 'primereact/toast';
 import { SolidCircularLoader } from '../../../../../../components/core/common/SolidLoaders/SolidCircularLoader';
 import { ERROR_MESSAGES } from "../../../../../../constants/error-messages";
+import { env } from "../../../../../../adapters/env";
+import showToast from "../../../../../../helpers/showToast";
 
 
 const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
@@ -81,16 +83,6 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
     }] = useSeederMutation();
 
     const toast = useRef<Toast>(null);
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
-        });
-    };
 
     // Utitlity to track if solid-api is up
     const [isPinging, setIsPinging] = useState(false);
@@ -98,7 +90,7 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
     const pingBackendWithRetry = async (retries = 30, delay = 500): Promise<boolean> => {
         for (let i = 0; i < retries; i++) {
             try {
-                const res = await fetch(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/ping`);
+                const res = await fetch(`${env("NEXT_PUBLIC_BACKEND_API_URL")}/api/ping`);
                 console.log("ping response", res);
 
                 if (res.ok)
@@ -128,7 +120,7 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
                 } else {
                     dispatch(closePopup());
                     console.log("Backend is not alive, cannot run seeder");
-                    showToast("error", ERROR_MESSAGES.BACKEND_UNAVAILABLE , ERROR_MESSAGES.SEEDER_NOT_TRIGGERED);
+                    showToast(toast, "error", ERROR_MESSAGES.BACKEND_UNAVAILABLE , ERROR_MESSAGES.SEEDER_NOT_TRIGGERED);
                 }
             }
         };
@@ -140,14 +132,14 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
     useEffect(() => {
         if (isSeederSuccess) {
             console.log(ERROR_MESSAGES.IS_SEEDER_SUCCESS, data);
-            showToast("success", ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY, ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY);
+            showToast(toast, "success", ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY, ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY);
             setIsGenerating(false);
             dispatch(closePopup());
             window.location.reload();
         }
         if (isSeederError) {
             console.log(ERROR_MESSAGES.IS_SEEDER_ERROR, isSeederError);
-            showToast("error", ERROR_MESSAGES.SEEDER_ERROR, ERROR_MESSAGES.SEEDER_NOT_RUN);
+            showToast(toast, "error", ERROR_MESSAGES.SEEDER_ERROR, ERROR_MESSAGES.SEEDER_NOT_RUN);
             setIsGenerating(false);
         }
     }, [isSeederSuccess])

@@ -1,13 +1,9 @@
-"use client"
 import { BackButton } from "../../../components/common/BackButton";
 import { CancelButton } from "../../../components/common/CancelButton";
 import { DropzonePlaceholder } from "../../../components/common/DropzonePlaceholder";
-import { DropzoneUpload } from "../../../components/common/DropzoneUpload";
 import { FileReaderExt } from "../../../components/common/FileReaderExt";
 import { SingleSelectAutoCompleteField } from "../../../components/common/SingleSelectAutoCompleteField";
-import { SolidBreadcrumb } from "../../../components/common/SolidBreadcrumb";
 import { SolidFormHeader } from "../../../components/common/SolidFormHeader";
-import { SolidFormStepper } from "../../../components/common/SolidFormStepper";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { getSingularAndPlural } from "../../../helpers/helpers";
 import { handleError } from "../../../helpers/ToastContainer";
@@ -15,9 +11,9 @@ import { useGetFieldDefaultMetaDataQuery } from "../../../redux/api/fieldApi";
 import { useDeleteMediaMutation } from "../../../redux/api/mediaApi";
 import { useCreatemoduleMutation, useDeletemoduleMutation, useUpdatemoduleMutation } from "../../../redux/api/moduleApi";
 import { useFormik } from "formik";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "../../../hooks/usePathname";
+import { useRouter } from "../../../hooks/useRouter";
 import { Button } from "primereact/button";
-import { Checkbox } from "primereact/checkbox";
 import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
@@ -29,8 +25,8 @@ import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
 import React, { useEffect, useRef, useState } from "react";
 import { useDropzone } from "react-dropzone";
-import { useSelector } from "react-redux";
 import * as Yup from "yup";
+import { env } from "../../../adapters/env";
 
 const footer = (
   <>
@@ -105,9 +101,9 @@ const CreateModule = ({ data }: any) => {
     name: Yup.string()
       // .matches(
       //   /^[a-z]+(-[a-z]+)*$/,
-      //   "Invalid format. Use lowercase letters and hyphens only."
+      //   "Invalid format. Use lowercase letters and hyphens only"
       // )
-    .required(ERROR_MESSAGES.FIELD_REUQIRED('Name')),
+      .required(ERROR_MESSAGES.FIELD_REUQIRED('Name')),
     displayName: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Display Name")),
     description: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Description Name")),
     defaultDataSource: Yup.string(),
@@ -207,7 +203,7 @@ const CreateModule = ({ data }: any) => {
 
   useEffect(() => {
     if (data) {
-      setmenuIconPreview(`${process.env.API_URL}/${data.menuIconUrl}`);
+      setmenuIconPreview(`${env("API_URL")}/${data.menuIconUrl}`);
 
       const fileName = data?.menuIconUrl?.split("/").pop(); // Extract filename from URL
       setFileDetails({ name: fileName || "Unknown File", type: "Uploaded File" });
@@ -472,7 +468,7 @@ const CreateModule = ({ data }: any) => {
               </div>
             </div>
             <div className="formgrid grid mt-4">
-              <div className="field col-12 pb-3 ld:pb-0 lg:col-6 flex flex-column gap-2"> 
+              <div className="field col-12 pb-3 ld:pb-0 lg:col-6 flex flex-column gap-2">
                 <label htmlFor="description" className="form-field-label">
                   Menu Sequence Number
                 </label>

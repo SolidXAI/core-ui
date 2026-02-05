@@ -1,4 +1,4 @@
-'use client';
+
 
 import { AppConfigProps, LayoutConfig, LayoutState } from '../../types';
 import { PrimeReactContext } from 'primereact/api';

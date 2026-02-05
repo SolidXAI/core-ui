@@ -1,4 +1,4 @@
-'use client';
+
 import { Button } from "primereact/button"
 import { getExtensionComponent } from "../../../helpers/registry";
 
@@ -23,7 +23,6 @@ export const ListViewRowActionPopup = ({ context }: any) => {
             {
                 context?.rowAction?.action ?
                     DynamicWidget && <DynamicWidget {...widgetProps} />
-                    // <LoadDynamicJsxComponent context={context}></LoadDynamicJsxComponent>
                     :
                     <>
                         <h1>{context?.modelName}</h1>

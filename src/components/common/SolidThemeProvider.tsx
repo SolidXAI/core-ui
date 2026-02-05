@@ -1,26 +1,24 @@
-"use client";
+
 
 import { useEffect, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname } from "../../hooks/usePathname";
 import { useSelector } from "react-redux";
+import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 
 export const SolidThemeProvider = () => {
     const pathname = usePathname();
-    // const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
-
-    // useEffect(() => {
-    //     if (pathname.includes("/auth/")) {
-    //         trigger("");
-    //     }
-    // }, [pathname, trigger]);
-
-    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+    const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
+    useEffect(() => {
+        if (pathname.includes("/auth/")) {
+            trigger("");
+        }
+    }, [pathname, trigger]);
 
     const [theme, setTheme] = useState("solid-light-purple");
     useEffect(() => {
-        if (pathname.includes("/auth/") && solidSettingsData?.authPagesTheme) {
+        if (pathname.includes("/auth/") && solidSettingsData?.data?.authPagesTheme) {
             const selectedTheme =
-                solidSettingsData?.authPagesTheme === "dark" ? "solid-dark-purple" : "solid-light-purple";
+                solidSettingsData?.data?.authPagesTheme === "dark" ? "solid-dark-purple" : "solid-light-purple";
             setTheme(selectedTheme);
         } else {
             setTheme("solid-light-purple");

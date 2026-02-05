@@ -1,11 +1,12 @@
-"use client"
+
 
 import { CancelButton, SolidCancelButton } from "../../../components/common/CancelButton";
 import { handleError } from "../../../helpers/ToastContainer";
 import { useGetFieldDefaultMetaDataQuery } from "../../../redux/api/fieldApi";
 import { useCreatemodelMutation, useDeletemodelMutation, useLazyGetModelsQuery, useUpdatemodelMutation } from "../../../redux/api/modelApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "../../../hooks/usePathname";
+import { useRouter } from "../../../hooks/useRouter";
 import { Button } from "primereact/button";
 import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
@@ -72,8 +73,10 @@ const CreateModel = ({ data, params }: any) => {
 
   useEffect(() => {
     if (data) {
+      const isLegacyTable =  data.isLegacyTableWithId || data.isLegacyTable
+      const isLegacyTableWithId = data.isLegacyTable ;
       const modelData = {
-        ...data, moduleId: data?.module?.id, parentModelId: data?.parentModel
+        ...data, moduleId: data?.module?.id, parentModelId: data?.parentModel,isLegacyTable,isLegacyTableWithId
       }
 
       setIsLoadingData(false);
@@ -172,6 +175,44 @@ const CreateModel = ({ data, params }: any) => {
 
   const handleFormSubmit = async () => {
 
+      let legacyTableConfig = {};
+  
+      if (modelMetaData?.isLegacyTable && modelMetaData?.isLegacyTableWithId) {
+        // UI: Both checked → Backend: both true
+        legacyTableConfig = {
+          isLegacyTable: true,
+          isLegacyTableWithId: false
+        };
+      } else if (modelMetaData?.isLegacyTable && !modelMetaData?.isLegacyTableWithId) {
+        // UI: Only isLegacyTable checked → Backend: only isLegacyTableWithId true
+        legacyTableConfig = {
+          isLegacyTable: false,
+          isLegacyTableWithId: true
+        };
+      } else {
+        // UI: Neither checked → Backend: both false
+        legacyTableConfig = {
+          isLegacyTable: false,
+          isLegacyTableWithId: false
+        };
+      }
+
+    if (modelMetaData?.isLegacyTable || modelMetaData?.isLegacyTableWithId) {
+      const hasPrimaryKey = fieldMetaData.some(
+        (field: any) => field.isPrimaryKey === true
+      );
+  
+      if (!hasPrimaryKey) {
+        toast?.current?.show({
+          severity: "error",
+          summary: "Primary Key Required",
+           detail: "Legacy tables set at least one field marked as Primary Key. Please mark a field as Primary Key before proceeding.",
+            life: 5000,
+        });
+        return; 
+      }
+    }
+
     if (data) {
       const fieldData = fieldMetaData.map(({ createdAt, updatedAt, deletedAt, mediaStorageProvider, identifier, ...rest }: any) => {
         if (rest.mediaMaxSizeKb) {
@@ -180,7 +221,7 @@ const CreateModel = ({ data, params }: any) => {
         return rest
       });
       const { module, parentModel, createdAt, updatedAt, id, deletedAt, ...modelData } = modelMetaData;
-      const updateData = { ...modelData, displayName: modelData.displayName.trim(), fields: fieldData };
+      const updateData = { ...modelData, displayName: modelData.displayName.trim(), fields: fieldData, ...legacyTableConfig };
       updateModel({ id: data.id, data: updateData });
     }
     else {
@@ -192,7 +233,7 @@ const CreateModel = ({ data, params }: any) => {
           return rest
         });
         const { module, parentModel, ...modelData } = modelMetaData;
-        const data = { ...modelData, displayName: modelData.displayName.trim(), fields: fieldData };
+        const data = { ...modelData, displayName: modelData.displayName.trim(), fields: fieldData, ...legacyTableConfig };
         createModel(data);
         if (isCreateModelSuccess) {
 
@@ -328,7 +369,7 @@ const CreateModel = ({ data, params }: any) => {
             op.current.toggle(e)
           }
         />
-          <Button
+        <Button
           outlined
           type="button"
           icon={'pi pi-cog'}
@@ -405,10 +446,10 @@ const CreateModel = ({ data, params }: any) => {
                   <>
                     <div>
                       {isDirty &&
-                      <>
-                        <Button label="Save" size="small" type="submit" className="hidden lg:flex" onClick={handleSubmit} />
-                        <Button  icon="pi pi-check" size="small" type="submit"  className=" lg:hidden solid-icon-button" onClick={handleSubmit} />
-                      </>
+                        <>
+                          <Button label="Save" size="small" type="submit" className="hidden lg:flex" onClick={handleSubmit} />
+                          <Button icon="pi pi-check" size="small" type="submit" className=" lg:hidden solid-icon-button" onClick={handleSubmit} />
+                        </>
                       }
                     </div>
                     {/* <div>
@@ -417,7 +458,7 @@ const CreateModel = ({ data, params }: any) => {
                   </>
                 }
                 {/* <CancelButton /> */}
-                <SolidCancelButton/>
+                <SolidCancelButton />
                 {formActionDropdown()}
               </div>
             </>

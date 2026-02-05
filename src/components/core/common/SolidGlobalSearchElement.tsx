@@ -1,20 +1,19 @@
-"use client"
-
 import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
 import { Dialog } from "primereact/dialog";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "../../../components/core/common/FilterComponent";
 import { Button } from "primereact/button";
-import { OverlayPanel } from "primereact/overlaypanel";
 import { Divider } from "primereact/divider";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "../../../hooks/usePathname";
+import { useRouter } from "../../../hooks/useRouter";
+import { useSearchParams } from "../../../hooks/useSearchParams";
 import { queryStringToQueryObject } from "../list/SolidListView";
 import { InputText } from "primereact/inputtext";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import qs from "qs";
-import { useSelector } from "react-redux";
 import { SolidSaveCustomFilterForm } from "./SolidSaveCustomFilterForm";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { hydrateRelationRules } from "../../../helpers/hydrateRelationRules";
+import { useSession } from '../../../hooks/useSession'
 
 const getRandomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -507,9 +506,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     const [savedFilterQueryString, setSavedFilterQueryString] = useState<string>();
     const [showOverlay, setShowOverlay] = useState(false);
     const overlayRef = useRef<HTMLDivElement | null>(null);
-    const { user } = useSelector((state: any) => state.auth);
 
-
+    const { data: session, status } = useSession();
+    const user = session?.user;
 
     const [refreshKey, setRefreshKey] = useState(0);
 
@@ -548,6 +547,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     useEffect(() => {
         const fn = async () => {
+            if (!viewData?.data?.solidView?.model?.id || !viewData?.data?.solidView?.id || !user?.id) {
+                return;
+            }
             setSavedFiltersLoaded(false)
             const filters = {
                 $or: [
@@ -555,7 +557,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                         $and: [
                             { model: { $in: [viewData?.data?.solidView?.model?.id] } },
                             { view: { $in: [viewData?.solidView?.id] } },
-                            { user: { $in: [user?.user?.id] } },
+                            { user: { $in: [user?.id] } },
                             { isPrivate: { $eq: true } }
                         ]
                     },
@@ -587,7 +589,13 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             }
         }
         fn()
-    }, [activeSavedFilter, savedFilterFetchDataRefreshKey])
+    }, [
+        activeSavedFilter,
+        savedFilterFetchDataRefreshKey,
+        viewData?.data?.solidView?.id,
+        viewData?.data?.solidView?.model?.id,
+        user?.id
+    ])
 
     useImperativeHandle(ref, () => ({
         clearFilter: () => {
@@ -655,13 +663,22 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             }
         }
         fn()
-    }, [activeSavedFilter, savedFilters, savedFiltersLoaded])
+    }, [viewData, activeSavedFilter, savedFilters, savedFiltersLoaded])
 
 
 
 
     useEffect(() => {
         if (viewData?.data?.solidFieldsMetadata) {
+            // Reset search state when switching views
+            setSearchChips([]);
+            setSearchFilter(null);
+            setFilterRules(initialState);
+            setCustomFilter(null);
+            setPredefinedSearchChip(null);
+            setPredefinedSearchBaseFilter(null);
+            setInputValue("");
+
             let fieldsData = viewData?.data?.solidFieldsMetadata;
             // console.log(`fiels data while rendering solid global search element: `);
             // console.log(fieldsData);
@@ -726,7 +743,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             setPredefinedSearches(predefinedSearchesList);
         }
         // used to open the 
-    }, [])
+    }, [viewData])
 
     useEffect(() => {
         if (chipsRef.current) {
@@ -932,7 +949,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 formData.append("modelId", viewData?.data?.solidView?.model?.id);
                 formData.append("viewId", viewData?.data?.solidView?.id);
                 formData.append("isPrivate", formValues.isPrivate);
-                formData.append("userId", user?.user?.id);
+                formData.append("userId", user?.id);
 
                 await updateEntity({ id: +formValues.id, data: formData }).unwrap();
 
@@ -957,7 +974,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 formData.append("modelId", viewData?.data?.solidView?.model?.id);
                 formData.append("viewId", viewData?.data?.solidView?.id);
                 formData.append("isPrivate", formValues.isPrivate);
-                formData.append("userId", user?.user?.id);
+                formData.append("userId", user?.id);
                 const result = await createEntity(formData).unwrap();
 
                 setSearchChips([]);
@@ -1284,7 +1301,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                             <div className="relative solid-global-search-element-wrapper">
                                 <InputText
                                     value={inputValue || ""}
-                                    placeholder="Search..."
+                                    placeholder="Search."
                                     onChange={(e) => {
                                         setInputValue(e.target.value);
                                         setShowOverlay(true);
@@ -1313,7 +1330,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 </div>
 
                 {showOverlay && (
-                    <div ref={overlayRef} className="absolute w-full z-5 surface-0 border-round border-1 border-300 shadow-2 solid-search-overlay-pannel" style={{ top: 35 }}>
+                    <div ref={overlayRef} className="absolute w-full z-5 shadow-2 solid-search-overlay-pannel" style={{ top: 35, background : "var(--surface-0)", border: '1px solid var(--surface-300) !important', borderRadius :'6px'}}>
+                    {/* <div ref={overlayRef} className="absolute w-full z-5 surface-0 border-round border-1 border-300 shadow-2 solid-search-overlay-pannel" style={{ top: 35 }}> */}
                         {inputValue ? (
                             <>
                                 <div className="custom-filter-search-options px-3 py-2 flex flex-column">

@@ -1,4 +1,4 @@
-'use client';
+
 import { useGenerateCodeForModelMutation } from "../../../../../../redux/api/modelApi";
 import { closePopup } from "../../../../../../redux/features/popupSlice";
 import { SolidListRowdataDynamicFunctionProps } from "../../../../../../types/solid-core";
@@ -12,6 +12,7 @@ import { Checkbox } from "primereact/checkbox";
 import { kebabCase } from "lodash";
 import { createSolidEntityApi } from "../../../../../../redux/api/solidEntityApi";
 import { ERROR_MESSAGES } from "../../../../../../constants/error-messages";
+import showToast from "../../../../../../helpers/showToast";
 
 
 const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
@@ -24,16 +25,6 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     }] = useDeleteSolidEntityMutation()
 
     const toast = useRef<Toast>(null);
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
-        });
-    };
 
     const deleteModelHandler = async () => {
         try {
@@ -46,27 +37,27 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
                     res.error?.data?.message ||
                     res.error?.error ||
                     ERROR_MESSAGES.ERROR_OCCURED;
-                showToast('error', ERROR_MESSAGES.DELETE_FAIELD, message);
+                showToast(toast, 'error', ERROR_MESSAGES.DELETE_FAIELD, message);
             } else {
-                showToast('success', ERROR_MESSAGES.MODEL_DELETE, ERROR_MESSAGES.MODEL_DELETE_SUCCESSFULLY(event.rowData.singularName));
+                showToast(toast, 'success', ERROR_MESSAGES.MODEL_DELETE, ERROR_MESSAGES.MODEL_DELETE_SUCCESSFULLY(event.rowData.singularName));
                 dispatch(closePopup());
             }
         } catch (err: any) {
             console.error("catch error", err);
-            showToast('error', ERROR_MESSAGES.ERROR, ERROR_MESSAGES.NETWORK_OR_SERVER_ERROR);
+            showToast(toast, 'error', ERROR_MESSAGES.ERROR, ERROR_MESSAGES.NETWORK_OR_SERVER_ERROR);
         }
     }
 
     const rows = [
-        { file: `${kebabCase(event.rowData.singularName)}.entity.ts`, description: 'The TypeORM entity definition for this model. Deleting it removes the model’s schema mapping.', intervention: 'Automatic' },
+        { file: `${kebabCase(event.rowData.singularName)}.entity.ts`, description: 'The TypeORM entity definition for this model. Deleting it removes the model’s schema mapping', intervention: 'Automatic' },
         { file: `${kebabCase(event.rowData.singularName)}.create.dto.ts`, description: 'DTO defining the payload for creating a new record of this model', intervention: 'Automatic' },
-        { file: `${kebabCase(event.rowData.singularName)}.update.dto.ts`, description: 'DTO defining the payload for updating an existing record of this model.', intervention: 'Automatic' },
-        { file: `${kebabCase(event.rowData.singularName)}.repository.ts`, description: 'Custom repository encapsulating database operations for this model.', intervention: 'Automatic' },
-        { file: `${kebabCase(event.rowData.singularName)}.service.ts`, description: 'Service layer containing business logic and interactions for this model.', intervention: 'Automatic' },
-        { file: `${kebabCase(event.rowData.singularName)}.controller.ts`, description: 'Controller exposing API endpoints related to this model.', intervention: 'Automatic' },
+        { file: `${kebabCase(event.rowData.singularName)}.update.dto.ts`, description: 'DTO defining the payload for updating an existing record of this model', intervention: 'Automatic' },
+        { file: `${kebabCase(event.rowData.singularName)}.repository.ts`, description: 'Custom repository encapsulating database operations for this model', intervention: 'Automatic' },
+        { file: `${kebabCase(event.rowData.singularName)}.service.ts`, description: 'Service layer containing business logic and interactions for this model', intervention: 'Automatic' },
+        { file: `${kebabCase(event.rowData.singularName)}.controller.ts`, description: 'Controller exposing API endpoints related to this model', intervention: 'Automatic' },
         { file: `${kebabCase(event.rowData.singularName)}.module.ts`, description: 'Module declaration that wires together the controller, service, and repository. All references to the deleted model must be removed here', intervention: 'Manual (X)', manual: true },
-        { file: `${kebabCase(event.rowData.singularName)}-metadata.json`, description: 'Remove references to this model in the model metadata, menu, action & view sections.', intervention: 'Automatic' },
-        { file: '-', description: 'Drop database table. Removes the database table from the DB, this is a very risky step. Best to review all relations to other models etc and then do this manually.', intervention: 'Manual (X)', manual: true },
+        { file: `${kebabCase(event.rowData.singularName)}-metadata.json`, description: 'Remove references to this model in the model metadata, menu, action & view sections', intervention: 'Automatic' },
+        { file: '-', description: 'Drop database table. Removes the database table from the DB, this is a very risky step. Best to review all relations to other models etc and then do this manually', intervention: 'Manual (X)', manual: true },
     ];
 
 

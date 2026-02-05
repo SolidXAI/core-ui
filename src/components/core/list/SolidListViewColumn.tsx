@@ -1,4 +1,4 @@
-"use client";
+
 import SolidBigintColumn from "./columns/SolidBigintColumn";
 import SolidBooleanColumn from "./columns/SolidBooleanColumn";
 import SolidComputedColumn from "./columns/SolidComputedColumn";

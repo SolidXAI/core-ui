@@ -1,10 +1,11 @@
-"use client";
+
 import { Menu } from "primereact/menu";
 import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 // import { RootState } from "../../redux/store";
 import { gridView, listView } from "../../redux/features/dataViewSlice";
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from "../../hooks/usePathname";
+import { useRouter } from "../../hooks/useRouter";
 import { HeaderDynamicTitles } from "../common/HeaderDynamicTitles";
 import FilterMenu from "./FilterMenu";
 

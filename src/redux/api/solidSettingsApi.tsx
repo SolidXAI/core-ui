@@ -19,7 +19,17 @@ export const solidSettingsApi = createApi({
         }),
         getAuthSettings: builder.query({
             query: () => {
-                return `/setting/wrapped`
+                console.log(`builder.query running for endpoint /setting/wrapped`);
+                return `/setting/wrapped`;
+            },
+            async onQueryStarted(_arg, { queryFulfilled }) {
+                console.log("[solidSettingsApi] getAuthSettings onQueryStarted");
+                try {
+                    await queryFulfilled;
+                    console.log("[solidSettingsApi] getAuthSettings queryFulfilled");
+                } catch (err) {
+                    console.error("[solidSettingsApi] getAuthSettings queryFulfilled error", err);
+                }
             },
         }),
         getSolidSettingsById: builder.query({
@@ -52,6 +62,10 @@ export const solidSettingsApi = createApi({
 
     })
 });
+
+if (typeof window !== "undefined") {
+    (window as any).__solidSettingsApi = solidSettingsApi;
+}
 
 export const {
     useCreateSolidSettingsMutation,

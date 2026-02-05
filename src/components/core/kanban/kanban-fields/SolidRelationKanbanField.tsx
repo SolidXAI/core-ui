@@ -1,4 +1,4 @@
-'use client';
+
 import { SolidKanbanViewFieldsParams } from '../SolidKanbanViewFields';
 import SolidRelationManyToOneKanbanField from './relations/SolidRelationManyToOneKanbanField';
 

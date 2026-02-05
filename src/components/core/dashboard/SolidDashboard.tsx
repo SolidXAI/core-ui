@@ -1,4 +1,4 @@
-"use client";
+
 import { DashboardResponse, useGetDashboardQuery } from '../../../redux/api/dashboardApi';
 import { SqlExpression } from '../../../types/solid-core';
 import { Button } from 'primereact/button';
@@ -16,7 +16,7 @@ import { SolidDashboardRenderError } from './SolidDashboardRenderError';
 import { useDispatch, useSelector } from "react-redux";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import SolidDashboardNotAvailable from './SolidDashboardNotAvailable';
-import { useLazyGetMcpUrlQuery } from '../../../redux/api/solidSettingsApi';
+import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from '../../../redux/api/solidSettingsApi';
 
 export enum DashboardVariableType {
   DATE = 'date',
@@ -214,10 +214,13 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
   const [mcpUrl, setMcpUrl] = useState<string | null>(null);
   const [getMcpUrl] = useLazyGetMcpUrlQuery();
 
-  const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+  const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
+  useEffect(() => {
+    trigger("") // Fetch settings on mount
+  }, [])
 
   useEffect(() => {
-    if (solidSettingsData?.mcpEnabled && solidSettingsData?.mcpServerUrl && solidSettingsData?.mcpApiKey) {
+    if (solidSettingsData?.data?.mcpEnabled && solidSettingsData?.data?.mcpServerUrl) {
       enableSolidXAiPanel();
     }
   }, [solidSettingsData]);

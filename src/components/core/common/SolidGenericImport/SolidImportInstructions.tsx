@@ -1,10 +1,11 @@
-"use client"
 import { Button } from 'primereact/button'
 import styles from './SolidImport.module.css'
 import { useLazyGetImportInstructionsQuery } from '../../../../redux/api/importTransactionApi';
 import { useEffect } from 'react';
-import { getSession } from 'next-auth/react';
+import { getSession } from "../../../../adapters/auth/index";
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
+import { env } from "../../../../adapters/env";
+
 export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any) => {
     const [getImportInstructions, { data: importInstructionsData, isLoading, isError }] =
         useLazyGetImportInstructionsQuery();
@@ -25,7 +26,7 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
                 throw new Error(ERROR_MESSAGES.NO_AUTH_TOKEN_FOUND);
             }
             const response = await fetch(
-                `${process.env.API_URL}/api/import-transaction/import-template/${modelId}/${format}`,
+                `${env("API_URL")}/api/import-transaction/import-template/${modelId}/${format}`,
                 {
                     method: 'GET',
                     headers: {
@@ -85,7 +86,7 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
                                                             {count}. {titleCaseKey}:
                                                         </p>
                                                         <div className='flex flex-wrap'>
-                                                            {values.map((item:any, i) => (
+                                                            {values.map((item: any, i) => (
                                                                 <span key={i} className='mr-2'>
                                                                     {typeof item === 'string'
                                                                         ? item

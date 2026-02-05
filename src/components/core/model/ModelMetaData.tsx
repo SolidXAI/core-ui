@@ -1,4 +1,4 @@
-'use client';
+
 import { SingleSelectAutoCompleteField } from "../../../components/common/SingleSelectAutoCompleteField";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { getSingularAndPlural } from "../../../helpers/helpers";
@@ -7,7 +7,8 @@ import { useLazyGetModelsQuery } from "../../../redux/api/modelApi";
 import { useLazyGetmodulesQuery } from "../../../redux/api/moduleApi";
 import { useFormik } from "formik";
 import { snakeCase } from "lodash";
-import { usePathname, useRouter } from "next/navigation";
+import { usePathname } from "../../../hooks/usePathname";
+import { useRouter } from "../../../hooks/useRouter";
 import { Checkbox } from "primereact/checkbox";
 import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
@@ -63,6 +64,19 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     parentModel: modelMetaData ? modelMetaData?.parentModel : "",
     isLegacyTable: modelMetaData ? modelMetaData?.isLegacyTable : false,
     isLegacyTableWithId: modelMetaData ? modelMetaData?.isLegacyTableWithId : false,
+  //   isLegacyTable: modelMetaData 
+  //   ? (modelMetaData.isLegacyTable && modelMetaData.isLegacyTableWithId && params.id !== 'new') 
+  //     ? true  
+  //     : modelMetaData.isLegacyTableWithId 
+  //       ? true  
+  //       : false 
+  //   : false,
+    
+  // isLegacyTableWithId: modelMetaData 
+  //   ? (modelMetaData.isLegacyTable && modelMetaData.isLegacyTableWithId &&  params.id !== 'new') 
+  //     ? true  
+  //     : false  
+  //   : false,
   };
 
   const [showTableName, setShowTableName] = useState<any>(false);
@@ -86,14 +100,14 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     singularName: Yup.string()
       // .matches(
       //   /^[a-z]+(-[a-z]+)*$/,
-      //   "Invalid format. Use lowercase letters and hyphens only."
+      //   "Invalid format. Use lowercase letters and hyphens only"
       // )
       .notOneOf(allModelsNames, ERROR_MESSAGES.FIELD_ALREADY_USE('Name', 'name'))
       .required(ERROR_MESSAGES.FIELD_REUQIRED('Singular Name')),
     pluralName: Yup.string()
       // .matches(
       //   /^[a-z]+(-[a-z]+)*$/,
-      //   "Invalid format. Use lowercase letters and hyphens only."
+      //   "Invalid format. Use lowercase letters and hyphens only"
       // )
       .required(ERROR_MESSAGES.FIELD_REUQIRED('Plural Name')),
     // tableName: Yup.string().required().matches(/^[a-z0-9_]+$/, ERROR_MESSAGES.SNAKE_CASE('Tabale')),
@@ -140,6 +154,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     innerRef: formikModelMetadataRef,
     onSubmit: async (values) => {
       const tableName = generateTableName(values.module.displayName, values.singularName);
+
       try {
         const modelData = {
           ...modelMetaData,
@@ -162,8 +177,9 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
             parentModelId: values.parentModelId,
             parentModel: values.parentModel,
           }),
-          isLegacyTable: values.isLegacyTable === true ? true : false,
-          isLegacyTableWithId: values.isLegacyTableWithId === true ? true : false,
+          isLegacyTable:values.isLegacyTable === true ? true : false,
+          isLegacyTableWithId:values.isLegacyTableWithId === true ? true :false
+           
         };
         setModelMetaData(modelData);
         nextTab()
@@ -578,6 +594,10 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     name="isLegacyTable"
                     onChange={(e) => {
                       formik.setFieldValue("isLegacyTable", e.checked);
+                      // Reset isLegacyTableWithId when isLegacyTable is unchecked
+                      if (!e.checked) {
+                        formik.setFieldValue("isLegacyTableWithId", false);
+                      }
                     }}
                     checked={formik.values.isLegacyTable}
                   ></Checkbox>
@@ -585,18 +605,26 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     Is Legacy Table
                   </label>
                 </div>
-                <div className="flex align-items-center gap-2 mt-3">
-                  <Checkbox
-                    name="isLegacyTableWithId"
-                    onChange={(e) => {
-                      formik.setFieldValue("isLegacyTableWithId", e.checked);
-                    }}
-                    checked={formik.values.isLegacyTableWithId}
-                  ></Checkbox>
-                  <label htmlFor="isLegacyTableWithId" className="form-field-label">
-                    Is Legacy Table With Id
-                  </label>
-                </div>
+                 {/* Conditionally show "Has existing Id" when "Is Legacy Table" is checked */}
+                {formik.values.isLegacyTable && (
+                  <div className="flex align-items-center gap-2 mt-2 ml-4">
+                    <Checkbox
+                      name="isLegacyTableWithId"
+                      onChange={(e) => {
+                        formik.setFieldValue("isLegacyTableWithId", e.checked);
+                      }}
+                      checked={formik.values.isLegacyTableWithId}
+                    ></Checkbox>
+                    <label htmlFor="isLegacyTableWithId" className="form-field-label">
+                      Has existing Id
+                    </label>
+                  </div>
+                )}
+                {formik.values.isLegacyTable && (
+                  <p className="form-field-label mt-2 text-sm">
+                    Note: Legacy tables require at least one field marked as Primary Key during model creation
+                  </p>
+                )}
                 {/* <div className="field col-6">
                   <div className="flex align-items-center gap-2 mt-3">
                     <Checkbox

@@ -1,4 +1,4 @@
-"use client";
+
 import { Dropdown } from 'primereact/dropdown';
 import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { InputTypes, SolidVarInputsFilterElement } from "../SolidVarInputsFilterElement";

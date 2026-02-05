@@ -1,7 +1,8 @@
-"use client";
 
-import Link from "next/link";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+
+import { usePathname } from "../../hooks/usePathname";
+import { useRouter } from "../../hooks/useRouter";
+import { useSearchParams } from "../../hooks/useSearchParams";
 import { BreadCrumb } from "primereact/breadcrumb";
 import { useEffect, useState } from "react";
 
@@ -29,7 +30,7 @@ const truncateText = (text: string, maxLength: number = 15) => {
 
 export const SolidBreadcrumb = (props: Props) => {
   const { solidFormViewMetaData, initialEntityData } = props;
-  
+
   const modelMetadata = solidFormViewMetaData?.data?.solidView?.model;
   const pathname = usePathname();
   const router = useRouter();
@@ -53,7 +54,7 @@ export const SolidBreadcrumb = (props: Props) => {
       const params = new URLSearchParams(searchParams.toString());
       params.set("userKeyField", userKeyFieldValue);
       const newUrl = `${pathname}?${params.toString()}`;
-      router.push(newUrl, { scroll: false });
+      router.push(newUrl);
     }
   }, [pathname, userKeyFieldValue, queryUserKeyField, isNewForm, router]);
 
@@ -73,7 +74,7 @@ export const SolidBreadcrumb = (props: Props) => {
   if (segments.length >= 4 && segments[0] === "admin" && segments[1] === "core") {
     const moduleName = segments[2];
     const modelName = segments[3];
-    const modelDisplayName = toTitleCase(modelName);
+    const modelDisplayName = modelMetadata?.displayName || toTitleCase(modelName);
 
     // Link to model list or kanban view based on stored view
     breadcrumbItems.push({

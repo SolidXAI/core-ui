@@ -1,6 +1,7 @@
-"use client"
 
-import { usePathname, useRouter } from 'next/navigation';
+
+import { usePathname } from "../../hooks/usePathname";
+import { useRouter } from "../../hooks/useRouter";
 import { Button } from 'primereact/button';
 
 

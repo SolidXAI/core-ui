@@ -1,12 +1,13 @@
-"use client";
-
+import { useSession } from '../../../hooks/useSession'
 import { permissionExpression } from "../../../helpers/permissions";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
 import { useFormik } from "formik";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "../../../hooks/usePathname";
+import { useRouter } from "../../../hooks/useRouter";
+import { useSearchParams } from "../../../hooks/useSearchParams";
 import "primeflex/primeflex.css";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -33,7 +34,7 @@ import { SolidShortTextField } from "./fields/SolidShortTextField";
 import { SolidTimeField } from "./fields/SolidTimeField";
 import { SolidUiEvent } from "../../../types";
 import { getExtensionComponent, getExtensionFunction } from "../../../helpers/registry";
-import { SolidFormWidgetProps, SolidLoadForm, SolidUiEventResponse } from "../../../types/solid-core";
+import { SolidFormWidgetProps, SolidUiEventResponse } from "../../../types/solid-core";
 import { SolidPasswordField } from "./fields/SolidPasswordField";
 import { SolidEmailField } from "./fields/SolidEmailField";
 import { Panel } from "primereact/panel";
@@ -46,14 +47,15 @@ import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 import { SolidFormActionHeader } from "./SolidFormActionHeader";
 import { SolidFormViewShimmerLoading } from "./SolidFormViewShimmerLoading";
-import { useSelector } from "react-redux";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 import { ConfirmDialog } from "primereact/confirmdialog";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
-import { useLazyGetMcpUrlQuery } from "../../../redux/api/solidSettingsApi";
+import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 import { SolidFormFooter } from "./SolidFormFooter";
+import { normalizeSolidFormActionPath } from "../../../helpers/routePaths";
+import showToast from "../../../helpers/showToast";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -64,6 +66,7 @@ export type SolidFormViewProps = {
     customCreateHandler?: any
     inlineCreateAutoSave?: boolean,
     customLayout?: any,
+    parentFieldName?: string,
     parentData?: any,
     redirectToPath?: string,
     onEmbeddedFormSave?: () => void,
@@ -173,7 +176,7 @@ const fieldFactory = (type: string, fieldContext: SolidFieldProps, setLightboxUr
 }
 
 // solidFieldsMetadata={solidFieldsMetadata} solidView={solidView}
-const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, parentData, setLightboxUrls, setOpenLightbox, onEmbeddedFormSave }: any) => {
+const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidFormViewMetaData, modelName, readOnly, viewMode, onChange, onBlur, parentFieldName, parentData, setLightboxUrls, setOpenLightbox, onEmbeddedFormSave }: any) => {
     const fieldContext: SolidFieldProps = {
         // field metadata - coming from the field-metadata table.
         fieldMetadata: fieldMetadata,
@@ -191,6 +194,9 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
     }
     if (parentData) {
         fieldContext.parentData = parentData;
+    }
+    if (parentFieldName) {
+        fieldContext.parentFieldName = parentFieldName;
     }
     if (onEmbeddedFormSave) {
         fieldContext.onEmbeddedFormSave = onEmbeddedFormSave;
@@ -300,6 +306,8 @@ const SolidNotebook = ({ children, activeTab, embeded }: any) => {
     const childrenArray = React.Children.toArray(children).filter(child => !!child);
 
     const router = useRouter();
+    const pathname = usePathname();
+    const searchParams = useSearchParams();
 
     // Local state to manage active tab in embedded context
     const [localActiveTab, setLocalActiveTab] = useState(activeTab);
@@ -316,10 +324,9 @@ const SolidNotebook = ({ children, activeTab, embeded }: any) => {
 
         if (newTabLabel) {
             if (!embeded) {
-                const currentUrl = new URL(window.location.href);
-                currentUrl.searchParams.set('activeTab', newTabLabel);
-                const updatedPath = currentUrl.toString();
-                router.push(updatedPath);
+                const queryParams = new URLSearchParams(searchParams.toString());
+                queryParams.set('activeTab', newTabLabel);
+                router.push(`${pathname}?${queryParams.toString()}`);
             } else {
                 // Update the active tab state locally for embedded view
                 setLocalActiveTab(newTabLabel);
@@ -425,7 +432,10 @@ const SolidPage = ({ attrs, children, key, formik, fields }: any) => {
 // };
 
 const SolidFormView = (params: SolidFormViewProps) => {
-    const { user } = useSelector((state: any) => state.auth);
+
+    const { data: session, status } = useSession();
+    const user = session?.user;
+
     const pathname = usePathname();
     const router = useRouter();
     const toast = useRef<Toast>(null);
@@ -446,6 +456,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [isShowChatter, setShowChatter] = useState(false);
     const [chatterLocaleWidth, setChatterLocaleWidth] = useState(380); // default width
     const [isResizingChatterLocale, setIsResizingChatterLocale] = useState(false);
+    const [isSubmitting, setIsSubmitting] = useState(false);
 
     const [solidWorkflowFieldValue, setSolidWorkflowFieldValue] = useState<string>("");
     const [defaultTabViewOptionIndex, setDefaultTabViewOptionIndex] = useState<number>(1);
@@ -462,10 +473,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const actionType = searchParams.get('actionType');
     const actionContext = searchParams.get('actionContext');
 
-    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+    const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
+    useEffect(() => {
+        trigger("") // Fetch settings on mount
+    }, [])
 
     useEffect(() => {
-        if (solidSettingsData?.mcpEnabled && solidSettingsData?.mcpServerUrl && solidSettingsData?.mcpApiKey) {
+        if (solidSettingsData?.data?.mcpEnabled && solidSettingsData?.data?.mcpServerUrl) {
             enableSolidXAiPanel();
         }
     }, [solidSettingsData]);
@@ -551,7 +565,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         setViewMode(newMode);
         const params = new URLSearchParams(searchParams.toString());
         params.set("viewMode", newMode);
-        router.push(`${pathname}?${params.toString()}`, { scroll: false });
+        router.push(`${pathname}?${params.toString()}`);
     };
 
     useEffect(() => {
@@ -741,17 +755,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
         isEntityUnpublishedError
     ]);
 
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
-
     const confirmDialogWithPromise = () => {
         return new Promise<boolean>((resolve) => {
             confirmResolveRef.current = resolve;
@@ -763,6 +766,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const solidView = solidFormViewMetaData.data.solidView;
         const solidFieldsMetadata = solidFormViewMetaData.data.solidFieldsMetadata;
         const layoutFieldsObj = getLayoutFieldsAsObject([formViewLayout]);
+        setIsSubmitting(true);
         try {
             let formData = new FormData();
 
@@ -819,7 +823,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 if (params.id === 'new') {
                     // default locale
                     const result = await createEntity(formData).unwrap();
-                    showToast("success", ERROR_MESSAGES.FORM_SAVED, ERROR_MESSAGES.FORM_SAVED_SUCCESSFULLY);
+                    showToast(toast, "success", ERROR_MESSAGES.FORM_SAVED, ERROR_MESSAGES.FORM_SAVED_SUCCESSFULLY);
                     // if (!params.embeded && result?.data?.id) {
                     //     const newPathname = pathname.replace(/new$/, result.data.id);
 
@@ -832,11 +836,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     //     setViewMode("view")
                     // }
                     if (!params.embeded) {
-                        const currentUrl = new URL(window.location.href);
-                        currentUrl.pathname = currentUrl.pathname.replace(/new$/, result?.data?.id);
-                        currentUrl.searchParams.set('viewMode', 'view');
-                        const updatedUrl = currentUrl.toString();
-                        router.push(updatedUrl);
+                        const baseFormPath = normalizeSolidFormActionPath(pathname, "form");
+                        const queryParams = new URLSearchParams(searchParams.toString());
+                        queryParams.set("viewMode", "view");
+                        router.push(`${baseFormPath}/${result?.data?.id}?${queryParams.toString()}`);
                         setViewMode("view")
                     }
                     return result;
@@ -846,7 +849,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
                     // const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
                     if (!params.embeded) {
-                        showToast("success", ERROR_MESSAGES.FORM_UPDATE, ERROR_MESSAGES.FORM_UPDATE_SUCCESSFULLY);
+                        showToast(toast, "success", ERROR_MESSAGES.FORM_UPDATE, ERROR_MESSAGES.FORM_UPDATE_SUCCESSFULLY);
                         if (result?.statusCode === 200) {
                             updateViewMode("view")
                         }
@@ -858,6 +861,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         } catch (err) {
             console.error(ERROR_MESSAGES.ENTITY_FAILED, err);
+        } finally {
+            setIsSubmitting(false);
         }
     }
 
@@ -1386,7 +1391,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
             const visibleToRole = attrs?.roles || [];
 
             if (visibleToRole.length > 0) {
-                if (!hasAnyRole(user?.user?.roles, visibleToRole)) {
+                if (!hasAnyRole(user?.roles, visibleToRole)) {
                     return <></>
                 }
             }
@@ -1420,15 +1425,18 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     if (visible === true) {
                         return <SolidGroup key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidGroup>;
                     }
+                    break;
                 case "row":
                     if (visible === true) {
                         return <SolidRow key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidRow>;
                     }
+                    break;
                 case "column":
                     if (visible === true) {
                         return <SolidColumn key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidColumn>;
                     }
-                case "field": {
+                    break;
+                case "field":
                     if (visible === true) {
 
                         // const fieldMetadata = solidFieldsMetadata[attrs.name];
@@ -1449,21 +1457,25 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             onBlur={formFieldOnXXX}
                             setLightboxUrls={setLightboxUrls}
                             setOpenLightbox={setOpenLightbox}
+                            parentFieldName={params.parentFieldName}
                             parentData={params.parentData}
                             onEmbeddedFormSave={() => setRefreshChatterMessage(true)}
                         />;
                     }
-                }
+                    break;
+
                 case "notebook":
                     if (visible === true) {
                         return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidNotebook>;
                     }
+                    break;
                 case "page":
                     if (visible === true) {
                         const fields = children.flatMap((child: any) => getLayoutFields(child));
                         const pageChildren = children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD));
                         return SolidPage({ children: pageChildren, attrs: attrs, key: key, formik: formik, fields });
                     }
+                    break;
                 case "custom":
                     if (visible === true) {
                         const widgetName = attrs?.widget;
@@ -1482,6 +1494,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             />
                         }
                     }
+                    break;
 
                 default:
                     return null;
@@ -1587,7 +1600,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 defaultEntityLocaleId,
             });
 
-            router.push(`${updatedPath}?${queryParams.toString()}`, { scroll: false });
+            router.push(`${updatedPath}?${queryParams.toString()}`);
         };
 
         const handleConfirmAccept = () => {
@@ -1615,10 +1628,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
             if (type === "publish") {
                 result = await publishSolidEntity(params.id).unwrap();
-                showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_PUBLISH);
+                showToast(toast, "success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_PUBLISH);
             } else {
                 result = await unpublishSolidEntity(params.id).unwrap();
-                showToast("success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_UNPUBLISH);
+                showToast(toast, "success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_UNPUBLISH);
             }
 
             console.log("publish/unpublish result", result);
@@ -1681,6 +1694,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             internationalisationEnabled={solidFormViewMetaData?.data?.solidView?.model?.internationalisation}
                             handleDraftPublishWorkFlow={handleDraftPublishWorkFlow}
                             onStepperUpdate={() => setRefreshChatterMessage(true)}
+                            isSubmitting={isSubmitting}
                         />
                         <div className={`px-4 py-3 md:p-4 solid-form-content ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}

@@ -1,7 +1,4 @@
 // @ts-nocheck
-
-"use client";
-
 import React, { useState, useEffect, useRef, useMemo } from "react";
 import {
   DataTable,
@@ -10,7 +7,7 @@ import {
 } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { FilterMatchMode } from "primereact/api";
-import Link from "next/link";
+import Link from "../../common/Link";
 import qs from "qs";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
@@ -23,7 +20,9 @@ import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { pascalCase } from "change-case";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { permissionExpression } from "../../../helpers/permissions";
-import { usePathname, useRouter, useSearchParams } from "next/navigation";
+import { usePathname } from "../../../hooks/usePathname";
+import { useRouter } from "../../../hooks/useRouter";
+import { useSearchParams } from "../../../hooks/useSearchParams";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "../../../components/core/common/FilterComponent";
 import { SolidLayoutViews } from "../common/SolidLayoutViews";
@@ -46,7 +45,7 @@ import { SolidListViewConfigure } from "./SolidListViewConfigure";
 import { SolidListViewShimmerLoading } from "./SolidListViewShimmerLoading";
 import { SolidEmptyListViewPlaceholder } from "./SolidEmptyListViewPlaceholder";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
-import { hasAnyRole, useHasAnyRole } from "../../../helpers/rolesHelper";
+import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { SolidListViewRowButtonContextMenu } from "./SolidListViewRowButtonContextMenu";
 import { useDispatch, useSelector } from "react-redux";
@@ -54,12 +53,13 @@ import styles from "./SolidListViewWrapper.module.css";
 import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
 import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from "../../../types/solid-core";
 import { getExtensionFunction } from "../../../helpers/registry";
-import { useSession } from "next-auth/react";
+import { useSession } from "../../../hooks/useSession";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
-import { useLazyGetMcpUrlQuery } from "../../../redux/api/solidSettingsApi";
+import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 import { log } from "console";
+import { normalizeSolidListKanbanActionPath } from "../../../helpers/routePaths";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -139,8 +139,8 @@ type SolidListViewParams = {
 };
 
 export const SolidListView = (params: SolidListViewParams) => {
-  const { user } = useSelector((state: any) => state.auth);
   const session = useSession();
+  const user = session?.data?.user;
   const dispatch = useDispatch();
   const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
 
@@ -150,7 +150,6 @@ export const SolidListView = (params: SolidListViewParams) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const localeName = searchParams.get("locale");
-  // TODO: The initial filter state will be created based on the fields which are present on this list view.
   const [filters, setFilters] = useState<any>(params.customFilter || null);
 
   // const [customFilter, setCustomFilter] = useState<FilterRule[]>(initialState);
@@ -169,10 +168,18 @@ export const SolidListView = (params: SolidListViewParams) => {
   const [mcpUrl, setMcpUrl] = useState<string | null>(null);
   const [getMcpUrl] = useLazyGetMcpUrlQuery();
 
-  const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
+  const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
+  useEffect(() => {
+    trigger("") // Fetch settings on mount
+  }, [])
+
+  const editBaseUrl = useMemo(
+    () => normalizeSolidListKanbanActionPath(pathname, editButtonUrl || "form"),
+    [editButtonUrl, pathname]
+  );
 
   useEffect(() => {
-    if (solidSettingsData?.mcpEnabled && solidSettingsData?.mcpServerUrl && solidSettingsData?.mcpApiKey) {
+    if (solidSettingsData?.data?.mcpEnabled && solidSettingsData?.data?.mcpServerUrl) {
       enableSolidXAiPanel();
     }
   }, [solidSettingsData]);
@@ -483,10 +490,12 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   // All list view state.
   const [listViewData, setListViewData] = useState<any[]>([]);
+
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(solidListViewLayout?.attrs?.defaultPageSize ? solidListViewLayout?.attrs?.defaultPageSize : 10);
   const [totalRecords, setTotalRecords] = useState(0);
-  let [sortField, setSortField] = useState("id");
+
+  const [sortField, setSortField] = useState("id");
   const [sortOrder, setSortOrder] = useState(-1);
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
   const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>([]);
@@ -550,6 +559,7 @@ export const SolidListView = (params: SolidListViewParams) => {
   // After data is fetched populate the list view state so as to be able to render the data.
   useEffect(() => {
     if (solidEntityListViewData) {
+      setLoading(true);
       const cleanedRecords = solidEntityListViewData.records.map((record) => {
         const newRecord = { ...record };
 
@@ -660,7 +670,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         setQueryDataLoaded(true);
         setToPopulate(populate);
         setToPopulateMedia(populateMedia);
-
+        setFirst(0);
       }
       setSelectedRecords([]);
       setSelectedRecoverRecords([]);
@@ -743,10 +753,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
 
   useEffect(() => {
-    console.log(
-      "useEffect: [first, rows, sortField, sortOrder, showArchived, toPopulate, toPopulateMedia, queryDataLoaded]"
-    );
-
+    console.log(`useEffect: [first- ${first}, rows- ${rows}, sortField- ${sortField}, sortOrder- ${sortOrder}, showArchived- ${showArchived}, toPopulate- ${toPopulate}, toPopulateMedia- ${toPopulateMedia}, queryDataLoaded- ${queryDataLoaded}]`);
     if (queryDataLoaded && filters) {
       setQueryString();
     }
@@ -1134,7 +1141,7 @@ export const SolidListView = (params: SolidListViewParams) => {
       const visibleToRole = column?.attrs?.roles || [];
 
       if (visibleToRole.length > 0) {
-        if (hasAnyRole(user?.user?.roles, visibleToRole)) {
+        if (hasAnyRole(user?.roles, visibleToRole)) {
           return SolidListViewColumn({
             solidListViewMetaData,
             fieldMetadata,
@@ -1515,7 +1522,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                   dataKey="id"
                   emptyMessage={
                     solidListViewMetaData?.data?.solidView?.model?.description ||
-                    "No Entities found."
+                    "No Entities found"
                   }
                   filterDisplay="menu"
                   totalRecords={totalRecords}
@@ -1561,7 +1568,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                     } else {
                       if (typeof window !== "undefined") {
                         // store a simple marker for the caller
-                        
+
                         // also store the full current URL so Back can restore exact state (including action params)
                         try {
                           sessionStorage.setItem("fromView", "list");
@@ -1570,7 +1577,7 @@ export const SolidListView = (params: SolidListViewParams) => {
                           // ignore storage errors
                         }
                       }
-                      router.push(`${editButtonUrl}/${rowData?.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`);
+                      router.push(`${editBaseUrl}/${rowData?.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`);
                     }
                   }
                   }
@@ -1592,15 +1599,13 @@ export const SolidListView = (params: SolidListViewParams) => {
                         // Only check hasAnyRole if roles are provided
                         const isAllowed =
                           roles.length === 0 ||
-                          hasAnyRole(user?.user?.roles, roles);
+                          hasAnyRole(user?.roles, roles);
 
                         const isVisible = rb?.attrs?.visible !== false;
 
                         return !isInContextMenu && isAllowed && isVisible;
                       })
                       .map((button: any, index: number) => {
-                        // const hasRole = button.attrs.roles && button.attrs.roles.length > 0 ? useHasAnyRole(button.attrs.roles) : true;
-                        // if (!hasRole) return null;
 
                         return (
                           <Column
@@ -1672,10 +1677,10 @@ export const SolidListView = (params: SolidListViewParams) => {
                                         try {
                                           sessionStorage.setItem("fromView", "list");
                                           sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-                                        } catch (e) {}
+                                        } catch (e) { }
                                       }
                                       router.push(
-                                        `${editButtonUrl}/${rowData?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
+                                        `${editBaseUrl}/${rowData?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
                                       );
                                     }
                                   }}
@@ -1767,9 +1772,9 @@ export const SolidListView = (params: SolidListViewParams) => {
                                               try {
                                                 sessionStorage.setItem("fromView", "list");
                                                 sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-                                              } catch (e) {}
+                                              } catch (e) { }
                                               router.push(
-                                                `${editButtonUrl}/${selectedDataRef.current?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
+                                                `${editBaseUrl}/${selectedDataRef.current?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
                                               );
                                             }
                                           }}

@@ -1,4 +1,4 @@
-"use client"
+
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
 import { useBulkUpdateSolidUserSettingsMutation, useGetSolidSettingsQuery } from '../../../../redux/api/solidSettingsApi';
 import { useFormik } from 'formik';
@@ -7,35 +7,24 @@ import { InputSwitch } from 'primereact/inputswitch';
 import { Toast } from 'primereact/toast';
 import React, { useEffect, useRef } from 'react'
 import { useSelector } from 'react-redux';
+import showToast from "../../../../helpers/showToast";
 export const SolidNotifications = () => {
-    // const {
-    //     data: solidSettingsData,
-    //     isLoading,
-    //     error,
-    //     refetch,
-    // } = useGetSolidSettingsQuery(undefined);
+    const {
+        data: solidSettingsData,
+        isLoading,
+        error,
+        refetch,
+    } = useGetSolidSettingsQuery(undefined);
 
-    // useEffect(() => {
-    //     refetch();
-    // }, []);
+    useEffect(() => {
+        refetch();
+    }, []);
 
-    const solidSettingsData = useSelector((state: any) => state.settingsState?.solidSettings);
     const toast = useRef<Toast>(null);
     const [bulkUpdateSolidSettings] = useBulkUpdateSolidUserSettingsMutation();
 
-    const showToast = (severity: "success" | "error", summary: string, detail: string) => {
-        toast.current?.show({
-            severity,
-            summary,
-            detail,
-            ...(severity === "error"
-                ? { sticky: true }            // stays until user closes
-                : { life: 3000 }),
-        });
-    };
-
     const initialValues = {
-        enableNotification: solidSettingsData?.enableNotification ?? true
+        enableNotification: solidSettingsData?.data?.enableNotification ?? true
     }
 
     const formik = useFormik({
@@ -44,7 +33,7 @@ export const SolidNotifications = () => {
         onSubmit: async (values) => {
             try {
                 const updatedSettingsArray: Array<{ key: string; value: string; type: string }> = [];
-                const currentSettings = solidSettingsData?.user || {};
+                const currentSettings = solidSettingsData?.data?.user || {};
 
                 const formData = new FormData();
 
@@ -74,7 +63,7 @@ export const SolidNotifications = () => {
                 });
 
                 if (updatedSettingsArray.length === 0) {
-                    showToast("success", ERROR_MESSAGES.NO_CHANGE, ERROR_MESSAGES.NO_SETTING_UPDATE);
+                    showToast(toast, "success", ERROR_MESSAGES.NO_CHANGE, ERROR_MESSAGES.NO_SETTING_UPDATE);
                     return;
                 }
 
@@ -85,11 +74,11 @@ export const SolidNotifications = () => {
                 const response = await bulkUpdateSolidSettings({ data: formData }).unwrap();
 
                 if (response.statusCode === 200) {
-                    showToast("success", ERROR_MESSAGES.UPDATED, ERROR_MESSAGES.SETTING_UPDATED);
+                    showToast(toast, "success", ERROR_MESSAGES.UPDATED, ERROR_MESSAGES.SETTING_UPDATED);
                 }
 
             } catch (error) {
-                showToast("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
+                showToast(toast, "error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
             }
         },
     })

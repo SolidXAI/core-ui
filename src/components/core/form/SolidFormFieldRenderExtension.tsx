@@ -1,4 +1,4 @@
-"use client";
+
 
 import { getExtensionComponent } from "../../../helpers/registry";
 import { FormikObject, SolidFieldProps } from "./fields/ISolidField";

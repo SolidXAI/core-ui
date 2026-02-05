@@ -1,4 +1,4 @@
-"use client";
+
 import { useEffect, useRef, useState } from "react";
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
 import { Button } from "primereact/button";

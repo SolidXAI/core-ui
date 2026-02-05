@@ -1,4 +1,4 @@
-'use client';
+
 import { SolidKanbanViewFieldsParams } from '../SolidKanbanViewFields';
 import SolidDateKanbanField from './SolidDateKanbanField';
 import SolidDatetimeKanbanField from './SolidDatetimeKanbanField';

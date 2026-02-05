@@ -1,19 +1,21 @@
-"use client"
-import { signIn } from 'next-auth/react'
-import { usePathname, useRouter } from 'next/navigation';
+import { usePathname } from "../../hooks/usePathname";
+import { useRouter } from "../../hooks/useRouter";
 import { Button } from 'primereact/button'
-import React from 'react'
+import { env } from "../../adapters/env";
 
 export const SocialMediaLogin = () => {
     const router = useRouter();
     const pathname = usePathname();
+
+    const googleApiConnectRedirectUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api/iam/google/connect`;
+
     return (
         <div className="flex justify-content-center mt-4 gap-3">
             <Button
                 className='flex justify-content-center gap-3 w-full google-auth-button'
                 outlined
                 severity="secondary"
-                onClick={() => router.push(`${process.env.NEXT_PUBLIC_BACKEND_API_URL}/api/iam/google/connect`)}
+                onClick={() => router.push(googleApiConnectRedirectUrl)}
             // onClick={()=>signIn('google', {callbackUrl :'https://uat-api.lm.solidxai.com/api/iam/google/connect'})}
             >
                 <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">

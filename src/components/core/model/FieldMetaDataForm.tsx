@@ -1,4 +1,4 @@
-'use client';
+
 import CodeEditor from "../../../components/common/CodeEditor";
 import { SingleSelectAutoCompleteField } from "../../../components/common/SingleSelectAutoCompleteField";
 import { getSingularAndPlural } from "../../../helpers/helpers";
@@ -8,7 +8,7 @@ import { useLazyGetModelsQuery, useUpdateUserKeyMutation } from "../../../redux/
 import { useLazyGetmodulesQuery } from "../../../redux/api/moduleApi";
 import { useFormik } from "formik";
 import { capitalize } from "lodash";
-import { usePathname } from "next/navigation";
+import { usePathname } from "../../../hooks/usePathname";
 import { AutoComplete } from "primereact/autocomplete";
 import { Button } from "primereact/button";
 import { Calendar } from "primereact/calendar";
@@ -419,7 +419,7 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
 
   const schema = {
     name: Yup.string()
-      // .matches(/^[a-z]+(-[a-z]+)*$/,"Invalid format. Use lowercase letters and hyphens only.")
+      // .matches(/^[a-z]+(-[a-z]+)*$/,"Invalid format. Use lowercase letters and hyphens only")
       .notOneOf(reservedNames, ERROR_MESSAGES.FIELD_ALREADY_USE('Name', 'name'))
       .required(ERROR_MESSAGES.FIELD_REUQIRED('Name')),
     displayName: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED('Display Name')),
@@ -714,7 +714,29 @@ const createValidationSchema = (currentFields: any, selectedType: any, allFields
     // ...(currentFields.includes("columnName") && { columnName: Yup.string().nullable().matches(/^[a-z0-9_]+$/, ERROR_MESSAGES.SNAKE_CASE('column')), }),
     ...(currentFields.includes("isPrimaryKey") && { isPrimaryKey: Yup.boolean(), }),
 
+    ...(currentFields.includes("required") && {
+      required: Yup.boolean().when("isPrimaryKey", (isPrimaryKey: any, schema) => {
+        if (isPrimaryKey.length > 0 && isPrimaryKey[0] === true) {
+          return schema.oneOf([true], "Required must be true when field is marked as Primary Key");
+        }
+        return schema;
+      }),
+    }),
 
+    ...(currentFields.includes("unique") && {
+      unique: Yup.boolean().when("isPrimaryKey", (isPrimaryKey: any, schema) => {
+        if (isPrimaryKey.length > 0 && isPrimaryKey[0] === true) {
+          return schema.oneOf([true], "Unique must be true when field is marked as Primary Key");
+        }
+        return schema;
+      }).when("required", (required: any, schema) => {
+        // Disallow unique field that is not required
+        if (required.length > 0 && required[0] === false) {
+          return schema.oneOf([false], "Unique fields must also be marked as Required");
+        }
+        return schema;
+      }),
+    }),
 
 
     // ...(currentFields.includes("externalIdProvider") && {
@@ -1237,17 +1259,20 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
           const newFieldData = { ...values, isSystem: values.isSystem == true ? true : '' }
           const formtatedFieldPayload = fieldBasedPayloadFormating(newFieldData, currentFields, fieldMetaData);
           const existingIndex = prevItems.findIndex((item: any) => item.identifier === formtatedFieldPayload.identifier);
+          let updatedItems;
           if (existingIndex !== -1) {
-            const updatedItems = [...prevItems];
+            updatedItems = [...prevItems];
             updatedItems[existingIndex] = formtatedFieldPayload;
             return updatedItems
           }
           else {
+            updatedItems = [...prevItems, formtatedFieldPayload];
             if (params?.id !== 'new' && formtatedFieldPayload?.required && !formtatedFieldPayload?.defaultValue) {
               setIsRequiredPopUp(true);
             }
-            return [...prevItems, formtatedFieldPayload]
+            // return [...prevItems, formtatedFieldPayload]
           }
+          return updatedItems;
         });
         if (values.userKey) {
           const data = {
@@ -2358,7 +2383,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
 
                           {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse && !formik.values.relationCoModelSingularName && (
                             <div className="field col-12 md:col-6 flex-flex-column gap-2 mt-3">
-                              <Message  text="Please select Co-model" />
+                              <Message text="Please select Co-model" />
                             </div>
                           )}
                           {currentFields.includes("relationCoModelFieldName") && formik.values.relationCreateInverse && formik.values.relationCoModelSingularName && (
@@ -2384,13 +2409,13 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 })}
                               />
                               {formik.values.relationType === "one-to-many" &&
-                                <p className="fieldSubTitle">This is a field that is created in the child model. In this case a <span style={{fontWeight: "700"}}>{formik.values.relationCoModelFieldName ?? formik.values.relationCoModelSingularName}</span> field will be created in the {formik.values.relationCoModelSingularName} when setting create inverse true.</p>
+                                <p className="fieldSubTitle">This is a field that is created in the child model. In this case a <span style={{ fontWeight: "700" }}>{formik.values.relationCoModelFieldName ?? formik.values.relationCoModelSingularName}</span> field will be created in the {formik.values.relationCoModelSingularName} when setting create inverse true.</p>
                               }
                               {formik.values.relationType === "many-to-one" &&
-                                <p className="fieldSubTitle">This is a field that is created in the parent model. In this case a <span style={{fontWeight: "700"}}>{formik.values.relationCoModelFieldName ?? `${formik.values.relationCoModelSingularName}s`}</span> field will be created in the {formik.values.relationCoModelSingularName} when setting create inverse true.</p>
+                                <p className="fieldSubTitle">This is a field that is created in the parent model. In this case a <span style={{ fontWeight: "700" }}>{formik.values.relationCoModelFieldName ?? `${formik.values.relationCoModelSingularName}s`}</span> field will be created in the {formik.values.relationCoModelSingularName} when setting create inverse true.</p>
                               }
                               {formik.values.relationType === "many-to-many" &&
-                                <p className="fieldSubTitle">In this case a {formik.values.relationCoModelFieldName} field will be created in the <span style={{fontWeight: "700"}}>{formik.values.relationCoModelSingularName ?? '{{}}'}</span> when setting create inverse true.</p>
+                                <p className="fieldSubTitle">In this case a {formik.values.relationCoModelFieldName} field will be created in the <span style={{ fontWeight: "700" }}>{formik.values.relationCoModelSingularName ?? '{{}}'}</span> when setting create inverse true.</p>
                               }
                               {isFormFieldValid(formik, "relationCoModelFieldName") && (
                                 <Message
@@ -3135,12 +3160,16 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               <Checkbox
                                 name="required"
                                 onChange={(e) => {
-                                  formik.setFieldValue("required", e.checked);
+                                  if (!formik.values.isPrimaryKey && !formik.values.unique) {
+                                    formik.setFieldValue("required", e.checked);
+                                  }
                                 }}
                                 checked={formik.values.required}
+                                disabled={formik.values.isPrimaryKey || formik.values.unique}
                               ></Checkbox>
                               <label htmlFor="ingredient1" className="form-field-label ml-2">
-                                Required
+                                Required {formik.values.isPrimaryKey && "(Auto-enabled for Primary Key)"}
+                                 {!formik.values.isPrimaryKey && formik.values.unique && "(Auto-enabled for Unique)"}
                               </label>
                             </div>
                             <p className="text-xs mt-2">You won't be able to create an entry if this field is empty</p>
@@ -3159,13 +3188,23 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                               <Checkbox
                                 name="unique"
                                 onChange={(e) => {
-                                  formik.setFieldValue("unique", e.checked);
-                                  formik.setFieldValue("isUserKey", false);
+                                  // Prevent unchecking if isPrimaryKey is true
+                                  if (!formik.values.isPrimaryKey) {
+                                    formik.setFieldValue("unique", e.checked);
+                                    formik.setFieldValue("isUserKey", false);
+                                    // Auto-enable required when unique is checked
+                                    if (e.checked) {
+                                      formik.setFieldValue("required", true);
+                                    }else{
+                                      formik.setFieldValue("required", false);
+                                    }
+                                  }
                                 }}
                                 checked={formik.values.unique}
+                                disabled={formik.values.isPrimaryKey}
                               ></Checkbox>
                               <label htmlFor="ingredient1" className="form-field-label ml-2">
-                                Unique
+                                Unique {formik.values.isPrimaryKey && "(Auto-enabled for Primary Key)"}
                               </label>
                             </div>
                             <p className="text-xs mt-2">You won't be able to create an entry if there is an existing entry with identical content</p>
@@ -3349,6 +3388,11 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 name="isPrimaryKey"
                                 onChange={(e) => {
                                   formik.setFieldValue("isPrimaryKey", e.checked);
+                                  // Auto-set required and unique when isPrimaryKey is checked
+                                  if (e.checked) {
+                                    formik.setFieldValue("required", true);
+                                    formik.setFieldValue("unique", true);
+                                  }
                                 }}
                                 checked={formik.values.isPrimaryKey}
                               ></Checkbox>

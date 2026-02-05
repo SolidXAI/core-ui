@@ -1,4 +1,4 @@
-"use client";
+
 import { SqlExpression } from "../../../types/solid-core";
 import { AutoComplete, AutoCompleteChangeEvent, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { Calendar } from "primereact/calendar";

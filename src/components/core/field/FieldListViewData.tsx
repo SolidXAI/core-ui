@@ -1,9 +1,9 @@
-"use client";
+
 import { useLazyGetfieldsQuery } from "../../../redux/api/fieldApi";
 import {
   useDeleteMultipleModelsMutation,
 } from "../../../redux/api/modelApi";
-import Link from "next/link";
+import Link from "../../common/Link";
 import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
@@ -253,7 +253,7 @@ export const FieldListViewData = () => {
         rowsPerPageOptions={[10, 25, 50]}
         dataKey="id"
         filters={filters}
-        emptyMessage="No Fields found."
+        emptyMessage="No Fields found"
         onFilter={onFilter}
         filterDisplay="row"
         totalRecords={totalRecords}

@@ -1,7 +1,8 @@
-"use client"
+import { useSession } from "../../../hooks/useSession";
 import { permissionExpression } from "../../../helpers/permissions";
-import Image from "next/image";
-import { usePathname, useRouter } from "next/navigation";
+import Image from "../../common/Image";
+import { usePathname } from "../../../hooks/usePathname";
+import { useRouter } from "../../../hooks/useRouter";
 import { Accordion, AccordionTab } from "primereact/accordion";
 import { Button } from "primereact/button";
 import { Checkbox } from "primereact/checkbox";
@@ -16,7 +17,7 @@ import { useHandleListCustomButtonClick } from "../../../components/common/useHa
 import { SolidListViewHeaderContextMenuButton } from "./SolidListViewHeaderContextMenuButton";
 import "../../common/solid-export.css";
 import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
-import { useHasAnyRole } from "../../../helpers/rolesHelper";
+import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 
 export const SolidListViewConfigure = (
@@ -107,7 +108,9 @@ export const SolidListViewConfigure = (
     };
 
     // Role checks
-    const useRoleCheck = (roles: string[]) => useHasAnyRole(roles ?? []);
+    const { data: session, status } = useSession();
+    const user = session?.user;
+    const useRoleCheck = (roles: string[]) => hasAnyRole(user?.roles, roles);
 
     // Map of action → roleCheck
     const roleCheckMap = {
