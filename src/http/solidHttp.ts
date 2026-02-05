@@ -12,7 +12,7 @@ const baseURL = `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api`;
  * - Global error event emission on network/5xx failures
  *
  * Usage:
- *   import { solidAxios } from "@solidstarters/solid-core-ui";
+ *   import { solidAxios } from "@solidxai/core-ui";
  *   const res = await solidAxios.get("/setting/wrapped");
  */
 export const solidAxios = axios.create({
@@ -58,6 +58,6 @@ export const solidDelete = solidAxios.delete;
  * Convenience methods when you don't want to import the instance.
  *
  * Usage:
- *   import { solidGet, solidPost } from "@solidstarters/solid-core-ui";
+ *   import { solidGet, solidPost } from "@solidxai/core-ui";
  *   const res = await solidGet("/setting/wrapped");
  */
