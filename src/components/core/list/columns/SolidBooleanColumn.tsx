@@ -83,5 +83,12 @@ export const DefaultBooleanListWidget = ({ rowData, solidListViewMetaData, field
     const trueLabel = column.attrs.trueLabel ?? 'Yes';
     const falseLabel = column.attrs.falseLabel ?? 'No';
     console.log(`rendering boolean column ${fieldKey} with value ${rowData[fieldKey]}, trueLabel=${trueLabel}, falseLabel=${falseLabel}`);
-    return rowData[fieldKey] === true ? trueLabel : falseLabel;
+    const value = rowData[fieldKey];
+    if (value === true) {
+        return trueLabel;
+    }
+    if (value === false) {
+        return falseLabel;
+    }
+    return '';
 }
