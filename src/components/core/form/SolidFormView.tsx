@@ -891,8 +891,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
     // Fetch the actual data here. 
     // This is the initial value of this form, will come from an API call in the case of edit. 
     let layoutFields = [];
-    let toPopulate = [];
-    let toPopulateMedia = [];
+    let toPopulate: string[] = [];
+    let toPopulateMedia: string[] = [];
     if (solidFormViewMetaData && formViewLayout) {
         const solidView = solidFormViewMetaData.data.solidView;
         const solidFieldsMetadata = solidFormViewMetaData.data.solidFieldsMetadata;
@@ -900,8 +900,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
         for (let i = 0; i < layoutFields?.length; i++) {
             const formLayoutField = layoutFields[i];
             const fieldMetadata = solidFieldsMetadata[formLayoutField.attrs.name];
-            if (fieldMetadata?.type === 'relation') {
-                toPopulate.push(fieldMetadata.name);
+            if (fieldMetadata?.type === 'relation' && fieldMetadata?.relationType === 'many-to-one') {
+                if (!toPopulate.includes(fieldMetadata.name)) {
+                    toPopulate.push(fieldMetadata.name);
+                }
             }
             if (fieldMetadata?.type === 'mediaSingle' || fieldMetadata?.type === 'mediaMultiple') {
                 toPopulateMedia.push(fieldMetadata.name);

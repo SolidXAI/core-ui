@@ -43,7 +43,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
 
     const isFormFieldValid = (formik: any, fieldName: string) =>
         formik.touched[fieldName] && formik.errors[fieldName];
-    const emailOrUsernameRegex = /^[a-zA-Z0-9._]{3,30}$/;
+    const emailOrUsernameRegex = /^[a-zA-Z0-9._]{2,30}$/;
 
     const PasswordLogin = () => {
         return (
