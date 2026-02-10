@@ -131,11 +131,9 @@
   },
   "files": [
     "dist/**/*",
-    "src/**/*",
     "types/**/*",
     "README.md",
     "LICENSE",
-    "dist-tests/**",
-    "tests/**"
+    "dist-tests/**"
   ]
 }
