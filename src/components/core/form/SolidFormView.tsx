@@ -900,7 +900,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         for (let i = 0; i < layoutFields?.length; i++) {
             const formLayoutField = layoutFields[i];
             const fieldMetadata = solidFieldsMetadata[formLayoutField.attrs.name];
-            if (fieldMetadata?.type === 'relation') {
+            if (fieldMetadata?.type === 'relation' && fieldMetadata?.relationType === 'many-to-one') {
                 toPopulate.push(fieldMetadata.name);
             }
             if (fieldMetadata?.type === 'mediaSingle' || fieldMetadata?.type === 'mediaMultiple') {
