@@ -95,17 +95,6 @@ const NavbarOne = () => {
             )}
             <div className="navBarOne">
                 <div>
-                    {/* <div className="p-0">
-                        <div className="navbar-brand">
-                            <a href="/">
-                                <img
-                                    style={{ cursor: "pointer" }}
-                                    src="/images/logo.png"
-                                    alt="Solid"
-                                />
-                            </a>
-                        </div>
-                    </div> */}
                     <div className="navbar-menu">
                         <>
                             {menu && menu.data.length > 0 && menu.data.map((m: any) => (

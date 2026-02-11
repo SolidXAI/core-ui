@@ -1,4 +1,3 @@
-// export * from './components/common/AuthBanner';
 export { AutoCompleteField } from './components/common/AutoCompleteField';
 export { CancelButton, SolidCancelButton } from './components/common/CancelButton';
 // export * from './components/common/CodeEditor';
@@ -305,7 +304,6 @@ export { AdminLayout } from './components/layout/AdminLayout';
 export { SolidAdmin } from './components/common/SolidAdmin';
 
 // Re-export default exports
-export { default as AuthBanner } from './components/common/AuthBanner';
 export { default as CodeEditor } from './components/common/CodeEditor';
 export { default as MarkdownViewer } from './components/common/MarkdownViewer';
 
