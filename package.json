@@ -8,8 +8,7 @@
     "prepare": "npm run build",
     "copy-resources": "copyfiles -u 1 \"src/resources/**/*\" dist",
     "copy-styles": "copyfiles -u 1 \"src/**/*\" dist/",
-    "build:tests": "tsc -p tsconfig.tests.json",
-    "prepack": "npm run build && npm run build:tests"
+    "prepack": "npm run build"
   },
   "keywords": [],
   "author": "",
