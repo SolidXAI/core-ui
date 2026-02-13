@@ -19,4 +19,4 @@ declare module '*.svg' {
 }
 
 // src/declarations.d.ts or types/declarations.d.ts
-declare module '@solidstarters/solid-core-ui';
+declare module '@solidxai/core-ui';

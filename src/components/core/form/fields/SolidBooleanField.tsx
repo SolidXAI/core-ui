@@ -428,7 +428,18 @@ export const DefaultBooleanFormViewWidget = ({ formik, fieldContext }: SolidForm
             {showFieldLabel !== false && (
                 <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
             )}
-            <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name] === true || formik.values[fieldLayoutInfo.attrs.name] === "true" ? trueLabel : falseLabel}</p>
+            <p className="m-0">
+                {(() => {
+                    const value = formik.values[fieldLayoutInfo.attrs.name];
+                    if (value === true) {
+                        return trueLabel;
+                    }
+                    if (value === false) {
+                        return falseLabel;
+                    }
+                    return '';
+                })()}
+            </p>
         </div>
     );
 }

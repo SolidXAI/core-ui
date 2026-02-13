@@ -380,7 +380,7 @@ export const SolidListView = (params: SolidListViewParams) => {
         }
 
         // Form the "toPopulate" array.
-        if (fieldMetadata.type === "relation") {
+        if (fieldMetadata.type === "relation" && fieldMetadata?.relationType === 'many-to-one') {
           if (!toPopulate.includes(fieldMetadata.name)) {
             toPopulate.push(fieldMetadata.name);
           }

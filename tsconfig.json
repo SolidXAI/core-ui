@@ -26,6 +26,7 @@
     "emitDeclarationOnly": false,
     "declarationDir": "dist",
     "sourceMap": true,                // Generate source maps for debugging
+    "inlineSources": true,            // Embed sources in sourcemaps for browser debugging
     "plugins": [
       {
         "name": "next"

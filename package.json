@@ -1,6 +1,6 @@
 {
-  "name": "@solidstarters/solid-core-ui",
-  "version": "1.1.211",
+  "name": "@solidxai/core-ui",
+  "version": "0.1.1",
   "scripts": {
     "prebuild": "npm run copy-resources && npm run copy-styles",
     "build": "tsc -p tsconfig.json && tsc-alias -p tsconfig.json",
@@ -8,9 +8,7 @@
     "prepare": "npm run build",
     "copy-resources": "copyfiles -u 1 \"src/resources/**/*\" dist",
     "copy-styles": "copyfiles -u 1 \"src/**/*\" dist/",
-    "publish:patch": "node publish.js patch",
-    "publish:minor": "node publish.js minor",
-    "publish:major": "node publish.js major"
+    "prepack": "npm run build"
   },
   "keywords": [],
   "author": "",
@@ -127,13 +125,14 @@
     "react-syntax-highlighter": "^15.6.6",
     "react-transition-group": "^4.4.5",
     "tsc-alias": "^1.8.10",
-    "typescript": "5.2.2"
+    "typescript": "5.2.2",
+    "@playwright/test": "^1.50.0"
   },
   "files": [
     "dist/**/*",
-    "src/**/*",
     "types/**/*",
     "README.md",
-    "LICENSE"
+    "LICENSE",
+    "dist-tests/**"
   ]
 }
