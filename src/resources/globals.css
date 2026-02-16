@@ -1291,27 +1291,6 @@ li.header-li-px {
   transition: all 0.25s ease-in;
 }
 
-
-/* Footer */
-.custom-footer {
-  background-image: url(../resources/images/Footerbg.png);
-  background-repeat: no-repeat;
-  background-size: cover;
-  background-position: top;
-}
-
-
-.custom-footer-logo {
-  width: calc(70px + (170 - 70) * (100vw - 320px) / (1920 - 320)) !important;
-}
-
-.footer-input-border {
-  border-radius: 40px;
-}
-
-
-
-
 @media only screen and (min-device-width: 1500px) and (max-device-width: 1699px) {
   li.header-li-px {
     padding: 0 12px !important;
