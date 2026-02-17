@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { forwardRef, useState, useEffect, useRef, useMemo, useImperativeHandle } from "react";
 import {
   DataTable,
   DataTableFilterMeta,
@@ -138,7 +138,67 @@ type SolidListViewParams = {
   customFilter?: any;
 };
 
-export const SolidListView = (params: SolidListViewParams) => {
+export type SolidListViewHandle = {
+  /**
+   * Re-runs the list fetch using the current internal state
+   * (filters, pagination, sorting, archived toggle, and populate config).
+   * Use this after external side-effects that may have changed list data
+   * but do not require changing list state first.
+   */
+  refresh: () => void;
+  /**
+   * Resets list filters to the default state and also clears the
+   * global search UI state through the existing search element ref.
+   * Use this for a full "Reset filters" action.
+   */
+  clearFilters: () => void;
+  /**
+   * Applies transformed filter predicates in the same shape used by
+   * SolidGlobalSearchElement -> handleApplyCustomFilter.
+   * Use this when external code wants to programmatically drive
+   * search/custom/saved/predefined filters.
+   */
+  applyFilter: (filter: {
+    custom_filter_predicate?: any;
+    search_predicate?: any;
+    saved_filter_predicate?: any;
+    predefined_search_predicate?: any;
+  }) => void;
+  /**
+   * Updates pagination state directly.
+   * Use this when a caller needs to jump to a specific page window
+   * or enforce a new page size.
+   */
+  setPagination: (nextFirst: number, nextRows: number) => void;
+  /**
+   * Updates sorting state and resets page offset to the first page.
+   * Use this for programmatic sort controls to match DataTable behavior.
+   */
+  setSort: (nextSortField: string, nextSortOrder: 1 | -1 | 0) => void;
+  /**
+   * Toggles inclusion of archived/soft-deleted records.
+   * Use this to switch between active-only and inclusive list views.
+   */
+  setShowArchived: (value: boolean) => void;
+  /**
+   * Returns a snapshot of current list state for orchestration/debugging.
+   * Includes a cloned listData array to avoid accidental external mutation.
+   */
+  getState: () => {
+    first: number;
+    rows: number;
+    sortField: string;
+    sortOrder: 1 | -1 | 0;
+    showArchived: boolean;
+    filters: any;
+    transformedFilter: any;
+    listData: any[];
+    totalRecords: number;
+    loading: boolean;
+  };
+};
+
+export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams>((params, ref) => {
   const session = useSession();
   const user = session?.data?.user;
   const dispatch = useDispatch();
@@ -909,6 +969,60 @@ export const SolidListView = (params: SolidListViewParams) => {
     setFilters(params.customFilter || { $and: [] })
     solidGlobalSearchElementRef.current.clearFilter();
   };
+
+  const cloneListData = () => {
+    if (typeof structuredClone === "function") {
+      return structuredClone(listViewData);
+    }
+    return JSON.parse(JSON.stringify(listViewData));
+  };
+
+  useImperativeHandle(ref, () => ({
+    refresh: () => {
+      void setQueryString();
+    },
+    clearFilters: () => {
+      clearFilter();
+    },
+    applyFilter: (filter) => {
+      handleApplyCustomFilter(filter);
+    },
+    setPagination: (nextFirst, nextRows) => {
+      setFirst(nextFirst);
+      setRows(nextRows);
+    },
+    setSort: (nextSortField, nextSortOrder) => {
+      setSortField(nextSortField);
+      setSortOrder(nextSortOrder);
+      setFirst(0);
+    },
+    setShowArchived: (value) => {
+      setShowArchived(value);
+    },
+    getState: () => ({
+      first,
+      rows,
+      sortField,
+      sortOrder,
+      showArchived,
+      filters,
+      transformedFilter,
+      listData: cloneListData(),
+      totalRecords,
+      loading,
+    }),
+  }), [
+    first,
+    rows,
+    sortField,
+    sortOrder,
+    showArchived,
+    filters,
+    transformedFilter,
+    totalRecords,
+    loading,
+    listViewData,
+  ]);
 
   const [selectedSolidViewData, setSelectedSolidViewData] = useState<any>();
   const selectedDataRef = useRef<any>();
@@ -1972,4 +2086,6 @@ export const SolidListView = (params: SolidListViewParams) => {
       }
     </div >
   );
-};
+});
+
+SolidListView.displayName = "SolidListView";
