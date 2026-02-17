@@ -6,5 +6,5 @@ export function ListPage() {
   const params = useParams();
   const moduleName = params.moduleName || "";
   const modelName = params.modelName ? camelCase(params.modelName) : "";
-  return <SolidListView {...params} embeded={false} moduleName={moduleName} modelName={modelName} />;
+  return <SolidListView key={moduleName + modelName} {...params} embeded={false} moduleName={moduleName} modelName={modelName} />;
 }
