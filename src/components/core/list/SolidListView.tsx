@@ -157,6 +157,7 @@ export type SolidListViewHandle = {
    * SolidGlobalSearchElement -> handleApplyCustomFilter.
    * Use this when external code wants to programmatically drive
    * search/custom/saved/predefined filters.
+   * eg custom_filter_predicate : {$and: [{displayName: {$containsi: "test"}}]}
    */
   applyFilter: (filter: {
     custom_filter_predicate?: any;
@@ -191,7 +192,7 @@ export type SolidListViewHandle = {
     sortOrder: 1 | -1 | 0;
     showArchived: boolean;
     filters: any;
-    transformedFilter: any;
+    filterPredicates: any;
     listData: any[];
     totalRecords: number;
     loading: boolean;
@@ -247,7 +248,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [showArchived, setShowArchived] = useState(false);
 
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
-  const [transformedFilter, setTransformedFilter] = useState(null);
+  const [filterPredicates, setFilterPredicates] = useState(null);
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
 
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
@@ -703,7 +704,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         setFirst(0);
       }
       setFilters(params.customFilter || { $and: [] })
-      setTransformedFilter(null);
+      setFilterPredicates(null);
       setSelectedRecords([]);
       setSelectedRecoverRecords([]);
       setQueryDataLoaded(true);
@@ -773,7 +774,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   // Create a ref that always has the latest filters
   const latestFiltersRef = useRef(filters);
-  const latestTransformedFilterRef = useRef(transformedFilter);
+  const latestFilterPredicatesRef = useRef(filterPredicates);
 
   // Keep refs in sync
   useEffect(() => {
@@ -781,13 +782,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   }, [filters]);
 
   useEffect(() => {
-    latestTransformedFilterRef.current = transformedFilter;
-  }, [transformedFilter]);
+    latestFilterPredicatesRef.current = filterPredicates;
+  }, [filterPredicates]);
 
 
   useEffect(() => {
     console.log(`useEffect: [first- ${first}, rows- ${rows}, sortField- ${sortField}, sortOrder- ${sortOrder}, showArchived- ${showArchived}, toPopulate- ${toPopulate}, toPopulateMedia- ${toPopulateMedia}, queryDataLoaded- ${queryDataLoaded}]`);
-    if (queryDataLoaded && filters && (transformedFilter || params.embeded == true)) {
+    if (queryDataLoaded && filters && (filterPredicates || params.embeded == true)) {
       setQueryString();
     }
   }, [
@@ -905,49 +906,48 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
     const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
 
-    if (latestTransformedFilterRef.current) {
+    if (latestFilterPredicatesRef.current && latestFilterPredicatesRef.current.persistFilter) {
       let url;
       const urlData = structuredClone(queryData);
       delete urlData.filters;
-      urlData.custom_filter_predicate = latestTransformedFilterRef.current.custom_filter_predicate || null;
-      urlData.search_predicate = latestTransformedFilterRef.current.search_predicate || null;
-
-      urlData.saved_filter_predicate = latestTransformedFilterRef.current.saved_filter_predicate || null;
-      urlData.predefined_search_predicate = latestTransformedFilterRef.current.predefined_search_predicate || null;
-
+      urlData.custom_filter_predicate = latestFilterPredicatesRef.current.custom_filter_predicate || null;
+      urlData.search_predicate = latestFilterPredicatesRef.current.search_predicate || null;
+      urlData.saved_filter_predicate = latestFilterPredicatesRef.current.saved_filter_predicate || null;
+      urlData.predefined_search_predicate = latestFilterPredicatesRef.current.predefined_search_predicate || null;
       queryObjectToQueryString(urlData);
     }
     triggerGetSolidEntities(queryString);
   };
 
   // handle filter...
-  const handleApplyCustomFilter = (transformedFilter: any) => {
+  const handleApplyCustomFilter = (filterPredicates: any, persistFilter: boolean = false) => {
     // we assume that the customfilter will always have $and array
     const queryfilter = structuredClone(params.customFilter) || { $and: [] }
 
-    if (transformedFilter.custom_filter_predicate) {
-      queryfilter.$and.push(transformedFilter.custom_filter_predicate);
+    if (filterPredicates.custom_filter_predicate) {
+      queryfilter.$and.push(filterPredicates.custom_filter_predicate);
     }
-    if (transformedFilter.search_predicate) {
-      queryfilter.$and.push(transformedFilter.search_predicate);
+    if (filterPredicates.search_predicate) {
+      queryfilter.$and.push(filterPredicates.search_predicate);
     }
-    if (transformedFilter.saved_filter_predicate) {
-      queryfilter.$and.push(transformedFilter.saved_filter_predicate);
+    if (filterPredicates.saved_filter_predicate) {
+      queryfilter.$and.push(filterPredicates.saved_filter_predicate);
     }
-    if (transformedFilter.predefined_search_predicate) {
-      queryfilter.$and.push(transformedFilter.predefined_search_predicate);
+    if (filterPredicates.predefined_search_predicate) {
+      queryfilter.$and.push(filterPredicates.predefined_search_predicate);
     }
-
-    const customFilter = transformedFilter;
     const updatedFilter = queryfilter;
 
     // Update refs IMMEDIATELY (synchronously)
     latestFiltersRef.current = updatedFilter;
-    latestTransformedFilterRef.current = transformedFilter;
+    const updatedFilterPredicates = structuredClone(filterPredicates);
+    updatedFilterPredicates.persistFilter = persistFilter;
+    latestFilterPredicatesRef.current = updatedFilterPredicates;
 
     // Then update state
     setFilters(updatedFilter);
-    setTransformedFilter(transformedFilter);
+    setPersistFilter(persistFilter);
+    setFilterPredicates(updatedFilterPredicates);
     // Force synchronous state updates
   };
 
@@ -1006,7 +1006,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       sortOrder,
       showArchived,
       filters,
-      transformedFilter,
+      filterPredicates,
       listData: cloneListData(),
       totalRecords,
       loading,
@@ -1018,7 +1018,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     sortOrder,
     showArchived,
     filters,
-    transformedFilter,
+    filterPredicates,
     totalRecords,
     loading,
     listViewData,
@@ -1408,11 +1408,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                         key={params.modelName}
                         showSaveFilterPopup={showSaveFilterPopup}
                         setShowSaveFilterPopup={setShowSaveFilterPopup}
-                        filters={filters}
-                        clearFilter={clearFilter}
                         ref={solidGlobalSearchElementRef}
                         viewData={solidListViewMetaData}
-                        handleApplyCustomFilter={handleApplyCustomFilter}>
+                        handleApplyCustomFilter={handleApplyCustomFilter}
+                        filterPredicates={filterPredicates}
+                      >
                       </SolidGlobalSearchElement>
                     </div>
 
@@ -1537,11 +1537,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   <SolidGlobalSearchElement
                     showSaveFilterPopup={showSaveFilterPopup}
                     setShowSaveFilterPopup={setShowSaveFilterPopup}
-                    filters={filters}
-                    clearFilter={clearFilter}
                     ref={solidGlobalSearchElementRef}
                     viewData={solidListViewMetaData}
-                    handleApplyCustomFilter={handleApplyCustomFilter}>
+                    handleApplyCustomFilter={handleApplyCustomFilter}
+                    filterPredicates={filterPredicates}
+                  >
+
                   </SolidGlobalSearchElement>
                 </div>
 

@@ -426,7 +426,7 @@ type RelationCache = Map<string, { label: string; value: number }>;
 
 
 
-export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCustomFilter, filters, clearFilter, showSaveFilterPopup, setShowSaveFilterPopup }: any, ref) => {
+export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCustomFilter, showSaveFilterPopup, setShowSaveFilterPopup, filterPredicates }: any, ref) => {
     const defaultState: FilterRule[] = [
         {
             id: 1,
@@ -545,6 +545,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     const [savedFilterFetchDataRefreshKey, setSavedFilterFetchDataRefreshKey] = useState(0);
 
+
+
     useEffect(() => {
         const fn = async () => {
             if (!viewData?.data?.solidView?.model?.id || !viewData?.data?.solidView?.id || !user?.id) {
@@ -635,6 +637,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     }
                 }
                 if (searchChips) {
+                    setSearchFilter(searchChips);
                     const formattedChips = searchChips?.$and.map((chip: any, key: any) => {
                         const chipKey = Object.keys(chip)[0]; // Get the key, e.g., "displayName"
                         const chipValue = chip[chipKey]?.$containsi; // Get the value of "$containsi"
@@ -646,7 +649,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     }
                     );
                     setSearchChips(formattedChips);
-                    setSearchFilter(searchChips);
 
                 }
                 if (customChips && Object.keys(customChips).length !== 0) {
@@ -662,6 +664,38 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         }
         fn()
     }, [viewData?.data?.solidView?.id, activeSavedFilter, savedFiltersLoaded])
+
+    useEffect(() => {
+        const fn = async () => {
+            console.log("Effect fired");
+            console.log("filterPredicates:", filterPredicates);
+            if (filterPredicates) {
+                console.log("inside filterPredicates");
+
+                if (filterPredicates?.custom_filter_predicate && filterPredicates?.custom_filter_predicate !== customFilter) {
+                    setCustomFilter(filterPredicates?.custom_filter_predicate);
+                    const rules: FilterRule = transformFiltersToRules(filterPredicates.custom_filter_predicate);
+                    const hydratedRules = await hydrateRelationRules([rules], viewData);
+                    setFilterRules(hydratedRules);
+                }
+                if (filterPredicates?.search_predicate && filterPredicates?.search_predicate !== searchFilter) {
+                    setSearchFilter(filterPredicates?.search_predicate);
+                    const formattedChips = filterPredicates.search_predicate?.$and.map((chip: any, key: any) => {
+                        const chipKey = Object.keys(chip)[0]; // Get the key, e.g., "displayName"
+                        const chipValue = chip[chipKey]?.$containsi; // Get the value of "$containsi"
+                        const chipdata = {
+                            columnName: chipKey,
+                            value: chipValue
+                        };
+                        return chipdata
+                    }
+                    );
+                    setSearchChips(formattedChips);
+                }
+            }
+        }
+        fn()
+    }, [filterPredicates])
 
     useEffect(() => {
         if (viewData?.data?.solidFieldsMetadata) {
@@ -848,7 +882,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
             const finalCustomFilter = customFilter
             const finalFilter = mergeAllDiffFilters(finalCustomFilter, finalSearchFilter, finalSavedFilter, finalPredefinedFilter)
-            handleApplyCustomFilter(finalFilter);
+            handleApplyCustomFilter(finalFilter, true);
             setHasSearched(false)
             // }
         }
