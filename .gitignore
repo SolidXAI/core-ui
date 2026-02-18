@@ -38,6 +38,7 @@ next-env.d.ts
 package-lock.json
 
 dist
+dist-tests
 
 *.tgz
 

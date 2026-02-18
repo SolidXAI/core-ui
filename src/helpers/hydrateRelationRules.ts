@@ -28,7 +28,7 @@ export async function hydrateRelationRules(
 
       if (
         meta?.type === "relation" &&
-        meta.relationType === "many-to-many" &&
+        (meta.relationType === "many-to-many" || meta.relationType === "many-to-one") &&
         Array.isArray(rule.value) &&
         typeof rule.value[0] === "number"
       ) {

@@ -220,8 +220,42 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
     }
 
 
+
+    const buildCustomFilter = (customFilterKey: any, fieldContext: any, fieldLayoutInfo: any) => {
+        const baseFilter = {
+            [customFilterKey]: {
+                id: {
+                    $eq: fieldContext.data && fieldContext.data.id !== undefined
+                        ? fieldContext.data.id
+                        : -1
+                }
+            }
+        };
+
+        const whereClause = fieldLayoutInfo?.attrs?.whereClause;
+
+        if (whereClause) {
+            try {
+                const parsedWhereClause = JSON.parse(whereClause);
+                return {
+                    [customFilterKey]: {
+                        ...baseFilter[customFilterKey],
+                        ...parsedWhereClause
+                    }
+                };
+            } catch (error) {
+                console.error('Failed to parse whereClause:', error);
+                return baseFilter;
+            }
+        }
+
+        return baseFilter;
+    };
+
+
     //Intial Params 
     useEffect(() => {
+
 
         const customFilter = fieldContext.fieldMetadata.relationCoModelFieldName ? fieldContext.fieldMetadata.relationCoModelFieldName : `${fieldContext.modelName}`
         const listviewparams = {
@@ -231,13 +265,15 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
             customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
             embeded: true,
             id: fieldContext.data ? fieldContext?.data?.id : 'new',
-            customFilter: {
-                [customFilter]: {
-                    id: {
-                        $eq: fieldContext.data && fieldContext.data.id !== undefined ? fieldContext.data.id : -1
-                    }
-                }
-            }
+            customFilter: buildCustomFilter(customFilter, fieldContext, fieldLayoutInfo)
+
+            // customFilter: {
+            //     [customFilter]: {
+            //         id: {
+            //             $eq: fieldContext.data && fieldContext.data.id !== undefined ? fieldContext.data.id : -1
+            //         }
+            //     }
+            // }
         }
         setListViewParams(listviewparams);
         const formviewparams: FormViewParams = {
@@ -338,6 +374,47 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
     const lastPathSegment = pathname.split('/').pop();
     const userKeyField: any = Object.entries(fieldContext.solidFormViewMetaData.data.solidFieldsMetadata).find(([_, value]: any) => value.isUserKey)?.[0];
 
+    const buildRelationCustomFilter = ({
+        fieldContext,
+        fieldLayoutInfo,
+    }: {
+        fieldContext: any;
+        fieldLayoutInfo?: any;
+    }) => {
+        if (!fieldContext) {
+            return { id: { $eq: -1 } };
+        }
+
+        const relationFieldName =
+            fieldContext.fieldMetadata?.relationCoModelFieldName ??
+            fieldContext.modelName;
+
+        const parentId = fieldContext.data?.id ?? -1;
+
+        const baseFilter = {
+            [relationFieldName]: {
+                id: { $eq: parentId },
+            },
+        };
+
+        const whereClause = fieldLayoutInfo?.attrs?.whereClause;
+
+        if (!whereClause) return { $and: [baseFilter] };
+
+        try {
+            const parsedWhereClause = JSON.parse(whereClause);
+
+            return {
+                $and: [baseFilter, parsedWhereClause],
+            };
+        } catch (error) {
+            console.error("Failed to parse whereClause:", error);
+            return { $and: [baseFilter] };
+        }
+    };
+
+
+
     const handlePopupOpen = (id: any) => {
 
         const formviewparams: FormViewParams = {
@@ -370,13 +447,17 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
             customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
             embeded: true,
             id: fieldContext.data ? fieldContext?.data?.id : 'new',
-            customFilter: {
-                [customFilter]: {
-                    id: {
-                        $eq: fieldContext.data ? fieldContext?.data?.id : -1
-                    }
-                }
-            }
+            customFilter: buildRelationCustomFilter({
+                fieldContext,
+                fieldLayoutInfo,
+            })
+            // customFilter: {
+            //     [customFilter]: {
+            //         id: {
+            //             $eq: fieldContext.data ? fieldContext?.data?.id : -1
+            //         }
+            //     }
+            // }
         }
         setListViewParams(lisviewparams)
     }
@@ -391,13 +472,19 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
             customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
             embeded: true,
             id: fieldContext.data ? fieldContext?.data?.id : 'new',
-            customFilter: {
-                [customFilter]: {
-                    id: {
-                        $eq: fieldContext?.data?.id !== undefined ? fieldContext?.data?.id : -1
-                    }
-                }
-            }
+            customFilter: buildRelationCustomFilter({
+                fieldContext,
+                fieldLayoutInfo,
+            })
+
+
+            // customFilter: {
+            //     [customFilter]: {
+            //         id: {
+            //             $eq: fieldContext?.data?.id !== undefined ? fieldContext?.data?.id : -1
+            //         }
+            //     }
+            // }
         }
         setListViewParams(listviewparams);
         const formviewparams: FormViewParams = {
@@ -525,6 +612,42 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
     const childModuleName = fieldLayoutInfo?.attrs?.childModuleName
 
 
+    const buildCustomFilter = ({ childFieldName, parentFieldName, formViewData, fieldLayoutInfo,
+    }: {
+        childFieldName?: string;
+        parentFieldName?: string;
+        formViewData?: any;
+        fieldLayoutInfo?: any;
+    }) => {
+        const baseFilter =
+            childFieldName && formViewData?.data
+                ? {
+                    [childFieldName]: {
+                        $eq: formViewData.data[parentFieldName as string],
+                    },
+                }
+                : { id: { $eq: -1 } };
+
+        // 2️⃣ Optional whereClause merge
+        const whereClause = fieldLayoutInfo?.attrs?.whereClause;
+
+        if (!whereClause) return { $and: [baseFilter] };
+
+        try {
+            const parsedWhereClause = JSON.parse(whereClause);
+
+            // If both filters exist, merge safely
+            return {
+                $and: [baseFilter, parsedWhereClause]
+            };
+        } catch (error) {
+            console.error("Failed to parse whereClause:", error);
+            return { $and: [baseFilter] };
+        }
+    };
+
+
+
     const handlePopupOpen = (id: any) => {
 
         const formviewparams: FormViewParams = {
@@ -548,7 +671,6 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
     const handlePopupClose = () => {
         setvisibleCreateRelationEntity(false);
         setRefreshList((prev) => !prev);
-        const customFilter = childModelName
         const lisviewparams = {
             moduleName: childModuleName,
             modelName: camelCase(childModelName),
@@ -556,23 +678,18 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
             customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
             embeded: true,
             id: formViewData && formViewData?.data ? formViewData?.data?.id : 'new',
-            customFilter: childFieldName && formViewData?.data
-                ? {
-                    [childFieldName]: {
-                        $eq: formViewData.data[parentFieldName]
-                    }
-                }
-                : {
-                    id: {
-                        $eq: -1
-                    }
-                }
+            customFilter: buildCustomFilter({
+                childFieldName,
+                parentFieldName,
+                formViewData,
+                fieldLayoutInfo,
+            })
         }
         setListViewParams(lisviewparams)
     }
     //Intial Params 
     useEffect(() => {
-        const customFilter = childModelName
+
         const listviewparams = {
             moduleName: childModuleName,
             modelName: camelCase(childModelName),
@@ -580,19 +697,13 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
             customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
             embeded: true,
             id: formViewData && formViewData?.data ? formViewData?.data?.id : 'new',
-            customFilter: childFieldName && formViewData?.data
-                ? {
-                    [childFieldName]: {
-                        $eq: formViewData.data[parentFieldName]
-                    }
-                }
-                : {
-                    id: {
-                        $eq: -1
-                    }
-                }
+            customFilter: buildCustomFilter({
+                childFieldName,
+                parentFieldName,
+                formViewData,
+                fieldLayoutInfo,
+            })
         }
-
         setListViewParams(listviewparams);
         const formviewparams: FormViewParams = {
             moduleName: childModuleName,

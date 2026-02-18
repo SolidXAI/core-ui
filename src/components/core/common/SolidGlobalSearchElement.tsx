@@ -426,7 +426,7 @@ type RelationCache = Map<string, { label: string; value: number }>;
 
 
 
-export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCustomFilter, filters, clearFilter, showSaveFilterPopup, setShowSaveFilterPopup }: any, ref) => {
+export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCustomFilter, showSaveFilterPopup, setShowSaveFilterPopup, filterPredicates }: any, ref) => {
     const defaultState: FilterRule[] = [
         {
             id: 1,
@@ -545,6 +545,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     const [savedFilterFetchDataRefreshKey, setSavedFilterFetchDataRefreshKey] = useState(0);
 
+
+
     useEffect(() => {
         const fn = async () => {
             if (!viewData?.data?.solidView?.model?.id || !viewData?.data?.solidView?.id || !user?.id) {
@@ -585,8 +587,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             if (savedFilter) {
                 console.log("savedFilter", savedFilter);
                 setSavedFilters(savedFilter?.records)
-                setSavedFiltersLoaded(true);
             }
+            setSavedFiltersLoaded(true);
         }
         fn()
     }, [
@@ -607,7 +609,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         const fn = async () => {
             let searchChips: any;
             let customChips: any;
-            let parsedSearchParams = searchParams;
             if (savedFiltersLoaded) {
 
                 if (activeSavedFilter && savedFilters.length === 0) return;
@@ -636,6 +637,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     }
                 }
                 if (searchChips) {
+                    setSearchFilter(searchChips);
                     const formattedChips = searchChips?.$and.map((chip: any, key: any) => {
                         const chipKey = Object.keys(chip)[0]; // Get the key, e.g., "displayName"
                         const chipValue = chip[chipKey]?.$containsi; // Get the value of "$containsi"
@@ -647,10 +649,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     }
                     );
                     setSearchChips(formattedChips);
-                    setSearchFilter(searchChips);
 
                 }
-
                 if (customChips && Object.keys(customChips).length !== 0) {
                     setCustomFilter(customChips);
                     const rules: FilterRule = transformFiltersToRules(customChips);
@@ -658,15 +658,44 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     setFilterRules(hydratedRules);
                 }
 
-                setHasSearched(true);
                 setRefreshKey((prev) => prev + 1)
+                setHasSearched(true);
             }
         }
         fn()
-    }, [viewData, activeSavedFilter, savedFilters, savedFiltersLoaded])
+    }, [viewData?.data?.solidView?.id, activeSavedFilter, savedFiltersLoaded])
 
+    useEffect(() => {
+        const fn = async () => {
+            console.log("Effect fired");
+            console.log("filterPredicates:", filterPredicates);
+            if (filterPredicates) {
+                console.log("inside filterPredicates");
 
-
+                if (filterPredicates?.custom_filter_predicate && filterPredicates?.custom_filter_predicate !== customFilter) {
+                    setCustomFilter(filterPredicates?.custom_filter_predicate);
+                    const rules: FilterRule = transformFiltersToRules(filterPredicates.custom_filter_predicate);
+                    const hydratedRules = await hydrateRelationRules([rules], viewData);
+                    setFilterRules(hydratedRules);
+                }
+                if (filterPredicates?.search_predicate && filterPredicates?.search_predicate !== searchFilter) {
+                    setSearchFilter(filterPredicates?.search_predicate);
+                    const formattedChips = filterPredicates.search_predicate?.$and.map((chip: any, key: any) => {
+                        const chipKey = Object.keys(chip)[0]; // Get the key, e.g., "displayName"
+                        const chipValue = chip[chipKey]?.$containsi; // Get the value of "$containsi"
+                        const chipdata = {
+                            columnName: chipKey,
+                            value: chipValue
+                        };
+                        return chipdata
+                    }
+                    );
+                    setSearchChips(formattedChips);
+                }
+            }
+        }
+        fn()
+    }, [filterPredicates])
 
     useEffect(() => {
         if (viewData?.data?.solidFieldsMetadata) {
@@ -831,7 +860,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
     }
 
     useEffect(() => {
-        if (refreshKey > 0) {
+        if (refreshKey > 0 && hasSearched) {
             console.log("refres", refreshKey);
             console.log("hasSearched", hasSearched);
 
@@ -852,14 +881,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             const finalPredefinedFilter = predefinedSearchBaseFilter
 
             const finalCustomFilter = customFilter
-
-            console.log("finalCustomFilter", finalCustomFilter);
-            console.log("finalPredefinedFilter", finalPredefinedFilter);
-            console.log("finalSavedFilter", finalSavedFilter);
-            console.log("finalSearchFilter", finalSearchFilter);
-
             const finalFilter = mergeAllDiffFilters(finalCustomFilter, finalSearchFilter, finalSavedFilter, finalPredefinedFilter)
-            handleApplyCustomFilter(finalFilter);
+            handleApplyCustomFilter(finalFilter, true);
+            setHasSearched(false)
             // }
         }
     }, [refreshKey]);
@@ -1330,8 +1354,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 </div>
 
                 {showOverlay && (
-                    <div ref={overlayRef} className="absolute w-full z-5 shadow-2 solid-search-overlay-pannel" style={{ top: 35, background : "var(--surface-0)", border: '1px solid var(--surface-300) !important', borderRadius :'6px'}}>
-                    {/* <div ref={overlayRef} className="absolute w-full z-5 surface-0 border-round border-1 border-300 shadow-2 solid-search-overlay-pannel" style={{ top: 35 }}> */}
+                    <div ref={overlayRef} className="absolute w-full z-5 shadow-2 solid-search-overlay-pannel" style={{ top: 35, background: "var(--surface-0)", border: '1px solid var(--surface-300) !important', borderRadius: '6px' }}>
+                        {/* <div ref={overlayRef} className="absolute w-full z-5 surface-0 border-round border-1 border-300 shadow-2 solid-search-overlay-pannel" style={{ top: 35 }}> */}
                         {inputValue ? (
                             <>
                                 <div className="custom-filter-search-options px-3 py-2 flex flex-column">
