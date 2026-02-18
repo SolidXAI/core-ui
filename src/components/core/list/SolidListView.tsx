@@ -946,7 +946,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
     // Then update state
     setFilters(updatedFilter);
-    setPersistFilter(persistFilter);
     setFilterPredicates(updatedFilterPredicates);
     // Force synchronous state updates
   };
