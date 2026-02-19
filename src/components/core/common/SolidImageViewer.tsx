@@ -58,7 +58,6 @@ export const SolidImageViewer = ({
         };
     }, [images, open]);
 
-
     // Show viewer when open becomes true
     useEffect(() => {
         if (open && viewerRef.current) {

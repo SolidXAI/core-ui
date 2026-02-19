@@ -53,6 +53,9 @@ export { SolidRelationManyToManyField } from './components/core/form/fields/rela
 export { SolidRelationManyToOneField } from './components/core/form/fields/relations/SolidRelationManyToOneField';
 export { SolidRelationOneToManyField } from './components/core/form/fields/relations/SolidRelationOneToManyField';
 
+export { SolidImageViewer } from './components/core/common/SolidImageViewer';
+export type { SolidImageViewerProps } from './components/core/common/SolidImageViewer';
+
 export { SolidChatter } from './components/core/chatter/SolidChatter';
 
 // export * from './components/core/kanban/KanbanBoard';
@@ -91,12 +94,15 @@ export { ToastContainer, handleError, handleSuccess } from './helpers/ToastConta
 // export { getAuthCookieName, getAuthHeader } from './helpers/authHeader';
 export { AppTitle } from './helpers/AppTitle';
 export { addCommasToAmount, calculateDaysOfStay, getSingularAndPlural } from './helpers/helpers';
+export { fetchS3Url } from './helpers/fetchS3Url';
+export type { FetchS3UrlOptions } from './helpers/fetchS3Url';
 export { permissionExpression } from './helpers/permissions';
 export { revalidateTag } from './helpers/revalidate';
 export { hasAnyRole } from './helpers/rolesHelper';
 export { registerExtensionComponent, registerExtensionFunction } from './helpers/registry';
 export { env } from './adapters/env';
 export { logger } from './helpers/logger';
+export { default as showToast } from './helpers/showToast';
 
 
 export {
@@ -127,7 +133,8 @@ export {
     useLazyGetSelectionDynamicValueQuery,
     useLazyGetSelectionDynamicValuesQuery,
     useLazyGetfieldByIdQuery,
-    useLazyGetfieldsQuery
+    useLazyGetfieldsQuery,
+    useResolveS3UrlMutation,
 } from './redux/api/fieldApi';
 
 export {

@@ -7,6 +7,7 @@ import { useResolveS3UrlMutation } from "../../../../../redux/api/fieldApi";
 import Viewer from "viewerjs";
 import "viewerjs/dist/viewer.css";
 import { SolidImageViewer } from "@/components/core/common/SolidImageViewer";
+import { fetchS3Url, type FetchS3UrlOptions } from "@/helpers/fetchS3Url";
 
 /**
  * SolidS3FileViewerWidget (PrimeReact version)
@@ -32,35 +33,27 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
 
     const [resolveS3Url] = useResolveS3UrlMutation();
 
-    const fetchS3Url = async () => {
-        console.log("fetch url called");
+    const resolveFileUrl = async () => {
         setIsLoading(true);
-        try {
-            const result = await resolveS3Url({
-                modelName: fieldContext.modelName,
-                fieldName: fieldContext.fieldMetadata.name,
-                s3Key: value,
-                fileType: fileType,
-                bucketName: bucketName,
-                mediaStorageProviderUserKey: mediaStorageProviderUserKey,
-                isPrivate: isPrivate
-            }).unwrap();
 
-            setIsLoading(false);
-            if (result.statusCode == "200") {
-                console.log("fetch url success", result.data.url);
-                return result.data.url;
-            }
-        } catch (e) {
-            console.error("Failed to resolve S3 URL:", e);
-            setIsLoading(false);
-            return null;
-        }
+        const options: FetchS3UrlOptions = {
+            modelName: fieldContext.modelName,
+            fieldName: fieldContext.fieldMetadata.name,
+            s3Key: value,
+            fileType: fileType,
+            bucketName: bucketName,
+            mediaStorageProviderUserKey: mediaStorageProviderUserKey,
+            isPrivate: isPrivate
+        };
+
+        const url = await fetchS3Url(resolveS3Url, options);
+        setIsLoading(false);
+        return url;
     };
 
     const handleDownload = async () => {
         if (isLoading) return;
-        const url = await fetchS3Url();
+        const url = await resolveFileUrl();
         if (!url) return;
         const a = document.createElement("a");
         a.href = url;
@@ -74,7 +67,7 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
         console.log("isLoading in view", isLoading);
         if (isLoading) return;
 
-        const url = await fetchS3Url();
+        const url = await resolveFileUrl();
         console.log("url after fetch success", url);
         if (!url) return;
 
