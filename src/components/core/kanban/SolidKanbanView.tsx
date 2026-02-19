@@ -119,7 +119,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [kanbanViewMetaData, setKanbanViewMetaData] = useState<any>({});
 
   const {
-    data: solidKanbanViewMetaData  } = useGetSolidViewLayoutQuery(kanbanViewMetaDataQs);
+    data: solidKanbanViewMetaData } = useGetSolidViewLayoutQuery(kanbanViewMetaDataQs);
 
 
 
@@ -619,39 +619,32 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
 
   // Handle the custom filter and Search Filter
-  const handleApplyCustomFilter = async (transformedFilter: any) => {
+  const handleApplyCustomFilter = async (filterPredicates: any, persistFilter: boolean = false) => {
 
     if (solidKanbanViewMetaData) {
       const queryfilter = {
         $and: [
         ]
       }
-      // if (transformedFilter.s_filter) {
-      //   queryfilter.$and.push(transformedFilter.s_filter)
-      // }
-      // if (transformedFilter.c_filter) {
-      //   queryfilter.$and.push(transformedFilter.c_filter)
-      // }
 
-
-      if (transformedFilter.custom_filter_predicate) {
+      if (filterPredicates.custom_filter_predicate) {
         // @ts-ignore
-        queryfilter.$and.push(transformedFilter.custom_filter_predicate);
+        queryfilter.$and.push(filterPredicates.custom_filter_predicate);
       }
-      if (transformedFilter.search_predicate) {
+      if (filterPredicates.search_predicate) {
         // @ts-ignore
-        queryfilter.$and.push(transformedFilter.search_predicate);
+        queryfilter.$and.push(filterPredicates.search_predicate);
       }
-      if (transformedFilter.saved_filter_predicate) {
+      if (filterPredicates.saved_filter_predicate) {
         // @ts-ignore
-        queryfilter.$and.push(transformedFilter.saved_filter_predicate);
+        queryfilter.$and.push(filterPredicates.saved_filter_predicate);
       }
-      if (transformedFilter.predefined_search_predicate) {
+      if (filterPredicates.predefined_search_predicate) {
         // @ts-ignore
-        queryfilter.$and.push(transformedFilter.predefined_search_predicate);
+        queryfilter.$and.push(filterPredicates.predefined_search_predicate);
       }
 
-      const customFilter = transformedFilter;
+      const customFilter = filterPredicates;
       const updatedFilter = { ...(filters || {}), ...(queryfilter || {}) };
 
       // Then update state

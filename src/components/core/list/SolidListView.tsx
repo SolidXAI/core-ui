@@ -1,5 +1,5 @@
 // @ts-nocheck
-import React, { useState, useEffect, useRef, useMemo } from "react";
+import React, { forwardRef, useState, useEffect, useRef, useMemo, useImperativeHandle } from "react";
 import {
   DataTable,
   DataTableFilterMeta,
@@ -138,7 +138,68 @@ type SolidListViewParams = {
   customFilter?: any;
 };
 
-export const SolidListView = (params: SolidListViewParams) => {
+export type SolidListViewHandle = {
+  /**
+   * Re-runs the list fetch using the current internal state
+   * (filters, pagination, sorting, archived toggle, and populate config).
+   * Use this after external side-effects that may have changed list data
+   * but do not require changing list state first.
+   */
+  refresh: () => void;
+  /**
+   * Resets list filters to the default state and also clears the
+   * global search UI state through the existing search element ref.
+   * Use this for a full "Reset filters" action.
+   */
+  clearFilters: () => void;
+  /**
+   * Applies transformed filter predicates in the same shape used by
+   * SolidGlobalSearchElement -> handleApplyCustomFilter.
+   * Use this when external code wants to programmatically drive
+   * search/custom/saved/predefined filters.
+   * eg custom_filter_predicate : {$and: [{displayName: {$containsi: "test"}}]}
+   */
+  applyFilter: (filter: {
+    custom_filter_predicate?: any;
+    search_predicate?: any;
+    saved_filter_predicate?: any;
+    predefined_search_predicate?: any;
+  }) => void;
+  /**
+   * Updates pagination state directly.
+   * Use this when a caller needs to jump to a specific page window
+   * or enforce a new page size.
+   */
+  setPagination: (nextFirst: number, nextRows: number) => void;
+  /**
+   * Updates sorting state and resets page offset to the first page.
+   * Use this for programmatic sort controls to match DataTable behavior.
+   */
+  setSort: (nextSortField: string, nextSortOrder: 1 | -1 | 0) => void;
+  /**
+   * Toggles inclusion of archived/soft-deleted records.
+   * Use this to switch between active-only and inclusive list views.
+   */
+  setShowArchived: (value: boolean) => void;
+  /**
+   * Returns a snapshot of current list state for orchestration/debugging.
+   * Includes a cloned listData array to avoid accidental external mutation.
+   */
+  getState: () => {
+    first: number;
+    rows: number;
+    sortField: string;
+    sortOrder: 1 | -1 | 0;
+    showArchived: boolean;
+    filters: any;
+    filterPredicates: any;
+    listData: any[];
+    totalRecords: number;
+    loading: boolean;
+  };
+};
+
+export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams>((params, ref) => {
   const session = useSession();
   const user = session?.data?.user;
   const dispatch = useDispatch();
@@ -150,17 +211,46 @@ export const SolidListView = (params: SolidListViewParams) => {
   const router = useRouter();
   const searchParams = useSearchParams();
   const localeName = searchParams.get("locale");
-  const [filters, setFilters] = useState<any>(params.customFilter || null);
 
-  // const [customFilter, setCustomFilter] = useState<FilterRule[]>(initialState);
-  // const [showGlobalSearchElement, setShowGlobalSearchElement] = useState<boolean>(false);
-
+  // Filter query realted states
+  const [filters, setFilters] = useState<any>(null);
+  const [totalRecords, setTotalRecords] = useState(0);
+  const [first, setFirst] = useState(0);
+  const [rows, setRows] = useState(solidListViewLayout?.attrs?.defaultPageSize ? solidListViewLayout?.attrs?.defaultPageSize : 10);
+  const [sortField, setSortField] = useState("id");
+  const [sortOrder, setSortOrder] = useState(-1);
   const [toPopulate, setToPopulate] = useState<string[]>([]);
   const [toPopulateMedia, setToPopulateMedia] = useState<string[]>([]);
+
+
   const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
   const [isOpenSolidXAiPanel, setIsOpenSolidXAiPanel] = useState(false);
   const [chatterWidth, setChatterWidth] = useState(380);
   const [isResizing, setIsResizing] = useState(false);
+
+
+  // All list view state.
+  const [listViewData, setListViewData] = useState<any[]>([]);
+  const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
+  const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>([]);
+
+  const [loading, setLoading] = useState<boolean>(true);
+
+  const [isDialogVisible, setDialogVisible] = useState(false);
+  const [isRecoverDialogVisible, setRecoverDialogVisible] = useState(false);
+
+  const [createButtonUrl, setCreateButtonUrl] = useState<string>();
+  const [editButtonUrl, setEditButtonUrl] = useState<string>();
+
+  const [createActionQueryParams, setCreateActionQueryParams] = useState<Record<string, string>>({});
+  const [editActionQueryParams, setEditActionQueryParams] = useState<Record<string, string>>({});
+
+  const [showArchived, setShowArchived] = useState(false);
+
+  const [queryDataLoaded, setQueryDataLoaded] = useState(false);
+  const [filterPredicates, setFilterPredicates] = useState(null);
+  const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
+
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
 
   const handleCustomButtonClick = useHandleListCustomButtonClick();
@@ -400,13 +490,10 @@ export const SolidListView = (params: SolidListViewParams) => {
     const rows = currentLayout?.attrs?.defaultPageSize ?? 25;
     const sortField = "id";
     const sortOrder = -1;
-    // setRows(rows);
-    // setToPopulate(populate);
-    // setToPopulateMedia(populateMedia);
-    // setSortField("id");
-    // setSortOrder(-1);
     return { sortField, sortOrder, rows, populate, populateMedia };
   };
+
+
 
   // Set the initial filter state based on the metadata.
   useEffect(() => {
@@ -422,38 +509,6 @@ export const SolidListView = (params: SolidListViewParams) => {
     }
   }, [solidListViewInitialMetaData]);
 
-  // set layout and actions for create and edit buttons and view modes
-  // useEffect(() => {
-  //   if (solidListViewMetaData) {
-  //     const listLayoutAttrs = solidListViewMetaData?.data?.solidView?.layout?.attrs;
-  //     const createActionUrl = listLayoutAttrs?.createAction && listLayoutAttrs?.createAction?.type === "custom" ? listLayoutAttrs?.createAction?.customComponent : "form/new";
-  //     const editActionUrl = listLayoutAttrs?.editAction && listLayoutAttrs?.editAction?.type === "custom" ? listLayoutAttrs?.editAction?.customComponent : "form";
-
-  //     if (listLayoutAttrs?.createAction) {
-  //       setCreateActionQueryParams({
-  //         actionName: listLayoutAttrs.createAction.name,
-  //         actionType: listLayoutAttrs.createAction.type,
-  //         actionContext: listLayoutAttrs.createAction.context,
-  //       });
-  //     }
-  //     if (listLayoutAttrs?.editAction) {
-  //       setEditActionQueryParams({
-  //         actionName: listLayoutAttrs.editAction.name,
-  //         actionType: listLayoutAttrs.editAction.type,
-  //         actionContext: listLayoutAttrs.editAction.context,
-  //       });
-  //     }
-
-  //     const viewModes = listLayoutAttrs?.allowedViews && listLayoutAttrs?.allowedViews.length > 0 && listLayoutAttrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view }; });
-  //     setViewModes(viewModes);
-  //     if (createActionUrl) {
-  //       setCreateButtonUrl(createActionUrl);
-  //     }
-  //     if (editActionUrl) {
-  //       setEditButtonUrl(editActionUrl);
-  //     }
-  //   }
-  // }, [solidListViewMetaData]);
 
   // set layout and actions for create and edit buttons and view modes
   useEffect(() => {
@@ -488,28 +543,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     }
   }, [solidListViewLayout]);
 
-  // All list view state.
-  const [listViewData, setListViewData] = useState<any[]>([]);
 
-  const [first, setFirst] = useState(0);
-  const [rows, setRows] = useState(solidListViewLayout?.attrs?.defaultPageSize ? solidListViewLayout?.attrs?.defaultPageSize : 10);
-  const [totalRecords, setTotalRecords] = useState(0);
-
-  const [sortField, setSortField] = useState("id");
-  const [sortOrder, setSortOrder] = useState(-1);
-  const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
-  const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>([]);
-  const [loading, setLoading] = useState<boolean>(true);
-  const [isDialogVisible, setDialogVisible] = useState(false);
-  const [isRecoverDialogVisible, setRecoverDialogVisible] = useState(false);
-  const [createButtonUrl, setCreateButtonUrl] = useState<string>();
-  const [editButtonUrl, setEditButtonUrl] = useState<string>();
-  const [createActionQueryParams, setCreateActionQueryParams] = useState<Record<string, string>>({});
-  const [editActionQueryParams, setEditActionQueryParams] = useState<Record<string, string>>({});
-  const [showArchived, setShowArchived] = useState(false);
-  const [queryDataLoaded, setQueryDataLoaded] = useState(false);
-  const [customFilter, setCustomFilter] = useState(null);
-  const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
 
   const sizeOptions = [
     { label: "Compact", value: "small", image: CompactImage },
@@ -610,6 +644,7 @@ export const SolidListView = (params: SolidListViewParams) => {
     console.log(
       "useEffect: [isDeleteSolidEntitiesSucess, isDeleteSolidSingleEntitySuccess, recoverByIdIsSuccess, recoverByIsSuccess, solidListViewMetaData]"
     );
+    setQueryDataLoaded(false)
     if (solidListViewMetaData && solidListViewLayout) {
       const queryObject = queryStringToQueryObject();
 
@@ -627,16 +662,16 @@ export const SolidListView = (params: SolidListViewParams) => {
             : [`id:desc`],
           filters: queryObject.filters,
         };
-        const filters = {
-          $and: [],
-        };
+        // const filters = {
+        //   $and: [],
+        // };
 
-        if (queryObject.custom_filter_predicate) {
-          filters.$and.push(queryObject.custom_filter_predicate);
-        }
-        if (queryObject.search_predicate) {
-          filters.$and.push(queryObject.search_predicate);
-        }
+        // if (queryObject.custom_filter_predicate) {
+        //   filters.$and.push(queryObject.custom_filter_predicate);
+        // }
+        // if (queryObject.search_predicate) {
+        //   filters.$and.push(queryObject.search_predicate);
+        // }
         // if (queryObject.saved_filter_predicate) {
         //   filters.$and.push(queryObject.saved_filter_predicate);
         // }
@@ -655,25 +690,24 @@ export const SolidListView = (params: SolidListViewParams) => {
         setSortField(queryData?.sort[0]?.field);
         setSortOrder(queryData?.sort[0]?.order);
         // latestFiltersRef.current = filters;
-        // setFilters(filters);
-
         const { sortField, sortOrder, rows, populate, populateMedia } = initialFilterMethod();
         setToPopulate(populate);
         setToPopulateMedia(populateMedia);
 
-        setQueryDataLoaded(true);
       } else {
         const { sortField, sortOrder, rows, populate, populateMedia } = initialFilterMethod();
         setRows(rows);
         setSortField(sortField);
         setSortOrder(sortOrder);
-        setQueryDataLoaded(true);
         setToPopulate(populate);
         setToPopulateMedia(populateMedia);
         setFirst(0);
       }
+      setFilters(params.customFilter || { $and: [] })
+      setFilterPredicates(null);
       setSelectedRecords([]);
       setSelectedRecoverRecords([]);
+      setQueryDataLoaded(true);
     }
   }, [
     isDeleteSolidEntitiesSucess,
@@ -740,7 +774,7 @@ export const SolidListView = (params: SolidListViewParams) => {
 
   // Create a ref that always has the latest filters
   const latestFiltersRef = useRef(filters);
-  const latestCustomFilterRef = useRef(customFilter);
+  const latestFilterPredicatesRef = useRef(filterPredicates);
 
   // Keep refs in sync
   useEffect(() => {
@@ -748,13 +782,13 @@ export const SolidListView = (params: SolidListViewParams) => {
   }, [filters]);
 
   useEffect(() => {
-    latestCustomFilterRef.current = customFilter;
-  }, [customFilter]);
+    latestFilterPredicatesRef.current = filterPredicates;
+  }, [filterPredicates]);
 
 
   useEffect(() => {
     console.log(`useEffect: [first- ${first}, rows- ${rows}, sortField- ${sortField}, sortOrder- ${sortOrder}, showArchived- ${showArchived}, toPopulate- ${toPopulate}, toPopulateMedia- ${toPopulateMedia}, queryDataLoaded- ${queryDataLoaded}]`);
-    if (queryDataLoaded && filters) {
+    if (queryDataLoaded && filters && (filterPredicates || params.embeded == true)) {
       setQueryString();
     }
   }, [
@@ -872,56 +906,48 @@ export const SolidListView = (params: SolidListViewParams) => {
 
     const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
 
-    if (latestCustomFilterRef.current) {
+    if (latestFilterPredicatesRef.current && latestFilterPredicatesRef.current.persistFilter) {
       let url;
       const urlData = structuredClone(queryData);
       delete urlData.filters;
-      urlData.custom_filter_predicate = latestCustomFilterRef.current.custom_filter_predicate || null;
-      urlData.search_predicate = latestCustomFilterRef.current.search_predicate || null;
-
+      urlData.custom_filter_predicate = latestFilterPredicatesRef.current.custom_filter_predicate || null;
+      urlData.search_predicate = latestFilterPredicatesRef.current.search_predicate || null;
+      urlData.saved_filter_predicate = latestFilterPredicatesRef.current.saved_filter_predicate || null;
+      urlData.predefined_search_predicate = latestFilterPredicatesRef.current.predefined_search_predicate || null;
       queryObjectToQueryString(urlData);
     }
     triggerGetSolidEntities(queryString);
   };
 
   // handle filter...
-  const handleApplyCustomFilter = (transformedFilter: any) => {
-    const queryfilter = params.customFilter || {
-      $and: [],
-    };
+  const handleApplyCustomFilter = (filterPredicates: any, persistFilter: boolean = false) => {
+    // we assume that the customfilter will always have $and array
+    const queryfilter = structuredClone(params.customFilter) || { $and: [] }
 
-    // custom_filter_predicate
-    // search_predicate
-    // saved_filter_predicate
-    // predefined_search_predicate
-    if (transformedFilter.custom_filter_predicate) {
-      queryfilter.$and.push(transformedFilter.custom_filter_predicate);
+    if (filterPredicates.custom_filter_predicate) {
+      queryfilter.$and.push(filterPredicates.custom_filter_predicate);
     }
-    if (transformedFilter.search_predicate) {
-      queryfilter.$and.push(transformedFilter.search_predicate);
+    if (filterPredicates.search_predicate) {
+      queryfilter.$and.push(filterPredicates.search_predicate);
     }
-    if (transformedFilter.saved_filter_predicate) {
-      queryfilter.$and.push(transformedFilter.saved_filter_predicate);
+    if (filterPredicates.saved_filter_predicate) {
+      queryfilter.$and.push(filterPredicates.saved_filter_predicate);
     }
-    if (transformedFilter.predefined_search_predicate) {
-      queryfilter.$and.push(transformedFilter.predefined_search_predicate);
+    if (filterPredicates.predefined_search_predicate) {
+      queryfilter.$and.push(filterPredicates.predefined_search_predicate);
     }
-
-    const customFilter = transformedFilter;
-    const updatedFilter = { ...(filters || {}), ...(queryfilter || {}) };
+    const updatedFilter = queryfilter;
 
     // Update refs IMMEDIATELY (synchronously)
     latestFiltersRef.current = updatedFilter;
-    latestCustomFilterRef.current = transformedFilter;
+    const updatedFilterPredicates = structuredClone(filterPredicates);
+    updatedFilterPredicates.persistFilter = persistFilter;
+    latestFilterPredicatesRef.current = updatedFilterPredicates;
 
     // Then update state
     setFilters(updatedFilter);
-    setCustomFilter(transformedFilter);
-
-
+    setFilterPredicates(updatedFilterPredicates);
     // Force synchronous state updates
-
-
   };
 
   // clear Filter
@@ -939,11 +965,63 @@ export const SolidListView = (params: SolidListViewParams) => {
     };
 
 
-    setFilters({
-      $and: []
-    });
+    setFilters(params.customFilter || { $and: [] })
     solidGlobalSearchElementRef.current.clearFilter();
   };
+
+  const cloneListData = () => {
+    if (typeof structuredClone === "function") {
+      return structuredClone(listViewData);
+    }
+    return JSON.parse(JSON.stringify(listViewData));
+  };
+
+  useImperativeHandle(ref, () => ({
+    refresh: () => {
+      void setQueryString();
+    },
+    clearFilters: () => {
+      clearFilter();
+    },
+    applyFilter: (filter) => {
+      handleApplyCustomFilter(filter);
+    },
+    setPagination: (nextFirst, nextRows) => {
+      setFirst(nextFirst);
+      setRows(nextRows);
+    },
+    setSort: (nextSortField, nextSortOrder) => {
+      setSortField(nextSortField);
+      setSortOrder(nextSortOrder);
+      setFirst(0);
+    },
+    setShowArchived: (value) => {
+      setShowArchived(value);
+    },
+    getState: () => ({
+      first,
+      rows,
+      sortField,
+      sortOrder,
+      showArchived,
+      filters,
+      filterPredicates,
+      listData: cloneListData(),
+      totalRecords,
+      loading,
+    }),
+  }), [
+    first,
+    rows,
+    sortField,
+    sortOrder,
+    showArchived,
+    filters,
+    filterPredicates,
+    totalRecords,
+    loading,
+    listViewData,
+  ]);
 
   const [selectedSolidViewData, setSelectedSolidViewData] = useState<any>();
   const selectedDataRef = useRef<any>();
@@ -1326,13 +1404,14 @@ export const SolidListView = (params: SolidListViewParams) => {
                   params.embeded === false && (
                     <div className="hidden lg:flex">
                       <SolidGlobalSearchElement
+                        key={params.modelName}
                         showSaveFilterPopup={showSaveFilterPopup}
                         setShowSaveFilterPopup={setShowSaveFilterPopup}
-                        filters={filters}
-                        clearFilter={clearFilter}
                         ref={solidGlobalSearchElementRef}
                         viewData={solidListViewMetaData}
-                        handleApplyCustomFilter={handleApplyCustomFilter}>
+                        handleApplyCustomFilter={handleApplyCustomFilter}
+                        filterPredicates={filterPredicates}
+                      >
                       </SolidGlobalSearchElement>
                     </div>
 
@@ -1457,11 +1536,12 @@ export const SolidListView = (params: SolidListViewParams) => {
                   <SolidGlobalSearchElement
                     showSaveFilterPopup={showSaveFilterPopup}
                     setShowSaveFilterPopup={setShowSaveFilterPopup}
-                    filters={filters}
-                    clearFilter={clearFilter}
                     ref={solidGlobalSearchElementRef}
                     viewData={solidListViewMetaData}
-                    handleApplyCustomFilter={handleApplyCustomFilter}>
+                    handleApplyCustomFilter={handleApplyCustomFilter}
+                    filterPredicates={filterPredicates}
+                  >
+
                   </SolidGlobalSearchElement>
                 </div>
 
@@ -2006,4 +2086,6 @@ export const SolidListView = (params: SolidListViewParams) => {
       }
     </div >
   );
-};
+});
+
+SolidListView.displayName = "SolidListView";
