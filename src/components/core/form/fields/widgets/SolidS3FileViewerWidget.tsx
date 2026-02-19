@@ -6,8 +6,8 @@ import { Dialog } from "primereact/dialog";
 import { useResolveS3UrlMutation } from "../../../../../redux/api/fieldApi";
 import Viewer from "viewerjs";
 import "viewerjs/dist/viewer.css";
-import { SolidImageViewer } from "@/components/core/common/SolidImageViewer";
-import { fetchS3Url, type FetchS3UrlOptions } from "@/helpers/fetchS3Url";
+import { SolidImageViewer } from "../../../../../components/core/common/SolidImageViewer";
+import { fetchS3Url, type FetchS3UrlOptions } from "../../../../..//helpers/fetchS3Url";
 
 /**
  * SolidS3FileViewerWidget (PrimeReact version)
