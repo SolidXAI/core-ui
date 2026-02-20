@@ -788,7 +788,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   useEffect(() => {
     console.log(`useEffect: [first- ${first}, rows- ${rows}, sortField- ${sortField}, sortOrder- ${sortOrder}, showArchived- ${showArchived}, toPopulate- ${toPopulate}, toPopulateMedia- ${toPopulateMedia}, queryDataLoaded- ${queryDataLoaded}]`);
-    if (queryDataLoaded && filters && (filterPredicates || params.embeded == true)) {
+    if (queryDataLoaded && filters) {
       setQueryString();
     }
   }, [
@@ -842,7 +842,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     let queryData: any = {
       offset: first,
       limit: rows,
-      filters: latestFiltersRef.current ?? latestFiltersRef.current,
+      filters: latestFiltersRef.current,
       populate: toPopulate,
       populateMedia: toPopulateMedia,
       locale: localeName ? localeName : "en",
