@@ -1,6 +1,4 @@
 export type FetchS3UrlOptions = {
-    modelName: string;
-    fieldName: string;
     s3Key: string;
     fileType?: string;
     bucketName?: string;

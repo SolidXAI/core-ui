@@ -37,8 +37,6 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
         setIsLoading(true);
 
         const options: FetchS3UrlOptions = {
-            modelName: fieldContext.modelName,
-            fieldName: fieldContext.fieldMetadata.name,
             s3Key: value,
             fileType: fileType,
             bucketName: bucketName,
