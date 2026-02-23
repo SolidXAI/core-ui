@@ -703,8 +703,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         setToPopulateMedia(populateMedia);
         setFirst(0);
       }
-      setFilters(params.customFilter || { $and: [] })
-      setFilterPredicates(null);
+      //below line was added to handle state stale issue when we converted boilerplate to vite 
+      //since now we dont need it becuase our component is remounted on every router change
+      //setFilters(params.customFilter || { $and: [] })
+      //setFilterPredicates(null);
       setSelectedRecords([]);
       setSelectedRecoverRecords([]);
       setQueryDataLoaded(true);
@@ -787,7 +789,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
 
   useEffect(() => {
-    console.log(`useEffect: [first- ${first}, rows- ${rows}, sortField- ${sortField}, sortOrder- ${sortOrder}, showArchived- ${showArchived}, toPopulate- ${toPopulate}, toPopulateMedia- ${toPopulateMedia}, queryDataLoaded- ${queryDataLoaded}]`);
+    console.log(`useEffect: [first- ${first}, rows- ${rows}, sortField- ${sortField}, sortOrder- ${sortOrder}, showArchived- ${showArchived}, toPopulate- ${toPopulate}, toPopulateMedia- ${toPopulateMedia}, queryDataLoaded- ${queryDataLoaded}, filterPredicates- ${filterPredicates}]`);
     if (queryDataLoaded && filters && (filterPredicates || params.embeded == true)) {
       setQueryString();
     }
@@ -800,7 +802,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     showArchived,
     toPopulate,
     toPopulateMedia,
-    queryDataLoaded
+    queryDataLoaded,
+    filterPredicates
   ]);
 
   // Handle pagination event.
