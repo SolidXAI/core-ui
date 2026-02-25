@@ -1,11 +1,13 @@
 
-import { useEffect, useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { useResolveS3UrlMutation } from "../../../../../redux/api/fieldApi";
 import Viewer from "viewerjs";
 import "viewerjs/dist/viewer.css";
+import { SolidImageViewer } from "../../../../../components/core/common/SolidImageViewer";
+import { fetchS3Url, type FetchS3UrlOptions } from "../../../../..//helpers/fetchS3Url";
 
 /**
  * SolidS3FileViewerWidget (PrimeReact version)
@@ -31,35 +33,25 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
 
     const [resolveS3Url] = useResolveS3UrlMutation();
 
-    const fetchS3Url = async () => {
-        console.log("fetch url called");
+    const resolveFileUrl = async () => {
         setIsLoading(true);
-        try {
-            const result = await resolveS3Url({
-                modelName: fieldContext.modelName,
-                fieldName: fieldContext.fieldMetadata.name,
-                s3Key: value,
-                fileType: fileType,
-                bucketName: bucketName,
-                mediaStorageProviderUserKey: mediaStorageProviderUserKey,
-                isPrivate: isPrivate
-            }).unwrap();
 
-            setIsLoading(false);
-            if (result.statusCode == "200") {
-                console.log("fetch url success", result.data.url);
-                return result.data.url;
-            }
-        } catch (e) {
-            console.error("Failed to resolve S3 URL:", e);
-            setIsLoading(false);
-            return null;
-        }
+        const options: FetchS3UrlOptions = {
+            s3Key: value,
+            fileType: fileType,
+            bucketName: bucketName,
+            mediaStorageProviderUserKey: mediaStorageProviderUserKey,
+            isPrivate: isPrivate
+        };
+
+        const url = await fetchS3Url(resolveS3Url, options);
+        setIsLoading(false);
+        return url;
     };
 
     const handleDownload = async () => {
         if (isLoading) return;
-        const url = await fetchS3Url();
+        const url = await resolveFileUrl();
         if (!url) return;
         const a = document.createElement("a");
         a.href = url;
@@ -72,13 +64,13 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
     const handleView = async () => {
         console.log("isLoading in view", isLoading);
         if (isLoading) return;
-        
-        const url = await fetchS3Url();
+
+        const url = await resolveFileUrl();
         console.log("url after fetch success", url);
         if (!url) return;
-        
+
         setPreviewUrl(url);
-        
+
         if (isImage) {
             // Trigger viewer to show after state update
             setShouldShowViewer(true);
@@ -92,54 +84,54 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
     const isDownloadOnly = ["xlsx", "xls", "csv", "doc", "docx"].includes(fileType);
 
     // 🔹 Initialize Viewer.js once image exists
-    useEffect(() => {
-        if (imageRef.current && previewUrl && isImage) {
-            // Destroy existing viewer if any
-            if (viewerRef.current) {
-                viewerRef.current.destroy();
-            }
+    // useEffect(() => {
+    //     if (imageRef.current && previewUrl && isImage) {
+    //         // Destroy existing viewer if any
+    //         if (viewerRef.current) {
+    //             viewerRef.current.destroy();
+    //         }
 
-            // Create new viewer instance
-            viewerRef.current = new Viewer(imageRef.current, {
-                toolbar: {
-                    zoomIn: 1,
-                    zoomOut: 1,
-                    rotateLeft: 1,
-                    rotateRight: 1,
-                    reset: 1,
-                },
-                navbar: false,
-                title: false,
-                transition: true,
-                movable: true,
-                scalable: true,
-                rotatable: true,
-                zoomable: true,
-                zIndex:9999,
-                // Add hidden event to reset state
-                hidden: () => {
-                    setShouldShowViewer(false);
-                }
-            });
+    //         // Create new viewer instance
+    //         viewerRef.current = new Viewer(imageRef.current, {
+    //             toolbar: {
+    //                 zoomIn: 1,
+    //                 zoomOut: 1,
+    //                 rotateLeft: 1,
+    //                 rotateRight: 1,
+    //                 reset: 1,
+    //             },
+    //             navbar: false,
+    //             title: false,
+    //             transition: true,
+    //             movable: true,
+    //             scalable: true,
+    //             rotatable: true,
+    //             zoomable: true,
+    //             zIndex: 9999,
+    //             // Add hidden event to reset state
+    //             hidden: () => {
+    //                 setShouldShowViewer(false);
+    //             }
+    //         });
 
-            console.log("Viewer initialized");
-        }
+    //         console.log("Viewer initialized");
+    //     }
 
-        return () => {
-            if (viewerRef.current) {
-                viewerRef.current.destroy();
-                viewerRef.current = null;
-            }
-        };
-    }, [previewUrl, isImage]);
+    //     return () => {
+    //         if (viewerRef.current) {
+    //             viewerRef.current.destroy();
+    //             viewerRef.current = null;
+    //         }
+    //     };
+    // }, [previewUrl, isImage]);
 
     // 🔹 Show viewer when shouldShowViewer becomes true
-    useEffect(() => {
-        if (shouldShowViewer && viewerRef.current) {
-            console.log("Showing viewer");
-            viewerRef.current.show();
-        }
-    }, [shouldShowViewer]);
+    // useEffect(() => {
+    //     if (shouldShowViewer && viewerRef.current) {
+    //         console.log("Showing viewer");
+    //         viewerRef.current.show();
+    //     }
+    // }, [shouldShowViewer]);
 
     return (
         <div className="mt-2 flex flex-col gap-2">
@@ -179,17 +171,32 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
 
             {/* Hidden image for Viewer.js - keep visibility hidden instead of display none */}
             {isImage && previewUrl && (
-                <img
-                    ref={imageRef}
-                    src={previewUrl}
-                    alt={value}
-                    style={{ 
-                        position: "absolute",
-                        visibility: "hidden",
-                        width: "1px",
-                        height: "1px"
+                // <img
+                //     ref={imageRef}
+                //     src={previewUrl}
+                //     alt={value}
+                //     style={{
+                //         position: "absolute",
+                //         visibility: "hidden",
+                //         width: "1px",
+                //         height: "1px"
+                //     }}
+                // />
+                <SolidImageViewer
+                    images={[previewUrl]}
+                    open={shouldShowViewer}
+                    onClose={() => setShouldShowViewer(false)}
+                    viewerOptions={{
+                        toolbar: {
+                            zoomIn: 1,
+                            zoomOut: 1,
+                            rotateLeft: 1,
+                            rotateRight: 1,
+                            reset: 1,
+                        },
                     }}
                 />
+
             )}
 
             <Dialog

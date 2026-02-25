@@ -6,10 +6,12 @@ import { classNames } from 'primereact/utils';
 import { SolidMediaListFieldWidgetProps } from '../../../../types/solid-core';
 import { getExtensionComponent } from '../../../../helpers/registry';
 
+const getCleanUrl = (url: string) => url.split("?")[0];
+
 // Helpers for file type detection
-const isImageFile = (url: string) => /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
-const isVideoFile = (url: string) => /\.(mp4|webm|ogg)$/i.test(url);
-const isAudioFile = (url: string) => /\.(mp3|wav|ogg)$/i.test(url);
+const isImageFile = (url: string) => /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(getCleanUrl(url));
+const isVideoFile = (url: string) => /\.(mp4|webm|ogg)$/i.test(getCleanUrl(url));
+const isAudioFile = (url: string) => /\.(mp3|wav|ogg)$/i.test(getCleanUrl(url));
 
 // Extensions that should be downloaded directly
 const downloadOnlyExt = [
@@ -152,7 +154,7 @@ export const DefaultMediaSingleListWidget = ({
 
     const firstUrl = mediaUrls[0];
     if (!firstUrl) return <div style={{ height: 40, width: 40 }} />;
-
+    const cleanUrl = getCleanUrl(firstUrl);
     return (
         <MediaWithFallback
             src={firstUrl}
@@ -160,7 +162,7 @@ export const DefaultMediaSingleListWidget = ({
             onClick={(event) => {
                 // Only open lightbox for image, video, or audio
                 event.stopPropagation()
-                if (isImageFile(firstUrl) || isVideoFile(firstUrl) || isAudioFile(firstUrl)) {
+                if (isImageFile(cleanUrl) || isVideoFile(cleanUrl) || isAudioFile(cleanUrl)) {
                     setLightboxUrls([{ src: firstUrl, downloadUrl: firstUrl }]);
                     setOpenLightbox(true);
                 }

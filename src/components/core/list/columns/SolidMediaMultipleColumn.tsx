@@ -9,10 +9,18 @@ import { classNames } from 'primereact/utils';
 import { FileReaderExt } from '../../../../components/common/FileReaderExt';
 import { Dialog } from 'primereact/dialog';
 
-// Helpers
-const isImageFile = (url: string) => /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(url);
-const isVideoFile = (url: string) => /\.(mp4|webm|ogg)$/i.test(url);
-const isAudioFile = (url: string) => /\.(mp3|wav|ogg)$/i.test(url);
+const getCleanUrl = (url: string) => url.split("?")[0];
+
+const isImageFile = (url: string) => /\.(jpg|jpeg|png|gif|bmp|webp)$/i.test(getCleanUrl(url));
+
+const isVideoFile = (url: string) => /\.(mp4|webm|ogg)$/i.test(getCleanUrl(url));
+
+const isAudioFile = (url: string) => /\.(mp3|wav|ogg)$/i.test(getCleanUrl(url));
+
+const isDocumentType = (url: string) => {
+    const ext = getCleanUrl(url).split(".").pop()?.toLowerCase();
+    return ext ? downloadOnlyExt.includes(ext) : false;
+};
 
 const downloadOnlyExt = [
     "txt", "zip", "rar",
@@ -21,11 +29,6 @@ const downloadOnlyExt = [
     "ppt", "pptx",
     "pdf", "csv"
 ];
-
-const isDocumentType = (url: string) => {
-    const ext = url.split("?")[0].split(".").pop()?.toLowerCase();
-    return ext ? downloadOnlyExt.includes(ext) : false;
-};
 
 const downloadFile = (url: string, name: string = "") => {
     const link = document.createElement("a");
@@ -169,10 +172,10 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
 
     const handleFileView = (file: any) => {
         const fileUrl = file?.fileUrl || "";
-        const cleanUrl = fileUrl.split("?")[0];
-        const ext = cleanUrl.split(".").pop()?.toLowerCase();
+        // const cleanUrl = fileUrl.split("?")[0];
+        // const ext = cleanUrl.split(".").pop()?.toLowerCase();
 
-        if (ext && downloadOnlyExt.includes(ext)) {
+        if (isDocumentType(fileUrl)) {
             downloadFile(file?.fileUrl, "")
 
         } else {
@@ -192,19 +195,18 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                 onClick={(event) => {
                     event.stopPropagation();
 
-                    const cleanUrl = fullrecord[0]?.fileUrl.split("?")[0];
-                    const ext = cleanUrl.split(".").pop()?.toLowerCase();
+                    // const cleanUrl = fullrecord[0]?.fileUrl.split("?")[0];
+                    // const ext = cleanUrl.split(".").pop()?.toLowerCase();
 
-                    if (ext && downloadOnlyExt.includes(ext) && fullrecord?.length > 1) {
+                    if (isDocumentType(fullrecord[0]?.fileUrl) && fullrecord?.length > 1) {
                         setShowAllFiles(true)
                         return;
                     }
 
-                    else if (ext && downloadOnlyExt.includes(ext)) {
+                    else if (isDocumentType(fullrecord[0]?.fileUrl)) {
                         downloadFile(fullrecord[0]?.fileUrl, "")
                         return;
                     }
-
                     // FIRST FILE IS MEDIA ⇒ OPEN LIGHTBOX
                     const urlsWithType = fullrecord.map((file: any) => ({
                         src: file.fileUrl,
@@ -215,33 +217,33 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                 }}
             />
 
-                {fullrecord?.length > 1 && <span
-                        style={{
-                            color: "#0895CD",
-                            fontWeight: "bold",
-                            cursor: "pointer",
-                            marginLeft: "4px"
-                        }}
-                        onClick={(event) => {
-                            event.stopPropagation();
-    
-                            if (isDocumentType(fullrecord[0]?.fileUrl)) {
-                                setShowAllFiles(true);
-                            } else {
-                                const urlsWithType = fullrecord.map((file: any) => ({
-                                    src: file.fileUrl,
-                                    downloadUrl: file.fileUrl
-                                }));
-                                setLightboxUrls(urlsWithType);
-                                setOpenLightbox(true);
-                            }
-                        }}
-                    >
-                        +{fullrecord.length - 1}
-                   </span>
-                }
+            {fullrecord?.length > 1 && <span
+                style={{
+                    color: "#0895CD",
+                    fontWeight: "bold",
+                    cursor: "pointer",
+                    marginLeft: "4px"
+                }}
+                onClick={(event) => {
+                    event.stopPropagation();
 
-             
+                    if (isDocumentType(fullrecord[0]?.fileUrl)) {
+                        setShowAllFiles(true);
+                    } else {
+                        const urlsWithType = fullrecord.map((file: any) => ({
+                            src: file.fileUrl,
+                            downloadUrl: file.fileUrl
+                        }));
+                        setLightboxUrls(urlsWithType);
+                        setOpenLightbox(true);
+                    }
+                }}
+            >
+                +{fullrecord.length - 1}
+            </span>
+            }
+
+
 
             {/* VIEW ALL DIALOG */}
             <Dialog
@@ -252,7 +254,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                 // style={{ minWidth: 450 }}
                 style={{ width: '32rem' }}
                 onClick={(event) => event.stopPropagation()}
-                breakpoints={{ '591px': '94vw'}}
+                breakpoints={{ '591px': '94vw' }}
             >
                 {fullrecord?.map((file: any) => {
                     const fileId = `${file.name}-${file.size}`;

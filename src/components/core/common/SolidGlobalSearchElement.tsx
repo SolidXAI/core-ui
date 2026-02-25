@@ -378,8 +378,14 @@ const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, ope
     return (
         <div className="flex align-items-center justify-content-between gap-2">
             <div>
-                <Button text size="small" className="text-base py-1 w-full" severity={Number(activeSavedFilter) == savedfilter.id ? "secondary" : "contrast"} onClick={() => applySavedFilter(savedfilter)}>{savedfilter.name}</Button>
-                {savedfilter?.description && <p className="text-xs pl-3">{savedfilter?.description}</p>}
+                <Button text
+                    size="small"
+                    className="text-base py-1 w-full"
+                    severity={Number(activeSavedFilter) == savedfilter.id ? "secondary" : "contrast"}
+                    onClick={() => applySavedFilter(savedfilter)}
+                    tooltip={savedfilter?.description}>{savedfilter.name}
+                </Button>
+                {/* {savedfilter?.description && <p className="text-xs pl-3">{savedfilter?.description}</p>} */}
             </div>
             <div className="flex align-items-center gap-2">
                 <Button
@@ -420,6 +426,57 @@ const replacePlaceholders = (obj: any, searchValue: string): any => {
         return newObj;
     }
     return obj;
+};
+
+
+const extractChips = (node: any): any[] => {
+    if (!node) return [];
+
+    // If node has $and
+    if (node.$and && Array.isArray(node.$and)) {
+        return node.$and.flatMap(extractChips);
+    }
+
+    // If node has $or
+    if (node.$or && Array.isArray(node.$or)) {
+        return node.$or.flatMap(extractChips);
+    }
+
+    // Leaf condition
+    const field = Object.keys(node)[0];
+    const operatorObj = node[field];
+
+    // ✅ Normal case
+    if (operatorObj?.$containsi) {
+        return [{
+            columnName: field,
+            value: operatorObj.$containsi,
+            columnDisplayName: field.charAt(0).toUpperCase() + field.slice(1),
+            searchField: field,
+            matchMode: "$containsi"
+        }];
+    }
+    // ✅ Nested case (like city.name)
+    else if (typeof operatorObj === "object") {
+        const nestedField = Object.keys(operatorObj)[0];
+        const nestedOperatorObj = operatorObj[nestedField];
+
+        const operatorKey = nestedOperatorObj
+            ? Object.keys(nestedOperatorObj).find(k => k.startsWith("$"))
+            : null;
+
+        if (operatorKey) {
+            return [{
+                columnName: field,
+                value: nestedOperatorObj[operatorKey],
+                columnDisplayName: field.charAt(0).toUpperCase() + field.slice(1),
+                searchField: `${field}.${nestedField}`,
+                matchMode: operatorKey
+            }];
+        }
+    }
+
+    return [];
 };
 
 type RelationCache = Map<string, { label: string; value: number }>;
@@ -638,16 +695,19 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 }
                 if (searchChips) {
                     setSearchFilter(searchChips);
-                    const formattedChips = searchChips?.$and.map((chip: any, key: any) => {
-                        const chipKey = Object.keys(chip)[0]; // Get the key, e.g., "displayName"
-                        const chipValue = chip[chipKey]?.$containsi; // Get the value of "$containsi"
-                        const chipdata = {
-                            columnName: chipKey,
-                            value: chipValue
-                        };
-                        return chipdata
-                    }
-                    );
+                    // const formattedChips = searchChips?.$and.map((chip: any, key: any) => {
+                    //     const chipKey = Object.keys(chip)[0]; // Get the key, e.g., "displayName"
+                    //     const chipValue = chip[chipKey]?.$containsi; // Get the value of "$containsi"
+                    //     const chipdata = {
+                    //         columnName: chipKey,
+                    //         value: chipValue
+                    //     };
+                    //     return chipdata
+                    // }
+                    // );
+                    // setSearchChips(formattedChips);
+
+                    const formattedChips = extractChips(searchChips);
                     setSearchChips(formattedChips);
 
                 }
@@ -680,17 +740,20 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 }
                 if (filterPredicates?.search_predicate && filterPredicates?.search_predicate !== searchFilter) {
                     setSearchFilter(filterPredicates?.search_predicate);
-                    const formattedChips = filterPredicates.search_predicate?.$and.map((chip: any, key: any) => {
-                        const chipKey = Object.keys(chip)[0]; // Get the key, e.g., "displayName"
-                        const chipValue = chip[chipKey]?.$containsi; // Get the value of "$containsi"
-                        const chipdata = {
-                            columnName: chipKey,
-                            value: chipValue
-                        };
-                        return chipdata
-                    }
-                    );
+                    // const formattedChips = filterPredicates.search_predicate?.$and.map((chip: any, key: any) => {
+                    //     const chipKey = Object.keys(chip)[0]; // Get the key, e.g., "displayName"
+                    //     const chipValue = chip[chipKey]?.$containsi; // Get the value of "$containsi"
+                    //     const chipdata = {
+                    //         columnName: chipKey,
+                    //         value: chipValue
+                    //     };
+                    //     return chipdata
+                    // }
+                    // );
+                    // setSearchChips(formattedChips);
+                    const formattedChips = extractChips(filterPredicates.search_predicate);
                     setSearchChips(formattedChips);
+
                 }
             }
         }
