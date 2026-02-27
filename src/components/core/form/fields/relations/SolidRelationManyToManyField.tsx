@@ -32,26 +32,26 @@ export class SolidRelationManyToManyField implements ISolidField {
 
     initialValue(): any {
 
-        const manyToManyFieldData = this.fieldContext.data[this.fieldContext.field.attrs.name];
-        const fieldMetadata = this.fieldContext.fieldMetadata;
-        const userKeyField = fieldMetadata?.relationModel?.userKeyField?.name;
-        if (manyToManyFieldData) {
-            return manyToManyFieldData.map((e: any) => {
-                const manyToManyColVal = e[userKeyField] || '';
-                return {
-                    label: manyToManyColVal,
-                    value: e?.id || '',
-                    original: e
-                };
-            });
-        }
+        // const manyToManyFieldData = this.fieldContext.data[this.fieldContext.field.attrs.name];
+        // const fieldMetadata = this.fieldContext.fieldMetadata;
+        // const userKeyField = fieldMetadata?.relationModel?.userKeyField?.name;
+        // if (manyToManyFieldData) {
+        //     return manyToManyFieldData.map((e: any) => {
+        //         const manyToManyColVal = e[userKeyField] || '';
+        //         return {
+        //             label: manyToManyColVal,
+        //             value: e?.id || '',
+        //             original: e
+        //         };
+        //     });
+        // }
         return [];
     }
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
         //if empty then clear the field
-        if(value && value.length === 0) {
+        if (value && value.length === 0) {
             formData.append(`${fieldLayoutInfo.attrs.name}Command`, "clear");
         }
         if (value && value.length > 0) {
@@ -161,12 +161,17 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
     const whereClause = fieldLayoutInfo.attrs.whereClause;
 
     const [visibleCreateDialog, setVisibleCreateDialog] = useState(false);
-    const { autoCompleteItems, fetchRelationEntities, addNewRelation } = useRelationEntityHandler({ fieldContext, formik });
+    const { autoCompleteItems, fetchRelationEntities, populateFormikWithRelatedEntities, addNewRelation } = useRelationEntityHandler({ fieldContext, formik });
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
     // const onChange = (e: any) => {
     //     formik.setFieldValue(fieldContext.field.attrs.name, e.value);
     // };
+
+    useEffect(() => {
+        populateFormikWithRelatedEntities();
+    }, [formik.values?.id]);
+
 
     const autoCompleteSearch = async (event: AutoCompleteCompleteEvent) => {
         const queryData: any = {
@@ -307,7 +312,12 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
 
     const readOnlyPermission = fieldContext.readOnly;
     const [visibleCreateDialog, setVisibleCreateDialog] = useState(false);
-    const { autoCompleteItems, fetchRelationEntities, addNewRelation } = useRelationEntityHandler({ fieldContext, formik });
+    const { autoCompleteItems, fetchRelationEntities, populateFormikWithRelatedEntities, addNewRelation } = useRelationEntityHandler({ fieldContext, formik });
+
+    useEffect(() => {
+        populateFormikWithRelatedEntities();
+    }, [formik.values?.id]);
+
 
     useEffect(() => {
         const fieldMetadata = fieldContext.fieldMetadata;
@@ -363,7 +373,7 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
             console.error(ERROR_MESSAGES.FIXED_FILTER_NOT_APPLIED);
 
         } else {
-             const autocompleteQs = qs.stringify(queryData, {
+            const autocompleteQs = qs.stringify(queryData, {
                 encodeValuesOnly: true,
             });
             fetchRelationEntities(autocompleteQs);
