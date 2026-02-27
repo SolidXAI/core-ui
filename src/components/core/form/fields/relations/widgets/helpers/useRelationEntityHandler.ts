@@ -38,6 +38,56 @@ export const useRelationEntityHandler = ({ fieldContext, formik, autoCompleteLim
     }
   };
 
+  const populateFormikWithRelatedEntities = async () => {
+
+    /**
+     * Example:
+     * permissions filtered by roles.id = current role id
+     */
+
+    const relationFieldName =
+      fieldContext.fieldMetadata?.relationCoModelFieldName ??
+      fieldContext.modelName;
+
+    const parentId = fieldContext.data?.id ?? -1;
+
+    const queryData = {
+      offset: 0,
+      limit: autoCompleteLimit,
+      filters: {
+        $and: [
+          {
+            [relationFieldName]: {
+              id: { $eq: parentId },
+            },
+          },
+        ],
+      },
+    };
+
+    const qsString = qs.stringify(queryData, {
+      encodeValuesOnly: true,
+    });
+
+    const response = await triggerGetSolidEntities(qsString);
+    const data = response.data;
+
+    if (!data) return;
+
+    const mappedItems = data.records.map((item: any) => ({
+      label: item[fieldMetadata?.relationModel?.userKeyField?.name],
+      value: item.id,
+      original: item,
+    }));
+
+    /**
+     * IMPORTANT:
+     * 1. Set checkbox options
+     * 2. Set formik selected values (checked state)
+     */
+    formik.setFieldValue(fieldLayoutInfo.attrs.name, mappedItems);
+  };
+
   const addNewRelation = (values: any) => {
     const currentData = formik.values[fieldLayoutInfo.attrs.name] || [];
     const jsonValues = Object.fromEntries(values.entries());
@@ -59,6 +109,7 @@ export const useRelationEntityHandler = ({ fieldContext, formik, autoCompleteLim
   return {
     autoCompleteItems,
     fetchRelationEntities,
+    populateFormikWithRelatedEntities,
     addNewRelation
   };
 };

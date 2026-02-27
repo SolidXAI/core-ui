@@ -27,8 +27,13 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
 
     const readOnlyPermission = fieldContext.readOnly;
     const [visibleCreateDialog, setVisibleCreateDialog] = useState(false);
-    const { autoCompleteItems, fetchRelationEntities, addNewRelation } = useRelationEntityHandler({ fieldContext, formik });
+    const { autoCompleteItems, fetchRelationEntities, populateFormikWithRelatedEntities, addNewRelation } = useRelationEntityHandler({ fieldContext, formik });
     const [visibleDialogs, setVisibleDialogs] = useState<{ [key: string]: boolean }>({});
+
+
+    useEffect(() => {
+        populateFormikWithRelatedEntities();
+    }, [formik.values?.id]);
 
     useEffect(() => {
         const queryData: any = {
@@ -51,7 +56,7 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
 
     const getHeaderTemplate = (controllerName: string) => (options: any) => {
         const className = `${options.className} justify-content-space-between`;
-    
+
         return (
             <div className={className}>
                 <div className="flex align-items-center gap-3">
@@ -88,44 +93,44 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
             </div>
         );
     };
-    
+
     const groupedEntities = groupByController(autoCompleteItems || []);
     return (
-            <div>
-                {Object.keys(groupedEntities).map((controllerName) => (
-                    <Panel toggleable headerTemplate={getHeaderTemplate(controllerName)} key={controllerName} className="mt-3 lg:mt-4">
-                        <div className="formgrid grid gap-3 lg:gap-0 ">
-                            {groupedEntities[controllerName].map((entity: any, i: number) => {
-                                const isChecked = formik.values[fieldLayoutInfo.attrs.name].some((item: any) => item.value === entity.value);
-                                return (
-                                    <div key={entity.label} className={`field col-12 lg:col-6  flex gap-2 ${i >= 2 ? 'lg:mt-3' : ''}`}>
-                                        <Checkbox
-                                            readOnly={readOnlyPermission}
-                                            inputId={entity.label}
-                                            checked={isChecked}
-                                            onChange={() => handleCheckboxChange(entity)}
-                                        />
-                                        <label htmlFor={entity.label} className="form-field-label m-0 solid-permisson-form-label"> {entity.label}</label>
-                                    </div>
-                                )
-                            })}
-                        </div>
-                    </Panel>
-                ))}
-                {Object.keys(groupedEntities).map((controllerName) => (
-                    <InlineRelationEntityDialog
-                        key={`dialog-${controllerName}`}
-                        visible={visibleDialogs[controllerName] || false}
-                        setVisible={(visible: any) =>
-                            setVisibleDialogs((prev) => ({
-                                ...prev,
-                                [controllerName]: visible,
-                            }))
-                        }
-                        fieldContext={fieldContext}
-                        onCreate={addNewRelation}
-                    />
-                ))}
-            </div>
-        )
+        <div>
+            {Object.keys(groupedEntities).map((controllerName) => (
+                <Panel toggleable headerTemplate={getHeaderTemplate(controllerName)} key={controllerName} className="mt-3 lg:mt-4">
+                    <div className="formgrid grid gap-3 lg:gap-0 ">
+                        {groupedEntities[controllerName].map((entity: any, i: number) => {
+                            const isChecked = formik.values[fieldLayoutInfo.attrs.name].some((item: any) => item.value === entity.value);
+                            return (
+                                <div key={entity.label} className={`field col-12 lg:col-6  flex gap-2 ${i >= 2 ? 'lg:mt-3' : ''}`}>
+                                    <Checkbox
+                                        readOnly={readOnlyPermission}
+                                        inputId={entity.label}
+                                        checked={isChecked}
+                                        onChange={() => handleCheckboxChange(entity)}
+                                    />
+                                    <label htmlFor={entity.label} className="form-field-label m-0 solid-permisson-form-label"> {entity.label}</label>
+                                </div>
+                            )
+                        })}
+                    </div>
+                </Panel>
+            ))}
+            {Object.keys(groupedEntities).map((controllerName) => (
+                <InlineRelationEntityDialog
+                    key={`dialog-${controllerName}`}
+                    visible={visibleDialogs[controllerName] || false}
+                    setVisible={(visible: any) =>
+                        setVisibleDialogs((prev) => ({
+                            ...prev,
+                            [controllerName]: visible,
+                        }))
+                    }
+                    fieldContext={fieldContext}
+                    onCreate={addNewRelation}
+                />
+            ))}
+        </div>
+    )
 };
