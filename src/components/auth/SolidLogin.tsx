@@ -168,11 +168,11 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
     }
 
     const PasswordLessLogin = () => {
-        const validationType = solidSettingsData?.data?.passwordlessRegistrationValidateWhat || "email";
+        const validationType = solidSettingsData?.data?.passwordlessLoginValidateWhat || "email";
         const [selectedAuthMethod, setSelectedAuthMethod] = useState<"email" | "mobile">("email");
 
         const getFieldConfig = () => {
-            if (validationType === "transactional") {
+            if (validationType === "selectable") {
                 if (selectedAuthMethod === "mobile") {
                     return {
                         label: "Mobile Number / Username",
@@ -241,13 +241,15 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         const RESEND_OTP_TIMER_MIN = parseFloat(env("NEXT_PUBLIC_RESEND_OTP_TIMER") || '0.5');
                         const RESEND_OTP_TIMER = Math.round(RESEND_OTP_TIMER_MIN * 60);
 
-                        // Use selectedAuthMethod for transactional, otherwise use fieldConfig.type
-                        const authType = validationType === "transactional" ? selectedAuthMethod : fieldConfig.type;
+                        // Use selectedAuthMethod for selectable, otherwise use fieldConfig.type
+                        const authType = validationType === "selectable" ? selectedAuthMethod : fieldConfig.type;
 
-                        const payload = {
-                            type: authType,
+                        const payload: { identifier: string; type?: string } = {
                             identifier: values.identifier,
                         };
+                        if (validationType === "selectable") {
+                            payload.type = selectedAuthMethod;
+                        }
 
                         const storedTimeStr = localStorage.getItem(RESEND_OTP_KEY);
                         const now = Date.now();
@@ -289,8 +291,8 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
             >
                 {(formik) => (
                     <Form>
-                        {/* Radio buttons for transactional type */}
-                        {validationType === "transactional" && (
+                        {/* Radio buttons for selectable type */}
+                        {validationType === "selectable" && (
                             <div className="flex flex-column gap-3 mt-3">
                                 <label className="solid-auth-input-label">Select Authentication Method</label>
                                 <div className="flex gap-4">

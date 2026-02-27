@@ -49,6 +49,7 @@ export const GeneralSettings = () => {
         appLogo: solidSettingsData?.data?.appLogo ?? null,
         companylogo: solidSettingsData?.data?.companylogo ?? null,
         passwordlessRegistrationValidateWhat: solidSettingsData?.data?.passwordlessRegistrationValidateWhat ?? "email",
+        passwordlessLoginValidateWhat: solidSettingsData?.data?.passwordlessLoginValidateWhat ?? "email",
         allowPublicRegistration: solidSettingsData?.data?.allowPublicRegistration ?? false,
         passwordBasedAuth: solidSettingsData?.data?.passwordBasedAuth ?? false,
         passwordLessAuth: solidSettingsData?.data?.passwordLessAuth ?? false,
@@ -853,22 +854,42 @@ export const GeneralSettings = () => {
                                                                         />
                                                                         <label htmlFor="passwordlessRegistrationValidateWhat-mobile" className="ml-2">Mobile</label>
                                                                     </div>
+                                                                </div>
+                                                            </div>
+                                                        </div>
+                                                    </div>
+                                                }
+                                                {formik.values.passwordLessAuth === true &&
+                                                    <div className="col-12 mt-3">
+                                                        <div className="formgrid grid align-items-center">
+                                                            <div className="col-12 sm:col-12 lg:col-5 xl:col-5">
+                                                                <label className="form-field-label">Password Less Login Method</label>
+                                                            </div>
+                                                            <div className='col-12 sm:col-12 lg:col-6 xl:col-6'>
+                                                                <div className="flex align-items-center gap-3 mt-3 lg:mt-0">
                                                                     <div className="flex align-items-center">
                                                                         <RadioButton
-                                                                            inputId="passwordlessRegistrationValidateWhat-transactional"
-                                                                            name="passwordlessRegistrationValidateWhat"
-                                                                            value="transactional"
-                                                                            checked={formik.values.passwordlessRegistrationValidateWhat === "transactional"}
-                                                                            onChange={(e) => formik.setFieldValue("passwordlessRegistrationValidateWhat", e.value)}
+                                                                            inputId="passwordlessLoginValidateWhat-email"
+                                                                            name="passwordlessLoginValidateWhat"
+                                                                            value="email"
+                                                                            checked={formik.values.passwordlessLoginValidateWhat === "email"}
+                                                                            onChange={(e) => formik.setFieldValue("passwordlessLoginValidateWhat", e.value)}
                                                                         />
-                                                                        <label htmlFor="passwordlessRegistrationValidateWhat-transactional" className="ml-2">Transactional</label>
+                                                                        <label htmlFor="passwordlessLoginValidateWhat-email" className="ml-2">Email</label>
+                                                                    </div>
+                                                                    <div className="flex align-items-center">
+                                                                        <RadioButton
+                                                                            inputId="passwordlessLoginValidateWhat-mobile"
+                                                                            name="passwordlessLoginValidateWhat"
+                                                                            value="mobile"
+                                                                            checked={formik.values.passwordlessLoginValidateWhat === "mobile"}
+                                                                            onChange={(e) => formik.setFieldValue("passwordlessLoginValidateWhat", e.value)}
+                                                                        />
+                                                                        <label htmlFor="passwordlessLoginValidateWhat-mobile" className="ml-2">Mobile</label>
                                                                     </div>
                                                                 </div>
                                                             </div>
                                                         </div>
-                                                        {formik.values.passwordlessRegistrationValidateWhat === "transactional" &&
-                                                            <p className="mt-3 text-sm font-bold">Note : In this method, you can pass the authentication method from the ui with possible values being either email or mobile. You can also pass both the values here</p>
-                                                        }
                                                     </div>
                                                 }
                                             </div>
