@@ -9,7 +9,6 @@ import { Button } from "primereact/button";
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
 import { useRelationEntityHandler } from "./widgets/helpers/useRelationEntityHandler";
 import { InlineRelationEntityDialog } from "./widgets/helpers/InlineRelationEntityDialog";
-import { capitalize } from "lodash";
 import { Checkbox } from "primereact/checkbox";
 import { Panel } from "primereact/panel";
 import { SolidFieldTooltip } from "../../../../../components/common/SolidFieldTooltip";
@@ -17,8 +16,27 @@ import qs from 'qs';
 // import Handlebars from "handlebars/dist/handlebars";
 import * as Handlebars from "handlebars";
 import { ERROR_MESSAGES } from "../../../../../constants/error-messages";
+import { useRouter } from "@/hooks/useRouter";
+import { usePathname } from "@/hooks/usePathname";
+import { camelCase, capitalize } from "lodash";
+import { SolidListView } from "@/components/core/list/SolidListView";
+import { RenderSolidFormEmbededView } from "./SolidRelationManyToOneField";
+import { Dialog } from "primereact/dialog";
 
-
+export type FormViewParams = {
+    moduleName: any;
+    id: any;
+    embeded: any;
+    isCustomCreate: any;
+    customLayout: any;
+    modelName: any;
+    parentFieldName?: any;
+    parentData: any;
+    onEmbeddedFormSave: any;
+    inlineCreateAutoSave: any;
+    customCreateHandler?: any;
+    handlePopupClose?: any
+}
 
 
 
@@ -50,34 +68,34 @@ export class SolidRelationManyToManyField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        //if empty then clear the field
-        if (value && value.length === 0) {
-            formData.append(`${fieldLayoutInfo.attrs.name}Command`, "clear");
-        }
-        if (value && value.length > 0) {
-            const shouldUseOriginal = value.every((item: any) => item.original && item.original.id);
+        // if empty then clear the field
+        // if (value && value.length === 0) {
+        //     formData.append(`${fieldLayoutInfo.attrs.name}Command`, "clear");
+        // }
+        // if (value && value.length > 0) {
+        //     const shouldUseOriginal = value.every((item: any) => item.original && item.original.id);
 
-            value.forEach((item: any, index: number) => {
-                if (shouldUseOriginal) {
-                    formData.append(
-                        `${fieldLayoutInfo.attrs.name}Ids[${index}]`,
-                        item.value
-                    );
-                } else {
-                    formData.append(
-                        `${fieldLayoutInfo.attrs.name}[${index}]`,
-                        JSON.stringify(item.original)
-                    );
-                }
-            });
-            if (shouldUseOriginal) {
-                formData.append(`${fieldLayoutInfo.attrs.name}Command`, "set")
-            } else {
-                formData.append(`${fieldLayoutInfo.attrs.name}Command`, "update")
+        //     value.forEach((item: any, index: number) => {
+        //         if (shouldUseOriginal) {
+        //             formData.append(
+        //                 `${fieldLayoutInfo.attrs.name}Ids[${index}]`,
+        //                 item.value
+        //             );
+        //         } else {
+        //             formData.append(
+        //                 `${fieldLayoutInfo.attrs.name}[${index}]`,
+        //                 JSON.stringify(item.original)
+        //             );
+        //         }
+        //     });
+        //     if (shouldUseOriginal) {
+        //         formData.append(`${fieldLayoutInfo.attrs.name}Command`, "set")
+        //     } else {
+        //         formData.append(`${fieldLayoutInfo.attrs.name}Command`, "update")
 
-            }
+        //     }
 
-        }
+        // }
     }
 
     validationSchema(): Yup.Schema {
@@ -111,7 +129,7 @@ export class SolidRelationManyToManyField implements ISolidField {
             editWidget = 'DefaultRelationManyToManyAutoCompleteFormEditWidget';
         }
         if (!viewWidget) {
-            viewWidget = 'DefaultRelationOneToManyFormViewWidget';
+            viewWidget = 'DefaultRelationManyToManyListFormEditWidget';
         }
         const viewMode: string = this.fieldContext.viewMode;
         return (
@@ -161,7 +179,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
     const whereClause = fieldLayoutInfo.attrs.whereClause;
 
     const [visibleCreateDialog, setVisibleCreateDialog] = useState(false);
-    const { autoCompleteItems, fetchRelationEntities, populateFormikWithRelatedEntities, addNewRelation } = useRelationEntityHandler({ fieldContext, formik });
+    const { autoCompleteItems, fetchRelationEntities, populateFormikWithRelatedEntities, addNewRelation, handleRelationUpdate } = useRelationEntityHandler({ fieldContext, formik });
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
     // const onChange = (e: any) => {
@@ -268,6 +286,22 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}
                         onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
+                        onSelect={(e) => {
+                            // e.value is the newly selected single item; formik.values already
+                            // updated by onChange above, so read the post-update array from formik.
+                            const updated = [
+                                ...(formik.values[fieldLayoutInfo.attrs.name] || []),
+                                e.value,
+                            ];
+                            handleRelationUpdate(updated);
+                        }}
+                        onUnselect={(e) => {
+                            const updated = (formik.values[fieldLayoutInfo.attrs.name] || []).filter(
+                                (item: any) => item.value !== e.value.value
+                            );
+                            handleRelationUpdate(updated);
+                        }}
+
                         className="solid-standard-autocomplete w-full"
                     />
                     {fieldContext.field.attrs.inlineCreate && (
@@ -312,7 +346,7 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
 
     const readOnlyPermission = fieldContext.readOnly;
     const [visibleCreateDialog, setVisibleCreateDialog] = useState(false);
-    const { autoCompleteItems, fetchRelationEntities, populateFormikWithRelatedEntities, addNewRelation } = useRelationEntityHandler({ fieldContext, formik });
+    const { autoCompleteItems, fetchRelationEntities, populateFormikWithRelatedEntities, addNewRelation, handleRelationUpdate } = useRelationEntityHandler({ fieldContext, formik });
 
     useEffect(() => {
         populateFormikWithRelatedEntities();
@@ -382,11 +416,16 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
     }, [fieldContext, formik.values]);
 
     const handleCheckboxChange = (e: any) => {
-        if (formik.values[fieldLayoutInfo.attrs.name].some((item: any) => item.value === e.value)) {
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, formik.values[fieldLayoutInfo.attrs.name].filter((s: any) => s.value !== e.value));
-        } else {
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, [...formik.values[fieldLayoutInfo.attrs.name], e]);
-        }
+        const current: any[] = formik.values[fieldLayoutInfo.attrs.name] || [];
+
+        const updated = current.some((s: any) => s.value === e.value)
+            ? current.filter((s: any) => s.value !== e.value)   // uncheck
+            : [...current, e];                              // check
+
+        formik.setFieldValue(fieldLayoutInfo.attrs.name, updated);
+
+        handleRelationUpdate(updated);
+
     };
 
     const headerTemplate = (options: any) => {
@@ -460,4 +499,209 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
         </div>
     )
 
+}
+
+
+
+const buildRelationCustomFilter = ({ fieldContext, fieldLayoutInfo, }: { fieldContext: any; fieldLayoutInfo?: any; }) => {
+    if (!fieldContext) {
+        return { id: { $eq: -1 } };
+    }
+    const relationFieldName =
+        fieldContext.fieldMetadata?.relationCoModelFieldName ??
+        fieldContext.modelName;
+
+    const parentId = fieldContext.data?.id ?? -1;
+
+
+    const baseFilter = {
+        [relationFieldName]: {
+            id: { $eq: parentId },
+        },
+    };
+
+    const whereClause = fieldLayoutInfo?.attrs?.whereClause;
+
+    if (!whereClause) return { $and: [baseFilter] };
+
+    try {
+        const parsedWhereClause = JSON.parse(whereClause);
+
+        return {
+            $and: [baseFilter, parsedWhereClause],
+        };
+    } catch (error) {
+        console.error("Failed to parse whereClause:", error);
+        return { $and: [baseFilter] };
+    }
+};
+
+export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const router = useRouter();
+
+    const fieldLayoutInfo = fieldContext.field;
+    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
+    const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
+    const [visibleCreateRelationEntity, setvisibleCreateRelationEntity] = useState(false);
+    const [listViewParams, setListViewParams] = useState<any>()
+    const [formViewParams, setformViewParams] = useState<FormViewParams>()
+    const [refreshList, setRefreshList] = useState(false); // Added state for rerender
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+    const readOnlyPermission = fieldContext.readOnly;
+    const pathname = usePathname();
+    const lastPathSegment = pathname.split('/').pop();
+    const userKeyField: any = Object.entries(fieldContext.solidFormViewMetaData.data.solidFieldsMetadata).find(([_, value]: any) => value.isUserKey)?.[0];
+    const [showSaveParentEntityConfirmationPopup, setShowSaveParentEntityConfirmationPopup] = useState(false);
+
+    useEffect(() => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const childEntity = urlParams.get('childEntity');
+        if (childEntity === fieldLayoutInfo.attrs.name && lastPathSegment !== "new") {
+            handlePopupOpen('new');
+        }
+    }, [])
+
+    const handlePopupOpen = (id: any) => {
+        if (lastPathSegment === "new") {
+            setShowSaveParentEntityConfirmationPopup(true);
+        } else {
+
+            const formviewparams: FormViewParams = {
+                moduleName: fieldContext.fieldMetadata.relationModelModuleName,
+                id: id,
+                embeded: true,
+                isCustomCreate: false,
+                customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
+                modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+                parentFieldName: fieldContext.fieldMetadata.relationCoModelFieldName,
+                parentData: userKeyField ? { [userKeyField]: { solidManyToOneLabel: fieldContext.data[userKeyField], solidManyToOneValue: fieldContext.data['id'] } } : {},
+                onEmbeddedFormSave: fieldContext.onEmbeddedFormSave,
+                inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
+            }
+            setformViewParams(formviewparams);
+            setvisibleCreateRelationEntity(true);
+        }
+    }
+
+    const handlePopupClose = () => {
+        setvisibleCreateRelationEntity(false);
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.delete('childEntity');
+        router.push(currentUrl.toString());
+        setRefreshList((prev) => !prev);
+        const customFilter = fieldContext.fieldMetadata.relationCoModelFieldName ? fieldContext.fieldMetadata.relationCoModelFieldName : `${fieldContext.modelName}`
+        const lisviewparams = {
+            moduleName: fieldContext.fieldMetadata.relationModelModuleName,
+            modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+            inlineCreate: readOnlyPermission === false ? true : false,
+            customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
+            embeded: true,
+            id: fieldContext.data ? fieldContext?.data?.id : 'new',
+            customFilter: buildRelationCustomFilter({
+                fieldContext,
+                fieldLayoutInfo,
+            })
+        }
+        setListViewParams(lisviewparams)
+    }
+
+    //Intial Params 
+    useEffect(() => {
+
+
+        const customFilter = fieldContext.fieldMetadata.relationCoModelFieldName ? fieldContext.fieldMetadata.relationCoModelFieldName : `${fieldContext.modelName}`
+        const listviewparams = {
+            moduleName: fieldContext.fieldMetadata.relationModelModuleName,
+            modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+            inlineCreate: readOnlyPermission === false ? true : false,
+            customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
+            embeded: true,
+            id: fieldContext.data ? fieldContext?.data?.id : 'new',
+            customFilter: buildRelationCustomFilter({
+                fieldContext,
+                fieldLayoutInfo,
+            })
+
+        }
+        setListViewParams(listviewparams);
+        const formviewparams: FormViewParams = {
+            moduleName: fieldContext.fieldMetadata.relationModelModuleName,
+            modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName),
+            parentFieldName: fieldContext.fieldMetadata.relationCoModelFieldName,
+            id: "new",
+            embeded: true,
+            isCustomCreate: false,
+            customLayout: fieldLayoutInfo?.attrs?.inlineCreateLayout,
+            parentData: userKeyField ? { [userKeyField]: { solidManyToOneLabel: fieldContext.data[userKeyField], solidManyToOneValue: fieldContext.data['id'] } } : {},
+            onEmbeddedFormSave: fieldContext.onEmbeddedFormSave,
+            inlineCreateAutoSave: fieldLayoutInfo?.attrs?.inlineCreateAutoSave,
+        }
+
+
+
+        setformViewParams(formviewparams)
+
+    }, [readOnlyPermission])
+
+    const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
+    const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
+
+    const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
+    const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+    const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
+
+    const saveParentEntity = async () => {
+        const currentPath = window.location.pathname;
+        const currentUrl = new URL(window.location.href);
+        currentUrl.searchParams.set('childEntity', fieldLayoutInfo.attrs.name);
+        currentUrl.searchParams.set('viewMode', 'edit');
+        const updatedPath = currentUrl.toString();
+        try {
+            console.log("updatedPath", updatedPath);
+            router.push(updatedPath);
+            await formik.handleSubmit();
+        } catch {
+
+        }
+        setShowSaveParentEntityConfirmationPopup(false);
+    };
+
+
+
+    return (
+        <div>
+            {/* <div className="justify-content-center align-items-center"> */}
+            {showFieldLabel != false &&
+                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                    <SolidFieldTooltip fieldContext={fieldContext} />
+                </label>
+            }
+
+            {/* {lastPathSegment === 'new' && <p>Please save the {solidFormViewMetaData.data.solidView.model.displayName} to be able to save {fieldMetadata.displayName}</p>} */}
+            {listViewParams &&
+                <SolidListView key={refreshList.toString()}  {...listViewParams} handlePopUpOpen={handlePopupOpen} />
+            }
+            {readOnlyPermission !== true && formViewParams &&
+                <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
+            }
+
+            <Dialog showHeader={false} headerClassName="py-2" contentClassName="px-0 pb-0" className="solid-confirm-dialog" contentStyle={{ borderRadius: 6 }} visible={showSaveParentEntityConfirmationPopup} style={{ width: '20vw' }} onHide={() => { if (!showSaveParentEntityConfirmationPopup) return; setShowSaveParentEntityConfirmationPopup(false); }}>
+                <div className="p-4">
+                    <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
+                        Before Creating {fieldLabel} you need to save {solidFormViewMetaData?.data?.solidView?.model?.displayName ? solidFormViewMetaData?.data?.solidView?.model?.displayName : capitalize(fieldContext.modelName)}.
+                        Please click save if you wish to proceed ?
+                    </p>
+                    <div className="flex align-items-center justify-content-start gap-2 mt-3">
+                        <Button label="Save" size="small" onClick={saveParentEntity} />
+                        <Button label="Cancel" size="small" onClick={() => setShowSaveParentEntityConfirmationPopup(false)} outlined className='bg-primary-reverse' />
+                    </div>
+                </div>
+            </Dialog>
+
+        </div>
+    );
 }

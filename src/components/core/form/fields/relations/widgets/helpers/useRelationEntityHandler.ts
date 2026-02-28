@@ -10,6 +10,40 @@ export const useRelationEntityHandler = ({ fieldContext, formik, autoCompleteLim
   const { useLazyGetSolidEntitiesQuery } = entityApi;
   const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
 
+  const parentEntityApi = createSolidEntityApi(fieldContext.modelName);
+  const { useUpdateSolidEntityMutation, usePatchUpdateSolidEntityMutation } = parentEntityApi;
+  const [updateSolidEntity] = usePatchUpdateSolidEntityMutation();
+
+
+  const handleRelationUpdate = async (updatedItems: any[]) => {
+    const parentId = fieldContext.data?.id;
+    const fieldName = fieldLayoutInfo.attrs.name;
+
+    if (!parentId || parentId === "new") {
+      return;
+    }
+
+    const formData = new FormData();
+
+    updatedItems.forEach((item, index) => {
+      formData.append(`${fieldName}Ids[${index}]`, item.value);
+    });
+
+    formData.append(`${fieldName}Command`, "update");
+
+    try {
+      await updateSolidEntity({ id: parentId, data: formData }).unwrap();
+    } catch (error: any) {
+      const message =
+        error?.data?.message ||
+        error?.message ||
+        `Failed to update ${fieldMetadata.displayName}`;
+    }
+
+
+  };
+
+
   const [autoCompleteItems, setAutoCompleteItems] = useState([]);
 
   const fetchRelationEntities = async (autocompleteQs = "", limit = autoCompleteLimit) => {
@@ -97,19 +131,23 @@ export const useRelationEntityHandler = ({ fieldContext, formik, autoCompleteLim
       original: jsonValues,
     };
 
-    formik.setFieldValue(fieldLayoutInfo.attrs.name, [...currentData, newItem]);
+    const updatedItems = [...currentData, newItem];
+    formik.setFieldValue(fieldLayoutInfo.attrs.name, updatedItems);
 
-    // Optionally add to autocomplete list
     setAutoCompleteItems((prev: any) => {
       const exists = prev.some((item: any) => item.label === newItem.label);
       return exists ? prev : [...prev, newItem];
     });
+
+    // Trigger update immediately after inline create
+    handleRelationUpdate(updatedItems);
   };
 
   return {
     autoCompleteItems,
     fetchRelationEntities,
     populateFormikWithRelatedEntities,
+    handleRelationUpdate,
     addNewRelation
   };
 };
