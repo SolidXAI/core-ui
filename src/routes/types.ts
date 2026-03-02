@@ -19,6 +19,7 @@ export type SolidRouteKey =
   | "admin"
   | "moduleHome"
   | "list"
+  | "tree"
   | "kanban"
   | "form"
   | "settings"

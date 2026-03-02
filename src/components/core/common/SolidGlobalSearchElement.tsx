@@ -6,7 +6,7 @@ import { Divider } from "primereact/divider";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
-import { queryStringToQueryObject } from "../list/SolidListView";
+import { getFilterObjectFromLocalStorage } from "../list/SolidListView";
 import { InputText } from "primereact/inputtext";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import qs from "qs";
@@ -14,6 +14,8 @@ import { SolidSaveCustomFilterForm } from "./SolidSaveCustomFilterForm";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { hydrateRelationRules } from "../../../helpers/hydrateRelationRules";
 import { useSession } from '../../../hooks/useSession'
+import GroupingComponent, { AggregationRule, GroupingRule, DateGroupingFormat } from "./GroupingComponent";
+
 
 const getRandomInt = (min: number, max: number) => {
     return Math.floor(Math.random() * (max - min + 1)) + min;
@@ -23,6 +25,24 @@ interface PredefinedSearch {
     name: string;
     description?: string;
     filters: Record<string, any>;
+}
+
+export type SearchableField = {
+    fieldName: string;
+    displayName: string;
+    searchField: string;
+    matchMode: string;
+}
+
+export type GroupableField = {
+    fieldName: string;
+    displayName: string;
+    searchField: string;
+    matchMode: string;
+    type: string;
+    ormType: string;
+    relationType: string;
+    computedFieldValueType: string;
 }
 
 const extractFields = (nodes: any[] = []): any[] => {
@@ -354,7 +374,7 @@ export const mergeSearchAndCustomFilters = (transformedFilter: any, newFilter: a
 }
 
 
-export const mergeAllDiffFilters = (customFilter: any, searchFilter: any, savedFilter: any, preDefinedFilter?: any) => {
+export const mergeAllDiffFilters = (customFilter: any, searchFilter: any, savedFilter: any, preDefinedFilter?: any, groupingRules?: GroupingRule[], aggregationRules?: AggregationRule[]) => {
     const filters: any = {};
 
     // Add only non-null filters
@@ -369,6 +389,12 @@ export const mergeAllDiffFilters = (customFilter: any, searchFilter: any, savedF
     }
     if (preDefinedFilter && Object.keys(preDefinedFilter).length > 0) {
         filters["predefined_search_predicate"] = preDefinedFilter;
+    }
+    if (groupingRules && Object.keys(groupingRules).length > 0) {
+        filters["grouping_rules"] = groupingRules;
+    }
+    if (aggregationRules && Object.keys(aggregationRules).length > 0) {
+        filters["aggregation_rules"] = aggregationRules;
     }
     // Return the combined filters object
     return filters;
@@ -479,11 +505,13 @@ const extractChips = (node: any): any[] => {
     return [];
 };
 
+
+
 type RelationCache = Map<string, { label: string; value: number }>;
 
 
 
-export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCustomFilter, showSaveFilterPopup, setShowSaveFilterPopup, filterPredicates }: any, ref) => {
+export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handleApplyCustomFilter, showSaveFilterPopup, setShowSaveFilterPopup, filterPredicates }: any, ref) => {
     const defaultState: FilterRule[] = [
         {
             id: 1,
@@ -512,6 +540,20 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             ]
         }
     ];
+
+    const defaultAggregationRules: AggregationRule[] = [
+        {
+            id: 1,
+            operator: "count",
+            fieldName: "id",
+            locked: true
+        }
+    ];
+
+    const defaultGroupingRules: GroupingRule[] = [
+        { id: 1, fieldName: null, dateGrouping: null }
+    ];
+
     const [initialState, setInitialState] = useState(defaultState);
     const pathname = usePathname();
 
@@ -530,12 +572,20 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     const [fields, setFields] = useState<any[]>([]);
     const [searchableFields, setSearchableFields] = useState<any[]>([]);
+    const [groupableFields, setGroupableFields] = useState<GroupableField[]>([]);
+
+    const [groupingRules, setGroupingRules] = useState<GroupingRule[]>(defaultGroupingRules);
+    const [aggregationRules, setAggregationRules] = useState<AggregationRule[]>(defaultAggregationRules);
 
     // used to show the list of predefined searches 
     const [predefinedSearches, setPredefinedSearches] = useState<PredefinedSearch[]>([]);
 
     // used to open / close the custom fitler popup 
     const [showGlobalSearchElement, setShowGlobalSearchElement] = useState<boolean>(false);
+
+    // used to open / close the group fitler popup 
+    const [showGroupFilterElement, setShowGroupFilterElement] = useState<boolean>(false);
+
 
     // searchChips maintain the ui to display searched query 
     // searchFilter maintain the transformed filter of the  searched query 
@@ -670,7 +720,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
                 if (activeSavedFilter && savedFilters.length === 0) return;
 
-                const queryObject = queryStringToQueryObject();
+                const queryObject = getFilterObjectFromLocalStorage();
                 // const savedQuery = parsedSearchParams?.get("savedQuery");
                 if (activeSavedFilter) {
                     const currentSavedFilterId = Number(activeSavedFilter);
@@ -717,6 +767,31 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     const hydratedRules = await hydrateRelationRules([rules], viewData);
                     setFilterRules(hydratedRules);
                 }
+                const hasGroupingRules = (queryObject?.grouping_rules?.some((rule: any) => rule.fieldName !== null));
+
+                if (hasGroupingRules) {
+                    setGroupingRules(queryObject?.grouping_rules);
+                } else {
+                    // If no grouping rules in localStorage check layout
+                    const layoutGroupBy = viewData?.data?.solidView?.layout?.attrs?.groupBy;
+
+                    if (Array.isArray(layoutGroupBy) && layoutGroupBy.length > 0) {
+                        const initialGroupingRules: GroupingRule[] = layoutGroupBy.map((groupStr: string, index: number) => {
+                            const [fieldName, dateGrouping] = groupStr.split(":");
+                            return {
+                                id: Date.now() + index,
+                                fieldName: fieldName || null,
+                                dateGrouping: (dateGrouping as DateGroupingFormat) || null
+                            };
+                        });
+                        setGroupingRules(initialGroupingRules);
+                    }
+                }
+
+                if (queryObject?.aggregation_rules && queryObject?.aggregation_rules !== aggregationRules) {
+                    setAggregationRules(queryObject?.aggregation_rules);
+                }
+
 
                 setRefreshKey((prev) => prev + 1)
                 setHasSearched(true);
@@ -791,6 +866,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                     matchMode: viewFieldElement?.attrs?.searchMatchMode,
                     searchField: viewFieldElement?.attrs?.searchField ?? null,
                     isSearchable: viewFieldElement?.attrs?.isSearchable ?? false,
+                    relationType: value?.relationType ?? null,
                 };
             });
 
@@ -816,8 +892,30 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 }
             });
 
-            // console.log("searchableFieldsList", searchableFieldsList);
-
+            const groupableFieldsList = fieldsList.filter((field: any) => {
+                switch (field.type) {
+                    case "relation":
+                        // Only include relation if searchField is present
+                        if (field.relationType === "many-to-one")
+                            return true;
+                        return false;
+                    case "longText":
+                    case "shortText":
+                    case "selectionStatic":
+                    case "selectionDynamic":
+                    case "int":
+                    case "float":
+                    case "boolean":
+                    case "date":
+                    case "datetime":
+                        return true;
+                    // case "selectionStatic":
+                    case "computed":
+                        return field.ormType === "varchar";
+                    default:
+                        return false;
+                }
+            });
 
             // Optionally map to a minimal structure if needed for UI
             let finalSearchableFieldsList: any = searchableFieldsList.map((field: any) => ({
@@ -827,9 +925,20 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 matchMode: field.matchMode
             }));
 
-            // console.log("finalSearchableFieldsList", finalSearchableFieldsList);
-
             setSearchableFields(finalSearchableFieldsList);
+
+            let finalGroupableFieldsList: any = groupableFieldsList.map((field: any) => ({
+                fieldName: field.value,
+                displayName: field.name,
+                searchField: field.searchField ?? "",
+                matchMode: field.matchMode,
+                type: field.type,
+                ormType: field.ormType,
+                relationType: field.relationType,
+                computedFieldValueType: field.computedFieldValueType
+            }));
+
+            setGroupableFields(finalGroupableFieldsList)
 
             const predefinedSearchesList = viewData?.data?.solidView?.layout?.attrs?.predefinedSearches || [];
             setPredefinedSearches(predefinedSearchesList);
@@ -922,10 +1031,16 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
     }
 
+    const applyGrouping = (groupingRules: GroupingRule[], aggregationRules: AggregationRule[]) => {
+        setHasSearched(true)
+        setShowGroupFilterElement(false);
+        setGroupingRules(groupingRules);
+        setAggregationRules(aggregationRules);
+        setRefreshKey((prev) => prev + 1)
+    }
+
     useEffect(() => {
         if (refreshKey > 0 && hasSearched) {
-            console.log("refres", refreshKey);
-            console.log("hasSearched", hasSearched);
 
             const formattedChips = {
                 $and: searchChips.map((chip: any) => ({
@@ -944,7 +1059,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
             const finalPredefinedFilter = predefinedSearchBaseFilter
 
             const finalCustomFilter = customFilter
-            const finalFilter = mergeAllDiffFilters(finalCustomFilter, finalSearchFilter, finalSavedFilter, finalPredefinedFilter)
+            const finalFilter = mergeAllDiffFilters(finalCustomFilter, finalSearchFilter, finalSavedFilter, finalPredefinedFilter, groupingRules, aggregationRules)
             handleApplyCustomFilter(finalFilter, true);
             setHasSearched(false)
             // }
@@ -1006,8 +1121,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         } else {
             console.error(ERROR_MESSAGES.SAVE_FILTER_UNDEFINED_NULL);
         }
-
     }
+
     const deleteSavedFilter = async () => {
         // delte the saved filter with id 
         await deleteEntity(savedFilterTobeDeleted);
@@ -1170,7 +1285,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         }
     }
 
-
     const SavedFiltersChip = () => {
 
         return (
@@ -1203,6 +1317,40 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
 
                     {/* button to clear filter */}
                     <a onClick={removeSavedFilter}
+                        style={{ cursor: "pointer" }}
+                    >
+                        <i className="pi pi-times ml-1">
+                        </i></a>
+                </div>
+            </li>
+        )
+    };
+
+    const removeGrouping = () => {
+        setGroupingRules(defaultGroupingRules);
+        setAggregationRules(defaultAggregationRules);
+        setHasSearched(true);
+        setRefreshKey((prev) => prev + 1)
+    }
+
+    const GroupingChip = () => {
+        return (
+            <li className="solid-global-search-chip">
+                <div className="flex align-items-center gap-2">
+                    <div className="flex align-items-center gap-2">
+                        <svg width="20" height="20" viewBox="0 0 20 20" fill="none" xmlns="http://www.w3.org/2000/svg"
+
+                            onClick={() => setShowGroupFilterElement(true)}
+                        >
+                            <rect width="20" height="20" rx="4" fill="#722ED1" />
+                            <path d="M8.66667 15V13.3333H11.3333V15H8.66667ZM6 10.8333V9.16667H14V10.8333H6ZM4 6.66667V5H16V6.66667H4Z"
+                                fill="white" />
+                        </svg>
+                        <span><strong>{groupingRules.length}</strong> Grouping rules applied</span>
+                    </div>
+
+                    {/* button to clear filter */}
+                    <a onClick={removeGrouping}
                         style={{ cursor: "pointer" }}
                     >
                         <i className="pi pi-times ml-1">
@@ -1312,7 +1460,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
         }
 
         try {
-            // Replace {{search}} placeholders with actual search value
+            // Replace {{ search }} placeholders with actual search value
             const processedFilter = replacePlaceholders(predefinedSearch.filters, inputValue.trim());
 
             // Clear all existing filters and searches
@@ -1383,6 +1531,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                         {currentSavedFilterData && <SavedFiltersChip />}
                         {predefinedSearchChip && <PredefinedSearchChip />}
                         {customFilter && <CustomChip />}
+                        {groupingRules.length > 0 && groupingRules.some(r => r.fieldName !== null) && <GroupingChip />}
                         <SearchChip />
                         <li ref={chipsRef}>
                             <div className="relative solid-global-search-element-wrapper">
@@ -1509,8 +1658,11 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                                 <Divider className="m-0" />
                             </>
                         }
-                        <div className="px-2 py-1">
+                        <div className="px-2 py-1 flex justify-content-between">
                             <Button text size="small" label="Custom Filter" iconPos="left" icon='pi pi-plus' onClick={() => setShowGlobalSearchElement(true)} className="font-bold" />
+                            {viewType === "tree" &&
+                                <Button text size="small" label="Grouping" iconPos="left" icon='pi pi-plus' onClick={() => setShowGroupFilterElement(true)} className="font-bold" />
+                            }
                         </div>
                     </div>
                 )
@@ -1521,19 +1673,40 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                         <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setShowGlobalSearchElement(false)} />
                     </div>
                     <Divider className="m-0" />
-                    <div className="p-3 lg:p-4">
+                    <div className="p-2 lg:p-2">
                         {fields.length > 0 &&
                             <FilterComponent viewData={viewData} fields={fields} filterRules={filterRules} setFilterRules={setFilterRules} transformFilterRules={transformCustomFilterRules} closeDialog={() => setShowGlobalSearchElement(false)}></FilterComponent>
                         }
                     </div>
                 </Dialog>
+                <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={showGroupFilterElement} style={{ width: '20vw' }} breakpoints={{ '1024px': '75vw', '991px': '90vw', '767px': '94w', '250px': '96vw' }} onHide={() => { if (!showGroupFilterElement) return; setShowGroupFilterElement(false); }}>
+                    <div className="flex align-items-center justify-content-between px-3">
+                        <h5 className="solid-custom-title m-0"></h5>
+                        <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setShowGroupFilterElement(false)} />
+                    </div>
+                    <Divider className="m-0" />
+                    <div className="p-2 lg:p-2">
+                        {groupableFields.length > 0 &&
+                            <GroupingComponent
+                                viewData={viewData}
+                                fields={groupableFields}
+                                groupingRules={groupingRules}
+                                setGroupingRules={setGroupingRules}
+                                aggregationRules={aggregationRules}
+                                setAggregationRules={setAggregationRules}
+                                applyGrouping={applyGrouping}
+                                closeDialog={() => setShowGroupFilterElement(false)}
+                            ></GroupingComponent>
+                        }
+                    </div>
+                </Dialog >
                 <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={showSavedFilterComponent} style={{ width: '65vw' }} breakpoints={{ '1024px': '75vw', '991px': '90vw', '767px': '94w', '250px': '96vw' }} onHide={() => { if (!showSavedFilterComponent) return; setShowSavedFilterComponent(false); }}>
                     <div className="flex align-items-center justify-content-between px-3">
                         <h5 className="solid-custom-title m-0">Saved Filter</h5>
                         <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setShowSavedFilterComponent(false)} />
                     </div>
                     <Divider className="m-0" />
-                    <div className="p-3 lg:p-4">
+                    <div className="p-2 lg:p-2">
                         {fields.length > 0 &&
                             <FilterComponent viewData={viewData} fields={fields} filterRules={currentSavedFilterRules} setFilterRules={setCurrentSavedFilterRules} transformFilterRules={transformSavedFilterRules} closeDialog={() => setShowSavedFilterComponent(false)}></FilterComponent>
                         }
@@ -1558,7 +1731,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, handleApplyCusto
                 >
                     <p>Are you sure you want to delete the {currentSavedFilterData?.name} saved query?</p>
                 </Dialog>
-            </div>
+            </div >
             {/* <div>
                 <Button
                     icon="pi pi-save"

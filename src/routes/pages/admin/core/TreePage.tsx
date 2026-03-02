@@ -1,31 +1,30 @@
-import { SolidListView } from "../../../../components/core/list/SolidListView";
 import { camelCase } from "change-case";
 import { useCallback } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
-import type { SolidListViewHandle } from "../../../../components/core/list/SolidListView";
+import type { SolidTreeViewHandle } from "../../../../components/core/tree/SolidTreeView";
 import { registerListView, unregisterListView } from "../../../../components/core/list/listViewRegistry";
+import { SolidTreeView } from "@/components/core/tree/SolidTreeView";
 
-export function ListPage() {
+export function TreePage() {
   const params = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
 
   const moduleName = params.moduleName || "";
   const modelName = params.modelName ? camelCase(params.modelName) : "";
-
   const menuItemId = searchParams.get("menuItemId") || "";
   const menuItemName = searchParams.get("menuItemName") || "";
   const actionId = searchParams.get("actionId") || "";
   const actionName = searchParams.get("actionName") || "";
 
-  const listId = `page:${moduleName}:${modelName}:${menuItemId}:${menuItemName}:${actionId}:${actionName}`;
+  const treeId = `page:${moduleName}:${modelName}:${menuItemId}:${menuItemName}:${actionId}:${actionName}`;
 
-  const setListRef = useCallback((handle: SolidListViewHandle | null) => {
+  const setTreeRef = useCallback((handle: SolidTreeViewHandle | null) => {
     if (handle) {
-      registerListView(listId, handle);
+      registerListView(treeId, handle);
       return;
     }
-    unregisterListView(listId);
-  }, [listId]);
+    unregisterListView(treeId);
+  }, [treeId]);
 
-  return <SolidListView ref={setListRef} key={moduleName + modelName + menuItemId + menuItemName + actionId + actionName} {...params} embeded={false} moduleName={moduleName} modelName={modelName} />;
+  return <SolidTreeView ref={setTreeRef} key={moduleName + modelName + menuItemId + menuItemName + actionId + actionName} {...params} embeded={false} moduleName={moduleName} modelName={modelName} />;
 }
