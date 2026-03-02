@@ -3,7 +3,7 @@
 import { useLazyNavigationQuery } from "../../../redux/api/modelApi";
 import { useEffect, useState } from "react";
 import qs from "qs";
-import { queryObjectToQueryStringByUrl, queryStringToQueryObjectByUrl } from "../list/SolidListView";
+import { setFilterObjectToLocalStorageByUrl, getFilterObjectFromLocalStorageByUrl } from "../list/SolidListView";
 import { SolidFormViewProps } from "./SolidFormView";
 import { usePathname } from "../../../hooks/usePathname";
 import { useSearchParams } from "../../../hooks/useSearchParams";
@@ -40,14 +40,14 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
             /\/form\/[^/]+/,
             "/list",
         );
-        const queryObject = queryStringToQueryObjectByUrl(listPath);
+        const queryObject = getFilterObjectFromLocalStorageByUrl(listPath);
 
         const updatedQueryObj = {
             ...queryObject,
             offset,
             limit,
         };
-        queryObjectToQueryStringByUrl(listPath, updatedQueryObj)
+        setFilterObjectToLocalStorageByUrl(listPath, updatedQueryObj)
     };
 
     const getNewUrl = (recordId: number): string => {
@@ -100,7 +100,7 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
                     "/list",
                 );
 
-                const queryObject = queryStringToQueryObjectByUrl(listPath);
+                const queryObject = getFilterObjectFromLocalStorageByUrl(listPath);
 
                 const queryData = {
                     offset: queryObject.offset || 0,

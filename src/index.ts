@@ -417,7 +417,10 @@ export type {
     SolidFormWidgetProps,
     SolidFormFieldWidgetProps,
     SolidChartRendererProps,
-    SolidBeforeListDataLoad
+    SolidBeforeListDataLoad,
+    SolidBeforeTreeNodeLoad,
+    SolidTreeUiEventResponse,
+    SolidTreeLoad
 } from './types';
 
 export { GeneralSettings } from './components/common/GeneralSettings';

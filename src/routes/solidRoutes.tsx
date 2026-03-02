@@ -23,6 +23,7 @@ import { InitiateRegisterPage } from "./pages/auth/InitiateRegisterPage";
 import { InitiateGoogleOauthPage } from "./pages/auth/InitiateGoogleOauthPage";
 import { SsoPage } from "./pages/auth/SsoPage";
 import type { SolidRoutesOptions, SolidRouteKey } from "./types";
+import { TreePage } from "./pages/admin/core/TreePage";
 
 export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] {
   const {
@@ -50,7 +51,7 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     { path: "/auth/initiate-forgot-password", element: pick("initiateForgotPassword", <InitiateForgotPasswordPage />) },
     { path: "/auth/initiate-forgot-password-thank-you", element: pick("initiateForgotPasswordThankYou", <InitiateForgotPasswordThankYouPage />) },
     { path: "/auth/confirm-forgot-password", element: pick("confirmForgotPassword", <ConfirmForgotPasswordPage />) },
-    
+
     // ??? not used ???
     { path: "/auth/reset-password", element: pick("resetPassword", <ResetPasswordPage />) },
 
@@ -63,6 +64,7 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     { path: "/admin", element: pick("admin", <AdminPage />) },
     { path: "/admin/core/:moduleName/home", element: pick("moduleHome", <ModuleHomePage />) },
     { path: "/admin/core/:moduleName/:modelName/list", element: pick("list", <ListPage />) },
+    { path: "/admin/core/:moduleName/:modelName/tree", element: pick("tree", <TreePage />) },
     { path: "/admin/core/:moduleName/:modelName/kanban", element: pick("kanban", <KanbanPage />) },
     { path: "/admin/core/:moduleName/:modelName/form/:id", element: pick("form", <FormPage />) },
     { path: "/admin/core/:moduleName/settings/:settings", element: pick("settings", <SettingsPage />) },

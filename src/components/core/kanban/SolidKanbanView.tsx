@@ -24,7 +24,7 @@ import { useRouter } from "../../../hooks/useRouter";
 import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
 import { KanbanUserViewLayout } from "./KanbanUserViewLayout";
 import { useDispatch, useSelector } from "react-redux";
-import { queryObjectToQueryString, queryStringToQueryObject } from "../list/SolidListView";
+import { setFilterObjectToLocalStorage, getFilterObjectFromLocalStorage } from "../list/SolidListView";
 import { Toast } from "primereact/toast";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
@@ -303,7 +303,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       const swimlanesCount = solidKanbanViewMetaData?.data.solidView?.layout?.attrs?.swimlanesCount || 5;
       if (groupByFieldName) {
 
-        const queryObject = queryStringToQueryObject();
+        const queryObject = getFilterObjectFromLocalStorage();
         let queryString = "";
         if (queryObject) {
           const filters = {
@@ -686,7 +686,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         // @ts-ignore
         urlData.search_predicate = customFilter.search_predicate || {};
         // @ts-ignore
-        queryObjectToQueryString(urlData);
+        setFilterObjectToLocalStorage(urlData);
       }
 
 
@@ -748,7 +748,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
             {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
               // <SolidGlobalSearchElement viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} ></SolidGlobalSearchElement>
               <div className="hidden lg:flex">
-                <SolidGlobalSearchElement showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
+                <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
               </div>
             }
           </div>
@@ -804,7 +804,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         {/* </div> */}
         {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && showGlobalSearchElement && (
           <div className="flex lg:hidden">
-            <SolidGlobalSearchElement showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
+            <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
           </div>
         )}
       </div>

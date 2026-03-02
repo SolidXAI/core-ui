@@ -66,7 +66,7 @@ const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-export const queryStringToQueryObject = () => {
+export const getFilterObjectFromLocalStorage = () => {
   const currentPageUrl = window.location.pathname; // Get the current page URL
   const encodedQueryString = localStorage.getItem(currentPageUrl); // Retrieve the encoded query string from local storage
 
@@ -85,7 +85,7 @@ export const queryStringToQueryObject = () => {
 };
 
 
-export const queryStringToQueryObjectByUrl = (url) => {
+export const getFilterObjectFromLocalStorageByUrl = (url) => {
   const currentPageUrl = url; // Get the current page URL
   const encodedQueryString = localStorage.getItem(currentPageUrl); // Retrieve the encoded query string from local storage
 
@@ -103,7 +103,7 @@ export const queryStringToQueryObjectByUrl = (url) => {
   }
 };
 
-export const queryObjectToQueryString = (queryObject: string) => {
+export const setFilterObjectToLocalStorage = (queryObject: string) => {
   if (queryObject) {
     const stringifiedObject = JSON.stringify(queryObject);
     // const stringifiedObject = qs.stringify(queryObject, { encodeValuesOnly: true, arrayFormat: "brackets" });
@@ -116,7 +116,7 @@ export const queryObjectToQueryString = (queryObject: string) => {
 };
 
 
-export const queryObjectToQueryStringByUrl = (url, queryObject: string) => {
+export const setFilterObjectToLocalStorageByUrl = (url, queryObject: string) => {
   if (queryObject) {
     const stringifiedObject = JSON.stringify(queryObject);
     // const stringifiedObject = qs.stringify(queryObject, { encodeValuesOnly: true, arrayFormat: "brackets" });
@@ -643,7 +643,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     );
     setQueryDataLoaded(false)
     if (solidListViewMetaData && solidListViewLayout) {
-      const queryObject = queryStringToQueryObject();
+      const queryObject = getFilterObjectFromLocalStorage();
 
       if (queryObject) {
         const queryData = {
@@ -906,14 +906,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
 
     if (latestFilterPredicatesRef.current && latestFilterPredicatesRef.current.persistFilter) {
-      let url;
-      const urlData = structuredClone(queryData);
-      delete urlData.filters;
-      urlData.custom_filter_predicate = latestFilterPredicatesRef.current.custom_filter_predicate || null;
-      urlData.search_predicate = latestFilterPredicatesRef.current.search_predicate || null;
-      urlData.saved_filter_predicate = latestFilterPredicatesRef.current.saved_filter_predicate || null;
-      urlData.predefined_search_predicate = latestFilterPredicatesRef.current.predefined_search_predicate || null;
-      queryObjectToQueryString(urlData);
+      const fileterTobeStored = structuredClone(queryData);
+      delete fileterTobeStored.filters;
+      fileterTobeStored.custom_filter_predicate = latestFilterPredicatesRef.current.custom_filter_predicate || null;
+      fileterTobeStored.search_predicate = latestFilterPredicatesRef.current.search_predicate || null;
+      fileterTobeStored.saved_filter_predicate = latestFilterPredicatesRef.current.saved_filter_predicate || null;
+      fileterTobeStored.predefined_search_predicate = latestFilterPredicatesRef.current.predefined_search_predicate || null;
+      setFilterObjectToLocalStorage(fileterTobeStored);
     }
     triggerGetSolidEntities(queryString);
   };
@@ -1400,6 +1399,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     <div className="hidden lg:flex">
                       <SolidGlobalSearchElement
                         key={params.modelName}
+                        viewType="list"
                         showSaveFilterPopup={showSaveFilterPopup}
                         setShowSaveFilterPopup={setShowSaveFilterPopup}
                         ref={solidGlobalSearchElementRef}
@@ -1529,6 +1529,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
               params.embeded === false && (
                 <div className="flex lg:hidden">
                   <SolidGlobalSearchElement
+                    viewType="list"
                     showSaveFilterPopup={showSaveFilterPopup}
                     setShowSaveFilterPopup={setShowSaveFilterPopup}
                     ref={solidGlobalSearchElementRef}

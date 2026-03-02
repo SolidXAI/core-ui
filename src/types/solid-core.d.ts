@@ -122,6 +122,10 @@ export type SolidUiEvents =
     // Implemented
     "onListLoad" |
     // Implemented
+    "onBeforeTreeLoad" |
+    // Implemented
+    "onTreeLoad" |
+    // Implemented
     "onBeforeListDataLoad" |
     // Not Implemented
     "afterLogin" |
@@ -196,6 +200,32 @@ export type SolidBeforeListDataLoad = {
     params?: SolidListViewParams
 }
 
+export type SolidBeforeTreeNodeLoad = {
+    type: SolidUiEvents;
+    level: number;
+    levelFieldName: string;
+    fieldsMetadata: FieldsMetadata;
+    viewMetadata: SolidView;
+    treeViewLayout: ListLayoutType;
+    filter?: any,
+    queryParams?: any,
+    user: any,
+    session: Session,
+    params?: SolidListViewParams
+}
+
+export type SolidTreeLoad = {
+    type: SolidUiEvents;
+    fieldsMetadata: FieldsMetadata;
+    viewMetadata: SolidView;
+    treeViewLayout: ListLayoutType;
+    nodes: any[];
+    queryParams?: any,
+    user: any,
+    session: Session,
+    params?: SolidListViewParams
+}
+
 export type SolidListUiEventResponse = {
     filterApplied?: Boolean;
     newFilter?: any;
@@ -204,6 +234,16 @@ export type SolidListUiEventResponse = {
     layoutChanged?: Boolean;
     newLayout?: LayoutNode;
 }
+
+export type SolidTreeUiEventResponse = {
+    filterApplied?: Boolean;
+    newFilter?: any,
+    dataChanged?: Boolean;
+    newNodes?: any[];
+    layoutChanged?: Boolean;
+    newLayout?: LayoutNode;
+}
+
 
 export type SolidAfterLoginEvent = {
     type: SolidUiEvents;
