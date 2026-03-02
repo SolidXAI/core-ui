@@ -87,7 +87,7 @@ export class SolidBooleanField implements ISolidField {
         const fieldLayoutInfo = this.fieldContext.field;
         const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
         const className = fieldLayoutInfo.attrs?.className || 'field col-12';
-        useEffect(() => { formik.setFieldValue(fieldLayoutInfo.attrs.name, "false") }, [])
+        //useEffect(() => { formik.setFieldValue(fieldLayoutInfo.attrs.name, "false") }, [])
 
         const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
@@ -240,12 +240,12 @@ export const SolidBooleanCheckboxStyleFormEditWidget = ({ formik, fieldContext }
     const readOnlyPermission = fieldContext.readOnly;
 
     // Set default value to false on mount
-    useEffect(() => {
-        if (formik.values[fieldLayoutInfo.attrs.name] === undefined) {
-            console.log("Setting default value:", false);
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, false);
-        }
-    }, []);
+    // useEffect(() => {
+    //     if (formik.values[fieldLayoutInfo.attrs.name] === undefined) {
+    //         console.log("Setting default value:", false);
+    //         //formik.setFieldValue(fieldLayoutInfo.attrs.name, false);
+    //     }
+    // }, []);
 
     const handleChange = (e: CheckboxChangeEvent) => {
         const newValue = e.checked; // This returns `true` or `false`
@@ -284,7 +284,19 @@ export const SolidBooleanCheckboxStyleFormEditWidget = ({ formik, fieldContext }
                             id={fieldLayoutInfo.attrs.name}
                             checked={formik.values[fieldLayoutInfo.attrs.name] === true}
                             // onChange={handleChange}
-                            onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
+                            onChange={(e) => {
+                                const normalizedEvent = {
+                                    ...e,
+                                    target: {
+                                        ...e.target,
+                                        name: fieldLayoutInfo.attrs.name,
+                                        value: e.checked,
+                                        checked: e.checked,
+                                        type: 'checkbox'
+                                    }
+                                };
+                                fieldContext.onChange(normalizedEvent, 'onFieldChange')
+                            }}
                             disabled={formDisabled || fieldDisabled}
                             readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                             className={classNames("", {
