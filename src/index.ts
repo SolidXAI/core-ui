@@ -66,6 +66,7 @@ export { SolidKanbanView } from './components/core/kanban/SolidKanbanView';
 export { SolidModuleHome } from './components/common/SolidModuleHome';
 export { SolidListView } from './components/core/list/SolidListView';
 export * from './components/core/list/listViewRegistry';
+export * from './components/core/tree/treeViewRegistry';
 export { SolidListViewColumn, getNumberOfInputs } from './components/core/list/SolidListViewColumn';
 export type { SolidListViewColumnParams } from './components/core/list/SolidListViewColumn';
 

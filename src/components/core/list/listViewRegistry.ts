@@ -21,4 +21,3 @@ export const hasListView = (listId: string): boolean => {
 export const getRegisteredListViewIds = (): string[] => {
   return Array.from(listViewRegistry.keys());
 };
-
