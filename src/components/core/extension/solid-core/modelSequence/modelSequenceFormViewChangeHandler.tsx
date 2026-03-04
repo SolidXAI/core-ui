@@ -1,4 +1,4 @@
-import { SolidViewLayoutManager } from "@/components/core/common/SolidViewLayoutManager";
+import { SolidViewLayoutManager } from "../../../../../components/core/common/SolidViewLayoutManager";
 
 const hanldeModelSequenceFormViewChange = async (event: any) => {
 
@@ -25,7 +25,7 @@ const hanldeModelSequenceFormViewChange = async (event: any) => {
 
         layoutManager.updateNodeAttributes('model', { "whereClause": JSON.stringify(modelWhereClause) });
         layoutManager.updateNodeAttributes('field', { "whereClause": JSON.stringify(fieldWhereClauseOnModule) });
-        
+
         return {
             layoutChanged: true,
             dataChanged: true,

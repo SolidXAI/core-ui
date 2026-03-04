@@ -3,7 +3,7 @@ import { useCallback } from "react";
 import { useParams, useSearchParams } from "react-router-dom";
 import type { SolidTreeViewHandle } from "../../../../components/core/tree/SolidTreeView";
 import { registerTree, unregisterTree } from "../../../../components/core/tree/treeViewRegistry";
-import { SolidTreeView } from "@/components/core/tree/SolidTreeView";
+import { SolidTreeView } from "../../../../components/core/tree/SolidTreeView";
 
 export function TreePage() {
   const params = useParams();

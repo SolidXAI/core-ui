@@ -45,7 +45,7 @@ import { SolidAiInteractionMetadataFieldFormWidget } from "../components/core/fo
 import { SolidAiInteractionMessageFieldFormWidget } from "../components/core/form/fields/widgets/SolidAiInteractionMessageFieldFormWidget";
 import { SolidS3FileViewerWidget } from "../components/core/form/fields/widgets/SolidS3FileViewerWidget";
 import DeleteModuleRowAction from "../components/core/extension/solid-core/moduleMetadata/list/DeleteModuleRowAction";
-import hanldeModelSequenceFormViewChange from "@/components/core/extension/solid-core/modelSequence/modelSequenceFormViewChangeHandler";
+import hanldeModelSequenceFormViewChange from "../components/core/extension/solid-core/modelSequence/modelSequenceFormViewChangeHandler";
 
 type ExtensionComponentType = null | 'list_field_widget' | 'form_field_view_widget' | 'form_field_edit_widget' | 'list_row_action ' | 'list_header_action' | 'form_action' | 'form_widget';
 
@@ -311,7 +311,7 @@ registerExtensionComponent("ChartFormPreviewWidget", ChartFormPreviewWidget, ["c
 
 // Formview Default View widgets
 registerExtensionComponent("MaskedShortTextListViewWidget", MaskedShortTextListViewWidget, ["maskedShortTextList"]);
-registerExtensionComponent("PublishedStatusListViewWidget",PublishedStatusListViewWidget,["publishedStatus"])
+registerExtensionComponent("PublishedStatusListViewWidget", PublishedStatusListViewWidget, ["publishedStatus"])
 
 // Formview Custom view widgets
 registerExtensionComponent("SolidRelationFieldAvatarFormWidget", SolidRelationFieldAvatarFormWidget, []);
