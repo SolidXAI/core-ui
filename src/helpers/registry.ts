@@ -45,6 +45,7 @@ import { SolidAiInteractionMetadataFieldFormWidget } from "../components/core/fo
 import { SolidAiInteractionMessageFieldFormWidget } from "../components/core/form/fields/widgets/SolidAiInteractionMessageFieldFormWidget";
 import { SolidS3FileViewerWidget } from "../components/core/form/fields/widgets/SolidS3FileViewerWidget";
 import DeleteModuleRowAction from "../components/core/extension/solid-core/moduleMetadata/list/DeleteModuleRowAction";
+import hanldeModelSequenceFormViewChange from "@/components/core/extension/solid-core/modelSequence/modelSequenceFormViewChangeHandler";
 
 type ExtensionComponentType = null | 'list_field_widget' | 'form_field_view_widget' | 'form_field_edit_widget' | 'list_row_action ' | 'list_header_action' | 'form_action' | 'form_widget';
 
@@ -335,3 +336,4 @@ registerExtensionFunction("emailFormTypeLoad", hanldeEmailFormTypeLoad);
 // TODO: @Jyotsana you need to create an extension function which will be used "onFieldChange"
 // on change of module, apply a where clause on the model & field fields.. 
 // on change of model, apply a where clause on the field field...
+registerExtensionFunction("modelSequenceFormViewChangeHandler", hanldeModelSequenceFormViewChange);
