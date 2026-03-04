@@ -2,7 +2,13 @@ import { useState } from "react";
 import qs from "qs";
 import { createSolidEntityApi } from "../../../../../../../redux/api/solidEntityApi";
 
-export const useRelationEntityHandler = ({ fieldContext, formik, autoCompleteLimit = 1000 }: any) => {
+export type RelationItem = {
+  label: string;
+  value: any;
+  original?: any;
+};
+
+export const useRelationEntityHandler = ({ fieldContext, autoCompleteLimit = 1000 }: any) => {
   const fieldMetadata = fieldContext.fieldMetadata;
   const fieldLayoutInfo = fieldContext.field;
 
@@ -11,77 +17,54 @@ export const useRelationEntityHandler = ({ fieldContext, formik, autoCompleteLim
   const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
 
   const parentEntityApi = createSolidEntityApi(fieldContext.modelName);
-  const { useUpdateSolidEntityMutation, usePatchUpdateSolidEntityMutation } = parentEntityApi;
+  const { usePatchUpdateSolidEntityMutation, useUpdateSolidEntityMutation } = parentEntityApi;
   const [updateSolidEntity] = usePatchUpdateSolidEntityMutation();
 
+  /**
+   * AUTOCOMPLETE & CHECKBOX:
+   * The currently linked items — drives what chips are shown in the autocomplete
+   * and which checkboxes are checked.
+   */
+  const [currentValues, setCurrentValues] = useState<RelationItem[]>([]);
 
-  const handleRelationUpdate = async (updatedItems: any[]) => {
+  /**
+   * CHECKBOX ONLY:
+   * All possible options to render as checkboxes.
+   * For autocomplete this is not needed — options are fetched on user search input.
+   */
+  const [allOptions, setAllOptions] = useState<RelationItem[]>([]);
+
+  /**
+   * AUTOCOMPLETE ONLY:
+   * The live suggestion list shown in the dropdown while the user is typing.
+   * Populated by `fetchSuggestions` on each keystroke.
+   */
+  const [suggestions, setSuggestions] = useState<RelationItem[]>([]);
+
+  // ─── Internal ────────────────────────────────────────────────────────────────
+
+  const sendLinkCommand = async (item: RelationItem, command: "link" | "unlink") => {
     const parentId = fieldContext.data?.id;
     const fieldName = fieldLayoutInfo.attrs.name;
 
-    if (!parentId || parentId === "new") {
-      return;
-    }
+    if (!parentId || parentId === "new") return;
 
     const formData = new FormData();
+    formData.append(`${fieldName}Ids[0]`, item.value);
+    formData.append(`${fieldName}Command`, command);
 
-    updatedItems.forEach((item, index) => {
-      formData.append(`${fieldName}Ids[${index}]`, item.value);
-    });
-
-    formData.append(`${fieldName}Command`, "update");
-
-    try {
-      await updateSolidEntity({ id: parentId, data: formData }).unwrap();
-    } catch (error: any) {
-      const message =
-        error?.data?.message ||
-        error?.message ||
-        `Failed to update ${fieldMetadata.displayName}`;
-    }
-
-
+    await updateSolidEntity({ id: parentId, data: formData }).unwrap();
   };
 
+  // ─── Shared ──────────────────────────────────────────────────────────────────
 
-  const [autoCompleteItems, setAutoCompleteItems] = useState([]);
-
-  const fetchRelationEntities = async (autocompleteQs = "", limit = autoCompleteLimit) => {
-    // const queryData = {
-    //   offset: 0,
-    //   limit: limit,
-    //   filters: {
-    //     [fieldMetadata?.relationModel?.userKeyField?.name]: {
-    //       '$containsi': query
-    //     }
-    //   }
-    // };
-
-    // const autocompleteQs = qs.stringify(queryData, { encodeValuesOnly: true });
-
-    const response = await triggerGetSolidEntities(autocompleteQs);
-    const data = response.data;
-
-    if (data) {
-      const mappedItems = data.records.map((item: any) => ({
-        label: item[fieldMetadata?.relationModel?.userKeyField?.name],
-        value: item['id'],
-        original: item
-      }));
-      setAutoCompleteItems(mappedItems);
-    }
-  };
-
-  const populateFormikWithRelatedEntities = async () => {
-
-    /**
-     * Example:
-     * permissions filtered by roles.id = current role id
-     */
-
+  /**
+   * Fetch currently linked items and populate `currentValues`.
+   * Call on mount for both autocomplete and checkbox widgets.
+   */
+  const fetchCurrentValues = async () => {
     const relationFieldName =
-      fieldContext.fieldMetadata?.relationCoModelFieldName ??
-      fieldContext.modelName;
+      fieldContext.fieldMetadata?.relationCoModelFieldName ?? fieldContext.modelName;
 
     const parentId = fieldContext.data?.id ?? -1;
 
@@ -89,65 +72,124 @@ export const useRelationEntityHandler = ({ fieldContext, formik, autoCompleteLim
       offset: 0,
       limit: autoCompleteLimit,
       filters: {
-        $and: [
-          {
-            [relationFieldName]: {
-              id: { $eq: parentId },
-            },
-          },
-        ],
+        $and: [{ [relationFieldName]: { id: { $eq: parentId } } }],
       },
     };
 
-    const qsString = qs.stringify(queryData, {
-      encodeValuesOnly: true,
-    });
+    const response = await triggerGetSolidEntities(qs.stringify(queryData, { encodeValuesOnly: true }));
+    if (!response.data) return;
 
-    const response = await triggerGetSolidEntities(qsString);
-    const data = response.data;
-
-    if (!data) return;
-
-    const mappedItems = data.records.map((item: any) => ({
+    const mapped: RelationItem[] = response.data.records.map((item: any) => ({
       label: item[fieldMetadata?.relationModel?.userKeyField?.name],
       value: item.id,
       original: item,
     }));
 
-    /**
-     * IMPORTANT:
-     * 1. Set checkbox options
-     * 2. Set formik selected values (checked state)
-     */
-    formik.setFieldValue(fieldLayoutInfo.attrs.name, mappedItems);
+    setCurrentValues(mapped);
   };
 
-  const addNewRelation = (values: any) => {
-    const currentData = formik.values[fieldLayoutInfo.attrs.name] || [];
+  /**
+   * Link an item: fire the API call, and on success update `currentValues`.
+   * Used by both autocomplete (onSelect) and checkbox (onChange when unchecked).
+   */
+  const linkItem = async (item: RelationItem) => {
+    try {
+      await sendLinkCommand(item, "link");
+      setCurrentValues((prev) =>
+        prev.some((s) => s.value === item.value) ? prev : [...prev, item]
+      );
+    } catch (error: any) {
+      console.error(error?.data?.message || error?.message || `Failed to link ${fieldMetadata.displayName}`);
+    }
+  };
+
+  /**
+   * Unlink an item: fire the API call, and on success update `currentValues`.
+   * Used by both autocomplete (onUnselect) and checkbox (onChange when checked).
+   */
+  const unlinkItem = async (item: RelationItem) => {
+    try {
+      await sendLinkCommand(item, "unlink");
+      setCurrentValues((prev) => prev.filter((s) => s.value !== item.value));
+    } catch (error: any) {
+      console.error(error?.data?.message || error?.message || `Failed to unlink ${fieldMetadata.displayName}`);
+    }
+  };
+
+  // ─── Autocomplete-specific ───────────────────────────────────────────────────
+
+  /**
+   * Fetch suggestions for the autocomplete dropdown based on the user's search query.
+   * Call this inside `completeMethod` of the AutoComplete component.
+   */
+  const fetchSuggestions = async (autocompleteQs = "") => {
+    const response = await triggerGetSolidEntities(autocompleteQs);
+    if (!response.data) return;
+
+    const mapped: RelationItem[] = response.data.records.map((item: any) => ({
+      label: item[fieldMetadata?.relationModel?.userKeyField?.name],
+      value: item["id"],
+      original: item,
+    }));
+
+    setSuggestions(mapped);
+  };
+
+  // ─── Checkbox-specific ───────────────────────────────────────────────────────
+
+  /**
+   * Fetch all possible options for the checkbox list.
+   * Call this on mount for the checkbox widget.
+   */
+  const fetchAllOptions = async (autocompleteQs = "") => {
+    const response = await triggerGetSolidEntities(autocompleteQs);
+    if (!response.data) return;
+
+    const mapped: RelationItem[] = response.data.records.map((item: any) => ({
+      label: item[fieldMetadata?.relationModel?.userKeyField?.name],
+      value: item["id"],
+      original: item,
+    }));
+
+    setAllOptions(mapped);
+  };
+
+  // ─── Inline create ───────────────────────────────────────────────────────────
+
+  /**
+   * Handle an inline-created entity: link it and add to both `currentValues`
+   * and `allOptions` (so it shows up in the checkbox list immediately).
+   */
+  const addNewRelation = async (values: any) => {
     const jsonValues = Object.fromEntries(values.entries());
-    const newItem = {
+    const newItem: RelationItem = {
       label: jsonValues[fieldMetadata?.relationModel?.userKeyField?.name],
       value: "new",
       original: jsonValues,
     };
 
-    const updatedItems = [...currentData, newItem];
-    formik.setFieldValue(fieldLayoutInfo.attrs.name, updatedItems);
+    await linkItem(newItem);
 
-    setAutoCompleteItems((prev: any) => {
-      const exists = prev.some((item: any) => item.label === newItem.label);
-      return exists ? prev : [...prev, newItem];
-    });
-
-    // Trigger update immediately after inline create
-    handleRelationUpdate(updatedItems);
+    // Also add to allOptions so checkbox widget shows the new item
+    setAllOptions((prev) =>
+      prev.some((s) => s.value === newItem.value) ? prev : [...prev, newItem]
+    );
   };
 
   return {
-    autoCompleteItems,
-    fetchRelationEntities,
-    populateFormikWithRelatedEntities,
-    handleRelationUpdate,
-    addNewRelation
+    // State
+    currentValues,
+    allOptions,
+    suggestions,
+    // Shared
+    fetchCurrentValues,
+    linkItem,
+    unlinkItem,
+    // Autocomplete-specific
+    fetchSuggestions,
+    // Checkbox-specific
+    fetchAllOptions,
+    // Inline create
+    addNewRelation,
   };
 };
