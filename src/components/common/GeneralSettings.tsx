@@ -830,7 +830,7 @@ export const GeneralSettings = () => {
                                                     <div className="col-12 mt-3">
                                                         <div className="formgrid grid align-items-center">
                                                             <div className="col-12 sm:col-12 lg:col-5 xl:col-5">
-                                                                <label className="form-field-label">Password Less Authentication Method</label>
+                                                                <label className="form-field-label">Password Less Registration Method</label>
                                                             </div>
                                                             <div className='col-12 sm:col-12 lg:col-6 xl:col-6'>
                                                                 <div className="flex align-items-center gap-3 mt-3 lg:mt-0">
@@ -886,6 +886,16 @@ export const GeneralSettings = () => {
                                                                             onChange={(e) => formik.setFieldValue("passwordlessLoginValidateWhat", e.value)}
                                                                         />
                                                                         <label htmlFor="passwordlessLoginValidateWhat-mobile" className="ml-2">Mobile</label>
+                                                                    </div>
+                                                                    <div className="flex align-items-center">
+                                                                        <RadioButton
+                                                                            inputId="passwordlessLoginValidateWhat-selectable"
+                                                                            name="passwordlessLoginValidateWhat"
+                                                                            value="selectable"
+                                                                            checked={formik.values.passwordlessLoginValidateWhat === "selectable"}
+                                                                            onChange={(e) => formik.setFieldValue("passwordlessLoginValidateWhat", e.value)}
+                                                                        />
+                                                                        <label htmlFor="passwordlessLoginValidateWhat-selectable" className="ml-2">Selectable</label>
                                                                     </div>
                                                                 </div>
                                                             </div>
