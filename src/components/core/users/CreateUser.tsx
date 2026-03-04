@@ -90,6 +90,7 @@ const CreateUser = ({ data, params }: any) => {
     mobile: data ? data.mobile : "",
     password: "",
     confirmPassword: "",
+    failedLoginAttempts: data ? data.failedLoginAttempts : 0,
   };
 
   const validationSchema = Yup.object({
@@ -121,6 +122,12 @@ const CreateUser = ({ data, params }: any) => {
         otherwise: (schema) => schema.notRequired().nullable(),
       }),
     mobile: Yup.number().required(ERROR_MESSAGES.FIELD_REUQIRED('Mobile')),
+    failedLoginAttempts: Yup.number()
+      .typeError("Failed Login Attempts must be a number")
+      .nullable()
+      .transform((value, originalValue) =>
+        originalValue === "" ? null : value
+      ),
   });
 
 
@@ -219,6 +226,7 @@ const CreateUser = ({ data, params }: any) => {
           email: values.email,
           mobile: values.mobile,
           roles: selectedRoles,
+          failedLoginAttempts: values.failedLoginAttempts,
         };
         if (values.password) {
           userData.password = values.password;
@@ -233,6 +241,7 @@ const CreateUser = ({ data, params }: any) => {
           mobile: values.mobile,
           password: values.password,
           roles: selectedRoles,
+          failedLoginAttempts: values.failedLoginAttempts,
         };
 
         registerPrivate(userData)
@@ -435,6 +444,36 @@ const CreateUser = ({ data, params }: any) => {
                         )}
                       </div>
                     </>}
+                    {params.id !== "new" && (
+                      <div className="field col-12 md:col-6 flex flex-column gap-1 mt-4">
+                        <label htmlFor="failedLoginAttempts" className="form-field-label">
+                          Failed Login Attempts
+                        </label>
+                        <InputText
+                          type="number"
+                          id="failedLoginAttempts"
+                          name="failedLoginAttempts"
+                          autoComplete="off"
+                          onChange={formik.handleChange}
+                          value={formik.values.failedLoginAttempts}
+                          className={classNames("", {
+                            "p-invalid":
+                              formik.touched.failedLoginAttempts &&
+                              formik.errors.failedLoginAttempts,
+                          })}
+                        />
+                        {formik.touched.failedLoginAttempts &&
+                          formik.errors.failedLoginAttempts && (
+                            <Message
+                              severity="error"
+                              text={formik.errors.failedLoginAttempts?.toString()}
+                            />
+                          )}
+                        <small className="text-color-secondary">
+                          Your account has been locked due to repeated unsuccessful login attempts. Please contact your system admin.
+                        </small>
+                      </div>
+                    )}
                   </div>
                 </Panel>
 
