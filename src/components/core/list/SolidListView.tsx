@@ -132,10 +132,13 @@ type SolidListViewParams = {
   moduleName: string;
   modelName: string;
   inlineCreate?: boolean;
-  handlePopUpOpen?: any;
+  handleAddClickForEmbeddedView?: any;
+  handleEditClickForEmbeddedView?: any;
   embeded?: boolean;
+  embededFieldRelationType?: string;
   customLayout?: any;
   customFilter?: any;
+  handleDeleteClick?: any;
 };
 
 export type SolidListViewHandle = {
@@ -1058,7 +1061,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       </div>
       // <a onClick={() => {
       //   if (params.embeded == true) {
-      //     params.handlePopUpOpen(solidViewData.id);
+      //     params.handleAddClickForEmbeddedView(solidViewData.id);
       //   } else {
       //     router.push(`${editButtonUrl}/${solidViewData.id}`)
       //   }
@@ -1471,7 +1474,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       label={solidListViewLayout?.attrs?.addButtonTitle ? solidListViewLayout?.attrs?.addButtonTitle : "Add"}
                       className={`${solidListViewLayout?.attrs?.addButtonClassName}`}
                       size="small"
-                      onClick={() => params.handlePopUpOpen("new")}
+                      onClick={() => params.handleAddClickForEmbeddedView("new")}
                     ></Button>
                   )}
                 {/* Button For Manual Refresh */}
@@ -1639,7 +1642,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     if (!(hasFindPermission || hasUpdatePermission)) return;
 
                     if (params.embeded === true) {
-                      params.handlePopUpOpen(rowData?.id);
+                      params.handleEditClickForEmbeddedView(rowData?.id);
                     } else {
                       if (typeof window !== "undefined") {
                         // store a simple marker for the caller
@@ -1746,7 +1749,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                   icon={"pi pi-pencil"}
                                   onClick={() => {
                                     if (params.embeded == true) {
-                                      params.handlePopUpOpen(rowData?.id);
+                                      params.handleEditClickForEmbeddedView(rowData?.id);
                                     } else {
                                       if (typeof window !== "undefined") {
                                         try {
@@ -1771,15 +1774,15 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     `${permissionExpression(params.modelName, 'delete')}`
                   ) &&
                     solidListViewLayout?.attrs?.delete !== false &&
-                    solidListViewLayout?.attrs?.showRowDeleteInContextMenu ===
-                    false && (
+                    solidListViewLayout?.attrs?.showRowDeleteInContextMenu !==
+                    true && (
                       <Column
                         header="Delete"
                         body={(rowData) => {
                           const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.publishedAt;
                           return (
                             <>
-                              {!shouldHideEditOrDeleteButton && (
+                              {(!shouldHideEditOrDeleteButton || params.embeded) && (
                                 <Button
                                   text
                                   type="button"
@@ -1789,8 +1792,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                   severity="danger"
                                   icon={"pi pi-trash"}
                                   onClick={() => {
-                                    setSelectedSolidViewData(rowData);
-                                    setDeleteEntity(true);
+                                    if (params?.embededFieldRelationType === "many-to-many") {
+                                      params?.handleDeleteClick(rowData.id);
+                                    } else {
+                                      setSelectedSolidViewData(rowData);
+                                      setDeleteEntity(true);
+                                    }
                                   }}
                                 />
                               )}
@@ -1840,7 +1847,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                           icon={"pi pi-pencil"}
                                           onClick={() => {
                                             if (params.embeded == true) {
-                                              params.handlePopUpOpen(
+                                              params.handleEditClickForEmbeddedView(
                                                 selectedDataRef.current?.id
                                               );
                                             } else {
@@ -1856,7 +1863,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                         />
                                       )}
 
-                                      {hasDeleteInContextMenu && (
+                                      {hasDeleteInContextMenu && params.embeded !== true && (
                                         <Button
                                           text
                                           type="button"

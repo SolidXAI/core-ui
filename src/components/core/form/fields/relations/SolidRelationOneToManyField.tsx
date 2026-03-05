@@ -209,11 +209,11 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
         const urlParams = new URLSearchParams(window.location.search);
         const childEntity = urlParams.get('childEntity');
         if (childEntity === fieldLayoutInfo.attrs.name && lastPathSegment !== "new") {
-            handlePopupOpen('new');
+            handleAddOrEditClickForEmbeddedView('new');
         }
     }, [])
 
-    const handlePopupOpen = (id: any) => {
+    const handleAddOrEditClickForEmbeddedView = (id: any) => {
         if (lastPathSegment === "new") {
             setShowSaveParentEntityConfirmationPopup(true);
         } else {
@@ -332,7 +332,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
 
             {/* {lastPathSegment === 'new' && <p>Please save the {solidFormViewMetaData.data.solidView.model.displayName} to be able to save {fieldMetadata.displayName}</p>} */}
             {listViewParams &&
-                <SolidListView key={refreshList.toString()}  {...listViewParams} handlePopUpOpen={handlePopupOpen} />
+                <SolidListView key={refreshList.toString()}  {...listViewParams} handleAddClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} handleEditClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} />
             }
             {readOnlyPermission !== true && formViewParams &&
                 <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
@@ -375,7 +375,7 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
     const userKeyField: any = Object.entries(fieldContext.solidFormViewMetaData.data.solidFieldsMetadata).find(([_, value]: any) => value.isUserKey)?.[0];
 
 
-    const handlePopupOpen = (id: any) => {
+    const handleAddOrEditClickForEmbeddedView = (id: any) => {
 
         const formviewparams: FormViewParams = {
             moduleName: fieldContext.fieldMetadata.relationModelModuleName,
@@ -467,7 +467,7 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
 
             {/* {lastPathSegment === 'new' && <p>Please save the {solidFormViewMetaData.data.solidView.model.displayName} to be able to save {fieldMetadata.displayName}</p>} */}
             {listViewParams &&
-                <SolidListView key={refreshList.toString()}  {...listViewParams} handlePopUpOpen={handlePopupOpen} />
+                <SolidListView key={refreshList.toString()}  {...listViewParams} handleAddClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} handleEditClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} />
             }
             {readOnlyPermission !== true && formViewParams &&
                 <RenderSolidFormEmbededView fieldLayoutInfo={fieldLayoutInfo} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
@@ -592,7 +592,7 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
 
 
 
-    const handlePopupOpen = (id: any) => {
+    const handleAddOrEditClickForEmbeddedView = (id: any) => {
 
         const formviewparams: FormViewParams = {
             moduleName: childModuleName,
@@ -680,7 +680,7 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
 
             {/* {lastPathSegment === 'new' && <p>Please save the {solidFormViewMetaData.data.solidView.model.displayName} to be able to save {fieldMetadata.displayName}</p>} */}
             {listViewParams &&
-                <SolidListView key={refreshList.toString()}  {...listViewParams} handlePopUpOpen={handlePopupOpen} />
+                <SolidListView key={refreshList.toString()}  {...listViewParams} handleAddClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} handleEditClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} />
             }
             {readOnlyPermission !== true && formViewParams &&
                 <RenderSolidFormEmbededView fieldLayoutInfo={fieldLayoutInfo} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>

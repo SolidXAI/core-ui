@@ -438,16 +438,62 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
     ).find(([_, value]: any) => value.isUserKey)?.[0];
     const [showSaveParentEntityConfirmationPopup, setShowSaveParentEntityConfirmationPopup] = useState(false);
 
-    useEffect(() => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const childEntity = urlParams.get('childEntity');
-        if (childEntity === fieldLayoutInfo.attrs.name && lastPathSegment !== "new") {
-            handlePopupOpen('new');
-        }
-    }, []);
 
-    const handlePopupOpen = (id: any) => {
+
+    const [visibleLinkDialog, setVisibleLinkDialog] = useState(false);
+    const [linkSearchResults, setLinkSearchResults] = useState<any[]>([]);
+    const [selectedLinkItem, setSelectedLinkItem] = useState<any>(null);
+    const [isLinking, setIsLinking] = useState(false);
+
+    const { fetchSuggestions, linkItem, unlinkItem, suggestions } = useRelationEntityHandler({ fieldContext });
+
+    const handleAddClickForEmbeddedView = () => {
         if (lastPathSegment === "new") {
+            setShowSaveParentEntityConfirmationPopup(true);
+        } else {
+            setSelectedLinkItem(null);
+            setLinkSearchResults([]);
+            setVisibleLinkDialog(true);
+        }
+    };
+
+    const handleLinkSearch = async (event: AutoCompleteCompleteEvent) => {
+        const queryData: any = {
+            offset: 0,
+            limit: 1000,
+            filters: {
+                $and: [
+                    {
+                        [fieldMetadata?.relationModel?.userKeyField?.name]: {
+                            [fieldLayoutInfo?.attrs?.autocompleteMatchMode || '$containsi']: event.query,
+                        },
+                    },
+                ],
+            },
+        };
+        await fetchSuggestions(qs.stringify(queryData, { encodeValuesOnly: true }));
+    };
+
+    const handleLinkConfirm = async () => {
+        if (!selectedLinkItem) return;
+        setIsLinking(true);
+        try {
+            await linkItem(selectedLinkItem);
+            setVisibleLinkDialog(false);
+            setSelectedLinkItem(null);
+            setRefreshList((prev) => !prev);
+        } finally {
+            setIsLinking(false);
+        }
+    };
+
+    const handleDeleteClick = async (id: any) => {
+        await unlinkItem({ value: id, label: '' });
+        setRefreshList((prev) => !prev);
+    };
+
+    const handleEditClickForEmbeddedView = (id: any) => {
+        if (id === "new") {
             setShowSaveParentEntityConfirmationPopup(true);
         } else {
             setformViewParams({
@@ -533,7 +579,7 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                 </label>
             )}
             {listViewParams && (
-                <SolidListView key={refreshList.toString()} {...listViewParams} handlePopUpOpen={handlePopupOpen} />
+                <SolidListView key={refreshList.toString()} {...listViewParams} embededFieldRelationType="many-to-many" handleAddClickForEmbeddedView={handleAddClickForEmbeddedView} handleEditClickForEmbeddedView={handleEditClickForEmbeddedView} handleDeleteClick={handleDeleteClick} />
             )}
             {readOnlyPermission !== true && formViewParams && (
                 <RenderSolidFormEmbededView
@@ -545,6 +591,50 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                     handlePopupClose={handlePopupClose}
                 />
             )}
+
+            <Dialog
+                header={`Link existing ${fieldLabel}`}
+                visible={visibleLinkDialog}
+                style={{ width: '30vw', minWidth: 320 }}
+                onHide={() => setVisibleLinkDialog(false)}
+                footer={
+                    <div className="flex gap-2 justify-content-end">
+                        <Button
+                            label="Link"
+                            size="small"
+                            disabled={!selectedLinkItem || isLinking}
+                            loading={isLinking}
+                            onClick={handleLinkConfirm}
+                        />
+                        <Button
+                            label="Cancel"
+                            size="small"
+                            outlined
+                            className="bg-primary-reverse"
+                            onClick={() => setVisibleLinkDialog(false)}
+                        />
+                    </div>
+                }
+            >
+                <div className="flex flex-column gap-2 pt-2">
+                    <label className="form-field-label">
+                        Search {fieldLabel}
+                    </label>
+                    <AutoComplete
+                        field="label"
+                        value={selectedLinkItem}
+                        suggestions={suggestions}
+                        completeMethod={handleLinkSearch}
+                        onChange={(e) => setSelectedLinkItem(e.value)}
+                        onSelect={(e) => setSelectedLinkItem(e.value)}
+                        placeholder={`Type to search...`}
+                        className="w-full"
+                        dropdown
+                    />
+                </div>
+            </Dialog>
+
+
             <Dialog
                 showHeader={false}
                 headerClassName="py-2"
