@@ -1122,6 +1122,10 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
       const originalBody = (listColumn as any)?.props?.body;
       const originalProps = (listColumn as any)?.props || {};
+      const mergedColumnStyle = {
+        minWidth: "12rem",
+        ...(originalProps.style || {}),
+      };
 
       return (
         <Column
@@ -1129,7 +1133,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           field={originalProps.field ?? fieldMetadata.name}
           header={originalProps.header}
           // sortable
-          style={originalProps.style}
+          style={mergedColumnStyle}
           className={originalProps.className}
           headerClassName={originalProps.headerClassName}
           bodyClassName={originalProps.bodyClassName}
@@ -1429,10 +1433,24 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           )}
       </div>
 
-      <style>{`.p-datatable .p-datatable-loading-overlay, .p-treetable .p-treetable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
+      <style>{`
+        .p-datatable .p-datatable-loading-overlay,
+        .p-treetable .p-treetable-loading-overlay {
+          background-color: rgba(0, 0, 0, 0.0);
+        }
+
+        /* Force TreeTable to grow to content width so horizontal scroll appears instead of column squeeze. */
+        .solid-treetable-wrapper .p-treetable .p-treetable-scrollable-header-table,
+        .solid-treetable-wrapper .p-treetable .p-treetable-scrollable-body-table,
+        .solid-treetable-wrapper .p-treetable .p-treetable-scrollable-footer-table {
+          width: max-content !important;
+          min-width: 100% !important;
+          table-layout: auto !important;
+        }
+      `}</style>
 
       {/* ── Tree table ── */}
-      <div className="solid-datatable-wrapper solid-treetable-wrapper flex-1 min-h-0">
+      <div className="solid-datatable-wrapper solid-treetable-wrapper flex-1 min-h-0 overflow-auto">
         {activeGroupingRules.length === 0 ? (
           <div className="flex flex-column align-items-center justify-content-center h-full p-6 text-center">
             <div className="mb-4" style={{ opacity: 0.1 }}>
@@ -1455,7 +1473,10 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
             onToggle={(event: any) => setExpandedKeys(event.value)}
             onExpand={handleNodeExpand}
             scrollable
+            tableStyle={{ minWidth: "max-content" }}
             tableClassName="solid-data-table"
+            resizableColumns
+            columnResizeMode="expand"
             selectionMode="checkbox"
             selectionKeys={selectedNodeKeys}
             sortField={sortField}
