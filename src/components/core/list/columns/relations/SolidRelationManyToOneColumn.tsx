@@ -95,18 +95,29 @@ export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaD
             <Button
                 label={manyToOneColVal}
                 link
+                icon="pi pi-external-link"
+                iconPos="right"
+                className="w-auto"
                 onClick={() => {
-                    // Get current path from browser
                     const pathSegments = window.location.pathname.split('/').filter(Boolean);
 
-                    // The modelName is the second-last segment before "list"
                     const listIndex = pathSegments.lastIndexOf('list');
+
                     if (listIndex > 0) {
                         pathSegments[listIndex - 1] = kebabCase(fieldMetadata?.relationModel?.singularName);
                         pathSegments[listIndex] = `form/${manyToOneFieldData?.id}`;
                     }
+                    else if (pathSegments[pathSegments.length - 2] === "form") {
+                        pathSegments[pathSegments.length - 3] = kebabCase(fieldMetadata?.relationModel?.singularName);
+                        pathSegments[pathSegments.length - 2] = "form";
+                        pathSegments[pathSegments.length - 1] = manyToOneFieldData?.id;
+                    }
+
                     const newPath = `/${pathSegments.join('/')}?viewMode=view`;
-                    router.push(newPath);
+
+                    // open in new tab
+                    window.open(newPath, "_blank");
+
                 }}
             />
         );

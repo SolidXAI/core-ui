@@ -1,9 +1,7 @@
-
 import { capitalize } from "lodash";
 import { Panel } from "primereact/panel";
 import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
-import { InputSwitch } from "primereact/inputswitch";
 import { useRelationEntityHandler } from "../../../../../components/core/form/fields/relations/widgets/helpers/useRelationEntityHandler";
 import { InlineRelationEntityDialog } from "../../../../../components/core/form/fields/relations/widgets/helpers/InlineRelationEntityDialog";
 import { Checkbox } from "primereact/checkbox";
@@ -24,33 +22,38 @@ const groupByController = (items: any[]) => {
 
 export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldLayoutInfo = fieldContext.field;
-
     const readOnlyPermission = fieldContext.readOnly;
     const [visibleCreateDialog, setVisibleCreateDialog] = useState(false);
-    const { autoCompleteItems, fetchRelationEntities, populateFormikWithRelatedEntities, addNewRelation } = useRelationEntityHandler({ fieldContext, formik });
+
     const [visibleDialogs, setVisibleDialogs] = useState<{ [key: string]: boolean }>({});
 
+    const {
+        allOptions,
+        currentValues,
+        fetchAllOptions,
+        fetchCurrentValues,
+        linkItem,
+        unlinkItem,
+        addNewRelation,
+    } = useRelationEntityHandler({ fieldContext });
 
+    // On mount: load already-linked permissions into currentValues
     useEffect(() => {
-        populateFormikWithRelatedEntities();
-    }, [formik.values?.id]);
+        fetchCurrentValues();
+    }, [fieldContext.data?.id]);
 
+    // On mount: load all available permissions into allOptions
     useEffect(() => {
-        const queryData: any = {
-            offset: 0,
-            limit: 1000
-        };
-        const autocompleteQs = qs.stringify(queryData, {
-            encodeValuesOnly: true,
-        });
-        fetchRelationEntities(autocompleteQs);
+        const queryData = { offset: 0, limit: 1000 };
+        fetchAllOptions(qs.stringify(queryData, { encodeValuesOnly: true }));
     }, []);
 
-    const handleCheckboxChange = (e: any) => {
-        if (formik.values[fieldLayoutInfo.attrs.name].some((item: any) => item.value === e.value)) {
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, formik.values[fieldLayoutInfo.attrs.name].filter((s: any) => s.value !== e.value));
+    const handleCheckboxChange = (item: any) => {
+        const isCurrentlyLinked = currentValues.some((s) => s.value === item.value);
+        if (isCurrentlyLinked) {
+            unlinkItem(item);
         } else {
-            formik.setFieldValue(fieldLayoutInfo.attrs.name, [...formik.values[fieldLayoutInfo.attrs.name], e]);
+            linkItem(item);
         }
     };
 
@@ -94,26 +97,33 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
         );
     };
 
-    const groupedEntities = groupByController(autoCompleteItems || []);
+    const groupedEntities = groupByController(allOptions || []);
     return (
         <div>
             {Object.keys(groupedEntities).map((controllerName) => (
-                <Panel toggleable headerTemplate={getHeaderTemplate(controllerName)} key={controllerName} className="mt-3 lg:mt-4">
-                    <div className="formgrid grid gap-3 lg:gap-0 ">
-                        {groupedEntities[controllerName].map((entity: any, i: number) => {
-                            const isChecked = formik.values[fieldLayoutInfo.attrs.name].some((item: any) => item.value === entity.value);
-                            return (
-                                <div key={entity.label} className={`field col-12 lg:col-6  flex gap-2 ${i >= 2 ? 'lg:mt-3' : ''}`}>
-                                    <Checkbox
-                                        readOnly={readOnlyPermission}
-                                        inputId={entity.label}
-                                        checked={isChecked}
-                                        onChange={() => handleCheckboxChange(entity)}
-                                    />
-                                    <label htmlFor={entity.label} className="form-field-label m-0 solid-permisson-form-label"> {entity.label}</label>
-                                </div>
-                            )
-                        })}
+                <Panel
+                    key={controllerName}
+                    toggleable
+                    headerTemplate={getHeaderTemplate(controllerName)}
+                    className="mt-3 lg:mt-4"
+                >
+                    <div className="formgrid grid gap-3 lg:gap-0">
+                        {groupedEntities[controllerName].map((entity: any, i: number) => (
+                            <div
+                                key={entity.value}
+                                className={`field col-12 lg:col-6 flex gap-2 ${i >= 2 ? 'lg:mt-3' : ''}`}
+                            >
+                                <Checkbox
+                                    readOnly={readOnlyPermission}
+                                    inputId={entity.label}
+                                    checked={currentValues.some((s) => s.value === entity.value)}
+                                    onChange={() => handleCheckboxChange(entity)}
+                                />
+                                <label htmlFor={entity.label} className="form-field-label m-0 solid-permisson-form-label">
+                                    {entity.label}
+                                </label>
+                            </div>
+                        ))}
                     </div>
                 </Panel>
             ))}
@@ -132,5 +142,5 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
                 />
             ))}
         </div>
-    )
+    );
 };

@@ -144,6 +144,47 @@ export class SolidRelationOneToManyField implements ISolidField {
 }
 
 
+
+const buildRelationCustomFilter = ({
+    fieldContext,
+    fieldLayoutInfo,
+}: {
+    fieldContext: any;
+    fieldLayoutInfo?: any;
+}) => {
+    if (!fieldContext) {
+        return { id: { $eq: -1 } };
+    }
+    const relationFieldName =
+        fieldContext.fieldMetadata?.relationCoModelFieldName ??
+        fieldContext.modelName;
+
+    const parentId = fieldContext.data?.id ?? -1;
+
+
+    const baseFilter = {
+        [relationFieldName]: {
+            id: { $eq: parentId },
+        },
+    };
+
+    const whereClause = fieldLayoutInfo?.attrs?.whereClause;
+
+    if (!whereClause) return { $and: [baseFilter] };
+
+    try {
+        const parsedWhereClause = JSON.parse(whereClause);
+
+        return {
+            $and: [baseFilter, parsedWhereClause],
+        };
+    } catch (error) {
+        console.error("Failed to parse whereClause:", error);
+        return { $and: [baseFilter] };
+    }
+};
+
+
 export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
     const router = useRouter();
@@ -168,11 +209,11 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
         const urlParams = new URLSearchParams(window.location.search);
         const childEntity = urlParams.get('childEntity');
         if (childEntity === fieldLayoutInfo.attrs.name && lastPathSegment !== "new") {
-            handlePopupOpen('new');
+            handleAddOrEditClickForEmbeddedView('new');
         }
     }, [])
 
-    const handlePopupOpen = (id: any) => {
+    const handleAddOrEditClickForEmbeddedView = (id: any) => {
         if (lastPathSegment === "new") {
             setShowSaveParentEntityConfirmationPopup(true);
         } else {
@@ -208,50 +249,13 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
             customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
             embeded: true,
             id: fieldContext.data ? fieldContext?.data?.id : 'new',
-            customFilter: {
-                [customFilter]: {
-                    id: {
-                        $eq: fieldContext.data && fieldContext.data.id !== undefined ? fieldContext.data.id : -1
-                    }
-                }
-            }
+            customFilter: buildRelationCustomFilter({
+                fieldContext,
+                fieldLayoutInfo,
+            })
         }
         setListViewParams(lisviewparams)
     }
-
-
-
-    const buildCustomFilter = (customFilterKey: any, fieldContext: any, fieldLayoutInfo: any) => {
-        const baseFilter = {
-            [customFilterKey]: {
-                id: {
-                    $eq: fieldContext.data && fieldContext.data.id !== undefined
-                        ? fieldContext.data.id
-                        : -1
-                }
-            }
-        };
-
-        const whereClause = fieldLayoutInfo?.attrs?.whereClause;
-
-        if (whereClause) {
-            try {
-                const parsedWhereClause = JSON.parse(whereClause);
-                return {
-                    [customFilterKey]: {
-                        ...baseFilter[customFilterKey],
-                        ...parsedWhereClause
-                    }
-                };
-            } catch (error) {
-                console.error('Failed to parse whereClause:', error);
-                return baseFilter;
-            }
-        }
-
-        return baseFilter;
-    };
-
 
     //Intial Params 
     useEffect(() => {
@@ -265,15 +269,11 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
             customLayout: fieldLayoutInfo?.attrs?.inlineListLayout,
             embeded: true,
             id: fieldContext.data ? fieldContext?.data?.id : 'new',
-            customFilter: buildCustomFilter(customFilter, fieldContext, fieldLayoutInfo)
+            customFilter: buildRelationCustomFilter({
+                fieldContext,
+                fieldLayoutInfo,
+            })
 
-            // customFilter: {
-            //     [customFilter]: {
-            //         id: {
-            //             $eq: fieldContext.data && fieldContext.data.id !== undefined ? fieldContext.data.id : -1
-            //         }
-            //     }
-            // }
         }
         setListViewParams(listviewparams);
         const formviewparams: FormViewParams = {
@@ -332,7 +332,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
 
             {/* {lastPathSegment === 'new' && <p>Please save the {solidFormViewMetaData.data.solidView.model.displayName} to be able to save {fieldMetadata.displayName}</p>} */}
             {listViewParams &&
-                <SolidListView key={refreshList.toString()}  {...listViewParams} handlePopUpOpen={handlePopupOpen} />
+                <SolidListView key={refreshList.toString()}  {...listViewParams} handleAddClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} handleEditClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} />
             }
             {readOnlyPermission !== true && formViewParams &&
                 <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
@@ -374,48 +374,8 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
     const lastPathSegment = pathname.split('/').pop();
     const userKeyField: any = Object.entries(fieldContext.solidFormViewMetaData.data.solidFieldsMetadata).find(([_, value]: any) => value.isUserKey)?.[0];
 
-    const buildRelationCustomFilter = ({
-        fieldContext,
-        fieldLayoutInfo,
-    }: {
-        fieldContext: any;
-        fieldLayoutInfo?: any;
-    }) => {
-        if (!fieldContext) {
-            return { id: { $eq: -1 } };
-        }
 
-        const relationFieldName =
-            fieldContext.fieldMetadata?.relationCoModelFieldName ??
-            fieldContext.modelName;
-
-        const parentId = fieldContext.data?.id ?? -1;
-
-        const baseFilter = {
-            [relationFieldName]: {
-                id: { $eq: parentId },
-            },
-        };
-
-        const whereClause = fieldLayoutInfo?.attrs?.whereClause;
-
-        if (!whereClause) return { $and: [baseFilter] };
-
-        try {
-            const parsedWhereClause = JSON.parse(whereClause);
-
-            return {
-                $and: [baseFilter, parsedWhereClause],
-            };
-        } catch (error) {
-            console.error("Failed to parse whereClause:", error);
-            return { $and: [baseFilter] };
-        }
-    };
-
-
-
-    const handlePopupOpen = (id: any) => {
+    const handleAddOrEditClickForEmbeddedView = (id: any) => {
 
         const formviewparams: FormViewParams = {
             moduleName: fieldContext.fieldMetadata.relationModelModuleName,
@@ -451,13 +411,6 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
                 fieldContext,
                 fieldLayoutInfo,
             })
-            // customFilter: {
-            //     [customFilter]: {
-            //         id: {
-            //             $eq: fieldContext.data ? fieldContext?.data?.id : -1
-            //         }
-            //     }
-            // }
         }
         setListViewParams(lisviewparams)
     }
@@ -476,15 +429,6 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
                 fieldContext,
                 fieldLayoutInfo,
             })
-
-
-            // customFilter: {
-            //     [customFilter]: {
-            //         id: {
-            //             $eq: fieldContext?.data?.id !== undefined ? fieldContext?.data?.id : -1
-            //         }
-            //     }
-            // }
         }
         setListViewParams(listviewparams);
         const formviewparams: FormViewParams = {
@@ -523,7 +467,7 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
 
             {/* {lastPathSegment === 'new' && <p>Please save the {solidFormViewMetaData.data.solidView.model.displayName} to be able to save {fieldMetadata.displayName}</p>} */}
             {listViewParams &&
-                <SolidListView key={refreshList.toString()}  {...listViewParams} handlePopUpOpen={handlePopupOpen} />
+                <SolidListView key={refreshList.toString()}  {...listViewParams} handleAddClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} handleEditClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} />
             }
             {readOnlyPermission !== true && formViewParams &&
                 <RenderSolidFormEmbededView fieldLayoutInfo={fieldLayoutInfo} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
@@ -648,7 +592,7 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
 
 
 
-    const handlePopupOpen = (id: any) => {
+    const handleAddOrEditClickForEmbeddedView = (id: any) => {
 
         const formviewparams: FormViewParams = {
             moduleName: childModuleName,
@@ -736,7 +680,7 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
 
             {/* {lastPathSegment === 'new' && <p>Please save the {solidFormViewMetaData.data.solidView.model.displayName} to be able to save {fieldMetadata.displayName}</p>} */}
             {listViewParams &&
-                <SolidListView key={refreshList.toString()}  {...listViewParams} handlePopUpOpen={handlePopupOpen} />
+                <SolidListView key={refreshList.toString()}  {...listViewParams} handleAddClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} handleEditClickForEmbeddedView={handleAddOrEditClickForEmbeddedView} />
             }
             {readOnlyPermission !== true && formViewParams &&
                 <RenderSolidFormEmbededView fieldLayoutInfo={fieldLayoutInfo} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
