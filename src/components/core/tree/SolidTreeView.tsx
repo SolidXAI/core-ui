@@ -1434,19 +1434,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       </div>
 
       <style>{`
-        .p-datatable .p-datatable-loading-overlay,
-        .p-treetable .p-treetable-loading-overlay {
-          background-color: rgba(0, 0, 0, 0.0);
-        }
-
-        /* Force TreeTable to grow to content width so horizontal scroll appears instead of column squeeze. */
-        .solid-treetable-wrapper .p-treetable .p-treetable-scrollable-header-table,
-        .solid-treetable-wrapper .p-treetable .p-treetable-scrollable-body-table,
-        .solid-treetable-wrapper .p-treetable .p-treetable-scrollable-footer-table {
-          width: max-content !important;
-          min-width: 100% !important;
-          table-layout: auto !important;
-        }
+       
       `}</style>
 
       {/* ── Tree table ── */}
@@ -1515,7 +1503,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
               expander={(node: any) => node?.data?.__treeMeta?.nodeType === "group"}
               body={groupColumnBody}
 
-              style={{ minWidth: "18rem" }}
+              style={{ minWidth: "18rem", display: "flex", alignItems: "center" }}
             />
 
             {renderColumnsDynamically()}

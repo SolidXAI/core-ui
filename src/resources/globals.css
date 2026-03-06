@@ -3588,3 +3588,17 @@ flex-shrink: 0; */
 .solid-treetable-wrapper .p-treetable .p-treetable-tbody>tr>td {
   padding: 0.25rem 0.25rem;
 }
+
+.solid-treetable-wrapper .p-datatable .p-datatable-loading-overlay,
+.solid-treetable-wrapper .p-treetable .p-treetable-loading-overlay {
+  background-color: rgba(0, 0, 0, 0.0);
+}
+
+/* Force TreeTable to grow to content width so horizontal scroll appears instead of column squeeze. */
+.solid-treetable-wrapper .p-treetable .p-treetable-scrollable-header-table,
+.solid-treetable-wrapper .p-treetable .p-treetable-scrollable-body-table,
+.solid-treetable-wrapper .p-treetable .p-treetable-scrollable-footer-table {
+  width: max-content !important;
+  min-width: 100% !important;
+  table-layout: auto !important;
+}
