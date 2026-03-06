@@ -122,7 +122,7 @@ export type SolidUiEvents =
     // Implemented
     "onListLoad" |
     // Implemented
-    "onBeforeTreeLoad" |
+    "onBeforeTreeDataLoad" |
     // Implemented
     "onTreeLoad" |
     // Implemented

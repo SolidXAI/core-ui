@@ -532,8 +532,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         });
       }
 
-      const viewModes = listLayoutAttrs?.allowedViews && listLayoutAttrs?.allowedViews.length > 0 && listLayoutAttrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view }; });
-      setViewModes(viewModes);
+      // const viewModes = listLayoutAttrs?.allowedViews && listLayoutAttrs?.allowedViews.length > 0 && listLayoutAttrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view }; });
+      setViewModes(solidListViewInitialMetaData?.data?.viewModes);
       if (createActionUrl) {
         setCreateButtonUrl(createActionUrl);
       }

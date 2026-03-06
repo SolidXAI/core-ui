@@ -39,6 +39,7 @@ import { HomePageModuleSvg } from "../../Svg/HomePageModuleSvg";
 import { SolidBeforeTreeNodeLoad } from "../../../types";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { SolidTreeLoad, SolidTreeUiEventResponse } from "../../../types/solid-core";
+import { Tooltip } from "primereact/tooltip";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -313,6 +314,12 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
   useEffect(() => { latestFiltersRef.current = filters; }, [filters]);
   useEffect(() => { latestFilterPredicatesRef.current = filterPredicates; }, [filterPredicates]);
+
+  useEffect(() => {
+    if (solidTreeViewMetaData) {
+      setViewModes(solidTreeViewMetaData?.data?.viewModes);
+    }
+  }, [solidTreeViewMetaData]);
 
   useEffect(() => {
     const solidFieldsMetadata = solidTreeViewMetaData?.data?.solidFieldsMetadata;
@@ -596,10 +603,10 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     if (mergedFilters) queryData.filters = mergedFilters;
 
     // event invocation is not tested
-    const dynamicHeader = solidTreeViewMetaData?.data?.solidView?.layout?.onBeforeTreeLoad;
+    const dynamicHeader = solidTreeViewMetaData?.data?.solidView?.layout?.onBeforeTreeDataLoad;
     let dynamicExtensionFunction = null;
     const event: SolidBeforeTreeNodeLoad = {
-      type: "onBeforeTreeLoad",
+      type: "onBeforeTreeDataLoad",
       level: ruleIndex,
       levelFieldName: rule.fieldName,
       fieldsMetadata: solidTreeViewMetaData?.data?.solidFieldsMetadata,
@@ -626,7 +633,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
             queryData = updatedListData?.newFilter;
           }
         } catch (err) {
-          console.error("Error executing onBeforeTreeLoad extension:", err);
+          console.error("Error executing onBeforeTreeDataLoad extension:", err);
         }
       }
     }
@@ -656,10 +663,10 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
 
     // event invocation is not tested
-    const dynamicHeader = solidTreeViewMetaData?.data?.solidView?.layout?.onBeforeTreeLoad;
+    const dynamicHeader = solidTreeViewMetaData?.data?.solidView?.layout?.onBeforeTreeDataLoad;
     let dynamicExtensionFunction = null;
     const event: SolidBeforeTreeNodeLoad = {
-      type: "onBeforeTreeLoad",
+      type: "onBeforeTreeDataLoad",
       level: groupPath.length,
       levelFieldName: groupPath[groupPath.length - 1].fieldName,
       fieldsMetadata: solidTreeViewMetaData?.data?.solidFieldsMetadata,
@@ -686,7 +693,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
             queryData = updatedListData?.newFilter;
           }
         } catch (err) {
-          console.error("Error executing onBeforeTreeLoad extension:", err);
+          console.error("Error executing onBeforeTreeDataLoad extension:", err);
         }
       }
     }
@@ -1185,8 +1192,26 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     if (nodeMeta?.nodeType !== "group") return <span>&nbsp;</span>;
 
     const label = nodeMeta.groupLabel ?? "";
-
-    return <span className="font-semibold">{label}</span>;
+    const truncateAfter = 30;
+    return (
+      <div className="flex align-items-center">
+        <div
+          className="solid-table-row"
+          style={{ maxWidth: `${truncateAfter}ch` }}
+        // title={truncateAfter ? displayValue : undefined}
+        >
+          <span className="font-semibold">{label}</span>
+        </div>
+        {truncateAfter && label.length > truncateAfter &&
+          <>
+            <Tooltip target=".solid-field-tooltip-icon" />
+            <i className="pi pi-info-circle solid-field-tooltip-icon"
+              data-pr-tooltip={label}
+            />
+          </>
+        }
+      </div>
+    );
   };
 
   // ─── Root pagination bar ──────────────────────────────────────────────────
@@ -1515,9 +1540,9 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                     style={{ display: "flex", alignItems: "center", gap: "0.2rem", justifyContent: "flex-end" }}
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <span style={{ fontSize: "0.9rem", color: "var(--text-color-secondary)", whiteSpace: "nowrap" }}>
-                      {pagEntry.offset + 1}–{Math.min(pagEntry.offset + pagEntry.limit, pagEntry.total)} of {pagEntry.total} {getSingularAndPlural(ofLabel).toPlural ?? ofLabel} in {inLabel}
-                    </span>
+                    {/* <span style={{ fontSize: "0.9rem", color: "var(--text-color-secondary)", whiteSpace: "nowrap" }}>
+                        {pagEntry.offset + 1}–{Math.min(pagEntry.offset + pagEntry.limit, pagEntry.total)} of {pagEntry.total} {getSingularAndPlural(ofLabel).toPlural ?? ofLabel} in {inLabel}
+                      </span> */}
                     <Button
                       type="button"
                       icon="pi pi-angle-left"
