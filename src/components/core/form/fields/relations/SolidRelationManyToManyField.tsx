@@ -14,10 +14,10 @@ import { SolidFieldTooltip } from "../../../../../components/common/SolidFieldTo
 import qs from 'qs';
 import * as Handlebars from "handlebars";
 import { ERROR_MESSAGES } from "../../../../../constants/error-messages";
-import { useRouter } from "@/hooks/useRouter";
-import { usePathname } from "@/hooks/usePathname";
+import { useRouter } from "../../../../../hooks/useRouter";
+import { usePathname } from "../../../../../hooks/usePathname";
 import { camelCase, capitalize } from "lodash";
-import { SolidListView } from "@/components/core/list/SolidListView";
+import { SolidListView } from "../../../../core/list/SolidListView";
 import { RenderSolidFormEmbededView } from "./SolidRelationManyToOneField";
 import { Dialog } from "primereact/dialog";
 
