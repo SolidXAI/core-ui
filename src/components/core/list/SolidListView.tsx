@@ -1,31 +1,24 @@
-// @ts-nocheck
-import React, { forwardRef, useState, useEffect, useRef, useMemo, useImperativeHandle } from "react";
+import { forwardRef, useState, useEffect, useRef, useMemo, useImperativeHandle } from "react";
 import {
   DataTable,
-  DataTableFilterMeta,
   DataTableStateEvent,
 } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { FilterMatchMode } from "primereact/api";
-import Link from "../../common/Link";
 import qs from "qs";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { SolidListViewColumn } from "./SolidListViewColumn";
-// import { SolidListViewOptions } from "../common/SolidListviewOptions";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
-import { pascalCase } from "change-case";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { permissionExpression } from "../../../helpers/permissions";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
-import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "../../../components/core/common/FilterComponent";
-import { SolidLayoutViews } from "../common/SolidLayoutViews";
 import { FilterIcon } from '../../../components/modelsComponents/filterIcon';
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Toast } from "primereact/toast";
@@ -33,8 +26,6 @@ import { Divider } from "primereact/divider";
 import CompactImage from '../../../resources/images/layout/images/compact.png';
 import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
-import KanbanImage from '../../../resources/images/layout/images/kanban.png';
-import { capitalize, filter, set } from "lodash";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import Download from "yet-another-react-lightbox/plugins/download";
@@ -58,7 +49,6 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
-import { log } from "console";
 import { normalizeSolidListKanbanActionPath } from "../../../helpers/routePaths";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
@@ -85,7 +75,7 @@ export const getFilterObjectFromLocalStorage = () => {
 };
 
 
-export const getFilterObjectFromLocalStorageByUrl = (url) => {
+export const getFilterObjectFromLocalStorageByUrl = (url: string) => {
   const currentPageUrl = url; // Get the current page URL
   const encodedQueryString = localStorage.getItem(currentPageUrl); // Retrieve the encoded query string from local storage
 
@@ -116,7 +106,7 @@ export const setFilterObjectToLocalStorage = (queryObject: string) => {
 };
 
 
-export const setFilterObjectToLocalStorageByUrl = (url, queryObject: string) => {
+export const setFilterObjectToLocalStorageByUrl = (url: string, queryObject: string) => {
   if (queryObject) {
     const stringifiedObject = JSON.stringify(queryObject);
     // const stringifiedObject = qs.stringify(queryObject, { encodeValuesOnly: true, arrayFormat: "brackets" });
@@ -208,11 +198,16 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
 
   const pathname = usePathname();
-  const solidGlobalSearchElementRef = useRef();
+  const solidGlobalSearchElementRef = useRef<any>();
 
   const router = useRouter();
   const searchParams = useSearchParams();
   const localeName = searchParams.get("locale");
+
+
+  const [solidListViewMetaData, setSolidListViewMetaData] = useState<any>(null);
+  const [solidListViewLayout, setSolidListViewLayout] = useState<any>(null);
+  const [isDraftPublishWorkflowEnabled, setIsDraftPublishWorkflowEnabled] = useState(false);
 
   // Filter query realted states
   const [filters, setFilters] = useState<any>(null);
@@ -400,9 +395,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     }
   );
 
-  const [solidListViewMetaData, setSolidListViewMetaData] = useState(null);
-  const [solidListViewLayout, setSolidListViewLayout] = useState(null);
-  const [isDraftPublishWorkflowEnabled, setIsDraftPublishWorkflowEnabled] = useState(false);
   const {
     data: solidListViewInitialMetaData,
     error: solidListViewMetaDataError,
@@ -489,7 +481,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     const populate = toPopulate;
     const populateMedia = toPopulateMedia;
     const rows = currentLayout?.attrs?.defaultPageSize ?? 25;
-    const multiSortMeta = [{ field: "id", order: -1 }];
+    const multiSortMeta: { field: string; order: 1 | -1 }[] = [{ field: "id", order: -1 }];
     return { multiSortMeta, rows, populate, populateMedia };
   };
 
@@ -594,7 +586,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   useEffect(() => {
     if (solidEntityListViewData) {
       setLoading(true);
-      const cleanedRecords = solidEntityListViewData.records.map((record) => {
+      const cleanedRecords = solidEntityListViewData.records.map((record: any) => {
         const newRecord = { ...record };
 
         Object.entries(newRecord).forEach(([key, value]) => {
@@ -753,10 +745,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
 
   // Create a ref that always has the latest filters
-  const latestFiltersRef = useRef(filters);
-  const latestFilterPredicatesRef = useRef(filterPredicates);
+  const latestFiltersRef = useRef<any>(filters);
+  const latestFilterPredicatesRef = useRef<any>(filterPredicates);
   // 1. Add the ref (near the other latestXxxRef declarations)
-  const latestMultiSortMetaRef = useRef(multiSortMeta);
+  const latestMultiSortMetaRef = useRef<any>(multiSortMeta);
 
   // 2. Keep it in sync
   useEffect(() => {
@@ -855,7 +847,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     const currentSortMeta = latestMultiSortMetaRef.current;
 
     if (currentSortMeta && currentSortMeta.length > 0) {
-      queryData.sort = currentSortMeta.map(({ field, order }) => {
+      queryData.sort = currentSortMeta.map(({ field, order }: any) => {
         const meta = solidFieldsMetadata?.[field];
         let resolvedField = field;
         if (meta?.type === "relation" && meta?.relationType === "many-to-one") {
@@ -966,7 +958,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
 
     setFilters(params.customFilter || { $and: [] })
-    solidGlobalSearchElementRef.current.clearFilter();
+    solidGlobalSearchElementRef?.current.clearFilter();
   };
 
   const cloneListData = () => {
@@ -1022,7 +1014,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const [selectedSolidViewData, setSelectedSolidViewData] = useState<any>();
   const selectedDataRef = useRef<any>();
-  const op = useRef(null);
+  const op = useRef<any>(null);
   const [deleteEntity, setDeleteEntity] = useState(false);
 
   // clickable link allowing one to open the detail / form view.
@@ -1071,7 +1063,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   };
 
   // Recover functions
-  const recoverById = (id) => {
+  const recoverById = (id: any) => {
     triggerRecoverSolidEntitiesById(id);
   };
 
@@ -1104,7 +1096,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     }
   }, [recoverByIdIsSuccess, recoverByIdData, recoverByIdIsError, recoverByIdError, recoverIsError, recoverError]);
 
-  const showError = async (error) => {
+  const showError = async (error: any) => {
     const errorMessages = error?.data?.message;
     const messages = Array.isArray(errorMessages)
       ? errorMessages
@@ -1133,7 +1125,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     }
   };
 
-  const showFieldError = async (error) => {
+  const showFieldError = async (error: any) => {
     if (error) {
       toast?.current?.show({
         severity: "error",
@@ -1291,7 +1283,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         throw new Error(ERROR_MESSAGES.NO_ENTITY_SELECTED);
       }
 
-      const response = await deleteSolidSingleEntiry(selectedSolidViewData.id);
+      const response: any = await deleteSolidSingleEntiry(selectedSolidViewData.id);
 
       if (response?.data?.statusCode === 200) {
         setDeleteEntity(false);
@@ -1299,18 +1291,14 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           severity: "success",
           summary: ERROR_MESSAGES.DELETED,
           detail: ERROR_MESSAGES.ENTITY_DELETE,
-          ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+          life: 3000,
         });
       } else {
         toast.current?.show({
           severity: "error",
           summary: ERROR_MESSAGES.DELETE_FAIELD,
           detail: response?.error?.data?.error,
-          ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+          sticky: true,          // stays until user closes
         });
       }
     } catch (error: any) {
@@ -1318,9 +1306,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         severity: "error",
         summary: ERROR_MESSAGES.DELETE_FAIELD,
         detail: ERROR_MESSAGES.SOMETHING_WRONG,
-        ...(severity === "error"
-          ? { sticky: true }            // stays until user closes
-          : { life: 3000 }),
+        sticky: true,          // stays until user closes
+
       });
     }
   };
@@ -1365,7 +1352,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const hasCustomContextMenuButtons =
     solidListViewLayout?.attrs?.rowButtons?.some(
-      (rb) => rb?.attrs?.actionInContextMenu === true
+      (rb: any) => rb?.attrs?.actionInContextMenu === true
     );
 
   const hasAnyContextMenuActions =
@@ -1436,7 +1423,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
                 <div className="hidden lg:flex align-items-center solid-header-buttons-wrapper">
                   {solidListViewLayout?.attrs?.headerButtons
-                    ?.filter((rb) => rb.attrs.actionInContextMenu != true)
+                    ?.filter((rb: any) => rb.attrs.actionInContextMenu != true)
                     ?.map((button: any, index: number) => (
                       <SolidListViewHeaderButton
                         key={index}
@@ -1614,7 +1601,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   // loadingIcon="pi pi-spinner"
                   selection={
                     params.embeded === true
-                      ? null
+                      ? []
                       : [...selectedRecords, ...selectedRecoverRecords]
                   }
                   onSelectionChange={
@@ -1879,7 +1866,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                       )}
                                       {hasCustomContextMenuButtons && solidListViewLayout?.attrs?.rowButtons
                                         ?.filter(
-                                          (rb) =>
+                                          (rb: any) =>
                                             rb?.attrs?.actionInContextMenu === true &&
                                             rb?.attrs?.visible !== false
                                         )
@@ -1985,7 +1972,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         <div className="p-4">
           <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>Are you sure you want to delete the selected records?</p>
           <div className="flex align-items-center gap-2 mt-3">
-            <Button label="Delete" severity="danger" size="small" onClick={handleDeleteEntity} autoFocus onClick={deleteBulk} />
+            <Button label="Delete" severity="danger" size="small" autoFocus onClick={deleteBulk} />
             <Button label="Cancel" size="small" onClick={onDeleteClose} outlined className='bg-primary-reverse' />
           </div>
         </div>

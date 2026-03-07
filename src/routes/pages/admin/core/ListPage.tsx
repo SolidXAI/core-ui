@@ -27,5 +27,5 @@ export function ListPage() {
     unregisterListView(listId);
   }, [listId]);
 
-  return <SolidListView ref={setListRef} key={moduleName + modelName + menuItemId + menuItemName + actionId + actionName} {...params} embeded={false} moduleName={moduleName} modelName={modelName} />;
+  return <SolidListView ref={setListRef} key={listId} {...params} embeded={false} moduleName={moduleName} modelName={modelName} />;
 }
