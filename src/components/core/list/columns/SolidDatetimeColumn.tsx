@@ -19,7 +19,7 @@ const SolidDatetimeColumn = ({ solidListViewMetaData, fieldMetadata, column }: S
             body={(rowData) => {
                 let viewWidget = column.attrs.viewWidget;
                 if (!viewWidget) {
-                    viewWidget = 'DefaultTextListWidget';
+                    viewWidget = 'DefaultDateTimeListWidget';
                 }
                 let DynamicWidget = getExtensionComponent(viewWidget);
                 const widgetProps: SolidListFieldWidgetProps = {

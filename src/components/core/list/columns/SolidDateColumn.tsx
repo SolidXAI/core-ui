@@ -3,6 +3,7 @@ import { Column } from "primereact/column";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { SolidListFieldWidgetProps } from '../../../../types/solid-core';
 import { getExtensionComponent } from '../../../../helpers/registry';
+import { DateFieldViewComponent } from "../../common/DateFieldViewComponent";
 
 const SolidDateColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
     const truncateAfter = solidListViewMetaData?.data?.solidView?.layout?.attrs?.truncateAfter
@@ -19,7 +20,7 @@ const SolidDateColumn = ({ solidListViewMetaData, fieldMetadata, column }: Solid
             body={(rowData) => {
                 let viewWidget = column.attrs.viewWidget;
                 if (!viewWidget) {
-                    viewWidget = 'DefaultTextListWidget';
+                    viewWidget = 'DefaultDateTimeListWidget';
                 }
                 let DynamicWidget = getExtensionComponent(viewWidget);
                 const widgetProps: SolidListFieldWidgetProps = {
@@ -41,3 +42,27 @@ const SolidDateColumn = ({ solidListViewMetaData, fieldMetadata, column }: Solid
 };
 
 export default SolidDateColumn;
+
+
+
+export const DefaultDateTimeListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
+    let displayValue = rowData[fieldMetadata.name];
+    const format = solidListViewMetaData?.data?.solidView?.layout?.attrs?.format;
+
+    if (fieldMetadata?.selectionStaticValues && displayValue) {
+        const mapping: Record<string, string> = {};
+
+        fieldMetadata.selectionStaticValues.forEach((entry: string) => {
+            const [val, label] = entry.split(":");
+            mapping[val] = label;
+        });
+
+        const values = displayValue.split(",").map((v: string) => v.trim());
+
+        displayValue = values.map((v: string) => mapping[v] || v).join(", ");
+    }
+
+    return (
+        <DateFieldViewComponent value={displayValue} format={format} fallback="-"></DateFieldViewComponent>
+    );
+};
