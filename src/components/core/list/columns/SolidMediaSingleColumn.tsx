@@ -131,7 +131,6 @@ const SolidMediaSingleColumn = ({ solidListViewMetaData, fieldMetadata, column, 
             }}
             sortable={column.attrs.sortable}
             showFilterOperator={false}
-            filterPlaceholder={`Search by ${fieldMetadata.displayName}`}
             style={{ minWidth: "12rem" }}
             headerClassName="table-header-fs"
         />

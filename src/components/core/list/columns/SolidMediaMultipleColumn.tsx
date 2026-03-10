@@ -105,11 +105,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
 };
 
 
-// Column Component
 const SolidMediaMultipleColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidListViewColumnParams) => {
-    const filterable = false;
-    const showFilterOperator = false;
-    const columnDataType = undefined;
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
     return (
@@ -140,9 +136,6 @@ const SolidMediaMultipleColumn = ({ solidListViewMetaData, fieldMetadata, column
                 )
             }}
             sortable={column.attrs.sortable}
-            dataType={columnDataType}
-            showFilterOperator={showFilterOperator}
-            filterPlaceholder={`Search by ${fieldMetadata.displayName}`}
             style={{ minWidth: "12rem" }}
             headerClassName="table-header-fs"
         />

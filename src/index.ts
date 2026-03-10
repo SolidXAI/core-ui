@@ -79,7 +79,7 @@ export { SolidVarInputsFilterElement } from './components/core/list/SolidVarInpu
 
 export { default as SolidDashboard } from './components/core/dashboard/SolidDashboard';
 
-export { dateFilterMatchModeOptions } from './components/core/list/columns/SolidDateColumn';
+export { dateFilterMatchModeOptions } from './components/core/filter/fields/SolidDateField';
 
 export { ModelListViewData } from './components/core/model/ModelListViewData';
 export { ModuleListViewData } from './components/core/module/ModuleListViewData';
