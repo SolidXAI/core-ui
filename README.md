@@ -255,4 +255,4 @@ No proprietary runtime. No vendor lock-in. Built on the stack your developers al
 
 ## License
 
-ISC © [Logicloop](https://logicloop.io)
+BSL-1.1 © [Logicloop](https://logicloop.io)
