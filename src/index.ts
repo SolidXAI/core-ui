@@ -298,7 +298,9 @@ export {
     useLazyGetAuthSettingsQuery,
     useLazyGetSolidSettingsQuery,
     useLazyGetSolidSettingsByIdQuery,
-    useUpdateSolidSettingsMutation
+    useUpdateSolidSettingsMutation,
+    useGetSolidVersionInfoQuery,
+    useLazyGetSolidVersionInfoQuery
 } from './redux/api/solidSettingsApi';
 
 export { logout, setToken } from './redux/features/authSlice';
