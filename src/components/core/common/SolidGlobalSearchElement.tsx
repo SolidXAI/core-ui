@@ -414,24 +414,28 @@ const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, ope
                 {/* {savedfilter?.description && <p className="text-xs pl-3">{savedfilter?.description}</p>} */}
             </div>
             <div className="flex align-items-center gap-2">
-                <Button
-                    icon="pi pi-pencil"
-                    style={{ fontSize: 10 }}
-                    severity="secondary"
-                    outlined size="small"
-                    onClick={() => openSavedCustomFilter(savedfilter)}
-                />
-                <Button
-                    icon="pi pi-trash"
-                    style={{ fontSize: 10 }}
-                    severity="secondary"
-                    outlined size="small"
-                    onClick={() => {
-                        setSavedFilterTobeDeleted(savedfilter.id),
-                            setIsDeleteSQDialogVisible(true);
+                {savedfilter.isSeeded !== true &&
+                    <>
+                        <Button
+                            icon="pi pi-pencil"
+                            style={{ fontSize: 10 }}
+                            severity="secondary"
+                            outlined size="small"
+                            onClick={() => openSavedCustomFilter(savedfilter)}
+                        />
+                        <Button
+                            icon="pi pi-trash"
+                            style={{ fontSize: 10 }}
+                            severity="secondary"
+                            outlined size="small"
+                            onClick={() => {
+                                setSavedFilterTobeDeleted(savedfilter.id),
+                                    setIsDeleteSQDialogVisible(true);
+                            }}
+                        />
+                    </>
+                }
 
-                    }}
-                />
             </div>
         </div>
     )
