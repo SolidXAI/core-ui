@@ -2,13 +2,11 @@
 
 > Turn your data models into production-grade enterprise applications — with auth, APIs, roles, and admin views — in minutes, not months.
 
-`@solidxai/core-ui` is the frontend library that powers every [SolidX](https://solidxai.com) admin panel. It is a React + TypeScript component library that provides a complete, metadata-driven UI — authentication flows, list views, form views, kanban boards, dashboards, and more — all wired up and ready to drop into your application.
+`@solidxai/core-ui` is the frontend library that powers every [SolidX](https://solidxai.com) admin panel. It is a React + TypeScript component library that provides a complete, metadata-driven UI — authentication flows, list views, form views, tree views, kanban boards, dashboards, and more.
 
 [![npm version](https://img.shields.io/npm/v/@solidxai/core-ui)](https://www.npmjs.com/package/@solidxai/core-ui)
-[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
+[![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](https://opensource.org/licenses/BSL-1.1)
 [![Documentation](https://img.shields.io/badge/docs-solidxai.com-blue)](https://docs.solidxai.com/docs)
-
----
 
 ## What it provides
 
@@ -18,11 +16,9 @@ The library covers:
 
 - **Complete authentication UI** — login, register, OTP/passwordless, Google OAuth, forgot/reset password
 - **Metadata-driven views** — list, form, kanban, and tree views that render themselves from your model's field metadata
-- **Redux store + RTK Query** — a pre-configured store and 26+ API slices for every SolidX backend resource
+- **Redux + RTK Query** — preconfigured state management and API layer for interacting with SolidX backend services
 - **Layout system** — admin shell, sidebars, navbars, and auth layout, all theme-aware
 - **Extensibility hooks** — registry system, route overrides, custom reducers, and component extension points
-
----
 
 ## Core Capabilities
 
@@ -31,9 +27,9 @@ The library covers:
 A full set of authentication pages and the underlying session logic, ready to use out of the box.
 
 - **Login** — password-based and OTP/passwordless flows on the same page
-- **Registration** — password and OTP-based registration with email/phone verification
+- **Registration** — password and OTP-based registration with email/mobile verification
 - **Forgot & Reset Password** — multi-step flow with token validation
-- **Google OAuth** — redirect-based flow that lands back in your app with a JWT
+- **Google OAuth** — google redirect-based flow that lands back in your app with a JWT
 - **Session management** — `signIn`, `signOut`, `getSession`, `refreshAccessToken` adapters that persist tokens and handle expiry automatically
 - **Route guard** — `AuthGuard` protects all admin routes; unauthenticated users are redirected to login
 
@@ -61,17 +57,17 @@ The heart of the library. Pass your model's metadata and the view renders itself
 - Search, filter, and sort — consistent with the list view experience
 
 **Tree View (`SolidTreeView`)**
-- Hierarchical display for parent-child or nested data structures
-- Driven by the same metadata conventions as the other views
+- Displays data in grouped, hierarchical structures
+- Supports nested parent–child relationships
+- Uses the same metadata conventions as other views
 
 ### Dashboard
 
 A drag-and-drop dashboard builder for composing analytical views.
 
-- Arrange widgets freely on a responsive grid (powered by GridStack)
 - Connect widgets to SQL-based dashboard questions defined in the backend
-- Chart.js for visualisations; PrimeReact DataTable and MeterGroup for tabular and progress data
 - Variables panel for runtime filter injection into SQL queries
+- Support for bar, line, pie, doughnut, data table, meter group widgets
 
 ### Chatter
 
@@ -104,7 +100,6 @@ A complete admin shell that mirrors the SolidX platform's admin panel.
 - `AdminSidebar` / `UserSidebar` — menu-driven navigation built from the backend's menu metadata
 - `Header`, `DashboardHeader`, `ListingHeader` — contextual headers per view type
 - `SolidThemeProvider` — light and dark purple themes, switchable at runtime
-- `AppConfig` — runtime configuration panel
 
 ### Routing
 
