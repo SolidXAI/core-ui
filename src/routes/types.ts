@@ -18,6 +18,7 @@ export type SolidRouteKey =
   | "sso"
   | "admin"
   | "moduleHome"
+  | "dashboard"
   | "list"
   | "tree"
   | "kanban"

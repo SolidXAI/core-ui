@@ -450,6 +450,7 @@ export { getSolidRoutes } from './routes/solidRoutes';
 export type { SolidRoutesOptions } from './routes/types';
 export { AdminPage } from './routes/pages/admin/AdminPage';
 export { ModuleHomePage } from './routes/pages/admin/core/ModuleHomePage';
+export { DashboardPage as AdminDashboardPage } from './routes/pages/admin/core/DashboardPage';
 export { ListPage as AdminListPage } from './routes/pages/admin/core/ListPage';
 export { KanbanPage as AdminKanbanPage } from './routes/pages/admin/core/KanbanPage';
 export { FormPage as AdminFormPage } from './routes/pages/admin/core/FormPage';
