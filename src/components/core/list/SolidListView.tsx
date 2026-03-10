@@ -1762,15 +1762,19 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     `${permissionExpression(params.modelName, 'delete')}`
                   ) &&
                     solidListViewLayout?.attrs?.delete !== false &&
-                    solidListViewLayout?.attrs?.showRowDeleteInContextMenu !==
-                    true && (
+                    (params.embeded ||
+                      (solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== undefined &&
+                        solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== true)
+                    )
+                    &&
+                    (
                       <Column
                         header="Delete"
                         body={(rowData) => {
                           const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.publishedAt;
                           return (
                             <>
-                              {(!shouldHideEditOrDeleteButton || params.embeded) && (
+                              {(!shouldHideEditOrDeleteButton) && (
                                 <Button
                                   text
                                   type="button"
@@ -1851,7 +1855,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                         />
                                       )}
 
-                                      {hasDeleteInContextMenu && params.embeded !== true && (
+                                      {hasDeleteInContextMenu && !params.embeded && (
                                         <Button
                                           text
                                           type="button"
