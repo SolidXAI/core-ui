@@ -4,6 +4,7 @@ import { Dialog } from "primereact/dialog";
 import { useEffect, useMemo, useState } from "react";
 import { SolidPersonalInfo } from "./SolidPersonalInfo";
 import { SolidChangePassword } from "./SolidChangePassword";
+import { SolidVersionInfo } from "./SolidVersionInfo";
 import styles from './SolidAccountSettings.module.css'
 import { useSelector } from "react-redux";
 import { useLazyGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi";
@@ -32,6 +33,11 @@ export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfile
             key: "change_password",
             icon: "pi pi-key"
         },
+        {
+            label: "About",
+            key: "about",
+            icon: "pi pi-info-circle"
+        },
     ]
 
     const renderSettingComponent = useMemo(() => {
@@ -40,6 +46,8 @@ export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfile
                 return <SolidPersonalInfo />;
             case "change_password":
                 return <SolidChangePassword solidSettingsData={solidSettingsData} />;
+            case "about":
+                return <SolidVersionInfo />;
             default:
                 return null;
         }
