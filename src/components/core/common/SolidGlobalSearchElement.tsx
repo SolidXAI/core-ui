@@ -806,11 +806,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
     useEffect(() => {
         const fn = async () => {
-            console.log("Effect fired");
-            console.log("filterPredicates:", filterPredicates);
             if (filterPredicates) {
-                console.log("inside filterPredicates");
-
                 if (filterPredicates?.custom_filter_predicate && filterPredicates?.custom_filter_predicate !== customFilter) {
                     setCustomFilter(filterPredicates?.custom_filter_predicate);
                     const rules: FilterRule = transformFiltersToRules(filterPredicates.custom_filter_predicate);
