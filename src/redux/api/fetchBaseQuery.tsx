@@ -7,7 +7,7 @@ import { eventBus, AppEvents } from "../../helpers/eventBus";
 
 // Base URL for the API endpoints
 const baseUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api`;
-logger.debug(`fetchBaseQuery resolved baseUrl to ${baseUrl}`);
+// logger.debug(`fetchBaseQuery resolved baseUrl to ${baseUrl}`);
 
 
 const rawBaseQuery = fetchBaseQuery({
@@ -22,12 +22,12 @@ const rawBaseQuery = fetchBaseQuery({
 
     if (session?.user?.accessToken) {
       headers.set("authorization", `Bearer ${session.user.accessToken}`);
-      logger.debug("[prepareHeaders] set auth header");
+      // logger.debug("[prepareHeaders] set auth header");
     } else {
-      logger.debug("[prepareHeaders] no access token");
+      // logger.debug("[prepareHeaders] no access token");
     }
 
-    logger.debug("[prepareHeaders] end");
+    // logger.debug("[prepareHeaders] end");
     return headers;
   },
 });

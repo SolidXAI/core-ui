@@ -416,7 +416,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       const column = currentLayout?.children[i];
       const fieldMetadata = solidFieldsMetadata?.[column.attrs.name];
       if (!fieldMetadata?.type) {
-        console.log(`Some problem in rendering column: `, column);
         showFieldError(ERROR_MESSAGES.FIELD_NOT_IN_METADATA(column.attrs.label));
         // return;
       }
@@ -633,9 +632,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   // Fetch data after toPopulate has been populated...
   useEffect(() => {
-    console.log(
-      "useEffect: [isDeleteSolidEntitiesSucess, isDeleteSolidSingleEntitySuccess, recoverByIdIsSuccess, recoverByIsSuccess, solidListViewMetaData]"
-    );
     setQueryDataLoaded(false)
     if (solidListViewMetaData && solidListViewLayout) {
       const queryObject = getFilterObjectFromLocalStorage();
@@ -766,7 +762,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
 
   useEffect(() => {
-    console.log(`useEffect: [first- ${first}, rows- ${rows}, multiSortMeta- ${multiSortMeta}, showArchived- ${showArchived}, toPopulate- ${toPopulate}, toPopulateMedia- ${toPopulateMedia}, queryDataLoaded- ${queryDataLoaded}, filterPredicates- ${filterPredicates}]`);
     if (queryDataLoaded && filters && (filterPredicates || params.embeded == true)) {
       setQueryString();
     }
