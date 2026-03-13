@@ -104,7 +104,7 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
       );
     setFilteredFields(filtered);
     setTimeout(() => {
-        autoCompleteRef.current?.show();
+      autoCompleteRef.current?.show();
     }, 0);
   };
   return (

@@ -36,8 +36,11 @@ export const getSingularAndPlural = (displayName: any) => {
 
   const toPluralCamelCase = pluralize(toCamelCase);
 
+  const toPlural = pluralize(displayName);
 
-  return { toKebabCase, toSnakeCase, toPluralKebabCase, toPluralCamelCase,toCamelCase };
+  const toSingular = pluralize(displayName, 1);
+
+  return { toKebabCase, toSnakeCase, toPluralKebabCase, toPluralCamelCase, toCamelCase, toPlural, toSingular };
 };
 
 function cleanForQuery(values: any) {

@@ -23,7 +23,7 @@ import { DefaultSelectionStaticAutocompleteFormEditWidget, DefaultSelectionStati
 import { DefaultShortTextFormEditWidget, DefaultShortTextFormViewWidget, MaskedShortTextFormViewWidget, MaskedShortTextFormEditWidget, MaskedShortTextListViewWidget } from "../components/core/form/fields/SolidShortTextField";
 import { DefaultRelationManyToOneFormEditWidget, DefaultRelationManyToOneFormViewWidget, PseudoRelationManyToOneFormWidget } from "../components/core/form/fields/relations/SolidRelationManyToOneField";
 import { DefaultRelationOneToManyFormEditWidget, DefaultRelationOneToManyFormViewWidget, PseudoRelationOneToManyFormWidget } from "../components/core/form/fields/relations/SolidRelationOneToManyField";
-import { DefaultRelationManyToManyAutoCompleteFormEditWidget, DefaultRelationManyToManyCheckBoxFormEditWidget } from "../components/core/form/fields/relations/SolidRelationManyToManyField";
+import { DefaultRelationManyToManyAutoCompleteFormEditWidget, DefaultRelationManyToManyCheckBoxFormEditWidget, DefaultRelationManyToManyListFormEditWidget } from "../components/core/form/fields/relations/SolidRelationManyToManyField";
 import { DefaultBooleanListWidget } from "../components/core/list/columns/SolidBooleanColumn";
 import { DefaultTextListWidget } from "../components/core/list/columns/SolidShortTextColumn";
 import { DefaultMediaSingleListWidget } from "../components/core/list/columns/SolidMediaSingleColumn";
@@ -45,6 +45,7 @@ import { SolidAiInteractionMetadataFieldFormWidget } from "../components/core/fo
 import { SolidAiInteractionMessageFieldFormWidget } from "../components/core/form/fields/widgets/SolidAiInteractionMessageFieldFormWidget";
 import { SolidS3FileViewerWidget } from "../components/core/form/fields/widgets/SolidS3FileViewerWidget";
 import DeleteModuleRowAction from "../components/core/extension/solid-core/moduleMetadata/list/DeleteModuleRowAction";
+import hanldeModelSequenceFormViewChange from "../components/core/extension/solid-core/modelSequence/modelSequenceFormViewChangeHandler";
 
 type ExtensionComponentType = null | 'list_field_widget' | 'form_field_view_widget' | 'form_field_edit_widget' | 'list_row_action ' | 'list_header_action' | 'form_action' | 'form_widget';
 
@@ -229,6 +230,9 @@ registerExtensionComponent("DefaultRelationManyToManyAutoCompleteFormEditWidget"
 // - relation.many2many (checkbox)
 registerExtensionComponent("DefaultRelationManyToManyCheckBoxFormEditWidget", DefaultRelationManyToManyCheckBoxFormEditWidget, []);
 
+// - relation.many2many (list)
+registerExtensionComponent("DefaultRelationManyToManyListFormEditWidget", DefaultRelationManyToManyListFormEditWidget, []);
+
 // - relation.one2many
 registerExtensionComponent("DefaultRelationOneToManyFormEditWidget", DefaultRelationOneToManyFormEditWidget, []);
 registerExtensionComponent("PseudoRelationOneToManyFormWidget", PseudoRelationOneToManyFormWidget, []);
@@ -310,7 +314,7 @@ registerExtensionComponent("ChartFormPreviewWidget", ChartFormPreviewWidget, ["c
 
 // Formview Default View widgets
 registerExtensionComponent("MaskedShortTextListViewWidget", MaskedShortTextListViewWidget, ["maskedShortTextList"]);
-registerExtensionComponent("PublishedStatusListViewWidget",PublishedStatusListViewWidget,["publishedStatus"])
+registerExtensionComponent("PublishedStatusListViewWidget", PublishedStatusListViewWidget, ["publishedStatus"])
 
 // Formview Custom view widgets
 registerExtensionComponent("SolidRelationFieldAvatarFormWidget", SolidRelationFieldAvatarFormWidget, []);
@@ -335,3 +339,4 @@ registerExtensionFunction("emailFormTypeLoad", hanldeEmailFormTypeLoad);
 // TODO: @Jyotsana you need to create an extension function which will be used "onFieldChange"
 // on change of module, apply a where clause on the model & field fields.. 
 // on change of model, apply a where clause on the field field...
+registerExtensionFunction("modelSequenceFormViewChangeHandler", hanldeModelSequenceFormViewChange);

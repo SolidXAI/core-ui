@@ -1,31 +1,24 @@
-// @ts-nocheck
-import React, { forwardRef, useState, useEffect, useRef, useMemo, useImperativeHandle } from "react";
+import { forwardRef, useState, useEffect, useRef, useMemo, useImperativeHandle } from "react";
 import {
   DataTable,
-  DataTableFilterMeta,
   DataTableStateEvent,
 } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { FilterMatchMode } from "primereact/api";
-import Link from "../../common/Link";
 import qs from "qs";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { SolidListViewColumn } from "./SolidListViewColumn";
-// import { SolidListViewOptions } from "../common/SolidListviewOptions";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
-import { pascalCase } from "change-case";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { permissionExpression } from "../../../helpers/permissions";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
-import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "../../../components/core/common/FilterComponent";
-import { SolidLayoutViews } from "../common/SolidLayoutViews";
 import { FilterIcon } from '../../../components/modelsComponents/filterIcon';
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Toast } from "primereact/toast";
@@ -33,8 +26,6 @@ import { Divider } from "primereact/divider";
 import CompactImage from '../../../resources/images/layout/images/compact.png';
 import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
-import KanbanImage from '../../../resources/images/layout/images/kanban.png';
-import { capitalize, filter, set } from "lodash";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import Download from "yet-another-react-lightbox/plugins/download";
@@ -58,7 +49,6 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
-import { log } from "console";
 import { normalizeSolidListKanbanActionPath } from "../../../helpers/routePaths";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
@@ -66,7 +56,7 @@ const getRandomInt = (min: number, max: number) => {
   return Math.floor(Math.random() * (max - min + 1)) + min;
 };
 
-export const queryStringToQueryObject = () => {
+export const getFilterObjectFromLocalStorage = () => {
   const currentPageUrl = window.location.pathname; // Get the current page URL
   const encodedQueryString = localStorage.getItem(currentPageUrl); // Retrieve the encoded query string from local storage
 
@@ -85,7 +75,7 @@ export const queryStringToQueryObject = () => {
 };
 
 
-export const queryStringToQueryObjectByUrl = (url) => {
+export const getFilterObjectFromLocalStorageByUrl = (url: string) => {
   const currentPageUrl = url; // Get the current page URL
   const encodedQueryString = localStorage.getItem(currentPageUrl); // Retrieve the encoded query string from local storage
 
@@ -103,7 +93,7 @@ export const queryStringToQueryObjectByUrl = (url) => {
   }
 };
 
-export const queryObjectToQueryString = (queryObject: string) => {
+export const setFilterObjectToLocalStorage = (queryObject: string) => {
   if (queryObject) {
     const stringifiedObject = JSON.stringify(queryObject);
     // const stringifiedObject = qs.stringify(queryObject, { encodeValuesOnly: true, arrayFormat: "brackets" });
@@ -116,7 +106,7 @@ export const queryObjectToQueryString = (queryObject: string) => {
 };
 
 
-export const queryObjectToQueryStringByUrl = (url, queryObject: string) => {
+export const setFilterObjectToLocalStorageByUrl = (url: string, queryObject: string) => {
   if (queryObject) {
     const stringifiedObject = JSON.stringify(queryObject);
     // const stringifiedObject = qs.stringify(queryObject, { encodeValuesOnly: true, arrayFormat: "brackets" });
@@ -132,10 +122,13 @@ type SolidListViewParams = {
   moduleName: string;
   modelName: string;
   inlineCreate?: boolean;
-  handlePopUpOpen?: any;
+  handleAddClickForEmbeddedView?: any;
+  handleEditClickForEmbeddedView?: any;
   embeded?: boolean;
+  embededFieldRelationType?: string;
   customLayout?: any;
   customFilter?: any;
+  handleDeleteClick?: any;
 };
 
 export type SolidListViewHandle = {
@@ -175,7 +168,7 @@ export type SolidListViewHandle = {
    * Updates sorting state and resets page offset to the first page.
    * Use this for programmatic sort controls to match DataTable behavior.
    */
-  setSort: (nextSortField: string, nextSortOrder: 1 | -1 | 0) => void;
+  setSort: (nextMultiSortMeta: { field: string; order: 1 | -1 }[]) => void;
   /**
    * Toggles inclusion of archived/soft-deleted records.
    * Use this to switch between active-only and inclusive list views.
@@ -188,8 +181,7 @@ export type SolidListViewHandle = {
   getState: () => {
     first: number;
     rows: number;
-    sortField: string;
-    sortOrder: 1 | -1 | 0;
+    multiSortMeta: { field: string; order: 1 | -1 }[];
     showArchived: boolean;
     filters: any;
     filterPredicates: any;
@@ -206,19 +198,23 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
 
   const pathname = usePathname();
-  const solidGlobalSearchElementRef = useRef();
+  const solidGlobalSearchElementRef = useRef<any>();
 
   const router = useRouter();
   const searchParams = useSearchParams();
   const localeName = searchParams.get("locale");
+
+
+  const [solidListViewMetaData, setSolidListViewMetaData] = useState<any>(null);
+  const [solidListViewLayout, setSolidListViewLayout] = useState<any>(null);
+  const [isDraftPublishWorkflowEnabled, setIsDraftPublishWorkflowEnabled] = useState(false);
 
   // Filter query realted states
   const [filters, setFilters] = useState<any>(null);
   const [totalRecords, setTotalRecords] = useState(0);
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(solidListViewLayout?.attrs?.defaultPageSize ? solidListViewLayout?.attrs?.defaultPageSize : 10);
-  const [sortField, setSortField] = useState("id");
-  const [sortOrder, setSortOrder] = useState(-1);
+  const [multiSortMeta, setMultiSortMeta] = useState<{ field: string; order: 1 | -1 }[]>([{ field: "id", order: -1 }]);
   const [toPopulate, setToPopulate] = useState<string[]>([]);
   const [toPopulateMedia, setToPopulateMedia] = useState<string[]>([]);
 
@@ -399,9 +395,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     }
   );
 
-  const [solidListViewMetaData, setSolidListViewMetaData] = useState(null);
-  const [solidListViewLayout, setSolidListViewLayout] = useState(null);
-  const [isDraftPublishWorkflowEnabled, setIsDraftPublishWorkflowEnabled] = useState(false);
   const {
     data: solidListViewInitialMetaData,
     error: solidListViewMetaDataError,
@@ -423,7 +416,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       const column = currentLayout?.children[i];
       const fieldMetadata = solidFieldsMetadata?.[column.attrs.name];
       if (!fieldMetadata?.type) {
-        console.log(`Some problem in rendering column: `, column);
         showFieldError(ERROR_MESSAGES.FIELD_NOT_IN_METADATA(column.attrs.label));
         // return;
       }
@@ -488,9 +480,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     const populate = toPopulate;
     const populateMedia = toPopulateMedia;
     const rows = currentLayout?.attrs?.defaultPageSize ?? 25;
-    const sortField = "id";
-    const sortOrder = -1;
-    return { sortField, sortOrder, rows, populate, populateMedia };
+    const multiSortMeta: { field: string; order: 1 | -1 }[] = [{ field: "id", order: -1 }];
+    return { multiSortMeta, rows, populate, populateMedia };
   };
 
 
@@ -532,8 +523,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         });
       }
 
-      const viewModes = listLayoutAttrs?.allowedViews && listLayoutAttrs?.allowedViews.length > 0 && listLayoutAttrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view }; });
-      setViewModes(viewModes);
+      // const viewModes = listLayoutAttrs?.allowedViews && listLayoutAttrs?.allowedViews.length > 0 && listLayoutAttrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view }; });
+      setViewModes(solidListViewInitialMetaData?.data?.viewModes);
       if (createActionUrl) {
         setCreateButtonUrl(createActionUrl);
       }
@@ -594,7 +585,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   useEffect(() => {
     if (solidEntityListViewData) {
       setLoading(true);
-      const cleanedRecords = solidEntityListViewData.records.map((record) => {
+      const cleanedRecords = solidEntityListViewData.records.map((record: any) => {
         const newRecord = { ...record };
 
         Object.entries(newRecord).forEach(([key, value]) => {
@@ -641,12 +632,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   // Fetch data after toPopulate has been populated...
   useEffect(() => {
-    console.log(
-      "useEffect: [isDeleteSolidEntitiesSucess, isDeleteSolidSingleEntitySuccess, recoverByIdIsSuccess, recoverByIsSuccess, solidListViewMetaData]"
-    );
     setQueryDataLoaded(false)
     if (solidListViewMetaData && solidListViewLayout) {
-      const queryObject = queryStringToQueryObject();
+      const queryObject = getFilterObjectFromLocalStorage();
 
       if (queryObject) {
         const queryData = {
@@ -654,51 +642,29 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           limit: queryObject.limit || 25,
           populate: queryObject.populate,
           populateMedia: queryObject.populateMedia,
-          sort: queryObject.sort
-            ? queryObject.sort?.map((sortItem: string) => {
-              const [field, order] = sortItem.split(":");
-              return { field, order };
-            })
-            : [`id:desc`],
+          sort: queryObject.sort,
           filters: queryObject.filters,
         };
-        // const filters = {
-        //   $and: [],
-        // };
 
-        // if (queryObject.custom_filter_predicate) {
-        //   filters.$and.push(queryObject.custom_filter_predicate);
-        // }
-        // if (queryObject.search_predicate) {
-        //   filters.$and.push(queryObject.search_predicate);
-        // }
-        // if (queryObject.saved_filter_predicate) {
-        //   filters.$and.push(queryObject.saved_filter_predicate);
-        // }
-        // if (queryObject.predefined_search_predicate) {
-        //   filters.$and.push(queryObject.predefined_search_predicate);
-        // }
-
-        // if (queryObject.s_filter) {
-        //   filters.$and.push(queryObject.s_filter);
-        // }
-        // if (queryObject.c_filter) {
-        //   filters.$and.push(queryObject.c_filter);
-        // }
         setRows(Number(queryData.limit));
         setFirst(Number(queryData?.offset));
-        setSortField(queryData?.sort[0]?.field);
-        setSortOrder(queryData?.sort[0]?.order);
-        // latestFiltersRef.current = filters;
-        const { sortField, sortOrder, rows, populate, populateMedia } = initialFilterMethod();
+        const parsedMultiSortMeta: { field: string; order: 1 | -1 }[] =
+          Array.isArray(queryData.sort) && queryData.sort.length > 0
+            ? queryData.sort.map((sortItem: string) => {
+              const [field, order] = sortItem.split(":");
+              return { field, order: order === "asc" ? 1 : -1 } as { field: string; order: 1 | -1 };
+            })
+            : [{ field: "id", order: -1 }];
+
+        setMultiSortMeta(parsedMultiSortMeta);
+        const { multiSortMeta, rows, populate, populateMedia } = initialFilterMethod();
         setToPopulate(populate);
         setToPopulateMedia(populateMedia);
 
       } else {
-        const { sortField, sortOrder, rows, populate, populateMedia } = initialFilterMethod();
+        const { multiSortMeta, rows, populate, populateMedia } = initialFilterMethod();
         setRows(rows);
-        setSortField(sortField);
-        setSortOrder(sortOrder);
+        setMultiSortMeta(multiSortMeta);
         setToPopulate(populate);
         setToPopulateMedia(populateMedia);
         setFirst(0);
@@ -775,8 +741,15 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
 
   // Create a ref that always has the latest filters
-  const latestFiltersRef = useRef(filters);
-  const latestFilterPredicatesRef = useRef(filterPredicates);
+  const latestFiltersRef = useRef<any>(filters);
+  const latestFilterPredicatesRef = useRef<any>(filterPredicates);
+  // 1. Add the ref (near the other latestXxxRef declarations)
+  const latestMultiSortMetaRef = useRef<any>(multiSortMeta);
+
+  // 2. Keep it in sync
+  useEffect(() => {
+    latestMultiSortMetaRef.current = multiSortMeta;
+  }, [multiSortMeta]);
 
   // Keep refs in sync
   useEffect(() => {
@@ -789,20 +762,18 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
 
   useEffect(() => {
-    console.log(`useEffect: [first- ${first}, rows- ${rows}, sortField- ${sortField}, sortOrder- ${sortOrder}, showArchived- ${showArchived}, toPopulate- ${toPopulate}, toPopulateMedia- ${toPopulateMedia}, queryDataLoaded- ${queryDataLoaded}, filterPredicates- ${filterPredicates}]`);
     if (queryDataLoaded && filters && (filterPredicates || params.embeded == true)) {
       setQueryString();
     }
   }, [
     first,
     rows,
-    sortField,
-    sortOrder,
-    filters,
+    multiSortMeta,
     showArchived,
     toPopulate,
     toPopulateMedia,
     queryDataLoaded,
+    filters,
     filterPredicates
   ]);
 
@@ -813,13 +784,27 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   };
 
   // Handle sort event.
-  const onSort = (event: DataTableStateEvent) => {
-    const { sortField, sortOrder } = event;
-    const validSortOrder = sortOrder === 1 || sortOrder === -1 ? sortOrder : 0;
-    setSortField(sortField);
-    setSortOrder(validSortOrder);
-    setFirst(0);
+  // const onSort = (event: DataTableStateEvent) => {
+  //   const { sortField, sortOrder } = event;
+  //   const validSortOrder = sortOrder === 1 || sortOrder === -1 ? sortOrder : 0;
+  //   setSortField(sortField);
+  //   setSortOrder(validSortOrder);
+  //   setFirst(0);
 
+  // };
+
+  const onSort = (event: DataTableStateEvent) => {
+    const meta = event.multiSortMeta || [];
+
+    const validMeta = meta
+      .filter((m) => m.order === 1 || m.order === -1)
+      .map((m) => ({
+        field: m.field,
+        order: m.order as 1 | -1,
+      }));
+
+    setMultiSortMeta(validMeta);
+    setFirst(0);
   };
 
   // handle change in the records which are currently selected...
@@ -853,21 +838,22 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
 
 
-    if (sortField && solidFieldsMetadata && solidFieldsMetadata[sortField]) {
-      const sortFieldMetadata = solidFieldsMetadata[sortField];
-      if (
-        sortFieldMetadata?.type === "relation" &&
-        sortFieldMetadata?.relationType === "many-to-one"
-      ) {
-        sortField = `${sortField}.${sortFieldMetadata?.relationModel?.userKeyField?.name}`;
-      }
-      queryData.sort = [
-        `${sortField}:${sortOrder == 0 ? null : sortOrder == 1 ? "asc" : "desc"
-        }`,
-      ];
+    // ✅ Use ref instead of stale closure value
+    const currentSortMeta = latestMultiSortMetaRef.current;
+
+    if (currentSortMeta && currentSortMeta.length > 0) {
+      queryData.sort = currentSortMeta.map(({ field, order }: any) => {
+        const meta = solidFieldsMetadata?.[field];
+        let resolvedField = field;
+        if (meta?.type === "relation" && meta?.relationType === "many-to-one") {
+          resolvedField = `${field}.${meta?.relationModel?.userKeyField?.name}`;
+        }
+        return `${resolvedField}:${order === 1 ? "asc" : "desc"}`;
+      });
     } else {
       queryData.sort = [`id:desc`];
     }
+
 
     if (showArchived) {
       queryData.showSoftDeleted = "inclusive";
@@ -910,14 +896,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
 
     if (latestFilterPredicatesRef.current && latestFilterPredicatesRef.current.persistFilter) {
-      let url;
-      const urlData = structuredClone(queryData);
-      delete urlData.filters;
-      urlData.custom_filter_predicate = latestFilterPredicatesRef.current.custom_filter_predicate || null;
-      urlData.search_predicate = latestFilterPredicatesRef.current.search_predicate || null;
-      urlData.saved_filter_predicate = latestFilterPredicatesRef.current.saved_filter_predicate || null;
-      urlData.predefined_search_predicate = latestFilterPredicatesRef.current.predefined_search_predicate || null;
-      queryObjectToQueryString(urlData);
+      const fileterTobeStored = structuredClone(queryData);
+      delete fileterTobeStored.filters;
+      fileterTobeStored.custom_filter_predicate = latestFilterPredicatesRef.current.custom_filter_predicate || null;
+      fileterTobeStored.search_predicate = latestFilterPredicatesRef.current.search_predicate || null;
+      fileterTobeStored.saved_filter_predicate = latestFilterPredicatesRef.current.saved_filter_predicate || null;
+      fileterTobeStored.predefined_search_predicate = latestFilterPredicatesRef.current.predefined_search_predicate || null;
+      setFilterObjectToLocalStorage(fileterTobeStored);
     }
     triggerGetSolidEntities(queryString);
   };
@@ -956,10 +941,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   // clear Filter
   const clearFilter = () => {
     if (solidListViewMetaData) {
-      const { sortField, sortOrder, rows, populate, populateMedia } = initialFilterMethod();
+      const { multiSortMeta, rows, populate, populateMedia } = initialFilterMethod();
       setRows(rows);
-      setSortField(sortField);
-      setSortOrder(sortOrder);
+      setMultiSortMeta(multiSortMeta);
       setToPopulate(populate);
       setToPopulateMedia(populateMedia);
     }
@@ -969,7 +953,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
 
     setFilters(params.customFilter || { $and: [] })
-    solidGlobalSearchElementRef.current.clearFilter();
+    solidGlobalSearchElementRef?.current.clearFilter();
   };
 
   const cloneListData = () => {
@@ -993,9 +977,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       setFirst(nextFirst);
       setRows(nextRows);
     },
-    setSort: (nextSortField, nextSortOrder) => {
-      setSortField(nextSortField);
-      setSortOrder(nextSortOrder);
+    setSort: (nextMultiSortMeta) => {
+      setMultiSortMeta(nextMultiSortMeta);
       setFirst(0);
     },
     setShowArchived: (value) => {
@@ -1004,8 +987,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     getState: () => ({
       first,
       rows,
-      sortField,
-      sortOrder,
+      multiSortMeta,
       showArchived,
       filters,
       filterPredicates,
@@ -1016,8 +998,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   }), [
     first,
     rows,
-    sortField,
-    sortOrder,
+    multiSortMeta,
     showArchived,
     filters,
     filterPredicates,
@@ -1028,7 +1009,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const [selectedSolidViewData, setSelectedSolidViewData] = useState<any>();
   const selectedDataRef = useRef<any>();
-  const op = useRef(null);
+  const op = useRef<any>(null);
   const [deleteEntity, setDeleteEntity] = useState(false);
 
   // clickable link allowing one to open the detail / form view.
@@ -1066,7 +1047,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       </div>
       // <a onClick={() => {
       //   if (params.embeded == true) {
-      //     params.handlePopUpOpen(solidViewData.id);
+      //     params.handleAddClickForEmbeddedView(solidViewData.id);
       //   } else {
       //     router.push(`${editButtonUrl}/${solidViewData.id}`)
       //   }
@@ -1077,7 +1058,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   };
 
   // Recover functions
-  const recoverById = (id) => {
+  const recoverById = (id: any) => {
     triggerRecoverSolidEntitiesById(id);
   };
 
@@ -1110,7 +1091,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     }
   }, [recoverByIdIsSuccess, recoverByIdData, recoverByIdIsError, recoverByIdError, recoverIsError, recoverError]);
 
-  const showError = async (error) => {
+  const showError = async (error: any) => {
     const errorMessages = error?.data?.message;
     const messages = Array.isArray(errorMessages)
       ? errorMessages
@@ -1139,7 +1120,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     }
   };
 
-  const showFieldError = async (error) => {
+  const showFieldError = async (error: any) => {
     if (error) {
       toast?.current?.show({
         severity: "error",
@@ -1297,7 +1278,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         throw new Error(ERROR_MESSAGES.NO_ENTITY_SELECTED);
       }
 
-      const response = await deleteSolidSingleEntiry(selectedSolidViewData.id);
+      const response: any = await deleteSolidSingleEntiry(selectedSolidViewData.id);
 
       if (response?.data?.statusCode === 200) {
         setDeleteEntity(false);
@@ -1305,18 +1286,14 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           severity: "success",
           summary: ERROR_MESSAGES.DELETED,
           detail: ERROR_MESSAGES.ENTITY_DELETE,
-          ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+          life: 3000,
         });
       } else {
         toast.current?.show({
           severity: "error",
           summary: ERROR_MESSAGES.DELETE_FAIELD,
           detail: response?.error?.data?.error,
-          ...(severity === "error"
-            ? { sticky: true }            // stays until user closes
-            : { life: 3000 }),
+          sticky: true,          // stays until user closes
         });
       }
     } catch (error: any) {
@@ -1324,9 +1301,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         severity: "error",
         summary: ERROR_MESSAGES.DELETE_FAIELD,
         detail: ERROR_MESSAGES.SOMETHING_WRONG,
-        ...(severity === "error"
-          ? { sticky: true }            // stays until user closes
-          : { life: 3000 }),
+        sticky: true,          // stays until user closes
+
       });
     }
   };
@@ -1371,7 +1347,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const hasCustomContextMenuButtons =
     solidListViewLayout?.attrs?.rowButtons?.some(
-      (rb) => rb?.attrs?.actionInContextMenu === true
+      (rb: any) => rb?.attrs?.actionInContextMenu === true
     );
 
   const hasAnyContextMenuActions =
@@ -1408,6 +1384,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     <div className="hidden lg:flex">
                       <SolidGlobalSearchElement
                         key={params.modelName}
+                        viewType="list"
                         showSaveFilterPopup={showSaveFilterPopup}
                         setShowSaveFilterPopup={setShowSaveFilterPopup}
                         ref={solidGlobalSearchElementRef}
@@ -1441,7 +1418,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
                 <div className="hidden lg:flex align-items-center solid-header-buttons-wrapper">
                   {solidListViewLayout?.attrs?.headerButtons
-                    ?.filter((rb) => rb.attrs.actionInContextMenu != true)
+                    ?.filter((rb: any) => rb.attrs.actionInContextMenu != true)
                     ?.map((button: any, index: number) => (
                       <SolidListViewHeaderButton
                         key={index}
@@ -1479,7 +1456,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       label={solidListViewLayout?.attrs?.addButtonTitle ? solidListViewLayout?.attrs?.addButtonTitle : "Add"}
                       className={`${solidListViewLayout?.attrs?.addButtonClassName}`}
                       size="small"
-                      onClick={() => params.handlePopUpOpen("new")}
+                      onClick={() => params.handleAddClickForEmbeddedView("new")}
                     ></Button>
                   )}
                 {/* Button For Manual Refresh */}
@@ -1537,6 +1514,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
               params.embeded === false && (
                 <div className="flex lg:hidden">
                   <SolidGlobalSearchElement
+                    viewType="list"
                     showSaveFilterPopup={showSaveFilterPopup}
                     setShowSaveFilterPopup={setShowSaveFilterPopup}
                     ref={solidGlobalSearchElementRef}
@@ -1612,21 +1590,21 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   first={first}
                   onPage={onPageChange}
                   onSort={(e: DataTableStateEvent) => onSort(e)}
-                  sortField={sortField}
-                  sortOrder={sortOrder === 1 || sortOrder === -1 ? sortOrder : 0}
+                  multiSortMeta={multiSortMeta}
                   loading={false}
                   // loading={loading || isLoading}
                   // loadingIcon="pi pi-spinner"
                   selection={
                     params.embeded === true
-                      ? null
+                      ? []
                       : [...selectedRecords, ...selectedRecoverRecords]
                   }
                   onSelectionChange={
                     params.embeded === true ? undefined : onSelectionChange
                   }
                   selectionMode={params.embeded === true ? null : "checkbox"}
-                  removableSort
+                  removableSort={solidListViewLayout?.attrs?.removableSort ?? true}
+                  sortMode={solidListViewLayout?.attrs?.sortMode ?? "multiple"}
                   filterIcon={<FilterIcon />}
                   tableClassName="solid-data-table"
                   paginatorClassName="solid-paginator"
@@ -1647,7 +1625,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     if (!(hasFindPermission || hasUpdatePermission)) return;
 
                     if (params.embeded === true) {
-                      params.handlePopUpOpen(rowData?.id);
+                      params.handleEditClickForEmbeddedView(rowData?.id);
                     } else {
                       if (typeof window !== "undefined") {
                         // store a simple marker for the caller
@@ -1754,7 +1732,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                   icon={"pi pi-pencil"}
                                   onClick={() => {
                                     if (params.embeded == true) {
-                                      params.handlePopUpOpen(rowData?.id);
+                                      params.handleEditClickForEmbeddedView(rowData?.id);
                                     } else {
                                       if (typeof window !== "undefined") {
                                         try {
@@ -1779,15 +1757,19 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     `${permissionExpression(params.modelName, 'delete')}`
                   ) &&
                     solidListViewLayout?.attrs?.delete !== false &&
-                    solidListViewLayout?.attrs?.showRowDeleteInContextMenu ===
-                    false && (
+                    (params.embeded ||
+                      (solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== undefined &&
+                        solidListViewLayout?.attrs?.showRowDeleteInContextMenu !== true)
+                    )
+                    &&
+                    (
                       <Column
                         header="Delete"
                         body={(rowData) => {
                           const shouldHideEditOrDeleteButton = isDraftPublishWorkflowEnabled && rowData?.publishedAt;
                           return (
                             <>
-                              {!shouldHideEditOrDeleteButton && (
+                              {(!shouldHideEditOrDeleteButton) && (
                                 <Button
                                   text
                                   type="button"
@@ -1797,8 +1779,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                   severity="danger"
                                   icon={"pi pi-trash"}
                                   onClick={() => {
-                                    setSelectedSolidViewData(rowData);
-                                    setDeleteEntity(true);
+                                    if (params?.embededFieldRelationType === "many-to-many") {
+                                      params?.handleDeleteClick(rowData.id);
+                                    } else {
+                                      setSelectedSolidViewData(rowData);
+                                      setDeleteEntity(true);
+                                    }
                                   }}
                                 />
                               )}
@@ -1848,7 +1834,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                           icon={"pi pi-pencil"}
                                           onClick={() => {
                                             if (params.embeded == true) {
-                                              params.handlePopUpOpen(
+                                              params.handleEditClickForEmbeddedView(
                                                 selectedDataRef.current?.id
                                               );
                                             } else {
@@ -1864,7 +1850,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                         />
                                       )}
 
-                                      {hasDeleteInContextMenu && (
+                                      {hasDeleteInContextMenu && !params.embeded && (
                                         <Button
                                           text
                                           type="button"
@@ -1879,7 +1865,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                       )}
                                       {hasCustomContextMenuButtons && solidListViewLayout?.attrs?.rowButtons
                                         ?.filter(
-                                          (rb) =>
+                                          (rb: any) =>
                                             rb?.attrs?.actionInContextMenu === true &&
                                             rb?.attrs?.visible !== false
                                         )
@@ -1985,7 +1971,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         <div className="p-4">
           <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>Are you sure you want to delete the selected records?</p>
           <div className="flex align-items-center gap-2 mt-3">
-            <Button label="Delete" severity="danger" size="small" onClick={handleDeleteEntity} autoFocus onClick={deleteBulk} />
+            <Button label="Delete" severity="danger" size="small" autoFocus onClick={deleteBulk} />
             <Button label="Cancel" size="small" onClick={onDeleteClose} outlined className='bg-primary-reverse' />
           </div>
         </div>

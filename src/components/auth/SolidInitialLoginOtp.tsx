@@ -44,11 +44,6 @@ const SolidInitialLoginOtp = () => {
                     title: "OTP Verification",
                     subtitle: "Please enter the OTP sent to your mobile number to complete verification"
                 };
-            case "transactional":
-                return {
-                    title: "OTP Verification",
-                    subtitle: "Please enter the OTP for your transaction to complete verification"
-                };
             case "email":
             default:
                 return {

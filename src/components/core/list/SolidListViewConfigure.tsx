@@ -19,6 +19,15 @@ import "../../common/solid-export.css";
 import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
+import { capitalize } from "lodash";
+
+export type ViewMode = {
+    actionId: string;
+    actionName: string;
+    menuItemId: string;
+    menuItemName: string;
+    type: string;
+}
 
 export const SolidListViewConfigure = (
     { listViewMetaData,
@@ -54,11 +63,11 @@ export const SolidListViewConfigure = (
     const [isOverlayOpen, setIsOverlayOpen] = useState(false);
 
 
-    const handleViewChange = (newView: string) => {
-        if (view === newView) return; // Prevent unnecessary updates
+    const handleViewChange = (newView: ViewMode) => {
+        if (view === newView.type) return; // Prevent unnecessary updates
         const pathSegments = pathname.split('/').filter(Boolean);
-        pathSegments[pathSegments.length - 1] = newView; // Replace the last part with new view
-        const newPath = '/' + pathSegments.join('/');
+        pathSegments[pathSegments.length - 1] = newView.type; // Replace the last part with new view
+        const newPath = '/' + pathSegments.join('/') + `?menuItemId=${newView.menuItemId}&menuItemName=${newView.menuItemName}&actionId=${newView.actionId}&actionName=${newView.actionName}`;
         router.push(newPath);
     };
 
@@ -279,18 +288,18 @@ export const SolidListViewConfigure = (
                                 {viewModes && viewModes.length > 0 &&
                                     <AccordionTab header="Switch Type">
                                         <div className="flex flex-column gap-1 p-1">
-                                            {viewModes.map((option: any) => (
-                                                <div key={option.value} className={`flex align-items-center ${option.value === view ? 'solid-active-view' : 'solid-view'}`}>
+                                            {viewModes.map((option: ViewMode) => (
+                                                <div key={option.type} className={`flex align-items-center ${option.type === view ? 'solid-active-view' : 'solid-view'}`}>
                                                     <RadioButton
-                                                        inputId={option.value}
+                                                        inputId={option.type}
                                                         name="views"
-                                                        value={option.value}
+                                                        value={option.type}
                                                         // onChange={(e) => router}
-                                                        onChange={() => handleViewChange(option.value)}
-                                                        checked={option.value === view}
+                                                        onChange={() => handleViewChange(option)}
+                                                        checked={option.type === view}
                                                     />
-                                                    <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
-                                                        {option.label}
+                                                    <label htmlFor={option.type} className="ml-2 flex align-items-center justify-content-between w-full">
+                                                        {capitalize(option.type)}
                                                     </label>
                                                 </div>
                                             ))}

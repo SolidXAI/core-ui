@@ -152,7 +152,7 @@ export const SelectionStaticVariableFilterComponent: React.FC<DashboardVariableF
   // Selection Static Values
   const [selectionStaticValues, setSelectionStaticValues] = useState<string[]>(defaultStaticValues);
   const [filteredStaticItems, setFilteredStaticItems] = useState<string[]>([]);
-  const staticValues = dashboardVariable.selectionStaticValues || [];
+  const staticValues = JSON.parse(dashboardVariable.selectionStaticValues || '[]') || [];
 
   // The values are in the format val:label, we need to extract the labels
   const staticValueItems = staticValues.map((val: any) => ({ value: val.split(':')[0], label: val.split(':')[1] }));

@@ -1,38 +1,11 @@
 
-import { FilterMatchMode } from 'primereact/api';
-import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
-import { FormEvent } from "primereact/ts-helpers";
+import { Column } from "primereact/column";
 import { SolidListViewColumnParams } from '../../../../../components/core/list/SolidListViewColumn';
-import { InputTypes, SolidVarInputsFilterElement } from '../../../../../components/core/list/SolidVarInputsFilterElement';
-import { Button } from 'primereact/button';
 import { getExtensionComponent } from '../../../../../helpers/registry';
-import { Chip } from 'primereact/chip';
 import { SolidListFieldWidgetProps } from '../../../../../types/solid-core';
 
 
 const SolidRelationManyToManyColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
-    const filterable = column.attrs.filterable;
-    const showFilterOperator = false;
-    const filterMatchModeOptions = [
-        { label: 'In', value: FilterMatchMode.IN },
-        { label: 'Not In', value: FilterMatchMode.NOT_IN },
-    ];
-    const columnDataType = undefined;
-    const filterTemplate = (options: ColumnFilterElementTemplateOptions) => {
-
-        return (
-            <SolidVarInputsFilterElement
-                values={options.value}
-                onChange={(e: FormEvent<HTMLInputElement>) => options.filterCallback(e, options.index)}
-                inputType={InputTypes.RelationManyToOne}
-                solidListViewMetaData={solidListViewMetaData}
-                fieldMetadata={fieldMetadata}
-                column={column}
-            >
-            </SolidVarInputsFilterElement>
-        )
-    };
-
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
     return (
@@ -40,13 +13,7 @@ const SolidRelationManyToManyColumn = ({ solidListViewMetaData, fieldMetadata, c
             key={fieldMetadata.name}
             field={fieldMetadata.name}
             header={header}
-            // className="text-sm"
             sortable={column.attrs.sortable}
-            // filter={filterable}
-            dataType={columnDataType}
-            showFilterOperator={showFilterOperator}
-            filterMatchModeOptions={filterMatchModeOptions}
-            filterElement={filterTemplate}
             body={(rowData) => {
                 let viewWidget = column.attrs.viewWidget;
                 if (!viewWidget) {
@@ -92,7 +59,7 @@ export const DefaultRelationManyToManyListWidget = ({ rowData, solidListViewMeta
                 {manyToManyColVal.length > 0 &&
                     <p>
 
-                        <span style={{backgroundColor: '#f5f5f5', padding: '7px', borderRadius: '4px'}}>{manyToManyColVal[0]}</span>
+                        <span style={{ backgroundColor: '#f5f5f5', padding: '7px', borderRadius: '4px' }}>{manyToManyColVal[0]}</span>
                         <span style={{ color: "#0895CD", fontWeight: 'bold' }}>{manyToManyColVal.length - 1 > 0 ? ` +${manyToManyColVal.length - 1}` : ""}</span>
 
                     </p >

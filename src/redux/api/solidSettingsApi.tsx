@@ -59,6 +59,9 @@ export const solidSettingsApi = createApi({
         getMcpUrl: builder.query({
             query: (qs) => `/setting/get-mcp-url?${qs}`,
         }),
+        getSolidVersionInfo: builder.query({
+            query: () => `/info/versions`,
+        }),
 
     })
 });
@@ -79,5 +82,7 @@ export const {
     useBulkUpdateSolidSettingsMutation,
     useBulkUpdateSolidUserSettingsMutation,
     useGetMcpUrlQuery,
-    useLazyGetMcpUrlQuery
+    useLazyGetMcpUrlQuery,
+    useGetSolidVersionInfoQuery,
+    useLazyGetSolidVersionInfoQuery
 } = solidSettingsApi;

@@ -7,9 +7,10 @@ import { registerListView, unregisterListView } from "../../../../components/cor
 
 export function ListPage() {
   const params = useParams();
+  const [searchParams, setSearchParams] = useSearchParams();
+
   const moduleName = params.moduleName || "";
   const modelName = params.modelName ? camelCase(params.modelName) : "";
-  const [searchParams, setSearchParams] = useSearchParams();
 
   const menuItemId = searchParams.get("menuItemId") || "";
   const menuItemName = searchParams.get("menuItemName") || "";
@@ -26,5 +27,5 @@ export function ListPage() {
     unregisterListView(listId);
   }, [listId]);
 
-  return <SolidListView ref={setListRef} key={moduleName + modelName + menuItemId + menuItemName + actionId + actionName} {...params} embeded={false} moduleName={moduleName} modelName={modelName} />;
+  return <SolidListView ref={setListRef} key={listId} {...params} embeded={false} moduleName={moduleName} modelName={modelName} />;
 }
