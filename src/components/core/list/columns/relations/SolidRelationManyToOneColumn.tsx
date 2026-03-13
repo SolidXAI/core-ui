@@ -1,9 +1,6 @@
 
-import { FilterMatchMode } from 'primereact/api';
-import { Column, ColumnFilterElementTemplateOptions } from "primereact/column";
-import { FormEvent } from "primereact/ts-helpers";
+import { Column } from "primereact/column";
 import { SolidListViewColumnParams } from '../../../../../components/core/list/SolidListViewColumn';
-import { InputTypes, SolidVarInputsFilterElement } from '../../../../../components/core/list/SolidVarInputsFilterElement';
 import { getExtensionComponent } from '../../../../../helpers/registry';
 import { SolidListFieldWidgetProps } from '../../../../../types/solid-core';
 import { Button } from 'primereact/button';
@@ -11,30 +8,6 @@ import { useRouter } from "../../../../../hooks/useRouter";
 import { kebabCase } from 'change-case';
 
 const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
-    const filterable = column.attrs.filterable;
-    const showFilterOperator = false;
-    const filterMatchModeOptions = [
-        { label: 'In', value: FilterMatchMode.IN },
-        { label: 'Not In', value: FilterMatchMode.NOT_IN },
-    ];
-    const columnDataType = undefined;
-
-
-
-    const filterTemplate = (options: ColumnFilterElementTemplateOptions) => {
-
-        return (
-            <SolidVarInputsFilterElement
-                values={options.value}
-                onChange={(e: FormEvent<HTMLInputElement>) => options.filterCallback(e, options.index)}
-                inputType={InputTypes.RelationManyToOne}
-                solidListViewMetaData={solidListViewMetaData}
-                fieldMetadata={fieldMetadata}
-                column={column}
-            >
-            </SolidVarInputsFilterElement>
-        )
-    };
 
     const header = column.attrs.label ?? fieldMetadata.displayName;
 
@@ -45,11 +18,6 @@ const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, co
             header={header}
             // className="text-sm"
             sortable={column.attrs.sortable}
-            // filter={filterable}
-            dataType={columnDataType}
-            showFilterOperator={showFilterOperator}
-            filterMatchModeOptions={filterMatchModeOptions}
-            filterElement={filterTemplate}
             body={(rowData) => {
                 let viewWidget = column.attrs.viewWidget;
                 if (!viewWidget) {
@@ -95,18 +63,29 @@ export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaD
             <Button
                 label={manyToOneColVal}
                 link
+                icon="pi pi-external-link"
+                iconPos="right"
+                className="w-auto"
                 onClick={() => {
-                    // Get current path from browser
                     const pathSegments = window.location.pathname.split('/').filter(Boolean);
 
-                    // The modelName is the second-last segment before "list"
                     const listIndex = pathSegments.lastIndexOf('list');
+
                     if (listIndex > 0) {
                         pathSegments[listIndex - 1] = kebabCase(fieldMetadata?.relationModel?.singularName);
                         pathSegments[listIndex] = `form/${manyToOneFieldData?.id}`;
                     }
+                    else if (pathSegments[pathSegments.length - 2] === "form") {
+                        pathSegments[pathSegments.length - 3] = kebabCase(fieldMetadata?.relationModel?.singularName);
+                        pathSegments[pathSegments.length - 2] = "form";
+                        pathSegments[pathSegments.length - 1] = manyToOneFieldData?.id;
+                    }
+
                     const newPath = `/${pathSegments.join('/')}?viewMode=view`;
-                    router.push(newPath);
+
+                    // open in new tab
+                    window.open(newPath, "_blank");
+
                 }}
             />
         );

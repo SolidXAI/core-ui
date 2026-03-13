@@ -33,7 +33,7 @@ export interface DashboardVariableRecord {
   id: number;
   variableName: string;
   variableType: DashboardVariableType;
-  selectionStaticValues?: string[];
+  selectionStaticValues?: string;
   selectionDynamicSourceType?: SOURCE_TYPE;
   selectionDynamicProviderName?: string;
   selectionDynamicSQL?: string;

@@ -34,7 +34,10 @@ import {
     SolidFormWidgetProps,
     SolidFormFieldWidgetProps,
     SolidChartRendererProps,
-    SolidBeforeListDataLoad
+    SolidBeforeListDataLoad,
+    SolidBeforeTreeNodeLoad,
+    SolidTreeUiEventResponse,
+    SolidTreeLoad
 } from './solid-core';
 
 type ChildContainerProps = {
@@ -72,5 +75,8 @@ export type {
     SolidFormWidgetProps,
     SolidChartRendererProps,
     SolidFormFieldWidgetProps,
-    SolidBeforeListDataLoad
+    SolidBeforeListDataLoad,
+    SolidBeforeTreeNodeLoad,
+    SolidTreeUiEventResponse,
+    SolidTreeLoad
 };

@@ -65,7 +65,9 @@ export { SolidKanbanView } from './components/core/kanban/SolidKanbanView';
 
 export { SolidModuleHome } from './components/common/SolidModuleHome';
 export { SolidListView } from './components/core/list/SolidListView';
+export { SolidTreeView } from './components/core/tree/SolidTreeView';
 export * from './components/core/list/listViewRegistry';
+export * from './components/core/tree/treeViewRegistry';
 export { SolidListViewColumn, getNumberOfInputs } from './components/core/list/SolidListViewColumn';
 export type { SolidListViewColumnParams } from './components/core/list/SolidListViewColumn';
 
@@ -77,7 +79,7 @@ export { SolidVarInputsFilterElement } from './components/core/list/SolidVarInpu
 
 export { default as SolidDashboard } from './components/core/dashboard/SolidDashboard';
 
-export { dateFilterMatchModeOptions } from './components/core/list/columns/SolidDateColumn';
+export { dateFilterMatchModeOptions } from './components/core/filter/fields/SolidDateField';
 
 export { ModelListViewData } from './components/core/model/ModelListViewData';
 export { ModuleListViewData } from './components/core/module/ModuleListViewData';
@@ -298,7 +300,9 @@ export {
     useLazyGetAuthSettingsQuery,
     useLazyGetSolidSettingsQuery,
     useLazyGetSolidSettingsByIdQuery,
-    useUpdateSolidSettingsMutation
+    useUpdateSolidSettingsMutation,
+    useGetSolidVersionInfoQuery,
+    useLazyGetSolidVersionInfoQuery
 } from './redux/api/solidSettingsApi';
 
 export { logout, setToken } from './redux/features/authSlice';
@@ -417,7 +421,10 @@ export type {
     SolidFormWidgetProps,
     SolidFormFieldWidgetProps,
     SolidChartRendererProps,
-    SolidBeforeListDataLoad
+    SolidBeforeListDataLoad,
+    SolidBeforeTreeNodeLoad,
+    SolidTreeUiEventResponse,
+    SolidTreeLoad
 } from './types';
 
 export { GeneralSettings } from './components/common/GeneralSettings';
@@ -445,6 +452,7 @@ export { getSolidRoutes } from './routes/solidRoutes';
 export type { SolidRoutesOptions } from './routes/types';
 export { AdminPage } from './routes/pages/admin/AdminPage';
 export { ModuleHomePage } from './routes/pages/admin/core/ModuleHomePage';
+export { DashboardPage as AdminDashboardPage } from './routes/pages/admin/core/DashboardPage';
 export { ListPage as AdminListPage } from './routes/pages/admin/core/ListPage';
 export { KanbanPage as AdminKanbanPage } from './routes/pages/admin/core/KanbanPage';
 export { FormPage as AdminFormPage } from './routes/pages/admin/core/FormPage';
