@@ -1,0 +1,134 @@
+# Changelog
+
+All notable changes to this project will be documented in this file.
+
+---
+
+## [0.1.4] - 2026-03-13
+
+### Added
+
+**Tree view**
+- `SolidTreeView` — a new hierarchical `TreeTable`-based view component supporting grouping rules, aggregation rules (count/sum/avg/min/max), multi-column sort, filter, per-node pagination, expand/collapse, and create/edit/delete via embedded form dialogs. Permissions and a `beforeTreeDataLoad` extension hook are supported.
+- `treeViewRegistry` — new registry (`Map<string, SolidTreeViewHandle>`) with `registerTree`, `unregisterTree`, `getTree`, `hasTree`, and `getRegisteredTreeIds`, mirroring the existing `listViewRegistry` API.
+- `TreePage` route component wrapping `SolidTreeView`; route `/admin/core/:moduleName/:modelName/tree` registered with key `"tree"`.
+- Both `SolidTreeView` and `treeViewRegistry` are exported from `src/index.ts`.
+
+**Many-to-many list view**
+- `DefaultRelationManyToManyListFormEditWidget` — a new widget that renders an embedded `SolidListView` for related M2M records. Includes a "Link existing" `AutoComplete` dialog and a "save parent first" confirmation dialog. Passes `embededFieldRelationType="many-to-many"` to the list view.
+- Registered in `registry.ts`; set as the new default view widget for `SolidRelationManyToManyField` (previously used the one-to-many widget).
+
+**One-to-many filter**
+- `SolidOneToManyFilterElement` — new filter element using PrimeReact `AutoComplete`, fetching suggestions via `createSolidEntityApi` with `$containsi` on `userKeyField`.
+- `SolidRelationOneToManyField` (filter) — new filter field UI with `$in`/`$notIn` operator dropdown and `SolidVarInputsFilterElement` with input type `RelationOneToMany`.
+- `InputTypes.RelationOneToMany` added to the `InputTypes` enum.
+- `SolidRelationField` (filter) now dispatches to `SolidRelationOneToManyField` when `relationType === 'one-to-many'`.
+
+**Multi-column sort in `SolidListView`**
+- `sortField`/`sortOrder` state replaced with `multiSortMeta: { field: string; order: 1 | -1 }[]`.
+- `DataTable` uses `multiSortMeta` prop with `sortMode="multiple"` (configurable via layout attrs).
+- `SolidListViewHandle.setSort` now takes `nextMultiSortMeta` array; `getState` returns `multiSortMeta`.
+- `removableSort` is configurable via `solidListViewLayout.attrs.removableSort` (default `true`).
+
+**Version info panel**
+- `SolidVersionInfo` component in account settings — queries `/info/versions` and displays package name, version tag, and repo type (local vs npm) for `solid-core`, `solid-core-ui`, and `solid-code-builder`.
+- New RTK Query endpoint `getSolidVersionInfo` added to `solidSettingsApi`; hooks exported from `src/index.ts`.
+- "About" tab added to `SolidAccountSettings`.
+
+**Dashboard page**
+- `DashboardPage` route component reads `dashboardId` and `dashboardName` from URL params and renders `SolidDashboard`.
+- Route `/admin/core/:moduleName/dashboards/:dashboardId` registered with key `"dashboard"`.
+- Exported as `AdminDashboardPage` from `src/index.ts`.
+
+**`GroupingComponent`**
+- New shared component for defining grouping rules (with date-format options: YYYY, MMM, YYYY-MM, YYYY-MM-DD) and aggregation rules on numeric fields. Used by `SolidTreeView` and `SolidKanbanView`.
+
+**`DefaultDateTimeListWidget`**
+- New list widget in `SolidDateColumn.tsx` that uses `DateFieldViewComponent` for configurable date formatting, replacing raw string display.
+- `SolidDateColumn` and `SolidDatetimeColumn` now use `DefaultDateTimeListWidget` as their default view widget instead of `DefaultTextListWidget`.
+
+**`modelSequenceFormViewChangeHandler`**
+- New `onFieldChange` extension handler: when the `module` field changes, sets `whereClause` on both `model` and `field` fields; when `model` changes, sets `whereClause` on `field` only. Registered in `registry.ts`.
+
+**`failedLoginAttempts` field in `CreateUser`**
+- Numeric field added to the user form, visible only in edit mode. Included in both create and update payloads with Yup validation.
+
+**`passwordlessLoginValidateWhat` setting**
+- Separate "Password Less Login Method" section added to `GeneralSettings` with Email, Mobile, and Selectable options — distinct from the existing registration method setting.
+- `SolidLogin` now reads `passwordlessLoginValidateWhat` (not `passwordlessRegistrationValidateWhat`) to control login flow.
+
+---
+
+### Changed
+
+**M2M persistence model**
+- M2M changes are now persisted immediately per-interaction via `handleRelationUpdate` / `linkItem` / `unlinkItem` (individual `PATCH` calls with `${fieldName}Ids[]` and a `"connect"` or `"disconnect"` command), instead of accumulating changes in Formik and submitting them on form save. The `updateFormData` body was disabled to prevent double-writes.
+- M2M field population on form load moved from `SolidRelationManyToManyField.initialValue()` to a new `populateFormikWithRelatedEntities` async call triggered by `useEffect([formik.values.id])`, which fetches linked records from the API. This applies to all three M2M widgets (`AutoComplete`, `CheckBox`, `RolePermissions`).
+- `RolePermissionsManyToManyFieldWidget` no longer uses Formik state for checkbox tracking; it uses `allOptions` + `currentValues` from `useRelationEntityHandler`.
+
+**`SolidListView` — embedded relation API**
+- `handlePopUpOpen` prop split into `handleAddClickForEmbeddedView` and `handleEditClickForEmbeddedView`. All callers updated.
+- New props: `embededFieldRelationType: string` and `handleDeleteClick`. When `embededFieldRelationType === "many-to-many"`, the delete button calls `handleDeleteClick(rowData.id)` instead of the normal delete dialog.
+
+**`SolidListView` — delete column visibility**
+- Column now shows when `params.embeded === true` (always for embedded M2M), or when `showRowDeleteInContextMenu` is explicitly defined and is not `true`. Context menu delete is hidden when `params.embeded === true`.
+
+**`SolidListView` — view modes source**
+- `viewModes` now reads from `solidListViewInitialMetaData.data.viewModes` (API response) instead of mapping `solidListViewLayout.attrs.allowedViews`. `handleViewChange` navigates to the view type path and appends `menuItemId`, `menuItemName`, `actionId`, `actionName` as query params. Same change applied to `SolidKanbanView` and `SolidTreeView`.
+
+**`SolidListView` — `ListPage` remount key**
+- The `key` prop on `ListPage` changed from a concatenation of six fields to just `listId`.
+
+**`SolidTreeView` — scrollable layout**
+- `TreeTable` is now scrollable with `tableStyle={{ minWidth: "max-content" }}`, `resizableColumns`, and `columnResizeMode="expand"`. Columns get a default `minWidth: "12rem"`. CSS for `solid-treetable-wrapper` moved from inline `<style>` tags to `globals.css`.
+
+**`SolidTreeView` — event rename**
+- `onBeforeTreeLoad` renamed to `onBeforeTreeDataLoad` throughout event invocations and type definitions in `solid-core.d.ts`.
+
+**`SolidBooleanField` — `onChange` normalisation**
+- `onChange` now wraps the raw PrimeReact `CheckboxChangeEvent` in a normalised synthetic event (`{ target: { name, value, checked }, type: 'checkbox' }`) before calling `fieldContext.onChange`.
+- The `useEffect` that auto-set a default value of `"false"` on mount has been removed from both the standard and checkbox-style boolean widgets.
+
+**`buildRelationCustomFilter` — shared and explicit AND**
+- Inline `buildCustomFilter` functions removed from individual widgets; replaced with a shared module-level `buildRelationCustomFilter` that uses `$and: [baseFilter, parsedWhereClause]` for explicit AND semantics, supporting an optional `whereClause` attribute.
+
+**`DefaultRelationManyToOneListWidget` — opens in new tab**
+- Clicking the many-to-one link now calls `window.open(newPath, "_blank")` instead of `router.push`. Adds a `pi-external-link` icon and a fallback path-segment detection for form pages.
+
+**`SolidGlobalSearchElement` — seeded filter protection**
+- Edit and delete buttons in `SavedFilterList` are now hidden for filters where `savedfilter.isSeeded === true`.
+
+**`SolidDashboardVariable` — `selectionStaticValues` parsed from JSON**
+- `staticValues` now uses `JSON.parse(dashboardVariable.selectionStaticValues || '[]')` to handle the field being stored as a JSON string rather than an array.
+
+**Passwordless login — "transactional" renamed to "selectable"**
+- `"transactional"` replaced with `"selectable"` throughout `SolidLogin.tsx`. The "Transactional" radio button and associated note removed from `GeneralSettings`; the `"transactional"` OTP title case removed from `SolidInitialLoginOtp`.
+
+---
+
+### Fixed
+
+- **M2M field not populated on form edit** — `initialValue()` was unreliable; replaced with `populateFormikWithRelatedEntities` which fetches linked records from the API on load.
+- **M2M checkbox null safety** — `handleCheckboxChange` now guards against `formik.values[fieldName]` being `undefined` with a fallback to `[]`.
+- **`SolidListView` stale sort closure** — `setQueryString` previously read sort state from a closed-over variable. A `latestMultiSortMetaRef` ref is now kept in sync via `useEffect` to avoid stale values.
+- **`SolidShortTextColumn` unintended date coercion** — the `parseIsoDate` function and its detection branch were silently reformatting any ISO-looking string (e.g., identifiers). Removed entirely; date columns now use `DefaultDateTimeListWidget`.
+- **`SolidListView` delete toast `severity` undefined** — the `...(severity === "error" ? ...)` spread in `handleDeleteEntity` referenced an undefined `severity` variable. Fixed to use literal `life: 3000` for success and `sticky: true` for error paths.
+- **`TreePage` using wrong registry** — `TreePage` was calling `registerListView`/`unregisterListView` with the tree handle; corrected to use `registerTree`/`unregisterTree`.
+- **`SolidTreeView` `@/` alias imports** — all `@/` alias imports replaced with relative paths, fixing build failures in environments where the alias is not resolved (also fixed in `modelSequenceFormViewChangeHandler.tsx`, `registry.ts`, `TreePage.tsx`, `SolidRelationManyToManyField.tsx`).
+
+---
+
+### Removed / Cleaned Up
+
+- **PrimeReact built-in column filters** — removed `filterElement`, `filterMatchModeOptions`, `dataType`, `showFilterOperator`, and related imports (~543 lines) from all 16 column components (`SolidBooleanColumn`, `SolidDateColumn`, `SolidDatetimeColumn`, `SolidExternalIdColumn`, `SolidIdColumn`, `SolidIntColumn`, `SolidMediaMultipleColumn`, `SolidMediaSingleColumn`, `SolidSelectionDynamicColumn`, `SolidSelectionStaticColumn`, `SolidShortTextColumn`, `SolidTimeColumn`, `SolidUuidColumn`, `SolidRelationManyToManyColumn`, `SolidRelationManyToOneColumn`, `SolidRelationOneToManyColumn`). The project uses its own custom filter panel (`FilterComponent`).
+- **`parseIsoDate` from `SolidShortTextColumn`** — function and `dayjs` import deleted entirely.
+- **`@ts-nocheck` from `SolidListView`** — directive removed; explicit type annotations added throughout; duplicate `onClick` prop on the bulk-delete confirm button removed.
+- **`console.log` / `console.error` statements** — debug logs removed from `SolidGlobalSearchElement`, `SolidListView`, and `fetchBaseQuery`.
+- **Unused imports** — `capitalize` (lodash), `InputSwitch` (primereact), `Link`, `pascalCase`, `KanbanImage`, `SolidLayoutViews`, `FilterOperator`/`FilterRule`/`FilterRuleType`, `DataTableFilterMeta` removed from `SolidListView` and related files.
+- **Inline `<style>` in `SolidTreeView`** — `solid-treetable-wrapper` CSS rules moved to `src/resources/globals.css`.
+
+---
+
+## [0.1.3] - 2026-02-25
+
+_(previous release — no changelog entry)_
