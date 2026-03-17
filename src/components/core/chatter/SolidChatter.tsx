@@ -59,11 +59,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
         } else if (date.toDateString() === yesterday.toDateString()) {
             return 'Yesterday';
         } else {
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
+            return dateString;
         }
     };
 
