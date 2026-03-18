@@ -49,19 +49,6 @@ export const DefaultDateTimeListWidget = ({ rowData, solidListViewMetaData, fiel
     let displayValue = rowData[fieldMetadata.name];
     const format = solidListViewMetaData?.data?.solidView?.layout?.attrs?.format;
 
-    if (fieldMetadata?.selectionStaticValues && displayValue) {
-        const mapping: Record<string, string> = {};
-
-        fieldMetadata.selectionStaticValues.forEach((entry: string) => {
-            const [val, label] = entry.split(":");
-            mapping[val] = label;
-        });
-
-        const values = displayValue.split(",").map((v: string) => v.trim());
-
-        displayValue = values.map((v: string) => mapping[v] || v).join(", ");
-    }
-
     return (
         <DateFieldViewComponent value={displayValue} format={format} fallback="-"></DateFieldViewComponent>
     );
