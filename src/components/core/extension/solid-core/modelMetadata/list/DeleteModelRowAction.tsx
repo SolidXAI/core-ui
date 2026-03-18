@@ -52,7 +52,7 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
         { file: `${kebabCase(event.rowData.singularName)}.repository.ts`, description: 'Custom repository encapsulating database operations for this model', intervention: 'Automatic' },
         { file: `${kebabCase(event.rowData.singularName)}.service.ts`, description: 'Service layer containing business logic and interactions for this model', intervention: 'Automatic' },
         { file: `${kebabCase(event.rowData.singularName)}.controller.ts`, description: 'Controller exposing API endpoints related to this model', intervention: 'Automatic' },
-        { file: `${kebabCase(event.rowData.singularName)}.module.ts`, description: 'Module declaration that wires together the controller, service, and repository. All references to the deleted model must be removed here', intervention: 'Manual (X)', manual: true },
+        { file: `${kebabCase(event.rowData.singularName)}.module.ts`, description: 'Module declaration that wires together the controller, service, and repository. All imports and references to the deleted model are removed automatically', intervention: 'Automatic' },
         { file: `${kebabCase(event.rowData.singularName)}-metadata.json`, description: 'Remove references to this model in the model metadata, menu, action & view sections', intervention: 'Automatic' },
         { file: '-', description: 'Drop database table. Removes the database table from the DB, this is a very risky step. Best to review all relations to other models etc and then do this manually', intervention: 'Manual (X)', manual: true },
     ];
@@ -84,7 +84,7 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
                                 checked={isConfirmed}
                                 onChange={() => setIsConfirmed(!isConfirmed)} />
                             <label htmlFor="confirmation" className="ml-2 form-field-label">
-                                I confirm that #7 &amp; #9 will be done by me manually after the automatic steps above are applied.
+                                I confirm that #9 (drop database table) will be done by me manually after the automatic steps above are applied.
                             </label>
                         </div>
                     </div>
