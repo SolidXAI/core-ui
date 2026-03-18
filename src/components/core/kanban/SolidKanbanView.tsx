@@ -28,7 +28,7 @@ import { setFilterObjectToLocalStorage, getFilterObjectFromLocalStorage } from "
 import { Toast } from "primereact/toast";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
-import { normalizeSolidListKanbanActionPath } from "../../../helpers/routePaths";
+import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 import showToast from "../../../helpers/showToast";
 
 
@@ -224,7 +224,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
   const [maxSwimLanesCount, setMaxSwimLanesCount] = useState<number>(0);
   // @ts-ignore
-  const editBaseUrl = normalizeSolidListKanbanActionPath(pathname, editButtonUrl || "form");
+  const editBaseUrl = normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form");
   // Get the kanban view data.
   // const [triggerGetSolidEntitiesForKanban, { data: solidEntityKanbanViewData, isLoading, error }] = useLazyGetSolidKanbanEntitiesQuery();
   const [triggerGetSolidEntities, { data: solidEntityKanbanViewData }] = useLazyGetSolidEntitiesQuery();

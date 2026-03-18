@@ -3589,6 +3589,11 @@ flex-shrink: 0; */
   padding: 0.25rem 0.25rem;
 }
 
+
+.solid-treetable-wrapper .p-treetable .p-treetable-tbody>tr>td .p-treetable-toggler {
+  height: 3rem;
+}
+
 .solid-treetable-wrapper .p-datatable .p-datatable-loading-overlay,
 .solid-treetable-wrapper .p-treetable .p-treetable-loading-overlay {
   background-color: rgba(0, 0, 0, 0.0);

@@ -8,7 +8,7 @@ import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import { SolidXAIIcon } from '../solid-ai/SolidXAIIcon';
 import styles from './SolidDashboard.module.css';
 import SolidDashboardBody from './SolidDashboardBody';
-import SolidDashboardVariable from './SolidDashboardVariable';
+import { DashboardFilter } from './DashboardFilter';
 import { SolidAiMainWrapper } from '../solid-ai/SolidAiMainWrapper';
 import { SolidDashboardFilterRequired } from './SolidDashboardFilterRequired';
 import { SolidDashboardLoading } from './SolidDashboardLoading';
@@ -139,6 +139,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
   const [isResizing, setIsResizing] = useState(false);
   const [questions, setQuestions] = useState<any[]>([]);
   const [dashboardVariables, setDashboardVariables] = useState<DashboardVariableRecord[]>([]);
+  const [isDashboardFilterVisible, setIsDashboardFilterVisible] = useState(false);
 
 
   useEffect(() => {
@@ -271,7 +272,26 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
                   }
                 </p>
               </div>
-              {dashboardVariables && dashboardVariables.length > 0 && <SolidDashboardVariable dashboardVariables={dashboardVariables} filters={filters} setFilters={setFilters} />}
+              {dashboardVariables && dashboardVariables.length > 0 && (
+                <>
+                  <Button
+                    label="Filter"
+                    icon={filters.length > 0 ? "pi pi-filter-fill" : "pi pi-filter"}
+                    outlined={filters.length === 0}
+                    severity={filters.length > 0 ? "info" : "secondary"}
+                    style={filters.length > 0 ? { background: "rgb(114, 46, 209)" } : {}}
+                    size="small"
+                    onClick={() => setIsDashboardFilterVisible(true)}
+                  />
+                  <DashboardFilter
+                    dashboardVariables={dashboardVariables}
+                    initialFilters={filters}
+                    onApply={setFilters}
+                    visible={isDashboardFilterVisible}
+                    onHide={() => setIsDashboardFilterVisible(false)}
+                  />
+                </>
+              )}
             </div>
             {!isRenderDashboardBody(questions, dashboardVariables, filters) && <SolidDashboardFilterRequired />}
             {isRenderDashboardBody(questions, dashboardVariables, filters) && <SolidDashboardBody questions={questions} filters={filters} />}
