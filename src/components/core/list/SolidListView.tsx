@@ -49,7 +49,7 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
-import { normalizeSolidListKanbanActionPath } from "../../../helpers/routePaths";
+import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -260,7 +260,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   }, [])
 
   const editBaseUrl = useMemo(
-    () => normalizeSolidListKanbanActionPath(pathname, editButtonUrl || "form"),
+    () => normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form"),
     [editButtonUrl, pathname]
   );
 
