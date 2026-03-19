@@ -7,6 +7,8 @@ import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete
 import { SqlExpression } from "../../../types/solid-core";
 import { DashboardVariableRecord } from "./SolidDashboard";
 import { useLazyGetDashboardVariableSelectionDynamicValuesQuery } from "../../../redux/api/dashboardApi";
+import { Divider } from "primereact/divider";
+import { Fieldset } from "primereact/fieldset";
 
 interface DashboardFilterProps {
     dashboardVariables: DashboardVariableRecord[];
@@ -35,16 +37,12 @@ const dateFilterMatchModeOptions = [
     { label: 'Greater Than Or Equal', value: "$gte" },
     { label: 'In', value: "$in" },
     { label: 'Not In', value: "$notIn" },
-    { label: 'Between', value: "$between" },
-    { label: 'Is null', value: "$null" },
-    { label: 'Is Not null', value: "$notNull" }
+    { label: 'Between', value: "$between" }
 ];
 
 const selectionFilterMatchModeOptions = [
     { label: 'In', value: "$in" },
-    { label: 'Not In', value: "$notIn" },
-    { label: 'Is null', value: "$null" },
-    { label: 'Is Not null', value: "$notNull" }
+    { label: 'Not In', value: "$notIn" }
 ];
 
 const FilterValueInput = ({ rule, onChange }: any) => {
@@ -301,48 +299,58 @@ export const DashboardFilter: React.FC<DashboardFilterProps> = ({
     };
 
     return (
-        <Dialog
-            header="Dashboard Filters"
-            visible={visible}
-            style={{ width: '60vw' }}
-            onHide={onHide}
-            breakpoints={{ '960px': '75vw', '641px': '100vw' }}
-        >
-            <div className="flex flex-column gap-3 py-3">
-                {rules.map((rule) => (
-                    <div key={rule.id} className="grid grid-nogutter align-items-start">
-                        <div className="col-12 md:col-3 pr-2">
-                            <div className="p-inputtext p-disabled w-full flex align-items-center mb-2 md:mb-0" style={{ minHeight: '38px' }}>
-                                {rule.fieldName}
-                            </div>
-                        </div>
-                        <div className="col-12 md:col-3 pr-2">
-                            <Dropdown
-                                value={rule.matchMode}
-                                onChange={(e: any) => handleChange(rule.id, 'matchMode', e.value)}
-                                options={rule.variable.variableType === 'date' ? dateFilterMatchModeOptions : selectionFilterMatchModeOptions}
-                                optionLabel='label'
-                                optionValue='value'
-                                placeholder="Select Operator"
-                                className="p-inputtext-sm w-full"
-                            />
-                        </div>
-                        <div className="col-12 md:col-6">
-                            <FilterValueInput rule={rule} onChange={handleChange} />
-                        </div>
-                    </div>
-                ))}
-                {rules.length === 0 && (
-                    <div className="text-color-secondary italic">No variables available for this dashboard.</div>
-                )}
+
+
+        <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={visible} style={{ width: '50vw' }} breakpoints={{ '1024px': '75vw', '991px': '90vw', '767px': '94w', '250px': '96vw' }} onHide={onHide}>
+            <div className="flex align-items-center justify-content-between px-3">
+                <h5 className="solid-custom-title m-0">Add Custom Filter</h5>
+                <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={onHide} />
             </div>
-            <div className="flex justify-content-between align-items-center mt-4">
-                <Button label="Clear Filters" icon="pi pi-filter-slash" severity="danger" text onClick={handleClear} />
-                <div className="flex gap-2">
-                    <Button label="Cancel" icon="pi pi-times" onClick={onHide} className="p-button-text" />
+            <Divider className="m-0" />
+            <div className="p-2 lg:p-2">
+                <Fieldset className='primary-filter-fieldset'>
+                    <div className="flex flex-column gap-3 py-3">
+
+                        {rules.map((rule) => (
+                            <div key={rule.id} className="grid grid-nogutter align-items-start">
+                                <div className="col-12 md:col-3 pr-2">
+                                    <div className="p-inputtext p-disabled w-full flex align-items-center mb-2 md:mb-0" style={{ minHeight: '38px' }}>
+                                        {rule.fieldName}
+                                    </div>
+                                </div>
+                                <div className="col-12 md:col-3 pr-2">
+                                    <Dropdown
+                                        value={rule.matchMode}
+                                        onChange={(e: any) => handleChange(rule.id, 'matchMode', e.value)}
+                                        options={rule.variable.variableType === 'date' ? dateFilterMatchModeOptions : selectionFilterMatchModeOptions}
+                                        optionLabel='label'
+                                        optionValue='value'
+                                        placeholder="Select Operator"
+                                        className="p-inputtext-sm w-full"
+                                    />
+                                </div>
+                                <div className="col-12 md:col-6">
+                                    <FilterValueInput rule={rule} onChange={handleChange} />
+                                </div>
+                            </div>
+                        ))}
+                        {rules.length === 0 && (
+                            <div className="text-color-secondary italic">No variables available for this dashboard.</div>
+                        )}
+                    </div>
+                </Fieldset>
+                {/* <div className="flex justify-content-between align-items-center mt-4">
+                    <Button label="Clear Filters" icon="pi pi-filter-slash" severity="danger" text onClick={handleClear} />
+                    <div className="flex gap-2">
+                    </div>
+                </div> */}
+                <div className='flex gap-3 mt-3'>
                     <Button label="Apply" icon="pi pi-check" onClick={handleApply} autoFocus />
+                    <Button type='button' label='Cancel' outlined size='small' onClick={onHide} />
                 </div>
+
             </div>
         </Dialog>
+
     );
 };
