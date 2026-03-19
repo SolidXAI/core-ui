@@ -345,7 +345,7 @@ export const DashboardFilter: React.FC<DashboardFilterProps> = ({
                     </div>
                 </div> */}
                 <div className='flex gap-3 mt-3'>
-                    <Button label="Apply" icon="pi pi-check" onClick={handleApply} autoFocus />
+                    <Button label="Apply" size="small" onClick={handleApply} autoFocus />
                     <Button type='button' label='Cancel' outlined size='small' onClick={onHide} />
                 </div>
 
