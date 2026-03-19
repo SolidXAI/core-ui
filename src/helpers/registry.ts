@@ -46,6 +46,7 @@ import { SolidAiInteractionMessageFieldFormWidget } from "../components/core/for
 import { SolidS3FileViewerWidget } from "../components/core/form/fields/widgets/SolidS3FileViewerWidget";
 import DeleteModuleRowAction from "../components/core/extension/solid-core/moduleMetadata/list/DeleteModuleRowAction";
 import hanldeModelSequenceFormViewChange from "../components/core/extension/solid-core/modelSequence/modelSequenceFormViewChangeHandler";
+import { DefaultDateTimeListWidget } from "../components/core/list/columns/SolidDateColumn";
 
 type ExtensionComponentType = null | 'list_field_widget' | 'form_field_view_widget' | 'form_field_edit_widget' | 'list_row_action ' | 'list_header_action' | 'form_action' | 'form_widget';
 
@@ -135,6 +136,9 @@ registerExtensionComponent("SolidManyToManyRelationAvatarListWidget", SolidManyT
 
 // - relation.one2many
 registerExtensionComponent("DefaultRelationOneToManyListWidget", DefaultRelationOneToManyListWidget, []);
+
+// - relation.datetime
+registerExtensionComponent('DefaultDateTimeListWidget', DefaultDateTimeListWidget, []);
 
 // ...
 
