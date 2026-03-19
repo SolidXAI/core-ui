@@ -274,15 +274,25 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
               </div>
               {dashboardVariables && dashboardVariables.length > 0 && (
                 <>
-                  <Button
-                    label="Filter"
-                    icon={filters.length > 0 ? "pi pi-filter-fill" : "pi pi-filter"}
-                    outlined={filters.length === 0}
-                    severity={filters.length > 0 ? "info" : "secondary"}
-                    style={filters.length > 0 ? { background: "rgb(114, 46, 209)" } : {}}
-                    size="small"
-                    onClick={() => setIsDashboardFilterVisible(true)}
-                  />
+                  <div className='flex gap-2'>
+                    <Button
+                      label="Filter"
+                      icon={filters.length > 0 ? "pi pi-filter-fill" : "pi pi-filter"}
+                      outlined={filters.length === 0}
+                      severity={filters.length > 0 ? "info" : "secondary"}
+                      style={filters.length > 0 ? { background: "rgb(114, 46, 209)" } : {}}
+                      size="small"
+                      onClick={() => setIsDashboardFilterVisible(true)}
+                    />
+                    {filters.length > 0 && (
+                      <Button
+                        // label="Clear Filters"
+                        icon="pi pi-filter-slash"
+                        severity="danger"
+                        onClick={() => { setFilters([]); setIsDashboardFilterVisible(false); }}
+                      />
+                    )}
+                  </div>
                   <DashboardFilter
                     dashboardVariables={dashboardVariables}
                     initialFilters={filters}
