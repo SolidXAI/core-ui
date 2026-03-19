@@ -40,10 +40,10 @@ import { SolidBeforeTreeNodeLoad } from "../../../types";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { SolidTreeLoad, SolidTreeUiEventResponse } from "../../../types/solid-core";
 import { Tooltip } from "primereact/tooltip";
-import { useRouter } from "@/hooks/useRouter";
-import { normalizeSolidListTreeKanbanActionPath } from "@/helpers/routePaths";
-import { usePathname } from "@/hooks/usePathname";
-import { useHandleListCustomButtonClick } from "@/components/common/useHandleListCustomButtonClick";
+import { useRouter } from "../../../hooks/useRouter";
+import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
+import { usePathname } from "../../../hooks/usePathname";
+import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { SolidListViewRowButtonContextMenu } from "../list/SolidListViewRowButtonContextMenu";
 
