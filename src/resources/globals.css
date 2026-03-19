@@ -3589,6 +3589,9 @@ flex-shrink: 0; */
   padding: 0.25rem 0.25rem;
 }
 
+.solid-treetable-wrapper .p-treetable .p-treetable-tbody>tr {
+  cursor: pointer;
+}
 
 .solid-treetable-wrapper .p-treetable .p-treetable-tbody>tr>td .p-treetable-toggler {
   height: 3rem;
