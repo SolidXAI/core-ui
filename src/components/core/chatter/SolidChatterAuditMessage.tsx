@@ -1,10 +1,7 @@
 
 import React from 'react'
 import dayjs from 'dayjs'
-import utc from 'dayjs/plugin/utc'
 import { RightArrowSvg } from '../../../components/Svg/RightArrowSvg'
-
-dayjs.extend(utc)
 
 const DATE_FIELD_TYPES = ['date', 'datetime', 'time']
 
@@ -13,20 +10,10 @@ function formatAuditValue(
     displayValue: string | null | undefined,
     fieldType?: string
 ): string {
+    // fieldType may be null for older audit records — fall through to displayValue
     if (fieldType && DATE_FIELD_TYPES.includes(fieldType)) {
         if (!value) return 'None'
-
-        // UTC ISO string (has Z) — convert to browser local time
-        if (value.endsWith('Z')) {
-            const d = dayjs(value)
-            if (!d.isValid()) return value
-            if (fieldType === 'date') return d.format('DD-MM-YYYY')
-            if (fieldType === 'time') return d.format('HH:mm')
-            return d.format('DD-MM-YYYY HH:mm')
-        }
-
-        // Wall-clock string (no Z) — parse as UTC to preserve components without timezone shift
-        const d = dayjs.utc(value)
+        const d = dayjs(value)
         if (!d.isValid()) return value
         if (fieldType === 'date') return d.format('DD-MM-YYYY')
         if (fieldType === 'time') return d.format('HH:mm')
