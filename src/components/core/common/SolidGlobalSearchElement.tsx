@@ -835,16 +835,21 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         fn()
     }, [filterPredicates])
 
+    const prevViewIdRef = useRef<string | null>(null);
     useEffect(() => {
+        const currentViewId = viewData?.data?.solidView?.id;
         if (viewData?.data?.solidFieldsMetadata) {
             // Reset search state when switching views
-            setSearchChips([]);
-            setSearchFilter(null);
-            setFilterRules(initialState);
-            setCustomFilter(null);
-            setPredefinedSearchChip(null);
-            setPredefinedSearchBaseFilter(null);
-            setInputValue("");
+            if (prevViewIdRef.current !== null && prevViewIdRef.current !== currentViewId) {
+                setSearchChips([]);
+                setSearchFilter(null);
+                setFilterRules(initialState);
+                setCustomFilter(null);
+                setPredefinedSearchChip(null);
+                setPredefinedSearchBaseFilter(null);
+                setInputValue("");
+            }
+            prevViewIdRef.current = currentViewId;
 
             let fieldsData = viewData?.data?.solidFieldsMetadata;
             // console.log(`fiels data while rendering solid global search element: `);
