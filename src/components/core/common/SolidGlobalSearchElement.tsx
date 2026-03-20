@@ -846,6 +846,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             setPredefinedSearchBaseFilter(null);
             setInputValue("");
 
+
             let fieldsData = viewData?.data?.solidFieldsMetadata;
             // console.log(`fiels data while rendering solid global search element: `);
             // console.log(fieldsData);

@@ -244,7 +244,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [showArchived, setShowArchived] = useState(false);
 
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
-  const [filterPredicates, setFilterPredicates] = useState(null);
+  const [filterPredicates, setFilterPredicates] = useState<any>(null);
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
 
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
@@ -657,10 +657,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
             : [{ field: "id", order: -1 }];
 
         setMultiSortMeta(parsedMultiSortMeta);
-        const { multiSortMeta, rows, populate, populateMedia } = initialFilterMethod();
+        const { populate, populateMedia } = initialFilterMethod();
         setToPopulate(populate);
         setToPopulateMedia(populateMedia);
-
       } else {
         const { multiSortMeta, rows, populate, populateMedia } = initialFilterMethod();
         setRows(rows);
@@ -671,7 +670,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       }
       //below line was added to handle state stale issue when we converted boilerplate to vite 
       //since now we dont need it becuase our component is remounted on every router change
-      setFilters(params.customFilter || { $and: [] })
+      //setFilters(params.customFilter || { $and: [] })
       //setFilterPredicates(null);
       setSelectedRecords([]);
       setSelectedRecoverRecords([]);
