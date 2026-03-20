@@ -244,7 +244,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [showArchived, setShowArchived] = useState(false);
 
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
-  const [filterPredicates, setFilterPredicates] = useState(null);
+  const [filterPredicates, setFilterPredicates] = useState<any>(null);
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
 
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
@@ -655,9 +655,39 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
             : [{ field: "id", order: -1 }];
 
         setMultiSortMeta(parsedMultiSortMeta);
-        const { multiSortMeta, rows, populate, populateMedia } = initialFilterMethod();
+        const { populate, populateMedia } = initialFilterMethod();
         setToPopulate(populate);
         setToPopulateMedia(populateMedia);
+
+        // ✅ Re-calculate composite ‘filters’ from predicates stored in local storage
+        const initialFilters = structuredClone(params.customFilter) || { $and: [] };
+        const predicates = {
+          custom_filter_predicate: queryObject.custom_filter_predicate || null,
+          search_predicate: queryObject.search_predicate || null,
+          saved_filter_predicate: queryObject.saved_filter_predicate || null,
+          predefined_search_predicate: queryObject.predefined_search_predicate || null,
+          persistFilter: true, // Mark as persistent to maintain it across navigation
+        };
+
+        if (predicates.custom_filter_predicate) {
+          initialFilters.$and.push(predicates.custom_filter_predicate);
+        }
+        if (predicates.search_predicate) {
+          initialFilters.$and.push(predicates.search_predicate);
+        }
+        if (predicates.saved_filter_predicate) {
+          initialFilters.$and.push(predicates.saved_filter_predicate);
+        }
+        if (predicates.predefined_search_predicate) {
+          initialFilters.$and.push(predicates.predefined_search_predicate);
+        }
+
+        setFilters(initialFilters);
+        setFilterPredicates(predicates);
+        // FORCE synchronous logic by updating ref as well if needed, 
+        // but since we update state before setQueryDataLoaded(true), it should be fine.
+        latestFiltersRef.current = initialFilters;
+        latestFilterPredicatesRef.current = predicates;
 
       } else {
         const { multiSortMeta, rows, populate, populateMedia } = initialFilterMethod();
@@ -666,10 +696,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         setToPopulate(populate);
         setToPopulateMedia(populateMedia);
         setFirst(0);
+        setFilters(params.customFilter || { $and: [] })
+        setFilterPredicates(null);
       }
       //below line was added to handle state stale issue when we converted boilerplate to vite 
       //since now we dont need it becuase our component is remounted on every router change
-      setFilters(params.customFilter || { $and: [] })
+      // setFilters(params.customFilter || { $and: [] }) 
       //setFilterPredicates(null);
       setSelectedRecords([]);
       setSelectedRecoverRecords([]);
