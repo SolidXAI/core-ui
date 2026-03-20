@@ -1739,7 +1739,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                     size="small"
                                     className="px-0"
                                     style={{ width: 30 }}
-                                    onClick={() => handleChatterExpandClick('default')}
+                                    onClick={() => handleChatterExpandClick('chatter')}
                                 />
                             </div>
                             :
