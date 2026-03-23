@@ -670,8 +670,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       }
       //below line was added to handle state stale issue when we converted boilerplate to vite 
       //since now we dont need it becuase our component is remounted on every router change
-      //setFilters(params.customFilter || { $and: [] })
-      //setFilterPredicates(null);
+      if (params.embeded === true || solidListViewLayout?.attrs?.enableGlobalSearch === false) {
+        setFilters(params.customFilter || { $and: [] });
+        setFilterPredicates(null);
+      }
       setSelectedRecords([]);
       setSelectedRecoverRecords([]);
       setQueryDataLoaded(true);
