@@ -4,113 +4,165 @@ import { GridStackOptions, GridStackWidget } from 'gridstack';
 import styles from './SolidDashboard.module.css'
 import { SolidQuestionRenderer } from './SolidQuestionRenderer';
 import { SqlExpression } from '../../../types/solid-core';
-import PrimeReactDatatableRenderer from './chart-renderers/PrimeReactDatatableRenderer';
-import { useGetDashboardQuestionDataByIdQuery } from '../../../redux/api/dashboardQuestionApi';
-import qs from 'qs';
-import { ProgressSpinner } from 'primereact/progressspinner';
+import ReactGridLayout, { useContainerWidth, Layout, LayoutItem } from "react-grid-layout";
+import { useEffect, useRef, useState } from 'react';
+import PrimeDataTableWrapper from './PrimeDataTableWrapper';
+import 'react-grid-layout/css/styles.css';
+import 'react-resizable/css/styles.css';
+import { useLazyGetUserDashboardLayoutByDashboardIdQuery } from '../../../redux/api/dashboardLayoutApi';
+import showToast from '../../../helpers/showToast';
+import { ERROR_MESSAGES } from '../../../constants/error-messages';
+import { Toast } from 'primereact/toast';
 
 export interface SolidDashboardBodyProps {
   dashboardOptions?: GridStackOptions;
   widgetOptions?: GridStackWidget[];
   // Replace `any` with a proper `Question` type when available
+  dashboardId: string;
   questions: any[];
   filters: SqlExpression[];
+  dashboardLayout: GridItem[];
+  setDashboardLayout: (dashboardLayout: GridItem[]) => void;
 }
 
-const SolidDashboardBody = ({ questions, filters = [] }: SolidDashboardBodyProps) => {
-  // const gridRef = useRef<HTMLDivElement>(null);
+export type GridItem = {
+  i: string;
+  x: number;
+  y: number;
+  w: number;
+  h: number;
+};
+
+// Layout is Layout[] at runtime in v2 — the type definition is misleading
+type LayoutArray = LayoutItem[];
+
+const generateDefaultLayout = (questions: any[]): GridItem[] => {
+  return questions.map((q, index) => {
+    const col = index % 3;
+    const row = Math.floor(index / 3);
+    return {
+      i: String(q.name),
+      x: col,
+      y: row * 4,
+      w: 1,
+      h: 4,
+    };
+  });
+};
+
+
+
+const SolidDashboardBody = ({ dashboardId, questions, filters = [], dashboardLayout, setDashboardLayout }: SolidDashboardBodyProps) => {
+  const toast = useRef<Toast>(null);
+
+  const sortedQuestions = [...questions]
+    .map((q, index) => ({ ...q, defaultIndex: index + 1 }))
+    .sort((a, b) => (a.sequenceNumber ?? a.defaultIndex) - (b.sequenceNumber ?? b.defaultIndex));
+
+  const { width, containerRef, mounted } = useContainerWidth();
+  const isLayoutReady = useRef(false);
+
+  const [fetchUserLayout, { data: userLayoutData, isSuccess, isLoading }] =
+    useLazyGetUserDashboardLayoutByDashboardIdQuery();
+
+  useEffect(() => {
+    if (!dashboardId || questions.length === 0) return;
+    const loadLayout = async () => {
+      try {
+        const response = await fetchUserLayout(dashboardId).unwrap();
+        const raw = response?.data?.layout;
+        const savedLayout = typeof raw === 'string' ? JSON.parse(raw) : raw;
+
+        const layout = savedLayout
+          ? sortedQuestions.map((q) => {
+            const saved = (savedLayout as GridItem[]).find(s => s.i === String(q.name));
+            return saved ?? generateDefaultLayout([q])[0];
+          })
+          : generateDefaultLayout(sortedQuestions);
+
+        setDashboardLayout(layout);
+        setTimeout(() => { isLayoutReady.current = true; }, 100);
+      } catch (error: any) {
+        if (error.status === 403) {
+          showToast(toast, "error", ERROR_MESSAGES.FORBIDDEN_ERROR, ERROR_MESSAGES.FORBIDDEN_ERROR);
+        } else {
+          showToast(toast, "error", ERROR_MESSAGES.SOMETHING_WRONG, ERROR_MESSAGES.SOMETHING_WRONG);
+        }
+      }
+    };
+
+    loadLayout();
+  }, [questions, dashboardId]);
+
 
   // useEffect(() => {
-  //   if (!gridRef.current) return;
-
-  //   // Initialize Gridstack on the specific ref
-  //   const grid = GridStack.init(dashboardOptions || {}, gridRef.current);
-
-  //   // Load widgets if provided
-  //   if (widgetOptions && widgetOptions.length > 0) {
-  //     grid.load(
-  //       widgetOptions.map((widget) => ({
-  //         ...widget,
-  //         content: `${widget.content ?? 'Widget'}`,
-  //       }))
-  //     );
-  //   }
-
-  //   // Cleanup on unmount
-  //   return () => {
-  //     grid.destroy(false);
-  //   };
-  // }, [dashboardOptions, widgetOptions]);
+  //   if (questions.length === 0) return;
+  //   const saved = getSavedLayout();
+  //   setDashboardLayout(generateLayout(sortedQuestions, saved));
+  //   // Delay the ready flag so onLayoutChange doesn't fire before we're set
+  //   setTimeout(() => { isLayoutReady.current = true; }, 100);
+  // }, [questions]);
 
 
-  // Fallback sequencing
-  const questionsWithDefaultIndex = questions.map((q, index) => ({
-    ...q,
-    defaultIndex: index + 1,
-  }));
+  const handleLayoutChange = (newLayout: Layout) => {
+    if (!isLayoutReady.current) return;
 
+    // v2 passes LayoutItem[] at runtime despite the type saying Layout
+    const layoutArray = newLayout as unknown as LayoutItem[];
 
-  const sortedQuestions = [...questionsWithDefaultIndex].sort((a, b) => {
-    const aSeq = a.sequenceNumber ?? a.defaultIndex;
-    const bSeq = b.sequenceNumber ?? b.defaultIndex;
-    return aSeq - bSeq;
-  });
+    const updated: GridItem[] = layoutArray.map(item => ({
+      i: item.i,
+      x: item.x,
+      y: item.y,
+      w: item.w,
+      h: item.h,
+    }));
 
+    setDashboardLayout(updated);
+    // saving is handled by the parent/caller
+  };
 
   return (
-    <div className={`p-4 overflow-y-auto ${styles.SolidDashboardContentWrapper}`}>
-      {/* <div className="grid-stack" ref={gridRef}></div> */}
-      <div className='grid'>
-        {/* {questions && questions.map((question: any) => {
-          return (
-            <div className='col-4 p-3'>
-              <SolidQuestionRenderer question={question} filters={filters} key={question.id} isPreview={false} />
-            </div>
-          )
-        })} */}
-        {sortedQuestions
-          .filter((question: any) => question.visualisedAs !== 'prime-datatable')
-          .map((question: any) => (
-            <div className="col-4 p-3" key={question.id}>
-              <SolidQuestionRenderer
-                question={question}
-                filters={filters}
-                isPreview={false}
-              />
-            </div>
-          ))}
+    <>
+      <Toast ref={toast} />
+      <div
+        ref={containerRef as React.RefObject<HTMLDivElement>}
+        className={`p-4 ${styles.SolidDashboardContentWrapper}`}
+        style={{ width: '100%', overflowY: 'auto', minHeight: 0 }}
 
-        {sortedQuestions
-          .filter((question: any) => question.visualisedAs === 'prime-datatable')
-          .map((question: any) => {
-            const queryParams = qs.stringify({ isPreview: false, filters }, { arrayFormat: 'brackets' });
-
-            const { data: questionData, isLoading } = useGetDashboardQuestionDataByIdQuery({
-              id: question.id,
-              qs: queryParams,
-            });
-
-            if (isLoading) return <ProgressSpinner />;
-            const textAlign = question?.textAlign ?? 'start'
-
-            return (
-              <div className="col-12 p-3" key={question.id}>
-                <div className={`${styles.SolidChartCardWrapper} p-4`} style={{ maxHeight: '40vh', overflowY: 'scroll' }}>
-                  <div className={`font-medium text-${textAlign} ${styles.SolidChartTitle}`}>{question.name}</div>
-                  <div className={`mt-2 font-bold text-3xl text-${textAlign} ${styles.SolidChartTitle}`}>{questionData.data.kpi}</div>
-                  <div className='mt-3'>
-
-                    <PrimeReactDatatableRenderer
-                      options={JSON.parse(question?.chartOptions)}
-                      visualizationData={questionData?.data?.visualizationData}
-                    />
-                  </div>
-                </div>
+      >
+        {mounted && dashboardLayout.length > 0 && (
+          <ReactGridLayout
+            width={width}
+            layout={dashboardLayout}
+            gridConfig={{
+              cols: 3,
+              rowHeight: 120,
+            }}
+            dragConfig={{
+              handle: ".drag-handle",
+            }}
+            resizeConfig={{
+              enabled: true,
+            }}
+            onLayoutChange={handleLayoutChange}
+          >
+            {sortedQuestions.map((question: any) => (
+              <div key={String(question.name)} className="drag-handle cursor-move bg-white rounded shadow p-2 overflow-hidden">
+                {/* <div className=" mb-2 font-bold">
+                {question.name}
+              </div> */}
+                {question.visualisedAs === "prime-datatable" ? (
+                  <PrimeDataTableWrapper question={question} filters={filters} />
+                ) : (
+                  <SolidQuestionRenderer question={question} filters={filters} isPreview={false} />
+                )}
               </div>
-            )
-          })}
+            ))}
+          </ReactGridLayout>
+        )}
       </div>
-    </div>
+    </>
   );
 };
 
