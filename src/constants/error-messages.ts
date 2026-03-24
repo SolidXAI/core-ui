@@ -11,7 +11,7 @@ export const ERROR_MESSAGES = {
   PLEASE_WAIT: "Please wait",
   SOMETHING_WRONG: 'Something Went Wrong !',
   LOGOUT_FAILED: 'Logout Failed !',
-  LOGIN_SUCCESSFULLY : 'Login Successfully',
+  LOGIN_SUCCESSFULLY: 'Login Successfully',
 
   /* -------------------------------- PASSWORD -------------------------------- */
   FAILED_TO_UPDATE_PASSWORD: 'Failed to update password',
@@ -60,10 +60,10 @@ export const ERROR_MESSAGES = {
   EMAIL_ALREADY_TAKEN: 'Email is already taken,',
   UPDATED: 'Updated',
   SETTING_UPDATED: 'Settings updated',
-  USER_REGISTER : 'User Registered',
-  NO_CHANGE : 'No Change',
-  NO_SETTING_UPDATE : 'No settings were updated',
-  UPDATING_USER : 'Error updating user view:',
+  USER_REGISTER: 'User Registered',
+  NO_CHANGE: 'No Change',
+  NO_SETTING_UPDATE: 'No settings were updated',
+  UPDATING_USER: 'Error updating user view:',
 
   /* ---------------------------- RELATION & FILTER ---------------------------- */
   INVALID_FILTER_STRUCTURE: 'Invalid filter structure',
@@ -85,19 +85,22 @@ export const ERROR_MESSAGES = {
   ON_FORM_LOAD: 'Error in onFormLoad handler:',
   UNABLE_LOAD_DYNAMIC_MODULE: 'Unable to load dynamic module: ',
   LOADING_COMPONENT: 'Error loading component',
-  FORM_LAYOUT_UPDATE : 'Form Layout Updated successfully!',
-  LAYOUT  : 'Layout',
-  MARK_PUBLISH : 'Marked as publish !',
-  MARK_UNPUBLISH : 'Marked as unpublish !',
-  SAVED : 'Saved',
-  FORM_UPDATE : 'Form Updated',
-  FORM_UPDATE_SUCCESSFULLY : 'Form updated successfully!',
-  FORM_SAVED : 'Form Saved',
-  FORM_SAVED_SUCCESSFULLY : 'Form saved successfully!',
-  PROFILE_SAVED : 'Profile Saved',
-  PROFILE_SAVED_SUCCESSFULLY : 'Profile saved successfully!',
-  NO_UPDATE_MADE :'No updates were made',
-  
+  FORM_LAYOUT_UPDATE: 'Form Layout Updated successfully!',
+  LAYOUT: 'Layout',
+  MARK_PUBLISH: 'Marked as publish !',
+  MARK_UNPUBLISH: 'Marked as unpublish !',
+  SAVED: 'Saved',
+  FORM_UPDATE: 'Form Updated',
+  FORM_UPDATE_SUCCESSFULLY: 'Form updated successfully!',
+  FORM_SAVED: 'Form Saved',
+  FORM_SAVED_SUCCESSFULLY: 'Form saved successfully!',
+  PROFILE_SAVED: 'Profile Saved',
+  PROFILE_SAVED_SUCCESSFULLY: 'Profile saved successfully!',
+  NO_UPDATE_MADE: 'No updates were made',
+  DASHBOARD_LAYOUT_UPDATE_SUCCESSFULLY: 'Dashboard Layout Updated successfully!',
+  DASHBOARD_LAYOUT_UPDATE_FAILED: 'Failed to update dashboard layout!',
+
+
 
 
   /* ------------------------------ INTERACTIONS ------------------------------ */
@@ -129,6 +132,7 @@ export const ERROR_MESSAGES = {
   NETWORK_ERROR: 'Network error occurred. Please try again',
   NETWORK_OR_SERVER_ERROR: 'Network or server error occurred',
   DELETE_ERROR: 'Delete error',
+  FORBIDDEN_ERROR: 'You do not have permission to perform this action.',
 
   /* ----------------------------- IMPORT / EXPORT ----------------------------- */
   IMPORT_ERROR: 'Import Error',
@@ -197,8 +201,8 @@ export const ERROR_MESSAGES = {
   // -------------------- OTP --------------------
   OTP_CHARACTER: (count: Number) =>
     `OTP must be a ${count}-digit number`,
-  OPT_RESEND : 'OTP Resent Successfully',
-  OPT_SEND : 'OTP Sent Successfully',
+  OPT_RESEND: 'OTP Resent Successfully',
+  OPT_SEND: 'OTP Sent Successfully',
 
   // -------------------- UPDATE MESSAGES --------------------
   FIELD_UPDATE: (field: string) => `${field} Updated`,

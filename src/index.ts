@@ -120,6 +120,13 @@ export {
     useConfirmOtpRegisterMutation
 } from './redux/api/authApi';
 
+export {
+    useGetDashboardLayoutQuery,
+    useLazyGetDashboardLayoutQuery,
+    useUpsertUserDashboardLayoutMutation,
+    useLazyGetUserDashboardLayoutByDashboardIdQuery
+} from './redux/api/dashboardLayoutApi';
+
 export { baseQueryWithAuth } from './redux/api/fetchBaseQuery';
 
 export {
@@ -270,6 +277,7 @@ export {
 
 export { dashboardApi } from './redux/api/dashboardApi';
 export { dashboardQuestionApi } from './redux/api/dashboardQuestionApi';
+export { dashboardLayoutApi } from './redux/api/dashboardLayoutApi';
 export { aiInteractionApi } from './redux/api/aiInteractionApi';
 
 export {
