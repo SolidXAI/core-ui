@@ -116,8 +116,11 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                     const auditRecord = msg.chatterMessageDetails?.map((detail: any) => ({
                         field: detail.fieldName,
                         fieldDisplayName: detail.fieldDisplayName,
-                        previous: detail.oldValueDisplay || detail.oldValue || 'None',
-                        current: detail.newValueDisplay || detail.newValue
+                        fieldType: detail.fieldType,
+                        previous: detail.oldValue,
+                        current: detail.newValue,
+                        previousDisplay: detail.oldValueDisplay,
+                        currentDisplay: detail.newValueDisplay,
                     })) || [];
 
                     return {
