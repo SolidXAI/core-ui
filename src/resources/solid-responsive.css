@@ -175,33 +175,6 @@
         left: 60px !important;
     }
 
-    /* ==================== solid auth ======================== */
-
-    .solid-center-layout {
-        width: 100vw;
-
-    }
-
-    .auth-container.side {
-        width: 525px;
-        max-width: 96%;
-    }
-
-
-    .auth-container {
-        min-width: auto;
-        padding: 25px;
-        border-radius: 1rem;
-        margin: auto;
-        width: 525px;
-        max-width: 96%;
-    }
-
-
-    .solid-auth-input-label.right {
-        color: #000;
-    }
-
     /* ===================== Solid Account Setting ===================== */
 
     .solid-account-setting-main {
@@ -623,16 +596,6 @@
 
 
 @media(max-width:591px) {
-
-    /* ==================== solid auth ======================== */
-
-    .solid-auth-title {
-        font-size: 1.2rem;
-    }
-
-    .p-tabview-title {
-        font-size: 0.85rem;
-    }
 
     /* =========================  Drop Zone ===========================*/
     .solid-dropzone {

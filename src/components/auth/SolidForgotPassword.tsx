@@ -7,9 +7,6 @@ import { Message } from "primereact/message";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef } from "react";
 import * as Yup from "yup";
-import { useSelector } from "react-redux";
-import Image from "../common/Image";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import showToast from "../../helpers/showToast";
@@ -67,19 +64,8 @@ const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder 
         <>
             <Toast ref={toast} />
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
-                {solidSettingsData?.data?.authPagesLayout === 'center' &&
-                    <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
-                            <Image
-                                alt="solid logo"
-                                src={solidSettingsData?.data?.appLogo || SolidLogo}
-                                className="relative"
-                                fill
-                            />
-                        </div>
-                    </div>
-                }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>Forgot Password</h2>
+                <h2 className="solid-auth-title">Forgot password</h2>
+                <p className="solid-auth-helper">Enter your email to receive reset instructions</p>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
                 <form onSubmit={formik.handleSubmit}>
                     <div className="flex flex-column gap-2">

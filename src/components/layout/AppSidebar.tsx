@@ -1,213 +1,330 @@
 import { ToastContainer } from "../../helpers/ToastContainer";
 import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
-import { showNavbar, toggleNavbar, hideNavbar } from "../../redux/features/navbarSlice";
+import { hideNavbar, toggleNavbar } from "../../redux/features/navbarSlice";
 import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
 import { useSession } from "../../hooks/useSession";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import NavbarTwoMenu from "./navbar-two-menu";
 import UserProfileMenu from "./user-profile-menu";
-import Image from "../common/Image";
-import SettingImage from '../../resources/images/Navigation/SolidSettinsIcon.svg'
-import { Avatar } from "primereact/avatar";
+import SolidLink from "../common/Link";
 import { usePathname } from "../../hooks/usePathname";
 import { env } from "../../adapters/env";
+
+type SolidMenuItem = {
+    key?: string;
+    title: string;
+    path?: string;
+    icon?: string | { src?: string };
+    children?: SolidMenuItem[];
+};
+
+const defaultMenuKey = env("NEXT_PUBLIC_DEFAULT_MENU_KEY");
+const SIDEBAR_STORAGE_KEY = "solidx.sidebar.collapsed";
+const SIDEBAR_TOGGLE_EVENT = "solidx:sidebar-toggle";
+const DESKTOP_SIDEBAR_WIDTH = "272px";
+
+function filterMenuItems(items: SolidMenuItem[], query: string): SolidMenuItem[] {
+    const normalizedQuery = query.trim().toLowerCase();
+    if (!normalizedQuery) return items;
+
+    const next: SolidMenuItem[] = [];
+    items.forEach((item) => {
+        const children = item.children ? filterMenuItems(item.children, normalizedQuery) : [];
+        const matchesSelf = item.title.toLowerCase().includes(normalizedQuery);
+        if (matchesSelf || children.length > 0) {
+            next.push({ ...item, children });
+        }
+    });
+    return next;
+}
+
+const SidebarMenuTree = ({
+    items,
+    pathname,
+    forceExpand,
+}: {
+    items: SolidMenuItem[];
+    pathname: string;
+    forceExpand?: boolean;
+}) => {
+    const [expandedKeys, setExpandedKeys] = useState<Record<string, boolean>>({});
+
+    const buildNodeId = (node: SolidMenuItem, parentId: string, index: number) => {
+        const base = node.key || node.path || node.title || `node-${index}`;
+        return `${parentId}/${base}`;
+    };
+
+    useEffect(() => {
+        const initialExpanded: Record<string, boolean> = {};
+        if (forceExpand) {
+            const walk = (nodes: SolidMenuItem[], parentId = "root") => {
+                nodes.forEach((node, index) => {
+                    const nodeId = buildNodeId(node, parentId, index);
+                    if (node.children && node.children.length > 0 && node.key) {
+                        initialExpanded[nodeId] = true;
+                        walk(node.children, nodeId);
+                    } else if (node.children && node.children.length > 0) {
+                        initialExpanded[nodeId] = true;
+                        walk(node.children, nodeId);
+                    }
+                });
+            };
+            walk(items);
+        }
+        setExpandedKeys(initialExpanded);
+    }, [items, forceExpand]);
+
+    const toggleExpanded = (nodeId: string) => {
+        setExpandedKeys((prev) => ({ ...prev, [nodeId]: !prev[nodeId] }));
+    };
+
+    const renderNode = (node: SolidMenuItem, depth = 0, parentId = "root", index = 0) => {
+        const nodeId = buildNodeId(node, parentId, index);
+        const hasChildren = !!(node.children && node.children.length > 0);
+        const isExpanded = expandedKeys[nodeId] === true;
+        const isActive = !!node.path && pathname === node.path;
+        const paddingLeft = 12 + depth * 14;
+
+        return (
+            <li key={nodeId} className="solid-sidebar-tree-item">
+                <div
+                    className={`solid-sidebar-tree-row ${isActive ? "is-active" : ""}`}
+                    style={{ paddingLeft }}
+                >
+                    {hasChildren ? (
+                        <button
+                            type="button"
+                            className="solid-sidebar-tree-parent"
+                            onClick={() => toggleExpanded(nodeId)}
+                            aria-expanded={isExpanded}
+                            aria-label={`Toggle ${node.title}`}
+                        >
+                            <span className="solid-sidebar-tree-label">{node.title}</span>
+                        </button>
+                    ) : node.path ? (
+                        <SolidLink href={node.path} className="solid-sidebar-tree-link">
+                            <span className="solid-sidebar-tree-label">{node.title}</span>
+                        </SolidLink>
+                    ) : (
+                        <span className="solid-sidebar-tree-label">{node.title}</span>
+                    )}
+                    {hasChildren && (
+                        <button
+                            type="button"
+                            className="solid-sidebar-tree-toggle"
+                            onClick={() => toggleExpanded(nodeId)}
+                            aria-label={`Toggle ${node.title}`}
+                        >
+                            <span className="solid-tree-plusminus">{isExpanded ? "−" : "+"}</span>
+                        </button>
+                    )}
+                </div>
+                {hasChildren && isExpanded && (
+                    <ul className="solid-sidebar-tree-list solid-sidebar-tree-children">
+                        {node.children!.map((child, childIndex) => renderNode(child, depth + 1, nodeId, childIndex))}
+                    </ul>
+                )}
+            </li>
+        );
+    };
+
+    return <ul className="solid-sidebar-tree-list">{items.map((item, index) => renderNode(item, 0, "root", index))}</ul>;
+};
 
 const AppSidebar = () => {
     const dispatch = useDispatch();
     const pathname = usePathname();
-    // const [show, setShow] = useState(false);
-    const visibleNavbar = useSelector(
-        (state: any) => state.navbarState.visibleNavbar
-    );
+    const visibleNavbar = useSelector((state: any) => state.navbarState.visibleNavbar);
     const { data: menu } = useGetSolidMenuBasedOnRoleQuery("");
 
-
-    const [currentMenu, setCurrentMenu] = useState();
-    const [currentMainMenu, setCurrentMainMenu] = useState();
     const [searchTerm, setSearchTerm] = useState("");
-
-    useEffect(() => {
-        if (menu) {
-            setCurrentMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === env("NEXT_PUBLIC_DEFAULT_MENU_KEY"))[0]?.children);
-            setCurrentMainMenu(menu && menu.data.length > 0 && menu.data.filter((m: any) => m.key === env("NEXT_PUBLIC_DEFAULT_MENU_KEY"))[0]?.title)
-        }
-    }, [menu])
+    const [workspaceOpen, setWorkspaceOpen] = useState(false);
+    const [selectedWorkspaceKey, setSelectedWorkspaceKey] = useState("");
+    const [isDesktop, setIsDesktop] = useState<boolean>(typeof window === "undefined" ? true : window.innerWidth > 1199);
+    const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
+        if (typeof window === "undefined") return false;
+        const stored = window.localStorage.getItem(SIDEBAR_STORAGE_KEY);
+        if (stored === null) return true;
+        return stored === "true";
+    });
 
     const { data } = useSession();
-
-    // const handleToggle = () => setShow(!show);
-    const handleToggle = () => dispatch(toggleNavbar());
-    const handleMenu = (m: any) => {
-        // setShow(true);
-        dispatch(showNavbar());
-        setCurrentMainMenu(m.title);
-        setCurrentMenu(m.children);
-    };
-
-    useEffect(() => {
-        // Check if screen is small at the time of route change
-        if (window.innerWidth <= 1199) {
-            dispatch(hideNavbar());
-        }
-    }, [pathname, dispatch]);
-
 
     useEffect(() => {
         if (data) {
             dispatch(setUser(data?.user));
             dispatch(setIsAuthenticated(true));
         }
-    }, [data]);
-
-    const [isSearchShow, setSearchShow] = useState(false);
-    const searchRef = useRef<HTMLDivElement>(null);
-
-    const handleClickOutside = (event: any) => {
-        if (searchRef.current && !searchRef.current.contains(event.target)) {
-            setSearchShow(false);
-        }
-    };
+    }, [data, dispatch]);
 
     useEffect(() => {
-        if (isSearchShow) {
-            document.addEventListener("mousedown", handleClickOutside);
-        } else {
-            document.removeEventListener("mousedown", handleClickOutside);
-        }
-
-        return () => {
-            document.removeEventListener("mousedown", handleClickOutside);
-        };
-    }, [isSearchShow]);
-
-    const additionalMenu = {
-        title: "General Settings",
-        key: "general-settings",
-        children: [
-            {
-                title: "Settings",
-                path: "",
-                key: "settings-menu-item",
-                children: [
-                    {
-                        title: "App Settings",
-                        path: "/admin/settings/app-settings",
-                        key: "app-setting"
-                    },
-                    {
-                        title: "Authentication Settings",
-                        path: "/admin/settings/authentication-settings",
-                        key: "auth-setting"
-                    },
-                    {
-                        title: "Misc",
-                        path: "/admin/settings/misc-settings",
-                        key: "misc-setting"
-                    }
-                ]
+        const onResize = () => {
+            const desktop = window.innerWidth > 1199;
+            setIsDesktop(desktop);
+            if (desktop) {
+                dispatch(hideNavbar());
             }
-        ],
-        icon: env("NEXT_PUBLIC_SETTINGS_ICON") ? env("NEXT_PUBLIC_SETTINGS_ICON") : SettingImage
+        };
+
+        onResize();
+        window.addEventListener("resize", onResize);
+        return () => window.removeEventListener("resize", onResize);
+    }, [dispatch]);
+
+    useEffect(() => {
+        if (typeof window === "undefined") return;
+        window.localStorage.setItem(SIDEBAR_STORAGE_KEY, String(isCollapsed));
+    }, [isCollapsed]);
+
+    useEffect(() => {
+        const width = isDesktop ? (isCollapsed ? "0px" : DESKTOP_SIDEBAR_WIDTH) : "0px";
+        document.documentElement.style.setProperty("--solid-sidebar-width", width);
+    }, [isDesktop, isCollapsed]);
+
+    useEffect(() => {
+        if (!menu?.data?.length) return;
+        const defaultWorkspace = menu.data.find((m: any) => m.key === defaultMenuKey) || menu.data[0];
+        setSelectedWorkspaceKey((prev) => prev || defaultWorkspace?.key || "");
+    }, [menu]);
+
+    useEffect(() => {
+        if (!isDesktop) {
+            dispatch(hideNavbar());
+        }
+    }, [pathname, dispatch, isDesktop]);
+
+    useEffect(() => {
+        const onToggleRequest = () => {
+            if (window.innerWidth > 1199) {
+                setIsCollapsed((prev) => !prev);
+                return;
+            }
+            dispatch(toggleNavbar());
+        };
+
+        window.addEventListener(SIDEBAR_TOGGLE_EVENT, onToggleRequest);
+        return () => window.removeEventListener(SIDEBAR_TOGGLE_EVENT, onToggleRequest);
+    }, [dispatch]);
+
+    const workspaces: SolidMenuItem[] = menu?.data || [];
+    const selectedWorkspace = workspaces.find((m) => m.key === selectedWorkspaceKey) || workspaces[0];
+    const selectedWorkspaceChildren = selectedWorkspace?.children || [];
+
+    const filteredMenu = useMemo(
+        () => filterMenuItems(selectedWorkspaceChildren, searchTerm),
+        [selectedWorkspaceChildren, searchTerm]
+    );
+
+    const shellClasses = [
+        "solid-sidebar",
+        isDesktop && isCollapsed ? "is-collapsed" : "",
+        !isDesktop && visibleNavbar ? "is-open" : "",
+    ]
+        .filter(Boolean)
+        .join(" ");
+
+    const selectWorkspace = (workspace: SolidMenuItem) => {
+        setSelectedWorkspaceKey(workspace.key || "");
+        setSearchTerm("");
+        setWorkspaceOpen(false);
     };
-
-
 
     return (
         <>
             <ToastContainer />
-            {visibleNavbar && (
-                <div
-                    className="sidebar-backdrop"
-                    onClick={handleToggle}
-                />
-            )}
-            {/* commented this as this is not working properly @Jenendar to figure this out... */}
-            {(visibleNavbar || currentMainMenu) && (
-                <div
-                    className={`sidebar-toggle-button  ${!visibleNavbar || !currentMainMenu ? "s-collapsed hidden md:flex" : ""}`}
-                    onClick={handleToggle}
-                // severity="secondary"
-                >
-                    <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none">
-                        <rect x="0.3" y="0.3" width="23.4" height="23.4" rx="2.1" fill="white" />
-                        <rect x="0.3" y="0.3" width="23.4" height="23.4" rx="2.1" stroke="#D8E2EA" strokeWidth="0.6" />
-                        <path d="M5.09735 16V14.6667H13.5929V16H5.09735ZM5.09735 12.6667V11.3333H11.6324V12.6667H5.09735ZM5.09735 9.33333V8H13.5929V9.33333H5.09735Z" fill="#8D9199" />
-                        <path d="M16.2621 12L18.9026 14.3L18.099 15L14.6549 12L18.099 9L18.9026 9.7L16.2621 12Z" fill="#8D9199" />
-                    </svg>
-                </div>
-            )}
+            {!isDesktop && visibleNavbar && <div className="solid-sidebar-backdrop" onClick={() => dispatch(toggleNavbar())} />}
 
-            <div className={`sidebar-left ${visibleNavbar ? "open" : ""}`}>
-                <div className="navbar-menu">
-                    {menu?.data.length > 0 && menu?.data.map((m: any) => {
-                        const iconSrc =
-                            typeof m.icon === "string"
-                                ? m.icon
-                                : m.icon && typeof m.icon.src === "string"
-                                    ? m.icon.src
-                                    : null;
-                        return (
-                            <a
-                                key={m.title}
-                                className={`flex align-items-center menu-item ${currentMainMenu === m.title ? "active-menu-image" : ""}`}
-                                onClick={() => handleMenu(m)}
-                                style={{ cursor: 'pointer' }}
-                            >
-                                {m.icon ?
-                                    <Image
-                                        src={iconSrc.startsWith("/") ? iconSrc : `${env("API_URL")}/${iconSrc}`}
-                                        alt={m.title}
-                                        height={30}
-                                        width={30}
-                                        className="relative"
-                                        unoptimized
-                                    />
-                                    :
-                                    <div>
-                                        <Avatar label={m.title.charAt(0)} shape="circle" style={{ backgroundColor: 'var(--primary-color)', fontWeight: 500 }} />
-                                    </div>
-                                }
-                            </a>
-                        )
-                    })}
-                </div>
-
-                <UserProfileMenu></UserProfileMenu>
-            </div>
-            {currentMenu && (
-                <div className={`sidebar-right ${visibleNavbar ? "open" : ""}`}>
-
-                    <div className="flex relative justify-content-between align-items-center py-3 xl:py-4 px-3">
-                        <div className="text-base sidebar-title font-semibold">{currentMainMenu && currentMainMenu}</div>
-                        {/* <button
-                            className="sidebar-toggle-button"
-                            onClick={handleToggle}
+            <aside className={shellClasses}>
+                <div className="solid-sidebar-header">
+                    <div className="solid-workspace-switcher">
+                        <button
+                            type="button"
+                            className="solid-workspace-trigger"
+                            onClick={() => setWorkspaceOpen((prev) => !prev)}
+                            aria-label="Select workspace"
                         >
-                            <img
-                                style={{ cursor: "pointer" }}
-                                src={`/images/menu-toggle.png`}
-                                alt="Solid"
-                            />
-                        </button> */}
+                            <span className="solid-workspace-avatar">
+                                {(selectedWorkspace?.title || "W").slice(0, 1).toUpperCase()}
+                            </span>
+                            {!isCollapsed && (
+                                <>
+                                    <span className="solid-workspace-label-wrap">
+                                        <span className="solid-workspace-label-top">Workspace</span>
+                                        <span className="solid-workspace-label">{selectedWorkspace?.title || "Workspace"}</span>
+                                    </span>
+                                    <span className={`solid-workspace-chevron-dual ${workspaceOpen ? "is-open" : ""}`} aria-hidden="true">
+                                        <svg xmlns="http://www.w3.org/2000/svg" width="14" height="14" viewBox="0 0 14 14" fill="none">
+                                            <path d="M4 6L7 3L10 6" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+                                            <path d="M4 8L7 11L10 8" stroke="currentColor" strokeWidth="1.25" strokeLinecap="round" strokeLinejoin="round" />
+                                        </svg>
+                                    </span>
+                                </>
+                            )}
+                        </button>
+
+                        {workspaceOpen && !isCollapsed && (
+                            <div className="solid-workspace-menu">
+                                {workspaces.map((workspace) => (
+                                    <button
+                                        type="button"
+                                        key={workspace.key || workspace.title}
+                                        className={`solid-workspace-item ${workspace.key === selectedWorkspace?.key ? "is-active" : ""}`}
+                                        onClick={() => selectWorkspace(workspace)}
+                                    >
+                                        <span className="solid-workspace-item-avatar">{workspace.title.slice(0, 1).toUpperCase()}</span>
+                                        <span className="solid-workspace-item-label">{workspace.title}</span>
+                                    </button>
+                                ))}
+                            </div>
+                        )}
                     </div>
-                    {/* <div className="w-full px-3 mb-3" style={{ position: 'relative' }} ref={searchRef}>
-                        <IconField iconPosition="left">
-                            <InputIcon className="pi pi-search text-sm"> </InputIcon>
-                            <InputText placeholder="Search" className="small-input text-sm w-full pr-6" />
-                        </IconField>
-                        <div className="absolute max-h-1rem" style={{ top: 5, right: 20 }}>
-                            <img
-                                style={{ cursor: "pointer", maxHeight: '1.3rem' }}
-                                src="/images/icons/jump-to-icon.png"
-                                alt="Solid"
+
+                </div>
+
+                {!isCollapsed ? (
+                    <>
+                        <div className="solid-sidebar-search-wrap">
+                            <input
+                                type="text"
+                                value={searchTerm}
+                                onChange={(e) => setSearchTerm(e.target.value)}
+                                placeholder="Search in menu..."
+                                className="solid-sidebar-search"
                             />
                         </div>
-                    </div> */}
-                    <div className="px-3 solid-sidebar-menuitems-wrapper">
-                        <NavbarTwoMenu menuItems={currentMenu}></NavbarTwoMenu>
+
+                        <div className="solid-sidebar-tree-wrap">
+                            <SidebarMenuTree items={filteredMenu} pathname={pathname} forceExpand={!!searchTerm.trim()} />
+                        </div>
+                    </>
+                ) : (
+                    <div className="solid-sidebar-collapsed-nav">
+                        {filteredMenu.slice(0, 10).map((item) => (
+                            <SolidLink
+                                key={item.key || item.title}
+                                href={item.path || "#"}
+                                className={`solid-collapsed-item ${pathname === item.path ? "is-active" : ""}`}
+                                title={item.title}
+                            >
+                                {item.title.slice(0, 1).toUpperCase()}
+                            </SolidLink>
+                        ))}
                     </div>
+                )}
+
+                <div className="solid-sidebar-footer">
+                    <UserProfileMenu />
                 </div>
+            </aside>
+
+            {isDesktop && isCollapsed && (
+                <button
+                    type="button"
+                    className="solid-sidebar-hotspot"
+                    onClick={() => setIsCollapsed(false)}
+                    aria-label="Expand sidebar"
+                    title="Expand sidebar"
+                />
             )}
         </>
     );

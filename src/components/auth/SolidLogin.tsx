@@ -7,22 +7,20 @@ import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import { Password } from "primereact/password";
-import { TabPanel, TabView } from 'primereact/tabview';
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import { useInitateLoginMutation } from "../../redux/api/authApi";
-import Image from "../common/Image";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "../../helpers/resendOtpHelper";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { RadioButton } from "primereact/radiobutton";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
 import showToast from "../../helpers/showToast";
+import { AuthTabs } from "./AuthTabs";
 
-interface AuthTabsProps {
+interface AuthModesProps {
     passwordBasedAuth: boolean;
     passwordLessAuth: boolean;
 }
@@ -114,7 +112,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 placeholder={signInValidatorPlaceholder ? signInValidatorPlaceholder : "Email or Username"}
                                 onChange={formik.handleChange}
                                 value={formik.values.identifier}
-                                invalid={!!formik.errors.identifier}
+                                invalid={!!isFormFieldValid(formik, "identifier")}
                                 onBlur={formik.handleBlur}
                             />
                             {isFormFieldValid(formik, "identifier") && <Message
@@ -124,14 +122,17 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                             />}
                         </div>
                         <div className="flex flex-column gap-1 mt-4" style={{}}>
-                            <label htmlFor="password" className="solid-auth-input-label">Password</label>
+                            <div className="flex align-items-center justify-content-between">
+                                <label htmlFor="password" className="solid-auth-input-label">Password</label>
+                                <Link href={"/auth/initiate-forgot-password"} className="solid-auth-inline-link">Forgot your password?</Link>
+                            </div>
                             <Password
                                 id="password"
                                 name="password"
                                 value={formik.values.password}
                                 onChange={formik.handleChange}
                                 toggleMask
-                                invalid={!!formik.errors.password}
+                                invalid={!!isFormFieldValid(formik, "password")}
                                 inputClassName="w-full"
                                 feedback={false}
                             />
@@ -145,19 +146,6 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                     <Checkbox inputId="remember" onChange={(e: any) => setChecked(e.checked)} checked={checked} />
                                     <label htmlFor="remember" className="ml-2">Remember me</label>
                                 </div> */}
-                        <div className="mt-4 flex align-items-center justify-content-between">
-                            {/* <div className="flex align-items-center gap-2">
-                                <Checkbox
-                                    inputId="rememberMe"
-                                    name="rememberMe"
-                                    checked={formik.values.rememberMe}
-                                    onChange={formik.handleChange}
-                                />
-                                <label htmlFor="rememberMe" className="solid-auth-input-label">Remember me</label>
-                            </div> */}
-                            <div></div>
-                            <Link href={"/auth/initiate-forgot-password"} className="solid-auth-input-label font-bold">Forgot Password?</Link>
-                        </div>
                         <div className="mt-4">
                             <Button className="w-full font-light auth-submit-button" label="Sign In" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
                         </div>
@@ -335,7 +323,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 placeholder={fieldConfig.placeholder}
                                 onChange={formik.handleChange}
                                 value={formik.values.identifier}
-                                invalid={!!formik.errors.identifier}
+                                invalid={!!isFormFieldValid(formik, "identifier")}
                                 onBlur={formik.handleBlur}
                             />
                             {isFormFieldValid(formik, "identifier") && <Message
@@ -353,20 +341,17 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
         )
     }
 
-    const AuthTabs: React.FC<AuthTabsProps> = ({ passwordBasedAuth, passwordLessAuth }) => {
+    const RenderAuthModes: React.FC<AuthModesProps> = ({ passwordBasedAuth, passwordLessAuth }) => {
         if (passwordBasedAuth && passwordLessAuth) {
             return (
-                <TabView className="solid-auth-tabview"
+                <AuthTabs
                     activeIndex={activeIndex}
-                    onTabChange={(e) => setActiveIndex(e.index)}
-                >
-                    <TabPanel header="With Password">
-                        <PasswordLogin />
-                    </TabPanel>
-                    <TabPanel header="Without Password">
-                        <PasswordLessLogin />
-                    </TabPanel>
-                </TabView>
+                    onChange={setActiveIndex}
+                    tabs={[
+                        { key: "with-password", label: "With Password", content: <PasswordLogin /> },
+                        { key: "without-password", label: "Without Password", content: <PasswordLessLogin /> },
+                    ]}
+                />
             );
         } else if (passwordBasedAuth) {
             return <PasswordLogin />;
@@ -381,27 +366,15 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
         <div className="">
             <Toast ref={toast} />
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
-                {solidSettingsData?.data?.authPagesLayout === 'center' &&
-                    <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
-                            <Image
-                                alt="solid logo"
-                                src={solidSettingsData?.data?.appLogo || SolidLogo}
-                                className="relative"
-                                fill
-                            />
-                        </div>
-                    </div>
-                }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>Sign In To Your Account</h2>
-                {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
+                <h2 className="solid-auth-title">Login to your account</h2>
+                <p className="solid-auth-helper">Enter your credentials below to login to your account</p>
 
-                <AuthTabs passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} />
+                <RenderAuthModes passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} />
                 {solidSettingsData?.data?.iamGoogleOAuthEnabled &&
                     <>
                         <Divider align="center">
                             <div className="inline-flex align-items-center">
-                                OR
+                                Or continue with
                             </div>
                         </Divider>
                         <SocialMediaLogin />

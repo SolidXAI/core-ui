@@ -1,37 +1,52 @@
-
-// components/PopupContainer.tsx
-import { useSelector, useDispatch } from 'react-redux';
-import { RootState } from '../../types/solid-core';
-import { closePopup } from '../../redux/features/popupSlice';
-import { Dialog } from 'primereact/dialog';
-import { get } from 'lodash';
-import { getExtensionComponent } from '../../helpers/registry';
-import { Button } from 'primereact/button';
-
+import { useEffect } from "react";
+import { useSelector, useDispatch } from "react-redux";
+import { RootState } from "../../types/solid-core";
+import { closePopup } from "../../redux/features/popupSlice";
+import { getExtensionComponent } from "../../helpers/registry";
 
 const SolidPopupContainer = () => {
-    const { isOpen, event } = useSelector((state: RootState) => state.popup);
-    const dispatch = useDispatch();
+  const { isOpen, event } = useSelector((state: RootState) => state.popup);
+  const dispatch = useDispatch();
 
-    if (!isOpen) return null;
+  const handleClose = () => dispatch(closePopup());
+  const isClosable = Boolean(event?.closable);
 
-    const DynamicComponent = getExtensionComponent(event?.action);
+  useEffect(() => {
+    if (!isOpen || !isClosable) return;
 
-    return (
-        <Dialog
-            visible={isOpen}
-            onHide={() => dispatch(closePopup())}
-            closable={false}
-            style={{ width: event.popupWidth ? event.popupWidth : '50vw' }}
-            modal
-            headerClassName='p-0'
-            contentClassName='p-0'
-            contentStyle={{ borderRadius: 6 }}
-            className='solid-common-dialog'
-        >
-            {DynamicComponent && <DynamicComponent {...event} />}
-        </Dialog>
-    );
+    const onKeyDown = (event: KeyboardEvent) => {
+      if (event.key === "Escape") {
+        handleClose();
+      }
+    };
+
+    window.addEventListener("keydown", onKeyDown);
+    return () => window.removeEventListener("keydown", onKeyDown);
+  }, [isOpen, isClosable]);
+
+  if (!isOpen) return null;
+
+  const DynamicComponent = getExtensionComponent(event?.action);
+  const popupWidth = event?.popupWidth ? event.popupWidth : "50vw";
+
+  return (
+    <div
+      className="solid-popup-backdrop"
+      role="presentation"
+      onClick={isClosable ? handleClose : undefined}
+    >
+      <div
+        className="solid-common-dialog solid-popup-surface"
+        role="dialog"
+        aria-modal="true"
+        aria-label="Popup"
+        style={{ width: popupWidth }}
+        onClick={(event) => event.stopPropagation()}
+      >
+        {DynamicComponent && <DynamicComponent {...event} />}
+      </div>
+    </div>
+  );
 };
 
 export default SolidPopupContainer;

@@ -8,21 +8,19 @@ import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import { Password } from "primereact/password";
-import { TabPanel, TabView } from "primereact/tabview";
 import { Toast } from "primereact/toast";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
-import Image from "../common/Image";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "../../helpers/resendOtpHelper";
 import { ProgressSpinner } from "primereact/progressspinner";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
 import showToast from "../../helpers/showToast";
+import { AuthTabs } from "./AuthTabs";
 
-interface AuthTabsProps {
+interface AuthModesProps {
     passwordBasedAuth: boolean;
     passwordLessAuth: boolean;
     showNameFieldsForRegistration?: boolean;
@@ -366,20 +364,21 @@ const SolidRegister = () => {
         )
     }
 
-    const AuthTabs: React.FC<AuthTabsProps> = ({ passwordBasedAuth, passwordLessAuth, showNameFieldsForRegistration }) => {
+    const RenderAuthModes: React.FC<AuthModesProps> = ({ passwordBasedAuth, passwordLessAuth, showNameFieldsForRegistration }) => {
         if (passwordBasedAuth && passwordLessAuth) {
             return (
-                <TabView className="solid-auth-tabview"
+                <AuthTabs
                     activeIndex={activeIndex}
-                    onTabChange={(e) => setActiveIndex(e.index)}
-                >
-                    <TabPanel header="With Password">
-                        <PasswordSignup showNameFieldsForRegistration={showNameFieldsForRegistration} />
-                    </TabPanel>
-                    <TabPanel header="Without Password">
-                        <PasswordLessSignup />
-                    </TabPanel>
-                </TabView>
+                    onChange={setActiveIndex}
+                    tabs={[
+                        {
+                            key: "with-password",
+                            label: "With Password",
+                            content: <PasswordSignup showNameFieldsForRegistration={showNameFieldsForRegistration} />,
+                        },
+                        { key: "without-password", label: "Without Password", content: <PasswordLessSignup /> },
+                    ]}
+                />
             );
         } else if (passwordBasedAuth) {
             return <PasswordSignup showNameFieldsForRegistration={showNameFieldsForRegistration} />;
@@ -404,26 +403,15 @@ const SolidRegister = () => {
                         </div>
                     </div>
                 )}
-                {solidSettingsData?.data?.authPagesLayout === 'center' &&
-                    <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
-                            <Image
-                                alt="solid logo"
-                                src={solidSettingsData?.data?.appLogo || SolidLogo}
-                                className="relative"
-                                fill
-                            />
-                        </div>
-                    </div>
-                }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>Sign Up</h2>
+                <h2 className="solid-auth-title">Create your account</h2>
+                <p className="solid-auth-helper">Enter your details below to create your account</p>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
-                <AuthTabs passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} showNameFieldsForRegistration={solidSettingsData?.data?.showNameFieldsForRegistration} />
+                <RenderAuthModes passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} showNameFieldsForRegistration={solidSettingsData?.data?.showNameFieldsForRegistration} />
                 {solidSettingsData?.data?.iamGoogleOAuthEnabled &&
                     <>
                         <Divider align="center">
                             <div className="inline-flex align-items-center">
-                                or
+                                Or continue with
                             </div>
                         </Divider>
                         <SocialMediaLogin />
@@ -432,7 +420,7 @@ const SolidRegister = () => {
             </div>
             <div className="text-center mt-3 md:mt-4">
                 <div className="text-sm text-400 secondary-dark-color">
-                    Already have an account ? <Link className="font-bold" href="/auth/login">Sign In</Link>
+                    Already have an account? <Link className="font-bold" href="/auth/login">Sign In</Link>
                 </div>
             </div>
         </div>

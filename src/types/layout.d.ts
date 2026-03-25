@@ -39,6 +39,9 @@ export type LayoutConfig = {
 export interface LayoutContextProps {
     layoutConfig: LayoutConfig;
     setLayoutConfig: Dispatch<SetStateAction<LayoutConfig>>;
+    themeMode: "light" | "dark";
+    setThemeMode: Dispatch<SetStateAction<"light" | "dark">>;
+    toggleThemeMode: () => void;
     layoutState: LayoutState;
     setLayoutState: Dispatch<SetStateAction<LayoutState>>;
     onMenuToggle: () => void;

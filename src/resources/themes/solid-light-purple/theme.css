@@ -1032,17 +1032,6 @@
     outline-color: transparent;
   }
 
-  .solid-auth-theme-wrapper .p-inputtext {
-    color: var(--auth-title-color) !important;
-    background: rgba(255, 255, 255, 0.20) !important;
-    border: 1px solid var(--solid-primary-border) !important;
-    border-radius: 8px !important;
-  }
-
-  .solid-auth-theme-wrapper .p-inputtext::placeholder {
-    color: #666666 !important;
-  }
-
   .p-inputtext:enabled:hover {
     border-color: #722ED1;
   }

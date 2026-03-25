@@ -1,3 +1,5 @@
+import './styles';
+
 export { AutoCompleteField } from './components/common/AutoCompleteField';
 export { CancelButton, SolidCancelButton } from './components/common/CancelButton';
 // export * from './components/common/CodeEditor';
@@ -385,6 +387,7 @@ export { default as SolidInitialLoginOtp } from './components/auth/SolidInitialL
 export { default as SolidInitiateRegisterOtp } from './components/auth/SolidInitiateRegisterOtp';
 export { GoogleAuthChecking } from './components/auth/GoogleAuthChecking';
 export { ForgotPasswordThankYou } from './components/auth/ForgotPasswordThankYou';
+export { SolidButton, SolidTab, SolidTabGroup } from './components/shad-cn-ui';
 
 // redux
 export { default as authenticationReducer } from './redux/features/authSlice';

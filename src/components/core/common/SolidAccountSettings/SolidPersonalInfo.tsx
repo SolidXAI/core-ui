@@ -1,304 +1,350 @@
-
-
+import { useMemo, useRef, useState } from "react";
+import { useFormik } from "formik";
 import { useDeleteMediaMutation } from "../../../../redux/api/mediaApi";
 import { useGetUserQuery, useUpdateUserProfileMutation } from "../../../../redux/api/userApi";
-import { useFormik } from "formik";
-import { AutoComplete } from "primereact/autocomplete";
-import { Avatar } from "primereact/avatar";
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
-import { InputText } from "primereact/inputtext";
-import { Toast } from "primereact/toast";
-import { useRef, useState } from "react";
-import styles from './SolidAccountSettings.module.css'
+import { useSession } from "../../../../hooks/useSession";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
-import showToast from "../../../../helpers/showToast";
-import { useSession } from '../../../../hooks/useSession'
+import { SolidButton } from "../../../shad-cn-ui/SolidButton";
+import styles from "./SolidAccountSettings.module.css";
+
+type ToastState = {
+  id: number;
+  severity: "success" | "error" | "info" | "warn";
+  summary: string;
+  detail: string;
+  sticky?: boolean;
+  life?: number;
+} | null;
+
+const ToastMessage = ({ toast, onClose }: { toast: ToastState; onClose: () => void }) => {
+  if (!toast) return null;
+  const severityClass =
+    toast.severity === "error"
+      ? styles.toastError
+      : toast.severity === "success"
+        ? styles.toastSuccess
+        : toast.severity === "warn"
+          ? styles.toastWarn
+          : styles.toastInfo;
+
+  return (
+    <div className={`${styles.toast} ${severityClass}`} role="status" aria-live="polite">
+      <div>
+        <div className={styles.toastTitle}>{toast.summary}</div>
+        <div className={styles.toastBody}>{toast.detail}</div>
+      </div>
+      <button type="button" className={styles.toastClose} onClick={onClose} aria-label="Close notification">
+        ×
+      </button>
+    </div>
+  );
+};
+
+const ConfirmDialog = ({
+  visible,
+  title,
+  text,
+  onConfirm,
+  onCancel,
+}: {
+  visible: boolean;
+  title: string;
+  text: string;
+  onConfirm: () => void;
+  onCancel: () => void;
+}) => {
+  if (!visible) return null;
+  return (
+    <div className={styles.confirmBackdrop} role="presentation" onClick={onCancel}>
+      <div
+        className={styles.confirmModal}
+        role="dialog"
+        aria-modal="true"
+        aria-label={title}
+        onClick={(event) => event.stopPropagation()}
+      >
+        <div className={styles.confirmHeader}>{title}</div>
+        <div className={styles.confirmBody}>{text}</div>
+        <div className={styles.confirmActions}>
+          <SolidButton size="sm" variant="destructive" onClick={onConfirm}>
+            Confirm
+          </SolidButton>
+          <SolidButton size="sm" variant="outline" onClick={onCancel}>
+            Cancel
+          </SolidButton>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export const SolidPersonalInfo = () => {
-    const fileInputRef = useRef<HTMLInputElement>(null);
-    const toast = useRef<Toast>(null);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const [toast, setToast] = useState<ToastState>(null);
 
-    const [previewImage, setPreviewImage] = useState<string | null>(null);
-    const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
-    const [replaceDialogVisible, setReplaceDialogVisible] = useState(false);
-    const [pendingFile, setPendingFile] = useState<File | null>(null);
+  const [previewImage, setPreviewImage] = useState<string | null>(null);
+  const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
+  const [replaceDialogVisible, setReplaceDialogVisible] = useState(false);
+  const [pendingFile, setPendingFile] = useState<File | null>(null);
 
-    const { data: session, status } = useSession();
-    const user = session?.user;
-    const userId = user?.id;
+  const { data: session } = useSession();
+  const userId = session?.user?.id;
 
-    const { data: userData, refetch } = useGetUserQuery(userId);
+  const { data: userData, refetch } = useGetUserQuery(userId, { skip: !userId });
+  const [deleteMedia] = useDeleteMediaMutation();
+  const [updateUser] = useUpdateUserProfileMutation();
 
-    const [
-        deleteMedia,
-    ] = useDeleteMediaMutation();
-    const [updateUser] = useUpdateUserProfileMutation();
-
-    const initialValues = {
-        fullName: userData?.data?.fullName ?? "",
-        profilePicture: userData?.data?._media?.profilePicture[0]?._full_url ?? null,
-    };
-
-    const formik = useFormik({
-        initialValues,
-        enableReinitialize: true,
-        onSubmit: async (values) => {
-            try {
-                const formData = new FormData();
-                if (values.fullName !== initialValues.fullName) {
-                    formData.append("fullName", values.fullName);
-                }
-
-                if (values.profilePicture && values.profilePicture instanceof File) {
-                    formData.append("profilePicture", values.profilePicture);
-                }
-
-                if (!formData.has("fullName") && !formData.has("profilePicture")) {
-                    showToast(toast, "info", ERROR_MESSAGES.NO_CHANGE, ERROR_MESSAGES.NO_UPDATE_MADE);
-                    return;
-                }
-
-                const response = await updateUser({ data: formData }).unwrap();
-                if (response?.statusCode === 200) {
-                    showToast(toast, "success", ERROR_MESSAGES.PROFILE_SAVED, ERROR_MESSAGES.PROFILE_SAVED_SUCCESSFULLY);
-                    refetch();
-                    formik.resetForm();
-                    setPreviewImage(null);
-                } else {
-                    showToast(toast, "error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_UPDATED_PROFILE);
-                }
-            } catch (error) {
-                showToast(toast, "error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
-            }
-        },
+  const notify = (
+    severity: "success" | "error" | "info" | "warn",
+    summary: string,
+    detail: string,
+    opts?: { sticky?: boolean; life?: number }
+  ) => {
+    setToast({
+      id: Date.now(),
+      severity,
+      summary,
+      detail,
+      sticky: opts?.sticky,
+      life: opts?.life ?? 3000,
     });
+  };
 
-    const getInitials = (value: string) => {
-        if (!value) return "";
+  const initialValues = useMemo(
+    () => ({
+      fullName: userData?.data?.fullName ?? "",
+      profilePicture: userData?.data?._media?.profilePicture?.[0]?._full_url ?? null,
+    }),
+    [userData]
+  );
 
-        const email = value.includes('@') ? value.split('@')[0] : value;
-        return email[0]?.toUpperCase() || "";
-    };
-
-    const getColorFromInitials = (initials: string) => {
-        let hash = 0;
-        for (let i = 0; i < initials.length; i++) {
-            hash = initials.charCodeAt(i) + ((hash << 5) - hash);
+  const formik = useFormik({
+    initialValues,
+    enableReinitialize: true,
+    onSubmit: async (values) => {
+      try {
+        const formData = new FormData();
+        if (values.fullName !== initialValues.fullName) {
+          formData.append("fullName", values.fullName);
         }
-        const hue = Math.abs(hash) % 360;
-        return `hsl(${hue}, 60%, 60%)`;
-    };
-    const value = userData?.data?.email;
-    const initials = getInitials(value);
-    const bgColor = getColorFromInitials(initials);
+        if (values.profilePicture && values.profilePicture instanceof File) {
+          formData.append("profilePicture", values.profilePicture);
+        }
 
-    const handleFileChange = (file: File) => {
-        const existing = userData?.data?._media?.profilePicture?.[0];
-        if (existing) {
-            setPendingFile(file);
-            setReplaceDialogVisible(true);
+        if (!formData.has("fullName") && !formData.has("profilePicture")) {
+          notify("info", ERROR_MESSAGES.NO_CHANGE, ERROR_MESSAGES.NO_UPDATE_MADE);
+          return;
+        }
+
+        const response = await updateUser({ data: formData }).unwrap();
+        if (response?.statusCode === 200) {
+          notify("success", ERROR_MESSAGES.PROFILE_SAVED, ERROR_MESSAGES.PROFILE_SAVED_SUCCESSFULLY);
+          refetch();
+          formik.resetForm();
+          setPreviewImage(null);
         } else {
-            formik.setFieldValue("profilePicture", file);
-            setPreviewImage(URL.createObjectURL(file));
+          notify("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_UPDATED_PROFILE);
         }
-    };
+      } catch {
+        notify("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
+      }
+    },
+  });
 
+  const initials = useMemo(() => {
+    const value = userData?.data?.email || "";
+    if (!value) return "U";
+    const email = value.includes("@") ? value.split("@")[0] : value;
+    return email[0]?.toUpperCase() || "U";
+  }, [userData]);
 
-    const handleDeleteAvatar = () => {
-        const existing = userData?.data?._media?.profilePicture?.[0];
-        if (existing) {
-            setDeleteDialogVisible(true);
-        } else {
-            formik.setFieldValue("profilePicture", null);
-            setPreviewImage(null);
-        }
-    };
+  const avatarBg = useMemo(() => {
+    let hash = 0;
+    for (let i = 0; i < initials.length; i++) {
+      hash = initials.charCodeAt(i) + ((hash << 5) - hash);
+    }
+    const hue = Math.abs(hash) % 360;
+    return `hsl(${hue}, 60%, 60%)`;
+  }, [initials]);
 
-    const confirmReplace = async () => {
-        const existing = userData?.data?._media?.profilePicture?.[0];
-        try {
-            if (existing?.id) {
-                await deleteMedia(existing.id).unwrap();
-            }
+  const liveAvatarUrl = previewImage || userData?.data?._media?.profilePicture?.[0]?._full_url || null;
+  const roleLabels = userData?.data?.roles?.map((role: any) => role.name) || [];
 
-            if (pendingFile) {
-                formik.setFieldValue("profilePicture", pendingFile);
-                setTimeout(() => {
-                    formik.submitForm();
-                }, 0);
-            }
+  const handleFileChange = (file: File) => {
+    const existing = userData?.data?._media?.profilePicture?.[0];
+    if (existing) {
+      setPendingFile(file);
+      setReplaceDialogVisible(true);
+      return;
+    }
+    formik.setFieldValue("profilePicture", file);
+    setPreviewImage(URL.createObjectURL(file));
+  };
 
-        } catch (error) {
-            showToast(toast, "error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_DELETED_IMAGE);
-        }
+  const handleDeleteAvatar = () => {
+    const existing = userData?.data?._media?.profilePicture?.[0];
+    if (existing) {
+      setDeleteDialogVisible(true);
+      return;
+    }
+    formik.setFieldValue("profilePicture", null);
+    setPreviewImage(null);
+  };
 
-        setReplaceDialogVisible(false);
-        setPendingFile(null);
-    };
+  const confirmReplace = async () => {
+    const existing = userData?.data?._media?.profilePicture?.[0];
+    try {
+      if (existing?.id) {
+        await deleteMedia(existing.id).unwrap();
+      }
+      if (pendingFile) {
+        formik.setFieldValue("profilePicture", pendingFile);
+        setPreviewImage(URL.createObjectURL(pendingFile));
+        setTimeout(() => {
+          formik.submitForm();
+        }, 0);
+      }
+    } catch {
+      notify("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_DELETED_IMAGE);
+    } finally {
+      setReplaceDialogVisible(false);
+      setPendingFile(null);
+    }
+  };
 
-    const confirmDelete = async () => {
-        const existing = userData?.data?._media?.profilePicture?.[0];
-        if (existing?.id) {
-            try {
-                await deleteMedia(existing.id).unwrap();
-                showToast(toast, "success", ERROR_MESSAGES.DELETED, ERROR_MESSAGES.PROFILE_PICTURE_REMOVE);
-                refetch();
-            } catch {
-                showToast(toast, "error", ERROR_MESSAGES.ERROR, ERROR_MESSAGES.FAILED_DELETED_IMAGE);
-            }
-        }
+  const confirmDelete = async () => {
+    const existing = userData?.data?._media?.profilePicture?.[0];
+    if (existing?.id) {
+      try {
+        await deleteMedia(existing.id).unwrap();
+        notify("success", ERROR_MESSAGES.DELETED, ERROR_MESSAGES.PROFILE_PICTURE_REMOVE);
+        refetch();
+      } catch {
+        notify("error", ERROR_MESSAGES.ERROR, ERROR_MESSAGES.FAILED_DELETED_IMAGE);
+      }
+    }
 
-        formik.setFieldValue("profilePicture", null);
-        setPreviewImage(null);
-        setDeleteDialogVisible(false);
-    };
+    formik.setFieldValue("profilePicture", null);
+    setPreviewImage(null);
+    setDeleteDialogVisible(false);
+  };
 
-    return (
-        <form onSubmit={formik.handleSubmit} className="h-full flex flex-column justify-content-between">
-            <Toast ref={toast} />
-            <div>
-                <div>
-                    <label className="form-field-label mb-2 font-bold">Profile Picture</label>
-                    <div className="flex align-items-center gap-3">
-                        {previewImage ? (
-                            <Avatar image={previewImage} shape="circle"
-                                style={{
-                                    height: '5rem',
-                                    width: '5rem'
-                                }}
-                            />
-                        ) : userData?.data?._media?.profilePicture?.[0]?._full_url ? (
-                            <div className="relative">
-                                <Avatar
-                                    image={userData?.data?._media?.profilePicture?.[0]?._full_url}
-                                    shape="circle"
-                                    style={{
-                                        height: '5rem',
-                                        width: '5rem'
-                                    }}
-                                />
-                                <div className={styles.SolidRemoveProfile} onClick={handleDeleteAvatar}>
-                                    <span className="pi pi-times" />
-                                </div>
-                            </div>
-                        ) : (
-                            <Avatar
-                                label={initials}
-                                size="xlarge"
-                                shape="circle"
-                                style={{
-                                    backgroundColor: bgColor,
-                                    color: '#ffffff',
-                                    height: '5rem',
-                                    width: '5rem'
-                                }}
-                            />
-                        )}
+  return (
+    <>
+      <form onSubmit={formik.handleSubmit} className={styles.accountForm}>
+        <ToastMessage toast={toast} onClose={() => setToast(null)} />
 
-                        <div className="flex gap-2">
-                            <Button
-                                type="button"
-                                size="small"
-                                severity="secondary"
-                                label="Upload Avatar"
-                                outlined
-                                className="small-button"
-                                onClick={() => fileInputRef.current?.click()}
-                            />
-                            <input
-                                ref={fileInputRef}
-                                type="file"
-                                accept=".jpg,.jpeg,.png,.svg"
-                                hidden
-                                onChange={(e) => {
-                                    const file = e.target.files?.[0];
-                                    if (file) handleFileChange(file);
-                                }}
-                            />
-                        </div>
-                    </div>
-                </div>
-                <div className='mt-4 mb-2 sm:mb-0' style={{ borderBottom: '1px dashed #D8E2EA' }}></div>
-                <div className="mt-4">
-                    <label className="form-field-label mb-2 font-bold">Details</label>
-                    <div className="grid">
-                        <div className="col-12 md:col-8 lg:col-5">
-                            <label className="form-field-label mb-2">Name</label>
-                            <InputText
-                                name="fullName"
-                                value={formik.values.fullName}
-                                onChange={formik.handleChange}
-                                className="w-full"
-                            />
-                        </div>
-                        <div className="col-12 md:col-8 lg:col-5">
-                            <label className="form-field-label mb-2">Email</label>
-                            <InputText disabled placeholder={userData?.data?.email} value={userData?.data?.email}
-                                className="w-full" />
-                        </div>
-                        <div className="col-12 md:col-8 lg:col-5">
-                            <label className="form-field-label mb-2">Contact Number</label>
-                            <InputText disabled placeholder={userData?.data?.mobile} value={userData?.data?.mobile}
-                                className="w-full" />
-                        </div>
-                        <div className="col-12 md:col-8 lg:col-5">
-                            <label className="form-field-label mb-2">Role</label>
-                            <AutoComplete
-                                multiple
-                                disabled
-                                value={userData?.data?.roles?.map((role: any) => role.name) || []}
-                            />
+        <div className={styles.accountScroll}>
+          <div className={styles.sectionTitle}>Profile Picture</div>
 
-                        </div>
-                    </div>
-                </div>
+          <div className={styles.avatarRow}>
+            <div className={styles.avatarShell}>
+              {liveAvatarUrl ? (
+                <img src={liveAvatarUrl} alt="Profile" className={styles.avatarImage} />
+              ) : (
+                <span className={styles.avatarFallback} style={{ backgroundColor: avatarBg }}>
+                  {initials}
+                </span>
+              )}
+
+              {liveAvatarUrl ? (
+                <button
+                  type="button"
+                  className={styles.avatarRemove}
+                  onClick={handleDeleteAvatar}
+                  aria-label="Delete profile picture"
+                >
+                  ×
+                </button>
+              ) : null}
             </div>
-            <div>
-                <Button
-                    type="submit"
-                    size="small"
-                    label="Save"
-                />
+
+            <SolidButton
+              type="button"
+              size="sm"
+              variant="outline"
+              className={styles.accountSecondaryBtn}
+              onClick={() => fileInputRef.current?.click()}
+            >
+              Upload Avatar
+            </SolidButton>
+
+            <input
+              ref={fileInputRef}
+              type="file"
+              accept=".jpg,.jpeg,.png,.svg"
+              hidden
+              onChange={(event) => {
+                const file = event.target.files?.[0];
+                if (file) handleFileChange(file);
+                event.currentTarget.value = "";
+              }}
+            />
+          </div>
+
+          <div className={styles.dashedDivider} />
+
+          <div className={styles.sectionTitle}>Details</div>
+          <div className={styles.grid}>
+            <div className={styles.field}>
+              <label htmlFor="fullName">Name</label>
+              <input
+                id="fullName"
+                name="fullName"
+                value={formik.values.fullName}
+                onChange={formik.handleChange}
+                className={styles.input}
+              />
             </div>
-            <Dialog
-                header={<h5 className='m-0 font-bold'>Replace Profile Picture</h5>}
-                visible={replaceDialogVisible}
-                headerClassName="px-4 py-3 secondary-border-bottom"
-                contentClassName="p-0"
-                style={{ width: '25vw' }}
-                className="solid-confirm-dialog "
-                modal
-                onHide={() => setReplaceDialogVisible(false)}
-            >
-                <div className="p-4">
-                    Do you want to replace the existing profile picture?
-                    <div className="flex justify-content-start mt-4 gap-2">
-                        <Button size="small" label="Confirm" severity="danger" onClick={confirmReplace} />
-                        <Button size="small" outlined label="Cancel" onClick={() => setReplaceDialogVisible(false)} />
-                    </div>
-                </div>
-            </Dialog>
 
-            <Dialog
-                header={<h5 className='m-0 font-bold'>Delete Profile Picture</h5>}
-                visible={deleteDialogVisible}
-                headerClassName="px-4 py-3 secondary-border-bottom"
-                contentClassName="p-0"
-                style={{ width: '25vw' }}
-                modal
-                className="solid-confirm-dialog "
-                onHide={() => setDeleteDialogVisible(false)}
-            >
-                <div className="p-4">
-                    Do you want to delete your profile picture?
-                    <div className="flex justify-content-start mt-4 gap-2">
-                        <Button size="small" label="Confirm" severity="danger" onClick={confirmDelete} />
-                        <Button size="small" outlined label="Cancel" onClick={() => setDeleteDialogVisible(false)} />
-                    </div>
-                </div>
-            </Dialog>
+            <div className={styles.field}>
+              <label htmlFor="email">Email</label>
+              <input id="email" disabled value={userData?.data?.email || ""} className={styles.input} />
+            </div>
 
-        </form>
-    )
-}
+            <div className={styles.field}>
+              <label htmlFor="mobile">Contact Number</label>
+              <input id="mobile" disabled value={userData?.data?.mobile || ""} className={styles.input} />
+            </div>
+
+            <div className={styles.field}>
+              <label>Role</label>
+              <div className={styles.roleBox}>
+                {roleLabels.map((name: string) => (
+                  <span key={name} className={styles.roleChip}>
+                    {name}
+                  </span>
+                ))}
+              </div>
+            </div>
+          </div>
+        </div>
+
+        <div className={styles.footerActions}>
+          <SolidButton type="submit" size="sm" loading={formik.isSubmitting}>
+            Save
+          </SolidButton>
+        </div>
+      </form>
+
+      <ConfirmDialog
+        visible={replaceDialogVisible}
+        title="Replace Profile Picture"
+        text="Do you want to replace the existing profile picture?"
+        onConfirm={confirmReplace}
+        onCancel={() => {
+          setReplaceDialogVisible(false);
+          setPendingFile(null);
+        }}
+      />
+
+      <ConfirmDialog
+        visible={deleteDialogVisible}
+        title="Delete Profile Picture"
+        text="Do you want to delete your profile picture?"
+        onConfirm={confirmDelete}
+        onCancel={() => setDeleteDialogVisible(false)}
+      />
+    </>
+  );
+};

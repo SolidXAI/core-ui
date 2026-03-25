@@ -1,20 +1,17 @@
 import Link from "../common/Link";
 import { usePathname } from "../../hooks/usePathname";
 import { useRouter } from "../../hooks/useRouter";
-import { PrimeReactContext } from "primereact/api";
-import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { useEffect, useState } from "react";
-import { useDispatch, useSelector } from "react-redux";
 import Image from "../common/Image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { Divider } from "primereact/divider";
-import AuthScreenRightBackgroundImage from '../../resources/images/auth/solid-left-layout-bg.png';
-import AuthScreenLeftBackgroundImage from '../../resources/images/auth/solid-right-layout-bg.png';
 import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
+import { SolidButton } from "../shad-cn-ui";
 
+const SHADCN_PLACEHOLDER_IMAGE = "https://ui.shadcn.com/placeholder.svg";
 
 export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
@@ -43,9 +40,10 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     //     }
     // }, [solidSettingsData]);
     useEffect(() => {
-        // Fetch settings if not already available
         trigger("");
+    }, [trigger]);
 
+    useEffect(() => {
         const allowPublicRegistration = solidSettingsData?.data?.allowPublicRegistration;
         if (allowPublicRegistration === false) {
             setAllowRegistration(false);
@@ -58,7 +56,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
             setAllowRegistration(true);
             setIsRestricted(false);
         }
-    }, [solidSettingsData, pathname, trigger]);
+    }, [solidSettingsData, pathname]);
 
     if (allowRegistration === null && pathname === "/auth/register") {
         console.log(`AuthLayout returning null because allowRegistration is null for register route`);
@@ -77,9 +75,9 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         let src = '';
 
         if (layout === 'left') {
-            src = solidSettingsData?.data?.authScreenLeftBackgroundImage || (AuthScreenLeftBackgroundImage as any).src || AuthScreenLeftBackgroundImage;
+            src = solidSettingsData?.data?.authScreenLeftBackgroundImage || SHADCN_PLACEHOLDER_IMAGE;
         } else if (layout === 'right') {
-            src = solidSettingsData?.data?.authScreenRightBackgroundImage || (AuthScreenRightBackgroundImage as any).src || AuthScreenRightBackgroundImage;
+            src = solidSettingsData?.data?.authScreenRightBackgroundImage || SHADCN_PLACEHOLDER_IMAGE;
         } else if (layout === 'center') {
             src = solidSettingsData?.data?.authScreenCenterBackgroundImage || (AuthScreenCenterBackgroundImage as any).src || AuthScreenCenterBackgroundImage;
         }
@@ -93,84 +91,88 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
         return src;
     };
 
-    return (
-        <div className={`solid-auth-theme-wrapper ${solidSettingsData?.data?.authPagesLayout || 'center'}`}
-            style={
-                solidSettingsData?.data?.authPagesLayout === 'center' ? { backgroundImage: `url(${solidSettingsData?.data?.authScreenCenterBackgroundImage || (AuthScreenCenterBackgroundImage as any)?.src || AuthScreenCenterBackgroundImage})` } : {}
-            }
-        >
-            <div className={`${solidSettingsData?.data?.authPagesLayout !== 'center' ? 'grid w-full h-full m-0' : ''}`}>
-                {solidSettingsData?.data?.authPagesLayout === 'left' &&
-                    <div className='col-12 lg:col-7 xl:col-6  flex align-items-center justify-content-center solid-login-dark-bg'>
-                        <div className="w-full">
-                            {solidSettingsData?.data?.appLogoPosition === "in_form_view" &&
-                                <div className="flex justify-content-center">
-                                    <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
-                                        <Image
-                                            alt="solid logo"
-                                            src={solidSettingsData?.data?.appLogo || SolidLogo}
-                                            className="relative"
-                                            fill
-                                        />
-                                    </div>
-                                </div>
-                            }
-                            {authChildren}
-                        </div>
-                    </div>
-                }
+    const normalizeAssetUrl = (src?: string) => {
+        if (!src) return "";
+        const isBlobOrAbsolute = src.startsWith("blob:") || src.startsWith("http");
+        if (isBlobOrAbsolute || src.startsWith("/")) return src;
+        return `${env("API_URL")}/${src}`;
+    };
 
-                <div
-                    className={`hidden lg:flex ${solidSettingsData?.data?.authPagesLayout !== 'center' ? 'col-5 xl:col-6 position-relative' : ''} 
-                                ${solidSettingsData?.data?.authPagesLayout === 'left' ? 'solid-left-layout' : ''} 
-                                ${solidSettingsData?.data?.authPagesLayout === 'right' ? 'solid-right-layout' : ''}`.trim()}
-                    style={{ backgroundImage: `url(${solidSideBanner()})` }}
-                >
-                    {solidSettingsData?.data?.appLogoPosition === "in_image_view" && solidSettingsData?.data?.authPagesLayout !== 'center' &&
-                        <div className={`solid-logo flex align-items-center gap-3 ${solidSettingsData?.data?.appLogoPosition}`}>
-                            <Image
-                                alt="solid logo"
-                                src={solidSettingsData?.data?.appLogo || SolidLogo}
-                                className="relative"
-                                fill
-                            />
-                        </div>
-                    }
-                    {solidSettingsData?.data?.showAuthContent && solidSettingsData?.data?.authPagesLayout !== 'center' &&
-                        <div className="w-full" style={{ zIndex: 1 }}>
-                            <div className="grid">
-                                <div className="col-8 mx-auto">
-                                    {solidSettingsData?.data?.appSubtitle && <h1 className="solid-auth-image-subtitle m-0">{solidSettingsData?.data?.appSubtitle}</h1>}
-                                    {solidSettingsData?.data?.appTitle && <h1 className="solid-auth-image-title mt-0">{solidSettingsData?.data?.appTitle}</h1>}
-                                    {solidSettingsData?.data?.appDescription && <p className="solid-auth-image-helper-text">{solidSettingsData?.data?.appDescription}</p>}
-                                </div>
-                            </div>
-                        </div>
-                    }
+    const authLogoSrc = normalizeAssetUrl(solidSettingsData?.data?.appLogo || "");
+    const appName = solidSettingsData?.data?.appTitle || "SolidX";
+
+    const renderBrand = (align: "center" | "start" = "start") => (
+        <a href="#" className={`solid-auth-brand ${align === "center" ? "is-center" : ""}`} aria-label={appName}>
+            <span className="solid-auth-brand-icon">
+                {authLogoSrc ? (
+                    <img src={authLogoSrc} alt={appName} />
+                ) : (
+                    <span className="solid-auth-brand-fallback">{appName.slice(0, 1).toUpperCase()}</span>
+                )}
+            </span>
+            <span className="solid-auth-brand-text">{appName}</span>
+        </a>
+    );
+
+    const authLayout = solidSettingsData?.data?.authPagesLayout || "center";
+    const authTheme = solidSettingsData?.data?.authPagesTheme === "dark" ? "dark" : "light";
+    const isCenter = authLayout === "center";
+    const isLeft = authLayout === "left";
+    const isRight = authLayout === "right";
+
+    const formPane = (
+        <div className="solid-auth-form-pane solid-login-dark-bg">
+            <div className="solid-auth-form-pane-inner">
+                {renderBrand("start")}
+                {authChildren}
+            </div>
+        </div>
+    );
+
+    const imagePane = (
+        <div
+            className={`solid-auth-image-pane position-relative ${isLeft ? "solid-left-layout pane-on-right" : "solid-right-layout pane-on-left"}`.trim()}
+            style={{ backgroundImage: `url(${solidSideBanner()})` }}
+        >
+            {solidSettingsData?.data?.appLogoPosition === "in_image_view" &&
+                <div className={`solid-logo flex align-items-center gap-3 ${solidSettingsData?.data?.appLogoPosition}`}>
+                    <Image
+                        alt="solid logo"
+                        src={solidSettingsData?.data?.appLogo || SolidLogo}
+                        className="relative"
+                        fill
+                    />
                 </div>
-                {solidSettingsData?.data?.authPagesLayout === 'center' && <div className="solid-center-layout">
-                    {authChildren}
-                </div>}
-                {solidSettingsData?.data?.authPagesLayout === 'right' &&
-                    <div className='col-12 lg:col-7 xl:col-6 flex align-items-center justify-content-center solid-login-dark-bg'>
-                        <div className="w-full">
-                            {solidSettingsData?.data?.appLogoPosition === "in_form_view" &&
-                                <div className="flex justify-content-center">
-                                    <div className={`solid-logo flex align-items-center gap-3 ${solidSettingsData?.data?.appLogoPosition}`}>
-                                        <Image
-                                            alt="solid logo"
-                                            src={solidSettingsData?.data?.appLogo || SolidLogo}
-                                            className="relative"
-                                            fill
-                                        />
-                                    </div>
-                                </div>
-                            }
-                            {authChildren}
+            }
+            {solidSettingsData?.data?.showAuthContent &&
+                <div className="w-full" style={{ zIndex: 1 }}>
+                    <div className="grid">
+                        <div className="col-8 mx-auto">
+                            {solidSettingsData?.data?.appSubtitle && <h1 className="solid-auth-image-subtitle m-0">{solidSettingsData?.data?.appSubtitle}</h1>}
+                            {solidSettingsData?.data?.appTitle && <h1 className="solid-auth-image-title mt-0">{solidSettingsData?.data?.appTitle}</h1>}
+                            {solidSettingsData?.data?.appDescription && <p className="solid-auth-image-helper-text">{solidSettingsData?.data?.appDescription}</p>}
                         </div>
                     </div>
-                }
-            </div>
+                </div>
+            }
+        </div>
+    );
+
+    return (
+        <div className={`solid-auth-theme-wrapper ${authLayout} auth-theme-${authTheme}`} data-auth-theme={authTheme}>
+            {!isCenter && (
+                <div className="solid-auth-split">
+                    {isLeft && formPane}
+                    {imagePane}
+                    {isRight && formPane}
+                </div>
+            )}
+            {isCenter && <div className="solid-center-layout">
+                <div className="solid-auth-center-stack">
+                    {renderBrand("center")}
+                    {authChildren}
+                </div>
+            </div>}
             {/* {solidSettingsData?.data?.showLegalLinks === true && */}
             <div className={`absolute hidden md:flex ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'solid-auth-footer flex flex-column sm:flex-row align-items-center justify-content-between' : 'solid-auth-footer-2 grid'}`}>
                 {solidSettingsData?.data?.authPagesLayout !== 'left' &&
@@ -211,7 +213,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                 className="solid-confirm-dialog "
                 footer={
                     < div className="flex align-items-center justify-content-start" >
-                        <Button label="Close" onClick={handleRegistration} size="small" />
+                        <SolidButton size="sm" onClick={handleRegistration}>Close</SolidButton>
                     </div >
                 }
                 draggable={false}
