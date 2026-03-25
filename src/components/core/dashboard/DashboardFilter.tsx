@@ -303,7 +303,7 @@ export const DashboardFilter: React.FC<DashboardFilterProps> = ({
 
         <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={visible} style={{ width: '50vw' }} breakpoints={{ '1024px': '75vw', '991px': '90vw', '767px': '94w', '250px': '96vw' }} onHide={onHide}>
             <div className="flex align-items-center justify-content-between px-3">
-                <h5 className="solid-custom-title m-0">Add Custom Filter</h5>
+                <h5 className="solid-custom-title m-0">Add Dashboard Filter</h5>
                 <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={onHide} />
             </div>
             <Divider className="m-0" />
@@ -313,12 +313,12 @@ export const DashboardFilter: React.FC<DashboardFilterProps> = ({
 
                         {rules.map((rule) => (
                             <div key={rule.id} className="grid grid-nogutter align-items-start">
-                                <div className="col-12 md:col-3 pr-2">
+                                <div className="col-12 md:col-4 pr-2">
                                     <div className="p-inputtext p-disabled w-full flex align-items-center mb-2 md:mb-0" style={{ minHeight: '38px' }}>
                                         {rule.fieldName}
                                     </div>
                                 </div>
-                                <div className="col-12 md:col-3 pr-2">
+                                <div className="col-12 md:col-4 pr-2">
                                     <Dropdown
                                         value={rule.matchMode}
                                         onChange={(e: any) => handleChange(rule.id, 'matchMode', e.value)}
@@ -329,7 +329,7 @@ export const DashboardFilter: React.FC<DashboardFilterProps> = ({
                                         className="p-inputtext-sm w-full"
                                     />
                                 </div>
-                                <div className="col-12 md:col-6">
+                                <div className="col-12 md:col-4">
                                     <FilterValueInput rule={rule} onChange={handleChange} />
                                 </div>
                             </div>
@@ -345,7 +345,7 @@ export const DashboardFilter: React.FC<DashboardFilterProps> = ({
                     </div>
                 </div> */}
                 <div className='flex gap-3 mt-3'>
-                    <Button label="Apply" icon="pi pi-check" onClick={handleApply} autoFocus />
+                    <Button label="Apply" size="small" onClick={handleApply} autoFocus />
                     <Button type='button' label='Cancel' outlined size='small' onClick={onHide} />
                 </div>
 
