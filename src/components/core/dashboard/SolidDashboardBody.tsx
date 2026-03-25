@@ -36,20 +36,20 @@ export type GridItem = {
 // Layout is Layout[] at runtime in v2 — the type definition is misleading
 type LayoutArray = LayoutItem[];
 
+
 const generateDefaultLayout = (questions: any[]): GridItem[] => {
   return questions.map((q, index) => {
     const col = index % 3;
     const row = Math.floor(index / 3);
     return {
       i: String(q.name),
-      x: col,
+      x: col * 4,   // 0, 4, 8 in a 12-col grid
       y: row * 4,
-      w: 1,
+      w: 4,
       h: 4,
     };
   });
 };
-
 
 
 const SolidDashboardBody = ({ dashboardId, questions, filters = [], dashboardLayout, setDashboardLayout }: SolidDashboardBodyProps) => {
@@ -136,7 +136,7 @@ const SolidDashboardBody = ({ dashboardId, questions, filters = [], dashboardLay
             width={width}
             layout={dashboardLayout}
             gridConfig={{
-              cols: 3,
+              cols: 12,
               rowHeight: 120,
             }}
             dragConfig={{
@@ -148,7 +148,7 @@ const SolidDashboardBody = ({ dashboardId, questions, filters = [], dashboardLay
             onLayoutChange={handleLayoutChange}
           >
             {sortedQuestions.map((question: any) => (
-              <div key={String(question.name)} className="drag-handle cursor-move bg-white rounded shadow p-2 overflow-hidden">
+              <div key={String(question.name)} className="drag-handle cursor-move rounded shadow p-2 overflow-hidden" style={{ backgroundColor: 'transparent' }}>
                 {/* <div className=" mb-2 font-bold">
                 {question.name}
               </div> */}
