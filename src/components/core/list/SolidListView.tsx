@@ -1097,8 +1097,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         //@ts-ignore
         content: (props) => (
           <div
-            className="flex flex-column align-items-left"
-            style={{ flex: "1" }}
+            className={`flex flex-column align-items-left ${styles.toastContentGrow}`}
           >
             {messages.map((m, index) => (
               <div className="flex align-items-center gap-2" key={index}>
@@ -1121,8 +1120,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         //@ts-ignore
         content: (props) => (
           <div
-            className="flex flex-column align-items-left"
-            style={{ flex: "1" }}
+            className={`flex flex-column align-items-left ${styles.toastContentGrow}`}
           >
             <div className="flex align-items-center gap-2">
               <span className="font-bold text-900">{String(error)}</span>
@@ -1556,8 +1554,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
             ) : (
               <div
-                className="solid-datatable-wrapper solid-list-table-area flex-1 min-h-0 overflow-hidden"
-                style={{ minHeight: 0, height: "100%", display: "flex", flexDirection: "column" }}
+                className={`solid-datatable-wrapper solid-list-table-area flex-1 min-h-0 overflow-hidden ${styles.listTableArea}`}
               >
                 <DataTable
                   value={listViewData}
@@ -1801,8 +1798,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                             className="retrieve-button solid-row-menu-trigger"
                           >
                             <i
-                              className="pi pi-refresh"
-                              style={{ fontSize: "1rem" }}
+                              className={`pi pi-refresh ${styles.retrieveIcon}`}
                             />
                           </a>
                         ) : (
@@ -1813,8 +1809,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                   {detailsBodyTemplate(rowData)}
                                   <OverlayPanel
                                     ref={op}
-                                    className="solid-custom-overlay"
-                                    style={{ top: 10, minWidth: 120 }}
+                                    className={`solid-custom-overlay ${styles.rowActionsOverlay}`}
                                   >
                                     <div className="solid-row-actions-menu flex flex-column gap-1 p-1">
                                       {hasEditInContextMenu && (
@@ -1903,16 +1898,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           >
             {isOpenSolidXAiPanel && (
               <div
-                style={{
-                  width: 5,
-                  cursor: "col-resize",
-                  position: "absolute",
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  height: "100%",
-                  zIndex: 9,
-                }}
+                className={styles.chatterResizeHandle}
                 onMouseDown={() => setIsResizing(true)}
               />
             )}
@@ -1921,8 +1907,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                 icon="pi pi-angle-double-right"
                 size="small"
                 text
-                className="chatter-collapse-btn"
-                style={{ width: 30, height: 30, aspectRatio: "1/1" }}
+                className={`chatter-collapse-btn ${styles.chatterSquareButton}`}
                 onClick={handleCloseSolidXAIPanel}
               />
             )}
@@ -1941,8 +1926,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                 <Button
                   icon="pi pi-chevron-left"
                   size="small"
-                  className="px-0"
-                  style={{ width: 30 }}
+                  className={`px-0 ${styles.chatterNarrowButton}`}
                   onClick={handleOpenSolidXAIPanel}
                 />
               </div>
@@ -1963,7 +1947,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       >
         <Divider className="m-0" />
         <div className="p-4">
-          <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>Are you sure you want to delete the selected records?</p>
+          <p className={`m-0 solid-primary-title ${styles.confirmDialogTitle}`}>Are you sure you want to delete the selected records?</p>
           <div className="flex align-items-center gap-2 mt-3">
             <Button label="Delete" severity="danger" size="small" autoFocus onClick={deleteBulk} />
             <Button label="Cancel" size="small" onClick={onDeleteClose} outlined className='bg-primary-reverse' />
@@ -2017,16 +2001,15 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         headerClassName="py-2"
         contentClassName="px-0 pb-0"
         visible={deleteEntity}
-        style={{ width: "20vw" }}
+        className={`solid-confirm-dialog ${styles.deleteEntityDialog}`}
         onHide={() => {
           if (!deleteEntity) return;
           setDeleteEntity(false);
         }}
-        className="solid-confirm-dialog"
       >
         <Divider className="m-0" />
         <div className="p-4">
-          <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
+          <p className={`m-0 solid-primary-title ${styles.confirmDialogTitle}`}>
             {`Are you sure you want to delete this ${solidListViewMetaData?.data?.solidView?.model?.displayName
               ? solidListViewMetaData?.data?.solidView?.model?.displayName
               : params?.modelName

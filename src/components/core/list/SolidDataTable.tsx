@@ -147,25 +147,13 @@ export function SolidDataTable({
 
   return (
     <div
-      className="solid-data-table-root w-full h-full min-h-0"
+      className="solid-data-table-root w-full min-h-0"
       style={{
-        display: "grid",
-        gridTemplateRows: "minmax(0, 1fr) auto",
         height: viewportHeight || "100%",
         maxHeight: viewportHeight || "100%",
-        minHeight: 0,
-        overflow: "hidden",
       }}
     >
-      <div
-        className="solid-data-table-viewport min-h-0 rounded-md border border-border/60 bg-background"
-        style={{
-          minHeight: 0,
-          height: "100%",
-          overflowX: "auto",
-          overflowY: "auto",
-        }}
-      >
+      <div className="solid-data-table-viewport min-h-0 rounded-md border border-border/60 bg-background">
         <table className={cx("w-full text-sm border-collapse", tableClassName)}>
           <thead className="bg-muted/30 sticky top-0 z-2">
             <tr>
@@ -265,10 +253,7 @@ export function SolidDataTable({
 
       {typeof onPage === "function" ? (
         <div
-          className={cx("w-full solid-table-paginator flex items-center justify-end gap-3 text-sm rounded-md border border-border/60 px-3 py-1.5 bg-background", paginatorClassName)}
-          style={{
-            alignSelf: "end",
-          }}
+          className={cx("w-full solid-table-paginator solid-table-paginator-align-end flex items-center justify-end gap-3 text-sm rounded-md border border-border/60 px-3 py-1.5 bg-background", paginatorClassName)}
         >
           <div className="solid-paginator-meta flex items-center gap-2 ml-auto">
             <span className="solid-paginator-label">Rows</span>

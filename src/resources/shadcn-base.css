@@ -2566,6 +2566,10 @@ body {
   padding-bottom: 8px;
 }
 
+.solid-table-paginator-align-end {
+  align-self: end;
+}
+
 .solid-paginator-meta {
   align-items: center;
 }
@@ -2650,6 +2654,32 @@ body {
 .solid-datatable-wrapper a {
   color: color-mix(in srgb, var(--primary) 84%, var(--foreground) 16%);
   font-weight: 500;
+}
+
+.solid-list-external-link {
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--primary) 84%, var(--foreground) 16%);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  line-height: 1.25;
+  font-weight: 500;
+  padding: 0;
+  cursor: pointer;
+}
+
+.solid-list-external-link:hover {
+  color: color-mix(in srgb, var(--primary) 94%, var(--foreground) 6%);
+}
+
+.solid-list-external-link-text {
+  white-space: nowrap;
+}
+
+.solid-list-external-link-icon {
+  opacity: 0.9;
 }
 
 .solid-data-table-viewport {

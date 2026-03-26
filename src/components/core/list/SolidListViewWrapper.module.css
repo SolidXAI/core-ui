@@ -4,6 +4,55 @@
   border-right: 0;
 }
 
+.listTableArea {
+  min-height: 0;
+  height: 100%;
+  display: flex;
+  flex-direction: column;
+}
+
+.toastContentGrow {
+  flex: 1;
+}
+
+.retrieveIcon {
+  font-size: 1rem;
+}
+
+.rowActionsOverlay {
+  top: 10px;
+  min-width: 120px;
+}
+
+.chatterResizeHandle {
+  width: 5px;
+  cursor: col-resize;
+  position: absolute;
+  left: 0;
+  top: 0;
+  bottom: 0;
+  height: 100%;
+  z-index: 9;
+}
+
+.chatterSquareButton {
+  width: 30px;
+  height: 30px;
+  aspect-ratio: 1/1;
+}
+
+.chatterNarrowButton {
+  width: 30px;
+}
+
+.confirmDialogTitle {
+  font-size: 16px;
+}
+
+.deleteEntityDialog {
+  width: 20vw !important;
+}
+
 .SolidXAIFloatingBtn {
     position: absolute;
     top: 50%;

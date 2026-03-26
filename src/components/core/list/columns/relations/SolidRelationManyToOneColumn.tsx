@@ -3,9 +3,8 @@ import { Column } from "../../SolidDataTable";
 import { SolidListViewColumnParams } from '../../../../../components/core/list/SolidListViewColumn';
 import { getExtensionComponent } from '../../../../../helpers/registry';
 import { SolidListFieldWidgetProps } from '../../../../../types/solid-core';
-import { Button } from 'primereact/button';
-import { useRouter } from "../../../../../hooks/useRouter";
 import { kebabCase } from 'change-case';
+import { ExternalLink } from "lucide-react";
 
 const SolidRelationManyToOneColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => {
 
@@ -49,7 +48,6 @@ export default SolidRelationManyToOneColumn;
 
 
 export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
-    const router = useRouter();
     const manyToOneFieldData = rowData[column.attrs.name];
 
     // This is the userkey that will be present within the rowData.
@@ -60,12 +58,9 @@ export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaD
         const manyToOneColVal = manyToOneFieldData[userKeyField];
 
         return (
-            <Button
-                label={manyToOneColVal}
-                link
-                icon="pi pi-external-link"
-                iconPos="right"
-                className="w-auto"
+            <button
+                type="button"
+                className="solid-list-external-link"
                 onClick={() => {
                     const pathSegments = window.location.pathname.split('/').filter(Boolean);
 
@@ -87,7 +82,10 @@ export const DefaultRelationManyToOneListWidget = ({ rowData, solidListViewMetaD
                     window.open(newPath, "_blank");
 
                 }}
-            />
+            >
+                <span className="solid-list-external-link-text">{manyToOneColVal}</span>
+                <ExternalLink size={13} strokeWidth={2} className="solid-list-external-link-icon" />
+            </button>
         );
     }
     else {
