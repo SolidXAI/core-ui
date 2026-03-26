@@ -30,6 +30,7 @@ export function Column(_props: SolidColumnProps) {
 type SolidDataTableProps = {
   value: any[];
   children: React.ReactNode;
+  size?: "small" | "normal" | "large";
   viewportHeight?: string;
   dataKey?: string;
   emptyMessage?: React.ReactNode;
@@ -80,6 +81,7 @@ function nextSortOrder(active: boolean, order: 1 | -1 | 0, removableSort = true)
 export function SolidDataTable({
   value,
   children,
+  size = "normal",
   viewportHeight,
   dataKey = "id",
   emptyMessage,
@@ -145,9 +147,16 @@ export function SolidDataTable({
     emitSelection([...(selection || []), rowData]);
   };
 
+  const densityClass =
+    size === "small"
+      ? "solid-table-density-compact"
+      : size === "large"
+        ? "solid-table-density-comfortable"
+        : "solid-table-density-cozy";
+
   return (
     <div
-      className="solid-data-table-root w-full min-h-0"
+      className={cx("solid-data-table-root w-full min-h-0", densityClass)}
       style={{
         height: viewportHeight || "100%",
         maxHeight: viewportHeight || "100%",
@@ -155,7 +164,7 @@ export function SolidDataTable({
     >
       <div className="solid-data-table-viewport min-h-0 rounded-md border border-border/60 bg-background">
         <table className={cx("w-full text-sm border-collapse", tableClassName)}>
-          <thead className="bg-muted/30 sticky top-0 z-2">
+          <thead className="solid-data-table-head sticky top-0 z-2">
             <tr>
               {columns.map((column, index) => {
                 const props = column.props;
@@ -166,7 +175,11 @@ export function SolidDataTable({
                 return (
                   <th
                     key={`header-${index}`}
-                    className={cx("px-2.5 py-1.5 text-left font-medium text-foreground whitespace-nowrap border-b border-border/50", props.headerClassName)}
+                    className={cx(
+                      "solid-data-table-th text-left text-foreground whitespace-nowrap",
+                      isSelectionColumn ? "solid-data-table-selection-col" : undefined,
+                      props.headerClassName
+                    )}
                     style={{ ...props.style, ...props.headerStyle }}
                   >
                     {isSelectionColumn ? (
@@ -212,7 +225,7 @@ export function SolidDataTable({
                 return (
                   <tr
                     key={key}
-                    className={cx("border-t border-border/50 hover:bg-muted/20", rowClassName?.(rowData))}
+                    className={cx("solid-data-table-row", rowClassName?.(rowData))}
                     onClick={(event) => {
                       const target = event.target as HTMLElement;
                       if (target.closest("button,a,input,label,[data-no-row-click='true']")) return;
@@ -238,7 +251,15 @@ export function SolidDataTable({
                             ? rowData?.[props.field]
                             : null;
                       return (
-                        <td key={`cell-${key}-${index}`} className={cx("px-2.5 py-1.5 align-top text-foreground", props.className)} style={props.style}>
+                        <td
+                          key={`cell-${key}-${index}`}
+                          className={cx(
+                            "solid-data-table-td align-top text-foreground",
+                            isSelectionColumn ? "solid-data-table-selection-col" : undefined,
+                            props.className
+                          )}
+                          style={props.style}
+                        >
                           {content}
                         </td>
                       );

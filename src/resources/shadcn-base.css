@@ -2419,6 +2419,11 @@ body {
   padding: 0 0 0 6px;
 }
 
+.solid-list-toolbar .solid-global-search-element:focus-within {
+  border-color: color-mix(in srgb, var(--ring) 60%, var(--border) 40%);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 18%, transparent);
+}
+
 .solid-list-toolbar .solid-global-search-element-wrapper {
   width: min(460px, 42vw);
 }
@@ -2446,6 +2451,10 @@ body {
   width: 34px;
   border-radius: 8px;
   right: 1px;
+}
+
+.solid-list-toolbar .custom-filter-button:hover {
+  background: color-mix(in srgb, var(--accent) 65%, transparent);
 }
 
 .solid-list-toolbar .p-button {
@@ -2516,15 +2525,64 @@ body {
   color: var(--foreground);
 }
 
-.solid-datatable-wrapper th {
-  font-weight: 600;
-  height: 38px;
-  background: color-mix(in srgb, var(--card) 92%, var(--background) 8%);
+.solid-data-table-head {
+  background: color-mix(in srgb, var(--card) 88%, var(--background) 12%);
 }
 
-.solid-datatable-wrapper td {
+.solid-data-table-th {
+  font-weight: 600;
+  color: color-mix(in srgb, var(--foreground) 90%, transparent);
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+}
+
+.solid-data-table-td {
   color: color-mix(in srgb, var(--foreground) 94%, transparent);
+}
+
+.solid-data-table-row {
+  border-top: 1px solid color-mix(in srgb, var(--border) 58%, transparent);
+  transition: background-color 140ms ease;
+}
+
+.solid-data-table-row:hover {
+  background: color-mix(in srgb, var(--accent) 46%, transparent);
+}
+
+.solid-table-density-compact .solid-data-table-th,
+.solid-table-density-compact .solid-data-table-td {
+  height: 34px;
+  padding: 0.3125rem 0.5625rem;
+}
+
+.solid-table-density-cozy .solid-data-table-th,
+.solid-table-density-cozy .solid-data-table-td {
   height: 38px;
+  padding: 0.375rem 0.625rem;
+}
+
+.solid-table-density-comfortable .solid-data-table-th,
+.solid-table-density-comfortable .solid-data-table-td {
+  height: 46px;
+  padding: 0.5rem 0.875rem;
+}
+
+.solid-data-table-selection-col {
+  width: 48px;
+  min-width: 48px;
+  max-width: 48px;
+  text-align: center;
+  padding-left: 0.75rem !important;
+  padding-right: 0.75rem !important;
+}
+
+.solid-table-cell-numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.solid-table-header-numeric {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .solid-table-header-button {
@@ -2713,15 +2771,15 @@ body {
 }
 
 .solid-custom-overlay .p-overlaypanel-content {
-  padding: 4px;
-  border-radius: 10px;
+  padding: 3px;
+  border-radius: 8px;
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
   background: var(--card);
-  box-shadow: 0 16px 36px rgba(2, 6, 23, 0.2);
+  box-shadow: 0 10px 24px color-mix(in srgb, hsl(222 47% 11%) 18%, transparent);
 }
 
 .solid-row-actions-menu {
-  min-width: 170px;
+  min-width: 152px;
 }
 
 .solid-row-action-button.p-button {
@@ -2730,21 +2788,33 @@ body {
   border: 1px solid transparent;
   background: transparent;
   color: var(--foreground);
-  border-radius: 8px;
-  min-height: 30px;
-  padding: 0 10px;
+  border-radius: 6px;
+  min-height: 27px;
+  padding: 0 8px;
   font-size: 12px;
   font-weight: 500;
+  line-height: 1.1;
 }
 
 .solid-row-action-button.p-button .p-button-label {
   flex: 1;
   text-align: left;
+  line-height: 1.1;
+}
+
+.solid-row-action-button.p-button .p-button-icon {
+  font-size: 11px;
+  margin-right: 6px;
 }
 
 .solid-row-action-button.p-button:hover {
   background: var(--accent);
   border-color: color-mix(in srgb, var(--border) 82%, transparent);
+}
+
+.solid-row-action-button.p-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 24%, transparent);
 }
 
 .solid-row-action-button.p-button.solid-row-action-button-danger {

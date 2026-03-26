@@ -1,4 +1,4 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import { Dialog } from "primereact/dialog";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "../../../components/core/common/FilterComponent";
 import { Button } from "primereact/button";
@@ -15,6 +15,7 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { hydrateRelationRules } from "../../../helpers/hydrateRelationRules";
 import { useSession } from '../../../hooks/useSession'
 import GroupingComponent, { AggregationRule, GroupingRule, DateGroupingFormat } from "./GroupingComponent";
+import { SearchX } from "lucide-react";
 
 
 const getRandomInt = (min: number, max: number) => {
@@ -401,33 +402,36 @@ export const mergeAllDiffFilters = (customFilter: any, searchFilter: any, savedF
 }
 
 const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, openSavedCustomFilter, setSavedFilterTobeDeleted, setIsDeleteSQDialogVisible }: any) => {
+    const isActive = Number(activeSavedFilter) == savedfilter.id;
+
     return (
-        <div className="flex align-items-center justify-content-between gap-2">
-            <div>
+        <div className="solid-saved-filter-item">
+            <div className="solid-saved-filter-main-wrap">
                 <Button text
                     size="small"
-                    className="text-base py-1 w-full"
-                    severity={Number(activeSavedFilter) == savedfilter.id ? "secondary" : "contrast"}
+                    className={`solid-saved-filter-main w-full ${isActive ? "is-active" : ""}`}
                     onClick={() => applySavedFilter(savedfilter)}
                     tooltip={savedfilter?.description}>{savedfilter.name}
                 </Button>
                 {/* {savedfilter?.description && <p className="text-xs pl-3">{savedfilter?.description}</p>} */}
             </div>
-            <div className="flex align-items-center gap-2">
+            <div className="solid-saved-filter-actions">
                 {savedfilter.isSeeded !== true &&
                     <>
                         <Button
                             icon="pi pi-pencil"
-                            style={{ fontSize: 10 }}
                             severity="secondary"
-                            outlined size="small"
+                            outlined
+                            size="small"
+                            className="solid-saved-filter-icon-btn"
                             onClick={() => openSavedCustomFilter(savedfilter)}
                         />
                         <Button
                             icon="pi pi-trash"
-                            style={{ fontSize: 10 }}
                             severity="secondary"
-                            outlined size="small"
+                            outlined
+                            size="small"
+                            className="solid-saved-filter-icon-btn is-danger"
                             onClick={() => {
                                 setSavedFilterTobeDeleted(savedfilter.id),
                                     setIsDeleteSQDialogVisible(true);
@@ -516,6 +520,16 @@ type RelationCache = Map<string, { label: string; value: number }>;
 
 
 export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handleApplyCustomFilter, showSaveFilterPopup, setShowSaveFilterPopup, filterPredicates }: any, ref) => {
+    type OverlayOption =
+        | { id: string; kind: "field"; field: any }
+        | { id: string; kind: "predefined"; predefined: any };
+    type ManagedChipItem = {
+        id: string;
+        type: "saved" | "search" | "predefined" | "custom" | "grouping";
+        label: string;
+        onRemove: () => void;
+    };
+
     const defaultState: FilterRule[] = [
         {
             id: 1,
@@ -560,6 +574,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
     const [initialState, setInitialState] = useState(defaultState);
     const pathname = usePathname();
+    const searchableEntityLabel =
+        viewData?.data?.solidView?.displayName ||
+        viewData?.data?.solidView?.model?.displayName ||
+        "records";
 
 
     const searchParams = useSearchParams() // Converts the query params to a string
@@ -601,6 +619,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
     //  state to maintain the text typed in the search input box
     const [inputValue, setInputValue] = useState<string | null>("");
+    const [activeOverlayOptionId, setActiveOverlayOptionId] = useState<string | null>(null);
 
     // flag to prevent un necessary re renders
     const [hasSearched, setHasSearched] = useState<boolean>(false);
@@ -617,6 +636,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     const [savedFilterQueryString, setSavedFilterQueryString] = useState<string>();
     const [showOverlay, setShowOverlay] = useState(false);
     const overlayRef = useRef<HTMLDivElement | null>(null);
+    const [showChipManager, setShowChipManager] = useState(false);
+    const chipManagerRef = useRef<HTMLDivElement | null>(null);
+    const chipManagerTriggerRef = useRef<HTMLButtonElement | null>(null);
 
     const { data: session, status } = useSession();
     const user = session?.user;
@@ -1217,6 +1239,23 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         };
     }, [showOverlay]);
 
+    useEffect(() => {
+        function handleChipManagerClickOutside(event: MouseEvent) {
+            const targetNode = event.target as Node;
+            if (chipManagerRef.current?.contains(targetNode)) return;
+            if (chipManagerTriggerRef.current?.contains(targetNode)) return;
+            setShowChipManager(false);
+        }
+
+        if (showChipManager) {
+            document.addEventListener("mousedown", handleChipManagerClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleChipManagerClickOutside);
+        };
+    }, [showChipManager]);
+
     const CustomChip = () => {
         console.log("customFilter", customFilter);
         const ruleCount =
@@ -1388,12 +1427,165 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         return acc;
     }, {});
 
+    const customRuleCount =
+        customFilter?.$or?.length ??
+        customFilter?.$and?.length ??
+        Object.keys(customFilter || {}).length;
+
+    const managedChipItems = useMemo<ManagedChipItem[]>(() => {
+        const items: ManagedChipItem[] = [];
+
+        if (currentSavedFilterData?.name) {
+            items.push({
+                id: "saved-filter",
+                type: "saved",
+                label: `Saved: ${currentSavedFilterData.name}`,
+                onRemove: () => removeSavedFilter(),
+            });
+        }
+
+        if (predefinedSearchChip?.name && predefinedSearchChip?.value) {
+            items.push({
+                id: "predefined-search",
+                type: "predefined",
+                label: `Predefined: ${predefinedSearchChip.name} (${predefinedSearchChip.value})`,
+                onRemove: () => removePredefinedSearchChip(),
+            });
+        }
+
+        if (customFilter && customRuleCount > 0) {
+            items.push({
+                id: "custom-filter",
+                type: "custom",
+                label: `${customRuleCount} custom rules applied`,
+                onRemove: () => clearCustomFilter(),
+            });
+        }
+
+        if (groupingRules.length > 0 && groupingRules.some((r) => r.fieldName !== null)) {
+            items.push({
+                id: "grouping-rules",
+                type: "grouping",
+                label: `${groupingRules.length} grouping rules applied`,
+                onRemove: () => removeGrouping(),
+            });
+        }
+
+        Object.entries(groupedSearchChips).forEach(([column, values]) => {
+            const fieldMeta = searchableFields.find((field) => field.fieldName === column);
+            const columnDisplayName = fieldMeta?.displayName || column;
+            items.push({
+                id: `search:${column}`,
+                type: "search",
+                label: `${columnDisplayName}: ${values.join(" or ")}`,
+                onRemove: () => handleRemoveChipGroup(column),
+            });
+        });
+
+        return items;
+    }, [
+        currentSavedFilterData,
+        predefinedSearchChip,
+        customFilter,
+        customRuleCount,
+        groupingRules,
+        groupedSearchChips,
+        searchableFields,
+    ]);
+
+    const MAX_VISIBLE_CHIPS = 3;
+    const visibleChipItems = managedChipItems.slice(0, MAX_VISIBLE_CHIPS);
+    const hiddenChipItems = managedChipItems.slice(MAX_VISIBLE_CHIPS);
+    const hiddenChipCount = hiddenChipItems.length;
+
+    const clearAllAppliedChips = () => {
+        if (managedChipItems.length === 0) return;
+
+        if (activeSavedFilter || currentSavedFilterData) {
+            removeSavedFilter();
+        }
+
+        setSearchChips([]);
+        setSearchFilter(null);
+        setPredefinedSearchChip(null);
+        setPredefinedSearchBaseFilter(null);
+        setCustomFilter(null);
+        setFilterRules(initialState);
+        setGroupingRules(defaultGroupingRules);
+        setAggregationRules(defaultAggregationRules);
+        setShowChipManager(false);
+        setHasSearched(true);
+        setRefreshKey((prev) => prev + 1);
+    };
+
+    useEffect(() => {
+        if (managedChipItems.length === 0 && showChipManager) {
+            setShowChipManager(false);
+        }
+    }, [managedChipItems.length, showChipManager]);
+
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter" && inputValue?.trim()) {
-            handleAddChip();
-            e.preventDefault();
+        const currentValue = inputValue?.trim() || "";
+        const fieldOptions: OverlayOption[] = currentValue
+            ? searchableFields.map((field: any) => ({ id: `field:${field.fieldName}`, kind: "field" as const, field }))
+            : [];
+        const predefinedOptions: OverlayOption[] =
+            currentValue && predefinedSearches?.length
+                ? predefinedSearches.map((predefined: any, idx: number) => ({
+                    id: `predefined:${predefined.name || idx}`,
+                    kind: "predefined" as const,
+                    predefined,
+                }))
+                : [];
+        const overlayOptions: OverlayOption[] = [...fieldOptions, ...predefinedOptions];
+
+        const applyFieldOption = (value: any) => {
+            const trimmed = inputValue?.trim();
+            if (!trimmed) return;
+            const values = trimmed.split(",").map((v) => v.trim()).filter((v) => v !== "");
+            const chipsToAdd = values.map(v => ({
+                columnName: value.fieldName,
+                value: v,
+                columnDisplayName: value.displayName,
+                searchField: value.searchField,
+                matchMode: value.matchMode
+            }));
+            setSearchChips((prev) => [...prev, ...chipsToAdd]);
+            setInputValue("");
+            setHasSearched(true);
+            setRefreshKey((prev) => prev + 1);
             setShowOverlay(false);
+        };
+
+        if ((e.key === "ArrowDown" || e.key === "ArrowUp") && overlayOptions.length > 0) {
+            e.preventDefault();
+            setShowOverlay(true);
+            const currentIndex = overlayOptions.findIndex((opt) => opt.id === activeOverlayOptionId);
+            const nextIndex =
+                e.key === "ArrowDown"
+                    ? (currentIndex + 1) % overlayOptions.length
+                    : currentIndex <= 0
+                        ? overlayOptions.length - 1
+                        : currentIndex - 1;
+            setActiveOverlayOptionId(overlayOptions[nextIndex].id);
+            return;
+        }
+
+        if (e.key === "Enter" && currentValue) {
+            if (overlayOptions.length > 0) {
+                const activeOption =
+                    overlayOptions.find((opt) => opt.id === activeOverlayOptionId) || overlayOptions[0];
+                if (activeOption?.kind === "field") {
+                    applyFieldOption(activeOption.field);
+                } else if (activeOption?.kind === "predefined") {
+                    handlePredefinedSearch(activeOption.predefined);
+                }
+            } else {
+                handleAddChip();
+                setShowOverlay(false);
+            }
+            e.preventDefault();
         } else if (e.key === "Backspace" && inputValue === "") {
 
             if (searchChips.length > 0) {
@@ -1413,6 +1605,27 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             setRefreshKey((prev) => prev + 1)
         }
     };
+
+    useEffect(() => {
+        const currentValue = inputValue?.trim() || "";
+        if (!showOverlay || !currentValue) {
+            setActiveOverlayOptionId(null);
+            return;
+        }
+
+        const fieldOptionIds = searchableFields.map((field: any) => `field:${field.fieldName}`);
+        const predefinedOptionIds = (predefinedSearches || []).map((predefined: any, idx: number) => `predefined:${predefined.name || idx}`);
+        const optionIds = [...fieldOptionIds, ...predefinedOptionIds];
+
+        if (!optionIds.length) {
+            setActiveOverlayOptionId(null);
+            return;
+        }
+
+        if (activeOverlayOptionId && !optionIds.includes(activeOverlayOptionId)) {
+            setActiveOverlayOptionId(null);
+        }
+    }, [showOverlay, inputValue, searchableFields, predefinedSearches, activeOverlayOptionId]);
 
     const SearchChip = () => (
         <>
@@ -1528,22 +1741,64 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         <>
             <div className="flex justify-content-center solid-custom-filter-wrapper relative">
                 <div className="solid-global-search-element">
-                    <ul className="">
-                        {currentSavedFilterData && <SavedFiltersChip />}
-                        {predefinedSearchChip && <PredefinedSearchChip />}
-                        {customFilter && <CustomChip />}
-                        {groupingRules.length > 0 && groupingRules.some(r => r.fieldName !== null) && <GroupingChip />}
-                        <SearchChip />
-                        <li ref={chipsRef}>
+                    <ul className="solid-global-search-chip-list">
+                        {visibleChipItems.map((chip) => (
+                            <li key={chip.id}>
+                                <div className={`search-filter-chip-type solid-chip-pill solid-chip-tone-${chip.type}`}>
+                                    <span className="custom-chip-value solid-chip-pill-label" title={chip.label}>
+                                        {chip.label}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        className="solid-chip-pill-remove"
+                                        onMouseDown={(e) => e.preventDefault()}
+                                        onClick={chip.onRemove}
+                                        aria-label={`Remove ${chip.label}`}
+                                    >
+                                        <i className="pi pi-times" />
+                                    </button>
+                                </div>
+                            </li>
+                        ))}
+                        {hiddenChipCount > 0 && (
+                            <li>
+                                <button
+                                    type="button"
+                                    ref={chipManagerTriggerRef}
+                                    className="solid-chip-manage-trigger"
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={() => setShowChipManager((prev) => !prev)}
+                                >
+                                    +{hiddenChipCount} more
+                                </button>
+                            </li>
+                        )}
+                        {managedChipItems.length > 0 && hiddenChipCount === 0 && (
+                            <li>
+                                <button
+                                    type="button"
+                                    ref={chipManagerTriggerRef}
+                                    className="solid-chip-manage-trigger solid-chip-manage-trigger-secondary"
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={() => setShowChipManager((prev) => !prev)}
+                                >
+                                    Manage
+                                </button>
+                            </li>
+                        )}
+                        <li ref={chipsRef} className="solid-global-search-input-item">
                             <div className="relative solid-global-search-element-wrapper">
                                 <InputText
+                                    className="solid-global-search-input"
                                     value={inputValue || ""}
                                     placeholder="Search."
                                     onChange={(e) => {
                                         setInputValue(e.target.value);
+                                        setShowChipManager(false);
                                         setShowOverlay(true);
                                     }}
                                     onFocus={() => {
+                                        setShowChipManager(false);
                                         if (inputValue?.trim()) setShowOverlay(true);
                                     }}
                                     onBlur={() => {
@@ -1558,112 +1813,162 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                     style={{ fontSize: 10 }}
                                     severity="secondary"
                                     outlined size="small"
-                                    onClick={() => setShowOverlay(true)}
-                                    className="custom-filter-button"
+                                    onClick={() => {
+                                        setShowChipManager(false);
+                                        setShowOverlay(true);
+                                    }}
+                                    className="custom-filter-button solid-global-search-trigger"
                                 />
                             </div>
                         </li>
                     </ul>
                 </div>
 
-                {showOverlay && (
-                    <div ref={overlayRef} className="absolute w-full z-5 shadow-2 solid-search-overlay-pannel" style={{ top: 35, background: "var(--surface-0)", border: '1px solid var(--surface-300) !important', borderRadius: '6px' }}>
-                        {/* <div ref={overlayRef} className="absolute w-full z-5 surface-0 border-round border-1 border-300 shadow-2 solid-search-overlay-pannel" style={{ top: 35 }}> */}
-                        {inputValue ? (
-                            <>
-                                <div className="custom-filter-search-options px-3 py-2 flex flex-column">
-                                    <h6 className="my-1 font-bold">Search By Fields</h6>
-                                    {
-                                        searchableFields.map((value: any, index: any) => {
-                                            // console.log("value", value);
-
-                                            return (
-                                                <Button
-                                                    key={index}
-                                                    className="p-2 flex gap-1 text-color"
-                                                    // onClick={() => handleAddChip(value)}
-                                                    onMouseDown={(e) => {
-                                                        // Prevent focus loss from input
-                                                        e.preventDefault();
-                                                        const currentValue = inputValue?.trim();
-                                                        if (currentValue) {
-                                                            const values = currentValue.split(",").map((v) => v.trim()).filter((v) => v !== "");
-                                                            const chipsToAdd = values.map(v => ({
-                                                                columnName: value.fieldName,
-                                                                value: v,
-                                                                columnDisplayName: value.displayName,
-                                                                searchField: value.searchField,
-                                                                matchMode: value.matchMode
-                                                            }));
-                                                            setSearchChips((prev) => [...prev, ...chipsToAdd]);
-                                                            setInputValue("");
-                                                            setHasSearched(true);
-                                                            setRefreshKey((prev) => prev + 1)
-                                                            setShowOverlay(false);
-                                                        }
-                                                    }}
-                                                    text
-                                                    severity="secondary"
-                                                    size="small"
-                                                >
-                                                    Search <strong>{value.displayName}</strong> for: <span className="font-bold text-color">{inputValue}</span>
-                                                </Button>
-                                            )
-                                        })
-                                    }
+                {showChipManager && managedChipItems.length > 0 && (
+                    <div ref={chipManagerRef} className="absolute z-5 solid-chip-manager-panel">
+                        <div className="solid-chip-manager-header">
+                            <div className="solid-chip-manager-title">Applied chips ({managedChipItems.length})</div>
+                            <button type="button" className="solid-chip-manager-clear-btn" onClick={clearAllAppliedChips}>
+                                Clear all
+                            </button>
+                        </div>
+                        <div className="solid-chip-manager-body">
+                            {managedChipItems.map((chip) => (
+                                <div key={`manage-${chip.id}`} className={`solid-chip-manager-item solid-chip-tone-${chip.type}`}>
+                                    <span className="solid-chip-manager-item-label" title={chip.label}>
+                                        {chip.label}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        className="solid-chip-manager-item-remove"
+                                        onClick={chip.onRemove}
+                                        aria-label={`Remove ${chip.label}`}
+                                    >
+                                        <i className="pi pi-times" />
+                                    </button>
                                 </div>
-                                {predefinedSearches && predefinedSearches.length > 0 && (
-                                    <>
-                                        <Divider className="m-0" />
-                                        <div className="custom-filter-search-options px-3 py-2 flex flex-column">
-                                            <h6 className="my-1 font-bold">Predefined Searches</h6>
-                                            {predefinedSearches.map((predefinedSearch: any, index: number) => (
-                                                <Button
-                                                    key={index}
-                                                    className="p-2 flex flex-column align-items-start gap-1 text-color"
-                                                    onMouseDown={(e) => {
-                                                        e.preventDefault();
-                                                        handlePredefinedSearch(predefinedSearch);
-                                                    }}
-                                                    text
-                                                    severity="secondary"
-                                                    size="small"
-                                                >
-                                                    <div className="flex gap-1 align-items-center">
-                                                        <strong>{predefinedSearch.name}:</strong>
-                                                        <span className="font-bold text-color">{inputValue}</span>
-                                                    </div>
-                                                    <div className="text-xs">{predefinedSearch.description}</div>
-                                                </Button>
-                                            ))}
-                                        </div>
-                                    </>
-                                )}
-                            </>
-                        ) :
-                            <>
-                                <div className="p-3 text-base">Search Here...</div>
-                                <Divider className="m-0" />
-                            </>
-                        }
-                        {savedFilters.length > 0 &&
-                            <>
-                                <div className="p-3">
-                                    <p className="font-medium">Saved Filters</p>
-                                    <div className="flex flex-column gap-2">
-                                        {savedFilters.map((savedfilter: any) =>
-                                            <SavedFilterList savedfilter={savedfilter} activeSavedFilter={activeSavedFilter} applySavedFilter={applySavedFilter} openSavedCustomFilter={openSavedCustomFilter} setSavedFilterTobeDeleted={setSavedFilterTobeDeleted} setIsDeleteSQDialogVisible={setIsDeleteSQDialogVisible}></SavedFilterList>
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {showOverlay && (
+                    <div ref={overlayRef} className="absolute w-full z-5 shadow-2 solid-search-overlay-pannel">
+                        <div className="solid-search-overlay-scroll">
+                            {inputValue ? (
+                                <>
+                                    <div className="custom-filter-search-options solid-search-overlay-section px-3 py-1 flex flex-column">
+                                        <h6 className="my-1 solid-search-overlay-heading solid-search-overlay-section-title">Search by fields</h6>
+                                        {searchableFields.length > 0 ? (
+                                            searchableFields.map((value: any, index: any) => {
+                                                return (
+                                                    <Button
+                                                        key={index}
+                                                        className={`flex gap-1 text-color solid-search-overlay-option ${activeOverlayOptionId === `field:${value.fieldName}` ? "solid-search-overlay-option-active" : ""}`}
+                                                        onMouseDown={(e) => {
+                                                            e.preventDefault();
+                                                            const currentValue = inputValue?.trim();
+                                                            if (currentValue) {
+                                                                const values = currentValue.split(",").map((v) => v.trim()).filter((v) => v !== "");
+                                                                const chipsToAdd = values.map(v => ({
+                                                                    columnName: value.fieldName,
+                                                                    value: v,
+                                                                    columnDisplayName: value.displayName,
+                                                                    searchField: value.searchField,
+                                                                    matchMode: value.matchMode
+                                                                }));
+                                                                setSearchChips((prev) => [...prev, ...chipsToAdd]);
+                                                                setInputValue("");
+                                                                setHasSearched(true);
+                                                                setRefreshKey((prev) => prev + 1)
+                                                                setShowOverlay(false);
+                                                            }
+                                                        }}
+                                                        onMouseEnter={() => setActiveOverlayOptionId(`field:${value.fieldName}`)}
+                                                        text
+                                                        severity="secondary"
+                                                        size="small"
+                                                    >
+                                                        Search <strong>{value.displayName}</strong> for: <span className="font-bold text-color">{inputValue}</span>
+                                                    </Button>
+                                                )
+                                            })
+                                        ) : (
+                                            <div className="solid-search-overlay-no-fields">
+                                                <div className="solid-search-overlay-no-fields-icon">
+                                                    <SearchX size={14} />
+                                                </div>
+                                                <div className="solid-search-overlay-no-fields-text">
+                                                    No fields configured for search.
+                                                </div>
+                                            </div>
                                         )}
                                     </div>
-                                </div>
-                                <Divider className="m-0" />
-                            </>
-                        }
-                        <div className="px-2 py-1 flex justify-content-between">
-                            <Button text size="small" label="Custom Filter" iconPos="left" icon='pi pi-plus' onClick={() => setShowGlobalSearchElement(true)} className="font-bold" />
-                            {viewType === "tree" &&
-                                <Button text size="small" label="Grouping" iconPos="left" icon='pi pi-plus' onClick={() => setShowGroupFilterElement(true)} className="font-bold" />
+                                    {predefinedSearches && predefinedSearches.length > 0 && (
+                                        <>
+                                            <Divider className="m-0" />
+                                            <div className="custom-filter-search-options solid-search-overlay-section px-3 py-1 flex flex-column">
+                                                <h6 className="my-1 solid-search-overlay-heading solid-search-overlay-section-title">Predefined searches</h6>
+                                                {predefinedSearches.map((predefinedSearch: any, index: number) => (
+                                                    <Button
+                                                        key={index}
+                                                        className={`flex flex-column align-items-start gap-1 text-color solid-search-overlay-option solid-search-overlay-option-stacked ${activeOverlayOptionId === `predefined:${predefinedSearch.name || index}` ? "solid-search-overlay-option-active" : ""}`}
+                                                        onMouseDown={(e) => {
+                                                            e.preventDefault();
+                                                            handlePredefinedSearch(predefinedSearch);
+                                                        }}
+                                                        onMouseEnter={() => setActiveOverlayOptionId(`predefined:${predefinedSearch.name || index}`)}
+                                                        text
+                                                        severity="secondary"
+                                                        size="small"
+                                                    >
+                                                        <div className="flex gap-1 align-items-center">
+                                                            <strong>{predefinedSearch.name}:</strong>
+                                                            <span className="font-bold text-color">{inputValue}</span>
+                                                        </div>
+                                                        <div className="text-xs">{predefinedSearch.description}</div>
+                                                    </Button>
+                                                ))}
+                                            </div>
+                                        </>
+                                    )}
+                                </>
+                            ) :
+                                <>
+                                    <div className="p-3 solid-search-overlay-empty">
+                                        <div className="solid-search-overlay-empty-title">Start typing to search</div>
+                                        <div className="solid-search-overlay-empty-subtitle">
+                                            Start typing in search input to see all fields on which you can search {searchableEntityLabel} by.
+                                        </div>
+                                    </div>
+                                    <Divider className="m-0" />
+                                </>
                             }
+                            {savedFilters.length > 0 &&
+                                <>
+                                    <div className="p-3 solid-search-overlay-section">
+                                        <p className="solid-search-overlay-heading solid-search-overlay-section-title">Saved filters</p>
+                                        <div className="flex flex-column solid-search-overlay-saved-list">
+                                            {savedFilters.map((savedfilter: any) =>
+                                                <SavedFilterList savedfilter={savedfilter} activeSavedFilter={activeSavedFilter} applySavedFilter={applySavedFilter} openSavedCustomFilter={openSavedCustomFilter} setSavedFilterTobeDeleted={setSavedFilterTobeDeleted} setIsDeleteSQDialogVisible={setIsDeleteSQDialogVisible}></SavedFilterList>
+                                            )}
+                                        </div>
+                                    </div>
+                                </>
+                            }
+                        </div>
+
+                        <div className="px-3 py-2 flex flex-column solid-search-overlay-footer">
+                            <div className="solid-search-overlay-footer-title solid-search-overlay-section-title">Or apply a custom filter</div>
+                            <div className="solid-search-overlay-footer-subtitle">
+                                Use custom filters to apply filters on any field using any operator for a more flexible approach to filtering data.
+                            </div>
+                            <div className="solid-search-overlay-footer-actions">
+                                <Button text size="small" label="Custom Filter" iconPos="left" icon='pi pi-filter' onClick={() => setShowGlobalSearchElement(true)} className="solid-search-overlay-option solid-search-overlay-footer-btn" />
+                                {viewType === "tree" &&
+                                    <Button text size="small" label="Grouping" iconPos="left" icon='pi pi-plus' onClick={() => setShowGroupFilterElement(true)} className="solid-search-overlay-option solid-search-overlay-footer-btn" />
+                                }
+                            </div>
                         </div>
                     </div>
                 )

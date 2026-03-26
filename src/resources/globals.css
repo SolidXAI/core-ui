@@ -2541,68 +2541,267 @@ li.header-li-px {
 }
 
 .solid-global-search-element {
-  border-radius: 8px;
+  border-radius: 10px;
   display: flex;
   align-items: center;
-  padding-left: 3px;
+  padding-left: 4px;
   padding-right: 0;
-  padding-top: 3px;
-  padding-bottom: 3px;
+  padding-top: 2px;
+  padding-bottom: 2px;
   overflow: hidden;
-  height: 32px;
+  min-height: 34px;
+  height: auto;
 }
 
 .custom-filter-button {
-  border-right: none;
-  border-top: none;
-  border-bottom: none;
+  border-right: 0;
+  border-top: 0;
+  border-bottom: 0;
   position: absolute;
   right: 0;
   top: 50%;
   transform: translateY(-50%);
-  border-radius: 0;
-  height: 35.5px;
+  border-radius: 8px;
+  height: 30px;
+  width: 30px;
 }
 
-.solid-global-search-element ul {
+.solid-global-search-element ul,
+.solid-global-search-chip-list {
   display: flex;
   align-items: center;
-  gap: 8px;
+  gap: 6px;
   margin: 0;
   list-style-type: none;
   padding: 0;
+  width: 100%;
+  flex-wrap: nowrap;
+  overflow-x: auto;
+  scrollbar-width: thin;
 }
 
 .custom-filter-chip-type {
   display: flex;
   align-items: center;
-  padding: 0.25rem 0.5rem !important;
-  color: var(--primary-color) !important;
-  font-size: 0.875rem !important;
-  border-radius: 0.375rem !important;
-  background: #FBF5FF !important;
-  height: 100%;
+  gap: 6px;
+  padding: 0.2rem 0.45rem !important;
+  color: color-mix(in srgb, var(--primary) 90%, var(--foreground) 10%) !important;
+  font-size: 0.75rem !important;
+  border-radius: 999px !important;
+  background: color-mix(in srgb, var(--primary) 10%, transparent) !important;
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+  min-height: 24px;
 }
 
 .search-filter-chip-type {
   display: flex;
   align-items: center;
-  font-size: 0.875rem !important;
-  background: #FBF5FF;
-  border-radius: 0.375rem;
-  padding: 0.417rem 0.5rem !important;
-  gap: 4px;
+  font-size: 0.74rem !important;
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+  border-radius: 999px;
+  padding: 0.22rem 0.48rem !important;
+  gap: 5px;
+  line-height: 1.2;
+}
+
+.solid-chip-pill {
+  max-width: 220px;
+}
+
+.solid-chip-pill-label {
+  max-width: 170px;
+  color: inherit;
+}
+
+.solid-chip-tone-saved {
+  background: color-mix(in srgb, hsl(262 83% 58%) 12%, transparent);
+  border-color: color-mix(in srgb, hsl(262 83% 58%) 26%, transparent);
+  color: color-mix(in srgb, hsl(262 74% 44%) 82%, var(--foreground) 18%);
+}
+
+.solid-chip-tone-search {
+  background: color-mix(in srgb, hsl(212 92% 45%) 10%, transparent);
+  border-color: color-mix(in srgb, hsl(212 92% 45%) 24%, transparent);
+  color: color-mix(in srgb, hsl(212 82% 38%) 80%, var(--foreground) 20%);
+}
+
+.solid-chip-tone-predefined {
+  background: color-mix(in srgb, hsl(174 70% 35%) 12%, transparent);
+  border-color: color-mix(in srgb, hsl(174 70% 35%) 24%, transparent);
+  color: color-mix(in srgb, hsl(174 65% 30%) 82%, var(--foreground) 18%);
+}
+
+.solid-chip-tone-custom {
+  background: color-mix(in srgb, hsl(35 88% 46%) 12%, transparent);
+  border-color: color-mix(in srgb, hsl(35 88% 46%) 28%, transparent);
+  color: color-mix(in srgb, hsl(30 84% 34%) 84%, var(--foreground) 16%);
+}
+
+.solid-chip-tone-grouping {
+  background: color-mix(in srgb, hsl(334 78% 46%) 10%, transparent);
+  border-color: color-mix(in srgb, hsl(334 78% 46%) 24%, transparent);
+  color: color-mix(in srgb, hsl(334 68% 38%) 82%, var(--foreground) 18%);
+}
+
+.solid-chip-pill-remove {
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+  width: 16px;
+  height: 16px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.solid-chip-pill-remove:hover {
+  background: color-mix(in srgb, var(--accent) 75%, transparent);
+  color: color-mix(in srgb, var(--foreground) 92%, transparent);
+}
+
+.solid-chip-manage-trigger {
+  border: 1px solid color-mix(in srgb, var(--primary) 28%, transparent);
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: color-mix(in srgb, var(--primary) 86%, var(--foreground) 14%);
+  border-radius: 999px;
+  min-height: 24px;
+  line-height: 1;
+  padding: 0 8px;
+  font-size: 11px;
+  font-weight: 600;
+  white-space: nowrap;
+  cursor: pointer;
+}
+
+.solid-chip-manage-trigger-secondary {
+  background: color-mix(in srgb, var(--accent) 62%, transparent);
+  border-color: color-mix(in srgb, var(--border) 86%, transparent);
+  color: color-mix(in srgb, var(--foreground) 86%, transparent);
+}
+
+.solid-chip-manager-panel {
+  top: calc(100% + 6px);
+  left: 0;
+  width: min(360px, 100%);
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  border-radius: 10px;
+  box-shadow: 0 14px 30px color-mix(in srgb, hsl(222 47% 11%) 16%, transparent);
+  overflow: hidden;
+}
+
+.solid-chip-manager-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  padding: 8px 10px;
+}
+
+.solid-chip-manager-title {
+  font-size: 12px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--foreground) 92%, transparent);
+}
+
+.solid-chip-manager-clear-btn {
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--primary) 85%, var(--foreground) 15%);
+  font-size: 11px;
+  font-weight: 600;
+  cursor: pointer;
+  padding: 0;
+}
+
+.solid-chip-manager-body {
+  max-height: 220px;
+  overflow-y: auto;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+  padding: 8px 10px 10px;
+}
+
+.solid-chip-manager-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  max-width: 100%;
+  border: 1px solid color-mix(in srgb, var(--primary) 24%, transparent);
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  border-radius: 999px;
+  min-height: 24px;
+  padding: 0 8px;
+}
+
+.solid-chip-manager-item.solid-chip-tone-saved .solid-chip-manager-item-label,
+.solid-chip-manager-item.solid-chip-tone-search .solid-chip-manager-item-label,
+.solid-chip-manager-item.solid-chip-tone-predefined .solid-chip-manager-item-label,
+.solid-chip-manager-item.solid-chip-tone-custom .solid-chip-manager-item-label,
+.solid-chip-manager-item.solid-chip-tone-grouping .solid-chip-manager-item-label {
+  color: inherit;
+}
+
+.solid-chip-manager-item-label {
+  font-size: 11px;
+  color: color-mix(in srgb, var(--foreground) 90%, transparent);
+  max-width: 260px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.solid-chip-manager-item-remove {
+  border: 0;
+  background: transparent;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+  width: 14px;
+  height: 14px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 999px;
+  padding: 0;
+  cursor: pointer;
+}
+
+.solid-chip-manager-item-remove:hover {
+  background: color-mix(in srgb, var(--accent) 75%, transparent);
 }
 
 .solid-global-search-element li {}
 
-.solid-global-search-element input {
+.solid-global-search-input-item {
+  flex: 1 1 140px;
+  min-width: 140px;
+}
+
+.solid-global-search-element-wrapper {
+  width: 100%;
+}
+
+.solid-global-search-element input,
+.solid-global-search-input {
   padding-top: 0;
-  padding-left: 3;
+  padding-left: 8px;
   padding-bottom: 0;
-  padding-right: 40px;
+  padding-right: 36px;
   border: none;
-  max-width: 160px !important;
+  max-width: 260px !important;
+  min-width: 120px;
+  height: 30px;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.solid-global-search-element input::placeholder,
+.solid-global-search-input::placeholder {
+  color: color-mix(in srgb, var(--muted-foreground) 85%, transparent);
 }
 
 .solid-global-search-filter .p-dialog-content {
@@ -2651,24 +2850,270 @@ li.header-li-px {
 }
 
 .custom-chip-column {
-  color: rgba(0, 0, 0, 0.65);
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
 }
 
 .custom-chip-value {
-  color: #000000;
+  color: var(--foreground);
+  max-width: 18ch;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
 }
 
 .custom-chip-or {
-  color: rgba(0, 0, 0, 0.65);
-  font-weight: 700;
+  color: color-mix(in srgb, var(--foreground) 55%, transparent);
+  font-weight: 600;
+  text-transform: lowercase;
 }
 
-.custom-filter-search-options button:first-child {
-  background-color: #64748b0a;
+.solid-search-overlay-pannel {
+  top: calc(100% + 4px) !important;
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent) !important;
+  border-radius: 10px;
+  overflow: hidden;
+  box-shadow: 0 14px 30px color-mix(in srgb, hsl(222 47% 11%) 16%, transparent);
+  max-height: min(72vh, 520px);
+  height: auto;
+  display: flex;
+  flex-direction: column;
 }
 
-.custom-filter-search-options button:first-child:hover {
-  background-color: transparent;
+.solid-search-overlay-scroll {
+  flex: 0 1 auto;
+  min-height: 0;
+  overflow-y: auto;
+  max-height: 420px;
+}
+
+.solid-search-overlay-section {
+  gap: 6px;
+}
+
+.custom-filter-search-options.solid-search-overlay-section {
+  gap: 2px;
+}
+
+.solid-search-overlay-heading {
+  margin: 0 !important;
+  font-size: 12px;
+  font-weight: 600;
+  text-transform: none;
+  letter-spacing: 0;
+  color: color-mix(in srgb, var(--foreground) 92%, transparent);
+}
+
+.solid-search-overlay-section-title {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: color-mix(in srgb, var(--foreground) 92%, transparent);
+}
+
+.solid-search-overlay-option.p-button {
+  justify-content: flex-start;
+  text-align: left;
+  border-radius: 6px;
+  min-height: 20px;
+  padding: 2px 8px !important;
+  font-size: 11px;
+  line-height: 1.2;
+  color: color-mix(in srgb, var(--foreground) 90%, transparent);
+  background: transparent !important;
+  border: 1px solid transparent !important;
+  box-shadow: none !important;
+}
+
+.solid-search-overlay-option.p-button:hover {
+  background: color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.solid-search-overlay-option.p-button:focus {
+  box-shadow: none;
+}
+
+.solid-search-overlay-option-active.p-button {
+  background: color-mix(in srgb, var(--accent) 72%, transparent);
+  border: 1px solid color-mix(in srgb, var(--ring) 52%, transparent);
+}
+
+.solid-search-overlay-option-active.p-button .p-button-label {
+  color: color-mix(in srgb, var(--foreground) 96%, transparent);
+}
+
+.solid-search-overlay-option-stacked.p-button {
+  align-items: flex-start;
+}
+
+.solid-search-overlay-empty {
+  display: flex;
+  flex-direction: column;
+  gap: 3px;
+  color: color-mix(in srgb, var(--foreground) 70%, transparent);
+}
+
+.solid-search-overlay-empty-title {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: color-mix(in srgb, var(--foreground) 92%, transparent);
+}
+
+.solid-search-overlay-empty-subtitle {
+  font-size: 11px;
+  font-weight: 400;
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--foreground) 66%, transparent);
+}
+
+.solid-search-overlay-saved-list .p-button {
+  min-height: 20px;
+  padding: 0 8px;
+  font-size: 11px;
+  border-radius: 8px;
+}
+
+.solid-search-overlay-saved-list {
+  max-height: none;
+  overflow-y: visible;
+  padding-right: 2px;
+}
+
+.solid-saved-filter-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.solid-saved-filter-main-wrap {
+  flex: 1 1 auto;
+  min-width: 0;
+}
+
+.solid-saved-filter-main.p-button {
+  justify-content: flex-start;
+  text-align: left;
+  border: 1px solid transparent;
+  background: transparent;
+  color: color-mix(in srgb, var(--foreground) 90%, transparent);
+  border-radius: 8px;
+  min-height: 20px;
+  padding: 0 8px;
+  font-size: 11px;
+  line-height: 1.2;
+}
+
+.solid-saved-filter-main.p-button .p-button-label {
+  text-overflow: ellipsis;
+  overflow: hidden;
+  white-space: nowrap;
+}
+
+.solid-saved-filter-main.p-button:hover {
+  background: color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.solid-saved-filter-main.p-button.is-active {
+  background: color-mix(in srgb, var(--accent) 72%, transparent);
+  border-color: color-mix(in srgb, var(--ring) 52%, transparent);
+  color: color-mix(in srgb, var(--foreground) 96%, transparent);
+  font-weight: 600;
+}
+
+.solid-saved-filter-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.solid-saved-filter-icon-btn.p-button {
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  padding: 0;
+}
+
+.solid-saved-filter-icon-btn.p-button .p-button-icon {
+  font-size: 10px;
+}
+
+.solid-saved-filter-icon-btn.p-button:hover {
+  background: color-mix(in srgb, var(--accent) 60%, transparent);
+}
+
+.solid-saved-filter-icon-btn.p-button.is-danger {
+  color: hsl(0 72% 45%);
+}
+
+.solid-search-overlay-footer {
+  border-top: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  background: color-mix(in srgb, var(--card) 96%, var(--background) 4%);
+  flex-shrink: 0;
+  position: sticky;
+  bottom: 0;
+  gap: 4px;
+}
+
+.solid-search-overlay-footer-title {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: color-mix(in srgb, var(--foreground) 92%, transparent);
+}
+
+.solid-search-overlay-footer-subtitle {
+  font-size: 10px;
+  font-weight: 400;
+  line-height: 1.3;
+  color: color-mix(in srgb, var(--foreground) 60%, transparent);
+  margin-bottom: 2px;
+}
+
+.solid-search-overlay-footer-btn.p-button {
+  min-height: 22px;
+  border-radius: 8px;
+  font-size: 11px;
+  justify-content: flex-start;
+  padding: 0 8px !important;
+}
+
+.solid-search-overlay-footer-actions {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  gap: 8px;
+}
+
+.solid-search-overlay-no-fields {
+  min-height: 42px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 2px 4px;
+}
+
+.solid-search-overlay-no-fields-icon {
+  width: 22px;
+  height: 22px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  background: color-mix(in srgb, var(--muted) 55%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: color-mix(in srgb, var(--foreground) 64%, transparent);
+}
+
+.solid-search-overlay-no-fields-text {
+  font-size: 11px;
+  line-height: 1.25;
+  font-weight: 500;
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+  text-align: center;
 }
 
 .solid-layout-accordion .p-accordion .p-accordion-header .p-accordion-header-link {
@@ -3129,13 +3574,177 @@ flex-shrink: 0; */
 .solid-empty-listview-placeholder-container {
   border-top: 1px solid var(--primary-light-color) !important;
   height: calc(100vh - 64px);
-  /* height: 100%; */
-  background-color: var(--solid-list-view-placeholder);
+  background:
+    radial-gradient(circle at 50% 20%, color-mix(in srgb, var(--primary) 4%, transparent), transparent 45%),
+    var(--solid-list-view-placeholder);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 20px;
+}
+
+.solid-empty-listview-placeholder-panel {
+  width: min(520px, 100%);
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 12px;
+  background: color-mix(in srgb, var(--card) 96%, var(--background) 4%);
+  box-shadow: 0 8px 20px color-mix(in srgb, hsl(222 47% 11%) 10%, transparent);
+  overflow: hidden;
+}
+
+.solid-empty-listview-header {
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  padding: 14px 18px 12px;
+}
+
+.solid-empty-listview-header-title {
+  font-size: 1.05rem;
+  font-weight: 700;
+  line-height: 1.2;
+  color: color-mix(in srgb, var(--foreground) 94%, transparent);
+}
+
+.solid-empty-listview-header-subtitle {
+  margin-top: 3px;
+  font-size: 0.82rem;
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--foreground) 66%, transparent);
+}
+
+.solid-empty-listview-body {
   display: flex;
   flex-direction: column;
   align-items: center;
+  text-align: center;
+  gap: 8px;
+  padding: 16px 18px 14px;
+}
+
+.solid-empty-listview-icon-wrap {
+  width: 34px;
+  height: 34px;
+  border-radius: 9px;
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  background: color-mix(in srgb, var(--muted) 65%, transparent);
+  display: inline-flex;
+  align-items: center;
   justify-content: center;
-  gap: 12px;
+}
+
+.solid-empty-listview-icon {
+  width: 15px;
+  height: 15px;
+  color: color-mix(in srgb, var(--foreground) 72%, transparent);
+}
+
+.solid-empty-listview-title {
+  font-size: 0.92rem;
+  font-weight: 700;
+  line-height: 1.3;
+  color: color-mix(in srgb, var(--foreground) 92%, transparent);
+}
+
+.solid-empty-listview-description {
+  max-width: 36ch;
+  font-size: 0.76rem;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--foreground) 65%, transparent);
+}
+
+.solid-empty-listview-actions {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  margin-top: 2px;
+}
+
+.solid-empty-listview-actions .solid-empty-listview-create-action .p-button,
+.solid-empty-listview-actions .p-button {
+  height: 30px;
+  border-radius: 8px;
+  font-weight: 600;
+  font-size: 0.78rem;
+  padding: 0 11px;
+}
+
+.solid-empty-listview-actions .solid-empty-listview-create-action .p-button {
+  background: var(--foreground);
+  border-color: var(--foreground);
+  color: var(--background);
+}
+
+.solid-empty-listview-actions .solid-empty-listview-create-action .p-button:hover {
+  background: color-mix(in srgb, var(--foreground) 90%, transparent);
+  border-color: color-mix(in srgb, var(--foreground) 90%, transparent);
+}
+
+.solid-empty-listview-import-button.p-button {
+  background: transparent;
+  border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
+  color: color-mix(in srgb, var(--foreground) 92%, transparent);
+}
+
+.solid-empty-listview-import-button.p-button:hover {
+  background: color-mix(in srgb, var(--accent) 45%, transparent);
+}
+
+.solid-empty-listview-custom-actions {
+  margin-top: 0;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+}
+
+.solid-empty-listview-secondary-action.p-button {
+  border-radius: 8px;
+  min-height: 26px;
+  font-size: 0.76rem;
+}
+
+@media (max-width: 768px) {
+  .solid-empty-listview-placeholder-panel {
+    border-radius: 10px;
+    width: min(100%, 420px);
+  }
+
+  .solid-empty-listview-header {
+    padding: 12px 12px 10px;
+  }
+
+  .solid-empty-listview-header-title {
+    font-size: 0.98rem;
+  }
+
+  .solid-empty-listview-header-subtitle {
+    font-size: 0.78rem;
+  }
+
+  .solid-empty-listview-body {
+    padding: 14px 12px 12px;
+    gap: 7px;
+  }
+
+  .solid-empty-listview-title {
+    font-size: 0.88rem;
+  }
+
+  .solid-empty-listview-description {
+    font-size: 0.74rem;
+  }
+
+  .solid-empty-listview-actions {
+    width: 100%;
+    flex-direction: column;
+  }
+
+  .solid-empty-listview-actions .solid-empty-listview-create-action .p-button,
+  .solid-empty-listview-actions .p-button {
+    width: 100%;
+    justify-content: center;
+  }
 }
 
 .solid-list-skeleton-wrapper {

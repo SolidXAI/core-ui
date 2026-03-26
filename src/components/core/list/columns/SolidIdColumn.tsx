@@ -13,7 +13,7 @@ const SolidIdColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidLi
         <Column
             key={fieldMetadata.name}
             field={fieldMetadata.name}
-            sortable={column.sortable}
+            sortable={column.attrs.sortable}
             header={() => {
                 return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{header}</div>)
             }}

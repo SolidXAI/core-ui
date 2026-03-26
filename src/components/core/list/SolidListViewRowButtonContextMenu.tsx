@@ -16,7 +16,7 @@ export const SolidListViewRowButtonContextMenu = ({ button, params, getSelectedS
         <Button
             type="button"
             icon={button?.attrs?.icon ? button?.attrs?.icon : "pi pi-pencil"}
-            className={`solid-row-action-button w-full text-left gap-2 ${button?.attrs?.className ? button?.attrs?.className : ''}`}
+            className={`solid-row-action-button w-full text-left gap-1 ${button?.attrs?.className ? button?.attrs?.className : ''}`}
             label={button.attrs.label}
             size="small"
             onClick={() => {

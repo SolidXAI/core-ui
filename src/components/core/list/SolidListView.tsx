@@ -1231,10 +1231,70 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   //   return <SolidListViewShimmerLoading />;
   // }
 
+  const hasMeaningfulFilterValue = (value: any): boolean => {
+    if (value === null || value === undefined) return false;
+    if (typeof value === "string") return value.trim().length > 0;
+    if (typeof value === "number" || typeof value === "boolean") return true;
+    if (Array.isArray(value)) return value.some((item) => hasMeaningfulFilterValue(item));
+    if (typeof value === "object") return hasAppliedFilters(value);
+    return false;
+  };
+
+  const hasAppliedFilters = (filterObject: any): boolean => {
+    if (!filterObject || typeof filterObject !== "object") return false;
+
+    if (Array.isArray(filterObject)) {
+      return filterObject.some((item) => hasAppliedFilters(item) || hasMeaningfulFilterValue(item));
+    }
+
+    return Object.entries(filterObject).some(([key, val]) => {
+      if (key === "matchMode" || key === "operator") return false;
+      if (key === "value") return hasMeaningfulFilterValue(val);
+      if ((key === "$and" || key === "$or") && Array.isArray(val)) {
+        return val.some((item) => hasAppliedFilters(item) || hasMeaningfulFilterValue(item));
+      }
+      if (typeof val === "object") return hasAppliedFilters(val);
+      return hasMeaningfulFilterValue(val);
+    });
+  };
+
+  const hasFilterPredicatesApplied =
+    hasAppliedFilters(filterPredicates?.custom_filter_predicate) ||
+    hasAppliedFilters(filterPredicates?.search_predicate) ||
+    hasAppliedFilters(filterPredicates?.saved_filter_predicate) ||
+    hasAppliedFilters(filterPredicates?.predefined_search_predicate);
+
+  const hasAppliedFilterValues = hasAppliedFilters(filters);
+
   const isListViewEmptyWithoutFilters =
     !loading &&
-    (!filters || Object.keys(filters).length === 0) &&
-    listViewData.length === 0;
+    listViewData.length === 0 &&
+    !hasAppliedFilterValues &&
+    !hasFilterPredicatesApplied;
+
+  useEffect(() => {
+    console.log("[SolidListView] Re-rendering list view with empty-state inputs:", {
+      loading,
+      isLoading,
+      listViewDataLength: listViewData.length,
+      hasAppliedFilterValues,
+      hasFilterPredicatesApplied,
+      isListViewEmptyWithoutFilters,
+      viewMode,
+      filters,
+      filterPredicates,
+    });
+  }, [
+    loading,
+    isLoading,
+    listViewData.length,
+    hasAppliedFilterValues,
+    hasFilterPredicatesApplied,
+    isListViewEmptyWithoutFilters,
+    viewMode,
+    filters,
+    filterPredicates,
+  ]);
 
   // if (isListViewEmptyWithoutFilters) {
   //   return (
@@ -1550,6 +1610,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                 actionsAllowed={actionsAllowed}
                 params={params}
                 solidListViewMetaData={solidListViewMetaData}
+                handleFetchUpdatedRecords={handleFetchUpdatedRecords}
               />
 
             ) : (

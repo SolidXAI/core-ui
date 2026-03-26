@@ -13,6 +13,8 @@ const SolidIntColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidL
             key={fieldMetadata.name}
             field={fieldMetadata.name}
             sortable={column.attrs.sortable}
+            className="solid-table-cell-numeric"
+            headerClassName="solid-table-header-numeric"
             header={() => {
                 return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{header}</div>)
             }}
