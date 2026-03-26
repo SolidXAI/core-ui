@@ -1,18 +1,18 @@
 
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
-import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { useState } from "react";
 import qs from "qs";
+import { SolidAutocomplete } from "../../shad-cn-ui/SolidAutocomplete";
 
 
-export const SolidManyToOneFilterElement = ({ value, updateInputs, index, fieldMetadata }: any) => {
+export const SolidManyToOneFilterElement = ({ value, updateInputs, index, fieldMetadata, multiple = false }: any) => {
 
     const entityApi = createSolidEntityApi(fieldMetadata.relationCoModelSingularName);
     const { useLazyGetSolidEntitiesQuery } = entityApi;
     const [triggerGetSolidEntities] = useLazyGetSolidEntitiesQuery();
 
     const [autoCompleteItems, setAutoCompleteItems] = useState([]);
-    const autoCompleteSearch = async (event: AutoCompleteCompleteEvent) => {
+    const autoCompleteSearch = async (event: any) => {
 
         // Get the list view layout & metadata first. 
         const queryData = {
@@ -47,15 +47,16 @@ export const SolidManyToOneFilterElement = ({ value, updateInputs, index, fieldM
     }
 
     return (
-        <AutoComplete
+        <SolidAutocomplete
             dropdown
             field="label"
             value={value}
+            multiple={multiple}
             suggestions={autoCompleteItems}
             completeMethod={autoCompleteSearch}
             onChange={(e) => updateInputs(index, e.value)}
             className="w-full"
-            inputClassName="w-full p-inputtext-sm"
+            inputClassName="w-full p-inputtext-sm solid-filter-compact-control"
         />
     )
 }

@@ -1,15 +1,11 @@
 // @ts-nocheck
-import { Calendar } from 'primereact/calendar';
-import { Dropdown } from 'primereact/dropdown';
-import { InputNumber } from 'primereact/inputnumber';
-import { InputText } from 'primereact/inputtext';
-import { Tooltip } from 'primereact/tooltip';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useState } from 'react';
 import { SolidFilterFields } from '../filter/SolidFilterFields';
-import { Button } from 'primereact/button';
 import { Fieldset } from 'primereact/fieldset';
-import { OverlayPanel } from 'primereact/overlaypanel';
-import { AutoComplete } from 'primereact/autocomplete';
+import { SolidButton } from '../../shad-cn-ui/SolidButton';
+import { SolidAutocomplete } from '../../shad-cn-ui/SolidAutocomplete';
+import { SolidInput } from '../../shad-cn-ui/SolidInput';
+import { SolidSelect } from '../../shad-cn-ui/SolidSelect';
 
 export enum FilterRuleType {
   RULE = 'rule',
@@ -88,8 +84,6 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
   // const applicableOperators = rule.fieldName ? operatorOptions[fields.find(f => f.name === rule.fieldName)?.value.type].map(e => { return { name: e } }) : [];
   // const applicableInputField = rule.fieldName ? fields.find(f => f.name === rule.fieldName)?.type : "";
 
-  const autoCompleteRef = useRef(null);
-
   const [fieldName, setFieldName] = useState({ name: rule.fieldName });
   const [matchMode, setMatchMode] = useState({ name: rule.matchMode });
 
@@ -103,19 +97,13 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
         item.name.toLowerCase().startsWith(query)
       );
     setFilteredFields(filtered);
-    setTimeout(() => {
-      autoCompleteRef.current?.show();
-    }, 0);
   };
   return (
-    // <div style={{ marginLeft: (level - 1) * 10 + 'px' }} className="filter-rule">
-
-    <div className='mt-2'>
-      <div className='flex flex-column md:flex-row  align-items-start md:align-items-center gap-2 md:gap-3'>
-        <div className='formgrid grid w-full'>
-          <div className='col-12 md:col-4 pb-2 md:pb-0'>
-            <AutoComplete
-              ref={autoCompleteRef}
+    <div className='solid-filter-rule-row'>
+      <div className='solid-filter-rule-main'>
+        <div className='solid-filter-rule-field'>
+          <div className='solid-filter-control-wrap'>
+            <SolidAutocomplete
               value={fieldName.name}
               suggestions={filteredFields}
               completeMethod={searchFields}
@@ -123,10 +111,10 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
               dropdown
               forceSelection // only values from list
               placeholder="Select Field"
-              className="w-full p-inputtext-sm solid-filter-auto-complete-field"
+              className="w-full p-inputtext-sm solid-filter-auto-complete-field solid-filter-compact-control"
               onChange={(e) => {
                 setFieldName({ name: e.value }); // e.value will be an object or null
-                if (e.value) {
+                if (e.value && typeof e.value === "object" && e.value.value) {
                   onChange(rule.id, 'fieldName', e.value.value); // send value to parent
                 } else {
                   onChange(rule.id, 'fieldName', '');
@@ -134,49 +122,43 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
               }}
             />
           </div>
-          <div className='col-12 md:col-8'>
-            <div className='formgrid grid w-full'>
-              {rule.fieldName ?
-                <div className='col-12'>
-                  <SolidFilterFields viewData={viewData} fieldMetadata={viewData.data.solidFieldsMetadata[rule.fieldName]} onChange={onChange} index={rule.id} rule={rule}></SolidFilterFields>
-                </div>
-                : <>
-                  <div className='col-12 md:col-6 pb-2 md:pb-0'>
-                    <InputText
-                      disabled
-                      value={rule.value || ''}
-                      placeholder="operator"
-                      className='w-full p-inputtext-sm '
-                    />
-                  </div>
-                  <div className='col-12 md:col-6'>
-                    <InputText
-                      disabled
-                      value={rule.value || ''}
-                      placeholder="value"
-                      className='w-full p-inputtext-sm'
-                    />
-                  </div>
-                </>
-              }
-            </div>
-          </div>
         </div>
-        <div className='formgrid grid'>
-          <div className='col-4 px-0 flex align-items-center'>
-            <Button text severity='secondary' icon="pi pi-plus" size='small' onClick={() => onAddRule(rule.parentRule)} className='solid-filter-action-btn' />
-          </div>
-          <div className='col-4 px-0 flex align-items-center'>
-            <Button text severity='secondary' icon={"pi pi-folder-plus"} size='small' onClick={() => onAddGroup(rule.id)} className='solid-filter-action-btn' />
-          </div>
-          <div className='col-4 px-0 flex align-items-center'>
-            <Button text severity='secondary' icon="pi pi-trash" size='small' onClick={() => onDelete(rule.id)} className='solid-filter-action-btn' />
+        <div className='solid-filter-rule-value'>
+          <div className='solid-filter-control-wrap'>
+            {rule.fieldName ?
+              <SolidFilterFields viewData={viewData} fieldMetadata={viewData.data.solidFieldsMetadata[rule.fieldName]} onChange={onChange} index={rule.id} rule={rule}></SolidFilterFields>
+              : <div className='solid-filter-empty-pair'>
+                <SolidInput
+                  disabled
+                  value={rule.value || ''}
+                  placeholder="Operator"
+                  className='w-full p-inputtext-sm solid-filter-compact-control'
+                />
+                <SolidInput
+                  disabled
+                  value={rule.value || ''}
+                  placeholder="Value"
+                  className='w-full p-inputtext-sm solid-filter-compact-control'
+                />
+              </div>
+            }
           </div>
         </div>
       </div>
+      <div className='solid-filter-rule-actions'>
+        <SolidButton variant="ghost" size='sm' onClick={() => onAddRule(rule.parentRule)} className='solid-filter-action-btn solid-filter-action-icon-btn'>
+          <i className="pi pi-plus" />
+        </SolidButton>
+        <SolidButton variant="ghost" size='sm' onClick={() => onAddGroup(rule.id)} className='solid-filter-action-btn solid-filter-action-icon-btn'>
+          <i className="pi pi-folder-plus" />
+        </SolidButton>
+        <SolidButton variant="ghost" size='sm' onClick={() => onDelete(rule.id)} className='solid-filter-action-btn solid-filter-action-icon-btn is-danger'>
+          <i className="pi pi-trash" />
+        </SolidButton>
+      </div>
 
       {rule.children && rule.children.map(nestedRule => (
-        <div className='py-3 nested-custom-filter' key={nestedRule.id}>
+        <div className='nested-custom-filter' key={nestedRule.id}>
           {nestedRule.type === FilterRuleType.RULE
             ? <FilterRuleComponent key={nestedRule.id} viewData={viewData} fields={fields} rule={nestedRule} onChange={onChange} onAddRule={onAddRule} onAddGroup={onAddGroup} onDelete={onDelete} level={level + 1} />
             : <FilterGroupComponent key={nestedRule.id} viewData={viewData} fields={fields} group={nestedRule} onChange={onChange} onAddRule={onAddRule} onAddGroup={onAddGroup} onDelete={onDelete} level={level + 1} />
@@ -190,39 +172,19 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
 
 // Component to render a group of filter rules
 const FilterGroupComponent = ({ viewData, fields, group, onChange, onAddRule, onAddGroup, onDelete, level }) => {
-  const op = useRef(null);
   const legendTemplate = (
-    <>
-      <Button
-        size='small'
-        label={group.matchOperator}
-        className='small-button'
-        icon="pi pi-angle-down"
-        iconPos='right'
-        onClick={(e) => op.current.toggle(e)}
-        style={{
-          textTransform: "uppercase"
-        }}
+    <div className="solid-filter-group-operator-wrap">
+      <SolidSelect
+        value={group.matchOperator}
+        options={[
+          { label: "OR", value: FilterOperator.OR },
+          { label: "AND", value: FilterOperator.AND },
+        ]}
+        placeholder="Operator"
+        className="solid-filter-group-operator-select"
+        onChange={(event) => onChange(group.id, 'matchOperator', event.value)}
       />
-      <OverlayPanel ref={op} className='m-0'>
-        <div className='flex flex-column'>
-          <Button
-            size="small"
-            label="AND"
-            text
-            className='small-button'
-            onClick={(e) => { onChange(group.id, 'matchOperator', FilterOperator.AND); op.current.hide(e) }}
-          />
-          <Button
-            size="small"
-            label="OR"
-            text
-            className='small-button'
-            onClick={(e) => { onChange(group.id, 'matchOperator', FilterOperator.OR); op.current.hide(e) }}
-          />
-        </div>
-      </OverlayPanel>
-    </>
+    </div>
     // <select className='filter-select'
     //   value={group.matchOperator}
     //   onChange={e => onChange(group.id, 'matchOperator', e.target.value)}
@@ -232,7 +194,7 @@ const FilterGroupComponent = ({ viewData, fields, group, onChange, onAddRule, on
     // </select>
   )
   return (
-    <Fieldset legend={legendTemplate} className='primary-filter-fieldset'>
+    <Fieldset legend={legendTemplate} className='primary-filter-fieldset solid-filter-group-shell'>
       {group.children && group.children.map(rule => (
         rule.type === FilterRuleType.RULE
           ? <FilterRuleComponent key={rule.id} viewData={viewData} fields={fields} rule={rule} onChange={onChange} onAddRule={onAddRule} onAddGroup={onAddGroup} onDelete={onDelete} level={level + 1} />
@@ -246,7 +208,10 @@ const FilterGroupComponent = ({ viewData, fields, group, onChange, onAddRule, on
 
       {/* Add Condition Button to add parent rule */}
       {level === 0 &&
-        <Button text label='Add Condition' icon="pi pi-plus" size='small' onClick={() => onAddRule(group.id)} className='px-0 mt-2' />
+        <SolidButton variant="ghost" size='sm' onClick={() => onAddRule(group.id)} className='px-0 mt-2 solid-filter-add-condition-btn'>
+          <i className="pi pi-plus" />
+          Add Condition
+        </SolidButton>
       }
     </Fieldset>
   );
@@ -429,7 +394,7 @@ const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, transf
 
 
   return (
-    <div className=''>
+    <div className='solid-filter-builder'>
       {filterRules.map(rule => (
         <FilterGroupComponent
           key={rule.id}
@@ -443,9 +408,9 @@ const FilterComponent = ({ viewData, fields, filterRules, setFilterRules, transf
           level={0} // Top-level group
         />
       ))}
-      <div className='flex gap-3 mt-3'>
-        <Button label="Apply" size="small" onClick={() => transformFilterRules(filterRules)} type="submit" />
-        <Button type='button' label='Cancel' outlined size='small' onClick={closeDialog} />
+      <div className='solid-filter-builder-actions'>
+        <SolidButton variant="primary" size="sm" onClick={() => transformFilterRules(filterRules)} type="submit" className="solid-filter-submit-btn">Apply</SolidButton>
+        <SolidButton type='button' variant="outline" size='sm' onClick={closeDialog} className="solid-filter-cancel-btn">Cancel</SolidButton>
         {/* 
         <br></br>
         <textarea value={printedState} readOnly rows={20} cols={100} style={{ marginTop: '20px' }} /> */}

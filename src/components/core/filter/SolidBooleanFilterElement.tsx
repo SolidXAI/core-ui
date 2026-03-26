@@ -1,12 +1,12 @@
-import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { useState } from "react";
+import { SolidAutocomplete } from "../../shad-cn-ui/SolidAutocomplete";
 
 
-export const SolidBooleanFilterElement = ({ value, updateInputs, index, fieldMetadata }: any) => {
+export const SolidBooleanFilterElement = ({ value, updateInputs, index, fieldMetadata, multiple = false }: any) => {
 
     // selection dynamic specific code. 
     const [selectionStaticItems, setSelectionStaticItems] = useState<any>([]);
-    const selectionStaticSearch = (event: AutoCompleteCompleteEvent) => {
+    const selectionStaticSearch = (event: any) => {
         const selectionStaticData = [
             { label: 'true', value: "true" },
             { label: 'false', value: "false" }
@@ -16,15 +16,16 @@ export const SolidBooleanFilterElement = ({ value, updateInputs, index, fieldMet
     }
 
     return (
-        <AutoComplete
+        <SolidAutocomplete
             field="label"
             value={value}
+            multiple={multiple}
             dropdown
             suggestions={selectionStaticItems}
             completeMethod={selectionStaticSearch}
             onChange={(e) => updateInputs(index, e.value)}
             className="w-full"
-            inputClassName="w-full p-inputtext-sm"
+            inputClassName="w-full p-inputtext-sm solid-filter-compact-control"
         />
     )
 }

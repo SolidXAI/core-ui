@@ -16,6 +16,7 @@ import { hydrateRelationRules } from "../../../helpers/hydrateRelationRules";
 import { useSession } from '../../../hooks/useSession'
 import GroupingComponent, { AggregationRule, GroupingRule, DateGroupingFormat } from "./GroupingComponent";
 import { SearchX } from "lucide-react";
+import { SolidButton } from "../../shad-cn-ui/SolidButton";
 
 
 const getRandomInt = (min: number, max: number) => {
@@ -718,7 +719,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             const savedFilter = await triggerGetSolidEntities(queryString).unwrap();
 
             if (savedFilter) {
-                console.log("savedFilter", savedFilter);
+                // console.log("savedFilter", savedFilter);
                 setSavedFilters(savedFilter?.records)
             }
             setSavedFiltersLoaded(true);
@@ -1257,7 +1258,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     }, [showChipManager]);
 
     const CustomChip = () => {
-        console.log("customFilter", customFilter);
+        // console.log("customFilter", customFilter);
         const ruleCount =
             customFilter?.$or?.length ??
             customFilter?.$and?.length ??
@@ -1973,25 +1974,35 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     </div>
                 )
                 }
-                <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={showGlobalSearchElement} style={{ width: '65vw' }} breakpoints={{ '1024px': '75vw', '991px': '90vw', '767px': '94w', '250px': '96vw' }} onHide={() => { if (!showGlobalSearchElement) return; setShowGlobalSearchElement(false); }}>
-                    <div className="flex align-items-center justify-content-between px-3">
-                        <h5 className="solid-custom-title m-0">Add Custom Filter</h5>
-                        <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setShowGlobalSearchElement(false)} />
+                <Dialog header={false} className="solid-global-search-filter solid-filter-dialog-shell" showHeader={false} visible={showGlobalSearchElement} style={{ width: '52vw' }} breakpoints={{ '1200px': '62vw', '1024px': '72vw', '991px': '86vw', '767px': '94vw', '250px': '96vw' }} onHide={() => { if (!showGlobalSearchElement) return; setShowGlobalSearchElement(false); }}>
+                    <div className="solid-filter-dialog-head">
+                        <div>
+                            <h5 className="solid-filter-dialog-title m-0">Add Custom Filter</h5>
+                            <p className="solid-filter-dialog-subtitle m-0">Apply conditions on any field with operators.</p>
+                        </div>
+                        <SolidButton type="button" variant="ghost" size="sm" aria-label="Cancel" onClick={() => setShowGlobalSearchElement(false)} className="solid-filter-dialog-close">
+                            <i className="pi pi-times" />
+                        </SolidButton>
                     </div>
-                    <Divider className="m-0" />
-                    <div className="p-2 lg:p-2">
+                    <div className="solid-filter-dialog-sep" />
+                    <div className="solid-filter-dialog-body">
                         {fields.length > 0 &&
                             <FilterComponent viewData={viewData} fields={fields} filterRules={filterRules} setFilterRules={setFilterRules} transformFilterRules={transformCustomFilterRules} closeDialog={() => setShowGlobalSearchElement(false)}></FilterComponent>
                         }
                     </div>
                 </Dialog>
-                <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={showGroupFilterElement} style={{ width: '20vw' }} breakpoints={{ '1024px': '75vw', '991px': '90vw', '767px': '94w', '250px': '96vw' }} onHide={() => { if (!showGroupFilterElement) return; setShowGroupFilterElement(false); }}>
-                    <div className="flex align-items-center justify-content-between px-3">
-                        <h5 className="solid-custom-title m-0"></h5>
-                        <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setShowGroupFilterElement(false)} />
+                <Dialog header={false} className="solid-global-search-filter solid-filter-dialog-shell solid-filter-dialog-shell-grouping" showHeader={false} visible={showGroupFilterElement} style={{ width: '24vw' }} breakpoints={{ '1024px': '75vw', '991px': '90vw', '767px': '94w', '250px': '96vw' }} onHide={() => { if (!showGroupFilterElement) return; setShowGroupFilterElement(false); }}>
+                    <div className="solid-filter-dialog-head">
+                        <div>
+                            <h5 className="solid-filter-dialog-title m-0">Grouping</h5>
+                            <p className="solid-filter-dialog-subtitle m-0">Configure grouping and aggregation.</p>
+                        </div>
+                        <SolidButton type="button" variant="ghost" size="sm" aria-label="Cancel" onClick={() => setShowGroupFilterElement(false)} className="solid-filter-dialog-close">
+                            <i className="pi pi-times" />
+                        </SolidButton>
                     </div>
-                    <Divider className="m-0" />
-                    <div className="p-2 lg:p-2">
+                    <div className="solid-filter-dialog-sep" />
+                    <div className="solid-filter-dialog-body">
                         {groupableFields.length > 0 &&
                             <GroupingComponent
                                 viewData={viewData}
@@ -2006,13 +2017,18 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                         }
                     </div>
                 </Dialog >
-                <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={showSavedFilterComponent} style={{ width: '65vw' }} breakpoints={{ '1024px': '75vw', '991px': '90vw', '767px': '94w', '250px': '96vw' }} onHide={() => { if (!showSavedFilterComponent) return; setShowSavedFilterComponent(false); }}>
-                    <div className="flex align-items-center justify-content-between px-3">
-                        <h5 className="solid-custom-title m-0">Saved Filter</h5>
-                        <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setShowSavedFilterComponent(false)} />
+                <Dialog header={false} className="solid-global-search-filter solid-filter-dialog-shell" showHeader={false} visible={showSavedFilterComponent} style={{ width: '52vw' }} breakpoints={{ '1200px': '62vw', '1024px': '72vw', '991px': '86vw', '767px': '94vw', '250px': '96vw' }} onHide={() => { if (!showSavedFilterComponent) return; setShowSavedFilterComponent(false); }}>
+                    <div className="solid-filter-dialog-head">
+                        <div>
+                            <h5 className="solid-filter-dialog-title m-0">Saved Filter</h5>
+                            <p className="solid-filter-dialog-subtitle m-0">Review and refine the saved filter conditions.</p>
+                        </div>
+                        <SolidButton type="button" variant="ghost" size="sm" aria-label="Cancel" onClick={() => setShowSavedFilterComponent(false)} className="solid-filter-dialog-close">
+                            <i className="pi pi-times" />
+                        </SolidButton>
                     </div>
-                    <Divider className="m-0" />
-                    <div className="p-2 lg:p-2">
+                    <div className="solid-filter-dialog-sep" />
+                    <div className="solid-filter-dialog-body">
                         {fields.length > 0 &&
                             <FilterComponent viewData={viewData} fields={fields} filterRules={currentSavedFilterRules} setFilterRules={setCurrentSavedFilterRules} transformFilterRules={transformSavedFilterRules} closeDialog={() => setShowSavedFilterComponent(false)}></FilterComponent>
                         }

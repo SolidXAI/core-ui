@@ -2,7 +2,7 @@
 
 import { SolidFilterFieldsParams, getNumberOfInputs } from '../../../../../components/core/filter/SolidFilterFields';
 import { SolidVarInputsFilterElement, InputTypes } from '../../../../../components/core/filter/SolidVarInputsFilterElement';
-import { Dropdown } from 'primereact/dropdown';
+import { SolidSelect } from "../../../../shad-cn-ui/SolidSelect";
 
 const SolidRelationOneToManyField = ({
     fieldMetadata,
@@ -24,7 +24,7 @@ const SolidRelationOneToManyField = ({
         <div className="flex flex-column md:flex-row align-items-start gap-2 md:gap-0">
             {/* Operator */}
             <div className="col-12 md:col-6 px-0 md:pr-2 md:pl-0">
-                <Dropdown
+                <SolidSelect
                     value={rule.matchMode}
                     onChange={(e) => {
                         onChange(rule.id, 'matchMode', e.value);

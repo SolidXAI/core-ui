@@ -1,8 +1,8 @@
 import React, { useMemo } from "react";
-import { Dropdown } from "primereact/dropdown";
-import { Button } from "primereact/button";
 import { GroupableField } from "./SolidGlobalSearchElement";
-import { AutoComplete } from "primereact/autocomplete";
+import { SolidAutocomplete } from "../../shad-cn-ui/SolidAutocomplete";
+import { SolidSelect } from "../../shad-cn-ui/SolidSelect";
+import { SolidButton } from "../../shad-cn-ui/SolidButton";
 
 const groupedDateOptions = [
   {
@@ -253,58 +253,29 @@ const GroupingComponent = ({
     );
   };
 
+  const groupedDateFlatOptions = groupedDateOptions.flatMap((group) =>
+    group.items.map((item) => ({
+      label: `${group.label}: ${item.label}`,
+      value: item.value,
+    }))
+  );
+
   return (
-    <div className="primary-filter-fieldset p-2">
-      <style>{`
-        .solid-mini-dropdown {
-          border: none !important;
-          background: transparent !important;
-          border-radius: 4px !important;
-          transition: background 0.2s !important;
-        }
-        .solid-mini-dropdown:hover {
-          background: rgba(0, 0, 0, 0.1) !important;
-        }
-        .solid-mini-dropdown .p-dropdown-label {
-          padding: 0 0.5rem !important;
-          line-height: 1.5rem !important;
-          font-size: 0.75rem !important;
-          font-weight: 600 !important;
-          color: var(--text-color-secondary) !important;
-        }
-        .solid-mini-dropdown .p-dropdown-trigger {
-          width: 1.5rem !important;
-        }
-        .solid-chip {
-           border: 1px solid var(--surface-300) !important;
-           background: var(--surface-100) !important;
-           box-shadow: 0 1px 2px rgba(0,0,0,0.05) !important;
-           transition: all 0.2s ease-in-out;
-           border-radius: 100px !important; /* Made more rounded */
-        }
-        .solid-chip:hover {
-           background: var(--surface-200) !important;
-           transform: translateY(-1px);
-        }
-        .solid-chip .pi-times {
-           border: none !important; /* Ensure no border on the x */
-           background: transparent !important;
-        }
-      `}</style>
+    <div className="solid-grouping-builder">
 
       {/* ========================================================= */}
       {/* A. APPLY GROUPS */}
       {/* ========================================================= */}
-      <p className="mb-2 font-bold">Apply Groups</p>
+      <p className="mb-2 font-bold solid-filter-section-title">Apply Groups</p>
 
-      <div className="mb-3">
-        <AutoComplete
+      <div className="mb-3 solid-grouping-search-row">
+        <SolidAutocomplete
           value={groupSearchValue}
           suggestions={filteredGroupingFields}
           completeMethod={searchGroupingFields}
           field="displayName"
           placeholder="Search Field to Group By"
-          className="w-full"
+          className="w-full solid-filter-compact-control"
           dropdown
           onChange={(e) => setGroupSearchValue(e.value)}
           onSelect={(e) => {
@@ -320,9 +291,9 @@ const GroupingComponent = ({
         />
       </div>
 
-      <div className="flex align-items-center gap-2 flex-wrap mb-4" style={{ minHeight: '2rem' }}>
+      <div className="solid-grouping-chip-list">
         {groupingRules.length == 1 && groupingRules[0].fieldName === null && (
-          <span className="text-sm text-400 italic">No grouping rules applied.</span>
+          <span className="solid-grouping-empty-state">No grouping rules applied.</span>
         )}
         {groupingRules.map((rule, index) => {
           const fieldMeta = fields.find((f) => f.fieldName === rule.fieldName);
@@ -332,31 +303,24 @@ const GroupingComponent = ({
 
           return (
             <React.Fragment key={rule.id}>
-              <div
-                className="flex align-items-center gap-2 px-2 py-1 solid-chip text-sm font-medium text-700"
-              >
+              <div className="solid-grouping-chip">
                 <span>{fieldMeta.displayName}</span>
 
                 {isDate && (
-                  <Dropdown
+                  <SolidSelect
                     value={rule.dateGrouping || "YYYY-MM-DD"}
-                    options={groupedDateOptions}
+                    options={groupedDateFlatOptions}
                     optionLabel="label"
-                    optionGroupLabel="label"
-                    optionGroupChildren="items"
-                    optionGroupTemplate={groupedDateItemTemplate}
-                    itemTemplate={groupedDateValueTemplate}
+                    optionValue="value"
                     placeholder="Format"
-                    className="solid-mini-dropdown"
-                    style={{ height: '1.5rem', fontSize: '0.75rem', padding: '0 0.25rem' }}
+                    className="solid-grouping-chip-select"
                     onChange={(e) => updateGroup(rule.id, "dateGrouping", e.value)}
                   />
                 )}
 
-                <i
-                  className="pi pi-times cursor-pointer text-400 hover:text-red-500 transition-colors"
-                  onClick={() => removeGroup(rule.id)}
-                />
+                <button type="button" className="solid-grouping-chip-remove" onClick={() => removeGroup(rule.id)}>
+                  <i className="pi pi-times" />
+                </button>
               </div>
               {index < groupingRules.length - 1 && (
                 <i className="pi pi-angle-double-right text-400 text-xs" />
@@ -369,16 +333,16 @@ const GroupingComponent = ({
       {/* ========================================================= */}
       {/* B. APPLY AGGREGATIONS */}
       {/* ========================================================= */}
-      <p className="mt-4 mb-2 font-bold">Apply Aggregations</p>
+      <p className="mt-4 mb-2 font-bold solid-filter-section-title">Apply Aggregations</p>
 
-      <div className="mb-3">
-        <AutoComplete
+      <div className="mb-3 solid-grouping-search-row">
+        <SolidAutocomplete
           value={aggSearchValue}
           suggestions={filteredAggregationFields}
           completeMethod={searchAggregationFields}
           field="displayName"
           placeholder="Search Field to Aggregate"
-          className="w-full"
+          className="w-full solid-filter-compact-control"
           dropdown
           onChange={(e) => setAggSearchValue(e.value)}
           onSelect={(e) => {
@@ -393,36 +357,31 @@ const GroupingComponent = ({
         />
       </div>
 
-      <div className="flex align-items-center gap-2 flex-wrap mb-4" style={{ minHeight: '3rem' }}>
+      <div className="solid-grouping-chip-list">
         {aggregationRules.length === 0 && (
-          <span className="text-sm text-400 italic">No aggregations applied.</span>
+          <span className="solid-grouping-empty-state">No aggregations applied.</span>
         )}
         {aggregationRules.map((rule) => {
           const fieldMeta = fields.find((f) => f.fieldName === rule.fieldName);
           if (!fieldMeta) return null;
 
           return (
-            <div
-              key={rule.id}
-              className="flex align-items-center gap-2 px-2 py-1 solid-chip text-sm font-medium text-700"
-            >
+            <div key={rule.id} className="solid-grouping-chip">
               <span>{fieldMeta.displayName}</span>
 
-              <Dropdown
+              <SolidSelect
                 value={rule.operator}
                 options={aggregateOperators}
                 disabled={rule.locked}
                 placeholder="Op"
-                className="solid-mini-dropdown"
-                style={{ height: '1.5rem', fontSize: '0.75rem', padding: '0 0.25rem' }}
+                className="solid-grouping-chip-select"
                 onChange={(e) => updateAggregation(rule.id, "operator", e.value)}
               />
 
               {!rule.locked && (
-                <i
-                  className="pi pi-times cursor-pointer text-400 hover:text-red-500 transition-colors"
-                  onClick={() => removeAggregation(rule.id)}
-                />
+                <button type="button" className="solid-grouping-chip-remove" onClick={() => removeAggregation(rule.id)}>
+                  <i className="pi pi-times" />
+                </button>
               )}
             </div>
           );
@@ -430,20 +389,15 @@ const GroupingComponent = ({
       </div>
 
       {/* FOOTER */}
-      <div className="flex justify-content-center gap-2 mt-4 pt-3 surface-border">
-        <Button
-          label="Apply"
-          icon="pi pi-check"
-          size="small"
-          onClick={() => applyGrouping(groupingRules, aggregationRules)}
-        />
-        <Button
-          label="Cancel"
-          icon="pi pi-times"
-          size="small"
-          outlined
-          onClick={closeDialog}
-        />
+      <div className="solid-grouping-footer">
+        <SolidButton size="sm" variant="primary" onClick={() => applyGrouping(groupingRules, aggregationRules)}>
+          <i className="pi pi-check" />
+          Apply
+        </SolidButton>
+        <SolidButton size="sm" variant="outline" onClick={closeDialog}>
+          <i className="pi pi-times" />
+          Cancel
+        </SolidButton>
       </div>
     </div>
   );

@@ -1,5 +1,5 @@
 
-import { Dropdown } from 'primereact/dropdown';
+import { SolidSelect } from "../../../shad-cn-ui/SolidSelect";
 import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
 
@@ -27,7 +27,7 @@ const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilter
     return (
         <div className='flex flex-column md:flex-row align-items-start gap-2 md:gap-0'>
             <div className="col-12 md:col-6 px-0 md:pr-2 md:pl-0">
-                <Dropdown
+                <SolidSelect
                     value={rule.matchMode}
                     onChange={(e: any) => {
                         onChange(rule.id, 'matchMode', e.value)
@@ -41,7 +41,7 @@ const SolidBooleanField = ({ fieldMetadata, onChange, index, rule }: SolidFilter
             </div>
 
             <div className='flex flex-column gap-2 col-12 md:col-6 px-0 md:pl-2 md:pr-0'>
-                {/* <Dropdown
+                {/* <SolidSelect
                     value={rule.value}
                     options={booleanOptions}
                     onChange={(e: any) => {

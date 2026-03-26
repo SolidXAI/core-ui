@@ -276,7 +276,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       };
       const queryString = qs.stringify({ ...queryData }, { encodeValuesOnly: true });
       const response = await getMcpUrl(queryString).unwrap();
-      console.log("response", response);
+      // console.log("response", response);
       if (response && response?.data?.mcpUrl) {
         setMcpUrl(response?.data?.mcpUrl);
       }
@@ -1272,29 +1272,29 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     !hasAppliedFilterValues &&
     !hasFilterPredicatesApplied;
 
-  useEffect(() => {
-    console.log("[SolidListView] Re-rendering list view with empty-state inputs:", {
-      loading,
-      isLoading,
-      listViewDataLength: listViewData.length,
-      hasAppliedFilterValues,
-      hasFilterPredicatesApplied,
-      isListViewEmptyWithoutFilters,
-      viewMode,
-      filters,
-      filterPredicates,
-    });
-  }, [
-    loading,
-    isLoading,
-    listViewData.length,
-    hasAppliedFilterValues,
-    hasFilterPredicatesApplied,
-    isListViewEmptyWithoutFilters,
-    viewMode,
-    filters,
-    filterPredicates,
-  ]);
+  // useEffect(() => {
+  //   console.log("[SolidListView] Re-rendering list view with empty-state inputs:", {
+  //     loading,
+  //     isLoading,
+  //     listViewDataLength: listViewData.length,
+  //     hasAppliedFilterValues,
+  //     hasFilterPredicatesApplied,
+  //     isListViewEmptyWithoutFilters,
+  //     viewMode,
+  //     filters,
+  //     filterPredicates,
+  //   });
+  // }, [
+  //   loading,
+  //   isLoading,
+  //   listViewData.length,
+  //   hasAppliedFilterValues,
+  //   hasFilterPredicatesApplied,
+  //   isListViewEmptyWithoutFilters,
+  //   viewMode,
+  //   filters,
+  //   filterPredicates,
+  // ]);
 
   // if (isListViewEmptyWithoutFilters) {
   //   return (
