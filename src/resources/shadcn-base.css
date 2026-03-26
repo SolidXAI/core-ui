@@ -96,6 +96,9 @@ body {
 .solid-main-content {
   flex: 1;
   min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
 }
 
 .solid-admin-header {
@@ -2352,4 +2355,396 @@ body {
 .solid-auth-theme-wrapper > * {
   position: relative;
   z-index: 1;
+}
+
+/* List table (non-Prime table layer) */
+.solid-list-page-wrapper {
+  height: calc(100dvh - 46px) !important;
+  max-height: calc(100dvh - 46px) !important;
+  min-height: 0;
+  flex: 1 1 auto;
+  overflow: hidden !important;
+  background-color: var(--background) !important;
+  padding: 12px;
+}
+
+.solid-list-page-wrapper .page-header {
+  flex-shrink: 0;
+}
+
+.solid-list-content {
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  min-height: 0;
+  height: 100%;
+}
+
+.solid-list-surface {
+  width: 100%;
+  height: 100%;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  flex: 1 1 auto;
+  background: var(--card);
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  border-radius: 12px;
+  box-shadow: 0 8px 24px rgba(2, 6, 23, 0.08);
+  overflow: hidden;
+}
+
+.solid-list-toolbar {
+  padding: 10px 12px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  background: color-mix(in srgb, var(--card) 94%, var(--background) 6%);
+}
+
+.solid-list-toolbar .view-title {
+  font-size: 15px;
+  font-weight: 600;
+  line-height: 1.2;
+  color: var(--foreground);
+}
+
+.solid-list-toolbar .solid-list-toolbar-actions {
+  gap: 8px !important;
+}
+
+.solid-list-toolbar .solid-global-search-element {
+  height: 36px;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 10px;
+  background: var(--background);
+  padding: 0 0 0 6px;
+}
+
+.solid-list-toolbar .solid-global-search-element-wrapper {
+  width: min(460px, 42vw);
+}
+
+.solid-list-toolbar .solid-global-search-element input {
+  height: 34px;
+  max-width: none !important;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font-size: 13px;
+  color: var(--foreground);
+  padding-left: 8px;
+  padding-right: 40px;
+}
+
+.solid-list-toolbar .solid-global-search-element input::placeholder {
+  color: color-mix(in srgb, var(--muted-foreground) 78%, transparent);
+}
+
+.solid-list-toolbar .custom-filter-button {
+  border: 0;
+  background: transparent;
+  height: 34px;
+  width: 34px;
+  border-radius: 8px;
+  right: 1px;
+}
+
+.solid-list-toolbar .p-button {
+  height: 32px;
+  border-radius: 8px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.solid-list-toolbar .p-button.p-button-secondary,
+.solid-list-toolbar .p-button.p-button-outlined,
+.solid-list-toolbar .solid-icon-button {
+  border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
+  background: var(--background);
+  color: var(--foreground);
+}
+
+.solid-list-toolbar .solid-icon-button {
+  width: 32px !important;
+  min-width: 32px !important;
+  padding: 0 !important;
+}
+
+.solid-list-table-area {
+  display: flex;
+  flex-direction: column;
+  flex: 1;
+  min-height: 0;
+  padding: 0 10px 0;
+}
+
+.solid-list-page-wrapper .solid-datatable-wrapper {
+  height: 100% !important;
+  min-height: 0;
+}
+
+.solid-list-table-area > .solid-data-table-root {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.solid-data-table-root {
+  height: 100%;
+  display: grid;
+  grid-template-rows: minmax(0, 1fr) auto;
+  min-height: 0;
+  overflow: hidden;
+}
+
+.solid-data-table-viewport {
+  min-height: 0;
+  height: 100%;
+  overflow-y: auto;
+  overflow-x: auto;
+}
+
+.solid-datatable-wrapper table {
+  width: 100%;
+  min-width: max-content;
+  table-layout: auto;
+}
+
+.solid-datatable-wrapper th,
+.solid-datatable-wrapper td {
+  font-size: 13px;
+  line-height: 1.35;
+  white-space: nowrap;
+  color: var(--foreground);
+}
+
+.solid-datatable-wrapper th {
+  font-weight: 600;
+  height: 38px;
+  background: color-mix(in srgb, var(--card) 92%, var(--background) 8%);
+}
+
+.solid-datatable-wrapper td {
+  color: color-mix(in srgb, var(--foreground) 94%, transparent);
+  height: 38px;
+}
+
+.solid-table-header-button {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+  font-weight: 600;
+  color: inherit;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.solid-table-header-button.is-sortable {
+  cursor: pointer;
+}
+
+.solid-table-header-button i {
+  font-size: 11px;
+}
+
+.solid-data-table-root input[type="checkbox"] {
+  width: 15px;
+  height: 15px;
+  accent-color: var(--primary);
+}
+
+.solid-table-paginator {
+  flex-shrink: 0;
+  min-height: 44px;
+  position: relative;
+  z-index: 1;
+  background: var(--card);
+  border-color: color-mix(in srgb, var(--border) 86%, transparent) !important;
+  border-bottom: 0;
+  border-bottom-left-radius: 0;
+  border-bottom-right-radius: 0;
+  padding-top: 8px;
+  padding-bottom: 8px;
+}
+
+.solid-paginator-meta {
+  align-items: center;
+}
+
+.solid-paginator-label,
+.solid-paginator-report {
+  font-size: 12px;
+  line-height: 1;
+  color: color-mix(in srgb, var(--foreground) 82%, transparent);
+  font-weight: 500;
+}
+
+.solid-paginator-select {
+  height: 32px;
+  min-width: 46px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 0 26px 0 8px;
+}
+
+.solid-paginator-btn {
+  height: 32px;
+  min-width: 72px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  background: var(--background);
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 500;
+  line-height: 1;
+  padding: 0 12px;
+  transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.solid-paginator-btn:hover:not(:disabled) {
+  background: var(--accent);
+  border-color: color-mix(in srgb, var(--border) 74%, transparent);
+}
+
+.solid-paginator-btn:disabled {
+  opacity: 0.46;
+  cursor: not-allowed;
+}
+
+.solid-data-table-viewport {
+  scrollbar-width: thin;
+  scrollbar-color: color-mix(in srgb, var(--foreground) 26%, transparent) color-mix(in srgb, var(--background) 86%, transparent);
+}
+
+.solid-data-table-viewport::-webkit-scrollbar {
+  width: 10px;
+  height: 10px;
+}
+
+.solid-data-table-viewport::-webkit-scrollbar-track {
+  background: color-mix(in srgb, var(--background) 86%, transparent);
+  border-radius: 999px;
+}
+
+.solid-data-table-viewport::-webkit-scrollbar-thumb {
+  background: color-mix(in srgb, var(--foreground) 26%, transparent);
+  border-radius: 999px;
+  border: 2px solid color-mix(in srgb, var(--background) 86%, transparent);
+}
+
+.solid-data-table-viewport::-webkit-scrollbar-thumb:hover {
+  background: color-mix(in srgb, var(--foreground) 36%, transparent);
+}
+
+.solid-datatable-wrapper .greyed-out-row {
+  opacity: 0.55;
+}
+
+.solid-datatable-wrapper a {
+  color: color-mix(in srgb, var(--primary) 84%, var(--foreground) 16%);
+  font-weight: 500;
+}
+
+.solid-data-table-viewport {
+  border-width: 1px !important;
+}
+
+.solid-row-menu-trigger.p-button,
+.solid-row-menu-trigger {
+  width: 28px;
+  height: 28px;
+  min-width: 28px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  background: var(--background);
+  color: color-mix(in srgb, var(--foreground) 78%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease;
+}
+
+.solid-row-menu-trigger.p-button:hover,
+.solid-row-menu-trigger:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.solid-row-menu-trigger .p-button-label {
+  display: none;
+}
+
+.solid-custom-overlay .p-overlaypanel-content {
+  padding: 4px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  background: var(--card);
+  box-shadow: 0 16px 36px rgba(2, 6, 23, 0.2);
+}
+
+.solid-row-actions-menu {
+  min-width: 170px;
+}
+
+.solid-row-action-button.p-button {
+  width: 100%;
+  justify-content: flex-start;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--foreground);
+  border-radius: 8px;
+  min-height: 30px;
+  padding: 0 10px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.solid-row-action-button.p-button .p-button-label {
+  flex: 1;
+  text-align: left;
+}
+
+.solid-row-action-button.p-button:hover {
+  background: var(--accent);
+  border-color: color-mix(in srgb, var(--border) 82%, transparent);
+}
+
+.solid-row-action-button.p-button.solid-row-action-button-danger {
+  color: hsl(0 72% 45%);
+}
+
+.solid-row-action-button.p-button.solid-row-action-button-danger:hover {
+  background: color-mix(in srgb, hsl(0 72% 45%) 11%, transparent);
+  border-color: color-mix(in srgb, hsl(0 72% 45%) 40%, transparent);
+}
+
+.solid-inline-row-button.p-button {
+  min-height: 28px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
+  background: transparent;
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 500;
+  padding: 0 9px;
+}
+
+.solid-inline-row-button.p-button:hover {
+  background: var(--accent);
+  border-color: color-mix(in srgb, var(--border) 78%, transparent);
+}
+
+.solid-inline-row-button.solid-inline-row-button-icon.p-button {
+  width: 28px;
+  min-width: 28px;
+  padding: 0;
+  justify-content: center;
 }

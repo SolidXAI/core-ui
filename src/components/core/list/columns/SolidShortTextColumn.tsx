@@ -1,5 +1,5 @@
 
-import { Column } from "primereact/column";
+import { Column } from "../SolidDataTable";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import SolidTableRowCell from '../SolidTableRowCell';
 import { getExtensionComponent } from '../../../../helpers/registry';

@@ -1,4 +1,4 @@
-import { Column } from "primereact/column";
+import { Column } from "../SolidDataTable";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { SolidListFieldWidgetProps } from "../../../../types/solid-core";
 import { getExtensionComponent } from "../../../../helpers/registry";

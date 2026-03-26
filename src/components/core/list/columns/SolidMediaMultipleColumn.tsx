@@ -1,6 +1,6 @@
 
 import React, { useState } from 'react';
-import { Column } from "primereact/column";
+import { Column } from "../SolidDataTable";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { Button } from 'primereact/button';
 import { SolidMediaListFieldWidgetProps } from '../../../../types/solid-core';

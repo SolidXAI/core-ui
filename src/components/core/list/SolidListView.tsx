@@ -1,9 +1,5 @@
 import { forwardRef, useState, useEffect, useRef, useMemo, useImperativeHandle } from "react";
-import {
-  DataTable,
-  DataTableStateEvent,
-} from "primereact/datatable";
-import { Column } from "primereact/column";
+import { SolidDataTable as DataTable, DataTableStateEvent, Column } from "./SolidDataTable";
 import { FilterMatchMode } from "primereact/api";
 import qs from "qs";
 import { Button } from "primereact/button";
@@ -19,7 +15,6 @@ import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
-import { FilterIcon } from '../../../components/modelsComponents/filterIcon';
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Toast } from "primereact/toast";
 import { Divider } from "primereact/divider";
@@ -168,7 +163,7 @@ export type SolidListViewHandle = {
    * Updates sorting state and resets page offset to the first page.
    * Use this for programmatic sort controls to match DataTable behavior.
    */
-  setSort: (nextMultiSortMeta: { field: string; order: 1 | -1 }[]) => void;
+  setSort: (nextSortField: string, nextSortOrder: 1 | -1 | 0) => void;
   /**
    * Toggles inclusion of archived/soft-deleted records.
    * Use this to switch between active-only and inclusive list views.
@@ -181,7 +176,8 @@ export type SolidListViewHandle = {
   getState: () => {
     first: number;
     rows: number;
-    multiSortMeta: { field: string; order: 1 | -1 }[];
+    sortField: string;
+    sortOrder: 1 | -1 | 0;
     showArchived: boolean;
     filters: any;
     filterPredicates: any;
@@ -214,7 +210,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [totalRecords, setTotalRecords] = useState(0);
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(solidListViewLayout?.attrs?.defaultPageSize ? solidListViewLayout?.attrs?.defaultPageSize : 10);
-  const [multiSortMeta, setMultiSortMeta] = useState<{ field: string; order: 1 | -1 }[]>([{ field: "id", order: -1 }]);
+  const [sortField, setSortField] = useState<string>("id");
+  const [sortOrder, setSortOrder] = useState<1 | -1 | 0>(-1);
   const [toPopulate, setToPopulate] = useState<string[]>([]);
   const [toPopulateMedia, setToPopulateMedia] = useState<string[]>([]);
 
@@ -246,6 +243,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
   const [filterPredicates, setFilterPredicates] = useState<any>(null);
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
+  const [showGlobalSearchElement, setShowGlobalSearchElement] = useState(false);
 
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
 
@@ -355,6 +353,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     };
     fetchPermissions();
   }, [params.modelName]);
+
 
   const isFilterApplied = filters ? true : false;
 
@@ -480,8 +479,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     const populate = toPopulate;
     const populateMedia = toPopulateMedia;
     const rows = currentLayout?.attrs?.defaultPageSize ?? 25;
-    const multiSortMeta: { field: string; order: 1 | -1 }[] = [{ field: "id", order: -1 }];
-    return { multiSortMeta, rows, populate, populateMedia };
+    const sortField = "id";
+    const sortOrder: 1 | -1 = -1;
+    return { sortField, sortOrder, rows, populate, populateMedia };
   };
 
 
@@ -648,22 +648,26 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
         setRows(Number(queryData.limit));
         setFirst(Number(queryData?.offset));
-        const parsedMultiSortMeta: { field: string; order: 1 | -1 }[] =
-          Array.isArray(queryData.sort) && queryData.sort.length > 0
-            ? queryData.sort.map((sortItem: string) => {
-              const [field, order] = sortItem.split(":");
-              return { field, order: order === "asc" ? 1 : -1 } as { field: string; order: 1 | -1 };
-            })
-            : [{ field: "id", order: -1 }];
-
-        setMultiSortMeta(parsedMultiSortMeta);
+        let restoredSortField = "id";
+        let restoredSortOrder: 1 | -1 | 0 = -1;
+        if (Array.isArray(queryData.sort) && queryData.sort.length > 0) {
+          const [field, order] = String(queryData.sort[0]).split(":");
+          restoredSortField = field || "id";
+          restoredSortOrder = order === "asc" ? 1 : -1;
+        } else if (queryObject.sortField) {
+          restoredSortField = String(queryObject.sortField);
+          restoredSortOrder = queryObject.sortOrder === 1 || queryObject.sortOrder === -1 ? queryObject.sortOrder : -1;
+        }
+        setSortField(restoredSortField);
+        setSortOrder(restoredSortOrder);
         const { populate, populateMedia } = initialFilterMethod();
         setToPopulate(populate);
         setToPopulateMedia(populateMedia);
       } else {
-        const { multiSortMeta, rows, populate, populateMedia } = initialFilterMethod();
+        const { sortField, sortOrder, rows, populate, populateMedia } = initialFilterMethod();
         setRows(rows);
-        setMultiSortMeta(multiSortMeta);
+        setSortField(sortField);
+        setSortOrder(sortOrder);
         setToPopulate(populate);
         setToPopulateMedia(populateMedia);
         setFirst(0);
@@ -744,13 +748,16 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   // Create a ref that always has the latest filters
   const latestFiltersRef = useRef<any>(filters);
   const latestFilterPredicatesRef = useRef<any>(filterPredicates);
-  // 1. Add the ref (near the other latestXxxRef declarations)
-  const latestMultiSortMetaRef = useRef<any>(multiSortMeta);
+  const latestSortFieldRef = useRef<string>(sortField);
+  const latestSortOrderRef = useRef<1 | -1 | 0>(sortOrder);
 
-  // 2. Keep it in sync
   useEffect(() => {
-    latestMultiSortMetaRef.current = multiSortMeta;
-  }, [multiSortMeta]);
+    latestSortFieldRef.current = sortField;
+  }, [sortField]);
+
+  useEffect(() => {
+    latestSortOrderRef.current = sortOrder;
+  }, [sortOrder]);
 
   // Keep refs in sync
   useEffect(() => {
@@ -769,7 +776,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   }, [
     first,
     rows,
-    multiSortMeta,
+    sortField,
+    sortOrder,
     showArchived,
     toPopulate,
     toPopulateMedia,
@@ -795,16 +803,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   // };
 
   const onSort = (event: DataTableStateEvent) => {
-    const meta = event.multiSortMeta || [];
-
-    const validMeta = meta
-      .filter((m) => m.order === 1 || m.order === -1)
-      .map((m) => ({
-        field: m.field,
-        order: m.order as 1 | -1,
-      }));
-
-    setMultiSortMeta(validMeta);
+    const nextSortField = event.sortField ? String(event.sortField) : "";
+    const nextSortOrder = event.sortOrder === 1 || event.sortOrder === -1 ? event.sortOrder : 0;
+    setSortField(nextSortField);
+    setSortOrder(nextSortOrder);
     setFirst(0);
   };
 
@@ -839,18 +841,15 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
 
 
-    // ✅ Use ref instead of stale closure value
-    const currentSortMeta = latestMultiSortMetaRef.current;
-
-    if (currentSortMeta && currentSortMeta.length > 0) {
-      queryData.sort = currentSortMeta.map(({ field, order }: any) => {
-        const meta = solidFieldsMetadata?.[field];
-        let resolvedField = field;
-        if (meta?.type === "relation" && meta?.relationType === "many-to-one") {
-          resolvedField = `${field}.${meta?.relationModel?.userKeyField?.name}`;
-        }
-        return `${resolvedField}:${order === 1 ? "asc" : "desc"}`;
-      });
+    const currentSortField = latestSortFieldRef.current;
+    const currentSortOrder = latestSortOrderRef.current;
+    if (currentSortField && (currentSortOrder === 1 || currentSortOrder === -1)) {
+      const meta = solidFieldsMetadata?.[currentSortField];
+      let resolvedField = currentSortField;
+      if (meta?.type === "relation" && meta?.relationType === "many-to-one") {
+        resolvedField = `${currentSortField}.${meta?.relationModel?.userKeyField?.name}`;
+      }
+      queryData.sort = [`${resolvedField}:${currentSortOrder === 1 ? "asc" : "desc"}`];
     } else {
       queryData.sort = [`id:desc`];
     }
@@ -942,9 +941,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   // clear Filter
   const clearFilter = () => {
     if (solidListViewMetaData) {
-      const { multiSortMeta, rows, populate, populateMedia } = initialFilterMethod();
+      const { sortField, sortOrder, rows, populate, populateMedia } = initialFilterMethod();
       setRows(rows);
-      setMultiSortMeta(multiSortMeta);
+      setSortField(sortField);
+      setSortOrder(sortOrder);
       setToPopulate(populate);
       setToPopulateMedia(populateMedia);
     }
@@ -978,8 +978,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       setFirst(nextFirst);
       setRows(nextRows);
     },
-    setSort: (nextMultiSortMeta) => {
-      setMultiSortMeta(nextMultiSortMeta);
+    setSort: (nextSortField, nextSortOrder) => {
+      setSortField(nextSortField);
+      setSortOrder(nextSortOrder);
       setFirst(0);
     },
     setShowArchived: (value) => {
@@ -988,7 +989,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     getState: () => ({
       first,
       rows,
-      multiSortMeta,
+      sortField,
+      sortOrder,
       showArchived,
       filters,
       filterPredicates,
@@ -999,7 +1001,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   }), [
     first,
     rows,
-    multiSortMeta,
+    sortField,
+    sortOrder,
     showArchived,
     filters,
     filterPredicates,
@@ -1016,12 +1019,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   // clickable link allowing one to open the detail / form view.
   const detailsBodyTemplate = (solidViewData: any) => {
     return (
-      <div>
+      <div className="flex justify-content-end" data-no-row-click="true">
         <Button
           type="button"
-          text
           size="small"
-          className=""
+          icon="pi pi-ellipsis-h"
+          className="solid-row-menu-trigger"
           onClick={(e) =>
           // @ts-ignore
           {
@@ -1031,20 +1034,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
             op.current.toggle(e)
           }
           }
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="3"
-            height="10"
-            viewBox="0 0 4 16"
-            fill="none"
-          >
-            <path
-              d="M4 14C4 14.55 3.80417 15.0208 3.4125 15.4125C3.02083 15.8042 2.55 16 2 16C1.45 16 0.979167 15.8042 0.5875 15.4125C0.195833 15.0208 0 14.55 0 14C0 13.45 0.195833 12.9792 0.5875 12.5875C0.979167 12.1958 1.45 12 2 12C2.55 12 3.02083 12.1958 3.4125 12.5875C3.80417 12.9792 4 13.45 4 14ZM4 8C4 8.55 3.80417 9.02083 3.4125 9.4125C3.02083 9.80417 2.55 10 2 10C1.45 10 0.979167 9.80417 0.5875 9.4125C0.195833 9.02083 0 8.55 0 8C0 7.45 0.195833 6.97917 0.5875 6.5875C0.979167 6.19583 1.45 6 2 6C2.55 6 3.02083 6.19583 3.4125 6.5875C3.80417 6.97917 4 7.45 4 8ZM4 2C4 2.55 3.80417 3.02083 3.4125 3.4125C3.02083 3.80417 2.55 4 2 4C1.45 4 0.979167 3.80417 0.5875 3.4125C0.195833 3.02083 0 2.55 0 2C0 1.45 0.195833 0.979166 0.5875 0.5875C0.979167 0.195833 1.45 0 2 0C2.55 0 3.02083 0.195833 3.4125 0.5875C3.80417 0.979166 4 1.45 4 2Z"
-              fill="#666666"
-            />
-          </svg>
-        </Button>
+        />
       </div>
       // <a onClick={() => {
       //   if (params.embeded == true) {
@@ -1179,7 +1169,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const [openLightbox, setOpenLightbox] = useState(false);
   const [lightboxUrls, setLightboxUrls] = useState({});
-  const [showGlobalSearchElement, setShowGlobalSearchElement] = useState(false);
 
   // Render columns dynamically based on metadata
   const renderColumnsDynamically = (solidListViewMetaData: any, solidListViewLayout: any) => {
@@ -1362,14 +1351,15 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     }
   };
   return (
-    <div className="page-parent-wrapper flex">
-      <div className={`h-full flex-grow-1 ${styles.ListContentWrapper}`}>
+    <div className="page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden">
+      <div className={`solid-list-content h-full flex flex-column flex-grow-1 ${styles.ListContentWrapper}`}>
+        <div className="solid-list-surface flex flex-column flex-1 min-h-0">
         {solidListViewInitialMetaData && queryDataLoaded &&
-          <div className="page-header flex-column lg:flex-row">
+          <div className="page-header solid-list-toolbar flex-column lg:flex-row">
             <Toast ref={toast} />
             {/* <div> */}
-            <div className="flex justify-content-between w-full">
-              <div className="flex gap-3 align-items-center w-full ">
+            <div className="flex justify-content-between w-full solid-list-toolbar-row">
+              <div className="flex gap-3 align-items-center w-full solid-list-toolbar-left">
                 <div className='flex align-items-center gap-2'>
                   {params.embeded !== true &&
                     <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
@@ -1399,7 +1389,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   )}
 
               </div>
-              <div className="flex align-items-center solid-header-buttons-wrapper">
+              <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
                 {solidListViewLayout?.attrs?.enableGlobalSearch === true &&
                   params.embeded === false && (
                     <div className="flex lg:hidden">
@@ -1565,9 +1555,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
               />
 
             ) : (
-              <div className="solid-datatable-wrapper flex-1 min-h-0 overflow-auto">
+              <div
+                className="solid-datatable-wrapper solid-list-table-area flex-1 min-h-0 overflow-hidden"
+                style={{ minHeight: 0, height: "100%", display: "flex", flexDirection: "column" }}
+              >
                 <DataTable
                   value={listViewData}
+                  viewportHeight={params.embeded === true ? undefined : "calc(100dvh - 210px)"}
                   rowClassName={(rowData) => {
                     return rowData.deletedAt ? "greyed-out-row" : "";
                   }}
@@ -1591,7 +1585,8 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   first={first}
                   onPage={onPageChange}
                   onSort={(e: DataTableStateEvent) => onSort(e)}
-                  multiSortMeta={multiSortMeta}
+                  sortField={sortField || undefined}
+                  sortOrder={sortOrder}
                   loading={false}
                   // loading={loading || isLoading}
                   // loadingIcon="pi pi-spinner"
@@ -1605,10 +1600,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   }
                   selectionMode={params.embeded === true ? null : "checkbox"}
                   removableSort={solidListViewLayout?.attrs?.removableSort ?? true}
-                  sortMode={solidListViewLayout?.attrs?.sortMode ?? "multiple"}
-                  filterIcon={<FilterIcon />}
-                  tableClassName="solid-data-table"
-                  paginatorClassName="solid-paginator"
+                  sortMode="single"
                   paginatorTemplate="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink"
                   currentPageReportTemplate="{first} - {last} of {totalRecords}"
                   onRowClick={(e) => {
@@ -1682,7 +1674,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                       ? button?.attrs?.icon
                                       : "pi pi-pencil"
                                   }
-                                  className={`w-full text-left gap-2 ${button?.attrs?.className
+                                  className={`solid-inline-row-button w-full text-left gap-2 ${button?.attrs?.className
                                     ? button?.attrs?.className
                                     : ""
                                     }`}
@@ -1726,7 +1718,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                   text
                                   type="button"
                                   severity="secondary"
-                                  className=""
+                                  className="solid-inline-row-button solid-inline-row-button-icon"
                                   label=""
                                   size="small"
                                   iconPos="left"
@@ -1774,7 +1766,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                 <Button
                                   text
                                   type="button"
-                                  className=""
+                                  className="solid-inline-row-button solid-inline-row-button-icon"
                                   size="small"
                                   iconPos="left"
                                   severity="danger"
@@ -1806,7 +1798,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                               event.stopPropagation();
                               recoverById(rowData.id);
                             }}
-                            className="retrieve-button"
+                            className="retrieve-button solid-row-menu-trigger"
                           >
                             <i
                               className="pi pi-refresh"
@@ -1824,11 +1816,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                     className="solid-custom-overlay"
                                     style={{ top: 10, minWidth: 120 }}
                                   >
-                                    <div className="flex flex-column gap-1 p-1">
+                                    <div className="solid-row-actions-menu flex flex-column gap-1 p-1">
                                       {hasEditInContextMenu && (
                                         <Button
                                           type="button"
-                                          className="w-full text-left gap-1"
+                                          className="solid-row-action-button w-full text-left gap-1"
                                           label="Edit"
                                           size="small"
                                           iconPos="left"
@@ -1855,7 +1847,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                         <Button
                                           text
                                           type="button"
-                                          className="w-full text-left gap-1"
+                                          className="solid-row-action-button solid-row-action-button-danger w-full text-left gap-1"
                                           label="Delete"
                                           size="small"
                                           iconPos="left"
@@ -1899,6 +1891,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
             )}
           </>
         }
+        </div>
       </div>
       {
         mcpUrl &&

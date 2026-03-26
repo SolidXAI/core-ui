@@ -1,7 +1,7 @@
 .ListContentWrapper{
   transition: width 0.3s ease;
   min-width: 0;
-  border-right: 1px solid var(--primary-light-color);
+  border-right: 0;
 }
 
 .SolidXAIFloatingBtn {
