@@ -1,5 +1,4 @@
 import { useRouter } from "../../hooks/useRouter";
-import { AlertTriangle } from "lucide-react";
 import { SolidErrorStatePage } from "./SolidErrorStatePage";
 
 type SolidErrorPageProps = {
@@ -20,7 +19,6 @@ export const SolidErrorPage = ({
   return (
     <SolidErrorStatePage
       statusCode="500"
-      icon={AlertTriangle}
       title={title}
       description={message}
       actionLabel={actionLabel}

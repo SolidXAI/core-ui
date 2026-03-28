@@ -1319,6 +1319,100 @@ body {
   }
 }
 
+.solid-error-page {
+  min-height: 100vh;
+  display: grid;
+  grid-template-columns: 1fr;
+  background: var(--background);
+}
+
+.solid-error-page__content {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 32px 28px;
+}
+
+.solid-error-page__copy {
+  text-align: center;
+  max-width: 460px;
+}
+
+.solid-error-page__eyebrow {
+  margin: 0 0 12px;
+  font-size: clamp(30px, 4vw, 52px);
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.solid-error-page__title {
+  margin: 0 0 8px;
+  font-size: clamp(26px, 2.4vw, 34px);
+  line-height: 1.2;
+  color: var(--foreground);
+}
+
+.solid-error-page__description {
+  margin: 0 auto 20px;
+  max-width: 420px;
+  font-size: 15px;
+  line-height: 1.55;
+  color: var(--muted-foreground);
+}
+
+.solid-error-page__cta {
+  border-radius: 10px;
+}
+
+.solid-error-page__visual {
+  display: none;
+  position: relative;
+  padding: 32px 28px;
+  align-items: center;
+  justify-content: center;
+}
+
+.solid-error-page__visual-card {
+  width: min(100%, 620px);
+  height: min(82vh, 640px);
+  border-radius: 20px;
+  background: #050505;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  overflow: hidden;
+}
+
+.solid-error-page__code {
+  position: absolute;
+  inset: 50% auto auto 50%;
+  transform: translate(-50%, -50%);
+  font-size: clamp(140px, 18vw, 270px);
+  line-height: 0.9;
+  font-weight: 800;
+  letter-spacing: 0.02em;
+  color: rgba(255, 255, 255, 0.18);
+  user-select: none;
+}
+
+.solid-error-page__icon {
+  width: clamp(96px, 10vw, 160px);
+  height: clamp(96px, 10vw, 160px);
+  color: #ffffff;
+  z-index: 1;
+}
+
+@media (min-width: 1024px) {
+  .solid-error-page {
+    grid-template-columns: 1fr 1fr;
+  }
+
+  .solid-error-page__visual {
+    display: flex;
+  }
+}
+
 /* Auth (ShadCN-style shell while preserving existing auth logic) */
 .solid-auth-theme-wrapper {
   min-height: 100vh;

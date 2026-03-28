@@ -1,5 +1,4 @@
 import { useRouter } from "../../hooks/useRouter";
-import { SearchX } from "lucide-react";
 import { SolidErrorStatePage } from "./SolidErrorStatePage";
 
 type SolidNotFoundPageProps = {
@@ -20,7 +19,6 @@ export const SolidNotFoundPage = ({
   return (
     <SolidErrorStatePage
       statusCode="404"
-      icon={SearchX}
       title={title}
       description={message}
       actionLabel={actionLabel}
