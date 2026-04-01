@@ -1,5 +1,5 @@
 import { Message } from "primereact/message";
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
 import { getExtensionComponent } from "../../../../../helpers/registry";
@@ -20,6 +20,8 @@ import { camelCase, capitalize } from "lodash";
 import { SolidListView } from "../../../../core/list/SolidListView";
 import { RenderSolidFormEmbededView } from "./SolidRelationManyToOneField";
 import { Dialog } from "primereact/dialog";
+import { useMountEffect } from "primereact/hooks";
+import { Messages } from "primereact/messages";
 
 export type FormViewParams = {
     moduleName: any;
@@ -114,10 +116,13 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const readOnlyPermission = fieldContext.readOnly;
-    const disabled = fieldLayoutInfo.attrs?.disabled;
-    const readOnly = fieldLayoutInfo.attrs?.readOnly;
+    const pathname = usePathname();
+    const lastPathSegment = pathname.split('/').pop();
+    const disabled = fieldLayoutInfo.attrs?.disabled || lastPathSegment === "new";
+    const readOnly = fieldLayoutInfo.attrs?.readOnly || lastPathSegment === "new";
 
     const [visibleCreateDialog, setVisibleCreateDialog] = useState(false);
 
@@ -187,6 +192,14 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
         }
     };
 
+
+    const msgs = useRef<Messages>(null);
+
+    useMountEffect(() => {
+        msgs.current?.clear();
+        msgs.current?.show({ id: '1', sticky: true, severity: 'info', summary: 'Info', detail: `Please save the ${solidFormViewMetaData?.data?.solidView?.model?.displayName} to add  ${fieldLabel}.`, closable: false });
+    });
+
     return (
         <div className="relative">
             <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
@@ -197,6 +210,13 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                         <SolidFieldTooltip fieldContext={fieldContext} />
                     </label>
                 )}
+                {
+                    lastPathSegment === "new" && (
+                        <div className="flex justify-content-start">
+                            <Messages ref={msgs} />
+                        </div>
+                    )
+                }
                 <div className="flex align-items-center gap-3">
                     <AutoComplete
                         readOnly={readOnly || readOnlyPermission}
@@ -214,6 +234,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                         onSelect={(e) => linkItem(e.value)}
                         onUnselect={(e) => unlinkItem(e.value)}
                         className="solid-standard-autocomplete w-full"
+
                     />
                     {fieldContext.field.attrs.inlineCreate && (
                         <>
@@ -267,6 +288,12 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
     const fieldLayoutInfo = fieldContext.field;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const readOnlyPermission = fieldContext.readOnly;
+    const pathname = usePathname();
+    const lastPathSegment = pathname.split('/').pop();
+    const disabled = fieldLayoutInfo.attrs?.disabled || lastPathSegment === "new";
+    const readOnly = fieldLayoutInfo.attrs?.readOnly || lastPathSegment === "new";
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
 
     const [visibleCreateDialog, setVisibleCreateDialog] = useState(false);
 
@@ -369,8 +396,22 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
         </div>
     );
 
+    const msgs = useRef<Messages>(null);
+
+    useMountEffect(() => {
+        msgs.current?.clear();
+        msgs.current?.show({ id: '1', sticky: true, severity: 'info', summary: 'Info', detail: `Please save the ${solidFormViewMetaData?.data?.solidView?.model?.displayName} to add  ${fieldLabel}.`, closable: false });
+    });
+
     return (
         <div>
+            {
+                lastPathSegment === "new" && (
+                    <div className="flex justify-content-start">
+                        <Messages ref={msgs} />
+                    </div>
+                )
+            }
             <Panel toggleable headerTemplate={headerTemplate}>
                 <div className="formgrid grid">
                     {allOptions.map((item: any, i: number) => (
@@ -380,6 +421,7 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
                                 inputId={item.label}
                                 checked={currentValues.some((s) => s.value === item.value)}
                                 onChange={() => handleCheckboxChange(item)}
+                                disabled={disabled}
                             />
                             <label htmlFor={item.label} className="form-field-label m-0">
                                 {item.label}
