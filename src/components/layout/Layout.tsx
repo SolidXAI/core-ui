@@ -11,6 +11,7 @@ import AppConfig from './AppConfig';
 import { LayoutContext } from './context/layoutcontext';
 import AppSidebar from './AppSidebar';
 import SolidPopupContainer from '../common/SolidPopupContainer';
+import { GlobalToast } from '../common/GlobalToast';
 import { useSession } from "../../hooks/useSession";
 import { getExtensionFunction } from '../../helpers/registry';
 import { SolidOnApplicationMountEvent } from '../../types/solid-core';
@@ -193,6 +194,7 @@ export const Layout = ({ children }: ChildContainerProps) => {
                     <i className="pi pi-th-large"></i>
                 </div> */}
                 <SolidPopupContainer></SolidPopupContainer>
+                <GlobalToast />
                 <div className={`main-content ${visibleNavbar ? "shifted" : ""}`}>
                     {children}
                     {/* {getEnv("NEXT_PUBLIC_ENABLE_CUSTOM_HEADER_FOOTER") == "true" && <CustomFooter />} */}
