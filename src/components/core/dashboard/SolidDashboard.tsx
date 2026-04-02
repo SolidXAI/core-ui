@@ -135,7 +135,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
   const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
   const [filters, setFilters] = useState<SqlExpression[]>([]);
   const [isOpenSolidXAiPanel, setIsOpenSolidXAiPanel] = useState(false);
-  const [chatterWidth, setChatterWidth] = useState(380);
+  const [chatterWidth, setChatterWidth] = useState(700);
   const [isResizing, setIsResizing] = useState(false);
   const [questions, setQuestions] = useState<any[]>([]);
   const [dashboardVariables, setDashboardVariables] = useState<DashboardVariableRecord[]>([]);
@@ -172,7 +172,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
     if (isResizing) {
       const handleMouseMove = (e: MouseEvent) => {
         const newWidth = window.innerWidth - e.clientX;
-        const clampedWidth = Math.max(280, Math.min(newWidth, 700));
+        const clampedWidth = Math.max(700, newWidth);
         setChatterWidth(clampedWidth);
         localStorage.setItem('d_solidxai_width', clampedWidth.toString());
       };
