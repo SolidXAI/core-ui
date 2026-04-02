@@ -2,10 +2,10 @@ import { OverlayPanel } from 'primereact/overlaypanel';
 import { useEffect, useRef, useState } from 'react'
 import { createSolidEntityApi } from '../../redux/api/solidEntityApi';
 import { useFormik } from 'formik';
-import { Toast } from 'primereact/toast';
 import { useSearchParams } from "../../hooks/useSearchParams";
 import { ERROR_MESSAGES } from '../../constants/error-messages';
-import showToast from "../../helpers/showToast";
+import { useDispatch } from 'react-redux';
+import { showToast } from '../../redux/features/toastSlice';
 
 interface Props {
     solidFormViewMetaData?: any;
@@ -19,7 +19,7 @@ interface Props {
 
 export const SolidFormStepper = (props: Props) => {
     const { solidFormViewMetaData, modelName, initialEntityData, id, solidWorkflowFieldValue, setSolidWorkflowFieldValue, onStepperUpdate } = props;
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
     const formStepperOverlay = useRef(null);
     const containerRef = useRef<HTMLDivElement>(null);
     const leftFormStepperOverlay = useRef(null);
@@ -144,7 +144,7 @@ export const SolidFormStepper = (props: Props) => {
         try {
             const result = await updateStepper({ id: values.id, data: { [solidWorkflowFieldKey]: values[solidWorkflowFieldKey] } }).unwrap();
             if (result?.statusCode === 200) {
-                showToast(toast, "success", ERROR_MESSAGES.FIELD_UPDATE(defaultWorkflowFieldDisplayName), ERROR_MESSAGES.FIELD_UPDATE_SUCCESSFULLY(defaultWorkflowFieldDisplayName));
+                dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.FIELD_UPDATE(defaultWorkflowFieldDisplayName), detail: ERROR_MESSAGES.FIELD_UPDATE_SUCCESSFULLY(defaultWorkflowFieldDisplayName) }));
                 if (result?.data?.[solidWorkflowFieldKey]) {
                     setSolidWorkflowFieldValue(result.data[solidWorkflowFieldKey]);
                 }
@@ -154,7 +154,7 @@ export const SolidFormStepper = (props: Props) => {
             }
         } catch (error) {
             console.error(ERROR_MESSAGES.UPDATING_STEPPER, error);
-            showToast(toast, "error", ERROR_MESSAGES.UPDATE_FAILED, ERROR_MESSAGES.FAILED_UPDATE_FROM);
+            dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.UPDATE_FAILED, detail: ERROR_MESSAGES.FAILED_UPDATE_FROM }));
         }
     }
 
@@ -211,7 +211,6 @@ export const SolidFormStepper = (props: Props) => {
 
     return (
         <>
-            <Toast ref={toast} />
             <div ref={containerRef} className='arrow-stepper-container'>
                 {hasPreviousSteps && (
                     <div style={{ display: 'flex', alignItems: 'center' }}>

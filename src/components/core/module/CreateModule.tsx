@@ -6,7 +6,6 @@ import { SingleSelectAutoCompleteField } from "../../../components/common/Single
 import { SolidFormHeader } from "../../../components/common/SolidFormHeader";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { getSingularAndPlural } from "../../../helpers/helpers";
-import { handleError } from "../../../helpers/ToastContainer";
 import { useGetFieldDefaultMetaDataQuery } from "../../../redux/api/fieldApi";
 import { useDeleteMediaMutation } from "../../../redux/api/mediaApi";
 import { useCreatemoduleMutation, useDeletemoduleMutation, useUpdatemoduleMutation } from "../../../redux/api/moduleApi";
@@ -21,9 +20,10 @@ import { Message } from "primereact/message";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Panel } from "primereact/panel";
 import { ProgressBar } from "primereact/progressbar";
-import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
 import React, { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import { showToast } from "../../../redux/features/toastSlice";
 import { useDropzone } from "react-dropzone";
 import * as Yup from "yup";
 import { env } from "../../../adapters/env";
@@ -42,7 +42,7 @@ const footer = (
 );
 
 const CreateModule = ({ data }: any) => {
-  const toast = useRef<Toast>(null);
+  const dispatch = useDispatch();
   const router = useRouter();
   const pathname = usePathname()
   const [isDialogVisible, setDialogVisible] = useState(false);
@@ -233,8 +233,9 @@ const CreateModule = ({ data }: any) => {
     const errors = await formik.validateForm(); // Trigger validation and get the updated errors
     const errorMessages = Object.values(errors);
 
-    if (errorMessages.length > 0 && toast.current) {
-      handleError(errorMessages)
+    if (errorMessages.length > 0) {
+      const detail = Array.isArray(errorMessages) ? errorMessages.join(', ') : String(errorMessages);
+      dispatch(showToast({ severity: 'error', summary: 'Error', detail }));
       // toast.current.show({
       //   severity: "success",
       //   summary: "Can you send me the report?",
@@ -258,26 +259,8 @@ const CreateModule = ({ data }: any) => {
   };
 
   const showCustomeError = async (error: string[]) => {
-    if (error.length > 0 && toast.current) {
-      toast.current.show({
-        severity: "error",
-        summary: ERROR_MESSAGES.SEND_REPORT,
-        // sticky: true,
-        life: 3000,
-        //@ts-ignore
-        content: (props) => (
-          <div
-            className="flex flex-column align-items-left"
-            style={{ flex: "1" }}
-          >
-            {error.map((m: any, index) => (
-              <div className="flex align-items-center gap-2" key={index}>
-                <span className="font-bold text-900">{m}</span>
-              </div>
-            ))}
-          </div>
-        ),
-      });
+    if (error.length > 0) {
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEND_REPORT, detail: error.join(', '), life: 3000 }));
     }
   };
 
@@ -315,7 +298,11 @@ const CreateModule = ({ data }: any) => {
     // Handle any error
     errors.forEach(({ isError, error }) => {
       if (isError && error) {
-        handleError(error); // Call the centralized error handler
+        const errorMessage = error && typeof error === 'object' && 'data' in error && 'message' in (error as any).data
+          ? (error as any).data.message
+          : 'Something went wrong';
+        const detail = Array.isArray(errorMessage) ? errorMessage.join(', ') : String(errorMessage);
+        dispatch(showToast({ severity: 'error', summary: 'Error', detail }));
       }
     });
   }, [isError, isModuleUpdateError, isModuleDeleteError, isMediaDeleteError])
@@ -373,7 +360,6 @@ const CreateModule = ({ data }: any) => {
 
   return (
     <div className="solid-form-wrapper">
-      <Toast ref={toast} />
       <form style={{ width: '100%', borderRight: '1px solid var(--primary-light-color' }} onSubmit={formik.handleSubmit}>
         <div className="solid-form-header">
           {pathname.includes('new') ?

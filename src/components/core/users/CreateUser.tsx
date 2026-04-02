@@ -19,10 +19,11 @@ import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import { Panel } from "primereact/panel";
 import { Password } from "primereact/password";
-import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 import * as Yup from "yup";
+import { showToast } from "../../../redux/features/toastSlice";
 
 
 interface ErrorResponseData {
@@ -33,7 +34,7 @@ interface ErrorResponseData {
 
 const CreateUser = ({ data, params }: any) => {
 
-  const toast = useRef<Toast>(null);
+  const dispatch = useDispatch();
   const pathname = usePathname();
   const router = useRouter();
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
@@ -140,26 +141,8 @@ const CreateUser = ({ data, params }: any) => {
     const errors = await formik.validateForm();
     const errorMessages = Object.values(errors);
 
-    if (errorMessages.length > 0 && toast.current) {
-      toast.current.show({
-        severity: "error",
-        summary: ERROR_MESSAGES.SEND_REPORT,
-        // sticky: true,
-        life: 3000,
-        //@ts-ignore
-        content: (props) => (
-          <div
-            className="flex flex-column align-items-left"
-            style={{ flex: "1" }}
-          >
-            {errorMessages.map((m: any, index: number) => (
-              <div className="flex align-items-center gap-2" key={index}>
-                <span className="font-bold text-900">{m}</span>
-              </div>
-            ))}
-          </div>
-        ),
-      });
+    if (errorMessages.length > 0) {
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEND_REPORT, detail: errorMessages.join(', '), life: 3000 }));
     }
   };
 
@@ -177,28 +160,8 @@ const CreateUser = ({ data, params }: any) => {
         errorMessage = [ERROR_MESSAGES.SOMETHING_WRONG];
       }
 
-      toast.current?.show({
-        severity: 'error',
-        summary: ERROR_MESSAGES.ERROR,
-        detail: errorMessage,
-        sticky: true,
-        //@ts-ignore
-        content: (props) => (
-          <div className="flex flex-column align-items-left" style={{ flex: "1" }}>
-            {Array.isArray(errorMessage) ? (
-              errorMessage.map((message, index) => (
-                <div className="flex align-items-center gap-2" key={index}>
-                  <span className="font-bold text-900">{message.trim()}</span>
-                </div>
-              ))
-            ) : (
-              <div className="flex align-items-center gap-2">
-                <span className="font-bold text-900">{errorMessage?.trim()}</span>
-              </div>
-            )}
-          </div>
-        ),
-      });
+      const detail = Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage;
+      dispatch(showToast({ severity: 'error', summary: ERROR_MESSAGES.ERROR, detail }));
     };
 
     // Check and handle errors from each API operation
@@ -257,7 +220,6 @@ const CreateUser = ({ data, params }: any) => {
 
   return (
     <div className="solid-form-wrapper">
-      <Toast ref={toast} />
       <div className="solid-form-section" >
         <form onSubmit={formik.handleSubmit}>
           <div className="solid-form-header">

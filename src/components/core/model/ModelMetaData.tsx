@@ -15,10 +15,11 @@ import { InputText } from "primereact/inputtext";
 import { InputTextarea } from "primereact/inputtextarea";
 import { Message } from "primereact/message";
 import { Panel } from "primereact/panel";
-import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
 import qs from "qs";
 import React, { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import { showToast } from "../../../redux/features/toastSlice";
 import * as Yup from "yup";
 
 const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allModelsNames, deleteModelFunction, nextTab, formikModelMetadataRef, params, formErrors, setIsDirty }: any, ref) => {
@@ -26,7 +27,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
   // const ModelMetaData = ({ modelMetaData, setModelMetaData, deleteModelFunction, nextTab, formikModelMetadataRef }: any) => {   
 
   const router = useRouter();
-  const toast = useRef<Toast>(null);
+  const dispatch = useDispatch();
   const pathname = usePathname();
 
   const [triggerGetModules, { data: moduleData, isFetching: isModuleFetching, error: moduleError }] = useLazyGetmodulesQuery();
@@ -200,25 +201,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
     const errors = await formik.validateForm(); // Trigger validation and get the updated errors
     const errorMessages = Object.values(errors);
     if (errorMessages.length > 0) {
-      toast?.current?.show({
-        severity: "error",
-        summary: ERROR_MESSAGES.SEND_REPORT,
-        // sticky: true,
-        life: 3000,
-        //@ts-ignore
-        content: (props) => (
-          <div
-            className="flex flex-column align-items-left"
-            style={{ flex: "1" }}
-          >
-            {errorMessages.map((m, index) => (
-              <div className="flex align-items-center gap-2" key={index}>
-                <span className="font-bold text-900">{String(m)}</span>
-              </div>
-            ))}
-          </div>
-        ),
-      });
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEND_REPORT, detail: errorMessages.map(String).join(', '), life: 3000 }));
     }
   };
 
@@ -361,7 +344,6 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
   return (
 
     <>
-      <Toast ref={toast} />
       <form onSubmit={formik.handleSubmit}>
         {/* <div className="form-wrapper-subtitle">Name</div> */}
         <div className="">

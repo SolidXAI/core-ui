@@ -21,7 +21,7 @@ import { useSearchParams } from "../../../hooks/useSearchParams";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
 import { FilterIcon } from '../../../components/modelsComponents/filterIcon';
 import { OverlayPanel } from "primereact/overlaypanel";
-import { Toast } from "primereact/toast";
+import { showToast } from "../../../redux/features/toastSlice";
 import { Divider } from "primereact/divider";
 import CompactImage from '../../../resources/images/layout/images/compact.png';
 import CozyImage from '../../../resources/images/layout/images/cozy.png';
@@ -554,8 +554,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const [listViewRowActionPopupState, setListViewRowActionPopupState] = useState(false);
   const [listViewRowActionData, setListRowActionData] = useState<any>();
 
-  const toast = useRef<Toast>(null);
-
   // Get the list view data.
   const [triggerGetSolidEntities, { data: solidEntityListViewData, isLoading, error },] = useLazyGetSolidEntitiesQuery();
 
@@ -1073,12 +1071,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   useEffect(() => {
     if (recoverByIdIsSuccess && recoverByIdData) {
-      toast.current?.show({
-        severity: "success",
-        summary: "Success",
-        detail: recoverByIdData.data.message,
-        life: 3000,
-      });
+      dispatch(showToast({ severity: "success", summary: "Success", detail: recoverByIdData.data.message, life: 3000 }));
       return;
     }
     if (recoverByIdIsError && recoverByIdError) {
@@ -1099,46 +1092,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
         ? [errorMessages]
         : [];
     if (messages.length > 0) {
-      toast?.current?.show({
-        severity: "error",
-        summary: ERROR_MESSAGES.SEND_REPORT,
-        sticky: true,
-        //@ts-ignore
-        content: (props) => (
-          <div
-            className="flex flex-column align-items-left"
-            style={{ flex: "1" }}
-          >
-            {messages.map((m, index) => (
-              <div className="flex align-items-center gap-2" key={index}>
-                <span className="font-bold text-900">{String(m)}</span>
-              </div>
-            ))}
-          </div>
-        ),
-      });
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEND_REPORT, detail: messages.join(', ') }));
     }
   };
 
   const showFieldError = async (error: any) => {
     if (error) {
-      toast?.current?.show({
-        severity: "error",
-        summary: ERROR_MESSAGES.SEND_REPORT,
-        // sticky: true,
-        life: 3000,
-        //@ts-ignore
-        content: (props) => (
-          <div
-            className="flex flex-column align-items-left"
-            style={{ flex: "1" }}
-          >
-            <div className="flex align-items-center gap-2">
-              <span className="font-bold text-900">{String(error)}</span>
-            </div>
-          </div>
-        ),
-      });
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEND_REPORT, detail: String(error), life: 3000 }));
     }
   };
 
@@ -1151,21 +1111,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     deleteManySolidEntities(deleteList)
       .unwrap()
       .then(() => {
-        toast.current?.show({
-          severity: 'success',
-          summary: 'Deleted',
-          detail: ERROR_MESSAGES.RECORD_DELETE,
-          life: 3000
-        });
+        dispatch(showToast({ severity: 'success', summary: 'Deleted', detail: ERROR_MESSAGES.RECORD_DELETE, life: 3000 }));
         setDialogVisible(false);
       })
       .catch((error) => {
-        toast.current?.show({
-          severity: 'error',
-          summary: 'Delete Failed',
-          detail: error?.data?.message,
-          life: 4000
-        });
+        dispatch(showToast({ severity: 'error', summary: 'Delete Failed', detail: error?.data?.message, life: 4000 }));
       });
   };
 
@@ -1282,28 +1232,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
       if (response?.data?.statusCode === 200) {
         setDeleteEntity(false);
-        toast.current?.show({
-          severity: "success",
-          summary: ERROR_MESSAGES.DELETED,
-          detail: ERROR_MESSAGES.ENTITY_DELETE,
-          life: 3000,
-        });
+        dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.DELETED, detail: ERROR_MESSAGES.ENTITY_DELETE, life: 3000 }));
       } else {
-        toast.current?.show({
-          severity: "error",
-          summary: ERROR_MESSAGES.DELETE_FAIELD,
-          detail: response?.error?.data?.error,
-          sticky: true,          // stays until user closes
-        });
+        dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.DELETE_FAIELD, detail: response?.error?.data?.error }));
       }
     } catch (error: any) {
-      toast.current?.show({
-        severity: "error",
-        summary: ERROR_MESSAGES.DELETE_FAIELD,
-        detail: ERROR_MESSAGES.SOMETHING_WRONG,
-        sticky: true,          // stays until user closes
-
-      });
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.DELETE_FAIELD, detail: ERROR_MESSAGES.SOMETHING_WRONG }));
     }
   };
 
@@ -1365,7 +1299,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
       <div className={`h-full flex-grow-1 ${styles.ListContentWrapper}`}>
         {solidListViewInitialMetaData && queryDataLoaded &&
           <div className="page-header flex-column lg:flex-row">
-            <Toast ref={toast} />
             {/* <div> */}
             <div className="flex justify-content-between w-full">
               <div className="flex gap-3 align-items-center w-full ">

@@ -1,7 +1,6 @@
 
 
 import { CancelButton, SolidCancelButton } from "../../../components/common/CancelButton";
-import { handleError } from "../../../helpers/ToastContainer";
 import { useGetFieldDefaultMetaDataQuery } from "../../../redux/api/fieldApi";
 import { useCreatemodelMutation, useDeletemodelMutation, useLazyGetModelsQuery, useUpdatemodelMutation } from "../../../redux/api/modelApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
@@ -9,9 +8,10 @@ import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { Button } from "primereact/button";
 import { TabPanel, TabView } from "primereact/tabview";
-import { Toast } from "primereact/toast";
 import qs from "qs";
 import { useEffect, useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import { showToast } from "../../../redux/features/toastSlice";
 import FieldMetaData from "./FieldMetaData";
 import ModelMetaData from "./ModelMetaData";
 import { BackButton } from "../../../components/common/BackButton";
@@ -31,7 +31,7 @@ interface ErrorResponseData {
 
 const CreateModel = ({ data, params }: any) => {
 
-  const toast = useRef<Toast>(null);
+  const dispatch = useDispatch();
   const router = useRouter();
   const pathname = usePathname();
   const [deleteEntity, setDeleteEntity] = useState(false);
@@ -149,7 +149,7 @@ const CreateModel = ({ data, params }: any) => {
           setFormErrors(errors);
           const errorMessages = Object.values(errors);
           errorMessages.forEach((error) => {
-            handleError([error]); // Call handleError for each error separately
+            dispatch(showToast({ severity: 'error', summary: 'Error', detail: Array.isArray(error) ? error.join(', ') : String(error) }));
           });
 
           firstErrorTab = 0; // Model Metadata tab has errors
@@ -158,7 +158,7 @@ const CreateModel = ({ data, params }: any) => {
         }
 
         if (fieldMetaData.length === 0) {
-          handleError([ERROR_MESSAGES.ADD_ATLEAST_ONE_FIELD]);
+          dispatch(showToast({ severity: 'error', summary: 'Error', detail: ERROR_MESSAGES.ADD_ATLEAST_ONE_FIELD }));
           firstErrorTab = firstErrorTab ?? 1; // If no prior error, set to Field tab
         }
 
@@ -203,12 +203,7 @@ const CreateModel = ({ data, params }: any) => {
       );
   
       if (!hasPrimaryKey) {
-        toast?.current?.show({
-          severity: "error",
-          summary: "Primary Key Required",
-           detail: "Legacy tables set at least one field marked as Primary Key. Please mark a field as Primary Key before proceeding.",
-            life: 5000,
-        });
+        dispatch(showToast({ severity: "error", summary: "Primary Key Required", detail: "Legacy tables set at least one field marked as Primary Key. Please mark a field as Primary Key before proceeding.", life: 5000 }));
         return; 
       }
     }
@@ -257,25 +252,7 @@ const CreateModel = ({ data, params }: any) => {
     const errorMessages = Object.values(errors);
 
     if (errorMessages.length > 0) {
-      toast?.current?.show({
-        severity: "error",
-        summary: ERROR_MESSAGES.SEND_REPORT,
-        // sticky: true,
-        life: 3000,
-        //@ts-ignore
-        content: (props) => (
-          <div
-            className="flex flex-column align-items-left"
-            style={{ flex: "1" }}
-          >
-            {errorMessages.map((m, index) => (
-              <div className="flex align-items-center gap-2" key={index}>
-                <span className="font-bold text-900">{String(m)}</span>
-              </div>
-            ))}
-          </div>
-        ),
-      });
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEND_REPORT, detail: errorMessages.map(String).join(', '), life: 3000 }));
     }
   };
 
@@ -342,7 +319,11 @@ const CreateModel = ({ data, params }: any) => {
       // Handle any error
       errors.forEach(({ isError, error }) => {
         if (isError && error) {
-          handleError(error); // Call the centralized error handler
+          const errorMessage = error && typeof error === 'object' && 'data' in error && 'message' in (error as any).data
+            ? (error as any).data.message
+            : 'Something went wrong';
+          const detail = Array.isArray(errorMessage) ? errorMessage.join(', ') : String(errorMessage);
+          dispatch(showToast({ severity: 'error', summary: 'Error', detail }));
         }
       });
     }
@@ -419,7 +400,6 @@ const CreateModel = ({ data, params }: any) => {
 
   return (
     <div className="solid-form-wrapper">
-      <Toast ref={toast} />
       <div style={{ width: '100%', borderRight: '1px solid var(--primary-light-color' }}>
         <div className="solid-form-header">
           {params.id === "new" ?

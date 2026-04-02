@@ -9,14 +9,15 @@ import {
     DataTableFilterMeta,
     DataTableStateEvent,
 } from "primereact/datatable";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
 
 import { CreateButton } from "../../../components/common/CreateButton";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/query";
 import { Dialog } from "primereact/dialog";
-import { Toast } from "primereact/toast";
 import qs from "qs";
 import { ERROR_MESSAGES } from '../../../constants/error-messages';
+import { showToast } from '../../../redux/features/toastSlice';
 
 interface Users {
     id: string;
@@ -34,7 +35,7 @@ interface ErrorResponseData {
 }
 
 export const UserListView = () => {
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
     const [users, setUsers] = useState<Users[]>([]);
     const [filters, setFilters] = useState<DataTableFilterMeta>({
         fullName: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
@@ -108,23 +109,7 @@ export const UserListView = () => {
                 errorMessage = ERROR_MESSAGES.SOMETHING_WRONG;
             }
 
-            toast.current?.show({
-                severity: 'error',
-                summary: ERROR_MESSAGES.ERROR,
-                detail: errorMessage,
-                life: 3000,
-                //@ts-ignore
-                content: (props) => (
-                    <div
-                        className="flex flex-column align-items-left"
-                        style={{ flex: "1" }}
-                    >
-                        <div className="flex align-items-center gap-2" >
-                            <span className="font-bold text-900">{errorMessage}</span>
-                        </div>
-                    </div>
-                ),
-            });
+            dispatch(showToast({ severity: 'error', summary: ERROR_MESSAGES.ERROR, detail: errorMessage, life: 3000 }));
         }
     }, [isError, isUserDeleteError]);
 
@@ -270,7 +255,6 @@ export const UserListView = () => {
 
     return (
         <div className="">
-            <Toast ref={toast} />
             <div className="flex gap-3 mb-4">
                 <CreateButton />
                 {selectedUsers.length > 0 && <Button

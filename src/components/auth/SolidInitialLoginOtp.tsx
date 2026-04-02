@@ -6,15 +6,15 @@ import { useSearchParams } from "../../hooks/useSearchParams";
 import { Button } from "primereact/button";
 import { InputOtp } from "primereact/inputotp";
 import { Message } from "primereact/message";
-import { Toast } from "primereact/toast";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch } from 'react-redux';
 import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { signInWithOtp } from "../../adapters/auth/index";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
-import showToast from "../../helpers/showToast";
+import { showToast } from "../../redux/features/toastSlice";
 
 
 const SolidInitialLoginOtp = () => {
@@ -32,7 +32,7 @@ const SolidInitialLoginOtp = () => {
     }, [trigger])
 
     const [initiateResendOTP] = useInitateLoginMutation();
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
     const router = useRouter();
     const [timeLeft, setTimeLeft] = useState(RESEND_OTP_TIMER);
     const [resendEnabled, setResendEnabled] = useState(false);
@@ -113,21 +113,20 @@ const SolidInitialLoginOtp = () => {
             const response = await initiateResendOTP(payload).unwrap();
 
             if (response?.statusCode === 200) {
-                showToast(toast, "success", ERROR_MESSAGES.OPT_RESEND, response?.data?.message);
+                dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.OPT_RESEND, detail: response?.data?.message }));
                 localStorage.setItem(RESEND_OTP_KEY, Date.now().toString());
                 setTimeLeft(RESEND_OTP_TIMER);
                 setResendEnabled(false);
             } else {
-                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGIN_ERROR, detail: response.error }));
             }
         } catch (err: any) {
-            showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
+            dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGIN_ERROR, detail: err?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG }));
         }
     };
 
     return (
         <>
-            <Toast ref={toast} />
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`} style={{ minWidth: 480 }}>
                 {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">
@@ -160,18 +159,18 @@ const SolidInitialLoginOtp = () => {
                                 });
 
                                 if (response?.error) {
-                                    showToast(toast, "error", ERROR_MESSAGES.INAVLID_OTP, response.error);
+                                    dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.INAVLID_OTP, detail: response.error }));
                                     setErrors({
                                         otp: ERROR_MESSAGES.INAVLID_OTP,
                                     });
                                 } else {
                                     localStorage.removeItem(`resendOtpLogin_${identifier}`);
-                                    showToast(toast, "success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
+                                    dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
                                     const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin";
                                     router.push(redirectUrl);
                                 }
                             } catch (err: any) {
-                                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                                dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGIN_ERROR, detail: err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG }));
                             } finally {
                                 setSubmitting(false);
                             }

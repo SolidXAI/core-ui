@@ -1,8 +1,9 @@
-import { handleError } from "../../helpers/ToastContainer";
 import { signOut } from "../../adapters/auth/index";
 import { useSession } from "../../hooks/useSession";
 import { useRouter } from "../../hooks/useRouter";
 import { useEffect, useState } from "react";
+import { useDispatch } from 'react-redux';
+import { showToast } from '../../redux/features/toastSlice';
 import { Layout } from "./Layout";
 import { Dialog } from "primereact/dialog";
 import { Divider } from "primereact/divider";
@@ -11,6 +12,7 @@ import { ERROR_MESSAGES } from "../../constants/error-messages";
 
 export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     // const theme = useSelector((state: any) => state.theme.mode);
+    const dispatch = useDispatch();
     const { data: session, status } = useSession();
     const [isForcePasswordChange, setIsForcePasswordChange] = useState(false)
     useEffect(() => {
@@ -25,7 +27,7 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     useEffect(() => {
         if (status === "loading") return;
         if (!session || session?.error === "RefreshAccessTokenError") {
-            handleError([ERROR_MESSAGES.SESSION_EXPIRED])
+            dispatch(showToast({ severity: 'error', summary: 'Error', detail: ERROR_MESSAGES.SESSION_EXPIRED }))
             signOut({ callbackUrl: "/auth/login" });
         }
 
