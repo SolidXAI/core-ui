@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { SolidSelect } from "../../shad-cn-ui/SolidSelect";
 import { loadSession } from "../../../adapters/auth/storage";
 import styles from "./SolidAiChat.module.css";
 
@@ -64,14 +63,6 @@ function writeLS(key: string, val: string | null) {
 
 let _persistedSessionId: string | null = readLS(LS_SESSION_ID);
 let _historySessionId: string | null = readLS(LS_HISTORY_ID);
-
-// ── Models ────────────────────────────────────────────────────────────────────
-
-const MODELS = [
-    { label: "GPT-4o", value: "gpt-4o" },
-    { label: "Claude 3.5 Sonnet", value: "claude-3-5-sonnet" },
-    { label: "Gemini 1.5 Pro", value: "gemini-1-5-pro" },
-];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -436,7 +427,6 @@ function processHistoryEvents(backendMsgs: any[]): Message[] {
 export const SolidAiChat: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
-    const [model, setModel] = useState("gpt-4o");
     const [isConnected, setIsConnected] = useState(false);
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
@@ -1023,7 +1013,7 @@ export const SolidAiChat: React.FC = () => {
                             <i className="pi pi-comments" style={{ fontSize: "28px" }} />
                         </div>
                         <p className={styles.EmptyTitle}>How can I help you today?</p>
-                        <p className={styles.EmptySubtitle}>Ask me anything — powered by {MODELS.find((m) => m.value === model)?.label ?? model}.</p>
+                        <p className={styles.EmptySubtitle}>Ask me anything about your SolidX project.</p>
                     </div>
                 )}
 
@@ -1061,17 +1051,6 @@ export const SolidAiChat: React.FC = () => {
                             <div className={styles.AiTurnContent}>
                                 {group.msgs.flatMap((msg) => {
                                     const items: React.ReactNode[] = [];
-
-                                    // ── Step divider before step > 1 thinking events ──
-                                    if (msg.role === "event" && !msg.toolName && msg.step && msg.step > 1) {
-                                        items.push(
-                                            <div key={`divider-${msg.id}`} className={styles.StepDividerRow}>
-                                                <div className={styles.StepDividerLine} />
-                                                <span className={styles.StepDividerLabel}>Step {msg.step}</span>
-                                                <div className={styles.StepDividerLine} />
-                                            </div>
-                                        );
-                                    }
 
                                     if (msg.role === "event") {
                                         const active = msg.eventState === "active";
@@ -1166,7 +1145,7 @@ export const SolidAiChat: React.FC = () => {
                                             return items;
                                         }
 
-                                        // ── Thinking bubble (active) / done row ─────────
+                                        // ── Thinking bubble: only show while active ──────
                                         if (active) {
                                             items.push(
                                                 <div key={msg.id} className={styles.ThinkingBubble}>
@@ -1175,16 +1154,7 @@ export const SolidAiChat: React.FC = () => {
                                                         <span className={styles.ThinkingDot} />
                                                         <span className={styles.ThinkingDot} />
                                                     </div>
-                                                    <span className={styles.ThinkingLabel}>
-                                                        {msg.step && msg.step > 1 ? `Thinking...` : "Thinking…"}
-                                                    </span>
-                                                </div>
-                                            );
-                                        } else {
-                                            items.push(
-                                                <div key={msg.id} className={`${styles.EventRow} ${styles.EventRowDone}`}>
-                                                    <i className="pi pi-check-circle" />
-                                                    <span>{msg.content}</span>
+                                                    <span className={styles.ThinkingLabel}>Thinking…</span>
                                                 </div>
                                             );
                                         }
@@ -1248,26 +1218,13 @@ export const SolidAiChat: React.FC = () => {
                         disabled={!isConnected || !sessionId || isProcessing}
                         rows={1}
                     />
-                </div>
-
-                {/* ── Taskbar ── */}
-                <div className={styles.InputFooter}>
-                    <div className={styles.InputModelWrap}>
-                        <SolidSelect
-                            value={model}
-                            options={MODELS}
-                            onChange={(e) => setModel(e.value)}
-                            className={styles.ModelSelect}
-                        />
-                    </div>
-                    <div className={styles.TaskBarSpacer} />
                     <button
                         className={`${styles.SendBtn} ${canSend ? styles.SendBtnActive : ""}`}
                         disabled={!canSend}
                         onClick={handleSend}
                         aria-label="Send message"
                     >
-                        <i className="pi pi-send" style={{ fontSize: "13px" }} />
+                        <i className="pi pi-send" style={{ fontSize: "12px" }} />
                     </button>
                 </div>
             </div>

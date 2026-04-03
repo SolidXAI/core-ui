@@ -837,19 +837,21 @@
 
 /* ── Input area ── */
 .InputArea {
-    padding: 10px 14px 12px;
+    padding: 10px 14px 14px;
     border-top: 1px solid var(--border);
     background: var(--card);
     flex-shrink: 0;
 }
 
 .InputBox {
+    position: relative;
+    display: flex;
+    align-items: flex-end;
     background: var(--background);
     border: 1px solid var(--border);
     border-radius: 12px;
     overflow: hidden;
     transition: border-color 0.2s, box-shadow 0.2s;
-    margin-bottom: 6px;
 }
 
 .InputBox:focus-within {
@@ -863,11 +865,11 @@
 }
 
 .Textarea {
-    width: 100%;
+    flex: 1;
     background: transparent;
     border: none;
     color: var(--foreground);
-    padding: 10px 12px 8px;
+    padding: 10px 12px 10px;
     resize: none;
     font-size: 14px;
     line-height: 1.6;
@@ -888,88 +890,28 @@
     outline: none;
 }
 
-/* ── Taskbar (below input box) ── */
-.InputFooter {
-    display: flex;
-    align-items: center;
-    gap: 4px;
-    padding: 0 2px;
-}
-
-.InputModelWrap {
-    width: 150px;
-    flex-shrink: 0;
-}
-
-.ModelSelect {
-    font-size: 12px;
-    height: 26px;
-}
-
-/* Target the native select rendered by SolidSelect */
-.ModelSelect :global(.solid-select) {
-    height: 26px;
-    font-size: 12px;
-    font-family: inherit;
-    padding: 0 28px 0 8px;
-    background: var(--background);
-    color: var(--foreground);
-    border: 1px solid var(--border);
-    border-radius: 7px;
-    cursor: pointer;
-    appearance: none;
-    -webkit-appearance: none;
-    outline: none;
-    transition: border-color 0.15s, box-shadow 0.15s;
-    width: 100%;
-    box-sizing: border-box;
-}
-
-.ModelSelect :global(.solid-select):hover {
-    border-color: var(--primary);
-}
-
-.ModelSelect :global(.solid-select):focus {
-    border-color: var(--primary);
-    box-shadow: 0 0 0 2px var(--ring, rgba(37, 99, 235, 0.18));
-}
-
-/* Chevron icon */
-.ModelSelect :global(.solid-select-icon) {
-    position: absolute;
-    right: 7px;
-    top: 50%;
-    transform: translateY(-50%);
-    pointer-events: none;
-    font-size: 10px;
-    color: var(--muted-foreground);
-}
-
-.TaskBarSpacer {
-    flex: 1;
-}
-
-/* ── Send button ── */
+/* ── Send button (inside InputBox) ── */
 .SendBtn {
-    width: 30px;
-    height: 30px;
+    width: 28px;
+    height: 28px;
     border-radius: 8px;
-    border: 1px solid var(--border);
-    background: var(--accent);
+    border: none;
+    background: transparent;
     color: var(--muted);
     display: flex;
     align-items: center;
     justify-content: center;
     cursor: not-allowed;
-    transition: background 0.15s, color 0.15s, border-color 0.15s, transform 0.1s;
+    transition: background 0.15s, color 0.15s, transform 0.1s;
     flex-shrink: 0;
+    margin: 0 6px 7px 0;
 }
 
 .SendBtnActive {
     background: var(--primary);
     color: var(--primary-foreground);
-    border-color: var(--primary);
     cursor: pointer;
+    border-radius: 8px;
 }
 
 .SendBtnActive:hover {
@@ -982,23 +924,28 @@
 
 /* ── Tool call cards ── */
 .ToolCard {
-    border-radius: 8px;
+    border-radius: 6px;
     border: 1px solid var(--border);
     overflow: hidden;
     width: 100%;
     max-width: 100%;
     transition: border-color 0.15s, background 0.15s, opacity 0.15s;
+    font-size: 11px;
 }
 
 .ToolCardRunning {
-    border-color: rgba(59, 130, 246, 0.35);
-    background: rgba(59, 130, 246, 0.03);
+    border-color: rgba(59, 130, 246, 0.25);
+    background: rgba(59, 130, 246, 0.02);
 }
 
 .ToolCardDone {
     border-color: var(--border);
-    background: var(--card);
-    opacity: 0.92;
+    background: transparent;
+    opacity: 0.7;
+}
+
+.ToolCardDone:hover {
+    opacity: 0.9;
 }
 
 .ToolCardWarning {
@@ -1022,13 +969,14 @@
 }
 
 .ToolCardStatusIcon {
-    font-size: 11px;
+    font-size: 10px;
     color: rgb(59, 130, 246);
     flex-shrink: 0;
 }
 
 .ToolCardStatusDone {
     color: rgb(34, 197, 94);
+    opacity: 0.7;
 }
 
 .ToolCardStatusWarning {
@@ -1040,23 +988,23 @@
 }
 
 .ToolCardToolIcon {
-    font-size: 12px;
-    color: var(--muted-foreground);
+    font-size: 10px;
+    color: var(--muted);
     flex-shrink: 0;
 }
 
 .ToolCardName {
     font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
-    font-size: 11px;
-    font-weight: 600;
-    color: var(--foreground);
+    font-size: 10.5px;
+    font-weight: 500;
+    color: var(--muted-foreground);
     white-space: nowrap;
     flex-shrink: 0;
 }
 
 .ToolCardDesc {
-    font-size: 11px;
-    color: var(--muted-foreground);
+    font-size: 10.5px;
+    color: var(--muted);
     overflow: hidden;
     text-overflow: ellipsis;
     white-space: nowrap;
@@ -1066,40 +1014,41 @@
 }
 
 .ToolCardBadge {
-    font-size: 10px;
-    color: var(--muted-foreground);
+    font-size: 9px;
+    color: var(--muted);
     border: 1px solid var(--border);
-    border-radius: 4px;
-    padding: 0 5px;
-    line-height: 17px;
+    border-radius: 3px;
+    padding: 0 4px;
+    line-height: 15px;
     white-space: nowrap;
     flex-shrink: 0;
     margin-left: auto;
+    opacity: 0.7;
 }
 
 .ToolCardDuration {
-    font-size: 10px;
+    font-size: 9px;
     font-variant-numeric: tabular-nums;
-    color: var(--muted-foreground);
+    color: var(--muted);
     white-space: nowrap;
     flex-shrink: 0;
 }
 
 .ToolCardProgress {
     border-top: 1px solid var(--border);
-    padding: 5px 10px 6px;
+    padding: 3px 8px 4px;
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    background: rgba(0, 0, 0, 0.02);
+    gap: 2px;
+    background: rgba(0, 0, 0, 0.015);
 }
 
 .ToolProgressItem {
     display: flex;
     align-items: center;
-    gap: 5px;
-    font-size: 11px;
-    color: var(--muted-foreground);
+    gap: 4px;
+    font-size: 10px;
+    color: var(--muted);
 }
 
 .ToolProgressLabel {
@@ -1108,22 +1057,22 @@
 }
 
 .ToolProgressDuration {
-    font-size: 10px;
+    font-size: 9px;
     font-variant-numeric: tabular-nums;
-    color: var(--muted-foreground);
+    color: var(--muted);
     opacity: 0.6;
     white-space: nowrap;
     margin-left: auto;
 }
 
 .ToolProgressRunning {
-    color: rgb(59, 130, 246);
+    color: rgba(59, 130, 246, 0.8);
     font-weight: 500;
 }
 
 .ToolProgressDone {
-    color: var(--muted-foreground);
-    opacity: 0.75;
+    color: var(--muted);
+    opacity: 0.65;
 }
 
 /* ── Tool output preview ── */
@@ -1347,10 +1296,10 @@
 .ToolCardHeaderBtn {
     display: flex;
     align-items: center;
-    gap: 6px;
+    gap: 5px;
     width: 100%;
-    padding: 6px 10px;
-    font-size: 12px;
+    padding: 4px 8px;
+    font-size: 11px;
     flex-wrap: nowrap;
     min-width: 0;
     background: none;
