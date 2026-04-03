@@ -10,6 +10,7 @@ import styles from "./SolidAiChat.module.css";
 interface ToolProgressStep {
     label: string;
     status: "running" | "done";
+    durationMs?: number;
 }
 
 interface Message {
@@ -26,6 +27,10 @@ interface Message {
     durationMs?: number;
     toolStatus?: "success" | "warning" | "error";
     toolOutput?: string;
+    // step tracking for dividers
+    step?: number;
+    // error flag for styled error bubble
+    isError?: boolean;
 }
 
 interface SessionSummary {
@@ -120,10 +125,16 @@ function CodeBlock({ children, className }: { children?: React.ReactNode; classN
 
 const markdownComponents = {
     code({ node, inline, className, children, ...props }: any) {
-        if (inline) return <code className={styles.InlineCode} {...props}>{children}</code>;
+        // Detect by className — only named fenced blocks (```lang) become CodeBlock.
+        // Inline backticks and unnamed fenced blocks render as inline code.
+        const isBlock = /language-/.test(className || "");
+        if (!isBlock) return <code className={styles.InlineCode} {...props}>{children}</code>;
         return <CodeBlock className={className}>{children}</CodeBlock>;
     },
     pre({ children }: any) { return <>{children}</>; },
+    table({ children }: any) {
+        return <div className={styles.MarkdownTableWrapper}><table>{children}</table></div>;
+    },
 };
 
 // ── Tool helpers ──────────────────────────────────────────────────────────────
@@ -311,11 +322,23 @@ function processHistoryEvents(backendMsgs: any[]): Message[] {
                     const progressStatus = data.status || "running";
                     const stepStatus: ToolProgressStep["status"] =
                         progressStatus === "success" || progressStatus === "done" ? "done" : "running";
+                    const durationMs: number | undefined = data.duration_ms;
 
                     const prev = result[currentEventIdx];
                     if (prev && prev.role === "event") {
                         const existing = prev.toolProgress || [];
-                        prev.toolProgress = [...existing, { label, status: stepStatus }];
+                        const existingIdx = existing.findIndex((p) => p.label === label);
+                        if (existingIdx >= 0) {
+                            const updated = [...existing];
+                            updated[existingIdx] = {
+                                label,
+                                status: stepStatus,
+                                durationMs: durationMs ?? updated[existingIdx].durationMs,
+                            };
+                            prev.toolProgress = updated;
+                        } else {
+                            prev.toolProgress = [...existing, { label, status: stepStatus, durationMs }];
+                        }
                     }
                 }
                 break;
@@ -400,6 +423,7 @@ export const SolidAiChat: React.FC = () => {
     const [isProcessing, setIsProcessing] = useState(false);
     const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
     const [isDeletingSessionId, setIsDeletingSessionId] = useState<string | null>(null);
+    const [expandedToolIds, setExpandedToolIds] = useState<Set<string>>(new Set());
 
     const sessionMenuRef = useRef<HTMLDivElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -579,7 +603,7 @@ export const SolidAiChat: React.FC = () => {
                         currentStepRef.current = step;
                         // Only create a "Thinking…" row when there's no active live event
                         // (e.g. step 2+ after tool results already froze the previous card).
-                        if (!liveEventIdRef.current) addEvent("Thinking…");
+                        if (!liveEventIdRef.current) addEvent("Thinking…", { step });
                         break;
                     }
 
@@ -646,15 +670,22 @@ export const SolidAiChat: React.FC = () => {
                     case "ToolProgress": {
                         const label: string = data.data?.label ?? "";
                         const progressStatus: string = data.data?.status ?? "running";
+                        const durationMs: number | undefined = data.data?.duration_ms;
                         const stepStatus: ToolProgressStep["status"] =
                             progressStatus === "success" || progressStatus === "done" ? "done" : "running";
                         const id = liveEventIdRef.current;
                         if (!id) break;
-                        setMessages((prev) => prev.map((m) =>
-                            m.id === id
-                                ? { ...m, toolProgress: [...(m.toolProgress ?? []), { label, status: stepStatus }] }
-                                : m
-                        ));
+                        setMessages((prev) => prev.map((m) => {
+                            if (m.id !== id) return m;
+                            const existing = m.toolProgress ?? [];
+                            const idx = existing.findIndex((p) => p.label === label);
+                            if (idx >= 0) {
+                                const updated = [...existing];
+                                updated[idx] = { label, status: stepStatus, durationMs: durationMs ?? updated[idx].durationMs };
+                                return { ...m, toolProgress: updated };
+                            }
+                            return { ...m, toolProgress: [...existing, { label, status: stepStatus, durationMs }] };
+                        }));
                         break;
                     }
 
@@ -689,7 +720,7 @@ export const SolidAiChat: React.FC = () => {
                             const msgs = evtId
                                 ? prev.map((m) => m.id === evtId ? { ...m, eventState: "done" as const } : m)
                                 : prev;
-                            return [...msgs, { id: `err-${Date.now()}`, role: "assistant", content: `Error: ${errMsg}`, timestamp: new Date() }];
+                            return [...msgs, { id: `err-${Date.now()}`, role: "assistant" as const, content: errMsg, timestamp: new Date(), isError: true }];
                         });
                         break;
                     }
@@ -745,7 +776,7 @@ export const SolidAiChat: React.FC = () => {
             textareaRef.current.style.height = "auto";
             textareaRef.current.focus();
         }
-    }, [input, isConnected, sessionId]);
+    }, [input, isConnected, sessionId, isProcessing]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
         if (e.key === "Enter" && !e.shiftKey) { e.preventDefault(); handleSend(); }
@@ -768,6 +799,7 @@ export const SolidAiChat: React.FC = () => {
         activeSessionIdRef.current = "__switching__";
         setMessages([]);
         setIsProcessing(false);
+        setExpandedToolIds(new Set());
         setSessionId(null);
         setActiveHistoryId(null);
         setHasMoreHistory(false);
@@ -791,6 +823,7 @@ export const SolidAiChat: React.FC = () => {
         setMessages([]);
         setSessionId(null);
         setActiveHistoryId(targetSessionId);
+        setExpandedToolIds(new Set());
         setHasMoreHistory(false);
         setHistoryPage(1);
         setShowSessionMenu(false);
@@ -842,10 +875,10 @@ export const SolidAiChat: React.FC = () => {
                     <i className="pi pi-sparkles" style={{ fontSize: "13px" }} />
                 </div>
                 <span className={styles.HeaderTitle}>SolidX AI</span>
-                <span className={`${styles.StatusDot} ${isConnected ? styles.StatusOnline : styles.StatusOffline}`} />
+                <span className={`${styles.StatusDot} ${isProcessing ? styles.StatusRunning : isConnected ? styles.StatusOnline : styles.StatusOffline}`} />
                 <span className={styles.StatusLabel}>
                     <i className={`pi ${isConnected ? "pi-wifi" : "pi-times-circle"}`} style={{ fontSize: "11px" }} />
-                    {isConnected ? (sessionId ? "Connected" : "Starting…") : "Offline"}
+                    {isConnected ? (isProcessing ? "Running…" : sessionId ? "Connected" : "Starting…") : "Offline"}
                 </span>
 
                 <div className={styles.HeaderSpacer} />
@@ -977,7 +1010,20 @@ export const SolidAiChat: React.FC = () => {
                                 <i className="pi pi-android" style={{ fontSize: "12px" }} />
                             </div>
                             <div className={styles.AiTurnContent}>
-                                {group.msgs.map((msg) => {
+                                {group.msgs.flatMap((msg) => {
+                                    const items: React.ReactNode[] = [];
+
+                                    // ── Step divider before step > 1 thinking events ──
+                                    if (msg.role === "event" && !msg.toolName && msg.step && msg.step > 1) {
+                                        items.push(
+                                            <div key={`divider-${msg.id}`} className={styles.StepDividerRow}>
+                                                <div className={styles.StepDividerLine} />
+                                                <span className={styles.StepDividerLabel}>Step {msg.step}</span>
+                                                <div className={styles.StepDividerLine} />
+                                            </div>
+                                        );
+                                    }
+
                                     if (msg.role === "event") {
                                         const active = msg.eventState === "active";
 
@@ -999,9 +1045,23 @@ export const SolidAiChat: React.FC = () => {
                                                     status === "success" ? styles.ToolCardStatusDone :
                                                         styles.ToolCardStatusIcon;
 
-                                            return (
+                                            const hasExpandable = (msg.toolProgress && msg.toolProgress.length > 0) || !!msg.toolOutput;
+                                            const isExpanded = expandedToolIds.has(msg.id);
+                                            const toggleExpand = hasExpandable && status !== "running"
+                                                ? () => setExpandedToolIds((prev) => {
+                                                    const next = new Set(prev);
+                                                    if (next.has(msg.id)) next.delete(msg.id); else next.add(msg.id);
+                                                    return next;
+                                                })
+                                                : undefined;
+
+                                            items.push(
                                                 <div key={msg.id} className={`${styles.ToolCard} ${cardClass}`}>
-                                                    <div className={styles.ToolCardHeader}>
+                                                    <button
+                                                        className={styles.ToolCardHeaderBtn}
+                                                        onClick={toggleExpand}
+                                                        data-expandable={hasExpandable && status !== "running" ? "true" : undefined}
+                                                    >
                                                         <i className={`pi ${statusIcon} ${statusIconClass}`} />
                                                         <i className={`pi ${getToolIconClass(msg.toolName)} ${styles.ToolCardToolIcon}`} />
                                                         <span className={styles.ToolCardName}>{msg.toolName}</span>
@@ -1010,19 +1070,26 @@ export const SolidAiChat: React.FC = () => {
                                                         {msg.durationMs != null && (
                                                             <span className={styles.ToolCardDuration}>{formatDuration(msg.durationMs)}</span>
                                                         )}
-                                                    </div>
-                                                    {msg.toolProgress && msg.toolProgress.length > 0 && (
-                                                        <div className={styles.ToolCardProgress}>
+                                                        {hasExpandable && status !== "running" && (
+                                                            <i className={`pi pi-chevron-right ${styles.ToolCardChevron} ${isExpanded ? styles.ToolCardChevronOpen : ""}`} />
+                                                        )}
+                                                    </button>
+                                                    {/* Progress: always visible while running, collapsible when done */}
+                                                    {msg.toolProgress && msg.toolProgress.length > 0 && (status === "running" || isExpanded) && (
+                                                        <div className={`${styles.ToolCardProgress} ${styles.ToolCardExpandable}`}>
                                                             {msg.toolProgress.map((p, i) => (
                                                                 <div key={i} className={`${styles.ToolProgressItem} ${p.status === "running" ? styles.ToolProgressRunning : styles.ToolProgressDone}`}>
                                                                     <i className={`pi ${p.status === "running" ? "pi-spin pi-spinner" : "pi-check-circle"}`} style={{ fontSize: "10px" }} />
-                                                                    <span>{p.label}</span>
+                                                                    <span className={styles.ToolProgressLabel}>{p.label}</span>
+                                                                    {p.durationMs != null && p.status === "done" && (
+                                                                        <span className={styles.ToolProgressDuration}>{formatDuration(p.durationMs)}</span>
+                                                                    )}
                                                                 </div>
                                                             ))}
                                                         </div>
                                                     )}
-                                                    {msg.toolOutput && (
-                                                        <div className={styles.ToolCardOutput}>
+                                                    {msg.toolOutput && isExpanded && (
+                                                        <div className={`${styles.ToolCardOutput} ${styles.ToolCardExpandable}`}>
                                                             <div className={styles.ToolOutputHeader}>
                                                                 <span>Result</span>
                                                             </div>
@@ -1033,17 +1100,53 @@ export const SolidAiChat: React.FC = () => {
                                                     )}
                                                 </div>
                                             );
+                                            return items;
                                         }
 
-                                        // ── Thinking / generic row ──────────────────────
-                                        return (
-                                            <div key={msg.id} className={`${styles.EventRow} ${active ? styles.EventRowActive : styles.EventRowDone}`}>
-                                                <i className={`pi ${active ? "pi-spin pi-spinner" : "pi-check-circle"}`} />
-                                                <span>{msg.content}</span>
+                                        // ── Thinking bubble (active) / done row ─────────
+                                        if (active) {
+                                            items.push(
+                                                <div key={msg.id} className={styles.ThinkingBubble}>
+                                                    <div className={styles.ThinkingDots}>
+                                                        <span className={styles.ThinkingDot} />
+                                                        <span className={styles.ThinkingDot} />
+                                                        <span className={styles.ThinkingDot} />
+                                                    </div>
+                                                    <span className={styles.ThinkingLabel}>
+                                                        {msg.step && msg.step > 1 ? `Thinking...` : "Thinking…"}
+                                                    </span>
+                                                </div>
+                                            );
+                                        } else {
+                                            items.push(
+                                                <div key={msg.id} className={`${styles.EventRow} ${styles.EventRowDone}`}>
+                                                    <i className="pi pi-check-circle" />
+                                                    <span>{msg.content}</span>
+                                                </div>
+                                            );
+                                        }
+                                        return items;
+                                    }
+
+                                    // ── Error bubble ────────────────────────────────────
+                                    if (msg.isError) {
+                                        items.push(
+                                            <div key={msg.id} className={styles.ErrorBubble}>
+                                                <div className={styles.ErrorIcon}>
+                                                    <i className="pi pi-exclamation-circle" style={{ fontSize: "13px" }} />
+                                                </div>
+                                                <div className={styles.ErrorContent}>
+                                                    <p className={styles.ErrorTitle}>Error</p>
+                                                    <p className={styles.ErrorText}>{msg.content}</p>
+                                                </div>
                                             </div>
                                         );
+                                        return items;
                                     }
-                                    return (
+
+                                    // ── Assistant message ───────────────────────────────
+                                    const isStreaming = msg.id.startsWith("stream-") && isProcessing;
+                                    items.push(
                                         <div key={msg.id} className={styles.BubbleGroup}>
                                             <div className={`${styles.Bubble} ${styles.BubbleAssistant}`}>
                                                 <div className={styles.MarkdownRoot}>
@@ -1051,6 +1154,7 @@ export const SolidAiChat: React.FC = () => {
                                                         {msg.content}
                                                     </ReactMarkdown>
                                                 </div>
+                                                {isStreaming && <span className={styles.StreamingCursor} />}
                                             </div>
                                             <div className={`${styles.BubbleMeta} ${styles.BubbleMetaAssistant}`}>
                                                 <span className={styles.Timestamp}>
@@ -1060,6 +1164,7 @@ export const SolidAiChat: React.FC = () => {
                                             </div>
                                         </div>
                                     );
+                                    return items;
                                 })}
                             </div>
                         </div>
@@ -1077,7 +1182,7 @@ export const SolidAiChat: React.FC = () => {
                         value={input}
                         onChange={autoResize}
                         onKeyDown={handleKeyDown}
-                        disabled={!isConnected || !sessionId}
+                        disabled={!isConnected || !sessionId || isProcessing}
                         rows={1}
                     />
                 </div>
