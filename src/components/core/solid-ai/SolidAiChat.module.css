@@ -205,15 +205,13 @@
 
 .SessionItem {
     display: flex;
-    flex-direction: column;
-    gap: 2px;
+    align-items: center;
+    gap: 8px;
     width: 100%;
-    padding: 9px 13px;
+    padding: 2px 4px;
     background: none;
     border: none;
     border-top: 1px solid var(--border);
-    cursor: pointer;
-    text-align: left;
     transition: background 0.12s;
 }
 
@@ -221,12 +219,24 @@
     border-top: none;
 }
 
-.SessionItem:hover {
-    background: var(--accent);
-}
-
 .SessionItemActive {
     background: var(--accent) !important;
+}
+
+.SessionItemMain {
+    flex: 1;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 7px 9px;
+    cursor: pointer;
+    min-width: 0;
+    border-radius: 6px;
+    transition: background 0.1s;
+}
+
+.SessionItemMain:hover {
+    background: var(--accent);
 }
 
 .SessionItemPreview {
@@ -241,6 +251,32 @@
 .SessionItemMeta {
     font-size: 10px;
     color: var(--muted);
+}
+
+.SessionDeleteBtn {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    width: 26px;
+    height: 26px;
+    border-radius: 6px;
+    background: transparent;
+    border: none;
+    color: var(--muted);
+    cursor: pointer;
+    transition: background 0.12s, color 0.12s;
+    flex-shrink: 0;
+    margin-right: 4px;
+}
+
+.SessionDeleteBtn:hover:not(:disabled) {
+    background: rgba(239, 68, 68, 0.1);
+    color: #ef4444;
+}
+
+.SessionDeleteBtn:disabled {
+    opacity: 0.5;
+    cursor: not-allowed;
 }
 
 .SessionMenuEmpty {
@@ -916,7 +952,16 @@
 .ToolCardDone {
     border-color: var(--border);
     background: transparent;
-    opacity: 0.72;
+}
+
+.ToolCardWarning {
+    border-color: rgba(245, 158, 11, 0.5);
+    background: rgba(245, 158, 11, 0.04);
+}
+
+.ToolCardError {
+    border-color: rgba(239, 68, 68, 0.5);
+    background: rgba(239, 68, 68, 0.04);
 }
 
 .ToolCardHeader {
@@ -937,6 +982,14 @@
 
 .ToolCardStatusDone {
     color: rgb(34, 197, 94);
+}
+
+.ToolCardStatusWarning {
+    color: rgb(245, 158, 11);
+}
+
+.ToolCardStatusError {
+    color: rgb(239, 68, 68);
 }
 
 .ToolCardToolIcon {
@@ -1009,6 +1062,47 @@
 .ToolProgressDone {
     color: var(--muted-foreground);
     opacity: 0.7;
+}
+
+/* ── Tool output preview ── */
+.ToolCardOutput {
+    border-top: 1px solid var(--border);
+    padding: 6px 10px;
+    background: rgba(0, 0, 0, 0.015);
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.ToolOutputHeader {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    font-size: 10px;
+    font-weight: 600;
+    color: var(--muted-foreground);
+    text-transform: uppercase;
+    letter-spacing: 0.02em;
+}
+
+.ToolOutputText {
+    font-family: "SF Mono", "Fira Code", "Cascadia Code", monospace;
+    font-size: 11px;
+    line-height: 1.5;
+    color: var(--foreground);
+    white-space: pre-wrap;
+    word-break: break-all;
+    max-height: 120px;
+    overflow-y: auto;
+    scrollbar-width: thin;
+}
+
+.ToolOutputWarning {
+    color: rgb(180, 83, 9);
+}
+
+.ToolOutputError {
+    color: rgb(185, 28, 28);
 }
 
 /* ── Persistent event / step rows ── */

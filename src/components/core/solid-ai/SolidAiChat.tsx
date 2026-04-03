@@ -24,6 +24,8 @@ interface Message {
     toolDesc?: string;
     toolProgress?: ToolProgressStep[];
     durationMs?: number;
+    toolStatus?: "success" | "warning" | "error";
+    toolOutput?: string;
 }
 
 interface SessionSummary {
@@ -171,6 +173,54 @@ function formatDuration(ms?: number): string {
     return `${(ms / 1000).toFixed(1)}s`;
 }
 
+/**
+ * Parses tool output to extract semantic status and clean display text.
+ * Handles nested JSON structures like the Solid agent uses.
+ */
+function parseToolResult(output: string): { status: Message["toolStatus"]; text: string } {
+    if (!output) return { status: "success", text: "" };
+    try {
+        const outer = JSON.parse(output);
+        let status: Message["toolStatus"] = "success";
+        let text = "";
+
+        // The Solid agent often wraps the real result in a 'data' string or object
+        const innerData = outer.data;
+        if (typeof innerData === "string") {
+            try {
+                const inner = JSON.parse(innerData);
+                if (inner.generation_status === "error" || inner.status === "error") {
+                    status = "warning";
+                    text = inner.instructions || (inner.errors && inner.errors.join(", ")) || innerData;
+                } else {
+                    text = inner.message || inner.content || innerData;
+                }
+            } catch {
+                text = innerData;
+            }
+        } else if (innerData && typeof innerData === "object") {
+            if (innerData.generation_status === "error" || innerData.status === "error") {
+                status = "warning";
+                text = innerData.instructions || (innerData.errors && innerData.errors.join(", ")) || JSON.stringify(innerData);
+            } else {
+                text = innerData.message || innerData.content || JSON.stringify(innerData);
+            }
+        } else {
+            text = outer.content || outer.message || output;
+        }
+
+        // Check if the outer status is error
+        if (outer.status === "error" || outer.errors?.length > 0) {
+            status = "error";
+            text = outer.message || (outer.errors && outer.errors.join(", ")) || text;
+        }
+
+        return { status, text: text.length > 500 ? text.slice(0, 500) + "…" : text };
+    } catch {
+        return { status: "success", text: output.length > 120 ? output.slice(0, 120) + "…" : output };
+    }
+}
+
 // ── Message grouping ──────────────────────────────────────────────────────────
 // Groups consecutive event + assistant messages into a single AI turn so we can
 // render the avatar once per turn rather than per message.
@@ -276,6 +326,12 @@ function processHistoryEvents(backendMsgs: any[]): Message[] {
                     const prev = result[currentEventIdx];
                     if (prev && prev.role === "event") {
                         prev.durationMs = data.duration_ms || m.duration_ms;
+                        const outputStr = data.output || m.content || "";
+                        if (outputStr) {
+                            const { status, text } = parseToolResult(outputStr);
+                            prev.toolStatus = status;
+                            prev.toolOutput = text;
+                        }
                     }
                 }
                 break;
@@ -341,7 +397,9 @@ export const SolidAiChat: React.FC = () => {
     const [showSessionMenu, setShowSessionMenu] = useState(false);
     const [sessions, setSessions] = useState<SessionSummary[]>([]);
     const [isLoadingSessions, setIsLoadingSessions] = useState(false);
+    const [isProcessing, setIsProcessing] = useState(false);
     const [activeHistoryId, setActiveHistoryId] = useState<string | null>(null);
+    const [isDeletingSessionId, setIsDeletingSessionId] = useState<string | null>(null);
 
     const sessionMenuRef = useRef<HTMLDivElement>(null);
     const scrollRef = useRef<HTMLDivElement>(null);
@@ -355,6 +413,7 @@ export const SolidAiChat: React.FC = () => {
     // Tracks the id of the current "live" event message so we can update it in-place.
     const liveEventIdRef = useRef<string | null>(null);
     const currentStepRef = useRef<number | null>(null);
+    const activeSessionIdRef = useRef<string | null>(_persistedSessionId);
 
     // ── Close session menu on outside click ──────────────────────────────────
     useEffect(() => {
@@ -447,6 +506,16 @@ export const SolidAiChat: React.FC = () => {
             try {
                 const data = JSON.parse(event.data);
 
+                // Filtering: Only process messages for the active session.
+                // data.session_id is the primary field; sometimes it's nested in data.data
+                const msgSessionId = data.session_id || data.data?.session_id;
+
+                // If we have an active session and the message is for a different one, ignore it.
+                // Exception: session_started events are always allowed as they establish the new active ID.
+                if (data.type !== "session_started" && msgSessionId && activeSessionIdRef.current && msgSessionId !== activeSessionIdRef.current) {
+                    return;
+                }
+
                 // Add a new persistent event row, auto-freezing any previous live one.
                 // Pass extra fields (toolName, toolDesc, …) for tool card events.
                 const addEvent = (content: string, extra?: Partial<Message>) => {
@@ -473,15 +542,20 @@ export const SolidAiChat: React.FC = () => {
                     // ── Session lifecycle ──────────────────────────────────
                     case "session_started": {
                         const sid: string = data.session_id;
-                        // Prefer the backend's history_session_id, but fall back to our own
-                        // _historySessionId if the backend omits it (common during resumes).
-                        const historySid: string = data.history_session_id || _historySessionId || sid;
+                        // Prefer the backend's history_session_id if provided.
+                        // This fixes the "ID chaining" issue where resuming a restored session
+                        // would create a new ID. We want to stick to the "original" ID for history.
+                        const historySid: string = data.history_session_id || sid;
+
                         _persistedSessionId = sid;
                         _historySessionId = historySid;
                         writeLS(LS_SESSION_ID, sid);
                         writeLS(LS_HISTORY_ID, historySid);
                         setSessionId(sid);
+                        activeSessionIdRef.current = sid;
                         setActiveHistoryId(historySid);
+
+                        // Only fetch history if we don't have any messages yet (initial load or session switch)
                         setMessages((prev) => {
                             if (prev.length === 0) fetchHistory(historySid, 1, false);
                             return prev;
@@ -495,6 +569,7 @@ export const SolidAiChat: React.FC = () => {
 
                     // ── Agent lifecycle ────────────────────────────────────
                     case "AgentStarted":
+                        setIsProcessing(true);
                         currentStepRef.current = null;
                         addEvent("Thinking…");
                         break;
@@ -514,9 +589,21 @@ export const SolidAiChat: React.FC = () => {
 
                     case "ToolResult": {
                         const durationMs: number | undefined = data.data?.duration_ms;
+                        const outputStr: string = data.data?.output || "";
                         const id = liveEventIdRef.current;
-                        if (id && durationMs != null) {
-                            setMessages((prev) => prev.map((m) => m.id === id ? { ...m, durationMs } : m));
+                        if (id) {
+                            setMessages((prev) => prev.map((m) => {
+                                if (m.id === id) {
+                                    const update: Partial<Message> = { durationMs };
+                                    if (outputStr) {
+                                        const { status, text } = parseToolResult(outputStr);
+                                        update.toolStatus = status;
+                                        update.toolOutput = text;
+                                    }
+                                    return { ...m, ...update };
+                                }
+                                return m;
+                            }));
                         }
                         freezeEvent();
                         break;
@@ -572,7 +659,9 @@ export const SolidAiChat: React.FC = () => {
                     }
 
                     // ── Turn complete ──────────────────────────────────────
+                    case "TurnCompleteEvent":
                     case "turn_complete": {
+                        setIsProcessing(false);
                         const content: string = data.data?.content ?? "";
                         // Freeze any remaining live event
                         const evtId = liveEventIdRef.current;
@@ -592,6 +681,7 @@ export const SolidAiChat: React.FC = () => {
                     // ── Errors ─────────────────────────────────────────────
                     case "AgentError":
                     case "error": {
+                        setIsProcessing(false);
                         const errMsg: string = data.data?.error ?? "Unknown error";
                         const evtId = liveEventIdRef.current;
                         liveEventIdRef.current = null;
@@ -615,6 +705,7 @@ export const SolidAiChat: React.FC = () => {
         ws.onclose = () => {
             setIsConnected(false);
             setSessionId(null);
+            setIsProcessing(false);
             liveEventIdRef.current = null;
             if (!intentionalCloseRef.current) {
                 // Unexpected disconnect — banner is shown via !isConnected state; schedule reconnect.
@@ -641,8 +732,9 @@ export const SolidAiChat: React.FC = () => {
     // ── Send message ──────────────────────────────────────────────────────────
     const handleSend = useCallback(() => {
         const trimmed = input.trim();
-        if (!trimmed || !isConnected || !sessionId) return;
+        if (!trimmed || !isConnected || !sessionId || isProcessing) return;
 
+        setIsProcessing(true);
         hasStreamedRef.current = false;
         currentStepRef.current = null;
         liveEventIdRef.current = null;
@@ -673,7 +765,9 @@ export const SolidAiChat: React.FC = () => {
         writeLS(LS_SESSION_ID, null);
         writeLS(LS_HISTORY_ID, null);
         liveEventIdRef.current = null;
+        activeSessionIdRef.current = "__switching__";
         setMessages([]);
+        setIsProcessing(false);
         setSessionId(null);
         setActiveHistoryId(null);
         setHasMoreHistory(false);
@@ -684,11 +778,16 @@ export const SolidAiChat: React.FC = () => {
     }, []);
 
     const handleSelectSession = useCallback((targetSessionId: string) => {
+        if (targetSessionId === activeHistoryId) {
+            setShowSessionMenu(false);
+            return;
+        }
         _persistedSessionId = targetSessionId;
         _historySessionId = targetSessionId;
         writeLS(LS_SESSION_ID, targetSessionId);
         writeLS(LS_HISTORY_ID, targetSessionId);
         liveEventIdRef.current = null;
+        activeSessionIdRef.current = targetSessionId;
         setMessages([]);
         setSessionId(null);
         setActiveHistoryId(targetSessionId);
@@ -697,7 +796,27 @@ export const SolidAiChat: React.FC = () => {
         setShowSessionMenu(false);
         const userId = loadSession()?.user?.id ?? null;
         wsRef.current?.send(JSON.stringify({ action: "resume_session", session_id: targetSessionId, user_id: userId }));
-    }, []);
+    }, [activeHistoryId]);
+
+    const handleDeleteSession = useCallback(async (e: React.MouseEvent, targetId: string) => {
+        e.stopPropagation();
+        if (!window.confirm("Are you sure you want to delete this conversation?")) return;
+
+        setIsDeletingSessionId(targetId);
+        try {
+            const res = await fetch(`${API_BASE}/api/agent/sessions/${targetId}`, { method: "DELETE" });
+            if (res.ok) {
+                setSessions((prev) => prev.filter((s) => s.session_id !== targetId));
+                if (targetId === activeHistoryId) {
+                    handleNewChat();
+                }
+            }
+        } catch {
+            // ignore
+        } finally {
+            setIsDeletingSessionId(null);
+        }
+    }, [activeHistoryId, handleNewChat]);
 
     const handleToggleSessionMenu = useCallback(() => {
         setShowSessionMenu((prev) => { if (!prev) fetchSessions(); return !prev; });
@@ -710,8 +829,8 @@ export const SolidAiChat: React.FC = () => {
     }, [sessionId, isLoadingHistory, historyPage, fetchHistory]);
 
     // ── Derived ───────────────────────────────────────────────────────────────
-    const canSend = isConnected && !!sessionId && !!input.trim();
-    const inputPlaceholder = !isConnected ? "Connecting to server…" : !sessionId ? "Establishing session…" : "Message SolidX AI…";
+    const canSend = isConnected && !!sessionId && !!input.trim() && !isProcessing;
+    const inputPlaceholder = !isConnected ? "Connecting to server…" : !sessionId ? "Establishing session…" : isProcessing ? "SolidX AI is thinking…" : "Message SolidX AI…";
 
     // ── Render ────────────────────────────────────────────────────────────────
     return (
@@ -759,17 +878,27 @@ export const SolidAiChat: React.FC = () => {
                                     <div className={styles.SessionMenuEmpty}>No past sessions found</div>
                                 ) : (
                                     sessions.map((s) => (
-                                        <button
+                                        <div
                                             key={s.session_id}
                                             className={`${styles.SessionItem} ${s.session_id === activeHistoryId ? styles.SessionItemActive : ""}`}
                                             onClick={() => handleSelectSession(s.session_id)}
                                         >
-                                            <span className={styles.SessionItemPreview}>{s.preview || "New conversation"}</span>
-                                            <span className={styles.SessionItemMeta}>
-                                                {formatSessionDate(s.created_at)}
-                                                {s.total_steps > 0 && ` · ${s.total_steps} turn${s.total_steps !== 1 ? "s" : ""}`}
-                                            </span>
-                                        </button>
+                                            <div className={styles.SessionItemMain}>
+                                                <span className={styles.SessionItemPreview}>{s.preview || "New conversation"}</span>
+                                                <span className={styles.SessionItemMeta}>
+                                                    {formatSessionDate(s.created_at)}
+                                                    {s.total_steps > 0 && ` · ${s.total_steps} turn${s.total_steps !== 1 ? "s" : ""}`}
+                                                </span>
+                                            </div>
+                                            <button
+                                                className={styles.SessionDeleteBtn}
+                                                onClick={(e) => handleDeleteSession(e, s.session_id)}
+                                                disabled={isDeletingSessionId === s.session_id}
+                                                title="Delete conversation"
+                                            >
+                                                <i className={`pi ${isDeletingSessionId === s.session_id ? "pi-spin pi-spinner" : "pi-trash"}`} style={{ fontSize: "11px" }} />
+                                            </button>
+                                        </div>
                                     ))
                                 )}
                             </div>
@@ -854,13 +983,29 @@ export const SolidAiChat: React.FC = () => {
 
                                         // ── Tool call card ──────────────────────────────
                                         if (msg.toolName) {
+                                            const status = msg.toolStatus || (active ? "running" : "success");
+                                            const cardClass = status === "running" ? styles.ToolCardRunning :
+                                                status === "warning" ? styles.ToolCardWarning :
+                                                    status === "error" ? styles.ToolCardError :
+                                                        styles.ToolCardDone;
+
+                                            const statusIcon = status === "running" ? "pi-spin pi-spinner" :
+                                                status === "warning" ? "pi-exclamation-triangle" :
+                                                    status === "error" ? "pi-times-circle" :
+                                                        "pi-check-circle";
+
+                                            const statusIconClass = status === "warning" ? styles.ToolCardStatusWarning :
+                                                status === "error" ? styles.ToolCardStatusError :
+                                                    status === "success" ? styles.ToolCardStatusDone :
+                                                        styles.ToolCardStatusIcon;
+
                                             return (
-                                                <div key={msg.id} className={`${styles.ToolCard} ${active ? styles.ToolCardRunning : styles.ToolCardDone}`}>
+                                                <div key={msg.id} className={`${styles.ToolCard} ${cardClass}`}>
                                                     <div className={styles.ToolCardHeader}>
-                                                        <i className={`pi ${active ? "pi-spin pi-spinner" : "pi-check-circle"} ${styles.ToolCardStatusIcon} ${active ? "" : styles.ToolCardStatusDone}`} />
+                                                        <i className={`pi ${statusIcon} ${statusIconClass}`} />
                                                         <i className={`pi ${getToolIconClass(msg.toolName)} ${styles.ToolCardToolIcon}`} />
                                                         <span className={styles.ToolCardName}>{msg.toolName}</span>
-                                                        {msg.toolDesc && <span className={styles.ToolCardDesc}>{msg.toolDesc}</span>}
+                                                        {msg.toolDesc && <span className={styles.ToolCardDesc} title={msg.toolDesc}>{msg.toolDesc}</span>}
                                                         <span className={styles.ToolCardBadge}>{getToolCategory(msg.toolName)}</span>
                                                         {msg.durationMs != null && (
                                                             <span className={styles.ToolCardDuration}>{formatDuration(msg.durationMs)}</span>
@@ -874,6 +1019,16 @@ export const SolidAiChat: React.FC = () => {
                                                                     <span>{p.label}</span>
                                                                 </div>
                                                             ))}
+                                                        </div>
+                                                    )}
+                                                    {msg.toolOutput && (
+                                                        <div className={styles.ToolCardOutput}>
+                                                            <div className={styles.ToolOutputHeader}>
+                                                                <span>Result</span>
+                                                            </div>
+                                                            <div className={`${styles.ToolOutputText} ${status === "warning" ? styles.ToolOutputWarning : status === "error" ? styles.ToolOutputError : ""}`}>
+                                                                {msg.toolOutput}
+                                                            </div>
                                                         </div>
                                                     )}
                                                 </div>
