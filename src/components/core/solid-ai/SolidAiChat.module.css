@@ -998,7 +998,7 @@
 .ToolCardDone {
     border-color: var(--border);
     background: var(--card);
-    opacity: 0.8;
+    opacity: 0.92;
 }
 
 .ToolCardWarning {
@@ -1154,9 +1154,10 @@
     color: var(--foreground);
     white-space: pre-wrap;
     word-break: break-all;
-    max-height: 120px;
+    max-height: 300px;
     overflow-y: auto;
     scrollbar-width: thin;
+    margin: 0;
 }
 
 .ToolOutputWarning {
