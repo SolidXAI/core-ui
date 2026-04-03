@@ -6,6 +6,7 @@ import {
     themeReducer,
     userReducer
 } from "../../index";
+import solidStudioReducer from "../features/solidStudioSlice";
 import {
     authApi,
     aiInteractionApi,
@@ -59,4 +60,5 @@ export const solidReducers = {
     popup: popupReducer,
     navbarState: navbarReducer,
     dataViewState: dataViewReducer,
+    solidStudio: solidStudioReducer,
 };  

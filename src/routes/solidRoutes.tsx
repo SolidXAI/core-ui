@@ -1,6 +1,7 @@
 import type { RouteObject } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 import { AuthGuard } from "./guards/AuthGuard";
+import { AdminGuard } from "./guards/AdminGuard";
 import { AdminLayoutWrapper } from "../layouts/AdminLayoutWrapper";
 import { AuthLayoutWrapper } from "../layouts/AuthLayoutWrapper";
 import { ErrorPage } from "./pages/ErrorPage";
@@ -25,6 +26,8 @@ import { SsoPage } from "./pages/auth/SsoPage";
 import type { SolidRoutesOptions, SolidRouteKey } from "./types";
 import { TreePage } from "./pages/admin/core/TreePage";
 import { DashboardPage } from "./pages/admin/core/DashboardPage";
+import { StudioHomePage } from "./pages/studio/StudioHomePage";
+import { StudioLandingPage } from "./pages/studio/StudioLandingPage";
 
 export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] {
   const {
@@ -83,6 +86,13 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
         {
           element: pick("adminLayout", <AdminLayoutWrapper />),
           children: adminChildren,
+        },
+        {
+          element: pick("adminGuard", <AdminGuard />),
+          children: [
+            { path: "/studio", element: pick("studioHome", <StudioHomePage />) },
+            { path: "/landing", element: pick("landing", <StudioLandingPage />) },
+          ],
         },
       ],
     },

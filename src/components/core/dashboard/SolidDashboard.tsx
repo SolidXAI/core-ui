@@ -9,7 +9,7 @@ import { SolidXAIIcon } from '../solid-ai/SolidXAIIcon';
 import styles from './SolidDashboard.module.css';
 import SolidDashboardBody from './SolidDashboardBody';
 import { DashboardFilter } from './DashboardFilter';
-import { SolidAiMainWrapper } from '../solid-ai/SolidAiMainWrapper';
+// import { SolidAiMainWrapper } from '../solid-ai/SolidAiMainWrapper'; // moved to SolidX Studio panel
 import { SolidDashboardFilterRequired } from './SolidDashboardFilterRequired';
 import { SolidDashboardLoading } from './SolidDashboardLoading';
 import { SolidDashboardRenderError } from './SolidDashboardRenderError';
@@ -350,7 +350,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
               />
             </div>
             :
-            <SolidAiMainWrapper mcpUrl={mcpUrl} />
+            null // <SolidAiMainWrapper mcpUrl={mcpUrl} /> // moved to SolidX Studio panel
           }
         </div>
       )}

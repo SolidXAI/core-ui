@@ -312,6 +312,10 @@ export { gridView, listView } from './redux/features/dataViewSlice';
 export { hideNavbar, showNavbar, toggleNavbar } from './redux/features/navbarSlice';
 export { toggleTheme } from './redux/features/themeSlice';
 export { setIsAuthenticated, setUser } from './redux/features/userSlice';
+export { enterStudioMode, exitStudioMode, setStudioView } from './redux/features/solidStudioSlice';
+export type { SolidStudioState, StudioView } from './redux/features/solidStudioSlice';
+export { default as solidStudioReducer } from './redux/features/solidStudioSlice';
+export { SolidStudio, SolidStudioPanel, SolidStudioWrapper, SolidAiStudioLayout } from './components/layout/SolidAiStudioLayout';
 
 // Admin Parent Layout
 export { AdminLayout } from './components/layout/AdminLayout';

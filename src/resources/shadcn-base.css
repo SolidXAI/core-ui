@@ -34,6 +34,7 @@
   --sidebar-width: 272px;
   --sidebar-width-collapsed: 76px;
   --solid-sidebar-width: 272px;
+  --solid-studio-header-height: 0px;
   --shadow-soft: 0 12px 28px rgba(15, 23, 42, 0.1);
 }
 
@@ -81,12 +82,12 @@ body {
 }
 
 .solid-shell {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
   background: radial-gradient(circle at 0 0, rgba(37, 99, 235, 0.08), transparent 38%), var(--background);
 }
 
 .solid-main {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
   margin-left: var(--solid-sidebar-width);
   transition: margin-left 200ms ease;
   display: flex;
@@ -103,7 +104,7 @@ body {
 
 .solid-admin-header {
   position: sticky;
-  top: 0;
+  top: var(--solid-studio-header-height, 0px);
   z-index: 58;
   height: 46px;
   border-bottom: 1px solid var(--border);
@@ -241,6 +242,8 @@ body {
 .solid-sidebar {
   position: fixed;
   inset: 0 auto 0 0;
+  top: var(--solid-studio-header-height, 0px);
+  height: calc(100vh - var(--solid-studio-header-height, 0px));
   width: var(--sidebar-width);
   background: var(--sidebar-background);
   color: var(--sidebar-foreground);
@@ -248,7 +251,7 @@ body {
   z-index: 60;
   display: flex;
   flex-direction: column;
-  transition: width 200ms ease, transform 200ms ease;
+  transition: width 200ms ease, transform 200ms ease, top 220ms ease, height 220ms ease;
   box-shadow: var(--shadow-soft);
 }
 
@@ -395,7 +398,7 @@ body {
 
 .solid-sidebar-external-trigger {
   position: fixed;
-  top: 14px;
+  top: calc(var(--solid-studio-header-height, 0px) + 14px);
   left: calc(var(--solid-sidebar-width) + 8px);
   width: 30px;
   height: 30px;
@@ -415,10 +418,10 @@ body {
 
 .solid-sidebar-hotspot {
   position: fixed;
-  top: 0;
+  top: var(--solid-studio-header-height, 0px);
   left: 0;
   width: 14px;
-  height: 100vh;
+  height: calc(100vh - var(--solid-studio-header-height, 0px));
   border: 0;
   background: transparent;
   z-index: 61;
@@ -3197,4 +3200,382 @@ body {
   min-width: 28px;
   padding: 0;
   justify-content: center;
+}
+
+/* ── SolidX Studio Mode ───────────────────────────────────────────────────── */
+
+/* Global studio header — fixed full-width bar at top, z-index above everything */
+.solid-studio-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  z-index: 1100;
+  gap: 12px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+}
+
+.solid-studio-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  opacity: 1;
+  transition: opacity 0.15s;
+}
+
+.solid-studio-header-brand:hover {
+  opacity: 0.8;
+}
+
+.solid-studio-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.solid-studio-view-btn {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  padding: 0 14px;
+  height: 28px;
+  background: transparent;
+  color: var(--primary-foreground);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  opacity: 0.75;
+}
+
+.solid-studio-view-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  opacity: 1;
+}
+
+.solid-studio-view-btn.active {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.45);
+  opacity: 1;
+}
+
+.solid-studio-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Fixed AI chat panel — starts below the studio header */
+.solid-studio-panel-fixed {
+  position: fixed;
+  top: 44px;
+  right: 0;
+  width: 420px;
+  height: calc(100vh - 44px);
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border);
+  background: var(--background);
+  z-index: 1050;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
+  transform: translateX(0);
+  transition: transform 220ms ease;
+}
+
+.solid-studio-panel-fixed.collapsed {
+  transform: translateX(100%);
+}
+
+.solid-studio-panel-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.solid-studio-bar-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+}
+
+.solid-studio-exit-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  padding: 0 12px;
+  height: 28px;
+  background: rgba(255, 255, 255, 0.15);
+  color: var(--primary-foreground);
+  border: 1px solid rgba(255, 255, 255, 0.25);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+}
+
+.solid-studio-exit-btn:hover {
+  background: rgba(255, 255, 255, 0.28);
+}
+
+.solid-studio-panel-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  color: var(--primary-foreground);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.solid-studio-panel-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Drag handle on the left edge of the panel */
+.solid-studio-resize-handle {
+  position: absolute;
+  left: -4px;
+  top: 0;
+  width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+}
+
+.solid-studio-resize-handle::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 32px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.0);
+  transition: background 0.15s;
+}
+
+.solid-studio-resize-handle:hover::after,
+.solid-studio-resize-handle.dragging::after {
+  background: var(--primary);
+}
+
+/* Studio trigger button in AdminTopHeader */
+.solid-studio-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  padding: 0 10px;
+  height: 28px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.solid-studio-trigger-btn:hover {
+  opacity: 0.85;
+}
+
+/* ── Studio-active layout note ────────────────────────────────────────────────
+   Layout shifts are handled via the --solid-studio-header-height CSS variable
+   set on :root by SolidStudio when studio mode is active. All affected
+   elements (sidebar, hotspot, admin header, shell, main) consume this variable
+   directly in their base rules above — no class overrides needed.            */
+
+/* Studio home page — /studio */
+.solid-studio-home {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.solid-studio-home-inner {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.solid-studio-home-heading {
+  text-align: center;
+}
+
+.solid-studio-home-heading h1 {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0 0 8px;
+}
+
+.solid-studio-home-heading p {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  margin: 0;
+}
+
+.solid-studio-home-cards {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 16px;
+}
+
+.solid-studio-home-card {
+  display: flex;
+  flex-direction: column;
+  align-items: flex-start;
+  gap: 16px;
+  padding: 24px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  cursor: pointer;
+  text-align: left;
+  transition: border-color 0.15s, box-shadow 0.15s;
+  font-family: inherit;
+}
+
+.solid-studio-home-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary) 12%, transparent);
+}
+
+.solid-studio-home-card-icon {
+  color: var(--primary);
+}
+
+.solid-studio-home-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.solid-studio-home-card-title {
+  font-size: 15px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.solid-studio-home-card-desc {
+  font-size: 13px;
+  color: var(--muted-foreground);
+  line-height: 1.5;
+}
+
+/* Studio landing placeholder page — /landing default */
+.solid-studio-landing {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.solid-studio-landing-inner {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.solid-studio-landing-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--muted);
+  display: grid;
+  place-items: center;
+  color: var(--muted-foreground);
+}
+
+.solid-studio-landing-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.solid-studio-landing-desc {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.solid-studio-landing-desc code {
+  font-family: monospace;
+  font-size: 13px;
+  background: var(--muted);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--foreground);
+}
+
+.solid-studio-landing-snippet {
+  width: 100%;
+  background: var(--muted);
+  border-radius: 8px;
+  padding: 16px;
+  text-align: left;
+}
+
+.solid-studio-landing-snippet pre {
+  margin: 0;
+  font-family: monospace;
+  font-size: 12px;
+  color: var(--foreground);
+  white-space: pre-wrap;
+}
+
+.solid-studio-landing-hint {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  margin: 0;
 }

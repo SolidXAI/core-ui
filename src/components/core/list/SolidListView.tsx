@@ -41,7 +41,7 @@ import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from
 import { getExtensionFunction } from "../../../helpers/registry";
 import { useSession } from "../../../hooks/useSession";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
-import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper";
+// import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper"; // moved to SolidX Studio panel
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
@@ -1992,7 +1992,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                 />
               </div>
             ) : (
-              <SolidAiMainWrapper mcpUrl={mcpUrl} />
+              null // <SolidAiMainWrapper mcpUrl={mcpUrl} /> // moved to SolidX Studio panel
             )}
           </div>
         )

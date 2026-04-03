@@ -1,0 +1,7 @@
+{
+  "permissions": {
+    "additionalDirectories": [
+      "/opt/gitco/solid-starter/mswipe-nbf-app/solid-ui/src"
+    ]
+  }
+}

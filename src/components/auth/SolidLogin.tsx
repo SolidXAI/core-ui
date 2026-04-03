@@ -19,6 +19,8 @@ import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
 import showToast from "../../helpers/showToast";
 import { AuthTabs } from "./AuthTabs";
+import { loadSession } from "../../adapters/auth/storage";
+import { hasAnyRole } from "../../helpers/rolesHelper";
 
 interface AuthModesProps {
     passwordBasedAuth: boolean;
@@ -92,7 +94,10 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                             });
                         } else {
                             showToast(toast, "success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
-                            const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin";
+                            const session = loadSession();
+                            const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
+                            const wasInStudio = localStorage.getItem("solidx.studio.mode") === "true";
+                            const redirectUrl = isAdmin && wasInStudio ? "/studio" : (env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin");
                             router.push(redirectUrl);
                         }
                     } catch (error: any) {

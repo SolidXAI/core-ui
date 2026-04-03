@@ -1,9 +1,13 @@
 import { useContext, useMemo } from "react";
+import { useDispatch, useSelector } from "react-redux";
 import { usePathname } from "../../hooks/usePathname";
 import { useSearchParams } from "../../hooks/useSearchParams";
 import { useRouter } from "../../hooks/useRouter";
+import { useSession } from "../../hooks/useSession";
 import { useGetSolidActionByIdQuery } from "../../redux/api/solidActionApi";
 import { LayoutContext } from "./context/layoutcontext";
+import { enterStudioMode } from "../../redux/features/solidStudioSlice";
+import { hasAnyRole } from "../../helpers/rolesHelper";
 
 const SIDEBAR_TOGGLE_EVENT = "solidx:sidebar-toggle";
 
@@ -12,11 +16,23 @@ const toLabel = (value: string) =>
     .replace(/[-_]/g, " ")
     .replace(/\b\w/g, (m) => m.toUpperCase());
 
+const StudioSparkleIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path d="M7 1v2M7 11v2M1 7h2M11 7h2M2.93 2.93l1.41 1.41M9.66 9.66l1.41 1.41M2.93 11.07l1.41-1.41M9.66 4.34l1.41-1.41" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
+    <circle cx="7" cy="7" r="2" stroke="currentColor" strokeWidth="1.4" />
+  </svg>
+);
+
 export const AdminTopHeader = () => {
   const pathname = usePathname();
   const searchParams = useSearchParams();
   const router = useRouter();
+  const dispatch = useDispatch();
   const { toggleThemeMode } = useContext(LayoutContext);
+  const { data: session } = useSession();
+  const user = session?.user;
+  const isAdmin = hasAnyRole(user?.roles, ["Admin"]);
+  const isStudioMode = useSelector((state: any) => state.solidStudio?.isStudioMode ?? false);
 
   // We treat actionId as the source of truth for breadcrumb labels.
   // If present, we resolve module/model/action via action-metadata API
@@ -101,6 +117,18 @@ export const AdminTopHeader = () => {
         </nav>
 
         <div className="solid-admin-header-actions">
+          {isAdmin && !isStudioMode && (
+            <button
+              type="button"
+              className="solid-studio-trigger-btn"
+              onClick={() => { dispatch(enterStudioMode()); router.push("/studio"); }}
+              title="Enter SolidX Studio"
+            >
+              <StudioSparkleIcon />
+              Studio
+            </button>
+          )}
+
           <button
             type="button"
             className="solid-admin-theme-toggle"
