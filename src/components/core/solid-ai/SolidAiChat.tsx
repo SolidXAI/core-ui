@@ -1,7 +1,6 @@
 import React, { useState, useEffect, useRef, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
-import { SolidSelect } from "../../shad-cn-ui/SolidSelect";
 import { loadSession } from "../../../adapters/auth/storage";
 import styles from "./SolidAiChat.module.css";
 
@@ -23,10 +22,12 @@ interface Message {
     // tool call events only
     toolName?: string;
     toolDesc?: string;
+    toolArgs?: Record<string, unknown>;
     toolProgress?: ToolProgressStep[];
     durationMs?: number;
     toolStatus?: "success" | "warning" | "error";
     toolOutput?: string;
+    toolOutputRaw?: string;
     // step tracking for dividers
     step?: number;
     // error flag for styled error bubble
@@ -62,14 +63,6 @@ function writeLS(key: string, val: string | null) {
 
 let _persistedSessionId: string | null = readLS(LS_SESSION_ID);
 let _historySessionId: string | null = readLS(LS_HISTORY_ID);
-
-// ── Models ────────────────────────────────────────────────────────────────────
-
-const MODELS = [
-    { label: "GPT-4o", value: "gpt-4o" },
-    { label: "Claude 3.5 Sonnet", value: "claude-3-5-sonnet" },
-    { label: "Gemini 1.5 Pro", value: "gemini-1-5-pro" },
-];
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 
@@ -232,6 +225,18 @@ function parseToolResult(output: string): { status: Message["toolStatus"]; text:
     }
 }
 
+/**
+ * Detects LLM metadata strings that should not be rendered as chat messages.
+ * These include token counts, model info, finish_reason, and message-list summaries.
+ */
+function isLlmMetadata(content: string): boolean {
+    if (!content) return true;
+    return /\d+\s*(input|output)\s*tokens/i.test(content)
+        || /finish_reason:/i.test(content)
+        || /^\d+\s+messages\s*\(/i.test(content)
+        || /\|\s*model:\s*\S+/i.test(content);
+}
+
 // ── Message grouping ──────────────────────────────────────────────────────────
 // Groups consecutive event + assistant messages into a single AI turn so we can
 // render the avatar once per turn rather than per message.
@@ -312,6 +317,7 @@ function processHistoryEvents(backendMsgs: any[]): Message[] {
                     eventState: "done",
                     toolName,
                     toolDesc: describeToolArgs(toolArgs),
+                    toolArgs,
                 });
                 break;
             }
@@ -354,22 +360,31 @@ function processHistoryEvents(backendMsgs: any[]): Message[] {
                             const { status, text } = parseToolResult(outputStr);
                             prev.toolStatus = status;
                             prev.toolOutput = text;
+                            prev.toolOutputRaw = outputStr;
                         }
                     }
                 }
                 break;
             }
 
-            case "LlmComplete":
-            case "TurnCompleteEvent":
-                result.push({
-                    id,
-                    role: "assistant",
-                    content: m.content || data.content || "",
-                    timestamp: ts,
-                });
+            case "LlmComplete": {
+                const llmContent = m.content || data.content || "";
+                if (!llmContent || isLlmMetadata(llmContent)) break;
+                const prevAssistantLlm = [...result].reverse().find(r => r.role === "assistant");
+                if (prevAssistantLlm?.content === llmContent) break;
+                result.push({ id, role: "assistant", content: llmContent, timestamp: ts });
                 currentEventIdx = null;
                 break;
+            }
+            case "TurnCompleteEvent": {
+                const tcContent = m.content || data.content || "";
+                if (!tcContent) { currentEventIdx = null; break; }
+                const prevAssistantTc = [...result].reverse().find(r => r.role === "assistant");
+                if (prevAssistantTc?.content === tcContent) { currentEventIdx = null; break; }
+                result.push({ id, role: "assistant", content: tcContent, timestamp: ts });
+                currentEventIdx = null;
+                break;
+            }
 
             case "StepComplete":
             case "AgentComplete":
@@ -388,15 +403,17 @@ function processHistoryEvents(backendMsgs: any[]): Message[] {
                 break;
 
             default:
-                // If it's a simple user/assistant message without a recognized event_type,
-                // fall back to the top-level role/content.
-                if (m.role === "user" || m.role === "assistant") {
-                    result.push({
-                        id,
-                        role: m.role as "user" | "assistant",
-                        content: m.content || "",
-                        timestamp: ts,
-                    });
+                if (m.role === "user") {
+                    result.push({ id, role: "user", content: m.content || "", timestamp: ts });
+                    currentEventIdx = null;
+                } else if (m.role === "assistant") {
+                    const fallbackContent = m.content || "";
+                    if (fallbackContent && !isLlmMetadata(fallbackContent)) {
+                        const prevAst = [...result].reverse().find(r => r.role === "assistant");
+                        if (prevAst?.content !== fallbackContent) {
+                            result.push({ id, role: "assistant", content: fallbackContent, timestamp: ts });
+                        }
+                    }
                     currentEventIdx = null;
                 }
                 break;
@@ -410,7 +427,6 @@ function processHistoryEvents(backendMsgs: any[]): Message[] {
 export const SolidAiChat: React.FC = () => {
     const [messages, setMessages] = useState<Message[]>([]);
     const [input, setInput] = useState("");
-    const [model, setModel] = useState("gpt-4o");
     const [isConnected, setIsConnected] = useState(false);
     const [sessionId, setSessionId] = useState<string | null>(null);
     const [isLoadingHistory, setIsLoadingHistory] = useState(false);
@@ -623,6 +639,7 @@ export const SolidAiChat: React.FC = () => {
                                         const { status, text } = parseToolResult(outputStr);
                                         update.toolStatus = status;
                                         update.toolOutput = text;
+                                        update.toolOutputRaw = outputStr;
                                     }
                                     return { ...m, ...update };
                                 }
@@ -658,12 +675,31 @@ export const SolidAiChat: React.FC = () => {
                         break;
                     }
 
+                    // ── LLM complete (intermediate text before tool calls) ─
+                    case "LlmComplete": {
+                        const llmContent: string = data.data?.content ?? "";
+                        if (llmContent && !isLlmMetadata(llmContent)) {
+                            const evtId = liveEventIdRef.current;
+                            liveEventIdRef.current = null;
+                            setMessages((prev) => {
+                                let msgs = evtId
+                                    ? prev.map((m) => m.id === evtId ? { ...m, eventState: "done" as const } : m)
+                                    : prev;
+                                const lastAssistant = [...msgs].reverse().find(m => m.role === "assistant");
+                                if (!lastAssistant || lastAssistant.content !== llmContent) {
+                                    msgs = [...msgs, { id: `llm-${Date.now()}`, role: "assistant" as const, content: llmContent, timestamp: new Date() }];
+                                }
+                                return msgs;
+                            });
+                        }
+                        break;
+                    }
+
                     // ── Tool activity ──────────────────────────────────────
                     case "ToolCalling": {
-                        // Each tool call becomes its own card (freezes any "Thinking…" row).
                         const toolName: string = data.data?.tool_name ?? "tool";
                         const toolArgs: Record<string, unknown> = data.data?.arguments ?? {};
-                        addEvent(toolName, { toolName, toolDesc: describeToolArgs(toolArgs) });
+                        addEvent(toolName, { toolName, toolDesc: describeToolArgs(toolArgs), toolArgs });
                         break;
                     }
 
@@ -693,16 +729,19 @@ export const SolidAiChat: React.FC = () => {
                     case "TurnCompleteEvent":
                     case "turn_complete": {
                         setIsProcessing(false);
-                        const content: string = data.data?.content ?? "";
-                        // Freeze any remaining live event
+                        const content: string = data.data?.content ?? data.content ?? "";
                         const evtId = liveEventIdRef.current;
                         liveEventIdRef.current = null;
                         setMessages((prev) => {
                             let msgs = evtId
                                 ? prev.map((m) => m.id === evtId ? { ...m, eventState: "done" as const } : m)
                                 : prev;
-                            if (!hasStreamedRef.current && content) {
-                                msgs = [...msgs, { id: `tc-${Date.now()}`, role: "assistant", content, timestamp: new Date() }];
+                            if (content) {
+                                const lastAssistant = [...msgs].reverse().find(m => m.role === "assistant");
+                                const alreadyRendered = lastAssistant && lastAssistant.content === content;
+                                if (!hasStreamedRef.current && !alreadyRendered) {
+                                    msgs = [...msgs, { id: `tc-${Date.now()}`, role: "assistant", content, timestamp: new Date() }];
+                                }
                             }
                             return msgs;
                         });
@@ -974,7 +1013,7 @@ export const SolidAiChat: React.FC = () => {
                             <i className="pi pi-comments" style={{ fontSize: "28px" }} />
                         </div>
                         <p className={styles.EmptyTitle}>How can I help you today?</p>
-                        <p className={styles.EmptySubtitle}>Ask me anything — powered by {MODELS.find((m) => m.value === model)?.label ?? model}.</p>
+                        <p className={styles.EmptySubtitle}>Ask me anything about your SolidX project.</p>
                     </div>
                 )}
 
@@ -1013,17 +1052,6 @@ export const SolidAiChat: React.FC = () => {
                                 {group.msgs.flatMap((msg) => {
                                     const items: React.ReactNode[] = [];
 
-                                    // ── Step divider before step > 1 thinking events ──
-                                    if (msg.role === "event" && !msg.toolName && msg.step && msg.step > 1) {
-                                        items.push(
-                                            <div key={`divider-${msg.id}`} className={styles.StepDividerRow}>
-                                                <div className={styles.StepDividerLine} />
-                                                <span className={styles.StepDividerLabel}>Step {msg.step}</span>
-                                                <div className={styles.StepDividerLine} />
-                                            </div>
-                                        );
-                                    }
-
                                     if (msg.role === "event") {
                                         const active = msg.eventState === "active";
 
@@ -1045,7 +1073,7 @@ export const SolidAiChat: React.FC = () => {
                                                     status === "success" ? styles.ToolCardStatusDone :
                                                         styles.ToolCardStatusIcon;
 
-                                            const hasExpandable = (msg.toolProgress && msg.toolProgress.length > 0) || !!msg.toolOutput;
+                                            const hasExpandable = !!msg.toolOutput || !!msg.toolArgs;
                                             const isExpanded = expandedToolIds.has(msg.id);
                                             const toggleExpand = hasExpandable && status !== "running"
                                                 ? () => setExpandedToolIds((prev) => {
@@ -1074,9 +1102,9 @@ export const SolidAiChat: React.FC = () => {
                                                             <i className={`pi pi-chevron-right ${styles.ToolCardChevron} ${isExpanded ? styles.ToolCardChevronOpen : ""}`} />
                                                         )}
                                                     </button>
-                                                    {/* Progress: always visible while running, collapsible when done */}
-                                                    {msg.toolProgress && msg.toolProgress.length > 0 && (status === "running" || isExpanded) && (
-                                                        <div className={`${styles.ToolCardProgress} ${styles.ToolCardExpandable}`}>
+                                                    {/* Progress substeps: always visible */}
+                                                    {msg.toolProgress && msg.toolProgress.length > 0 && (
+                                                        <div className={styles.ToolCardProgress}>
                                                             {msg.toolProgress.map((p, i) => (
                                                                 <div key={i} className={`${styles.ToolProgressItem} ${p.status === "running" ? styles.ToolProgressRunning : styles.ToolProgressDone}`}>
                                                                     <i className={`pi ${p.status === "running" ? "pi-spin pi-spinner" : "pi-check-circle"}`} style={{ fontSize: "10px" }} />
@@ -1088,14 +1116,28 @@ export const SolidAiChat: React.FC = () => {
                                                             ))}
                                                         </div>
                                                     )}
-                                                    {msg.toolOutput && isExpanded && (
-                                                        <div className={`${styles.ToolCardOutput} ${styles.ToolCardExpandable}`}>
-                                                            <div className={styles.ToolOutputHeader}>
-                                                                <span>Result</span>
-                                                            </div>
-                                                            <div className={`${styles.ToolOutputText} ${status === "warning" ? styles.ToolOutputWarning : status === "error" ? styles.ToolOutputError : ""}`}>
-                                                                {msg.toolOutput}
-                                                            </div>
+                                                    {isExpanded && (msg.toolArgs || msg.toolOutput) && (
+                                                        <div className={styles.ToolCardExpandable}>
+                                                            {msg.toolArgs && Object.keys(msg.toolArgs).length > 0 && (
+                                                                <div className={styles.ToolCardOutput}>
+                                                                    <div className={styles.ToolOutputHeader}>
+                                                                        <span>Arguments</span>
+                                                                    </div>
+                                                                    <pre className={styles.ToolOutputText}>
+                                                                        {JSON.stringify(msg.toolArgs, null, 2)}
+                                                                    </pre>
+                                                                </div>
+                                                            )}
+                                                            {msg.toolOutput && (
+                                                                <div className={styles.ToolCardOutput}>
+                                                                    <div className={styles.ToolOutputHeader}>
+                                                                        <span>Result</span>
+                                                                    </div>
+                                                                    <pre className={`${styles.ToolOutputText} ${status === "warning" ? styles.ToolOutputWarning : status === "error" ? styles.ToolOutputError : ""}`}>
+                                                                        {msg.toolOutputRaw || msg.toolOutput}
+                                                                    </pre>
+                                                                </div>
+                                                            )}
                                                         </div>
                                                     )}
                                                 </div>
@@ -1103,7 +1145,7 @@ export const SolidAiChat: React.FC = () => {
                                             return items;
                                         }
 
-                                        // ── Thinking bubble (active) / done row ─────────
+                                        // ── Thinking bubble: only show while active ──────
                                         if (active) {
                                             items.push(
                                                 <div key={msg.id} className={styles.ThinkingBubble}>
@@ -1112,16 +1154,7 @@ export const SolidAiChat: React.FC = () => {
                                                         <span className={styles.ThinkingDot} />
                                                         <span className={styles.ThinkingDot} />
                                                     </div>
-                                                    <span className={styles.ThinkingLabel}>
-                                                        {msg.step && msg.step > 1 ? `Thinking...` : "Thinking…"}
-                                                    </span>
-                                                </div>
-                                            );
-                                        } else {
-                                            items.push(
-                                                <div key={msg.id} className={`${styles.EventRow} ${styles.EventRowDone}`}>
-                                                    <i className="pi pi-check-circle" />
-                                                    <span>{msg.content}</span>
+                                                    <span className={styles.ThinkingLabel}>Thinking…</span>
                                                 </div>
                                             );
                                         }
@@ -1185,26 +1218,13 @@ export const SolidAiChat: React.FC = () => {
                         disabled={!isConnected || !sessionId || isProcessing}
                         rows={1}
                     />
-                </div>
-
-                {/* ── Taskbar ── */}
-                <div className={styles.InputFooter}>
-                    <div className={styles.InputModelWrap}>
-                        <SolidSelect
-                            value={model}
-                            options={MODELS}
-                            onChange={(e) => setModel(e.value)}
-                            className={styles.ModelSelect}
-                        />
-                    </div>
-                    <div className={styles.TaskBarSpacer} />
                     <button
                         className={`${styles.SendBtn} ${canSend ? styles.SendBtnActive : ""}`}
                         disabled={!canSend}
                         onClick={handleSend}
                         aria-label="Send message"
                     >
-                        <i className="pi pi-send" style={{ fontSize: "13px" }} />
+                        <i className="pi pi-send" style={{ fontSize: "12px" }} />
                     </button>
                 </div>
             </div>
