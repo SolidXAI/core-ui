@@ -28,6 +28,7 @@ import { TreePage } from "./pages/admin/core/TreePage";
 import { DashboardPage } from "./pages/admin/core/DashboardPage";
 import { StudioHomePage } from "./pages/studio/StudioHomePage";
 import { StudioLandingPage } from "./pages/studio/StudioLandingPage";
+import { _solidRegisterExtraRoutes } from "./SolidLayoutRegistry";
 
 export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] {
   const {
@@ -36,6 +37,10 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     extraRoutes = [],
     elementOverrides = {},
   } = options;
+
+  // Auto-register layout routes so StudioLandingPage can discover them
+  // without any changes in the consuming project.
+  _solidRegisterExtraRoutes(extraRoutes);
 
   const pick = (key: SolidRouteKey, fallback: JSX.Element) =>
     (elementOverrides[key] as JSX.Element) || fallback;

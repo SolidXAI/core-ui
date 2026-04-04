@@ -457,6 +457,8 @@ export { AuthLayoutWrapper } from './layouts/AuthLayoutWrapper';
 export { AppEventListener } from './routes/AppEventListener';
 export { getSolidRoutes } from './routes/solidRoutes';
 export type { SolidRoutesOptions } from './routes/types';
+export { SolidLayoutRegistryProvider, useSolidLayoutRegistry } from './routes/SolidLayoutRegistry';
+export type { SolidLayoutEntry, SolidLayoutHandle } from './routes/SolidLayoutRegistry';
 export { AdminPage } from './routes/pages/admin/AdminPage';
 export { ModuleHomePage } from './routes/pages/admin/core/ModuleHomePage';
 export { DashboardPage as AdminDashboardPage } from './routes/pages/admin/core/DashboardPage';

@@ -1,10 +1,10 @@
 import React, { useCallback, useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, useLocation } from "react-router-dom";
 import { SolidAiChat } from "../core/solid-ai/SolidAiChat";
 import { exitStudioMode, setStudioView, type StudioView } from "../../redux/features/solidStudioSlice";
 import { useSession } from "../../hooks/useSession";
-import { env } from "../../adapters/env";
+import { signOut } from "../../adapters/auth/index";
 
 const HEADER_HEIGHT = "44px";
 const PANEL_WIDTH_DEFAULT = 420;
@@ -18,13 +18,6 @@ const StudioIcon = () => (
     <path d="M2 8a6 6 0 1 1 12 0A6 6 0 0 1 2 8Z" stroke="currentColor" strokeWidth="1.4" />
     <path d="M8 5v3l2 1.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
     <path d="M8 2V1M8 15v-1M1 8H0M16 8h-1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-  </svg>
-);
-
-const ExitIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-    <path d="M9.5 4.5 5 9M5 4.5l4.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    <rect x="1" y="1" width="12" height="12" rx="3" stroke="currentColor" strokeWidth="1.2" />
   </svg>
 );
 
@@ -44,6 +37,28 @@ const PanelCloseIcon = () => (
   </svg>
 );
 
+const DotsIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
+    <circle cx="8" cy="3" r="1.3" />
+    <circle cx="8" cy="8" r="1.3" />
+    <circle cx="8" cy="13" r="1.3" />
+  </svg>
+);
+
+const ExitStudioIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path d="M9.5 4.5 5 9M5 4.5l4.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
+    <rect x="1" y="1" width="12" height="12" rx="3" stroke="currentColor" strokeWidth="1.2" />
+  </svg>
+);
+
+const LogoutIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path d="M5 2H2.5A1.5 1.5 0 0 0 1 3.5v7A1.5 1.5 0 0 0 2.5 12H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
+    <path d="M9 4l3 3-3 3M12 7H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 // ── SolidStudio ────────────────────────────────────────────────────────────────
 // Single component that renders both the Studio header and the AI panel.
 // Mount this ONCE at the app root via AppEventListener.
@@ -54,13 +69,29 @@ export function SolidStudio() {
   const studioView = useSelector((state: any) => state.solidStudio?.studioView ?? null) as StudioView;
   const dispatch = useDispatch();
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const isOnStudioPage = pathname === "/studio";
   const { status } = useSession();
   const isAuthenticated = status === "authenticated";
   const [isPanelOpen, setIsPanelOpen] = useState(true);
   const [panelWidth, setPanelWidth] = useState(PANEL_WIDTH_DEFAULT);
   const [isDragging, setIsDragging] = useState(false);
+  const [isMenuOpen, setIsMenuOpen] = useState(false);
   const dragStartX = useRef(0);
   const dragStartWidth = useRef(PANEL_WIDTH_DEFAULT);
+  const menuRef = useRef<HTMLDivElement>(null);
+
+  // Close the 3-dot menu when clicking outside
+  useEffect(() => {
+    if (!isMenuOpen) return;
+    const handler = (e: MouseEvent) => {
+      if (menuRef.current && !menuRef.current.contains(e.target as Node)) {
+        setIsMenuOpen(false);
+      }
+    };
+    document.addEventListener("mousedown", handler);
+    return () => document.removeEventListener("mousedown", handler);
+  }, [isMenuOpen]);
 
   // Apply body padding + CSS variable so all fixed/sticky elements shift correctly
   useEffect(() => {
@@ -111,8 +142,15 @@ export function SolidStudio() {
   if (!isStudioMode || !isAuthenticated) return null;
 
   const handleExit = () => {
+    setIsMenuOpen(false);
     dispatch(exitStudioMode());
-    navigate(env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin");
+    navigate("/studio");
+  };
+
+  const handleLogout = () => {
+    setIsMenuOpen(false);
+    dispatch(exitStudioMode());
+    signOut({ callbackUrl: "/auth/login" });
   };
 
   const handleViewSwitch = (view: StudioView) => {
@@ -161,15 +199,32 @@ export function SolidStudio() {
           >
             {isPanelOpen ? <PanelCloseIcon /> : <PanelOpenIcon />}
           </button>
-          <button
-            type="button"
-            className="solid-studio-exit-btn"
-            onClick={handleExit}
-            title="Exit Studio mode"
-          >
-            <ExitIcon />
-            Exit Studio
-          </button>
+
+          {/* ── 3-dot menu ─────────────────────────────────────────────────── */}
+          <div className="solid-studio-menu" ref={menuRef}>
+            <button
+              type="button"
+              className="solid-studio-menu-trigger"
+              onClick={() => setIsMenuOpen((o) => !o)}
+              title="More options"
+            >
+              <DotsIcon />
+            </button>
+            {isMenuOpen && (
+              <div className="solid-studio-menu-dropdown">
+                {!isOnStudioPage && (
+                  <button type="button" className="solid-studio-menu-item" onClick={handleExit}>
+                    <ExitStudioIcon />
+                    Exit Studio
+                  </button>
+                )}
+                <button type="button" className="solid-studio-menu-item danger" onClick={handleLogout}>
+                  <LogoutIcon />
+                  Logout
+                </button>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 

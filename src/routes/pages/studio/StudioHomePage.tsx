@@ -4,7 +4,7 @@ import { useNavigate } from "react-router-dom";
 import { enterStudioMode, setStudioView } from "../../../redux/features/solidStudioSlice";
 
 const BackendIcon = () => (
-  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+  <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
     <rect x="2" y="6" width="28" height="20" rx="3" stroke="currentColor" strokeWidth="1.6" />
     <path d="M2 11h28" stroke="currentColor" strokeWidth="1.6" />
     <circle cx="6.5" cy="8.5" r="1" fill="currentColor" />
@@ -15,10 +15,16 @@ const BackendIcon = () => (
 );
 
 const FrontendIcon = () => (
-  <svg width="32" height="32" viewBox="0 0 32 32" fill="none" aria-hidden="true">
+  <svg width="28" height="28" viewBox="0 0 32 32" fill="none" aria-hidden="true">
     <rect x="2" y="4" width="28" height="18" rx="3" stroke="currentColor" strokeWidth="1.6" />
     <path d="M10 28h12M16 22v6" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" />
     <path d="M11 13l3-3-3-3M17 10h5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
+const ArrowIcon = () => (
+  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <path d="M3 8h10M9 4l4 4-4 4" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round" />
   </svg>
 );
 
@@ -26,10 +32,9 @@ export function StudioHomePage() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
 
-  // Entering studio mode when landing on this page
   useEffect(() => {
     dispatch(enterStudioMode());
-    dispatch(setStudioView(null)); // clear previous view so neither button shows active
+    dispatch(setStudioView(null));
   }, [dispatch]);
 
   const handleSelect = (view: "backend" | "frontend") => {
@@ -39,42 +44,59 @@ export function StudioHomePage() {
 
   return (
     <div className="solid-studio-home">
-      <div className="solid-studio-home-inner">
+      <div className="solid-studio-home-inner solid-studio-home-inner--wide">
         <div className="solid-studio-home-heading">
+          <div className="solid-studio-home-badge">SolidX Studio</div>
           <h1>Welcome to SolidX Studio</h1>
-          <p>Choose where you want to work today.</p>
+          <p>Choose your workspace to get started.</p>
         </div>
 
-        <div className="solid-studio-home-cards">
+        <div className="solid-studio-home-cards solid-studio-home-cards--2col">
+          {/* Backend Studio Card */}
           <button
             type="button"
-            className="solid-studio-home-card"
+            className="solid-studio-home-card solid-studio-home-card--backend"
             onClick={() => handleSelect("backend")}
+            aria-label="Open Backend Studio"
           >
-            <div className="solid-studio-home-card-icon">
-              <BackendIcon />
-            </div>
-            <div className="solid-studio-home-card-content">
-              <span className="solid-studio-home-card-title">Backend</span>
-              <span className="solid-studio-home-card-desc">
-                Admin panel, data management, configuration, and settings.
-              </span>
+            <div className="solid-studio-home-card-body">
+              <div className="solid-studio-home-card-icon solid-studio-home-card-icon--backend">
+                <BackendIcon />
+              </div>
+              <div className="solid-studio-home-card-content">
+                <span className="solid-studio-home-card-title">Backend Studio</span>
+                <span className="solid-studio-home-card-desc">
+                  Admin panel, data management, APIs, configuration, and settings.
+                </span>
+              </div>
+              <div className="solid-studio-home-card-cta">
+                <span>Open</span>
+                <ArrowIcon />
+              </div>
             </div>
           </button>
 
+          {/* Frontend Studio Card */}
           <button
             type="button"
-            className="solid-studio-home-card"
+            className="solid-studio-home-card solid-studio-home-card--frontend"
             onClick={() => handleSelect("frontend")}
+            aria-label="Open Frontend Studio"
           >
-            <div className="solid-studio-home-card-icon">
-              <FrontendIcon />
-            </div>
-            <div className="solid-studio-home-card-content">
-              <span className="solid-studio-home-card-title">Frontend</span>
-              <span className="solid-studio-home-card-desc">
-                Custom UI, landing pages, and user-facing layouts.
-              </span>
+            <div className="solid-studio-home-card-body">
+              <div className="solid-studio-home-card-icon solid-studio-home-card-icon--frontend">
+                <FrontendIcon />
+              </div>
+              <div className="solid-studio-home-card-content">
+                <span className="solid-studio-home-card-title">Frontend Studio</span>
+                <span className="solid-studio-home-card-desc">
+                  Custom UI, landing pages, components, and user-facing layouts.
+                </span>
+              </div>
+              <div className="solid-studio-home-card-cta">
+                <span>Open</span>
+                <ArrowIcon />
+              </div>
             </div>
           </button>
         </div>

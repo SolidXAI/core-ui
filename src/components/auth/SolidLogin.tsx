@@ -96,8 +96,8 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                             showToast(toast, "success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
                             const session = loadSession();
                             const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
-                            const wasInStudio = localStorage.getItem("solidx.studio.mode") === "true";
-                            const redirectUrl = isAdmin && wasInStudio ? "/studio" : (env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin");
+                            const isDev = env("VITE_SOLIDX_ENV") === "dev";
+                            const redirectUrl = isAdmin && isDev ? "/studio" : (env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin");
                             router.push(redirectUrl);
                         }
                     } catch (error: any) {
@@ -253,7 +253,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
 
                             if (remaining > 0) {
                                 const formatted = formatTimeLeft(remaining);
-                                showToast(toast, 
+                                showToast(toast,
                                     "error",
                                     ERROR_MESSAGES.PLEASE_WAIT,
                                     ERROR_MESSAGES.OPT_FORMAT(formatted)

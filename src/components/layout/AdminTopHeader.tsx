@@ -8,6 +8,7 @@ import { useGetSolidActionByIdQuery } from "../../redux/api/solidActionApi";
 import { LayoutContext } from "./context/layoutcontext";
 import { enterStudioMode } from "../../redux/features/solidStudioSlice";
 import { hasAnyRole } from "../../helpers/rolesHelper";
+import { env } from "../../adapters/env";
 
 const SIDEBAR_TOGGLE_EVENT = "solidx:sidebar-toggle";
 
@@ -33,6 +34,7 @@ export const AdminTopHeader = () => {
   const user = session?.user;
   const isAdmin = hasAnyRole(user?.roles, ["Admin"]);
   const isStudioMode = useSelector((state: any) => state.solidStudio?.isStudioMode ?? false);
+  const isDev = env("VITE_SOLIDX_ENV") === "dev";
 
   // We treat actionId as the source of truth for breadcrumb labels.
   // If present, we resolve module/model/action via action-metadata API
@@ -117,7 +119,7 @@ export const AdminTopHeader = () => {
         </nav>
 
         <div className="solid-admin-header-actions">
-          {isAdmin && !isStudioMode && (
+          {isAdmin && isDev && !isStudioMode && (
             <button
               type="button"
               className="solid-studio-trigger-btn"
