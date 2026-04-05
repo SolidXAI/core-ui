@@ -2,7 +2,7 @@ import { useEffect } from "react";
 import { eventBus, AppEvents } from "../helpers/eventBus";
 import { useRouter } from "../hooks/useRouter";
 import { usePathname } from "../hooks/usePathname";
-import { SolidStudio } from "../components/layout/SolidAiStudioLayout";
+import { SolidStudio, PreviewModePersist } from "../components/layout/SolidAiStudioLayout";
 
 type GlobalErrorPayload = {
   status?: number | string;
@@ -25,5 +25,10 @@ export function AppEventListener() {
     return () => off();
   }, [router, pathname]);
 
-  return <SolidStudio />;
+  return (
+    <>
+      <SolidStudio />
+      <PreviewModePersist />
+    </>
+  );
 }

@@ -3217,7 +3217,7 @@ body {
   padding: 0 16px;
   background: #722ED1;
   color: #ffffff;
-  z-index: 1100;
+  z-index: 999999;
   gap: 12px;
   box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
 }
@@ -3622,21 +3622,21 @@ body {
 
 /* Heading area */
 .solid-studio-home-heading {
-  text-align: left;
+  text-align: center;
   display: flex;
   flex-direction: column;
-  align-items: flex-start;
+  align-items: center;
   gap: 4px;
 }
 
 .solid-studio-home-badge {
   display: inline-flex;
   align-items: center;
-  font-size: 10px;
+  font-size: 9px;
   font-weight: 700;
-  letter-spacing: 0.07em;
+  letter-spacing: 0.05em;
   text-transform: uppercase;
-  padding: 2px 8px;
+  padding: 1px 6px;
   border-radius: 999px;
   background: color-mix(in srgb, var(--primary) 12%, transparent);
   color: var(--primary);

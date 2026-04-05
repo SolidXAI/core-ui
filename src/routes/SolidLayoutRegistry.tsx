@@ -70,22 +70,33 @@ function pathToTitle(path: string): string {
  * (guards, layout wrappers) by looking inside their children recursively.
  */
 function findFirstConcretePath(children: RouteObject[]): string | undefined {
+  // 1. FIRST PASS → prioritize index (including inside pathless wrappers)
   for (const child of children) {
-    if (child.path) return child.path;
-    // index route → no separate path, keep searching siblings
-    if ((child as any).index) continue;
-    // pathless wrapper (guard, layout wrapper) → recurse into its children
-    if (child.children?.length) {
+    if ((child as any).index || child.path === "") {
+      return "";
+    }
+    // Deep check for pathless wrappers in the first pass too
+    if (!child.path && child.children?.length) {
       const nested = findFirstConcretePath(child.children);
-      if (nested) return nested;
+      if (nested === "") return "";
     }
   }
+
+  // 2. SECOND PASS → find first path
+  for (const child of children) {
+    if (child.path) return child.path;
+
+    if (child.children?.length) {
+      const nested = findFirstConcretePath(child.children);
+      if (nested !== undefined) return nested;
+    }
+  }
+
   return undefined;
 }
-
 function resolveFirstChildTo(basePath: string, children: RouteObject[]): string {
   const concretePath = findFirstConcretePath(children);
-  if (!concretePath) return basePath;
+  if (concretePath === undefined || concretePath === "") return basePath;
   if (concretePath.startsWith("/")) return concretePath;
   return `${basePath.replace(/\/$/, "")}/${concretePath}`;
 }

@@ -1,15 +1,13 @@
-import React, { useCallback, useEffect, useRef, useState } from "react";
+import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-import { SolidAiChat } from "../core/solid-ai/SolidAiChat";
+// import { SolidAiChat } from "../core/solid-ai/SolidAiChat";
 import { exitStudioMode, setStudioView, type StudioView } from "../../redux/features/solidStudioSlice";
 import { useSession } from "../../hooks/useSession";
 import { signOut } from "../../adapters/auth/index";
 
 const HEADER_HEIGHT = "44px";
 const PANEL_WIDTH_DEFAULT = 420;
-const PANEL_WIDTH_MIN = 280;
-const PANEL_WIDTH_MAX = 720;
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 
@@ -52,6 +50,13 @@ const ExitStudioIcon = () => (
   </svg>
 );
 
+const PreviewIcon = () => (
+  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
+    <path d="M1 7s2.5-5 6-5 6 5 6 5-2.5 5-6 5-6-5-6-5Z" stroke="currentColor" strokeWidth="1.3" strokeLinejoin="round" />
+    <circle cx="7" cy="7" r="1.8" stroke="currentColor" strokeWidth="1.3" />
+  </svg>
+);
+
 const LogoutIcon = () => (
   <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
     <path d="M5 2H2.5A1.5 1.5 0 0 0 1 3.5v7A1.5 1.5 0 0 0 2.5 12H5" stroke="currentColor" strokeWidth="1.3" strokeLinecap="round" />
@@ -69,16 +74,16 @@ export function SolidStudio() {
   const studioView = useSelector((state: any) => state.solidStudio?.studioView ?? null) as StudioView;
   const dispatch = useDispatch();
   const navigate = useNavigate();
-  const { pathname } = useLocation();
+  const { pathname, search } = useLocation();
   const isOnStudioPage = pathname === "/studio";
+  const isPreviewMode = new URLSearchParams(search).get("preview") === "true" || (typeof sessionStorage !== "undefined" && sessionStorage.getItem("solid-preview") === "true");
+  const isPreviewable = !isOnStudioPage && pathname !== "/landing";
   const { status } = useSession();
   const isAuthenticated = status === "authenticated";
   const [isPanelOpen, setIsPanelOpen] = useState(true);
-  const [panelWidth, setPanelWidth] = useState(PANEL_WIDTH_DEFAULT);
-  const [isDragging, setIsDragging] = useState(false);
+  const [panelWidth] = useState(PANEL_WIDTH_DEFAULT);
+  const [isDragging] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
-  const dragStartX = useRef(0);
-  const dragStartWidth = useRef(PANEL_WIDTH_DEFAULT);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close the 3-dot menu when clicking outside
@@ -95,8 +100,8 @@ export function SolidStudio() {
 
   // Apply body padding + CSS variable so all fixed/sticky elements shift correctly
   useEffect(() => {
-    const active = isStudioMode && isAuthenticated;
-    document.body.style.paddingRight = active && isPanelOpen ? `${panelWidth}px` : "";
+    const active = isStudioMode && isAuthenticated && !isPreviewMode;
+    document.body.style.paddingRight = ""; // AI panel is hidden for now
     document.body.style.paddingTop = active ? HEADER_HEIGHT : "";
     document.body.style.transition = isDragging ? "none" : "padding 220ms ease";
     // CSS variable consumed by sidebar, hotspot, admin-header, shell, main
@@ -110,27 +115,26 @@ export function SolidStudio() {
       document.body.style.transition = "";
       document.documentElement.style.setProperty("--solid-studio-header-height", "0px");
     };
-  }, [isStudioMode, isAuthenticated, isPanelOpen, panelWidth, isDragging]);
+  }, [isStudioMode, isAuthenticated, isPreviewMode, isDragging]);
 
-  const onDragStart = useCallback((e: React.MouseEvent) => {
-    e.preventDefault();
-    dragStartX.current = e.clientX;
-    dragStartWidth.current = panelWidth;
-    setIsDragging(true);
-
-    const onMove = (ev: MouseEvent) => {
-      const delta = dragStartX.current - ev.clientX;
-      const next = Math.min(PANEL_WIDTH_MAX, Math.max(PANEL_WIDTH_MIN, dragStartWidth.current + delta));
-      setPanelWidth(next);
-    };
-    const onUp = () => {
-      setIsDragging(false);
-      window.removeEventListener("mousemove", onMove);
-      window.removeEventListener("mouseup", onUp);
-    };
-    window.addEventListener("mousemove", onMove);
-    window.addEventListener("mouseup", onUp);
-  }, [panelWidth]);
+  // const onDragStart = useCallback((e: React.MouseEvent) => {
+  //   e.preventDefault();
+  //   dragStartX.current = e.clientX;
+  //   dragStartWidth.current = panelWidth;
+  //   setIsDragging(true);
+  //   const onMove = (ev: MouseEvent) => {
+  //     const delta = dragStartX.current - ev.clientX;
+  //     const next = Math.min(PANEL_WIDTH_MAX, Math.max(PANEL_WIDTH_MIN, dragStartWidth.current + delta));
+  //     setPanelWidth(next);
+  //   };
+  //   const onUp = () => {
+  //     setIsDragging(false);
+  //     window.removeEventListener("mousemove", onMove);
+  //     window.removeEventListener("mouseup", onUp);
+  //   };
+  //   window.addEventListener("mousemove", onMove);
+  //   window.addEventListener("mouseup", onUp);
+  // }, [panelWidth]);
 
   // Auto-exit studio if the user logs out
   useEffect(() => {
@@ -139,7 +143,7 @@ export function SolidStudio() {
     }
   }, [status, isStudioMode, dispatch]);
 
-  if (!isStudioMode || !isAuthenticated) return null;
+  if (!isStudioMode || !isAuthenticated || isPreviewMode) return null;
 
   const handleExit = () => {
     setIsMenuOpen(false);
@@ -191,14 +195,14 @@ export function SolidStudio() {
         </nav>
 
         <div className="solid-studio-header-actions">
-          <button
+          {/* <button
             type="button"
             className="solid-studio-panel-toggle-btn"
             onClick={() => setIsPanelOpen((o) => !o)}
             title={isPanelOpen ? "Collapse AI panel" : "Expand AI panel"}
           >
             {isPanelOpen ? <PanelCloseIcon /> : <PanelOpenIcon />}
-          </button>
+          </button> */}
 
           {/* ── 3-dot menu ─────────────────────────────────────────────────── */}
           <div className="solid-studio-menu" ref={menuRef}>
@@ -212,6 +216,21 @@ export function SolidStudio() {
             </button>
             {isMenuOpen && (
               <div className="solid-studio-menu-dropdown">
+                {isPreviewable && (
+                  <button
+                    type="button"
+                    className="solid-studio-menu-item"
+                    onClick={() => {
+                      setIsMenuOpen(false);
+                      const params = new URLSearchParams(search);
+                      params.set("preview", "true");
+                      window.open(`${pathname}?${params.toString()}`, "_blank");
+                    }}
+                  >
+                    <PreviewIcon />
+                    Preview page
+                  </button>
+                )}
                 {!isOnStudioPage && (
                   <button type="button" className="solid-studio-menu-item" onClick={handleExit}>
                     <ExitStudioIcon />
@@ -228,8 +247,8 @@ export function SolidStudio() {
         </div>
       </div>
 
-      {/* ── AI chat panel ────────────────────────────────────────────────────── */}
-      <div
+      {/* ── AI chat panel (commented out — moved to agent-ui) ───────────────── */}
+      {/* <div
         className={`solid-studio-panel-fixed${isPanelOpen ? "" : " collapsed"}`}
         style={{ width: `${panelWidth}px` }}
       >
@@ -240,9 +259,40 @@ export function SolidStudio() {
         <div className="solid-studio-panel-body">
           <SolidAiChat />
         </div>
-      </div>
+      </div> */}
     </>
   );
+}
+
+// ── PreviewModePersist ─────────────────────────────────────────────────────────
+// Mount once at the app root alongside SolidStudio.
+// sessionStorage is tab-scoped, so preview opened in a new tab stays isolated.
+// Closing the tab is the natural way to exit preview mode.
+
+const PREVIEW_KEY = "solid-preview";
+
+export function PreviewModePersist() {
+  const { pathname, search } = useLocation();
+  const navigate = useNavigate();
+
+  // Activate: when URL has ?preview=true, store it in sessionStorage for this tab
+  useEffect(() => {
+    const params = new URLSearchParams(search);
+    if (params.get("preview") === "true") {
+      sessionStorage.setItem(PREVIEW_KEY, "true");
+    }
+  }, [search]);
+
+  // Persist: re-inject ?preview=true on every navigation if it was set
+  useEffect(() => {
+    if (sessionStorage.getItem(PREVIEW_KEY) !== "true") return;
+    const params = new URLSearchParams(search);
+    if (params.get("preview") === "true") return;
+    params.set("preview", "true");
+    navigate({ pathname, search: `?${params.toString()}` }, { replace: true });
+  }, [pathname, search, navigate]);
+
+  return null;
 }
 
 // ── SolidStudioWrapper ─────────────────────────────────────────────────────────
