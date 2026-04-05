@@ -67,7 +67,7 @@ const LogoutIcon = () => (
   </svg>
 );
 
-const ChatIcon = () => (
+export const ChatIcon = () => (
   <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
     <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
   </svg>
@@ -243,12 +243,12 @@ export function SolidStudio() {
                     Preview page
                   </button>
                 )}
-                {!isOnStudioPage && (
+                {/* {!isOnStudioPage && (
                   <button type="button" className="solid-studio-menu-item" onClick={handleExit}>
                     <ExitStudioIcon />
                     Exit Studio
                   </button>
-                )}
+                )} */}
                 <button type="button" className="solid-studio-menu-item danger" onClick={handleLogout}>
                   <LogoutIcon />
                   Logout

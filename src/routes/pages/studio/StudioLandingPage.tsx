@@ -2,6 +2,8 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSolidLayoutRegistry } from "../../SolidLayoutRegistry";
 import type { SolidLayoutEntry } from "../../SolidLayoutRegistry";
+import { ChatIcon } from "@/components/layout/SolidAiStudioLayout";
+import { env } from "../../../adapters/env";
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 
@@ -118,37 +120,85 @@ function LayoutThumb({ accentColor, title }: { accentColor: string; title: strin
   );
 }
 
+// ── Card Components (shadcn-inspired) ────────────────────────────────────────
+
+function Card({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return (
+    <div className={`solid-studio-card ${className}`}>
+      {children}
+    </div>
+  );
+}
+
+function CardHeader({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <div className={`solid-studio-card-header ${className}`}>{children}</div>;
+}
+
+function CardTitle({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <h3 className={`solid-studio-card-title ${className}`}>{children}</h3>;
+}
+
+function CardDescription({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <p className={`solid-studio-card-description ${className}`}>{children}</p>;
+}
+
+function CardContent({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <div className={`solid-studio-card-content ${className}`}>{children}</div>;
+}
+
+function CardFooter({ children, className = "" }: { children: React.ReactNode; className?: string }) {
+  return <div className={`solid-studio-card-footer ${className}`}>{children}</div>;
+}
+
 // ── Empty state ───────────────────────────────────────────────────────────────
 
 function EmptyState() {
   return (
-    <div className="solid-studio-landing-empty">
-      <div className="solid-studio-landing-empty-icon">
-        <NoLayoutIcon />
-      </div>
-      <div className="solid-studio-landing-empty-text">
-        <h3 className="solid-studio-landing-empty-title">No layouts registered yet</h3>
-        <p className="solid-studio-landing-empty-desc">
-          Any route with a <code>path</code> and <code>children</code> passed to{" "}
-          <code>getSolidRoutes()</code> will automatically appear as a card.
-        </p>
-      </div>
-      <div className="solid-studio-landing-snippet">
-        <pre>{`// AppRoutes.tsx
-const extraRoutes = [
-  {
-    path: "/my-layout",
-    element: <MyLayout />,
-    children: [{ index: true, element: <MyPage /> }],
-  },
-];
+    <div className="solid-studio-landing-empty-container">
+      <Card className="solid-studio-landing-empty-card">
+        <CardHeader className="solid-studio-landing-empty-header">
+          <div className="solid-studio-home-badge" style={{ marginBottom: '12px' }}>Frontend Studio</div>
+          <CardTitle>Frontend layout will appear here</CardTitle>
+          <CardDescription>
+            Register your app layouts to explore and customize them in the Studio.
+          </CardDescription>
+        </CardHeader>
 
-getSolidRoutes({ extraRoutes });`}</pre>
-      </div>
-      <p className="solid-studio-landing-hint">
-        Add <code>handle: {`{ title, description }`}</code> to a route to customise
-        its card.
-      </p>
+        <CardContent className="solid-studio-landing-empty-body">
+          <div className="solid-studio-landing-empty-primary-action">
+            <p>To get started, use the <strong>SolidX AI Agent</strong> to add a new custom layout.</p>
+            <button
+              type="button"
+              className="solid-studio-empty-cta-button"
+              onClick={() => {
+                const aiUrl = env("VITE_SOLIDX_AI_URL");
+                if (aiUrl) window.open(aiUrl, "_blank");
+              }}
+            >
+              <ChatIcon />
+              <span>Open AI Chat</span>
+              <ArrowIcon />
+            </button>
+          </div>
+
+          <div className="solid-studio-landing-empty-divider" />
+
+          <div className="solid-studio-landing-empty-details">
+            <p className="solid-studio-landing-empty-instruction">
+              Any route with a <code>path</code> and <code>children</code> passed to{" "}
+              <code>getSolidRoutes()</code> will automatically appear as a card.
+            </p>
+            <div className="solid-studio-landing-snippet">
+              <pre>
+                <code>{`// AppRoutes.tsx\nconst extraRoutes = [\n  {\n    path: "/my-layout",\n    element: <MyLayout />,\n    children: [{ index: true, element: <MyPage /> }],\n  },\n];\n\ngetSolidRoutes({ extraRoutes });`}</code>
+              </pre>
+            </div>
+            <p className="solid-studio-landing-hint">
+              <strong>Pro Tip:</strong> Add <code>handle: {`{ title, description }`}</code> to a route to customize its appearance.
+            </p>
+          </div>
+        </CardContent>
+      </Card>
     </div>
   );
 }
@@ -214,7 +264,7 @@ export function StudioLandingPage() {
 
         {/* Toolbar: title left, view toggle right */}
         <div className="solid-studio-home-toolbar">
-          <div className="solid-studio-home-toolbar-left">
+          {/* <div className="solid-studio-home-toolbar-left">
             <div className="solid-studio-home-heading">
               <div className="solid-studio-home-badge">Frontend Studio</div>
               <h1>Frontend Layouts</h1>
@@ -224,7 +274,7 @@ export function StudioLandingPage() {
                   : "Register your app layouts to explore them here."}
               </p>
             </div>
-          </div>
+          </div> */}
           {layouts.length > 0 && (
             <div className="solid-studio-home-toolbar-right">
               <button

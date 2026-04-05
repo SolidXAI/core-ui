@@ -103,14 +103,19 @@ function resolveFirstChildTo(basePath: string, children: RouteObject[]): string 
 
 function extractLayouts(routes: RouteObject[]): SolidLayoutEntry[] {
   return routes
-    .filter((r) => !!r.path && r.children && r.children.length > 0)
+    .filter((r) => !!r.path)
     .map((r) => {
       const handle = r.handle as SolidLayoutHandle | undefined;
+
+      const to = r.children?.length
+        ? resolveFirstChildTo(r.path!, r.children)
+        : r.path!; // 👈 fallback for standalone routes
+
       return {
         path: r.path!,
         title: handle?.title ?? pathToTitle(r.path!),
         description: handle?.description,
-        to: resolveFirstChildTo(r.path!, r.children!),
+        to,
       };
     });
 }
