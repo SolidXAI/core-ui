@@ -50,7 +50,6 @@ import { SolidFormViewShimmerLoading } from "./SolidFormViewShimmerLoading";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 import { ConfirmDialog } from "primereact/confirmdialog";
-import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 import { SolidFormFooter } from "./SolidFormFooter";
@@ -1748,14 +1747,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('chatter')}>
                                     Audit Trail
                                 </div>
-                                {
-                                    mcpUrl &&
-                                    (
-                                        <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('solidx-ai')}>
-                                            <div className="flex gap-2"> <SolidXAIIcon /> SolidX AI </div>
-                                        </div>
-                                    )
-                                }
                                 <Button
                                     icon="pi pi-chevron-left"
                                     size="small"

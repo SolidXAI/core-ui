@@ -128,6 +128,13 @@ const markdownComponents = {
     table({ children }: any) {
         return <div className={styles.MarkdownTableWrapper}><table>{children}</table></div>;
     },
+    a({ href, children }: any) {
+        return (
+            <a href={href} target="_blank" rel="noopener noreferrer" className={styles.MarkdownLink}>
+                {children}
+            </a>
+        );
+    },
 };
 
 // ── Tool helpers ──────────────────────────────────────────────────────────────
@@ -910,10 +917,6 @@ export const SolidAiChat: React.FC = () => {
 
             {/* ── Header ── */}
             <header className={styles.Header}>
-                <div className={styles.LogoBadge}>
-                    <i className="pi pi-sparkles" style={{ fontSize: "13px" }} />
-                </div>
-                <span className={styles.HeaderTitle}>SolidX AI</span>
                 <span className={`${styles.StatusDot} ${isProcessing ? styles.StatusRunning : isConnected ? styles.StatusOnline : styles.StatusOffline}`} />
                 <span className={styles.StatusLabel}>
                     <i className={`pi ${isConnected ? "pi-wifi" : "pi-times-circle"}`} style={{ fontSize: "11px" }} />

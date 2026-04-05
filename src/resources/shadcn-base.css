@@ -34,7 +34,11 @@
   --sidebar-width: 272px;
   --sidebar-width-collapsed: 76px;
   --solid-sidebar-width: 272px;
+  --solid-studio-header-height: 0px;
   --shadow-soft: 0 12px 28px rgba(15, 23, 42, 0.1);
+  --z-app: 1;
+  --z-overlay: 1000;
+  --z-studio: 9999;
 }
 
 html.dark,
@@ -80,13 +84,45 @@ body {
   color: var(--foreground);
 }
 
+/* Studio Mode Sandbox Constraints */
+#solid-studio-root {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Studio Mode Sandbox Utility Overrides */
+.h-screen {
+  height: calc(100vh - var(--solid-studio-header-height, 0px)) !important;
+}
+
+.min-h-screen {
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px)) !important;
+}
+
+.max-h-screen {
+  max-height: calc(100vh - var(--solid-studio-header-height, 0px)) !important;
+}
+
+#solid-studio-app-container {
+  position: relative;
+  /* CRITICAL: creates containing block, scoping position: fixed elements inside it */
+  transform: translate(0, 0);
+  height: calc(100vh - 44px);
+  /* adjust for studio header */
+  margin-top: 44px;
+  overflow: auto;
+  /* prevent stacking issues */
+  isolation: isolate;
+}
+
 .solid-shell {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
   background: radial-gradient(circle at 0 0, rgba(37, 99, 235, 0.08), transparent 38%), var(--background);
 }
 
 .solid-main {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
   margin-left: var(--solid-sidebar-width);
   transition: margin-left 200ms ease;
   display: flex;
@@ -241,6 +277,8 @@ body {
 .solid-sidebar {
   position: fixed;
   inset: 0 auto 0 0;
+  top: 0;
+  height: calc(100vh - var(--solid-studio-header-height, 0px));
   width: var(--sidebar-width);
   background: var(--sidebar-background);
   color: var(--sidebar-foreground);
@@ -248,7 +286,7 @@ body {
   z-index: 60;
   display: flex;
   flex-direction: column;
-  transition: width 200ms ease, transform 200ms ease;
+  transition: width 200ms ease, transform 200ms ease, top 220ms ease, height 220ms ease;
   box-shadow: var(--shadow-soft);
 }
 
@@ -418,7 +456,7 @@ body {
   top: 0;
   left: 0;
   width: 14px;
-  height: 100vh;
+  height: calc(100vh - var(--solid-studio-header-height, 0px));
   border: 0;
   background: transparent;
   z-index: 61;
@@ -1320,7 +1358,7 @@ body {
 }
 
 .solid-error-page {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
   display: grid;
   grid-template-columns: 1fr;
   background: var(--background);
@@ -1415,7 +1453,7 @@ body {
 
 /* Auth (ShadCN-style shell while preserving existing auth logic) */
 .solid-auth-theme-wrapper {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
   position: relative;
   display: grid;
   place-items: center;
@@ -1430,8 +1468,8 @@ body {
   place-items: center;
 }
 
-.solid-auth-theme-wrapper.left > .grid,
-.solid-auth-theme-wrapper.right > .grid {
+.solid-auth-theme-wrapper.left>.grid,
+.solid-auth-theme-wrapper.right>.grid {
   display: grid !important;
   grid-template-columns: 1fr 1fr;
   width: min(1180px, 100%);
@@ -1466,8 +1504,8 @@ body {
   background: linear-gradient(180deg, rgba(2, 6, 23, 0.24), rgba(2, 6, 23, 0.48));
 }
 
-.solid-auth-theme-wrapper.left .solid-left-layout > *,
-.solid-auth-theme-wrapper.right .solid-right-layout > * {
+.solid-auth-theme-wrapper.left .solid-left-layout>*,
+.solid-auth-theme-wrapper.right .solid-right-layout>* {
   position: relative;
   z-index: 1;
 }
@@ -1747,8 +1785,8 @@ body {
     padding: 14px;
   }
 
-  .solid-auth-theme-wrapper.left > .grid,
-  .solid-auth-theme-wrapper.right > .grid {
+  .solid-auth-theme-wrapper.left>.grid,
+  .solid-auth-theme-wrapper.right>.grid {
     grid-template-columns: 1fr;
     min-height: auto;
     border-radius: 14px;
@@ -1777,7 +1815,7 @@ body {
 
 /* Auth visual alignment (match shadcn login blocks) */
 .solid-auth-theme-wrapper {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
   background: #020204;
   color: #f4f4f5;
   padding: 0;
@@ -1797,10 +1835,10 @@ body {
   margin: 0 auto;
 }
 
-.solid-auth-theme-wrapper.left > .grid,
-.solid-auth-theme-wrapper.right > .grid {
+.solid-auth-theme-wrapper.left>.grid,
+.solid-auth-theme-wrapper.right>.grid {
   width: 100%;
-  min-height: 100vh;
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
   display: grid !important;
   grid-template-columns: 1fr 1fr;
   border: 0;
@@ -1834,8 +1872,8 @@ body {
   background: rgba(24, 24, 27, 0.62);
 }
 
-.solid-auth-theme-wrapper.left .solid-left-layout > *,
-.solid-auth-theme-wrapper.right .solid-right-layout > * {
+.solid-auth-theme-wrapper.left .solid-left-layout>*,
+.solid-auth-theme-wrapper.right .solid-right-layout>* {
   position: relative;
   z-index: 2;
 }
@@ -2085,8 +2123,8 @@ body {
     padding: 16px;
   }
 
-  .solid-auth-theme-wrapper.left > .grid,
-  .solid-auth-theme-wrapper.right > .grid {
+  .solid-auth-theme-wrapper.left>.grid,
+  .solid-auth-theme-wrapper.right>.grid {
     grid-template-columns: 1fr;
   }
 
@@ -2311,7 +2349,7 @@ body {
 .solid-auth-theme-wrapper .auth-container .p-message-text,
 .solid-auth-theme-wrapper .auth-container .p-inline-message-text,
 .solid-auth-theme-wrapper .auth-container .p-message-content,
-.solid-auth-theme-wrapper .auth-container .p-message-content > * {
+.solid-auth-theme-wrapper .auth-container .p-message-content>* {
   color: var(--solid-danger, #ef4444) !important;
 }
 
@@ -2334,7 +2372,7 @@ body {
 
 .solid-auth-theme-wrapper .solid-auth-split {
   width: 100%;
-  min-height: 100vh;
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   background: #020204;
@@ -2370,7 +2408,7 @@ body {
 
 .solid-auth-theme-wrapper .solid-auth-image-pane {
   position: relative;
-  min-height: 100vh;
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
   background-color: #27272a;
   background-size: cover;
   background-position: center;
@@ -2395,7 +2433,7 @@ body {
   }
 
   .solid-auth-theme-wrapper .solid-auth-form-pane {
-    min-height: 100vh;
+    min-height: calc(100vh - var(--solid-studio-header-height, 0px));
     padding: 20px;
   }
 }
@@ -2702,15 +2740,15 @@ body {
   opacity: 0.34;
 }
 
-.solid-auth-theme-wrapper > * {
+.solid-auth-theme-wrapper>* {
   position: relative;
   z-index: 1;
 }
 
 /* List table (non-Prime table layer) */
 .solid-list-page-wrapper {
-  height: calc(100dvh - 46px) !important;
-  max-height: calc(100dvh - 46px) !important;
+  height: calc(100dvh - var(--solid-studio-header-height, 0px) - 46px) !important;
+  max-height: calc(100dvh - var(--solid-studio-header-height, 0px) - 46px) !important;
   min-height: 0;
   flex: 1 1 auto;
   overflow: hidden !important;
@@ -2841,7 +2879,7 @@ body {
   min-height: 0;
 }
 
-.solid-list-table-area > .solid-data-table-root {
+.solid-list-table-area>.solid-data-table-root {
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -3197,4 +3235,937 @@ body {
   min-width: 28px;
   padding: 0;
   justify-content: center;
+}
+
+/* ── SolidX Studio Mode ───────────────────────────────────────────────────── */
+
+/* Global studio header — fixed full-width bar at top, z-index above everything */
+.solid-studio-header {
+  position: fixed;
+  top: 0;
+  left: 0;
+  right: 0;
+  height: 44px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 0 16px;
+  background: #722ED1;
+  color: #ffffff;
+  z-index: 999999;
+  gap: 12px;
+  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
+}
+
+.solid-studio-header-brand {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  font-weight: 600;
+  letter-spacing: 0.01em;
+  flex-shrink: 0;
+  background: none;
+  border: none;
+  color: inherit;
+  cursor: pointer;
+  padding: 0;
+  font-family: inherit;
+  opacity: 1;
+  transition: opacity 0.15s;
+}
+
+.solid-studio-header-brand:hover {
+  opacity: 0.8;
+}
+
+.solid-studio-header-nav {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.solid-studio-view-btn {
+  display: inline-flex;
+  align-items: center;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  padding: 0 14px;
+  height: 28px;
+  background: transparent;
+  color: var(--primary-foreground);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s, border-color 0.15s;
+  opacity: 0.75;
+}
+
+.solid-studio-view-btn:hover {
+  background: rgba(255, 255, 255, 0.12);
+  opacity: 1;
+}
+
+.solid-studio-view-btn.active {
+  background: rgba(255, 255, 255, 0.2);
+  border-color: rgba(255, 255, 255, 0.45);
+  opacity: 1;
+}
+
+.solid-studio-header-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-shrink: 0;
+}
+
+/* Fixed AI chat panel — starts below the studio header */
+.solid-studio-panel-fixed {
+  position: fixed;
+  top: 44px;
+  right: 0;
+  width: 420px;
+  height: calc(100vh - 44px);
+  display: flex;
+  flex-direction: column;
+  border-left: 1px solid var(--border);
+  background: var(--background);
+  z-index: 1050;
+  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
+  transform: translateX(0);
+  transition: transform 220ms ease;
+}
+
+.solid-studio-panel-fixed.collapsed {
+  transform: translateX(100%);
+}
+
+.solid-studio-panel-body {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  overflow: hidden;
+}
+
+.solid-studio-bar-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 10px;
+  font-weight: 700;
+  letter-spacing: 0.08em;
+  text-transform: uppercase;
+  padding: 2px 6px;
+  background: rgba(255, 255, 255, 0.18);
+  border-radius: 4px;
+}
+
+/* 3-dot menu */
+.solid-studio-menu {
+  position: relative;
+}
+
+.solid-studio-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  color: var(--primary-foreground);
+  /* adapts to both light (white fg) and dark (navy fg) primary backgrounds */
+  border: 1px solid color-mix(in srgb, var(--primary-foreground) 25%, transparent);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  font-family: inherit;
+}
+
+.solid-studio-menu-trigger:hover {
+  background: color-mix(in srgb, var(--primary-foreground) 12%, transparent);
+}
+
+.solid-studio-menu-dropdown {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 168px;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: var(--shadow-soft);
+  z-index: 1200;
+  overflow: hidden;
+  padding: 4px;
+}
+
+.solid-studio-menu-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  padding: 7px 10px;
+  font-size: 13px;
+  font-weight: 500;
+  font-family: inherit;
+  background: none;
+  border: none;
+  border-radius: 6px;
+  color: var(--card-foreground);
+  cursor: pointer;
+  text-align: left;
+  transition: background 0.12s, color 0.12s;
+}
+
+.solid-studio-menu-item:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+/* danger uses a literal red that reads well on --card in both light and dark */
+.solid-studio-menu-item.danger {
+  color: #ef4444;
+}
+
+.solid-studio-menu-item.danger:hover {
+  background: color-mix(in srgb, #ef4444 12%, var(--card));
+  color: #ef4444;
+}
+
+.solid-studio-panel-toggle-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 28px;
+  height: 28px;
+  background: transparent;
+  color: var(--primary-foreground);
+  border: 1px solid rgba(255, 255, 255, 0.2);
+  border-radius: 6px;
+  cursor: pointer;
+  transition: background 0.15s;
+  flex-shrink: 0;
+}
+
+.solid-studio-panel-toggle-btn:hover {
+  background: rgba(255, 255, 255, 0.15);
+}
+
+/* Drag handle on the left edge of the panel */
+.solid-studio-resize-handle {
+  position: absolute;
+  left: -4px;
+  top: 0;
+  width: 8px;
+  height: 100%;
+  cursor: col-resize;
+  z-index: 10;
+}
+
+.solid-studio-resize-handle::after {
+  content: "";
+  position: absolute;
+  left: 3px;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 2px;
+  height: 32px;
+  border-radius: 2px;
+  background: rgba(255, 255, 255, 0.0);
+  transition: background 0.15s;
+}
+
+.solid-studio-resize-handle:hover::after,
+.solid-studio-resize-handle.dragging::after {
+  background: var(--primary);
+}
+
+/* Studio trigger button in AdminTopHeader */
+.solid-studio-trigger-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 500;
+  font-family: inherit;
+  padding: 0 10px;
+  height: 28px;
+  background: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  border-radius: 6px;
+  cursor: pointer;
+  transition: opacity 0.15s;
+  white-space: nowrap;
+}
+
+.solid-studio-trigger-btn:hover {
+  opacity: 0.85;
+}
+
+/* ── Studio-active layout note ────────────────────────────────────────────────
+   Layout shifts are handled via the --solid-studio-header-height CSS variable
+   set on :root by SolidStudio when studio mode is active. All affected
+   elements (sidebar, hotspot, admin header, shell, main) consume this variable
+   directly in their base rules above — no class overrides needed.            */
+
+/* Studio home page — /studio */
+.solid-studio-home {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.solid-studio-home-inner {
+  width: 100%;
+  max-width: 560px;
+  display: flex;
+  flex-direction: column;
+  gap: 40px;
+}
+
+.solid-studio-home-inner--wide {
+  max-width: 840px;
+}
+
+.solid-studio-home-inner--wider {
+  max-width: 1080px;
+}
+
+/* Landing page overrides — top-aligned, full-width, scrollable */
+.solid-studio-home--top {
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 28px 24px;
+  height: calc(100vh - var(--solid-studio-header-height, 0px));
+  overflow-y: auto;
+}
+
+.solid-studio-home-inner--fluid {
+  max-width: 100%;
+  gap: 20px;
+}
+
+/* Auto-fill: ≥5 cards per row on wide screens, shrinks gracefully */
+.solid-studio-home-cards--fluid {
+  grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+  gap: 14px;
+}
+
+.solid-studio-home-cards--3col {
+  grid-template-columns: repeat(3, 1fr);
+}
+
+@media (max-width: 860px) {
+  .solid-studio-home-cards--3col {
+    grid-template-columns: repeat(2, 1fr);
+  }
+}
+
+@media (max-width: 560px) {
+  .solid-studio-home-cards--3col {
+    grid-template-columns: 1fr;
+  }
+}
+
+.solid-studio-home-card-icon--list {
+  background: color-mix(in srgb, hsl(158 64% 42%) 14%, transparent);
+  color: hsl(158 64% 42%);
+  border: 1px solid color-mix(in srgb, hsl(158 64% 42%) 22%, transparent);
+}
+
+.solid-studio-home-card-icon--kanban {
+  background: color-mix(in srgb, hsl(32 95% 48%) 14%, transparent);
+  color: hsl(32 95% 48%);
+  border: 1px solid color-mix(in srgb, hsl(32 95% 48%) 22%, transparent);
+}
+
+.solid-studio-home-card-icon--form {
+  background: color-mix(in srgb, hsl(270 65% 58%) 14%, transparent);
+  color: hsl(270 65% 58%);
+  border: 1px solid color-mix(in srgb, hsl(270 65% 58%) 22%, transparent);
+}
+
+.solid-studio-home-card-icon--tree {
+  background: color-mix(in srgb, hsl(199 89% 48%) 14%, transparent);
+  color: hsl(199 89% 48%);
+  border: 1px solid color-mix(in srgb, hsl(199 89% 48%) 22%, transparent);
+}
+
+.solid-studio-home-card-icon--settings {
+  background: color-mix(in srgb, hsl(215 25% 52%) 14%, transparent);
+  color: hsl(215 25% 52%);
+  border: 1px solid color-mix(in srgb, hsl(215 25% 52%) 22%, transparent);
+}
+
+.solid-studio-home-card-thumb {
+  width: 100%;
+  height: 100%;
+  display: block;
+}
+
+/* Toolbar: title+subtitle on the left, toggle buttons on the right */
+.solid-studio-home-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  flex-wrap: wrap;
+}
+
+.solid-studio-home-toolbar-left {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.solid-studio-home-toolbar-right {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+}
+
+.solid-studio-home-view-btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 32px;
+  height: 32px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  transition: background 0.15s, color 0.15s, border-color 0.15s;
+  font-family: inherit;
+  padding: 0;
+}
+
+.solid-studio-home-view-btn:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.solid-studio-home-view-btn--active {
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+  border-color: color-mix(in srgb, var(--primary) 28%, transparent);
+}
+
+/* Heading area */
+.solid-studio-home-heading {
+  text-align: center;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+}
+
+.solid-studio-home-badge {
+  display: inline-flex;
+  align-items: center;
+  font-size: 9px;
+  font-weight: 700;
+  letter-spacing: 0.05em;
+  text-transform: uppercase;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--primary) 12%, transparent);
+  color: var(--primary);
+  border: 1px solid color-mix(in srgb, var(--primary) 22%, transparent);
+  width: 105px;
+  margin: auto;
+}
+
+.solid-studio-home-heading h1 {
+  font-size: 16px;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+}
+
+.solid-studio-home-heading p {
+  font-size: 12.5px;
+  color: var(--muted-foreground);
+  margin: 0;
+}
+
+/* List view */
+.solid-studio-home-cards--list {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.solid-studio-home-card--list {
+  flex-direction: row;
+  align-items: center;
+  border-radius: 10px;
+  padding: 0;
+}
+
+.solid-studio-home-card--list .solid-studio-home-card-image-wrap {
+  display: none;
+}
+
+.solid-studio-home-card--list .solid-studio-home-card-body {
+  flex-direction: row;
+  align-items: center;
+  gap: 14px;
+  padding: 12px 16px;
+}
+
+.solid-studio-home-card--list .solid-studio-home-card-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  flex-shrink: 0;
+}
+
+.solid-studio-home-card--list .solid-studio-home-card-content {
+  flex-direction: row;
+  align-items: baseline;
+  gap: 10px;
+  flex: 1;
+  flex-wrap: wrap;
+}
+
+.solid-studio-home-card--list .solid-studio-home-card-title {
+  font-size: 13px;
+}
+
+.solid-studio-home-card--list .solid-studio-home-card-desc {
+  font-size: 11.5px;
+}
+
+/* Cards grid */
+.solid-studio-home-cards {
+  display: grid;
+  gap: 20px;
+}
+
+.solid-studio-home-cards--2col {
+  grid-template-columns: repeat(2, 1fr);
+}
+
+/* Card base */
+.solid-studio-home-card {
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 0;
+  padding: 0;
+  background: var(--card);
+  border: 1px solid var(--border);
+  border-radius: 14px;
+  cursor: pointer;
+  text-align: left;
+  overflow: hidden;
+  transition: border-color 0.18s, box-shadow 0.18s, transform 0.18s;
+  font-family: inherit;
+}
+
+.solid-studio-home-card:hover {
+  border-color: var(--primary);
+  box-shadow: 0 4px 24px color-mix(in srgb, var(--primary) 16%, transparent), 0 0 0 3px color-mix(in srgb, var(--primary) 10%, transparent);
+  transform: translateY(-2px);
+}
+
+/* Card body (icon-only layout) */
+.solid-studio-home-card-body {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  padding: 16px;
+  flex: 1;
+}
+
+/* Colored icon badge */
+.solid-studio-home-card-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 36px;
+  height: 36px;
+  border-radius: 9px;
+  flex-shrink: 0;
+}
+
+.solid-studio-home-card-icon--backend {
+  background: color-mix(in srgb, #722ED1 12%, transparent);
+  color: #722ED1;
+  border: 1px solid color-mix(in srgb, #722ED1 22%, transparent);
+}
+
+.solid-studio-home-card-icon--frontend {
+  background: color-mix(in srgb, #9043e0 12%, transparent);
+  color: #9043e0;
+  border: 1px solid color-mix(in srgb, #9043e0 22%, transparent);
+}
+
+/* Text content */
+.solid-studio-home-card-content {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+  flex: 1;
+}
+
+.solid-studio-home-card-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--foreground);
+  line-height: 1.3;
+}
+
+.solid-studio-home-card-desc {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  line-height: 1.5;
+}
+
+/* CTA row */
+.solid-studio-home-card-cta {
+  display: inline-flex;
+  align-items: center;
+  gap: 4px;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--primary);
+  opacity: 0.7;
+  transition: opacity 0.15s, gap 0.15s;
+}
+
+.solid-studio-home-card:hover .solid-studio-home-card-cta {
+  opacity: 1;
+  gap: 7px;
+}
+
+/* Studio landing placeholder page — /landing default */
+.solid-studio-landing {
+  min-height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 48px 24px;
+}
+
+.solid-studio-landing-inner {
+  width: 100%;
+  max-width: 480px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+  text-align: center;
+}
+
+.solid-studio-landing-icon {
+  width: 52px;
+  height: 52px;
+  border-radius: 12px;
+  background: var(--muted);
+  display: grid;
+  place-items: center;
+  color: var(--muted-foreground);
+}
+
+.solid-studio-landing-title {
+  font-size: 18px;
+  font-weight: 600;
+  color: var(--foreground);
+  margin: 0;
+}
+
+.solid-studio-landing-desc {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  margin: 0;
+  line-height: 1.6;
+}
+
+.solid-studio-landing-desc code {
+  font-family: monospace;
+  font-size: 13px;
+  background: var(--muted);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--foreground);
+}
+
+.solid-studio-landing-snippet {
+  width: 100%;
+  background: color-mix(in srgb, var(--foreground) 5%, var(--card));
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 16px 18px;
+  text-align: left;
+}
+
+.solid-studio-landing-snippet pre {
+  margin: 0;
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 12.5px;
+  line-height: 1.7;
+  color: var(--foreground);
+  white-space: pre;
+  overflow-x: auto;
+}
+
+.solid-studio-landing-hint {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  margin: 0;
+  opacity: 0.8;
+}
+
+.solid-studio-landing-hint code {
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 11.5px;
+  background: color-mix(in srgb, var(--primary) 8%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent);
+  padding: 1px 5px;
+  border-radius: 4px;
+  color: var(--primary);
+}
+
+.solid-studio-landing-empty {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+  padding: 64px 24px 48px;
+  text-align: center;
+  width: 100%;
+  max-width: 520px;
+  margin: 0 auto;
+}
+
+.solid-studio-landing-empty-icon {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  width: 60px;
+  height: 60px;
+  border-radius: 16px;
+  background: var(--accent);
+  color: var(--accent-foreground);
+  flex-shrink: 0;
+}
+
+.solid-studio-landing-empty-text {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.solid-studio-landing-empty-title {
+  font-size: 18px;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0;
+  letter-spacing: -0.01em;
+}
+
+.solid-studio-landing-empty-desc {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  margin: 0;
+  line-height: 1.65;
+  max-width: 380px;
+}
+
+.solid-studio-landing-empty-desc code {
+  font-family: ui-monospace, "Cascadia Code", monospace;
+  font-size: 12px;
+  background: color-mix(in srgb, var(--primary) 8%, var(--card));
+  border: 1px solid color-mix(in srgb, var(--primary) 15%, transparent);
+  padding: 1px 6px;
+  border-radius: 4px;
+  color: var(--primary);
+  white-space: nowrap;
+}
+
+/* --- Studio Empty State & Card Styles --- */
+
+.solid-studio-card {
+  background-color: var(--card);
+  color: var(--card-foreground);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+  overflow: hidden;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.solid-studio-card-header {
+  padding: 24px 24px 16px;
+  display: flex;
+  flex-direction: column;
+}
+
+.solid-studio-card-title {
+  font-size: 20px;
+  font-weight: 700;
+  color: var(--foreground);
+  margin: 0 0 8px;
+  letter-spacing: -0.02em;
+}
+
+.solid-studio-card-description {
+  font-size: 14px;
+  color: var(--muted-foreground);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.solid-studio-card-content {
+  padding: 0 24px 24px;
+}
+
+.solid-studio-card-footer {
+  padding: 16px 24px;
+  border-top: 1px solid var(--border);
+  background-color: color-mix(in srgb, var(--card) 97%, var(--foreground));
+}
+
+.solid-studio-landing-empty-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px 24px;
+  min-height: 500px;
+}
+
+.solid-studio-landing-empty-card {
+  max-width: 560px;
+  width: 100%;
+  text-align: center;
+}
+
+.solid-studio-landing-empty-header {
+  align-items: center;
+}
+
+.solid-studio-landing-empty-icon-box {
+  width: 64px;
+  height: 64px;
+  border-radius: 16px;
+  background-color: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-bottom: 20px;
+}
+
+.solid-studio-landing-empty-icon-box svg {
+  width: 32px;
+  height: 32px;
+  opacity: 0.8;
+}
+
+.solid-studio-landing-empty-primary-action {
+  background-color: color-mix(in srgb, var(--primary) 5%, transparent);
+  border: 1px dashed color-mix(in srgb, var(--primary) 30%, transparent);
+  border-radius: 12px;
+  padding: 24px;
+  margin-bottom: 24px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 16px;
+}
+
+.solid-studio-landing-empty-primary-action p {
+  margin: 0;
+  font-size: 14px;
+  color: var(--foreground);
+}
+
+.solid-studio-empty-cta-button {
+  display: inline-flex;
+  align-items: center;
+  gap: 10px;
+  height: 44px;
+  padding: 0 20px;
+  background-color: var(--primary);
+  color: var(--primary-foreground);
+  border: none;
+  border-radius: 10px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: all 0.2s ease;
+  box-shadow: 0 4px 10px color-mix(in srgb, var(--primary) 25%, transparent);
+}
+
+.solid-studio-empty-cta-button:hover {
+  background-color: color-mix(in srgb, var(--primary) 90%, black);
+  transform: translateY(-2px);
+  box-shadow: 0 6px 15px color-mix(in srgb, var(--primary) 35%, transparent);
+}
+
+.solid-studio-empty-cta-button:active {
+  transform: translateY(0);
+}
+
+.solid-studio-landing-empty-divider {
+  height: 1px;
+  background-color: var(--border);
+  margin: 24px 0;
+  position: relative;
+}
+
+.solid-studio-landing-empty-details {
+  text-align: left;
+}
+
+.solid-studio-landing-empty-instruction {
+  font-size: 13px;
+  color: var(--muted-foreground);
+  margin-bottom: 12px;
+}
+
+.solid-studio-landing-snippet {
+  background-color: #0f172a;
+  border-radius: 8px;
+  padding: 16px;
+  margin: 12px 0;
+  font-family: 'JetBrains Mono', 'Fira Code', monospace;
+  font-size: 12px;
+  line-height: 1.6;
+  color: #e2e8f0 !important;
+  overflow-x: auto;
+  border: 1px solid #1e293b;
+  text-align: left;
+}
+
+.solid-studio-landing-snippet pre,
+.solid-studio-landing-snippet code {
+  margin: 0;
+  color: inherit !important;
+  font-family: inherit;
+  background: transparent !important;
+  padding: 0 !important;
+}
+
+.solid-studio-landing-hint {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  background-color: var(--accent);
+  padding: 8px 12px;
+  border-radius: 6px;
+  margin-top: 16px;
+}
+
+.solid-studio-landing-hint code {
+  background-color: color-mix(in srgb, var(--foreground) 10%, transparent);
+  padding: 2px 4px;
+  border-radius: 4px;
 }

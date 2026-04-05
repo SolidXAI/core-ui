@@ -88,7 +88,7 @@
   right: -700px;
   /* Hidden by default */
   width: 700px;
-  height: 100vh;
+  height: calc(100vh - var(--solid-studio-header-height, 0px));
   transition: right 0.3s ease;
   z-index: 999;
   border-left: 1px solid var(--primary-light-color);

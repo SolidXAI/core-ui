@@ -709,10 +709,18 @@
     font-style: italic;
 }
 
-.MarkdownRoot a {
+.MarkdownRoot a,
+.MarkdownLink {
     color: var(--primary);
     text-decoration: underline;
     text-underline-offset: 2px;
+    cursor: pointer;
+    transition: opacity 0.15s;
+}
+
+.MarkdownRoot a:hover,
+.MarkdownLink:hover {
+    opacity: 0.72;
 }
 
 .MarkdownRoot hr {

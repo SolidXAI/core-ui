@@ -7,7 +7,8 @@ import { Toast } from 'primereact/toast';
 import { useEffect, useRef, useState } from 'react'
 import { env } from "../../adapters/env";
 import showToast from "../../helpers/showToast";
-
+import { loadSession } from "../../adapters/auth/storage";
+import { hasAnyRole } from "../../helpers/rolesHelper";
 export const GoogleAuthChecking = () => {
     const searchParams = useSearchParams();
     const accessCode = searchParams.get("accessCode");
@@ -33,7 +34,10 @@ export const GoogleAuthChecking = () => {
                     setError(ERROR_MESSAGES.AUTHENICATION__FAILED)
                 } else {
                     showToast(toast, "success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
-                    const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin";
+                    const session = loadSession();
+                    const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
+                    const isDev = env("VITE_SOLIDX_ENV") === "dev";
+                    const redirectUrl = isAdmin && isDev ? "/studio" : (env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin");
                     router.push(redirectUrl);
                 }
             } catch (err: any) {

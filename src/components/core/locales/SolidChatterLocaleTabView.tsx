@@ -3,7 +3,7 @@ import { TabView, TabPanel } from 'primereact/tabview';
 import { SolidChatter } from '../chatter/SolidChatter';
 import SolidLocale from './SolidLocale';
 import './solid-locale.css';
-import { SolidAiMainWrapper } from '../solid-ai/SolidAiMainWrapper';
+// import { SolidAiMainWrapper } from '../solid-ai/SolidAiMainWrapper'; // moved to SolidX Studio panel
 interface Props {
   solidFormViewMetaData: any;
   id: string;
@@ -74,6 +74,7 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
           actionsAllowed={actionsAllowed}
         />
       </TabPanel>
+      {/* SolidX AI tab moved to SolidX Studio panel
       {
         mcpUrl &&
         (
@@ -84,6 +85,7 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
           </TabPanel>
         )
       }
+      */}
     </TabView>
   );
 };
