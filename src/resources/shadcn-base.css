@@ -36,6 +36,9 @@
   --solid-sidebar-width: 272px;
   --solid-studio-header-height: 0px;
   --shadow-soft: 0 12px 28px rgba(15, 23, 42, 0.1);
+  --z-app: 1;
+  --z-overlay: 1000;
+  --z-studio: 9999;
 }
 
 html.dark,
@@ -81,6 +84,38 @@ body {
   color: var(--foreground);
 }
 
+/* Studio Mode Sandbox Constraints */
+#solid-studio-root {
+  position: relative;
+  height: 100vh;
+  overflow: hidden;
+}
+
+/* Studio Mode Sandbox Utility Overrides */
+.h-screen {
+  height: calc(100vh - var(--solid-studio-header-height, 0px)) !important;
+}
+
+.min-h-screen {
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px)) !important;
+}
+
+.max-h-screen {
+  max-height: calc(100vh - var(--solid-studio-header-height, 0px)) !important;
+}
+
+#solid-studio-app-container {
+  position: relative;
+  /* CRITICAL: creates containing block, scoping position: fixed elements inside it */
+  transform: translate(0, 0);
+  height: calc(100vh - 44px);
+  /* adjust for studio header */
+  margin-top: 44px;
+  overflow: auto;
+  /* prevent stacking issues */
+  isolation: isolate;
+}
+
 .solid-shell {
   min-height: calc(100vh - var(--solid-studio-header-height, 0px));
   background: radial-gradient(circle at 0 0, rgba(37, 99, 235, 0.08), transparent 38%), var(--background);
@@ -104,7 +139,7 @@ body {
 
 .solid-admin-header {
   position: sticky;
-  top: var(--solid-studio-header-height, 0px);
+  top: 0;
   z-index: 58;
   height: 46px;
   border-bottom: 1px solid var(--border);
@@ -242,7 +277,7 @@ body {
 .solid-sidebar {
   position: fixed;
   inset: 0 auto 0 0;
-  top: var(--solid-studio-header-height, 0px);
+  top: 0;
   height: calc(100vh - var(--solid-studio-header-height, 0px));
   width: var(--sidebar-width);
   background: var(--sidebar-background);
@@ -398,7 +433,7 @@ body {
 
 .solid-sidebar-external-trigger {
   position: fixed;
-  top: calc(var(--solid-studio-header-height, 0px) + 14px);
+  top: 14px;
   left: calc(var(--solid-sidebar-width) + 8px);
   width: 30px;
   height: 30px;
@@ -418,7 +453,7 @@ body {
 
 .solid-sidebar-hotspot {
   position: fixed;
-  top: var(--solid-studio-header-height, 0px);
+  top: 0;
   left: 0;
   width: 14px;
   height: calc(100vh - var(--solid-studio-header-height, 0px));
@@ -1323,7 +1358,7 @@ body {
 }
 
 .solid-error-page {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
   display: grid;
   grid-template-columns: 1fr;
   background: var(--background);
@@ -1418,7 +1453,7 @@ body {
 
 /* Auth (ShadCN-style shell while preserving existing auth logic) */
 .solid-auth-theme-wrapper {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
   position: relative;
   display: grid;
   place-items: center;
@@ -1780,7 +1815,7 @@ body {
 
 /* Auth visual alignment (match shadcn login blocks) */
 .solid-auth-theme-wrapper {
-  min-height: 100vh;
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
   background: #020204;
   color: #f4f4f5;
   padding: 0;
@@ -1803,7 +1838,7 @@ body {
 .solid-auth-theme-wrapper.left>.grid,
 .solid-auth-theme-wrapper.right>.grid {
   width: 100%;
-  min-height: 100vh;
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
   display: grid !important;
   grid-template-columns: 1fr 1fr;
   border: 0;
@@ -2337,7 +2372,7 @@ body {
 
 .solid-auth-theme-wrapper .solid-auth-split {
   width: 100%;
-  min-height: 100vh;
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   background: #020204;
@@ -2373,7 +2408,7 @@ body {
 
 .solid-auth-theme-wrapper .solid-auth-image-pane {
   position: relative;
-  min-height: 100vh;
+  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
   background-color: #27272a;
   background-size: cover;
   background-position: center;
@@ -2398,7 +2433,7 @@ body {
   }
 
   .solid-auth-theme-wrapper .solid-auth-form-pane {
-    min-height: 100vh;
+    min-height: calc(100vh - var(--solid-studio-header-height, 0px));
     padding: 20px;
   }
 }
@@ -2712,8 +2747,8 @@ body {
 
 /* List table (non-Prime table layer) */
 .solid-list-page-wrapper {
-  height: calc(100dvh - 46px) !important;
-  max-height: calc(100dvh - 46px) !important;
+  height: calc(100dvh - var(--solid-studio-header-height, 0px) - 46px) !important;
+  max-height: calc(100dvh - var(--solid-studio-header-height, 0px) - 46px) !important;
   min-height: 0;
   flex: 1 1 auto;
   overflow: hidden !important;

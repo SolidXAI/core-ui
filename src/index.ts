@@ -107,6 +107,7 @@ export { registerExtensionComponent, registerExtensionFunction } from './helpers
 export { env } from './adapters/env';
 export { logger } from './helpers/logger';
 export { default as showToast } from './helpers/showToast';
+export { enableStudioMode, disableStudioMode, getScrollElement, getScrollY, getViewportHeight } from './helpers/studioSandbox';
 
 
 export {

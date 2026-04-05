@@ -5,6 +5,9 @@ import { useNavigate, useLocation } from "react-router-dom";
 import { exitStudioMode, setStudioView, type StudioView } from "../../redux/features/solidStudioSlice";
 import { useSession } from "../../hooks/useSession";
 import { signOut } from "../../adapters/auth/index";
+import { createPortal } from "react-dom";
+import { enableStudioMode, disableStudioMode } from "../../helpers/studioSandbox";
+import { env } from "../../adapters/env";
 
 const HEADER_HEIGHT = "44px";
 const PANEL_WIDTH_DEFAULT = 420;
@@ -64,6 +67,12 @@ const LogoutIcon = () => (
   </svg>
 );
 
+const ChatIcon = () => (
+  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.2" strokeLinecap="round" strokeLinejoin="round">
+    <path d="M21 15a2 2 0 0 1-2 2H7l-4 4V5a2 2 0 0 1 2-2h14a2 2 0 0 1 2 2z" />
+  </svg>
+);
+
 // ── SolidStudio ────────────────────────────────────────────────────────────────
 // Single component that renders both the Studio header and the AI panel.
 // Mount this ONCE at the app root via AppEventListener.
@@ -98,24 +107,27 @@ export function SolidStudio() {
     return () => document.removeEventListener("mousedown", handler);
   }, [isMenuOpen]);
 
-  // Apply body padding + CSS variable so all fixed/sticky elements shift correctly
+  // Apply sandbox wrapper isolating app root so all fixed/sticky elements shift correctly
   useEffect(() => {
     const active = isStudioMode && isAuthenticated && !isPreviewMode;
-    document.body.style.paddingRight = ""; // AI panel is hidden for now
-    document.body.style.paddingTop = active ? HEADER_HEIGHT : "";
-    document.body.style.transition = isDragging ? "none" : "padding 220ms ease";
+
+    if (active) {
+      enableStudioMode();
+    } else {
+      disableStudioMode();
+    }
+
     // CSS variable consumed by sidebar, hotspot, admin-header, shell, main
     document.documentElement.style.setProperty(
       "--solid-studio-header-height",
       active ? HEADER_HEIGHT : "0px"
     );
+
     return () => {
-      document.body.style.paddingRight = "";
-      document.body.style.paddingTop = "";
-      document.body.style.transition = "";
+      disableStudioMode();
       document.documentElement.style.setProperty("--solid-studio-header-height", "0px");
     };
-  }, [isStudioMode, isAuthenticated, isPreviewMode, isDragging]);
+  }, [isStudioMode, isAuthenticated, isPreviewMode]);
 
   // const onDragStart = useCallback((e: React.MouseEvent) => {
   //   e.preventDefault();
@@ -162,8 +174,8 @@ export function SolidStudio() {
     navigate(view === "backend" ? "/admin" : "/landing");
   };
 
-  return (
-    <>
+  const studioUI = (
+    <div style={{ zIndex: "var(--z-studio)", position: "fixed", top: 0, left: 0, right: 0 }}>
       {/* ── Studio global header ─────────────────────────────────────────────── */}
       <div className="solid-studio-header">
         <button
@@ -244,6 +256,19 @@ export function SolidStudio() {
               </div>
             )}
           </div>
+
+          <button
+            type="button"
+            className="solid-studio-menu-trigger"
+            style={{ color: "var(--primary-foreground)" }}
+            onClick={() => {
+              const aiUrl = env("VITE_SOLIDX_AI_URL");
+              if (aiUrl) window.open(aiUrl, "_blank");
+            }}
+            title="Open AI Chat"
+          >
+            <ChatIcon />
+          </button>
         </div>
       </div>
 
@@ -260,8 +285,10 @@ export function SolidStudio() {
           <SolidAiChat />
         </div>
       </div> */}
-    </>
+    </div>
   );
+
+  return typeof document !== "undefined" ? createPortal(studioUI, document.body) : null;
 }
 
 // ── PreviewModePersist ─────────────────────────────────────────────────────────

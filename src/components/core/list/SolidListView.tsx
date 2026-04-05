@@ -1619,7 +1619,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                 >
                   <DataTable
                     value={listViewData}
-                    viewportHeight={params.embeded === true ? undefined : "calc(100dvh - 128px)"}
+                    viewportHeight={params.embeded === true ? undefined : "calc(100dvh - var(--solid-studio-header-height, 0px) - 128px)"}
                     rowClassName={(rowData) => {
                       return rowData.deletedAt ? "greyed-out-row" : "";
                     }}
