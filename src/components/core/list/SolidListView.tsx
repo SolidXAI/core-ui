@@ -36,14 +36,12 @@ import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { SolidListViewRowButtonContextMenu } from "./SolidListViewRowButtonContextMenu";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./SolidListViewWrapper.module.css";
-import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
 import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from "../../../types/solid-core";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { useSession } from "../../../hooks/useSession";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 // import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper"; // moved to SolidX Studio panel
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
-import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
@@ -217,9 +215,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
 
   const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
-  const [isOpenSolidXAiPanel, setIsOpenSolidXAiPanel] = useState(false);
-  const [chatterWidth, setChatterWidth] = useState(700);
-  const [isResizing, setIsResizing] = useState(false);
 
 
   // All list view state.
@@ -249,81 +244,10 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const handleCustomButtonClick = useHandleListCustomButtonClick();
 
-  const [mcpUrl, setMcpUrl] = useState<string | null>(null);
-  const [getMcpUrl] = useLazyGetMcpUrlQuery();
-
-  const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
-  useEffect(() => {
-    trigger("") // Fetch settings on mount
-  }, [])
-
   const editBaseUrl = useMemo(
     () => normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form"),
     [editButtonUrl, pathname]
   );
-
-  useEffect(() => {
-    if (solidSettingsData?.data?.mcpEnabled && solidSettingsData?.data?.mcpServerUrl) {
-      enableSolidXAiPanel();
-    }
-  }, [solidSettingsData]);
-
-  const enableSolidXAiPanel = async () => {
-    try {
-      const queryData = {
-        showHeader: "true",
-        inListView: "true"
-      };
-      const queryString = qs.stringify({ ...queryData }, { encodeValuesOnly: true });
-      const response = await getMcpUrl(queryString).unwrap();
-      // console.log("response", response);
-      if (response && response?.data?.mcpUrl) {
-        setMcpUrl(response?.data?.mcpUrl);
-      }
-    } catch (error) {
-
-    }
-  }
-
-
-  useEffect(() => {
-    const storedOpen = localStorage.getItem("l_solidxai_open");
-    const storedWidth = localStorage.getItem("l_solidxai_width");
-
-    if (storedOpen !== null) {
-      setIsOpenSolidXAiPanel(storedOpen === "true");
-    }
-
-    if (storedWidth !== null) {
-      const width = parseInt(storedWidth, 10);
-      if (!isNaN(width)) {
-        setChatterWidth(width);
-      }
-    }
-  }, []);
-
-  useEffect(() => {
-    if (isResizing) {
-      const handleMouseMove = (e: MouseEvent) => {
-        const newWidth = window.innerWidth - e.clientX;
-        const clampedWidth = Math.max(700, newWidth);
-        setChatterWidth(clampedWidth);
-        localStorage.setItem("l_solidxai_width", clampedWidth.toString());
-      };
-
-      const handleMouseUp = () => {
-        setIsResizing(false);
-      };
-
-      window.addEventListener("mousemove", handleMouseMove);
-      window.addEventListener("mouseup", handleMouseUp);
-
-      return () => {
-        window.removeEventListener("mousemove", handleMouseMove);
-        window.removeEventListener("mouseup", handleMouseUp);
-      };
-    }
-  }, [isResizing]);
 
   useEffect(() => {
     const fetchPermissions = async () => {
@@ -1310,15 +1234,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
   const handleFetchUpdatedRecords = () => {
     setQueryString();
   };
-  const handleOpenSolidXAIPanel = () => {
-    setIsOpenSolidXAiPanel(true);
-    localStorage.setItem("l_solidxai_open", "true");
-  };
-
-  const handleCloseSolidXAIPanel = () => {
-    setIsOpenSolidXAiPanel(false);
-    localStorage.setItem("l_solidxai_open", "false");
-  };
 
   const handleDeleteEntity = async () => {
     try {
@@ -1949,54 +1864,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           }
         </div>
       </div>
-      {
-        mcpUrl &&
-        params.embeded !== true && (
-          <div
-            className={`chatter-section ${isOpenSolidXAiPanel === false ? "collapsed" : "open"
-              }`}
-            style={{ width: chatterWidth }}
-          >
-            {isOpenSolidXAiPanel && (
-              <div
-                className={styles.chatterResizeHandle}
-                onMouseDown={() => setIsResizing(true)}
-              />
-            )}
-            {isOpenSolidXAiPanel && (
-              <Button
-                icon="pi pi-angle-double-right"
-                size="small"
-                text
-                className={`chatter-collapse-btn ${styles.chatterSquareButton}`}
-                onClick={handleCloseSolidXAIPanel}
-              />
-            )}
-
-            {isOpenSolidXAiPanel === false ? (
-              <div className="flex flex-column gap-2 justify-content-center p-2">
-                <div
-                  className="chatter-collapsed-content"
-                  onClick={handleOpenSolidXAIPanel}
-                >
-                  <div className="flex gap-2">
-                    {" "}
-                    <SolidXAIIcon /> SolidX AI{" "}
-                  </div>
-                </div>
-                <Button
-                  icon="pi pi-chevron-left"
-                  size="small"
-                  className={`px-0 ${styles.chatterNarrowButton}`}
-                  onClick={handleOpenSolidXAIPanel}
-                />
-              </div>
-            ) : (
-              null // <SolidAiMainWrapper mcpUrl={mcpUrl} /> // moved to SolidX Studio panel
-            )}
-          </div>
-        )
-      }
       <Dialog
         visible={isDialogVisible}
         header="Confirm Delete"

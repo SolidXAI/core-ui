@@ -5,7 +5,6 @@ import { Button } from 'primereact/button';
 import { Tooltip } from "primereact/tooltip";
 import qs from 'qs';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
-import { SolidXAIIcon } from '../solid-ai/SolidXAIIcon';
 import styles from './SolidDashboard.module.css';
 import SolidDashboardBody from './SolidDashboardBody';
 import { DashboardFilter } from './DashboardFilter';
@@ -16,7 +15,6 @@ import { SolidDashboardRenderError } from './SolidDashboardRenderError';
 import { useDispatch, useSelector } from "react-redux";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import SolidDashboardNotAvailable from './SolidDashboardNotAvailable';
-import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from '../../../redux/api/solidSettingsApi';
 
 export enum DashboardVariableType {
   DATE = 'date',
@@ -134,9 +132,6 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
   const dispatch = useDispatch();
   const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
   const [filters, setFilters] = useState<SqlExpression[]>([]);
-  const [isOpenSolidXAiPanel, setIsOpenSolidXAiPanel] = useState(false);
-  const [chatterWidth, setChatterWidth] = useState(700);
-  const [isResizing, setIsResizing] = useState(false);
   const [questions, setQuestions] = useState<any[]>([]);
   const [dashboardVariables, setDashboardVariables] = useState<DashboardVariableRecord[]>([]);
   const [isDashboardFilterVisible, setIsDashboardFilterVisible] = useState(false);
@@ -151,57 +146,6 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
     }
   }, [isLoading, data]);
 
-  useEffect(() => {
-    const storedOpen = localStorage.getItem('d_solidxai_open');
-    const storedWidth = localStorage.getItem('d_solidxai_width');
-
-    if (storedOpen !== null) {
-      setIsOpenSolidXAiPanel(storedOpen === 'true');
-    }
-
-    if (storedWidth !== null) {
-      const width = parseInt(storedWidth, 10);
-      if (!isNaN(width)) {
-        setChatterWidth(width);
-      }
-    }
-  }, []);
-
-
-  useEffect(() => {
-    if (isResizing) {
-      const handleMouseMove = (e: MouseEvent) => {
-        const newWidth = window.innerWidth - e.clientX;
-        const clampedWidth = Math.max(700, newWidth);
-        setChatterWidth(clampedWidth);
-        localStorage.setItem('d_solidxai_width', clampedWidth.toString());
-      };
-
-      const handleMouseUp = () => {
-        setIsResizing(false);
-      };
-
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-  }, [isResizing]);
-
-
-  const handleOpen = () => {
-    setIsOpenSolidXAiPanel(true);
-    localStorage.setItem('d_solidxai_open', 'true');
-  };
-
-  const handleClose = () => {
-    setIsOpenSolidXAiPanel(false);
-    localStorage.setItem('d_solidxai_open', 'false');
-  };
-
   const toggleBothSidebars = () => {
     if (visibleNavbar) {
       dispatch(toggleNavbar());   // close both
@@ -210,38 +154,6 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
     }
   };
 
-
-
-  const [mcpUrl, setMcpUrl] = useState<string | null>(null);
-  const [getMcpUrl] = useLazyGetMcpUrlQuery();
-
-  const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
-  useEffect(() => {
-    trigger("") // Fetch settings on mount
-  }, [])
-
-  useEffect(() => {
-    if (solidSettingsData?.data?.mcpEnabled && solidSettingsData?.data?.mcpServerUrl) {
-      enableSolidXAiPanel();
-    }
-  }, [solidSettingsData]);
-
-  const enableSolidXAiPanel = async () => {
-    try {
-      const queryData = {
-        showHeader: "true",
-        inListView: "true"
-      };
-      const queryString = qs.stringify({ ...queryData }, { encodeValuesOnly: true });
-      const response = await getMcpUrl(queryString).unwrap();
-      console.log("response", response);
-      if (response && response?.data?.mcpUrl) {
-        setMcpUrl(response?.data?.mcpUrl);
-      }
-    } catch (error) {
-
-    }
-  }
 
 
   return (
@@ -308,53 +220,6 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
           </>
         )}
       </div>
-      {mcpUrl && (
-        <div className={`chatter-section ${isOpenSolidXAiPanel === false ? 'collapsed' : 'open'}`} style={{ width: chatterWidth }}>
-          {isOpenSolidXAiPanel && (
-            <div
-              style={{
-                width: 5,
-                cursor: 'col-resize',
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                bottom: 0,
-                height: '100%',
-                zIndex: 9,
-              }}
-              onMouseDown={() => setIsResizing(true)}
-            />
-          )}
-          {isOpenSolidXAiPanel &&
-            <Button
-              icon="pi pi-angle-double-right"
-              size="small"
-              text
-              className="chatter-collapse-btn"
-              style={{ width: 30, height: 30, aspectRatio: '1/1' }}
-              onClick={handleClose}
-            />
-          }
-
-          {isOpenSolidXAiPanel === false ?
-            <div className="flex flex-column gap-2 justify-content-center p-2">
-              <div className="chatter-collapsed-content" onClick={handleOpen}>
-                <div className="flex gap-2"> <SolidXAIIcon /> SolidX AI </div>
-              </div>
-              <Button
-                icon="pi pi-chevron-left"
-                size="small"
-                className="px-0"
-                style={{ width: 30 }}
-                onClick={handleOpen}
-              />
-            </div>
-            :
-            null // <SolidAiMainWrapper mcpUrl={mcpUrl} /> // moved to SolidX Studio panel
-          }
-        </div>
-      )}
-
     </div>
   );
 }
