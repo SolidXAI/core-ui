@@ -402,15 +402,15 @@ export const mergeAllDiffFilters = (customFilter: any, searchFilter: any, savedF
     return filters;
 }
 
-const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, openSavedCustomFilter, setSavedFilterTobeDeleted, setIsDeleteSQDialogVisible }: any) => {
+const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, openSavedCustomFilter, setSavedFilterTobeDeleted, setIsDeleteSQDialogVisible, isFocused, onMouseEnter }: any) => {
     const isActive = Number(activeSavedFilter) == savedfilter.id;
 
     return (
-        <div className="solid-saved-filter-item">
+        <div className="solid-saved-filter-item" onMouseEnter={onMouseEnter}>
             <div className="solid-saved-filter-main-wrap">
                 <Button text
                     size="small"
-                    className={`solid-saved-filter-main w-full ${isActive ? "is-active" : ""}`}
+                    className={`solid-saved-filter-main w-full ${isActive ? "is-active" : ""} ${isFocused ? "solid-search-overlay-option-active" : ""}`}
                     onClick={() => applySavedFilter(savedfilter)}
                     tooltip={savedfilter?.description}>{savedfilter.name}
                 </Button>
@@ -523,7 +523,8 @@ type RelationCache = Map<string, { label: string; value: number }>;
 export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handleApplyCustomFilter, showSaveFilterPopup, setShowSaveFilterPopup, filterPredicates }: any, ref) => {
     type OverlayOption =
         | { id: string; kind: "field"; field: any }
-        | { id: string; kind: "predefined"; predefined: any };
+        | { id: string; kind: "predefined"; predefined: any }
+        | { id: string; kind: "saved"; saved: any };
     type ManagedChipItem = {
         id: string;
         type: "saved" | "search" | "predefined" | "custom" | "grouping";
@@ -620,7 +621,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
     //  state to maintain the text typed in the search input box
     const [inputValue, setInputValue] = useState<string | null>("");
-    const [activeOverlayOptionId, setActiveOverlayOptionId] = useState<string | null>(null);
+    const [focusedIndex, setFocusedIndex] = useState(-1);
 
     // flag to prevent un necessary re renders
     const [hasSearched, setHasSearched] = useState<boolean>(false);
@@ -640,6 +641,18 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     const [showChipManager, setShowChipManager] = useState(false);
     const chipManagerRef = useRef<HTMLDivElement | null>(null);
     const chipManagerTriggerRef = useRef<HTMLButtonElement | null>(null);
+
+    useEffect(() => {
+        if (focusedIndex >= 0 && showOverlay) {
+            const activeElement = document.querySelector(`.solid-search-overlay-option-active`);
+            if (activeElement) {
+                activeElement.scrollIntoView({
+                    block: 'nearest',
+                    inline: 'start'
+                });
+            }
+        }
+    }, [focusedIndex, showOverlay]);
 
     const { data: session, status } = useSession();
     const user = session?.user;
@@ -1526,20 +1539,34 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     }, [managedChipItems.length, showChipManager]);
 
 
-    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+    const overlayOptions = useMemo<OverlayOption[]>(() => {
         const currentValue = inputValue?.trim() || "";
-        const fieldOptions: OverlayOption[] = currentValue
-            ? searchableFields.map((field: any) => ({ id: `field:${field.fieldName}`, kind: "field" as const, field }))
+        const fields: OverlayOption[] = currentValue
+            ? searchableFields.map((field: any) => ({ 
+                id: `field:${field.fieldName}`, 
+                kind: "field" as const, 
+                field 
+            }))
             : [];
-        const predefinedOptions: OverlayOption[] =
+        const predefined: OverlayOption[] =
             currentValue && predefinedSearches?.length
-                ? predefinedSearches.map((predefined: any, idx: number) => ({
-                    id: `predefined:${predefined.name || idx}`,
+                ? predefinedSearches.map((p: any, idx: number) => ({
+                    id: `predefined:${p.name || idx}`,
                     kind: "predefined" as const,
-                    predefined,
+                    predefined: p,
                 }))
                 : [];
-        const overlayOptions: OverlayOption[] = [...fieldOptions, ...predefinedOptions];
+        const saved: OverlayOption[] = (savedFilters || []).map((s: any) => ({
+            id: `saved:${s.id}`,
+            kind: "saved" as const,
+            saved: s,
+        }));
+
+        return [...fields, ...predefined, ...saved];
+    }, [inputValue, searchableFields, predefinedSearches, savedFilters]);
+
+    const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
+        const currentValue = inputValue?.trim() || "";
 
         const applyFieldOption = (value: any) => {
             const trimmed = inputValue?.trim();
@@ -1562,71 +1589,52 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         if ((e.key === "ArrowDown" || e.key === "ArrowUp") && overlayOptions.length > 0) {
             e.preventDefault();
             setShowOverlay(true);
-            const currentIndex = overlayOptions.findIndex((opt) => opt.id === activeOverlayOptionId);
             const nextIndex =
                 e.key === "ArrowDown"
-                    ? (currentIndex + 1) % overlayOptions.length
-                    : currentIndex <= 0
-                        ? overlayOptions.length - 1
-                        : currentIndex - 1;
-            setActiveOverlayOptionId(overlayOptions[nextIndex].id);
+                    ? (focusedIndex + 1) % overlayOptions.length
+                    : (focusedIndex <= 0 ? overlayOptions.length - 1 : focusedIndex - 1);
+            setFocusedIndex(nextIndex);
             return;
         }
 
-        if (e.key === "Enter" && currentValue) {
-            if (overlayOptions.length > 0) {
-                const activeOption =
-                    overlayOptions.find((opt) => opt.id === activeOverlayOptionId) || overlayOptions[0];
+        if (e.key === "Enter") {
+            if (currentValue || focusedIndex >= 0) {
+                e.preventDefault();
+                const activeOption = overlayOptions[focusedIndex] || (currentValue ? overlayOptions[0] : null);
+                
                 if (activeOption?.kind === "field") {
                     applyFieldOption(activeOption.field);
                 } else if (activeOption?.kind === "predefined") {
                     handlePredefinedSearch(activeOption.predefined);
+                } else if (activeOption?.kind === "saved") {
+                    applySavedFilter(activeOption.saved);
+                } else if (currentValue) {
+                    handleAddChip();
+                    setShowOverlay(false);
                 }
-            } else {
-                handleAddChip();
-                setShowOverlay(false);
             }
-            e.preventDefault();
         } else if (e.key === "Backspace" && inputValue === "") {
-
             if (searchChips.length > 0) {
                 setSearchChips((prev) => prev.slice(0, -1));
             } else if (customFilter) {
-                setCustomFilter(null)
+                setCustomFilter(null);
                 setFilterRules(initialState);
             } else if (predefinedSearchChip) {
                 setPredefinedSearchChip(null);
                 setPredefinedSearchBaseFilter(null);
             } else if (activeSavedFilter) {
-                removeSavedFilter()
-            } else if (activeSavedFilter) {
-                clearCustomFilter();
+                removeSavedFilter();
             }
             setHasSearched(true);
-            setRefreshKey((prev) => prev + 1)
+            setRefreshKey((prev) => prev + 1);
         }
     };
 
     useEffect(() => {
-        const currentValue = inputValue?.trim() || "";
-        if (!showOverlay || !currentValue) {
-            setActiveOverlayOptionId(null);
-            return;
+        if (!showOverlay) {
+            setFocusedIndex(-1);
         }
-
-        const fieldOptionIds = searchableFields.map((field: any) => `field:${field.fieldName}`);
-        const predefinedOptionIds = (predefinedSearches || []).map((predefined: any, idx: number) => `predefined:${predefined.name || idx}`);
-        const optionIds = [...fieldOptionIds, ...predefinedOptionIds];
-
-        if (!optionIds.length) {
-            setActiveOverlayOptionId(null);
-            return;
-        }
-
-        if (activeOverlayOptionId && !optionIds.includes(activeOverlayOptionId)) {
-            setActiveOverlayOptionId(null);
-        }
-    }, [showOverlay, inputValue, searchableFields, predefinedSearches, activeOverlayOptionId]);
+    }, [showOverlay]);
 
     const SearchChip = () => (
         <>
@@ -1797,6 +1805,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                         setInputValue(e.target.value);
                                         setShowChipManager(false);
                                         setShowOverlay(true);
+                                        setFocusedIndex(-1);
                                     }}
                                     onFocus={() => {
                                         setShowChipManager(false);
@@ -1861,11 +1870,11 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                     <div className="custom-filter-search-options solid-search-overlay-section px-3 py-1 flex flex-column">
                                         <h6 className="my-1 solid-search-overlay-heading solid-search-overlay-section-title">Search by fields</h6>
                                         {searchableFields.length > 0 ? (
-                                            searchableFields.map((value: any, index: any) => {
+                                            searchableFields.map((value: any, index: number) => {
                                                 return (
                                                     <Button
                                                         key={index}
-                                                        className={`flex gap-1 text-color solid-search-overlay-option ${activeOverlayOptionId === `field:${value.fieldName}` ? "solid-search-overlay-option-active" : ""}`}
+                                                        className={`flex gap-1 text-color solid-search-overlay-option ${focusedIndex === index ? "solid-search-overlay-option-active" : ""}`}
                                                         onMouseDown={(e) => {
                                                             e.preventDefault();
                                                             const currentValue = inputValue?.trim();
@@ -1885,7 +1894,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                                 setShowOverlay(false);
                                                             }
                                                         }}
-                                                        onMouseEnter={() => setActiveOverlayOptionId(`field:${value.fieldName}`)}
+                                                        onMouseEnter={() => setFocusedIndex(index)}
                                                         text
                                                         severity="secondary"
                                                         size="small"
@@ -1913,12 +1922,12 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                 {predefinedSearches.map((predefinedSearch: any, index: number) => (
                                                     <Button
                                                         key={index}
-                                                        className={`flex flex-column align-items-start gap-1 text-color solid-search-overlay-option solid-search-overlay-option-stacked ${activeOverlayOptionId === `predefined:${predefinedSearch.name || index}` ? "solid-search-overlay-option-active" : ""}`}
+                                                        className={`flex flex-column align-items-start gap-1 text-color solid-search-overlay-option solid-search-overlay-option-stacked ${focusedIndex === searchableFields.length + index ? "solid-search-overlay-option-active" : ""}`}
                                                         onMouseDown={(e) => {
                                                             e.preventDefault();
                                                             handlePredefinedSearch(predefinedSearch);
                                                         }}
-                                                        onMouseEnter={() => setActiveOverlayOptionId(`predefined:${predefinedSearch.name || index}`)}
+                                                        onMouseEnter={() => setFocusedIndex(searchableFields.length + index)}
                                                         text
                                                         severity="secondary"
                                                         size="small"
@@ -1950,9 +1959,22 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                     <div className="p-3 solid-search-overlay-section">
                                         <p className="solid-search-overlay-heading solid-search-overlay-section-title">Saved filters</p>
                                         <div className="flex flex-column solid-search-overlay-saved-list">
-                                            {savedFilters.map((savedfilter: any) =>
-                                                <SavedFilterList savedfilter={savedfilter} activeSavedFilter={activeSavedFilter} applySavedFilter={applySavedFilter} openSavedCustomFilter={openSavedCustomFilter} setSavedFilterTobeDeleted={setSavedFilterTobeDeleted} setIsDeleteSQDialogVisible={setIsDeleteSQDialogVisible}></SavedFilterList>
-                                            )}
+                                            {savedFilters.map((savedfilter: any, index: number) => (
+                                                <SavedFilterList
+                                                    key={savedfilter.id}
+                                                    savedfilter={savedfilter}
+                                                    activeSavedFilter={activeSavedFilter}
+                                                    applySavedFilter={applySavedFilter}
+                                                    openSavedCustomFilter={openSavedCustomFilter}
+                                                    setSavedFilterTobeDeleted={setSavedFilterTobeDeleted}
+                                                    setIsDeleteSQDialogVisible={setIsDeleteSQDialogVisible}
+                                                    isFocused={overlayOptions[focusedIndex]?.id === `saved:${savedfilter.id}`}
+                                                    onMouseEnter={() => {
+                                                        const optIndex = overlayOptions.findIndex(o => o.id === `saved:${savedfilter.id}`);
+                                                        if (optIndex !== -1) setFocusedIndex(optIndex);
+                                                    }}
+                                                />
+                                            ))}
                                         </div>
                                     </div>
                                 </>

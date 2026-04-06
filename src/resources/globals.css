@@ -3327,12 +3327,14 @@ li.header-li-px {
 }
 
 .solid-search-overlay-option-active.p-button {
-  background: color-mix(in srgb, var(--accent) 72%, transparent);
-  border: 1px solid color-mix(in srgb, var(--ring) 52%, transparent);
+  background: color-mix(in srgb, var(--accent) 85%, transparent) !important;
+  border: 1px solid var(--primary-color) !important;
+  box-shadow: 0 0 0 1px var(--primary-color) !important;
 }
 
 .solid-search-overlay-option-active.p-button .p-button-label {
-  color: color-mix(in srgb, var(--foreground) 96%, transparent);
+  color: #fff !important;
+  font-weight: 600 !important;
 }
 
 .solid-search-overlay-option-stacked.p-button {
