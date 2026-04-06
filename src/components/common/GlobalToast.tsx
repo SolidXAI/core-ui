@@ -14,7 +14,8 @@ export const GlobalToast = () => {
                 severity: message.severity,
                 summary: message.summary,
                 detail: message.detail,
-                life: message.life ?? 3000,
+                sticky: message.sticky,
+                life: message.sticky ? undefined : (message.life ?? 3000),
             });
             dispatch(clearToast());
         }

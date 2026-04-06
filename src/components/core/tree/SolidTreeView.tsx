@@ -1434,28 +1434,12 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
       if (response?.data?.statusCode === 200) {
         setDeleteEntity(false);
-        toast.current?.show({
-          severity: "success",
-          summary: ERROR_MESSAGES.DELETED,
-          detail: ERROR_MESSAGES.ENTITY_DELETE,
-          life: 3000,
-        });
+        dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.DELETED, detail: ERROR_MESSAGES.ENTITY_DELETE, life: 3000 }));
       } else {
-        toast.current?.show({
-          severity: "error",
-          summary: ERROR_MESSAGES.DELETE_FAIELD,
-          detail: response?.error?.data?.error,
-          sticky: true,          // stays until user closes
-        });
+        dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.DELETE_FAIELD, detail: response?.error?.data?.error, sticky: true }));
       }
     } catch (error: any) {
-      toast.current?.show({
-        severity: "error",
-        summary: ERROR_MESSAGES.DELETE_FAIELD,
-        detail: ERROR_MESSAGES.SOMETHING_WRONG,
-        sticky: true,          // stays until user closes
-
-      });
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.DELETE_FAIELD, detail: ERROR_MESSAGES.SOMETHING_WRONG, sticky: true }));
     }
   };
 

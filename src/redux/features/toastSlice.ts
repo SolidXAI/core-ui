@@ -7,6 +7,7 @@ export interface ToastMessage {
     summary: string;
     detail?: string;
     life?: number;
+    sticky?: boolean;
 }
 
 export interface ToastState {
