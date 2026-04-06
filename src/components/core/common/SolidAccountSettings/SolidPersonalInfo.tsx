@@ -8,16 +8,16 @@ import { Avatar } from "primereact/avatar";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { InputText } from "primereact/inputtext";
-import { Toast } from "primereact/toast";
 import { useRef, useState } from "react";
+import { useDispatch } from 'react-redux';
+import { showToast } from '../../../../redux/features/toastSlice';
 import styles from './SolidAccountSettings.module.css'
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
-import showToast from "../../../../helpers/showToast";
 import { useSession } from '../../../../hooks/useSession'
 
 export const SolidPersonalInfo = () => {
     const fileInputRef = useRef<HTMLInputElement>(null);
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
 
     const [previewImage, setPreviewImage] = useState<string | null>(null);
     const [deleteDialogVisible, setDeleteDialogVisible] = useState(false);
@@ -55,21 +55,21 @@ export const SolidPersonalInfo = () => {
                 }
 
                 if (!formData.has("fullName") && !formData.has("profilePicture")) {
-                    showToast(toast, "info", ERROR_MESSAGES.NO_CHANGE, ERROR_MESSAGES.NO_UPDATE_MADE);
+                    dispatch(showToast({ severity: "info", summary: ERROR_MESSAGES.NO_CHANGE, detail: ERROR_MESSAGES.NO_UPDATE_MADE }));
                     return;
                 }
 
                 const response = await updateUser({ data: formData }).unwrap();
                 if (response?.statusCode === 200) {
-                    showToast(toast, "success", ERROR_MESSAGES.PROFILE_SAVED, ERROR_MESSAGES.PROFILE_SAVED_SUCCESSFULLY);
+                    dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.PROFILE_SAVED, detail: ERROR_MESSAGES.PROFILE_SAVED_SUCCESSFULLY }));
                     refetch();
                     formik.resetForm();
                     setPreviewImage(null);
                 } else {
-                    showToast(toast, "error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_UPDATED_PROFILE);
+                    dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.FAILED, detail: ERROR_MESSAGES.FAILED_UPDATED_PROFILE }));
                 }
             } catch (error) {
-                showToast(toast, "error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
+                dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.FAILED, detail: ERROR_MESSAGES.SOMETHING_WRONG }));
             }
         },
     });
@@ -130,7 +130,7 @@ export const SolidPersonalInfo = () => {
             }
 
         } catch (error) {
-            showToast(toast, "error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_DELETED_IMAGE);
+            dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.FAILED, detail: ERROR_MESSAGES.FAILED_DELETED_IMAGE }));
         }
 
         setReplaceDialogVisible(false);
@@ -142,10 +142,10 @@ export const SolidPersonalInfo = () => {
         if (existing?.id) {
             try {
                 await deleteMedia(existing.id).unwrap();
-                showToast(toast, "success", ERROR_MESSAGES.DELETED, ERROR_MESSAGES.PROFILE_PICTURE_REMOVE);
+                dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.DELETED, detail: ERROR_MESSAGES.PROFILE_PICTURE_REMOVE }));
                 refetch();
             } catch {
-                showToast(toast, "error", ERROR_MESSAGES.ERROR, ERROR_MESSAGES.FAILED_DELETED_IMAGE);
+                dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.ERROR, detail: ERROR_MESSAGES.FAILED_DELETED_IMAGE }));
             }
         }
 
@@ -156,7 +156,6 @@ export const SolidPersonalInfo = () => {
 
     return (
         <form onSubmit={formik.handleSubmit} className="h-full flex flex-column justify-content-between">
-            <Toast ref={toast} />
             <div>
                 <div>
                     <label className="form-field-label mb-2 font-bold">Profile Picture</label>

@@ -5,8 +5,9 @@ import { DataTable } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
 import { useMountEffect } from "primereact/hooks";
 import { Messages } from "primereact/messages";
-import { Toast } from "primereact/toast";
 import { useRef, useState } from "react";
+import { useDispatch } from "react-redux";
+import { showToast } from "../../../redux/features/toastSlice";
 import FieldMetaDataForm from "./FieldMetaDataForm";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
@@ -27,7 +28,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
       });
     }
   });
-  const toast = useRef<Toast>(null);
+  const dispatch = useDispatch();
   const [visiblePopup, setVisiblePopup] = useState(false);
   const [isRequiredPopUp, setIsRequiredPopUp] = useState(false);
   const [currentPopup, setCurrentPopup] = useState();
@@ -103,24 +104,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
   const showToaster = async (message: any, severity: any) => {
     const errorMessages = Object.values(message);
     if (errorMessages.length > 0) {
-      toast?.current?.show({
-        severity: severity,
-        summary: ERROR_MESSAGES.SEND_REPORT,
-        life: 3000,
-        //@ts-ignore
-        content: (props) => (
-          <div
-            className="flex flex-column align-items-left"
-            style={{ flex: "1" }}
-          >
-            {errorMessages.map((m, index) => (
-              <div className="flex align-items-center gap-2" key={index}>
-                <span className="font-bold text-900">{String(m)}</span>
-              </div>
-            ))}
-          </div>
-        ),
-      });
+      dispatch(showToast({ severity, summary: ERROR_MESSAGES.SEND_REPORT, detail: errorMessages.map(String).join(', '), life: 3000 }));
     }
   };
 
@@ -149,12 +133,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
                 // icon="pi pi-external-link"
                 onClick={() => {
                   if (!modelMetaData?.dataSourceType) {
-                    toast.current?.show({
-                      severity: 'error',
-                      summary: ERROR_MESSAGES.ERROR,
-                      detail: ERROR_MESSAGES.ORM_TYPE_REQUIRED,
-                      sticky: true,
-                    });
+                    dispatch(showToast({ severity: 'error', summary: ERROR_MESSAGES.ERROR, detail: ERROR_MESSAGES.ORM_TYPE_REQUIRED }));
                   } else {
                     setSelectedFieldMetaData(null);
                     setVisiblePopup(true)

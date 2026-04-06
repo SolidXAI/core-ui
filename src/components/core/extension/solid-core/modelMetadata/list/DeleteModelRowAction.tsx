@@ -3,16 +3,15 @@ import { useGenerateCodeForModelMutation } from "../../../../../../redux/api/mod
 import { closePopup } from "../../../../../../redux/features/popupSlice";
 import { SolidListRowdataDynamicFunctionProps } from "../../../../../../types/solid-core";
 import { Button } from "primereact/button";
-import { useRef, useState } from "react";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
-import { Toast } from 'primereact/toast';
+import { showToast } from "../../../../../../redux/features/toastSlice";
 import { DataTable } from "primereact/datatable";
 import { Column } from "primereact/column";
 import { Checkbox } from "primereact/checkbox";
 import { kebabCase } from "lodash";
 import { createSolidEntityApi } from "../../../../../../redux/api/solidEntityApi";
 import { ERROR_MESSAGES } from "../../../../../../constants/error-messages";
-import showToast from "../../../../../../helpers/showToast";
 
 
 const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
@@ -23,8 +22,6 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
     const [deleteSolidSingleEntiry, { 
         isError:isSolidEntitiesDeleteError , 
     }] = useDeleteSolidEntityMutation()
-
-    const toast = useRef<Toast>(null);
 
     const deleteModelHandler = async () => {
         try {
@@ -37,14 +34,14 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
                     res.error?.data?.message ||
                     res.error?.error ||
                     ERROR_MESSAGES.ERROR_OCCURED;
-                showToast(toast, 'error', ERROR_MESSAGES.DELETE_FAIELD, message);
+                dispatch(showToast({ severity: 'error', summary: ERROR_MESSAGES.DELETE_FAIELD, detail: message }));
             } else {
-                showToast(toast, 'success', ERROR_MESSAGES.MODEL_DELETE, ERROR_MESSAGES.MODEL_DELETE_SUCCESSFULLY(event.rowData.singularName));
+                dispatch(showToast({ severity: 'success', summary: ERROR_MESSAGES.MODEL_DELETE, detail: ERROR_MESSAGES.MODEL_DELETE_SUCCESSFULLY(event.rowData.singularName) }));
                 dispatch(closePopup());
             }
         } catch (err: any) {
             console.error("catch error", err);
-            showToast(toast, 'error', ERROR_MESSAGES.ERROR, ERROR_MESSAGES.NETWORK_OR_SERVER_ERROR);
+            dispatch(showToast({ severity: 'error', summary: ERROR_MESSAGES.ERROR, detail: ERROR_MESSAGES.NETWORK_OR_SERVER_ERROR }));
         }
     }
 
@@ -64,7 +61,6 @@ const DeleteModelRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
 
     return (
         <div className="">
-            <Toast ref={toast} />
             <div className="p-dialog-header secondary-border-bottom py-3" style={{ background: 'var(--solid-light-grey)' }}>
                 <span className="p-dialog-title">
                     Delete Model

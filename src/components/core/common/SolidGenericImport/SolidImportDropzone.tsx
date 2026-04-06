@@ -1,15 +1,15 @@
 
-import { useCallback, useRef, useState } from 'react';
+import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
 import { Button } from 'primereact/button'
+import { useDispatch } from 'react-redux';
+import { showToast } from '../../../../redux/features/toastSlice';
 import styles from './SolidImport.module.css'
 import { DocumentSvg } from './DocumentSvg';
 import { useCreateImportTransactionMutation } from '../../../../redux/api/importTransactionApi';
-import { Toast } from 'primereact/toast';
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
-import showToast from "../../../../helpers/showToast";
 export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMetadataId }: any) => {
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
 
     const [file, setFile] = useState<File | null>(null);
     const [createImportTransaction, { isLoading }] = useCreateImportTransactionMutation();
@@ -25,14 +25,14 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
             console.log('Upload success:', response);
             if (response?.statusCode === 200) {
                 setFile(uploadFile);
-                showToast(toast, "success", ERROR_MESSAGES.FILE_UPLOAD, ERROR_MESSAGES.FILE_UPLOAD_SUCCESSFULLY);
+                dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.FILE_UPLOAD, detail: ERROR_MESSAGES.FILE_UPLOAD_SUCCESSFULLY }));
                 setTransactionId?.(response?.data?.id);
             } else {
-                showToast(toast, "error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_UPLOAD_FILE)
+                dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.FAILED, detail: ERROR_MESSAGES.FAILED_UPLOAD_FILE }))
             }
         } catch (error) {
             console.error(ERROR_MESSAGES.FAILED_UPLOAD_FILE, error);
-            showToast(toast, "error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.FAILED_UPLOAD_FILE)
+            dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.FAILED, detail: ERROR_MESSAGES.FAILED_UPLOAD_FILE }))
         }
     };
 
@@ -65,7 +65,6 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
 
     return (
         <div>
-            <Toast ref={toast} />
             <div className={styles.SolidImportContextWrapper}>
                 <div {...getRootProps({ className: styles.dropzone })} className='h-full flex flex-column align-items-center justify-content-center'>
                     <input {...getInputProps()} />
@@ -103,7 +102,7 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
                     size='small'
                     onClick={() => {
                         if (!file) {
-                            showToast(toast, "error", ERROR_MESSAGES.MISSING_FILE, ERROR_MESSAGES.FAILED_UPLOAD_FILE);
+                            dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.MISSING_FILE, detail: ERROR_MESSAGES.FAILED_UPLOAD_FILE }));
                             return;
                         }
                         setImportStep(3);

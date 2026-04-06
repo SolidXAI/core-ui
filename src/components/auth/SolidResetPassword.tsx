@@ -6,15 +6,15 @@ import { useSearchParams } from "../../hooks/useSearchParams";
 import { Button } from "primereact/button";
 import { Message } from "primereact/message";
 import { Password } from "primereact/password";
-import { Toast } from "primereact/toast";
 import { classNames } from "primereact/utils";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
+import { useDispatch } from 'react-redux';
 import * as Yup from "yup";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
-import showToast from "../../helpers/showToast";
+import { showToast } from "../../redux/features/toastSlice";
 
 const SolidResetPassword = () => {
     const searchParams = useSearchParams();
@@ -28,7 +28,7 @@ const SolidResetPassword = () => {
     }, [trigger])
 
 
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
     const router = useRouter();
 
     const [confirmForgotPassword] = useConfirmForgotPasswordMutation();
@@ -74,13 +74,13 @@ const SolidResetPassword = () => {
                 };
                 const response = await confirmForgotPassword(payload).unwrap();
                 if (response?.statusCode === 200) {
-                    showToast(toast, "success", ERROR_MESSAGES.FIELD_UPDATE('Password'), ERROR_MESSAGES.FIELD_UPDATE_SUCCESSFULLY('Password'))
+                    dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.FIELD_UPDATE('Password'), detail: ERROR_MESSAGES.FIELD_UPDATE_SUCCESSFULLY('Password') }))
                     router.push('/auth/login');
                 } else (
-                    showToast(toast, "error", ERROR_MESSAGES.ERROR, response.error)
+                    dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.ERROR, detail: response.error }))
                 )
             } catch (err: any) {
-                showToast(toast, "error", err?.data?.message, err?.data?.data?.message ? err?.data?.data?.message : err?.data?.message);
+                dispatch(showToast({ severity: "error", summary: err?.data?.message, detail: err?.data?.data?.message ? err?.data?.data?.message : err?.data?.message }));
             }
         },
     });
@@ -90,7 +90,6 @@ const SolidResetPassword = () => {
 
     return (
         <>
-            <Toast ref={toast} />
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 {solidSettingsData?.data?.authPagesLayout === 'center' &&
                     <div className="flex justify-content-center">

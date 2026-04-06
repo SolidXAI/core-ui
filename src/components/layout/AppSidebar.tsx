@@ -1,4 +1,3 @@
-import { ToastContainer } from "../../helpers/ToastContainer";
 import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
 import { showNavbar, toggleNavbar, hideNavbar } from "../../redux/features/navbarSlice";
 import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
@@ -115,7 +114,6 @@ const AppSidebar = () => {
 
     return (
         <>
-            <ToastContainer />
             {visibleNavbar && (
                 <div
                     className="sidebar-backdrop"

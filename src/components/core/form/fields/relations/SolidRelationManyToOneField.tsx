@@ -3,7 +3,7 @@ import { createSolidEntityApi } from "../../../../../redux/api/solidEntityApi";
 import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { Message } from "primereact/message";
 import qs from "qs";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
 import { camelCase } from "lodash";
@@ -12,10 +12,10 @@ import { Dialog } from "primereact/dialog";
 import SolidFormView from '../../../../../components/core/form/SolidFormView';
 import { getExtensionComponent } from "../../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
-import showToast from "../../../../../helpers/showToast";
+import { useDispatch } from 'react-redux';
+import { showToast } from '../../../../../redux/features/toastSlice';
 // import Handlebars from "handlebars/dist/handlebars";
 import * as Handlebars from "handlebars";
-import { Toast } from "primereact/toast";
 import { SolidFieldTooltip } from "../../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../../constants/error-messages";
 import { getVirtualScrollerOptions } from "../../../../../helpers/autoCompleteVirtualScroll";
@@ -176,7 +176,7 @@ export class SolidRelationManyToOneField implements ISolidField {
 }
 
 export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
@@ -288,7 +288,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 
 
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
-            showToast(toast, "error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
+            dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SELECT_RELEVANT_FIELD, detail: ERROR_MESSAGES.FIELD_NOT_SELECT }));
 
         } else {
             try {
@@ -383,7 +383,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 
         const autocompleteQs = qs.stringify(queryData, { encodeValuesOnly: true });
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
-            showToast(toast, "error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
+            dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SELECT_RELEVANT_FIELD, detail: ERROR_MESSAGES.FIELD_NOT_SELECT }));
 
         } else {
             try {
@@ -422,7 +422,6 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
     }
     return (
         <div className="relative">
-            <Toast ref={toast} />
             <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
@@ -559,7 +558,7 @@ export const DefaultRelationManyToOneFormViewWidget = ({ formik, fieldContext }:
 
 
 export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
@@ -798,7 +797,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
 
 
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
-            showToast(toast, "error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
+            dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SELECT_RELEVANT_FIELD, detail: ERROR_MESSAGES.FIELD_NOT_SELECT }));
 
         } else {
             try {
@@ -909,7 +908,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
 
         const autocompleteQs = qs.stringify(queryData, { encodeValuesOnly: true });
         if (fixedFilterToBeApplied && !fixedFilterParsed) {
-            showToast(toast, "error", ERROR_MESSAGES.SELECT_RELEVANT_FIELD, ERROR_MESSAGES.FIELD_NOT_SELECT);
+            dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SELECT_RELEVANT_FIELD, detail: ERROR_MESSAGES.FIELD_NOT_SELECT }));
 
         } else {
             try {
@@ -956,7 +955,6 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
     }
     return (
         <div className="relative" >
-            <Toast ref={toast} />
             < div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4" >
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label" >

@@ -4,6 +4,7 @@ import {
     navbarReducer,
     popupReducer,
     themeReducer,
+    toastReducer,
     userReducer
 } from "../../index";
 import {
@@ -61,4 +62,5 @@ export const solidReducers = {
     popup: popupReducer,
     navbarState: navbarReducer,
     dataViewState: dataViewReducer,
+    toast: toastReducer,
 };  

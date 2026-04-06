@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Toast } from "primereact/toast";
+import { showToast } from "../../../redux/features/toastSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
@@ -122,7 +122,6 @@ const DEFAULT_PAGE_SIZE = 25;
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams>((params, ref) => {
-  const toast = useRef<Toast>(null);
   const dispatch = useDispatch();
   const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
   const searchParams = useSearchParams();
@@ -915,12 +914,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
     } catch (error: any) {
       setTreeNodes([]);
-      toast.current?.show({
-        severity: "error",
-        summary: "Failed to load tree",
-        detail: error?.data?.message || error?.message || "Unable to load grouped data",
-        life: 4000,
-      });
+      dispatch(showToast({ severity: "error", summary: "Failed to load tree", detail: error?.data?.message || error?.message || "Unable to load grouped data", life: 4000 }));
     } finally {
       setTreeLoading(false);
     }
@@ -1000,12 +994,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
         });
       }
     } catch (error: any) {
-      toast.current?.show({
-        severity: "error",
-        summary: "Failed to expand node",
-        detail: error?.data?.message || error?.message || "Unable to load children",
-        life: 4000,
-      });
+      dispatch(showToast({ severity: "error", summary: "Failed to expand node", detail: error?.data?.message || error?.message || "Unable to load children", life: 4000 }));
       setTreeNodes((prev) => updateNodeChildren(prev, nodeKey, []));
     } finally {
       setTreeLoading(false);
@@ -1131,21 +1120,11 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     deleteManySolidEntities(deleteList)
       .unwrap()
       .then(() => {
-        toast.current?.show({
-          severity: 'success',
-          summary: 'Deleted',
-          detail: ERROR_MESSAGES.RECORD_DELETE,
-          life: 3000
-        });
+        dispatch(showToast({ severity: 'success', summary: 'Deleted', detail: ERROR_MESSAGES.RECORD_DELETE, life: 3000 }));
         setDeleteRecordsDialogVisible(false);
       })
       .catch((error) => {
-        toast.current?.show({
-          severity: 'error',
-          summary: 'Delete Failed',
-          detail: error?.data?.message,
-          life: 4000
-        });
+        dispatch(showToast({ severity: 'error', summary: 'Delete Failed', detail: error?.data?.message, life: 4000 }));
       });
   };
 
@@ -1593,8 +1572,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
   return (
     <div className="page-parent-wrapper">
-      <Toast ref={toast} />
-
       {/* ── Header ── */}
       <div className="page-header flex-column lg:flex-row">
         <div className="flex justify-content-between w-full">
