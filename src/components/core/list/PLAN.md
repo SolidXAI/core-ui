@@ -43,10 +43,30 @@
 
 ## Phase 4: Filters + Search
 - [ ] Keep predicate model unchanged (`custom_filter_predicate`, `search_predicate`, `saved_filter_predicate`, `predefined_search_predicate`, grouping/aggregation).
-- [ ] Migrate `SolidGlobalSearchElement` dialogs/popovers to shadcn.
-- [ ] Migrate `FilterComponent` rule builder UI to shadcn controls.
+- [ ] Migrate `SolidGlobalSearchElement` shell off PrimeReact first.
+  Current reality:
+  `FilterComponent` already uses `SolidButton`, `SolidAutocomplete`, `SolidInput`, and `SolidSelect`, but the search shell still depends on Prime `Dialog`, `Button`, `Divider`, and `InputText`.
+- [ ] Replace `SolidGlobalSearchElement` dialog stack with internal dialog/popover primitives.
+  Targets:
+  custom filter dialog, grouping dialog, saved-filter edit dialog, save-filter dialog, delete-confirm dialog.
+- [ ] Replace `SolidGlobalSearchElement` toolbar/search-entry controls with internal primitives.
+  Targets:
+  search input, saved-filter actions, predefined-search actions, clear/apply buttons, overlay list actions.
+- [ ] Remove Prime button usage inside saved-filter list/actions.
+- [ ] Migrate `FilterComponent` container shell off Prime `Fieldset`.
+  Keep existing predicate/rule state shape and `transformFilterRules(...)` contract unchanged.
+- [ ] Replace remaining Prime icon class usage in filter flow with non-Prime icons.
+- [ ] Audit `SolidFilterFields` and list filter input widgets for hidden Prime event-shape coupling.
 - [ ] Preserve saved filter URL behavior (`savedQuery`) and local cache behavior.
 - [ ] Confirm relation filter hydration still works.
+- [ ] Preserve `clearFilter()` and imperative `SolidListViewHandle.applyFilter(...)` behavior unchanged.
+
+## Phase 4A: Recommended Execution Order For Filters
+- [ ] 1) Introduce/standardize a reusable internal dialog primitive if missing.
+- [ ] 2) Convert `SolidGlobalSearchElement` dialogs without changing filter logic.
+- [ ] 3) Convert search-entry row, chip/actions, and saved-filter action buttons.
+- [ ] 4) Replace `FilterComponent` Prime `Fieldset` shell.
+- [ ] 5) Verify `transformFiltersToRules`, `transformRulesToFilters`, `mergeAllDiffFilters`, and relation hydration parity.
 
 ## Phase 5: Configure Menu + Column Selector
 - [ ] Replace cog overlay/context menu with shadcn dropdown/popover.

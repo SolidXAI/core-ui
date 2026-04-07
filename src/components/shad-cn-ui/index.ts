@@ -4,3 +4,13 @@ export { SolidNumberInput } from "./SolidNumberInput";
 export { SolidAutocomplete } from "./SolidAutocomplete";
 export { SolidSelect } from "./SolidSelect";
 export { SolidTab, SolidTabGroup } from "./SolidTabs";
+export {
+  SolidDialog,
+  SolidDialogBody,
+  SolidDialogClose,
+  SolidDialogDescription,
+  SolidDialogFooter,
+  SolidDialogHeader,
+  SolidDialogSeparator,
+  SolidDialogTitle,
+} from "./SolidDialog";

@@ -1,7 +1,7 @@
 // @ts-nocheck
 import React, { useState } from 'react';
 import { SolidFilterFields } from '../filter/SolidFilterFields';
-import { Fieldset } from 'primereact/fieldset';
+import { FolderPlus, Plus, Trash2 } from 'lucide-react';
 import { SolidButton } from '../../shad-cn-ui/SolidButton';
 import { SolidAutocomplete } from '../../shad-cn-ui/SolidAutocomplete';
 import { SolidInput } from '../../shad-cn-ui/SolidInput';
@@ -147,13 +147,13 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
       </div>
       <div className='solid-filter-rule-actions'>
         <SolidButton variant="ghost" size='sm' onClick={() => onAddRule(rule.parentRule)} className='solid-filter-action-btn solid-filter-action-icon-btn'>
-          <i className="pi pi-plus" />
+          <Plus size={14} />
         </SolidButton>
         <SolidButton variant="ghost" size='sm' onClick={() => onAddGroup(rule.id)} className='solid-filter-action-btn solid-filter-action-icon-btn'>
-          <i className="pi pi-folder-plus" />
+          <FolderPlus size={14} />
         </SolidButton>
         <SolidButton variant="ghost" size='sm' onClick={() => onDelete(rule.id)} className='solid-filter-action-btn solid-filter-action-icon-btn is-danger'>
-          <i className="pi pi-trash" />
+          <Trash2 size={14} />
         </SolidButton>
       </div>
 
@@ -172,29 +172,20 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
 
 // Component to render a group of filter rules
 const FilterGroupComponent = ({ viewData, fields, group, onChange, onAddRule, onAddGroup, onDelete, level }) => {
-  const legendTemplate = (
-    <div className="solid-filter-group-operator-wrap">
-      <SolidSelect
-        value={group.matchOperator}
-        options={[
-          { label: "OR", value: FilterOperator.OR },
-          { label: "AND", value: FilterOperator.AND },
-        ]}
-        placeholder="Operator"
-        className="solid-filter-group-operator-select"
-        onChange={(event) => onChange(group.id, 'matchOperator', event.value)}
-      />
-    </div>
-    // <select className='filter-select'
-    //   value={group.matchOperator}
-    //   onChange={e => onChange(group.id, 'matchOperator', e.target.value)}
-    // >
-    //   <option value={FilterOperator.AND}>AND</option>
-    //   <option value={FilterOperator.OR}>OR</option>
-    // </select>
-  )
   return (
-    <Fieldset legend={legendTemplate} className='primary-filter-fieldset solid-filter-group-shell'>
+    <div className='primary-filter-fieldset solid-filter-group-shell'>
+      <div className="solid-filter-group-operator-wrap">
+        <SolidSelect
+          value={group.matchOperator}
+          options={[
+            { label: "OR", value: FilterOperator.OR },
+            { label: "AND", value: FilterOperator.AND },
+          ]}
+          placeholder="Operator"
+          className="solid-filter-group-operator-select"
+          onChange={(event) => onChange(group.id, 'matchOperator', event.value)}
+        />
+      </div>
       {group.children && group.children.map(rule => (
         rule.type === FilterRuleType.RULE
           ? <FilterRuleComponent key={rule.id} viewData={viewData} fields={fields} rule={rule} onChange={onChange} onAddRule={onAddRule} onAddGroup={onAddGroup} onDelete={onDelete} level={level + 1} />
@@ -209,11 +200,11 @@ const FilterGroupComponent = ({ viewData, fields, group, onChange, onAddRule, on
       {/* Add Condition Button to add parent rule */}
       {level === 0 &&
         <SolidButton variant="ghost" size='sm' onClick={() => onAddRule(group.id)} className='px-0 mt-2 solid-filter-add-condition-btn'>
-          <i className="pi pi-plus" />
+          <Plus size={14} />
           Add Condition
         </SolidButton>
       }
-    </Fieldset>
+    </div>
   );
 };
 

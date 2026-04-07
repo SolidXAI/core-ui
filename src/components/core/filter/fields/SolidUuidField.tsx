@@ -7,8 +7,8 @@ const SolidUuidField = ({ fieldMetadata, onChange, index, rule }: SolidFilterFie
     const showFilterOperator = false;
     const columnDataType = 'text';
     const filterMatchModeOptions = [
-        { label: 'In', value: "$in" },
-        { label: 'Not In', value: "$notIn" },
+        { label: 'Equals', value: "$eqi" },
+        { label: 'Not Equals', value: "$nei" },
         { label: 'Is null', value: "$null" },
         { label: 'Is Not null', value: "$notNull" }
 

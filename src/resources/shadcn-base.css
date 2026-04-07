@@ -4169,3 +4169,91 @@ body {
   padding: 2px 4px;
   border-radius: 4px;
 }
+
+.solid-radix-dialog-overlay {
+  position: fixed;
+  inset: 0;
+  z-index: calc(var(--z-overlay) + 1);
+  background: rgba(15, 23, 42, 0.48);
+  backdrop-filter: blur(3px);
+}
+
+.solid-radix-dialog-content {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  z-index: calc(var(--z-overlay) + 2);
+  width: min(640px, calc(100vw - 2rem));
+  max-width: calc(100vw - 2rem);
+  max-height: calc(100vh - 2rem);
+  transform: translate(-50%, -50%);
+  overflow: auto;
+  border-radius: 18px;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, white 4%), var(--card));
+  color: var(--foreground);
+  box-shadow: 0 28px 60px rgba(15, 23, 42, 0.24);
+}
+
+.solid-radix-dialog-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 16px;
+  padding: 20px 22px 16px;
+}
+
+.solid-radix-dialog-title {
+  margin: 0;
+  font-size: 18px;
+  line-height: 1.2;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.solid-radix-dialog-description {
+  margin: 6px 0 0;
+  font-size: 13px;
+  line-height: 1.5;
+  color: var(--muted-foreground);
+}
+
+.solid-radix-dialog-separator {
+  height: 1px;
+  background: color-mix(in srgb, var(--border) 88%, transparent);
+}
+
+.solid-radix-dialog-body {
+  padding: 18px 22px 22px;
+}
+
+.solid-radix-dialog-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 10px;
+  padding: 0 22px 22px;
+}
+
+.solid-radix-dialog-close {
+  width: 32px;
+  height: 32px;
+  border: 0;
+  border-radius: 10px;
+  background: transparent;
+  color: var(--muted-foreground);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 120ms ease, color 120ms ease, box-shadow 120ms ease;
+}
+
+.solid-radix-dialog-close:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.solid-radix-dialog-close:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+}

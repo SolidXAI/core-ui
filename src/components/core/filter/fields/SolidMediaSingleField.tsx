@@ -16,8 +16,6 @@ const SolidMediaSingleField = ({ fieldMetadata, onChange, index, rule }: SolidFi
         { label: 'Ends With', value: "$endsWith" },
         { label: 'Equals', value: "$eqi" },
         { label: 'Not Equals', value: "$nei" },
-        { label: 'In', value: "$in" },
-        { label: 'Not In', value: "$notIn" },
         { label: 'Is null', value: "$null" },
         { label: 'Is Not null', value: "$notNull" }
 

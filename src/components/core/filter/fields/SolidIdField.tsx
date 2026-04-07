@@ -7,8 +7,15 @@ const SolidIdField = ({ fieldMetadata, onChange, index, rule }: SolidFilterField
     const showFilterOperator = false;
     const columnDataType = 'text';
     const filterMatchModeOptions = [
-        { label: 'In', value: "$in" },
-        { label: 'Not In', value: "$notIn" }
+        { label: 'Equals', value: "$eq" },
+        { label: 'Not Equals', value: "$ne" },
+        { label: 'Less Than', value: "$lt" },
+        { label: 'Less Than Or Equal', value: "$lte" },
+        { label: 'Greater Than', value: "$gt" },
+        { label: 'Greater Than Or Equal', value: "$gte" },
+        { label: 'Between', value: "$between" },
+        { label: 'Is null', value: "$null" },
+        { label: 'Is Not null', value: "$notNull" }
     ];
     const numberOfInputs = getNumberOfInputs(rule.matchMode);
 

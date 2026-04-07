@@ -3001,8 +3001,10 @@ li.header-li-px {
 .solid-filter-control-wrap .p-inputnumber-input,
 .solid-filter-control-wrap .p-calendar input,
 .solid-filter-control-wrap .p-autocomplete .p-inputtext,
-.solid-filter-control-wrap .solid-autocomplete-input {
+.solid-filter-control-wrap .solid-autocomplete-input,
+.solid-filter-control-wrap .solid-autocomplete-chip-control {
   min-height: 30px;
+  height: 30px;
   font-size: 12px;
 }
 
@@ -3109,6 +3111,9 @@ li.header-li-px {
   flex-wrap: nowrap;
   overflow: hidden;
   min-height: 30px;
+  height: 30px;
+  padding-top: 2px;
+  padding-bottom: 2px;
 }
 
 .solid-filter-control-wrap .solid-autocomplete-chip {
@@ -3117,6 +3122,8 @@ li.header-li-px {
 
 .solid-filter-control-wrap .solid-autocomplete-inline-input {
   min-width: 56px;
+  min-height: 20px;
+  height: 20px;
 }
 
 .solid-filter-var-input-between {
@@ -3133,6 +3140,7 @@ li.header-li-px {
 .solid-global-search-filter .solid-filter-control-wrap .p-inputnumber-input,
 .solid-global-search-filter .solid-filter-control-wrap .p-calendar input,
 .solid-global-search-filter .solid-filter-control-wrap .p-autocomplete .p-inputtext,
+.solid-global-search-filter .solid-filter-control-wrap .solid-autocomplete-chip-control,
 .solid-global-search-filter .solid-filter-control-wrap .solid-autocomplete-input {
   border-color: color-mix(in srgb, var(--border) 86%, transparent);
   background: color-mix(in srgb, var(--card) 98%, transparent);
@@ -3153,14 +3161,28 @@ li.header-li-px {
   position: relative;
 }
 
+.solid-global-search-filter .solid-filter-control-wrap .solid-autocomplete-chip-control {
+  align-items: center;
+  padding: 0 28px 0 10px;
+  gap: 4px;
+  border-radius: 8px;
+}
+
+.solid-global-search-filter .solid-filter-control-wrap .solid-autocomplete-inline-input {
+  min-height: 100%;
+  height: 100%;
+  padding: 0;
+}
+
 .solid-global-search-filter .solid-filter-control-wrap .solid-select {
   width: 100%;
-  min-height: 29px;
+  min-height: 30px;
+  height: 30px;
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
   border-radius: 8px;
   background: color-mix(in srgb, var(--card) 98%, transparent);
   color: color-mix(in srgb, var(--foreground) 92%, transparent);
-  font-size: 11.5px;
+  font-size: 12px;
   padding: 0 28px 0 10px;
   appearance: none;
 }
@@ -3182,11 +3204,25 @@ li.header-li-px {
 }
 
 .solid-filter-group-operator-wrap {
-  min-width: 84px;
+  display: inline-flex;
+  width: fit-content;
+  min-width: 0;
+  margin-bottom: 8px;
+}
+
+.solid-filter-group-operator-select {
+  width: auto;
+}
+
+.solid-filter-group-operator-select.solid-select-wrap {
+  width: auto;
+  display: inline-flex;
 }
 
 .solid-filter-group-operator-select .solid-select {
-  min-height: 24px;
+  width: auto;
+  min-width: 76px;
+  min-height: 28px;
   border-radius: 7px;
   font-size: 11px;
   font-weight: 600;

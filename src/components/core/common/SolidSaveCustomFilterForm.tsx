@@ -1,7 +1,6 @@
-
-import { Button } from "primereact/button";
-import { Checkbox } from "primereact/checkbox";
 import { useState } from "react";
+import { SolidButton } from "../../shad-cn-ui/SolidButton";
+import { SolidInput } from "../../shad-cn-ui/SolidInput";
 
 interface SolidSaveCustomFilterFormProps {
     currentSavedFilterData: any,
@@ -34,42 +33,41 @@ export const SolidSaveCustomFilterForm: React.FC<SolidSaveCustomFilterFormProps>
         <form onSubmit={handleSubmit}>
             <div className="flex flex-column gap-2">
                 <label htmlFor="name">Name:</label>
-                <input
-                    type="text"
+                <SolidInput
                     id="name"
                     name="name"
                     placeholder="Filter Title"
-                    className="p-inputtext p-inputtext-sm p-component"
                     value={formValues.name}
                     onChange={handleChange}
                     readOnly={currentSavedFilterData}
                 />
             </div>
             <div className="mt-3 flex align-items-center ">
-                <Checkbox
-                    inputId="isPrivate"
+                <input
+                    id="isPrivate"
                     name="isPrivate"
+                    type="checkbox"
                     checked={formValues.isPrivate}
-                    onChange={(e: any) => handleChange(e)}
-                >
-                </Checkbox>
+                    onChange={handleChange}
+                />
                 <label htmlFor="isPrivate" className="ml-2">Is Private</label>
             </div>
             <div className="mt-3 flex align-items-center gap-2">
-                <Button
+                <SolidButton
                     type="submit"
-                    label={currentSavedFilterData ? "Update" : "Save"}
-                    size="small"
-                />
-                <Button
+                    size="sm"
+                >
+                    {currentSavedFilterData ? "Update" : "Save"}
+                </SolidButton>
+                <SolidButton
                     type="button"
-                    label="Cancel"
-                    size="small"
-                    outlined
+                    size="sm"
+                    variant="outline"
                     onClick={() => closeDialog()}
-                />
+                >
+                    Cancel
+                </SolidButton>
             </div>
         </form>
     );
 };
-
