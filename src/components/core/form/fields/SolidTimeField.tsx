@@ -3,12 +3,12 @@ import { Calendar } from "primereact/calendar";
 import { Message } from "primereact/message";
 import { useRef } from "react";
 import * as Yup from 'yup';
+import dayjs from 'dayjs';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
-import { DateFieldViewComponent } from '../../../../components/core/common/DateFieldViewComponent';
 
 
 // Converts multiple time formats into a JavaScript Date object
@@ -224,8 +224,10 @@ export const DefaultTimeFormViewWidget = ({
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
 
     const rawValue = formik.values[fieldName];
-    const format = fieldLayoutInfo.attrs?.format
+    const format = fieldLayoutInfo.attrs?.format;
 
+    const parsedTime = rawValue ? parseTimeStringToDate(rawValue) : null;
+    const displayValue = parsedTime ? (format ? dayjs(parsedTime).format(format) : formatTime(parsedTime)) : "-";
 
     return (
         <div className="mt-2 flex flex-column gap-2">
@@ -236,9 +238,7 @@ export const DefaultTimeFormViewWidget = ({
             )}
 
             <p className="m-0">
-                {/* {displayValue ?? "-"} */}
-                <DateFieldViewComponent value={rawValue} format={format} fallback="-"></DateFieldViewComponent>
-
+                {displayValue}
             </p>
         </div>
     );
