@@ -2,7 +2,7 @@ import Link from "../common/Link";
 import { usePathname } from "../../hooks/usePathname";
 import { PanelMenu } from "primereact/panelmenu";
 import { useState, useEffect } from "react";
-import { useSearchParams } from "@/hooks/useSearchParams";
+import { useSearchParams } from "../../hooks/useSearchParams";
 
 const NavbarTwoMenu = ({ menuItems }: any) => {
     const searchParams = useSearchParams();
