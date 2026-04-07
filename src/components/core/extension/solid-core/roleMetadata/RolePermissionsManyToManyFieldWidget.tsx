@@ -1,4 +1,5 @@
 import { capitalize } from "lodash";
+import { Message } from "primereact/message";
 import { Panel } from "primereact/panel";
 import { useEffect, useState } from "react";
 import { Button } from "primereact/button";
@@ -82,6 +83,7 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
                                     }))
                                 }
                                 className="custom-add-button"
+                                disabled={isUnsaved}
                             />
                             <InlineRelationEntityDialog
                                 visible={visibleCreateDialog}
@@ -97,9 +99,18 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
         );
     };
 
+    const isUnsaved = fieldContext.data?.id === undefined || fieldContext.data?.id === "new";
+    const entityName = fieldContext.solidFormViewMetaData?.data?.solidView?.model?.displayName || capitalize(fieldContext.modelName);
+    const fieldLabel = fieldLayoutInfo.attrs.label || "Permissions";
+
     const groupedEntities = groupByController(allOptions || []);
     return (
         <div>
+            {isUnsaved && (
+                <div className="mb-2">
+                    <Message severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-content-start" />
+                </div>
+            )}
             {Object.keys(groupedEntities).map((controllerName) => (
                 <Panel
                     key={controllerName}
@@ -114,7 +125,8 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
                                 className={`field col-12 lg:col-6 flex gap-2 ${i >= 2 ? 'lg:mt-3' : ''}`}
                             >
                                 <Checkbox
-                                    readOnly={readOnlyPermission}
+                                    readOnly={readOnlyPermission || isUnsaved}
+                                    disabled={isUnsaved}
                                     inputId={entity.label}
                                     checked={currentValues.some((s) => s.value === entity.value)}
                                     onChange={() => handleCheckboxChange(entity)}

@@ -187,6 +187,9 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
         }
     };
 
+    const isUnsaved = fieldContext.data?.id === undefined || fieldContext.data?.id === "new";
+    const entityName = fieldContext.solidFormViewMetaData?.data?.solidView?.model?.displayName || capitalize(fieldContext.modelName);
+
     return (
         <div className="relative">
             <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
@@ -197,15 +200,20 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                         <SolidFieldTooltip fieldContext={fieldContext} />
                     </label>
                 )}
+                {isUnsaved && (
+                    <div className="mb-2">
+                        <Message severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-content-start" />
+                    </div>
+                )}
                 <div className="flex align-items-center gap-3">
                     <AutoComplete
-                        readOnly={readOnly || readOnlyPermission}
-                        disabled={disabled || readOnlyPermission}
+                        readOnly={readOnly || readOnlyPermission || isUnsaved}
+                        disabled={disabled || readOnlyPermission || isUnsaved}
                         multiple
                         id={fieldLayoutInfo.attrs.name}
                         field="label"
                         value={currentValues}
-                        dropdown={!readOnlyPermission}
+                        dropdown={!readOnlyPermission && !isUnsaved}
                         suggestions={suggestions}
                         completeMethod={autoCompleteSearch}
                         onChange={() => {
@@ -227,6 +235,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                                     size="small"
                                     onClick={() => setVisibleCreateDialog(true)}
                                     className="custom-add-button"
+                                    disabled={isUnsaved}
                                 />
                             </div>
                             <InlineRelationEntityDialog
@@ -265,6 +274,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
 export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const readOnlyPermission = fieldContext.readOnly;
 
@@ -284,6 +294,11 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
     useEffect(() => {
         fetchCurrentValues();
     }, [fieldContext.data?.id]);
+
+    // Sync currentValues to Formik state for validation
+    useEffect(() => {
+        formik.setFieldValue(fieldLayoutInfo.attrs.name, currentValues);
+    }, [currentValues]);
 
     useEffect(() => {
         const queryData: any = {
@@ -325,6 +340,9 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
         }
     }, [fieldContext, formik.values]);
 
+    const isUnsaved = fieldContext.data?.id === undefined || fieldContext.data?.id === "new";
+    const entityName = fieldContext.solidFormViewMetaData?.data?.solidView?.model?.displayName || capitalize(fieldContext.modelName);
+
     const handleCheckboxChange = (item: any) => {
         const isCurrentlyLinked = currentValues.some((s) => s.value === item.value);
         if (isCurrentlyLinked) {
@@ -339,7 +357,7 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
             <div className="flex align-items-center gap-3">
                 {showFieldLabel !== false && (
                     <label className="form-field-label">
-                        {capitalize(fieldLayoutInfo.attrs.name)}
+                        {fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
                     </label>
@@ -355,6 +373,7 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
                             size="small"
                             onClick={() => setVisibleCreateDialog(true)}
                             className="custom-add-button"
+                            disabled={isUnsaved}
                         />
                         <InlineRelationEntityDialog
                             visible={visibleCreateDialog}
@@ -371,12 +390,18 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
 
     return (
         <div>
+            {isUnsaved && (
+                <div className="mb-2">
+                    <Message severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-content-start" />
+                </div>
+            )}
             <Panel toggleable headerTemplate={headerTemplate}>
                 <div className="formgrid grid">
                     {allOptions.map((item: any, i: number) => (
                         <div key={item.value} className={`field col-6 flex gap-2 ${i >= 2 ? 'mt-3' : ''}`}>
                             <Checkbox
-                                readOnly={readOnlyPermission}
+                                readOnly={readOnlyPermission || isUnsaved}
+                                disabled={isUnsaved}
                                 inputId={item.label}
                                 checked={currentValues.some((s) => s.value === item.value)}
                                 onChange={() => handleCheckboxChange(item)}
@@ -569,6 +594,9 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
         setShowSaveParentEntityConfirmationPopup(false);
     };
 
+    const isUnsaved = fieldContext.data?.id === undefined || fieldContext.data?.id === "new";
+    const entityName = fieldContext.solidFormViewMetaData?.data?.solidView?.model?.displayName || capitalize(fieldContext.modelName);
+
     return (
         <div>
             {showFieldLabel !== false && (
@@ -577,6 +605,11 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
+            )}
+            {isUnsaved && (
+                <div className="mb-2">
+                    <Message severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-content-start" />
+                </div>
             )}
             {listViewParams && (
                 <SolidListView key={refreshList.toString()} {...listViewParams} embededFieldRelationType="many-to-many" handleAddClickForEmbeddedView={handleAddClickForEmbeddedView} handleEditClickForEmbeddedView={handleEditClickForEmbeddedView} handleDeleteClick={handleDeleteClick} />
