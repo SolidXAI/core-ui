@@ -5,16 +5,16 @@ import { useSession } from "../../../../hooks/useSession";
 import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
 import { Password } from 'primereact/password';
-import { Toast } from 'primereact/toast';
-import { useMemo, useRef } from 'react';
+import { useMemo } from 'react';
+import { useDispatch } from 'react-redux';
+import { showToast } from '../../../../redux/features/toastSlice';
 import * as Yup from 'yup';
 import { SolidPasswordHelperText } from '../SolidPasswordHelperText';
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
 import { env } from "../../../../adapters/env";
-import showToast from "../../../../helpers/showToast";
 
 export const SolidChangePassword = ({ solidSettingsData }: any) => {
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
     const [changePassword] = useChangePasswordMutation();
 
     const session: any = useSession();
@@ -85,19 +85,19 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
 
                 const response = await changePassword(payload).unwrap();
                 if (response?.error) {
-                    showToast(toast, "error", ERROR_MESSAGES.ERROR, response.error)
+                    dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.ERROR, detail: response.error }))
                     setErrors({
                         currentPassword: ERROR_MESSAGES.INCORRECT_CURRENT,
                         newPassword: ERROR_MESSAGES.MUST_MATCH,
                         confirmPassword: ERROR_MESSAGES.MUST_MATCH,
                     })
                 } else {
-                    showToast(toast, "success", ERROR_MESSAGES.PASSWORD_CHANGE, ERROR_MESSAGES.PASSWORD_CHANGE);
-                    handleLogout(toast)
+                    dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.PASSWORD_CHANGE, detail: ERROR_MESSAGES.PASSWORD_CHANGE }));
+                    handleLogout(null)
                     resetForm();
                 }
             } catch (err: any) {
-                showToast(toast, "error", err?.data?.message, err?.data?.data?.message ? err?.data?.data?.message : err?.data?.message);
+                dispatch(showToast({ severity: "error", summary: err?.data?.message, detail: err?.data?.data?.message ? err?.data?.data?.message : err?.data?.message }));
             }
         },
     });
@@ -106,7 +106,6 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
 
     return (
         <form onSubmit={formik.handleSubmit} className="h-full flex flex-column justify-content-between">
-            <Toast ref={toast} />
             <div>
                 <div className='grid'>
                     <div className='col-12 md-col-8 lg:col-5'>

@@ -156,49 +156,41 @@ export const SolidAdmin = () => {
         )}
       </div> */}
       <div className="solid-welcome">
-        {!hasRedirect && (
-          <div className="mb-3">
-            <Message
-              severity="warn"
-              text="Default redirect URL is not configured. Please ask your system administrator to set VITE_LOGIN_REDIRECT_URL."
-            />
+
+        <div className="welcome-card">
+
+          <img
+            alt="solid logo"
+            src={SolidLogo}
+            className="mb-5 w-6rem flex-shrink-0"
+          />
+
+          <p className="welcome-eyebrow">Admin Console</p>
+
+          <h1 className="welcome-title">
+            Welcome to <em>SolidX</em>
+          </h1>
+
+          <div className="divider" />
+
+          <p className="welcome-desc">
+            Manage your modules, models, views, and permissions
+            from one place. Use the navigation on the left to
+            explore and configure your application.
+          </p>
+
+          <div className="features-row">
+            {["Modules", "Models", "Views", "Permissions", "Settings"].map((label) => (
+              <span key={label} className="feature-pill">{label}</span>
+            ))}
           </div>
-        )}
-        {hasRedirect && (
-          <div className="welcome-card">
 
-            <img
-              alt="solid logo"
-              src={SolidLogo}
-              className="mb-5 w-6rem flex-shrink-0"
-            />
+          <p className="hint">
+            Get started by selecting a section from the <span>left nav</span>
+          </p>
 
-            <p className="welcome-eyebrow">Admin Console</p>
+        </div>
 
-            <h1 className="welcome-title">
-              Welcome to <em>SolidX</em>
-            </h1>
-
-            <div className="divider" />
-
-            <p className="welcome-desc">
-              Manage your modules, models, views, and permissions
-              from one place. Use the navigation on the left to
-              explore and configure your application.
-            </p>
-
-            <div className="features-row">
-              {["Modules", "Models", "Views", "Permissions", "Settings"].map((label) => (
-                <span key={label} className="feature-pill">{label}</span>
-              ))}
-            </div>
-
-            <p className="hint">
-              Get started by selecting a section from the <span>left nav</span>
-            </p>
-
-          </div>
-        )}
       </div>
     </>
   );

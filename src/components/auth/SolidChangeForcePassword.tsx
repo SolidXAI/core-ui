@@ -6,14 +6,13 @@ import { useSession } from "../../hooks/useSession";
 import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
 import { Password } from 'primereact/password';
-import { Toast } from 'primereact/toast';
-import { useRef } from 'react';
+import { useDispatch } from 'react-redux';
 import * as Yup from 'yup';
 import { env } from "../../adapters/env";
-import showToast from "../../helpers/showToast";
+import { showToast } from "../../redux/features/toastSlice";
 
 const SolidChangeForcePassword = () => {
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
     const [changePassword] = useChangePasswordMutation();
 
     const session: any = useSession();
@@ -68,18 +67,18 @@ const SolidChangeForcePassword = () => {
                 // Call the mutation and handle the response
                 const response = await changePassword(payload).unwrap(); // Await the API call and unwrap to handle errors.
                 if (response?.error) {
-                    showToast(toast, "error", ERROR_MESSAGES.ERROR, response.error)
+                    dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.ERROR, detail: response.error }))
                     setErrors({
                         currentPassword: ERROR_MESSAGES.INCORRECT_CURRENT,
                         newPassword: ERROR_MESSAGES.MUST_MATCH,
                         confirmPassword: ERROR_MESSAGES.MUST_MATCH,
                     })
                 } else {
-                    showToast(toast, "success", ERROR_MESSAGES.FORCE_PASSWORD_CHANGE, ERROR_MESSAGES.PASSWORD_CHANGE);
+                    dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.FORCE_PASSWORD_CHANGE, detail: ERROR_MESSAGES.PASSWORD_CHANGE }));
                     signOut({ callbackUrl: "/auth/login" })
                 }
             } catch (err: any) {
-                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message);
+                dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGIN_ERROR, detail: err?.data?.message }));
                 // setErrors({
                 //     currentPassword: "Incorrect Current Password",
                 // })
@@ -112,8 +111,6 @@ const SolidChangeForcePassword = () => {
 
     return (
         <>
-            <Toast ref={toast} />
-
             <form onSubmit={formik.handleSubmit} className='d-flex flex-column gap-3 auth-form'>
                 <div className="flex flex-column gap-2 mt-2" style={{}}>
                     <label htmlFor="currentPassword" className="solid-auth-input-label">Current Password</label>

@@ -46,6 +46,10 @@ import { SolidAiInteractionMessageFieldFormWidget } from "../components/core/for
 import { SolidS3FileViewerWidget } from "../components/core/form/fields/widgets/SolidS3FileViewerWidget";
 import DeleteModuleRowAction from "../components/core/extension/solid-core/moduleMetadata/list/DeleteModuleRowAction";
 import hanldeModelSequenceFormViewChange from "../components/core/extension/solid-core/modelSequence/modelSequenceFormViewChangeHandler";
+import { DefaultDateTimeListWidget } from "../components/core/list/columns/SolidDateColumn";
+import dashboardFormViewChangeHandler from "../components/core/extension/solid-core/dashboard/dashboardFormViewChangeHandler";
+import dashboardQuestionFieldChangeHandler from "../components/core/extension/solid-core/dashboard/dashboardQuestionFieldChangeHandler";
+import dashboardQuestionOnFormLoadHandler from "../components/core/extension/solid-core/dashboard/dashboardQuestionOnFormLoadHandler";
 
 type ExtensionComponentType = null | 'list_field_widget' | 'form_field_view_widget' | 'form_field_edit_widget' | 'list_row_action ' | 'list_header_action' | 'form_action' | 'form_widget';
 
@@ -135,6 +139,9 @@ registerExtensionComponent("SolidManyToManyRelationAvatarListWidget", SolidManyT
 
 // - relation.one2many
 registerExtensionComponent("DefaultRelationOneToManyListWidget", DefaultRelationOneToManyListWidget, []);
+
+// - relation.datetime
+registerExtensionComponent('DefaultDateTimeListWidget', DefaultDateTimeListWidget, []);
 
 // ...
 
@@ -334,6 +341,11 @@ registerExtensionComponent("SolidIconViewWidget", SolidIconViewWidget, []);
 // Email Template
 registerExtensionFunction("emailFormTypeChangeHandler", hanldeEmailFormTypeChange);
 registerExtensionFunction("emailFormTypeLoad", hanldeEmailFormTypeLoad);
+
+// Dashboard
+registerExtensionFunction("dashboardFormViewChangeHandler", dashboardFormViewChangeHandler);
+registerExtensionFunction("dashboardQuestionFieldChangeHandler", dashboardQuestionFieldChangeHandler);
+registerExtensionFunction("dashboardQuestionOnFormLoadHandler", dashboardQuestionOnFormLoadHandler);
 
 // Model Sequence 
 // TODO: @Jyotsana you need to create an extension function which will be used "onFieldChange"

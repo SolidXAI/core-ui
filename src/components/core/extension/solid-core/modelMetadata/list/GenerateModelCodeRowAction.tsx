@@ -4,13 +4,12 @@ import { useSeederMutation } from "../../../../../../redux/api/solidServiceApi";
 import { closePopup } from "../../../../../../redux/features/popupSlice";
 import { SolidListRowdataDynamicFunctionProps } from "../../../../../../types/solid-core";
 import { Button } from "primereact/button";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
-import { Toast } from 'primereact/toast';
+import { showToast } from "../../../../../../redux/features/toastSlice";
 import { SolidCircularLoader } from '../../../../../../components/core/common/SolidLoaders/SolidCircularLoader';
 import { ERROR_MESSAGES } from "../../../../../../constants/error-messages";
 import { env } from "../../../../../../adapters/env";
-import showToast from "../../../../../../helpers/showToast";
 
 
 const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
@@ -82,8 +81,6 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
         isError: isSeederError
     }] = useSeederMutation();
 
-    const toast = useRef<Toast>(null);
-
     // Utitlity to track if solid-api is up
     const [isPinging, setIsPinging] = useState(false);
     const [isGenerating, setIsGenerating] = useState(false);
@@ -120,7 +117,7 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
                 } else {
                     dispatch(closePopup());
                     console.log("Backend is not alive, cannot run seeder");
-                    showToast(toast, "error", ERROR_MESSAGES.BACKEND_UNAVAILABLE , ERROR_MESSAGES.SEEDER_NOT_TRIGGERED);
+                    dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.BACKEND_UNAVAILABLE, detail: ERROR_MESSAGES.SEEDER_NOT_TRIGGERED }));
                 }
             }
         };
@@ -132,14 +129,14 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
     useEffect(() => {
         if (isSeederSuccess) {
             console.log(ERROR_MESSAGES.IS_SEEDER_SUCCESS, data);
-            showToast(toast, "success", ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY, ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY);
+            dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY, detail: ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY }));
             setIsGenerating(false);
             dispatch(closePopup());
             window.location.reload();
         }
         if (isSeederError) {
             console.log(ERROR_MESSAGES.IS_SEEDER_ERROR, isSeederError);
-            showToast(toast, "error", ERROR_MESSAGES.SEEDER_ERROR, ERROR_MESSAGES.SEEDER_NOT_RUN);
+            dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEEDER_ERROR, detail: ERROR_MESSAGES.SEEDER_NOT_RUN }));
             setIsGenerating(false);
         }
     }, [isSeederSuccess])
@@ -149,7 +146,6 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
         <>
             {isGenerating ?
                 <>
-                    <Toast ref={toast} />
                     <div className="flex flex-column align-items-center justify-content-center" style={{ padding: '2rem', height: 200 }}>
                         <SolidCircularLoader />
                         <p className="mt-4 font-medium">Waiting for backend...</p>
@@ -157,7 +153,6 @@ const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps)
                 </>
                 :
                 <>
-                    <Toast ref={toast} />
                     {event?.rowData?.module?.name != "solid-core" ?
                         <div className="">
                             <div className="p-dialog-header secondary-border-bottom py-3" style={{ background: 'var(--solid-light-grey)' }}>

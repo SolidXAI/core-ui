@@ -400,13 +400,13 @@ export const mergeAllDiffFilters = (customFilter: any, searchFilter: any, savedF
     return filters;
 }
 
-const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, openSavedCustomFilter, setSavedFilterTobeDeleted, setIsDeleteSQDialogVisible }: any) => {
+const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, openSavedCustomFilter, setSavedFilterTobeDeleted, setIsDeleteSQDialogVisible, isFocused }: any) => {
     return (
         <div className="flex align-items-center justify-content-between gap-2">
             <div>
                 <Button text
                     size="small"
-                    className="text-base py-1 w-full"
+                    className={`text-base py-1 w-full ${isFocused ? 'surface-hover' : ''}`}
                     severity={Number(activeSavedFilter) == savedfilter.id ? "secondary" : "contrast"}
                     onClick={() => applySavedFilter(savedfilter)}
                     tooltip={savedfilter?.description}>{savedfilter.name}
@@ -617,6 +617,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     const [savedFilterQueryString, setSavedFilterQueryString] = useState<string>();
     const [showOverlay, setShowOverlay] = useState(false);
     const overlayRef = useRef<HTMLDivElement | null>(null);
+    const [focusedIndex, setFocusedIndex] = useState<number>(-1);
 
     const { data: session, status } = useSession();
     const user = session?.user;
@@ -845,6 +846,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             setPredefinedSearchChip(null);
             setPredefinedSearchBaseFilter(null);
             setInputValue("");
+
 
             let fieldsData = viewData?.data?.solidFieldsMetadata;
             // console.log(`fiels data while rendering solid global search element: `);
@@ -1389,10 +1391,59 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        if (e.key === "Enter" && inputValue?.trim()) {
-            handleAddChip();
+        const hasInput = !!inputValue?.trim();
+        const searchCount = hasInput ? searchableFields.length : 0;
+        const predefinedCount = hasInput ? (predefinedSearches?.length || 0) : 0;
+        const savedFiltersCount = savedFilters?.length || 0;
+        const totalItems = searchCount + predefinedCount + savedFiltersCount;
+
+        if (e.key === "ArrowDown") {
             e.preventDefault();
-            setShowOverlay(false);
+            if (showOverlay) {
+                setFocusedIndex(prev => (prev < totalItems - 1 ? prev + 1 : prev));
+            }
+        } else if (e.key === "ArrowUp") {
+            e.preventDefault();
+            if (showOverlay) {
+                setFocusedIndex(prev => (prev > -1 ? prev - 1 : prev));
+            }
+        } else if (e.key === "Enter") {
+            if (hasInput || focusedIndex >= 0) e.preventDefault();
+            
+            const predefinedSearchOffset = searchCount;
+            const savedFilterOffset = predefinedSearchOffset + predefinedCount;
+
+            if (showOverlay && focusedIndex >= 0 && focusedIndex < predefinedSearchOffset) {
+                const value = searchableFields[focusedIndex];
+                const currentValue = inputValue?.trim() || "";
+                const values = currentValue.split(",").map((v) => v.trim()).filter((v) => v !== "");
+                const chipsToAdd = values.map((v: any) => ({
+                    columnName: value.fieldName,
+                    value: v,
+                    columnDisplayName: value.displayName,
+                    searchField: value.searchField,
+                    matchMode: value.matchMode
+                }));
+                setSearchChips((prev) => [...prev, ...chipsToAdd]);
+                setInputValue("");
+                setHasSearched(true);
+                setRefreshKey((prev) => prev + 1);
+                setShowOverlay(false);
+                setFocusedIndex(-1);
+            } else if (showOverlay && focusedIndex >= predefinedSearchOffset && focusedIndex < savedFilterOffset) {
+                const predefinedSearch = predefinedSearches[focusedIndex - predefinedSearchOffset];
+                handlePredefinedSearch(predefinedSearch);
+                setFocusedIndex(-1);
+            } else if (showOverlay && focusedIndex >= savedFilterOffset && focusedIndex < totalItems) {
+                const savedFilterIdx = focusedIndex - savedFilterOffset;
+                const savedFilter = savedFilters[savedFilterIdx];
+                if (savedFilter) applySavedFilter(savedFilter);
+                setFocusedIndex(-1);
+            } else if (hasInput) {
+                handleAddChip();
+                setShowOverlay(false);
+                setFocusedIndex(-1);
+            }
         } else if (e.key === "Backspace" && inputValue === "") {
 
             if (searchChips.length > 0) {
@@ -1541,6 +1592,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                     onChange={(e) => {
                                         setInputValue(e.target.value);
                                         setShowOverlay(true);
+                                        setFocusedIndex(-1);
                                     }}
                                     onFocus={() => {
                                         if (inputValue?.trim()) setShowOverlay(true);
@@ -1579,7 +1631,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                             return (
                                                 <Button
                                                     key={index}
-                                                    className="p-2 flex gap-1 text-color"
+                                                    className={`p-2 flex gap-1 text-color ${focusedIndex === index ? 'surface-hover' : ''}`}
                                                     // onClick={() => handleAddChip(value)}
                                                     onMouseDown={(e) => {
                                                         // Prevent focus loss from input
@@ -1619,7 +1671,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                             {predefinedSearches.map((predefinedSearch: any, index: number) => (
                                                 <Button
                                                     key={index}
-                                                    className="p-2 flex flex-column align-items-start gap-1 text-color"
+                                                    className={`p-2 flex flex-column align-items-start gap-1 text-color ${focusedIndex === (index + searchableFields.length) ? 'surface-hover' : ''}`}
                                                     onMouseDown={(e) => {
                                                         e.preventDefault();
                                                         handlePredefinedSearch(predefinedSearch);
@@ -1650,9 +1702,13 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                 <div className="p-3">
                                     <p className="font-medium">Saved Filters</p>
                                     <div className="flex flex-column gap-2">
-                                        {savedFilters.map((savedfilter: any) =>
-                                            <SavedFilterList savedfilter={savedfilter} activeSavedFilter={activeSavedFilter} applySavedFilter={applySavedFilter} openSavedCustomFilter={openSavedCustomFilter} setSavedFilterTobeDeleted={setSavedFilterTobeDeleted} setIsDeleteSQDialogVisible={setIsDeleteSQDialogVisible}></SavedFilterList>
-                                        )}
+                                        {savedFilters.map((savedfilter: any, idx: number) => {
+                                            const hasInput = !!inputValue?.trim();
+                                            const combinedOffset = (hasInput ? searchableFields.length : 0) + (hasInput ? (predefinedSearches?.length || 0) : 0);
+                                            return (
+                                                <SavedFilterList key={idx} savedfilter={savedfilter} activeSavedFilter={activeSavedFilter} applySavedFilter={applySavedFilter} openSavedCustomFilter={openSavedCustomFilter} setSavedFilterTobeDeleted={setSavedFilterTobeDeleted} setIsDeleteSQDialogVisible={setIsDeleteSQDialogVisible} isFocused={focusedIndex === combinedOffset + idx}></SavedFilterList>
+                                            )
+                                        })}
                                     </div>
                                 </div>
                                 <Divider className="m-0" />

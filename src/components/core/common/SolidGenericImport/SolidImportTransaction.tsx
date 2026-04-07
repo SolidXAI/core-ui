@@ -2,15 +2,15 @@
 import { Button } from 'primereact/button'
 import styles from './SolidImport.module.css'
 import { useCreateImportSyncMutation, useLazyGetImportMappingInfoQuery, usePatchUpdateImportTransactionMutation } from '../../../../redux/api/importTransactionApi';
-import React, { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Dropdown } from 'primereact/dropdown';
-import { Toast } from 'primereact/toast';
+import { useDispatch } from 'react-redux';
+import { showToast } from '../../../../redux/features/toastSlice';
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
-import showToast from "../../../../helpers/showToast";
 export const SolidImportTransaction = ({ setImportStatusResult, transactionId, setImportStep }: any) => {
     // console.log("get transaction id", transactionId);
 
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
     const [trigger, { data: mappingInfo, isLoading, isError }] = useLazyGetImportMappingInfoQuery();
     const [patchUpdateImportTransaction] = usePatchUpdateImportTransactionMutation();
     const [createImportSync, { isLoading: isImporting }] = useCreateImportSyncMutation();
@@ -86,14 +86,14 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
                         setImportStep(4);
                     }
                 } catch (importError: any) {
-                    showToast(toast, "error", ERROR_MESSAGES.IMPORT_ERROR, importError?.data?.error);
+                    dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.IMPORT_ERROR, detail: importError?.data?.error }));
                 }
 
                 // Async
             }
         } catch (error: any) {
             const errorMessage = error?.data?.error || ERROR_MESSAGES.SOMETHING_WRONG;
-            showToast(toast, "error", ERROR_MESSAGES.ERROR, errorMessage);
+            dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.ERROR, detail: errorMessage }));
         }
     };
 
@@ -101,7 +101,6 @@ export const SolidImportTransaction = ({ setImportStatusResult, transactionId, s
 
     return (
         <div>
-            <Toast ref={toast} />
             <div className={styles.SolidImportContextWrapper}>
                 <div className='grid m-0 relative'>
                     <div className={`col-6 font-bold p-3 ${styles.ImportTableHeader}`}>

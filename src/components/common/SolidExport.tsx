@@ -2,8 +2,9 @@
 import { useFormik } from "formik";
 import './solid-export.css';
 import { Button } from "primereact/button";
-import { Toast } from "primereact/toast";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
+import { useDispatch } from 'react-redux';
+import { showToast } from '../../redux/features/toastSlice';
 import { createSolidEntityApi } from "../../redux/api/solidEntityApi";
 import { Dropdown } from "primereact/dropdown";
 import { Dialog } from "primereact/dialog";
@@ -38,7 +39,7 @@ interface Question {
   name: string;
 }
 export const SolidExport = ({ listViewMetaData, filters }: any) => {
-  const toast = useRef<Toast>(null);
+  const dispatch = useDispatch();
   const entityApi = createSolidEntityApi("userViewMetadata");
   const { useUpsertSolidEntityMutation } = entityApi;
 
@@ -226,11 +227,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
 
       try {
         const response = await createExportTemplate(exportData).unwrap();
-        toast?.current?.show({
-          severity: "success",
-          summary: "Template Added",
-          detail: "Template Saved",
-        });
+        dispatch(showToast({ severity: "success", summary: "Template Added", detail: "Template Saved" }));
         let newAddedTemplate: TemplateOption = {
           name: selectedTemplate?.name || "",
           code: response.data.id,
@@ -246,11 +243,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
         console.error(ERROR_MESSAGES.TEMPLATE_FAILED, err);
       }
     } else {
-      toast?.current?.show({
-        severity: "error",
-        summary: ERROR_MESSAGES.TEMPLATE_FAILED,
-        detail: ERROR_MESSAGES.TEMPLATE_FAILED,
-      });
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.TEMPLATE_FAILED, detail: ERROR_MESSAGES.TEMPLATE_FAILED }));
     }
   };
 
@@ -387,11 +380,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
   const handleDeleteTemplate = async (id: string) => {
     const response = await deleteExportTemplate(id).unwrap();
     setTemplateOptions((prev) => prev.filter((template) => template.code !== id));
-    toast?.current?.show({
-      severity: "success",
-      summary: "Template Deleted",
-      detail: "Template Deleted",
-    });
+    dispatch(showToast({ severity: "success", summary: "Template Deleted", detail: "Template Deleted" }));
   };
   const itemTemplate = (option: TemplateOption) => {
     return (
@@ -410,7 +399,6 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
 
   return (
     <>
-      <Toast ref={toast} />
       {/*<div className="flex align-items-center justify-content-between m-0 p-0">
        <SolidExportStepper
        solidFormViewWorkflowData={steps}

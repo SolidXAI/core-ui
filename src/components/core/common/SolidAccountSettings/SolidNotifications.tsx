@@ -4,10 +4,9 @@ import { useBulkUpdateSolidUserSettingsMutation, useGetSolidSettingsQuery } from
 import { useFormik } from 'formik';
 import { Button } from 'primereact/button';
 import { InputSwitch } from 'primereact/inputswitch';
-import { Toast } from 'primereact/toast';
-import React, { useEffect, useRef } from 'react'
-import { useSelector } from 'react-redux';
-import showToast from "../../../../helpers/showToast";
+import React, { useEffect } from 'react'
+import { useDispatch, useSelector } from 'react-redux';
+import { showToast } from '../../../../redux/features/toastSlice';
 export const SolidNotifications = () => {
     const {
         data: solidSettingsData,
@@ -20,7 +19,7 @@ export const SolidNotifications = () => {
         refetch();
     }, []);
 
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
     const [bulkUpdateSolidSettings] = useBulkUpdateSolidUserSettingsMutation();
 
     const initialValues = {
@@ -63,7 +62,7 @@ export const SolidNotifications = () => {
                 });
 
                 if (updatedSettingsArray.length === 0) {
-                    showToast(toast, "success", ERROR_MESSAGES.NO_CHANGE, ERROR_MESSAGES.NO_SETTING_UPDATE);
+                    dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.NO_CHANGE, detail: ERROR_MESSAGES.NO_SETTING_UPDATE }));
                     return;
                 }
 
@@ -74,11 +73,11 @@ export const SolidNotifications = () => {
                 const response = await bulkUpdateSolidSettings({ data: formData }).unwrap();
 
                 if (response.statusCode === 200) {
-                    showToast(toast, "success", ERROR_MESSAGES.UPDATED, ERROR_MESSAGES.SETTING_UPDATED);
+                    dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.UPDATED, detail: ERROR_MESSAGES.SETTING_UPDATED }));
                 }
 
             } catch (error) {
-                showToast(toast, "error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
+                dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.FAILED, detail: ERROR_MESSAGES.SOMETHING_WRONG }));
             }
         },
     })
@@ -86,7 +85,6 @@ export const SolidNotifications = () => {
 
     return (
         <form onSubmit={formik.handleSubmit} className="h-full flex flex-column justify-content-between">
-            <Toast ref={toast} />
             <div>
                 <div className="flex align-items-start justify-content-between pb-3">
                     <div>

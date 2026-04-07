@@ -1,6 +1,5 @@
 
 import { CreateButton } from "../../../components/common/CreateButton";
-import { handleError, handleSuccess } from "../../../helpers/ToastContainer";
 import { useDeleteMultiplemodulesMutation, useGenerateCodeFormoduleMutation, useLazyGetmodulesQuery, useRefreshPermissionsMutation } from "../../../redux/api/moduleApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
 import Link from "../../common/Link";
@@ -13,9 +12,10 @@ import {
   DataTableStateEvent,
 } from "primereact/datatable";
 import { Dialog } from "primereact/dialog";
-import { Toast } from "primereact/toast";
 import qs from "qs";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
+import { useDispatch } from "react-redux";
+import { showToast } from "../../../redux/features/toastSlice";
 
 export interface ModelMetaData {
   id: string;
@@ -29,7 +29,7 @@ interface ErrorResponseData {
   error: string;
 }
 export const ModuleListViewData = () => {
-  const toast = useRef<Toast>(null);
+  const dispatch = useDispatch();
 
   const [moduleMetadata, setModuleMetadata] = useState<ModelMetaData[]>([]);
 
@@ -305,14 +305,18 @@ export const ModuleListViewData = () => {
 
   useEffect(() => {
     if (isGenerateCodeError) {
-      handleError(generateCodeError)
+      const errorMessage = generateCodeError && typeof generateCodeError === 'object' && 'data' in generateCodeError && 'message' in (generateCodeError as any).data
+        ? (generateCodeError as any).data.message
+        : 'Something went wrong';
+      const detail = Array.isArray(errorMessage) ? errorMessage.join(', ') : String(errorMessage);
+      dispatch(showToast({ severity: 'error', summary: 'Error', detail }));
     }
   }, [isGenerateCodeError])
 
 
   useEffect(() => {
     if (isGenerateCodeSuceess) {
-      handleSuccess(["Code Generated Successfully"])
+      dispatch(showToast({ severity: 'success', summary: 'Success', detail: 'Code Generated Successfully' }));
     }
   }, [isGenerateCodeSuceess])
 
@@ -322,8 +326,6 @@ export const ModuleListViewData = () => {
 
   return (
     <div className="">
-      <Toast ref={toast} />
-
       <div className="flex gap-3 mb-4">
         <CreateButton />
         <Button className='small-button' onClick={handleRefreshPermission}>Refresh Permissions</Button>

@@ -59,11 +59,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
         } else if (date.toDateString() === yesterday.toDateString()) {
             return 'Yesterday';
         } else {
-            return date.toLocaleDateString('en-US', {
-                year: 'numeric',
-                month: 'long',
-                day: 'numeric'
-            });
+            return dateString;
         }
     };
 
@@ -120,8 +116,11 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                     const auditRecord = msg.chatterMessageDetails?.map((detail: any) => ({
                         field: detail.fieldName,
                         fieldDisplayName: detail.fieldDisplayName,
-                        previous: detail.oldValueDisplay || detail.oldValue || 'None',
-                        current: detail.newValueDisplay || detail.newValue
+                        fieldType: detail.fieldType,
+                        previous: detail.oldValue,
+                        current: detail.newValue,
+                        previousDisplay: detail.oldValueDisplay,
+                        currentDisplay: detail.newValueDisplay,
                     })) || [];
 
                     return {

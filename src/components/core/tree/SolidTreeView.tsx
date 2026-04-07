@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { Toast } from "primereact/toast";
+import { showToast } from "../../../redux/features/toastSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
@@ -40,6 +40,12 @@ import { SolidBeforeTreeNodeLoad } from "../../../types";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { SolidTreeLoad, SolidTreeUiEventResponse } from "../../../types/solid-core";
 import { Tooltip } from "primereact/tooltip";
+import { useRouter } from "../../../hooks/useRouter";
+import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
+import { usePathname } from "../../../hooks/usePathname";
+import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
+import { OverlayPanel } from "primereact/overlaypanel";
+import { SolidListViewRowButtonContextMenu } from "../list/SolidListViewRowButtonContextMenu";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -116,14 +122,15 @@ const DEFAULT_PAGE_SIZE = 25;
 // ─── Component ────────────────────────────────────────────────────────────────
 
 export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams>((params, ref) => {
-  const toast = useRef<Toast>(null);
   const dispatch = useDispatch();
   const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
   const searchParams = useSearchParams();
 
   const session = useSession();
+  const router = useRouter()
   const user = session?.data?.user;
 
+  const pathname = usePathname();
   const solidGlobalSearchElementRef = useRef<any>(null);
 
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
@@ -131,8 +138,9 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   const [toPopulate, setToPopulate] = useState<string[]>([]);
   const [toPopulateMedia, setToPopulateMedia] = useState<string[]>([]);
   const [actionsAllowed, setActionsAllowed] = useState<string[]>([]);
-  const [createButtonUrl, setCreateButtonUrl] = useState<string>();
   const [createActionQueryParams, setCreateActionQueryParams] = useState<Record<string, string>>({});
+  const [editActionQueryParams, setEditActionQueryParams] = useState<Record<string, string>>({});
+
   const [selectedRecords, setSelectedRecords] = useState<any[]>([]);
   const [selectedRecoverRecords, setSelectedRecoverRecords] = useState<any[]>([]);
 
@@ -154,6 +162,14 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   const [isDeleteRecordsDialogVisible, setDeleteRecordsDialogVisible] = useState(false);
   const [isRecoverDialogVisible, setRecoverDialogVisible] = useState(false);
   const [showArchived, setShowArchived] = useState(false);
+
+
+  const [createButtonUrl, setCreateButtonUrl] = useState<string>();
+  const [editButtonUrl, setEditButtonUrl] = useState<string>();
+  const [isDraftPublishWorkflowEnabled, setIsDraftPublishWorkflowEnabled] = useState(false);
+
+
+
 
 
   const sizeOptions = [
@@ -289,7 +305,66 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     fetchPermissions();
   }, [params.modelName]);
 
-  const [deleteManySolidEntities] = useDeleteMultipleSolidEntitiesMutation();
+
+  // set layout and actions for create and edit buttons and view modes
+  useEffect(() => {
+    if (solidTreeViewLayout) {
+      const listLayoutAttrs = solidTreeViewLayout.attrs;
+      const createActionUrl = listLayoutAttrs?.createAction && listLayoutAttrs?.createAction?.type === "custom" ? listLayoutAttrs?.createAction?.customComponent : "form/new";
+      const editActionUrl = listLayoutAttrs?.editAction && listLayoutAttrs?.editAction?.type === "custom" ? listLayoutAttrs?.editAction?.customComponent : "form";
+
+      if (listLayoutAttrs?.createAction) {
+        setCreateActionQueryParams({
+          actionName: listLayoutAttrs.createAction.name,
+          actionType: listLayoutAttrs.createAction.type,
+          actionContext: listLayoutAttrs.createAction.context,
+        });
+      }
+      if (listLayoutAttrs?.editAction) {
+        setEditActionQueryParams({
+          actionName: listLayoutAttrs.editAction.name,
+          actionType: listLayoutAttrs.editAction.type,
+          actionContext: listLayoutAttrs.editAction.context,
+        });
+      }
+
+      // const viewModes = listLayoutAttrs?.allowedViews && listLayoutAttrs?.allowedViews.length > 0 && listLayoutAttrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view }; });
+      setViewModes(solidTreeViewMetaData?.data?.viewModes);
+      if (createActionUrl) {
+        setCreateButtonUrl(createActionUrl);
+      }
+      if (editActionUrl) {
+        setEditButtonUrl(editActionUrl);
+      }
+      setIsDraftPublishWorkflowEnabled(solidTreeViewMetaData?.data?.solidView?.model?.draftPublishWorkflow === true);
+    }
+  }, [solidTreeViewLayout]);
+
+
+
+  const editBaseUrl = useMemo(
+    () => normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form"),
+    [editButtonUrl, pathname]
+  );
+
+  const [
+    deleteSolidSingleEntiry,
+    { isSuccess: isDeleteSolidSingleEntitySuccess },
+  ] = useDeleteSolidEntityMutation();
+
+  // Delete mutation
+  const [
+    deleteManySolidEntities,
+    {
+      isLoading: isSolidEntitiesDeleted,
+      isSuccess: isDeleteSolidEntitiesSucess,
+      isError: isSolidEntitiesDeleteError,
+      error: SolidEntitiesDeleteError,
+      data: DeletedSolidEntities,
+    },
+  ] = useDeleteMultipleSolidEntitiesMutation();
+
+
 
   const treeViewTitle = solidTreeViewMetaData?.data?.solidView?.displayName;
 
@@ -839,12 +914,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
     } catch (error: any) {
       setTreeNodes([]);
-      toast.current?.show({
-        severity: "error",
-        summary: "Failed to load tree",
-        detail: error?.data?.message || error?.message || "Unable to load grouped data",
-        life: 4000,
-      });
+      dispatch(showToast({ severity: "error", summary: "Failed to load tree", detail: error?.data?.message || error?.message || "Unable to load grouped data", life: 4000 }));
     } finally {
       setTreeLoading(false);
     }
@@ -924,12 +994,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
         });
       }
     } catch (error: any) {
-      toast.current?.show({
-        severity: "error",
-        summary: "Failed to expand node",
-        detail: error?.data?.message || error?.message || "Unable to load children",
-        life: 4000,
-      });
+      dispatch(showToast({ severity: "error", summary: "Failed to expand node", detail: error?.data?.message || error?.message || "Unable to load children", life: 4000 }));
       setTreeNodes((prev) => updateNodeChildren(prev, nodeKey, []));
     } finally {
       setTreeLoading(false);
@@ -1055,21 +1120,11 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     deleteManySolidEntities(deleteList)
       .unwrap()
       .then(() => {
-        toast.current?.show({
-          severity: 'success',
-          summary: 'Deleted',
-          detail: ERROR_MESSAGES.RECORD_DELETE,
-          life: 3000
-        });
+        dispatch(showToast({ severity: 'success', summary: 'Deleted', detail: ERROR_MESSAGES.RECORD_DELETE, life: 3000 }));
         setDeleteRecordsDialogVisible(false);
       })
       .catch((error) => {
-        toast.current?.show({
-          severity: 'error',
-          summary: 'Delete Failed',
-          detail: error?.data?.message,
-          life: 4000
-        });
+        dispatch(showToast({ severity: 'error', summary: 'Delete Failed', detail: error?.data?.message, life: 4000 }));
       });
   };
 
@@ -1228,7 +1283,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     const rootHasPrev = hasPrev("root");
     const rootHasNext = hasNext("root");
 
-    if (!rootHasPrev && !rootHasNext) return null;
+    // if (!rootHasPrev && !rootHasNext) return null;
 
     return (
       <div style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid var(--surface-border)" }}>
@@ -1303,12 +1358,204 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     }),
   }), [filters, filterPredicates, params.customFilter, treeLoading, treeNodes, paginationMap]);
 
+
+  const handleCustomButtonClick = useHandleListCustomButtonClick();
+
+
+
+  const [selectedSolidViewData, setSelectedSolidViewData] = useState<any>();
+  const selectedDataRef = useRef<any>();
+  const op = useRef<any>(null);
+  const [deleteEntity, setDeleteEntity] = useState(false);
+
+  const hasEditInContextMenu = actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
+    solidTreeViewLayout?.attrs?.edit !== false &&
+    solidTreeViewLayout?.attrs?.showDefaultEditButton !== false &&
+    solidTreeViewLayout?.attrs?.showRowEditInContextMenu !== false &&
+    !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.publishedAt);
+
+  const hasDeleteInContextMenu = actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
+    solidTreeViewLayout?.attrs?.delete !== false &&
+    solidTreeViewLayout?.attrs?.showRowDeleteInContextMenu !== false &&
+    !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.publishedAt);
+
+  const hasCustomContextMenuButtons =
+    solidTreeViewLayout?.attrs?.rowButtons?.some(
+      (rb: any) => rb?.attrs?.actionInContextMenu === true
+    );
+
+  const hasAnyContextMenuActions =
+    hasEditInContextMenu || hasDeleteInContextMenu || hasCustomContextMenuButtons;
+
+
+  const detailsBodyTemplate = (solidViewData: any) => {
+    return (
+      <div>
+        <Button
+          type="button"
+          text
+          size="small"
+          className=""
+          onClick={(e) =>
+          // @ts-ignore
+          {
+            e.stopPropagation();
+            selectedDataRef.current = solidViewData;
+            setSelectedSolidViewData(solidViewData);
+            op.current?.toggle(e)
+          }
+          }
+        >
+          <svg
+            xmlns="http://www.w3.org/2000/svg"
+            width="3"
+            height="10"
+            viewBox="0 0 4 16"
+            fill="none"
+          >
+            <path
+              d="M4 14C4 14.55 3.80417 15.0208 3.4125 15.4125C3.02083 15.8042 2.55 16 2 16C1.45 16 0.979167 15.8042 0.5875 15.4125C0.195833 15.0208 0 14.55 0 14C0 13.45 0.195833 12.9792 0.5875 12.5875C0.979167 12.1958 1.45 12 2 12C2.55 12 3.02083 12.1958 3.4125 12.5875C3.80417 12.9792 4 13.45 4 14ZM4 8C4 8.55 3.80417 9.02083 3.4125 9.4125C3.02083 9.80417 2.55 10 2 10C1.45 10 0.979167 9.80417 0.5875 9.4125C0.195833 9.02083 0 8.55 0 8C0 7.45 0.195833 6.97917 0.5875 6.5875C0.979167 6.19583 1.45 6 2 6C2.55 6 3.02083 6.19583 3.4125 6.5875C3.80417 6.97917 4 7.45 4 8ZM4 2C4 2.55 3.80417 3.02083 3.4125 3.4125C3.02083 3.80417 2.55 4 2 4C1.45 4 0.979167 3.80417 0.5875 3.4125C0.195833 3.02083 0 2.55 0 2C0 1.45 0.195833 0.979166 0.5875 0.5875C0.979167 0.195833 1.45 0 2 0C2.55 0 3.02083 0.195833 3.4125 0.5875C3.80417 0.979166 4 1.45 4 2Z"
+              fill="#666666"
+            />
+          </svg>
+        </Button>
+      </div>
+    );
+  };
+
+
+  const handleDeleteEntity = async () => {
+    try {
+      if (!selectedSolidViewData?.id) {
+        throw new Error(ERROR_MESSAGES.NO_ENTITY_SELECTED);
+      }
+
+      const response: any = await deleteSolidSingleEntiry(selectedSolidViewData.id);
+
+      if (response?.data?.statusCode === 200) {
+        setDeleteEntity(false);
+        dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.DELETED, detail: ERROR_MESSAGES.ENTITY_DELETE, life: 3000 }));
+      } else {
+        dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.DELETE_FAIELD, detail: response?.error?.data?.error, sticky: true }));
+      }
+    } catch (error: any) {
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.DELETE_FAIELD, detail: ERROR_MESSAGES.SOMETHING_WRONG, sticky: true }));
+    }
+  };
+
+  const renderRowActions = (rowData: any) => {
+    return (
+      <div className="flex align-items-center justify-content-end gap-1">
+
+        {/* ---------------- CUSTOM ROW BUTTONS ---------------- */}
+        {solidTreeViewLayout?.attrs?.rowButtons &&
+          solidTreeViewLayout?.attrs?.rowButtons
+            .filter((rb: any) => {
+              const roles = rb?.attrs?.roles || [];
+              const isInContextMenu = rb.attrs.actionInContextMenu === true;
+
+              const isAllowed =
+                roles.length === 0 || hasAnyRole(user?.roles, roles);
+
+              const isVisible = rb?.attrs?.visible !== false;
+
+              return !isInContextMenu && isAllowed && isVisible;
+            })
+            .map((button: any, index: number) => (
+              <Button
+                key={index}
+                type="button"
+                icon={button?.attrs?.icon ?? "pi pi-pencil"}
+                className={`gap-2 ${button?.attrs?.className ?? ""}`}
+                label={
+                  button.attrs.showLabel !== false
+                    ? button.attrs.label
+                    : ""
+                }
+                size="small"
+                iconPos="left"
+                onClick={() => {
+                  const event = {
+                    params,
+                    rowData: rowData,
+                    solidListViewMetaData: solidTreeViewMetaData?.data,
+                  };
+                  handleCustomButtonClick(button.attrs, event);
+                }}
+              />
+            ))}
+
+        {/* ---------------- EDIT BUTTON ---------------- */}
+        {actionsAllowed.includes(
+          `${permissionExpression(params.modelName, "update")}`
+        ) &&
+          solidTreeViewLayout?.attrs?.edit !== false &&
+          solidTreeViewLayout?.attrs?.showRowEditInContextMenu === false && (
+            <Button
+              text
+              severity="secondary"
+              size="small"
+              icon="pi pi-pencil"
+              onClick={() => {
+                // if (params.embeded == true) {
+                //   params.handleEditClickForEmbeddedView(rowData?.id);
+                // } else {
+                try {
+                  sessionStorage.setItem("fromView", "list");
+                  sessionStorage.setItem(
+                    "fromViewUrl",
+                    window.location.pathname + window.location.search
+                  );
+                } catch (e) { }
+
+                router.push(
+                  `${editBaseUrl}/${rowData?.id}?viewMode=edit&${new URLSearchParams(
+                    editActionQueryParams
+                  ).toString()}`
+                );
+                // }
+              }}
+            />
+          )}
+
+        {/* ---------------- DELETE BUTTON ---------------- */}
+        {actionsAllowed.includes(
+          `${permissionExpression(params.modelName, "delete")}`
+        ) &&
+          solidTreeViewLayout?.attrs?.delete !== false &&
+          (params.embeded ||
+            (solidTreeViewLayout?.attrs?.showRowDeleteInContextMenu !==
+              undefined &&
+              solidTreeViewLayout?.attrs?.showRowDeleteInContextMenu !==
+              true)) && (
+            <Button
+              text
+              size="small"
+              severity="danger"
+              icon="pi pi-trash"
+              onClick={() => {
+                // if (
+                //   params?.embededFieldRelationType === "many-to-many"
+                // ) {
+                //   params?.handleDeleteClick(rowData.id);
+                // } else {
+                setSelectedSolidViewData(rowData);
+                setDeleteEntity(true);
+                // }
+              }}
+            />
+          )}
+
+        {/* ---------------- CONTEXT MENU ---------------- */}
+        {hasAnyContextMenuActions && detailsBodyTemplate(rowData)}
+      </div>
+    );
+  };
+
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
     <div className="page-parent-wrapper">
-      <Toast ref={toast} />
-
       {/* ── Header ── */}
       <div className="page-header flex-column lg:flex-row">
         <div className="flex justify-content-between w-full">
@@ -1474,7 +1721,45 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
               setSortField(e.sortField);
               setSortOrder(e.sortOrder as any);
             }}
+            onRowClick={(e) => {
+              const target = e.originalEvent.target as HTMLElement;
+              if (target.closest(".p-checkbox")) return;
+              if (target.closest(".p-c")) return;
+
+              if (e.node.leaf !== true) return;
+              const rowData = e.node.data;
+
+              if (solidTreeViewLayout?.attrs?.disableRowClick === true) return;
+
+              const hasFindPermission = actionsAllowed.includes(
+                permissionExpression(params.modelName, 'findOne')
+              );
+              const hasUpdatePermission =
+                actionsAllowed.includes(permissionExpression(params.modelName, 'update')) &&
+                solidTreeViewLayout?.attrs?.edit !== false;
+
+              if (!(hasFindPermission || hasUpdatePermission)) return;
+
+              // if (params.embeded === true) {
+              // params.handleEditClickForEmbeddedView(rowData?.id);
+              // } else {
+              if (typeof window !== "undefined") {
+                // store a simple marker for the caller
+
+                // also store the full current URL so Back can restore exact state (including action params)
+                try {
+                  sessionStorage.setItem("fromView", "list");
+                  sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
+                } catch (e) {
+                  // ignore storage errors
+                }
+              }
+              router.push(`${editBaseUrl}/${rowData?.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`);
+              // }
+            }
+            }
             onSelectionChange={(e) => {
+              e.originalEvent.stopPropagation();
               const incoming = e.value as Record<string, any>;
 
               setSelectedNodeKeys((prev: any) => {
@@ -1516,8 +1801,13 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
               body={(node: any) => {
                 const rowData = node?.data as TreeRowData;
                 const nodeMeta = rowData?.__treeMeta;
-                if (nodeMeta?.nodeType !== "group") return <span>&nbsp;</span>;
 
+                // ---------------- NORMAL ROW ----------------
+                if (nodeMeta?.nodeType !== "group") {
+                  return renderRowActions(rowData);
+                }
+
+                // ---------------- GROUP ROW ----------------
                 const nodeKey = String(node.key);
                 const isExpanded = expandedKeys[nodeKey];
                 const childrenLoaded = isExpanded && node.children && node.children.length > 0;
@@ -1585,6 +1875,40 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       {/* ── Root-level pagination bar ── */}
       <RootPaginationBar />
 
+
+
+
+      <Dialog
+        header={`Delete ${solidTreeViewMetaData?.data?.solidView?.model?.displayName
+          ? solidTreeViewMetaData?.data?.solidView?.model?.displayName
+          : params?.modelName
+          }`}
+        headerClassName="py-2"
+        contentClassName="px-0 pb-0"
+        visible={deleteEntity}
+        style={{ width: "20vw" }}
+        onHide={() => {
+          if (!deleteEntity) return;
+          setDeleteEntity(false);
+        }}
+        className="solid-confirm-dialog"
+      >
+        <Divider className="m-0" />
+        <div className="p-4">
+          <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
+            {`Are you sure you want to delete this ${solidTreeViewMetaData?.data?.solidView?.model?.displayName
+              ? solidTreeViewMetaData?.data?.solidView?.model?.displayName
+              : params?.modelName
+              }?`}
+          </p>
+          {/* <p className="" style={{ color: 'var{--solid-grey-500}' }}>{selectedSolidViewData?.singularName}</p> */}
+          <div className="flex align-items-center gap-2 mt-3">
+            <Button label="Delete" severity="danger" size="small" onClick={handleDeleteEntity} />
+            <Button label="Cancel" size="small" onClick={() => setDeleteEntity(false)} outlined className='bg-primary-reverse' />
+          </div>
+        </div>
+      </Dialog>
+
       {/* ── Delete dialog ── */}
       <Dialog
         visible={isDeleteRecordsDialogVisible}
@@ -1629,6 +1953,75 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       >
         <p>Are you sure you want to recover all records?</p>
       </Dialog>
+
+      <OverlayPanel
+        ref={op}
+        className="solid-custom-overlay"
+        style={{ top: 10, minWidth: 120 }}
+      >
+        <div className="flex flex-column gap-1 p-1">
+          {hasEditInContextMenu && (
+            <Button
+              type="button"
+              className="w-full text-left gap-1"
+              label="Edit"
+              size="small"
+              iconPos="left"
+              icon={"pi pi-pencil"}
+              onClick={() => {
+                // if (params.embeded == true) {
+                //   params.handleEditClickForEmbeddedView(
+                //     selectedDataRef.current?.id
+                //   );
+                // } else {
+                try {
+                  sessionStorage.setItem("fromView", "list");
+                  sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
+                } catch (e) { }
+                router.push(
+                  `${editBaseUrl}/${selectedDataRef.current?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
+                );
+                // }
+              }}
+            />
+          )}
+
+          {hasDeleteInContextMenu && !params.embeded && (
+            <Button
+              text
+              type="button"
+              className="w-full text-left gap-1"
+              label="Delete"
+              size="small"
+              iconPos="left"
+              severity="danger"
+              icon={"pi pi-trash"}
+              onClick={() => setDeleteEntity(true)}
+            />
+          )}
+          {hasCustomContextMenuButtons && solidTreeViewLayout?.attrs?.rowButtons
+            ?.filter(
+              (rb: any) =>
+                rb?.attrs?.actionInContextMenu === true &&
+                rb?.attrs?.visible !== false
+            )
+            .map((button: any, index: number) => (
+              <SolidListViewRowButtonContextMenu
+                key={`${index}-${selectedDataRef?.current?.id || ''}`}
+                button={button}
+                params={params}
+                getSelectedSolidViewData={() => selectedDataRef.current}
+                // selectedSolidViewData={selectedSolidViewData}
+                solidListViewMetaData={
+                  solidTreeViewMetaData
+                }
+                handleCustomButtonClick={
+                  handleCustomButtonClick
+                }
+              />
+            ))}
+        </div>
+      </OverlayPanel>
 
     </div>
   );

@@ -4,11 +4,11 @@ import { SqlExpression } from '../../../types/solid-core';
 import { Button } from 'primereact/button';
 import { Tooltip } from "primereact/tooltip";
 import qs from 'qs';
-import { Dispatch, SetStateAction, useEffect, useState } from 'react';
+import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
 import { SolidXAIIcon } from '../solid-ai/SolidXAIIcon';
 import styles from './SolidDashboard.module.css';
-import SolidDashboardBody from './SolidDashboardBody';
-import SolidDashboardVariable from './SolidDashboardVariable';
+import SolidDashboardBody, { GridItem } from './SolidDashboardBody';
+import { DashboardFilter } from './DashboardFilter';
 import { SolidAiMainWrapper } from '../solid-ai/SolidAiMainWrapper';
 import { SolidDashboardFilterRequired } from './SolidDashboardFilterRequired';
 import { SolidDashboardLoading } from './SolidDashboardLoading';
@@ -17,6 +17,10 @@ import { useDispatch, useSelector } from "react-redux";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import SolidDashboardNotAvailable from './SolidDashboardNotAvailable';
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from '../../../redux/api/solidSettingsApi';
+import showToast from '../../../helpers/showToast';
+import { Toast } from "primereact/toast";
+import { ERROR_MESSAGES } from '../../../constants/error-messages';
+import { useUpsertUserDashboardLayoutMutation } from '../../../redux/api/dashboardLayoutApi';
 
 export enum DashboardVariableType {
   DATE = 'date',
@@ -61,7 +65,7 @@ function handleDashboardData(
   }
 }
 
-function getQueryParams(moduleName: string, dashboardId?: number, dashboardName?: string) {
+function getQueryParams(moduleName: string, dashboardName?: string) {
   const filters: any = {
     module: {
       name: {
@@ -70,10 +74,8 @@ function getQueryParams(moduleName: string, dashboardId?: number, dashboardName?
     }
   };
 
-  if (dashboardId !== undefined) {
-    filters.id = { $eq: dashboardId };
-  } else if (dashboardName !== undefined) {
-    filters.name = { $eq: dashboardName };
+  if (dashboardName !== undefined) {
+    filters.name = { $eqi: dashboardName };
   }
 
   const query = {
@@ -114,12 +116,11 @@ function isRenderDashboardBody(questions: any[], dashboardVariables: DashboardVa
 
 type SolidDashboardViewProps = {
   moduleName: string;
-  dashboardId?: number;
   dashboardName?: string;
 };
 
 const SolidDashboard = (params: SolidDashboardViewProps) => {
-  const { data, isLoading, error } = useGetDashboardQuery(getQueryParams(params.moduleName, params.dashboardId, params.dashboardName)) // FIXME : error handling should be done properly
+  const { data, isLoading, error } = useGetDashboardQuery(getQueryParams(params.moduleName, params.dashboardName)) // FIXME : error handling should be done properly
   // Define a state called layoutOption and pass it after destructing the widgetOptions and dashboardOptions from layoutOption
   // TODO [HP]: Shouldn't the type of this state variable be something different? Why are we muddling this with layout but calling it body props? 
   // TODO [HP]: Body props should be clearly made up of Gridstack layout options, the questions that make up the body & the filter[] which is an array of SqlExpressions
@@ -132,6 +133,8 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
   // TODO [HP]: replace dashboardVariableFilterRules with filters everywhere...
   // const [dashboardVariableFilterRules, setDashboardVariableFilterRules] = useState<ISolidDashboardVariableFilterRule[]>([]);
   const dispatch = useDispatch();
+  const toast = useRef<Toast>(null);
+
   const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
   const [filters, setFilters] = useState<SqlExpression[]>([]);
   const [isOpenSolidXAiPanel, setIsOpenSolidXAiPanel] = useState(false);
@@ -139,6 +142,26 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
   const [isResizing, setIsResizing] = useState(false);
   const [questions, setQuestions] = useState<any[]>([]);
   const [dashboardVariables, setDashboardVariables] = useState<DashboardVariableRecord[]>([]);
+  const [isDashboardFilterVisible, setIsDashboardFilterVisible] = useState(false);
+
+
+  const [upsertDashboardLayout, { isLoading: isDashboardLayoutLoading, error: dashboardLayoutError, isSuccess: isDashboardLayoutSuccess, data: dashboardLayoutData }] = useUpsertUserDashboardLayoutMutation();
+
+  const [dashboardLayout, setDashboardLayout] = useState<GridItem[]>([]);
+
+  const updateUserDashboardLayout = async () => {
+    try {
+      const response = await upsertDashboardLayout({
+        dashboardId: data?.records[0].id,
+        layout: JSON.stringify(dashboardLayout),
+      }).unwrap();
+      if (response.statusCode === 200) {
+        showToast(toast, "success", ERROR_MESSAGES.LAYOUT, ERROR_MESSAGES.DASHBOARD_LAYOUT_UPDATE_SUCCESSFULLY);
+      }
+    } catch (error) {
+      showToast(toast, "error", ERROR_MESSAGES.LAYOUT, ERROR_MESSAGES.DASHBOARD_LAYOUT_UPDATE_FAILED);
+    }
+  }
 
 
   useEffect(() => {
@@ -245,6 +268,8 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
 
   return (
     <div className={`h-screen surface-0 flex`}>
+      <Toast ref={toast} />
+
       <div className={`h-full flex-grow-1 ${styles.SolidDashboardPageContentWrapper}`}>
         {isLoading && <SolidDashboardLoading />}
         {error && <SolidDashboardRenderError />}
@@ -271,61 +296,113 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
                   }
                 </p>
               </div>
-              {dashboardVariables && dashboardVariables.length > 0 && <SolidDashboardVariable dashboardVariables={dashboardVariables} filters={filters} setFilters={setFilters} />}
+              {dashboardVariables && dashboardVariables.length > 0 && (
+                <>
+                  <div className='flex gap-2'>
+                    <a onClick={() => setIsDashboardFilterVisible(true)}>
+                      <>
+                        <Button
+                          type="button"
+                          icon={filters.length > 0 ? "pi pi-filter-fill" : "pi pi-filter"}
+                          className={`p-button-sm lg:hidden solid-icon-button `}
+                          size='small'
+                        />
+
+                        <Button
+                          type="button"
+                          icon={filters.length > 0 ? "pi pi-filter-fill" : "pi pi-filter"}
+                          label={"Filter"}
+                          className={`hidden lg:inline-flex`}
+                          size='small'
+
+                        />
+                      </>
+                    </a>
+                    {filters.length > 0 && (
+                      <Button
+                        type="button"
+                        size="small"
+                        icon="pi pi-filter-slash"
+                        severity="secondary"
+                        className="solid-icon-button "
+                        outlined
+                        onClick={() => { setFilters([]); setIsDashboardFilterVisible(false); }}
+                      />
+                    )}
+                    <Button
+                      type="button"
+                      size="small"
+                      icon="pi pi-save"
+                      severity="secondary"
+                      className="solid-icon-button "
+                      outlined
+                      onClick={() => updateUserDashboardLayout()} />
+                  </div>
+                  <DashboardFilter
+                    dashboardVariables={dashboardVariables}
+                    initialFilters={filters}
+                    onApply={setFilters}
+                    visible={isDashboardFilterVisible}
+                    onHide={() => setIsDashboardFilterVisible(false)}
+                  />
+                </>
+              )}
             </div>
             {!isRenderDashboardBody(questions, dashboardVariables, filters) && <SolidDashboardFilterRequired />}
-            {isRenderDashboardBody(questions, dashboardVariables, filters) && <SolidDashboardBody questions={questions} filters={filters} />}
+            {isRenderDashboardBody(questions, dashboardVariables, filters) && <SolidDashboardBody dashboardId={data?.records[0]?.id} questions={questions} filters={filters} dashboardLayout={dashboardLayout} setDashboardLayout={setDashboardLayout} />}
           </>
         )}
       </div>
-      {mcpUrl && (
-        <div className={`chatter-section ${isOpenSolidXAiPanel === false ? 'collapsed' : 'open'}`} style={{ width: chatterWidth }}>
-          {isOpenSolidXAiPanel && (
-            <div
-              style={{
-                width: 5,
-                cursor: 'col-resize',
-                position: 'absolute',
-                left: 0,
-                top: 0,
-                bottom: 0,
-                height: '100%',
-                zIndex: 9,
-              }}
-              onMouseDown={() => setIsResizing(true)}
-            />
-          )}
-          {isOpenSolidXAiPanel &&
-            <Button
-              icon="pi pi-angle-double-right"
-              size="small"
-              text
-              className="chatter-collapse-btn"
-              style={{ width: 30, height: 30, aspectRatio: '1/1' }}
-              onClick={handleClose}
-            />
-          }
-
-          {isOpenSolidXAiPanel === false ?
-            <div className="flex flex-column gap-2 justify-content-center p-2">
-              <div className="chatter-collapsed-content" onClick={handleOpen}>
-                <div className="flex gap-2"> <SolidXAIIcon /> SolidX AI </div>
-              </div>
-              <Button
-                icon="pi pi-chevron-left"
-                size="small"
-                className="px-0"
-                style={{ width: 30 }}
-                onClick={handleOpen}
+      {
+        mcpUrl && (
+          <div className={`chatter-section ${isOpenSolidXAiPanel === false ? 'collapsed' : 'open'}`} style={{ width: chatterWidth }}>
+            {isOpenSolidXAiPanel && (
+              <div
+                style={{
+                  width: 5,
+                  cursor: 'col-resize',
+                  position: 'absolute',
+                  left: 0,
+                  top: 0,
+                  bottom: 0,
+                  height: '100%',
+                  zIndex: 9,
+                }}
+                onMouseDown={() => setIsResizing(true)}
               />
-            </div>
-            :
-            <SolidAiMainWrapper mcpUrl={mcpUrl} />
-          }
-        </div>
-      )}
+            )}
+            {isOpenSolidXAiPanel &&
+              <Button
+                icon="pi pi-angle-double-right"
+                size="small"
+                text
+                className="chatter-collapse-btn"
+                style={{ width: 30, height: 30, aspectRatio: '1/1' }}
+                onClick={handleClose}
+              />
+            }
 
-    </div>
+            {isOpenSolidXAiPanel === false ?
+              <div className="flex flex-column gap-2 justify-content-center p-2">
+                <div className="chatter-collapsed-content" onClick={handleOpen}>
+                  <div className="flex gap-2"> <SolidXAIIcon /> SolidX AI </div>
+                </div>
+                <Button
+                  icon="pi pi-chevron-left"
+                  size="small"
+                  className="px-0"
+                  style={{ width: 30 }}
+                  onClick={handleOpen}
+                />
+              </div>
+              :
+              <SolidAiMainWrapper mcpUrl={mcpUrl} />
+            }
+          </div>
+        )
+      }
+
+    </div >
   );
 }
 
