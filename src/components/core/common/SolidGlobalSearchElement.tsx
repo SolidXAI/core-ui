@@ -1040,7 +1040,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     };
 
     const clearCustomFilter = () => {
-        // handleApplyCustomFilter(finalFilter)
         setFilterRules(initialState);
         setCustomFilter(null)
         // setPredefinedSearchChip(null)
@@ -1062,7 +1061,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         //     };
         // }
         setCustomFilter(finalCustomFilter);
-        // handleApplyCustomFilter(finalFilter);
         setShowGlobalSearchElement(false);
         setHasSearched(true)
         setRefreshKey((prev) => prev + 1)
@@ -1080,7 +1078,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         //     };
         // }
         setCurrentSavedFilterQuery(finalCustomFilter);
-        // handleApplyCustomFilter(finalFilter);
         setShowSavedFilterComponent(false);
         setHasSearched(true)
         setRefreshKey((prev) => prev + 1)
@@ -1724,9 +1721,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             // Apply the predefined search filter as custom filter
             // setCustomFilter(processedFilter);
 
-            // Apply the filter
-            // handleApplyCustomFilter(finalFilter);
-
             // Clear input and close overlay
             setInputValue("");
             setShowOverlay(false);
@@ -1743,7 +1737,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         setPredefinedSearchChip(null);
         setPredefinedSearchBaseFilter(null)
         setCustomFilter(null);
-        // handleApplyCustomFilter(finalFilter);
         setHasSearched(true);
         setRefreshKey((prev) => prev + 1)
     };
