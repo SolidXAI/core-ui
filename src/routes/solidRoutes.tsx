@@ -72,7 +72,7 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
   const adminChildren: RouteObject[] = [
     { path: "/admin", element: pick("admin", <AdminPage />) },
     { path: "/admin/core/:moduleName/home", element: pick("moduleHome", <ModuleHomePage />) },
-    { path: "/admin/core/:moduleName/dashboards/:dashboardId", element: pick("dashboard", <DashboardPage />) },
+    { path: "/admin/core/:moduleName/dashboards/:dashboardName", element: pick("dashboard", <DashboardPage />) },
     { path: "/admin/core/:moduleName/:modelName/list", element: pick("list", <ListPage />) },
     { path: "/admin/core/:moduleName/:modelName/tree", element: pick("tree", <TreePage />) },
     { path: "/admin/core/:moduleName/:modelName/kanban", element: pick("kanban", <KanbanPage />) },

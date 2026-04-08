@@ -3,23 +3,24 @@ import { signInWithOAuthAccessCode } from "../../adapters/auth/index";
 import { useRouter } from "../../hooks/useRouter";
 import { useSearchParams } from "../../hooks/useSearchParams";
 import { ProgressSpinner } from 'primereact/progressspinner';
-import { Toast } from 'primereact/toast';
-import { useEffect, useRef, useState } from 'react'
+import { useEffect, useState } from 'react'
+import { useDispatch } from 'react-redux';
 import { env } from "../../adapters/env";
-import showToast from "../../helpers/showToast";
+import { showToast } from "../../redux/features/toastSlice";
 import { loadSession } from "../../adapters/auth/storage";
 import { hasAnyRole } from "../../helpers/rolesHelper";
+
 export const GoogleAuthChecking = () => {
     const searchParams = useSearchParams();
     const accessCode = searchParams.get("accessCode");
 
     const router = useRouter();
     const [error, setError] = useState<string | null>(null);
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
     useEffect(() => {
         const handleOAuthAuthentication = async () => {
             if (!accessCode) {
-                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, ERROR_MESSAGES.AUTHENICATION__FAILED);
+                dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGIN_ERROR, detail: ERROR_MESSAGES.AUTHENICATION__FAILED }));
                 setError(ERROR_MESSAGES.AUTHENICATION__FAILED);
                 return;
             }
@@ -30,10 +31,10 @@ export const GoogleAuthChecking = () => {
                 });
 
                 if (response?.error) {
-                    showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                    dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGIN_ERROR, detail: response.error }));
                     setError(ERROR_MESSAGES.AUTHENICATION__FAILED)
                 } else {
-                    showToast(toast, "success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
+                    dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
                     const session = loadSession();
                     const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
                     const isDev = env("VITE_SOLIDX_ENV") === "dev";
@@ -41,7 +42,7 @@ export const GoogleAuthChecking = () => {
                     router.push(redirectUrl);
                 }
             } catch (err: any) {
-                showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data?.message || ERROR_MESSAGES.AUTHENICATION__FAILED);
+                dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGIN_ERROR, detail: err?.data?.message || ERROR_MESSAGES.AUTHENICATION__FAILED }));
             }
         };
 
@@ -57,7 +58,6 @@ export const GoogleAuthChecking = () => {
     }
     return (
         <div>
-            <Toast ref={toast} />
             <ProgressSpinner />
         </div>
     )

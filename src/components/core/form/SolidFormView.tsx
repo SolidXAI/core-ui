@@ -12,7 +12,6 @@ import "primeflex/primeflex.css";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import { TabPanel, TabView } from "primereact/tabview";
-import { Toast } from "primereact/toast";
 import qs from "qs";
 import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import * as Yup from "yup";
@@ -54,7 +53,8 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 import { SolidFormFooter } from "./SolidFormFooter";
 import { normalizeSolidFormActionPath } from "../../../helpers/routePaths";
-import showToast from "../../../helpers/showToast";
+import { showToast } from "../../../redux/features/toastSlice";
+import { useDispatch } from "react-redux";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -437,7 +437,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
     const pathname = usePathname();
     const router = useRouter();
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
     const searchParams = useSearchParams();
     const [confirmVisible, setConfirmVisible] = useState(false);
     const confirmResolveRef = useRef<(value: boolean) => void>();
@@ -707,28 +707,8 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 errorMessage = [ERROR_MESSAGES.SOMETHING_WRONG];
             }
 
-            toast.current?.show({
-                severity: 'error',
-                summary: 'Error',
-                detail: errorMessage,
-                sticky: true,
-                //@ts-ignore
-                content: () => (
-                    <div className="flex flex-column align-items-left" style={{ flex: "1" }}>
-                        {Array.isArray(errorMessage) ? (
-                            errorMessage.map((message, index) => (
-                                <div className="flex align-items-center gap-2" key={index}>
-                                    <span className="font-bold text-900">{message.trim()}</span>
-                                </div>
-                            ))
-                        ) : (
-                            <div className="flex align-items-center gap-2">
-                                <span className="font-bold text-900">{errorMessage?.trim()}</span>
-                            </div>
-                        )}
-                    </div>
-                ),
-            });
+            const detail = Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage;
+            dispatch(showToast({ severity: 'error', summary: 'Error', detail }));
         };
 
         // Check and handle errors from each API operation
@@ -822,7 +802,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 if (params.id === 'new') {
                     // default locale
                     const result = await createEntity(formData).unwrap();
-                    showToast(toast, "success", ERROR_MESSAGES.FORM_SAVED, ERROR_MESSAGES.FORM_SAVED_SUCCESSFULLY);
+                    dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.FORM_SAVED, detail: ERROR_MESSAGES.FORM_SAVED_SUCCESSFULLY }));
                     // if (!params.embeded && result?.data?.id) {
                     //     const newPathname = pathname.replace(/new$/, result.data.id);
 
@@ -848,7 +828,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
                     // const result = await updateEntity({ id: +params.id, data: formData }).unwrap();
                     if (!params.embeded) {
-                        showToast(toast, "success", ERROR_MESSAGES.FORM_UPDATE, ERROR_MESSAGES.FORM_UPDATE_SUCCESSFULLY);
+                        dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.FORM_UPDATE, detail: ERROR_MESSAGES.FORM_UPDATE_SUCCESSFULLY }));
                         if (result?.statusCode === 200) {
                             updateViewMode("view")
                         }
@@ -868,12 +848,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const showFieldError = () => {
         if (errorFields?.length === 0) return;
         errorFields.forEach((error) => {
-            toast?.current?.show({
+            dispatch(showToast({
                 severity: "error",
                 summary: "Metadata Error",
                 detail: error,
-                life: 3000,
-            });
+            }));
 
         });
 
@@ -1629,10 +1608,10 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
             if (type === "publish") {
                 result = await publishSolidEntity(params.id).unwrap();
-                showToast(toast, "success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_PUBLISH);
+                dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.SAVED, detail: ERROR_MESSAGES.MARK_PUBLISH }));
             } else {
                 result = await unpublishSolidEntity(params.id).unwrap();
-                showToast(toast, "success", ERROR_MESSAGES.SAVED, ERROR_MESSAGES.MARK_UNPUBLISH);
+                dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.SAVED, detail: ERROR_MESSAGES.MARK_UNPUBLISH }));
             }
 
             console.log("publish/unpublish result", result);
@@ -1671,7 +1650,6 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         return (
             <div className="solid-form-wrapper">
-                <Toast ref={toast} />
                 <div className="solid-form-section" style={{ borderRight: params.embeded !== true ? '1px solid var(--primary-light-color)' : '' }} >
                     <form style={{ width: '100%' }} onSubmit={formik.handleSubmit}>
                         <SolidFormActionHeader

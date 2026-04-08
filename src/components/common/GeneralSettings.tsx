@@ -1,8 +1,7 @@
 import { useFormik } from 'formik';
 import { Button } from 'primereact/button';
 import { InputText } from 'primereact/inputtext';
-import { Toast } from 'primereact/toast';
-import { useCallback, useEffect, useRef, useState } from 'react'
+import { useCallback, useEffect, useState } from 'react'
 import { CancelButton } from './CancelButton';
 import { InputSwitch } from 'primereact/inputswitch';
 import { RadioButton } from 'primereact/radiobutton';
@@ -21,11 +20,10 @@ import { Dropdown } from 'primereact/dropdown';
 import { OpenAiProviderComponent } from './SolidSettings/LlmSettings/OpenAiProviderComponent';
 import { AnthropicProviderComponent } from './SolidSettings/LlmSettings/AnthropicProviderComponent';
 import { useDispatch, useSelector } from 'react-redux';
-import { handleError } from '../../helpers/ToastContainer';
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { useBulkUpdateSolidSettingsMutation, useLazyGetSolidSettingsQuery } from '../../redux/api/solidSettingsApi';
 import { env } from "../../adapters/env";
-import showToast from "../../helpers/showToast";
+import { showToast } from '../../redux/features/toastSlice';
 
 
 export const GeneralSettings = () => {
@@ -43,8 +41,6 @@ export const GeneralSettings = () => {
     }, [trigger])
     const pathname = usePathname();
     const [bulkUpdateSolidSettings] = useBulkUpdateSolidSettingsMutation();
-    const toast = useRef<Toast>(null);
-
     const initialValues = {
         appLogo: solidSettingsData?.data?.appLogo ?? null,
         companylogo: solidSettingsData?.data?.companylogo ?? null,
@@ -134,7 +130,7 @@ export const GeneralSettings = () => {
                 });
 
                 if (updatedSettingsArray.length === 0) {
-                    showToast(toast, "success", "No Changes", "No settings were updated");
+                    dispatch(showToast({ severity: "success", summary: "No Changes", detail: "No settings were updated" }));
                     return;
                 }
 
@@ -145,13 +141,13 @@ export const GeneralSettings = () => {
                 const response = await bulkUpdateSolidSettings({ data: formData }).unwrap();
 
                 if (response.statusCode === 200) {
-                    showToast(toast, "success", "Updated", "Settings updated");
+                    dispatch(showToast({ severity: "success", summary: "Updated", detail: "Settings updated" }));
                     trigger("")
                 }
 
             } catch (error: any) {
                 console.log("Error updating settings:", error);
-                showToast(toast, "error", ERROR_MESSAGES.FAILED, error?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
+                dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.FAILED, detail: error?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG }));
             }
         },
     });
@@ -160,8 +156,8 @@ export const GeneralSettings = () => {
         const errors = await formik.validateForm();
         const errorMessages = Object.values(errors);
 
-        if (errorMessages.length > 0 && toast.current) {
-            handleError(errorMessages)
+        if (errorMessages.length > 0) {
+            dispatch(showToast({ severity: 'error', summary: 'Error', detail: Array.isArray(errorMessages) ? errorMessages.join(', ') : errorMessages }));
         }
     }
     useEffect(() => {
@@ -179,12 +175,7 @@ export const GeneralSettings = () => {
             const file = acceptedFiles[0];
             if (file) {
                 if (file.size > 2 * 1024 * 1024) {
-                    toast.current?.show({
-                        severity: "error",
-                        summary: "File too large",
-                        detail: "Maximum file size is 2MB",
-                        sticky: true
-                    });
+                    dispatch(showToast({ severity: "error", summary: "File too large", detail: "Maximum file size is 2MB" }));
                     return;
                 }
                 formik.setFieldValue("appLogo", file);
@@ -198,12 +189,7 @@ export const GeneralSettings = () => {
         const file = acceptedFiles[0];
         if (file) {
             if (file.size > 2 * 1024 * 1024) {
-                toast.current?.show({
-                    severity: "error",
-                    summary: "File too large",
-                    detail: "Maximum file size is 2MB",
-                    sticky: true
-                });
+                dispatch(showToast({ severity: "error", summary: "File too large", detail: "Maximum file size is 2MB" }));
                 return;
             }
             formik.setFieldValue("companylogo", file);
@@ -262,12 +248,7 @@ export const GeneralSettings = () => {
             const file = acceptedFiles[0];
             if (file) {
                 if (file.size > 2 * 1024 * 1024) {
-                    toast.current?.show({
-                        severity: "error",
-                        summary: ERROR_MESSAGES.FILE_LARGE,
-                        detail: ERROR_MESSAGES.MAX_FILE_SIZE,
-                        sticky: true
-                    });
+                    dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.FILE_LARGE, detail: ERROR_MESSAGES.MAX_FILE_SIZE }));
                     return;
                 }
                 formik.setFieldValue("authScreenRightBackgroundImage", file);
@@ -281,12 +262,7 @@ export const GeneralSettings = () => {
         const file = acceptedFiles[0];
         if (file) {
             if (file.size > 2 * 1024 * 1024) {
-                toast.current?.show({
-                    severity: "error",
-                    summary: ERROR_MESSAGES.FILE_LARGE,
-                    detail: ERROR_MESSAGES.MAX_FILE_SIZE,
-                    sticky: true,
-                });
+                dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.FILE_LARGE, detail: ERROR_MESSAGES.MAX_FILE_SIZE }));
                 return;
             }
             formik.setFieldValue("authScreenLeftBackgroundImage", file);
@@ -298,12 +274,7 @@ export const GeneralSettings = () => {
         const file = acceptedFiles[0];
         if (file) {
             if (file.size > 2 * 1024 * 1024) {
-                toast.current?.show({
-                    severity: "error",
-                    summary: ERROR_MESSAGES.FILE_LARGE,
-                    detail: ERROR_MESSAGES.MAX_FILE_SIZE,
-                    sticky: true,
-                });
+                dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.FILE_LARGE, detail: ERROR_MESSAGES.MAX_FILE_SIZE }));
                 return;
             }
             formik.setFieldValue("authScreenCenterBackgroundImage", file);
@@ -447,7 +418,6 @@ export const GeneralSettings = () => {
 
     return (
         <div className="page-parent-wrapper">
-            <Toast ref={toast} />
             <div className="solid-form-wrapper">
                 <div className="solid-form-section">
                     <form onSubmit={formik.handleSubmit}>

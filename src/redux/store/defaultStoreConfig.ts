@@ -4,6 +4,7 @@ import {
     navbarReducer,
     popupReducer,
     themeReducer,
+    toastReducer,
     userReducer
 } from "../../index";
 import solidStudioReducer from "../features/solidStudioSlice";
@@ -26,7 +27,8 @@ import {
     solidServiceApi,
     solidSettingsApi,
     solidViewsApi,
-    userApi
+    userApi,
+    dashboardLayoutApi
 } from "../../index";
 
 // 1. Export all APIs in one array
@@ -49,7 +51,8 @@ export const solidApiSlices = [
     importTransactionApi,
     dashboardApi,
     dashboardQuestionApi,
-    aiInteractionApi
+    aiInteractionApi,
+    dashboardLayoutApi
 ];
 
 // 2. Export default reducers
@@ -61,4 +64,5 @@ export const solidReducers = {
     navbarState: navbarReducer,
     dataViewState: dataViewReducer,
     solidStudio: solidStudioReducer,
+    toast: toastReducer,
 };  

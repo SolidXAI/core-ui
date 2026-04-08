@@ -1,4 +1,3 @@
-
 import { DashboardResponse, useGetDashboardQuery } from '../../../redux/api/dashboardApi';
 import { SqlExpression } from '../../../types/solid-core';
 import { Button } from 'primereact/button';
@@ -6,7 +5,7 @@ import { Tooltip } from "primereact/tooltip";
 import qs from 'qs';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import styles from './SolidDashboard.module.css';
-import SolidDashboardBody from './SolidDashboardBody';
+import SolidDashboardBody, { GridItem } from './SolidDashboardBody';
 import { DashboardFilter } from './DashboardFilter';
 // import { SolidAiMainWrapper } from '../solid-ai/SolidAiMainWrapper'; // moved to SolidX Studio panel
 import { SolidDashboardFilterRequired } from './SolidDashboardFilterRequired';
@@ -15,6 +14,9 @@ import { SolidDashboardRenderError } from './SolidDashboardRenderError';
 import { useDispatch, useSelector } from "react-redux";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import SolidDashboardNotAvailable from './SolidDashboardNotAvailable';
+import { showToast } from '../../../redux/features/toastSlice';
+import { ERROR_MESSAGES } from '../../../constants/error-messages';
+import { useUpsertUserDashboardLayoutMutation } from '../../../redux/api/dashboardLayoutApi';
 
 export enum DashboardVariableType {
   DATE = 'date',
@@ -59,7 +61,7 @@ function handleDashboardData(
   }
 }
 
-function getQueryParams(moduleName: string, dashboardId?: number, dashboardName?: string) {
+function getQueryParams(moduleName: string, dashboardName?: string) {
   const filters: any = {
     module: {
       name: {
@@ -68,10 +70,8 @@ function getQueryParams(moduleName: string, dashboardId?: number, dashboardName?
     }
   };
 
-  if (dashboardId !== undefined) {
-    filters.id = { $eq: dashboardId };
-  } else if (dashboardName !== undefined) {
-    filters.name = { $eq: dashboardName };
+  if (dashboardName !== undefined) {
+    filters.name = { $eqi: dashboardName };
   }
 
   const query = {
@@ -112,12 +112,11 @@ function isRenderDashboardBody(questions: any[], dashboardVariables: DashboardVa
 
 type SolidDashboardViewProps = {
   moduleName: string;
-  dashboardId?: number;
   dashboardName?: string;
 };
 
 const SolidDashboard = (params: SolidDashboardViewProps) => {
-  const { data, isLoading, error } = useGetDashboardQuery(getQueryParams(params.moduleName, params.dashboardId, params.dashboardName)) // FIXME : error handling should be done properly
+  const { data, isLoading, error } = useGetDashboardQuery(getQueryParams(params.moduleName, params.dashboardName)) // FIXME : error handling should be done properly
   // Define a state called layoutOption and pass it after destructing the widgetOptions and dashboardOptions from layoutOption
   // TODO [HP]: Shouldn't the type of this state variable be something different? Why are we muddling this with layout but calling it body props? 
   // TODO [HP]: Body props should be clearly made up of Gridstack layout options, the questions that make up the body & the filter[] which is an array of SqlExpressions
@@ -130,12 +129,30 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
   // TODO [HP]: replace dashboardVariableFilterRules with filters everywhere...
   // const [dashboardVariableFilterRules, setDashboardVariableFilterRules] = useState<ISolidDashboardVariableFilterRule[]>([]);
   const dispatch = useDispatch();
+
   const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
   const [filters, setFilters] = useState<SqlExpression[]>([]);
   const [questions, setQuestions] = useState<any[]>([]);
   const [dashboardVariables, setDashboardVariables] = useState<DashboardVariableRecord[]>([]);
   const [isDashboardFilterVisible, setIsDashboardFilterVisible] = useState(false);
 
+  const [upsertDashboardLayout] = useUpsertUserDashboardLayoutMutation();
+
+  const [dashboardLayout, setDashboardLayout] = useState<GridItem[]>([]);
+
+  const updateUserDashboardLayout = async () => {
+    try {
+      const response = await upsertDashboardLayout({
+        dashboardId: data?.records[0].id,
+        layout: JSON.stringify(dashboardLayout),
+      }).unwrap();
+      if (response.statusCode === 200) {
+        dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LAYOUT, detail: ERROR_MESSAGES.DASHBOARD_LAYOUT_UPDATE_SUCCESSFULLY }));
+      }
+    } catch (error) {
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LAYOUT, detail: ERROR_MESSAGES.DASHBOARD_LAYOUT_UPDATE_FAILED }));
+    }
+  }
 
   useEffect(() => {
     // Invoke the dashboard api to fetch the dashboard data
@@ -158,6 +175,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
 
   return (
     <div className={`h-screen surface-0 flex`}>
+
       <div className={`h-full flex-grow-1 ${styles.SolidDashboardPageContentWrapper}`}>
         {isLoading && <SolidDashboardLoading />}
         {error && <SolidDashboardRenderError />}
@@ -187,23 +205,44 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
               {dashboardVariables && dashboardVariables.length > 0 && (
                 <>
                   <div className='flex gap-2'>
-                    <Button
-                      label="Filter"
-                      icon={filters.length > 0 ? "pi pi-filter-fill" : "pi pi-filter"}
-                      outlined={filters.length === 0}
-                      severity={filters.length > 0 ? "info" : "secondary"}
-                      style={filters.length > 0 ? { background: "rgb(114, 46, 209)" } : {}}
-                      size="small"
-                      onClick={() => setIsDashboardFilterVisible(true)}
-                    />
+                    <a onClick={() => setIsDashboardFilterVisible(true)}>
+                      <>
+                        <Button
+                          type="button"
+                          icon={filters.length > 0 ? "pi pi-filter-fill" : "pi pi-filter"}
+                          className={`p-button-sm lg:hidden solid-icon-button `}
+                          size='small'
+                        />
+
+                        <Button
+                          type="button"
+                          icon={filters.length > 0 ? "pi pi-filter-fill" : "pi pi-filter"}
+                          label={"Filter"}
+                          className={`hidden lg:inline-flex`}
+                          size='small'
+
+                        />
+                      </>
+                    </a>
                     {filters.length > 0 && (
                       <Button
-                        // label="Clear Filters"
+                        type="button"
+                        size="small"
                         icon="pi pi-filter-slash"
-                        severity="danger"
+                        severity="secondary"
+                        className="solid-icon-button "
+                        outlined
                         onClick={() => { setFilters([]); setIsDashboardFilterVisible(false); }}
                       />
                     )}
+                    <Button
+                      type="button"
+                      size="small"
+                      icon="pi pi-save"
+                      severity="secondary"
+                      className="solid-icon-button "
+                      outlined
+                      onClick={() => updateUserDashboardLayout()} />
                   </div>
                   <DashboardFilter
                     dashboardVariables={dashboardVariables}
@@ -216,7 +255,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
               )}
             </div>
             {!isRenderDashboardBody(questions, dashboardVariables, filters) && <SolidDashboardFilterRequired />}
-            {isRenderDashboardBody(questions, dashboardVariables, filters) && <SolidDashboardBody questions={questions} filters={filters} />}
+            {isRenderDashboardBody(questions, dashboardVariables, filters) && <SolidDashboardBody dashboardId={data?.records[0]?.id} questions={questions} filters={filters} dashboardLayout={dashboardLayout} setDashboardLayout={setDashboardLayout} />}
           </>
         )}
       </div>

@@ -4,12 +4,12 @@ import { useRouter } from "../../hooks/useRouter";
 import { Button } from "primereact/button";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
-import { Toast } from "primereact/toast";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import * as Yup from "yup";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
-import showToast from "../../helpers/showToast";
+import { showToast } from "../../redux/features/toastSlice";
+import { useDispatch } from "react-redux";
 
 const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) => {
     const [trigger, { data: solidSettingsData }] = useLazyGetAuthSettingsQuery()
@@ -18,7 +18,7 @@ const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder 
         trigger("") // Fetch settings on mount
     }, [trigger])
 
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
     const router = useRouter();
     const [initiateChangePassword] = useInitiateChangePasswordMutation();
     const validationSchema = Yup.object({
@@ -49,10 +49,10 @@ const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder 
                     const maskedEmail = maskEmail(email);
                     router.push(`/auth/initiate-forgot-password-thank-you?email=${maskedEmail}`)
                 } else (
-                    showToast(toast, "error", ERROR_MESSAGES.ERROR, response.error)
+                    dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.ERROR, detail: response.error }))
                 )
             } catch (err: any) {
-                showToast(toast, "error", ERROR_MESSAGES.ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.ERROR, detail: err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG }));
             }
         },
     });
@@ -62,7 +62,6 @@ const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder 
 
     return (
         <>
-            <Toast ref={toast} />
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 <h2 className="solid-auth-title">Forgot password</h2>
                 <p className="solid-auth-helper">Enter your email to receive reset instructions</p>

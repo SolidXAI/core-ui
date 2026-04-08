@@ -1561,10 +1561,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     const overlayOptions = useMemo<OverlayOption[]>(() => {
         const currentValue = inputValue?.trim() || "";
         const fields: OverlayOption[] = currentValue
-            ? searchableFields.map((field: any) => ({ 
-                id: `field:${field.fieldName}`, 
-                kind: "field" as const, 
-                field 
+            ? searchableFields.map((field: any) => ({
+                id: `field:${field.fieldName}`,
+                kind: "field" as const,
+                field
             }))
             : [];
         const predefined: OverlayOption[] =
@@ -1620,7 +1620,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             if (currentValue || focusedIndex >= 0) {
                 e.preventDefault();
                 const activeOption = overlayOptions[focusedIndex] || (currentValue ? overlayOptions[0] : null);
-                
+
                 if (activeOption?.kind === "field") {
                     applyFieldOption(activeOption.field);
                 } else if (activeOption?.kind === "predefined") {

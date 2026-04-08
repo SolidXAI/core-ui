@@ -25,12 +25,10 @@ import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
 import { KanbanUserViewLayout } from "./KanbanUserViewLayout";
 import { useDispatch, useSelector } from "react-redux";
 import { setFilterObjectToLocalStorage, getFilterObjectFromLocalStorage } from "../list/SolidListView";
-import { Toast } from "primereact/toast";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
-import showToast from "../../../helpers/showToast";
-
+import { showToast } from "../../../redux/features/toastSlice";
 
 type SolidKanbanViewParams = {
   moduleName: string;
@@ -67,8 +65,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [lightboxUrls, setLightboxUrls] = useState({});
   const [filterQueryString, setFilterQueryString] = useState<any>();
   const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
-  const toast = useRef<Toast>(null);
-
   const pushFiltersToRouter = (filterQueryString: any) => {
     // @ts-ignore
     router.push(`?${filterQueryString}`, undefined, { shallow: true });
@@ -565,16 +561,16 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
       const kanbanUpdateResponse = await patchKanbanView({ id: +movedItem.id, data: formData }).unwrap();
 
       if (kanbanUpdateResponse?.statusCode === 200) {
-        showToast(toast, "success", ERROR_MESSAGES.IS_SUCCESS, ERROR_MESSAGES.KANBAN_UPDATED);
+        dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.IS_SUCCESS, detail: ERROR_MESSAGES.KANBAN_UPDATED }));
       } else {
-        showToast(toast, "error", ERROR_MESSAGES.DUPLICATE_KEY, kanbanUpdateResponse?.error);
+        dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.DUPLICATE_KEY, detail: kanbanUpdateResponse?.error }));
         // Update the kanbanViewData state
         setKanbanViewData(oldkanbanViewData);
       }
     } catch (error: any) {
       // 6. Handle 500 or network errors
       console.error(ERROR_MESSAGES.API_ERROR, error);
-      showToast(toast, "error", ERROR_MESSAGES.SOMETHING_WRONG, error?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG);
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SOMETHING_WRONG, detail: error?.data?.message || ERROR_MESSAGES.SOMETHING_WRONG }));
       setKanbanViewData(oldkanbanViewData);
     }
   };
@@ -734,7 +730,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
   return (
     <div className="page-parent-wrapper">
-      <Toast ref={toast} />
       <div className="page-header flex-column lg:flex-row">
         <div className="flex justify-content-between w-full ">
 

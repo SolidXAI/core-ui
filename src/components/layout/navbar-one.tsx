@@ -1,4 +1,3 @@
-import { ToastContainer } from "../../helpers/ToastContainer";
 import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
 import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
 import { env } from "../../adapters/env";
@@ -72,7 +71,6 @@ const NavbarOne = () => {
 
     return (
         <div className="flex flex-column md:flex-row justify-content-between navBar">
-            <ToastContainer />
 
             {/* commented this as this is not working properly @Jenendar to figure this out... */}
             {currentMainMenu && (

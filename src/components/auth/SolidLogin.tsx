@@ -7,8 +7,7 @@ import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import { Password } from "primereact/password";
-import { Toast } from "primereact/toast";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import { useInitateLoginMutation } from "../../redux/api/authApi";
@@ -17,10 +16,11 @@ import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { RadioButton } from "primereact/radiobutton";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
-import showToast from "../../helpers/showToast";
+import { showToast } from "../../redux/features/toastSlice";
 import { AuthTabs } from "./AuthTabs";
 import { loadSession } from "../../adapters/auth/storage";
 import { hasAnyRole } from "../../helpers/rolesHelper";
+import { useDispatch } from "react-redux";
 
 interface AuthModesProps {
     passwordBasedAuth: boolean;
@@ -38,7 +38,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
     useEffect(() => {
         sessionStorage.removeItem("app-mounted");
     }, [])
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
     const router = useRouter();
 
     const isFormFieldValid = (formik: any, fieldName: string) =>
@@ -87,13 +87,13 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         });
 
                         if (response?.error) {
-                            showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                            dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGIN_ERROR, detail: response.error }));
                             setErrors({
                                 identifier: ERROR_MESSAGES.INVALID_CREDENTIALS,
                                 password: ERROR_MESSAGES.INVALID_CREDENTIALS,
                             });
                         } else {
-                            showToast(toast, "success", ERROR_MESSAGES.LOGIN_SUCCESS, ERROR_MESSAGES.DASHBOARD_REDIRECTING);
+                            dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
                             const session = loadSession();
                             const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
                             const isDev = env("VITE_SOLIDX_ENV") === "dev";
@@ -101,7 +101,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                             router.push(redirectUrl);
                         }
                     } catch (error: any) {
-                        showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, error?.data ? error?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                        dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGIN_ERROR, detail: error?.data ? error?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG }));
                     } finally {
                         setSubmitting(false); // Re-enable the button after submission
                     }
@@ -253,11 +253,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
 
                             if (remaining > 0) {
                                 const formatted = formatTimeLeft(remaining);
-                                showToast(toast,
-                                    "error",
-                                    ERROR_MESSAGES.PLEASE_WAIT,
-                                    ERROR_MESSAGES.OPT_FORMAT(formatted)
-                                );
+                                dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.PLEASE_WAIT, detail: ERROR_MESSAGES.OPT_FORMAT(formatted) }));
                                 setSubmitting(false);
                                 return; //  Prevent request
                             }
@@ -265,15 +261,15 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         const response = await initiateLogin(payload).unwrap(); // Call mutation trigger
 
                         if (response?.statusCode === 200) {
-                            showToast(toast, "success", ERROR_MESSAGES.OPT_RESEND, response?.data?.message);
+                            dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.OPT_RESEND, detail: response?.data?.message }));
                             const identifier = values.identifier;
                             localStorage.setItem(`resendOtpLogin_${identifier}`, Date.now().toString());
                             router.push(`/auth/initiate-login?identifier=${encodeURIComponent(identifier)}&type=${authType}`);
                         } else {
-                            showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                            dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGIN_ERROR, detail: response.error }));
                         }
                     } catch (err: any) {
-                        showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                        dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGIN_ERROR, detail: err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG }));
                         setErrors({
                             identifier: "Invalid Credentials",
                         });
@@ -369,7 +365,6 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
 
     return (
         <div className="">
-            <Toast ref={toast} />
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 <h2 className="solid-auth-title">Login to your account</h2>
                 <p className="solid-auth-helper">Enter your credentials below to login to your account</p>

@@ -123,11 +123,11 @@ export const SolidChangePassword = ({ solidSettingsData }: any) => {
   const validationSchema = useMemo(() => {
     const newPasswordValidation = effectiveRegex
       ? Yup.string()
-          .matches(
-            effectiveRegex,
-            solidSettingsData?.data?.authenticationPasswordRegexErrorMessage || ERROR_MESSAGES.PASSWORD_DO_NOT_MEET
-          )
-          .required(ERROR_MESSAGES.FIELD_REUQIRED("New password"))
+        .matches(
+          effectiveRegex,
+          solidSettingsData?.data?.authenticationPasswordRegexErrorMessage || ERROR_MESSAGES.PASSWORD_DO_NOT_MEET
+        )
+        .required(ERROR_MESSAGES.FIELD_REUQIRED("New password"))
       : Yup.string().min(6, ERROR_MESSAGES.PASSWORD_CHARACTER(6)).required(ERROR_MESSAGES.FIELD_REUQIRED("New password"));
 
     return Yup.object({

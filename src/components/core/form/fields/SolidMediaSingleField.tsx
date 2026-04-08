@@ -146,8 +146,17 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
     const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
-    const readOnlyPermission = fieldContext.readOnly ? fieldContext.readOnly : fieldLayoutInfo.attrs.readonly;
+    const readOnlyPermission = fieldContext.readOnly;
     const viewMode: string = fieldContext.viewMode;
+
+    const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
+    const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
+
+    const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
+    const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+
+    const isFieldDisabled = formDisabled || fieldDisabled;
+    const isFieldReadonly = formReadonly || fieldReadonly || readOnlyPermission;
 
     const [isDeleteImageDialogVisible, setDeleteImageDialogVisible] = useState(false);
     const [imageToBeDeletedData, setImageToBeDeletedData] = useState<any>();
@@ -272,6 +281,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
         },
         accept: getAcceptedFileTypes(fieldMetadata.mediaTypes),
         maxSize: fieldMetadata.mediaMaxSizeKb * 1024,
+        disabled: isFieldDisabled || isFieldReadonly
     });
 
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
@@ -314,7 +324,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
 
 
     return (
-        <div style={readOnlyPermission === true ? { filter: 'opacity(50%)', pointerEvents: 'none' } : {}}>
+        <div style={(isFieldDisabled === true || isFieldReadonly === true) ? { filter: 'opacity(50%)', pointerEvents: 'none' } : {}}>
             <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4 relative">
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
@@ -360,6 +370,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                                                 size="small"
                                                 severity="secondary"
                                                 // className="p-2"
+                                                disabled={isFieldDisabled || isFieldReadonly}
                                                 style={{
                                                     height: 16,
                                                     width: 16
@@ -375,6 +386,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                                                 size="small"
                                                 severity="secondary"
                                                 // className="p-2"
+                                                disabled={isFieldDisabled || isFieldReadonly}
                                                 style={{
                                                     height: 16,
                                                     width: 16

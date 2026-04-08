@@ -1,4 +1,3 @@
-import { ToastContainer } from "../../helpers/ToastContainer";
 import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
 import { hideNavbar, toggleNavbar } from "../../redux/features/navbarSlice";
 import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
@@ -231,7 +230,6 @@ const AppSidebar = () => {
 
     return (
         <>
-            <ToastContainer />
             {!isDesktop && visibleNavbar && <div className="solid-sidebar-backdrop" onClick={() => dispatch(toggleNavbar())} />}
 
             <aside className={shellClasses}>

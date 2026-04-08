@@ -1,13 +1,13 @@
 import { useFormik } from 'formik';
 import { Button } from 'primereact/button';
 import { Checkbox } from 'primereact/checkbox';
-import React, { useRef, useState } from 'react'
+import React, { useState } from 'react'
+import { useDispatch } from 'react-redux';
 import { createSolidEntityApi } from '../../../../redux/api/solidEntityApi';
-import { Toast } from "primereact/toast";
 import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
 import styles from './SolidListColumnSelector.module.css'
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
-import showToast from "../../../../helpers/showToast";
+import { showToast } from '../../../../redux/features/toastSlice';
 
 interface FieldMetadata {
     displayName: string;
@@ -21,7 +21,7 @@ interface FilterColumns {
 export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: any) => {
     console.log("listViewMetaData column selector", listViewMetaData);
 
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
     const [isDragging, setIsDragging] = useState(false);
     const entityApi = createSolidEntityApi('userViewMetadata');
     const {
@@ -136,7 +136,7 @@ export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: a
                         layout: JSON.stringify(updatedView.layout),
                     }).unwrap();
                     if (response.statusCode === 200) {
-                        showToast(toast, "success", ERROR_MESSAGES.LAYOUT, ERROR_MESSAGES.FORM_LAYOUT_UPDATE);
+                        dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LAYOUT, detail: ERROR_MESSAGES.FORM_LAYOUT_UPDATE }));
                         window.location.reload();
                     }
                 }
@@ -157,7 +157,6 @@ export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: a
 
     return (
         <>
-            <Toast ref={toast} />
             <form onSubmit={formik.handleSubmit} className="flex flex-column gap-1 px-2">
                 <DragDropContext onDragEnd={onDragEnd} onDragStart={() => setIsDragging(true)}>
                     <Droppable droppableId="columns">

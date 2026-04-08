@@ -1,16 +1,15 @@
 import { useFormik } from "formik";
 import { Button } from "primereact/button";
-import { useRef } from "react";
+import { useDispatch } from "react-redux";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { javascript } from "@codemirror/lang-javascript";
 import { oneDark } from "@codemirror/theme-one-dark";
 import CodeMirror, { EditorView } from "@uiw/react-codemirror";
-import { Toast } from "primereact/toast";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
-import showToast from "../../../helpers/showToast";
+import { showToast } from "../../../redux/features/toastSlice";
 
 export const KanbanUserViewLayout = ({ solidKanbanViewMetaData, setLayoutDialogVisible }: any) => {
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
     const entityApi = createSolidEntityApi("userViewMetadata");
     const { useUpsertSolidEntityMutation } = entityApi;
     const [upsertUserView] = useUpsertSolidEntityMutation();
@@ -32,7 +31,7 @@ export const KanbanUserViewLayout = ({ solidKanbanViewMetaData, setLayoutDialogV
                         layout: JSON.stringify(parsedLayout),
                     }).unwrap();
                     if (response.statusCode === 200) {
-                        showToast(toast, "success", ERROR_MESSAGES.LAYOUT, ERROR_MESSAGES.FORM_LAYOUT_UPDATE);
+                        dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LAYOUT, detail: ERROR_MESSAGES.FORM_LAYOUT_UPDATE }));
                         setLayoutDialogVisible(false);
                         window.location.reload();
                     }
@@ -45,7 +44,6 @@ export const KanbanUserViewLayout = ({ solidKanbanViewMetaData, setLayoutDialogV
 
     return (
         <>
-            <Toast ref={toast} />
             <form onSubmit={formik.handleSubmit}>
                 <CodeMirror
                     value={formik.values.layoutString}

@@ -8,8 +8,7 @@ import { Divider } from "primereact/divider";
 import { InputText } from "primereact/inputtext";
 import { Message } from "primereact/message";
 import { Password } from "primereact/password";
-import { Toast } from "primereact/toast";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import { formatTimeLeft } from "../../helpers/resendOtpHelper";
@@ -17,8 +16,9 @@ import { ProgressSpinner } from "primereact/progressspinner";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
-import showToast from "../../helpers/showToast";
+import { showToast } from "../../redux/features/toastSlice";
 import { AuthTabs } from "./AuthTabs";
+import { useDispatch } from "react-redux";
 
 interface AuthModesProps {
     passwordBasedAuth: boolean;
@@ -37,7 +37,7 @@ const SolidRegister = () => {
 
     const [showOverlay, setShowOverlay] = useState(false);
 
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
 
     const router = useRouter();
 
@@ -54,20 +54,20 @@ const SolidRegister = () => {
                 const apiError = error as FetchBaseQueryError;
                 // @ts-ignore
                 const errorMessages = Array.isArray(apiError.data?.message) ? apiError.data?.message : [apiError.data?.message];
-                toast.current?.show({
+                dispatch(showToast({
                     severity: "error",
                     summary: ERROR_MESSAGES.ERROR,
                     detail: errorMessages.join(", "),
-                    sticky: true
-                });
+                    life: 10000
+                }));
             } else {
                 const serializedError = error as Error;
-                toast.current?.show({
+                dispatch(showToast({
                     severity: "error",
                     summary: ERROR_MESSAGES.ERROR,
                     detail: serializedError.message || ERROR_MESSAGES.ERROR_OCCURED,
-                    sticky: true
-                });
+                    life: 10000
+                }));
             }
         }
     };
@@ -145,16 +145,16 @@ const SolidRegister = () => {
                         const response = await register(userData).unwrap();
 
                         if (response?.statusCode === 200) {
-                            showToast(toast, "success", ERROR_MESSAGES.USER_REGISTER, response?.data?.message);
+                            dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.USER_REGISTER, detail: response?.data?.message }));
                             setShowOverlay(true);
                             setTimeout(() => {
                                 router.push(`/auth/login`);
                             }, 3000);
                         } else {
-                            showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                            dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGIN_ERROR, detail: response.error }));
                         }
                     } catch (err: any) {
-                        showToast(toast, "error", ERROR_MESSAGES.EMAIL_ALREADY_TAKEN, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                        dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.EMAIL_ALREADY_TAKEN, detail: err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG }));
                     } finally {
                         setSubmitting(false);
                     }
@@ -295,11 +295,7 @@ const SolidRegister = () => {
 
                             if (remaining > 0) {
                                 const formatted = formatTimeLeft(remaining);
-                                showToast(toast, 
-                                    "error",
-                                    ERROR_MESSAGES.PLEASE_WAIT,
-                                    ERROR_MESSAGES.OPT_FORMAT(formatted)
-                                );
+                                dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.PLEASE_WAIT, detail: ERROR_MESSAGES.OPT_FORMAT(formatted) }));
                                 setSubmitting(false);
                                 return; //  Prevent request
                             }
@@ -307,15 +303,15 @@ const SolidRegister = () => {
                         const response = await initiateRegister(payload).unwrap(); // Call mutation trigger
 
                         if (response?.statusCode === 200) {
-                            showToast(toast, "success", ERROR_MESSAGES.OPT_SEND, response?.data?.message);
+                            dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.OPT_SEND, detail: response?.data?.message }));
                             const email = values.email;
                             localStorage.setItem(`resendOtpRegister_${email}`, Date.now().toString());
                             router.push(`/auth/initiate-register?email=${email}&username=${values.username}`);
                         } else {
-                            showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, response.error);
+                            dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGIN_ERROR, detail: response.error }));
                         }
                     } catch (err: any) {
-                        showToast(toast, "error", ERROR_MESSAGES.LOGIN_ERROR, err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG);
+                        dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LOGIN_ERROR, detail: err?.data ? err?.data?.message : ERROR_MESSAGES.SOMETHING_WRONG }));
                     } finally {
                         setSubmitting(false);
                     }
@@ -390,8 +386,7 @@ const SolidRegister = () => {
     };
     return (
         <div className="">
-            <Toast ref={toast} />
-            {/* 🔹 Overlay UI */}
+            {/* Overlay UI */}
             <div className={`auth-container position-relative ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
                 {showOverlay && (
                     <div className="absolute top-0 left-0 w-full h-full flex align-items-center justify-content-center register-success-popup">
