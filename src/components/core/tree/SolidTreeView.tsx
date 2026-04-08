@@ -45,7 +45,7 @@ import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePa
 import { usePathname } from "../../../hooks/usePathname";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { SolidListViewRowButtonContextMenu } from "../list/SolidListViewRowButtonContextMenu";
+import { SolidListViewRowActionMenuItem } from "../list/SolidListViewRowActionMenuItem";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -2006,12 +2006,11 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 rb?.attrs?.visible !== false
             )
             .map((button: any, index: number) => (
-              <SolidListViewRowButtonContextMenu
+              <SolidListViewRowActionMenuItem
                 key={`${index}-${selectedDataRef?.current?.id || ''}`}
                 button={button}
                 params={params}
-                getSelectedSolidViewData={() => selectedDataRef.current}
-                // selectedSolidViewData={selectedSolidViewData}
+                rowData={selectedDataRef.current}
                 solidListViewMetaData={
                   solidTreeViewMetaData
                 }

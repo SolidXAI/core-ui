@@ -1218,32 +1218,41 @@ body {
 }
 
 .solid-autocomplete-panel {
+  position: absolute;
+  top: calc(100% + 4px);
+  left: 0;
+  right: 0;
   z-index: 9999;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--card);
+  color: var(--card-foreground);
   box-shadow: 0 12px 26px rgba(2, 6, 23, 0.16);
+  min-width: 100%;
   max-height: 220px;
   overflow-y: auto;
   padding: 4px;
 }
 
 .solid-autocomplete-option {
+  display: block;
   width: 100%;
   text-align: left;
   border: 0;
   background: transparent;
   color: var(--foreground);
   font-size: 12px;
+  line-height: 1.2;
   border-radius: 6px;
-  min-height: 26px;
-  padding: 4px 8px;
+  min-height: 30px;
+  padding: 6px 8px;
   cursor: pointer;
 }
 
 .solid-autocomplete-option:hover,
 .solid-autocomplete-option.is-active {
   background: color-mix(in srgb, var(--accent) 70%, transparent);
+  cursor: pointer;
 }
 
 .solid-autocomplete-chip {
@@ -3156,6 +3165,15 @@ body {
   display: none;
 }
 
+.solid-popover-content {
+  z-index: 70;
+  padding: 3px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  background: var(--card);
+  box-shadow: 0 10px 24px color-mix(in srgb, hsl(222 47% 11%) 18%, transparent);
+}
+
 .solid-custom-overlay .p-overlaypanel-content {
   padding: 3px;
   border-radius: 8px;
@@ -3168,8 +3186,11 @@ body {
   min-width: 152px;
 }
 
-.solid-row-action-button.p-button {
+.solid-row-action-button {
+  display: inline-flex;
+  align-items: center;
   width: 100%;
+  gap: 6px;
   justify-content: flex-start;
   border: 1px solid transparent;
   background: transparent;
@@ -3180,34 +3201,38 @@ body {
   font-size: 12px;
   font-weight: 500;
   line-height: 1.1;
+  cursor: pointer;
 }
 
-.solid-row-action-button.p-button .p-button-label {
+.solid-row-action-button-label {
   flex: 1;
   text-align: left;
   line-height: 1.1;
 }
 
-.solid-row-action-button.p-button .p-button-icon {
+.solid-row-action-button-icon {
   font-size: 11px;
-  margin-right: 6px;
+  width: 12px;
+  min-width: 12px;
+  display: inline-flex;
+  justify-content: center;
 }
 
-.solid-row-action-button.p-button:hover {
+.solid-row-action-button:hover {
   background: var(--accent);
   border-color: color-mix(in srgb, var(--border) 82%, transparent);
 }
 
-.solid-row-action-button.p-button:focus-visible {
+.solid-row-action-button:focus-visible {
   outline: none;
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 24%, transparent);
 }
 
-.solid-row-action-button.p-button.solid-row-action-button-danger {
+.solid-row-action-button.solid-row-action-button-danger {
   color: hsl(0 72% 45%);
 }
 
-.solid-row-action-button.p-button.solid-row-action-button-danger:hover {
+.solid-row-action-button.solid-row-action-button-danger:hover {
   background: color-mix(in srgb, hsl(0 72% 45%) 11%, transparent);
   border-color: color-mix(in srgb, hsl(0 72% 45%) 40%, transparent);
 }

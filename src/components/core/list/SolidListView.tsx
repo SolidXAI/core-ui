@@ -15,7 +15,6 @@ import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
-import { OverlayPanel } from "primereact/overlaypanel";
 import { showToast } from "../../../redux/features/toastSlice";
 import { Divider } from "primereact/divider";
 import CompactImage from '../../../resources/images/layout/images/compact.png';
@@ -33,7 +32,6 @@ import { SolidEmptyListViewPlaceholder } from "./SolidEmptyListViewPlaceholder";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
-import { SolidListViewRowButtonContextMenu } from "./SolidListViewRowButtonContextMenu";
 import { useDispatch, useSelector } from "react-redux";
 import styles from "./SolidListViewWrapper.module.css";
 import { SolidBeforeListDataLoad, SolidListUiEventResponse, SolidLoadList } from "../../../types/solid-core";
@@ -43,6 +41,7 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 // import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper"; // moved to SolidX Studio panel
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
+import { SolidListViewRowActionsMenu } from "./SolidListViewRowActionsMenu";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -935,40 +934,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const [selectedSolidViewData, setSelectedSolidViewData] = useState<any>();
   const selectedDataRef = useRef<any>();
-  const op = useRef<any>(null);
   const [deleteEntity, setDeleteEntity] = useState(false);
-
-  // clickable link allowing one to open the detail / form view.
-  const detailsBodyTemplate = (solidViewData: any) => {
-    return (
-      <div className="flex justify-content-end" data-no-row-click="true">
-        <Button
-          type="button"
-          size="small"
-          icon="pi pi-ellipsis-h"
-          className="solid-row-menu-trigger"
-          onClick={(e) =>
-          // @ts-ignore
-          {
-            e.stopPropagation();
-            selectedDataRef.current = solidViewData;
-            setSelectedSolidViewData(solidViewData);
-            op.current.toggle(e)
-          }
-          }
-        />
-      </div>
-      // <a onClick={() => {
-      //   if (params.embeded == true) {
-      //     params.handleAddClickForEmbeddedView(solidViewData.id);
-      //   } else {
-      //     router.push(`${editButtonUrl}/${solidViewData.id}`)
-      //   }
-      // }} rel="noopener noreferrer" className="text-sm font-bold p-0" style={{ color: "#12415D" }}>
-      //   <i className="pi pi-pencil" style={{ fontSize: "1rem" }}></i>
-      // </a>
-    );
-  };
 
   // Recover functions
   const recoverById = (id: any) => {
@@ -1696,76 +1662,40 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                             <>
                               {solidListViewLayout?.attrs?.showRowContextMenu !==
                                 false && (
-                                  <>
-                                    {detailsBodyTemplate(rowData)}
-                                    <OverlayPanel
-                                      ref={op}
-                                      className={`solid-custom-overlay ${styles.rowActionsOverlay}`}
-                                    >
-                                      <div className="solid-row-actions-menu flex flex-column gap-1 p-1">
-                                        {hasEditInContextMenu && (
-                                          <Button
-                                            type="button"
-                                            className="solid-row-action-button w-full text-left gap-1"
-                                            label="Edit"
-                                            size="small"
-                                            iconPos="left"
-                                            icon={"pi pi-pencil"}
-                                            onClick={() => {
-                                              if (params.embeded == true) {
-                                                params.handleEditClickForEmbeddedView(
-                                                  selectedDataRef.current?.id
-                                                );
-                                              } else {
-                                                try {
-                                                  sessionStorage.setItem("fromView", "list");
-                                                  sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-                                                } catch (e) { }
-                                                router.push(
-                                                  `${editBaseUrl}/${selectedDataRef.current?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
-                                                );
-                                              }
-                                            }}
-                                          />
-                                        )}
-
-                                        {hasDeleteInContextMenu && !params.embeded && (
-                                          <Button
-                                            text
-                                            type="button"
-                                            className="solid-row-action-button solid-row-action-button-danger w-full text-left gap-1"
-                                            label="Delete"
-                                            size="small"
-                                            iconPos="left"
-                                            severity="danger"
-                                            icon={"pi pi-trash"}
-                                            onClick={() => setDeleteEntity(true)}
-                                          />
-                                        )}
-                                        {hasCustomContextMenuButtons && solidListViewLayout?.attrs?.rowButtons
-                                          ?.filter(
-                                            (rb: any) =>
-                                              rb?.attrs?.actionInContextMenu === true &&
-                                              rb?.attrs?.visible !== false
-                                          )
-                                          .map((button: any, index: number) => (
-                                            <SolidListViewRowButtonContextMenu
-                                              key={`${index}-${selectedDataRef?.current?.id || ''}`}
-                                              button={button}
-                                              params={params}
-                                              getSelectedSolidViewData={() => selectedDataRef.current}
-                                              // selectedSolidViewData={selectedSolidViewData}
-                                              solidListViewMetaData={
-                                                solidListViewMetaData
-                                              }
-                                              handleCustomButtonClick={
-                                                handleCustomButtonClick
-                                              }
-                                            />
-                                          ))}
-                                      </div>
-                                    </OverlayPanel>
-                                  </>
+                                  <div className="flex justify-content-end" data-no-row-click="true">
+                                    <SolidListViewRowActionsMenu
+                                      rowData={rowData}
+                                      hasEditInContextMenu={hasEditInContextMenu}
+                                      hasDeleteInContextMenu={hasDeleteInContextMenu}
+                                      hasCustomContextMenuButtons={hasCustomContextMenuButtons}
+                                      solidListViewLayout={solidListViewLayout}
+                                      solidListViewMetaData={solidListViewMetaData}
+                                      params={params}
+                                      handleCustomButtonClick={handleCustomButtonClick}
+                                      contentClassName={styles.rowActionsOverlay}
+                                      onSelectRow={(selectedRow: any) => {
+                                        selectedDataRef.current = selectedRow;
+                                        setSelectedSolidViewData(selectedRow);
+                                      }}
+                                      onEdit={(selectedRow: any) => {
+                                        if (params.embeded == true) {
+                                          params.handleEditClickForEmbeddedView(selectedRow?.id);
+                                        } else {
+                                          try {
+                                            sessionStorage.setItem("fromView", "list");
+                                            sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
+                                          } catch (e) { }
+                                          router.push(
+                                            `${editBaseUrl}/${selectedRow?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
+                                          );
+                                        }
+                                      }}
+                                      onDelete={(selectedRow: any) => {
+                                        setSelectedSolidViewData(selectedRow);
+                                        setDeleteEntity(true);
+                                      }}
+                                    />
+                                  </div>
                                 )}
                             </>
                           )

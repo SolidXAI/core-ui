@@ -1,9 +1,7 @@
 import { useSession } from "../../../hooks/useSession";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
-import { Button } from "primereact/button";
 
-export const SolidListViewRowButtonContextMenu = ({ button, params, getSelectedSolidViewData, solidListViewMetaData, handleCustomButtonClick }: any) => {
-    const selectedSolidViewData = getSelectedSolidViewData?.();
+export const SolidListViewRowActionMenuItem = ({ button, params, rowData, solidListViewMetaData, handleCustomButtonClick, onActionComplete }: any) => {
 
     const { data: session, status } = useSession();
     const user = session?.user;
@@ -13,16 +11,13 @@ export const SolidListViewRowButtonContextMenu = ({ button, params, getSelectedS
     if (!hasRole) return null;
 
     return (
-        <Button
+        <button
             type="button"
-            icon={button?.attrs?.icon ? button?.attrs?.icon : "pi pi-pencil"}
-            className={`solid-row-action-button w-full text-left gap-1 ${button?.attrs?.className ? button?.attrs?.className : ''}`}
-            label={button.attrs.label}
-            size="small"
+            className={`solid-row-action-button ${button?.attrs?.className ? button?.attrs?.className : ''}`}
             onClick={() => {
                 const event = {
                     params,
-                    rowData: selectedSolidViewData,
+                    rowData: rowData,
                     solidListViewMetaData: solidListViewMetaData.data,
                 };
 
@@ -34,7 +29,11 @@ export const SolidListViewRowButtonContextMenu = ({ button, params, getSelectedS
                 }
 
                 handleCustomButtonClick(modifiedButtonAttrs, event);
+                onActionComplete?.();
             }}
-        />
+        >
+            <i className={`${button?.attrs?.icon ? button?.attrs?.icon : "pi pi-pencil"} solid-row-action-button-icon`} />
+            <span className="solid-row-action-button-label">{button.attrs.label}</span>
+        </button>
     );
 };
