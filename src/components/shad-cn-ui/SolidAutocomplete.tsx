@@ -1,4 +1,5 @@
-import React, { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
+import { createPortal } from "react-dom";
 
 type SolidAutocompleteProps = {
   value?: any;
@@ -47,6 +48,7 @@ export function SolidAutocomplete({
   maxVisibleChips = 2,
 }: SolidAutocompleteProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
+  const controlRef = useRef<HTMLDivElement | null>(null);
   const completeTimerRef = useRef<number | null>(null);
   const [open, setOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
@@ -179,9 +181,15 @@ export function SolidAutocomplete({
     setActiveIndex(-1);
   };
 
+  const getPanelStyle = () => {
+    const rect = controlRef.current?.getBoundingClientRect();
+    if (!rect) return {};
+    return { position: "fixed" as const, top: rect.bottom + 4, left: rect.left, width: rect.width, zIndex: 9999 };
+  };
+
   return (
     <div ref={rootRef} className={cx("solid-autocomplete", className)}>
-      <div className={cx("solid-autocomplete-control solid-autocomplete-chip-control", isFocused && "is-focused")}>
+      <div ref={controlRef} className={cx("solid-autocomplete-control solid-autocomplete-chip-control", isFocused && "is-focused")}>
       {visibleSelectedItems.map((item, index) => (
           <span key={toItemKey(item, index)} className="solid-autocomplete-chip">
             <span className="solid-autocomplete-chip-label">{getDisplayValue(item, field)}</span>
@@ -277,8 +285,6 @@ export function SolidAutocomplete({
               setOpen(nextOpen);
               if (nextOpen) {
                 setManageOpen(false);
-              }
-              if (nextOpen) {
                 runCompleteMethod(query, true);
               }
             }}
@@ -315,8 +321,8 @@ export function SolidAutocomplete({
         </div>
       )}
 
-      {open && normalizedSuggestions.length > 0 && (
-        <div className="solid-autocomplete-panel" role="listbox">
+      {open && normalizedSuggestions.length > 0 && createPortal(
+        <div className="solid-autocomplete-panel" style={getPanelStyle()} role="listbox">
           {normalizedSuggestions.map((item, index) => (
             <button
               key={`${item.label}-${index}`}
@@ -332,7 +338,8 @@ export function SolidAutocomplete({
               {item.label}
             </button>
           ))}
-        </div>
+        </div>,
+        document.body
       )}
     </div>
   );

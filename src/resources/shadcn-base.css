@@ -1083,6 +1083,8 @@ body {
 
 .solid-btn-label {
   white-space: nowrap;
+    align-items: center;
+    display: flex;
 }
 
 .solid-select-wrap {
@@ -1216,11 +1218,7 @@ body {
 }
 
 .solid-autocomplete-panel {
-  position: absolute;
-  top: calc(100% + 4px);
-  left: 0;
-  right: 0;
-  z-index: 40;
+  z-index: 9999;
   border: 1px solid var(--border);
   border-radius: 8px;
   background: var(--card);

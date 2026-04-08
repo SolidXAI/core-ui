@@ -2978,7 +2978,7 @@ li.header-li-px {
 .solid-filter-rule-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: start;
+  align-items: center;
   gap: 6px 8px;
   padding: 5px 0;
 }
@@ -2988,6 +2988,7 @@ li.header-li-px {
   grid-template-columns: minmax(130px, 0.8fr) minmax(230px, 1.2fr);
   gap: 6px;
   width: 100%;
+  align-items: center;
 }
 
 .solid-filter-rule-field,
@@ -3011,14 +3012,14 @@ li.header-li-px {
 .solid-filter-empty-pair {
   display: grid;
   grid-template-columns: 1fr 1fr;
-  gap: 6px;
+  gap: 4px;
 }
 
 .solid-filter-rule-actions {
   display: inline-flex;
   align-items: center;
   gap: 4px;
-  padding-top: 3px;
+  padding-top: 0;
 }
 
 .solid-filter-action-btn.solid-filter-action-icon-btn {

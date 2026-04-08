@@ -539,6 +539,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         type: "saved" | "search" | "predefined" | "custom" | "grouping";
         label: string;
         onRemove: () => void;
+        onOpen?: () => void;
     };
 
     const defaultState: FilterRule[] = [
@@ -1492,6 +1493,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 type: "custom",
                 label: `${customRuleCount} custom rules applied`,
                 onRemove: () => clearCustomFilter(),
+                onOpen:() => setShowGlobalSearchElement(true)
             });
         }
 
@@ -1863,7 +1865,14 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                         </div>
                         <div className="solid-chip-manager-body">
                             {managedChipItems.map((chip) => (
-                                <div key={`manage-${chip.id}`} className={`solid-chip-manager-item solid-chip-tone-${chip.type}`}>
+                                <div key={`manage-${chip.id}`} className={`solid-chip-manager-item solid-chip-tone-${chip.type}`} onClick={() => {
+                                    if (chip.id == "custom-filter") {
+                                        if(chip.onOpen){
+                                            chip.onOpen()
+                                        }
+                                    }
+                                }
+                                }>
                                     <span className="solid-chip-manager-item-label" title={chip.label}>
                                         {chip.label}
                                     </span>
@@ -1895,7 +1904,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                         key={index}
                                                         variant="ghost"
                                                         size="sm"
-                                                        className={`flex gap-1 text-color solid-search-overlay-option ${focusedIndex === index ? "solid-search-overlay-option-active" : ""}`}
+                                                        className={`flex gap-1 text-color solid-search-overlay-option ${focusedIndex === index ? "solid-search-overlay-option-active" : ""} justify-content-start`}
                                                         onMouseDown={(e) => {
                                                             e.preventDefault();
                                                             const currentValue = inputValue?.trim();
@@ -1917,7 +1926,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                                         }}
                                                         onMouseEnter={() => setFocusedIndex(index)}
                                                     >
-                                                        Search <strong>{value.displayName}</strong> for: <span className="font-bold text-color">{inputValue}</span>
+                                                        Search <strong style={{paddingLeft:"2px"}}>{value.displayName}</strong> &nbsp; for:&nbsp; <span className="font-bold text-color">{inputValue}</span>
                                                     </SolidButton>
                                                 )
                                             })
@@ -1998,23 +2007,29 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             }
                         </div>
 
-                        <div className="px-3 py-2 flex flex-column solid-search-overlay-footer">
-                            <div className="solid-search-overlay-footer-title solid-search-overlay-section-title">Or apply a custom filter</div>
+                        <div className="px-3 py-2 flex flex-column solid-search-overlay-footer cursor-pointer" onClick={() => {
+                            if (viewType === "tree") {
+                                setShowGroupFilterElement(true)
+                            } else {
+                                setShowGlobalSearchElement(true)
+                            }
+                        }}>
+                            <div className="solid-search-overlay-footer-title solid-search-overlay-section-title">Or click here to custom filter</div>
                             <div className="solid-search-overlay-footer-subtitle">
                                 Use custom filters to apply filters on any field using any operator for a more flexible approach to filtering data.
                             </div>
-                            <div className="solid-search-overlay-footer-actions">
-                                <SolidButton variant="ghost" size="sm" onClick={() => setShowGlobalSearchElement(true)} className="solid-search-overlay-option solid-search-overlay-footer-btn">
+                            {/* <div className="solid-search-overlay-footer-actions">
+                                <SolidButton variant="ghost" size="sm" onClick={() => } className="solid-search-overlay-option solid-search-overlay-footer-btn">
                                     <Filter size={14} />
                                     Custom Filter
                                 </SolidButton>
                                 {viewType === "tree" &&
-                                    <SolidButton variant="ghost" size="sm" onClick={() => setShowGroupFilterElement(true)} className="solid-search-overlay-option solid-search-overlay-footer-btn">
+                                    <SolidButton variant="ghost" size="sm" onClick={() => } className="solid-search-overlay-option solid-search-overlay-footer-btn">
                                         <Plus size={14} />
                                         Grouping
                                     </SolidButton>
                                 }
-                            </div>
+                            </div> */}
                         </div>
                     </div>
                 )
