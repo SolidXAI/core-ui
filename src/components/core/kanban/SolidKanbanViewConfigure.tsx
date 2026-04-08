@@ -1,6 +1,7 @@
 import { permissionExpression } from "../../../helpers/permissions";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
+import { useSearchParams } from "../../../hooks/useSearchParams";
 import { useEffect, useState } from "react";
 import { SolidExport } from "../../../components/common/SolidExport";
 import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
@@ -60,6 +61,7 @@ export const SolidKanbanViewConfigure = ({
 }: any) => {
     const pathname = usePathname();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [view, setView] = useState<string>("");
     const [isCogMenuOpen, setIsCogMenuOpen] = useState(false);
     const [openImportDialog, setOpenImportDialog] = useState(false);
@@ -78,12 +80,38 @@ export const SolidKanbanViewConfigure = ({
         }
     }, [pathname]);
 
-    const handleViewChange = (newView: string) => {
-        if (view === newView) return;
+    const handleViewChange = (newViewType: string) => {
+        if (view === newViewType) return;
+
+        const nextView = visibleViewModes.find((option: any) => option.type === newViewType);
         const pathSegments = pathname.split("/").filter(Boolean);
-        pathSegments[pathSegments.length - 1] = newView;
+        pathSegments[pathSegments.length - 1] = newViewType;
+        const nextSearchParams = new URLSearchParams(searchParams.toString());
+        const currentQuery = {
+            menuItemId: searchParams.get("menuItemId"),
+            menuItemName: searchParams.get("menuItemName"),
+            actionId: searchParams.get("actionId"),
+            actionName: searchParams.get("actionName"),
+        };
+
+        const queryFields = {
+            menuItemId: nextView?.menuItemId ?? currentQuery.menuItemId,
+            menuItemName: nextView?.menuItemName ?? currentQuery.menuItemName,
+            actionId: nextView?.actionId ?? currentQuery.actionId,
+            actionName: nextView?.actionName ?? currentQuery.actionName,
+        };
+
+        Object.entries(queryFields).forEach(([key, value]) => {
+            if (value) {
+                nextSearchParams.set(key, value);
+            } else {
+                nextSearchParams.delete(key);
+            }
+        });
+
         const newPath = "/" + pathSegments.join("/");
-        router.push(newPath);
+        const nextQueryString = nextSearchParams.toString();
+        router.push(nextQueryString ? `${newPath}?${nextQueryString}` : newPath);
     };
 
     const clearLocalstorageCache = () => {

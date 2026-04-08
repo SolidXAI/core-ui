@@ -205,9 +205,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
     if (solidKanbanViewMetaData) {
       setKanbanViewMetaData(solidKanbanViewMetaData);
-      // const viewModes = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.length > 0 && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view } });
       setViewModes(solidKanbanViewMetaData?.data?.viewModes);
-      // setViewModes(viewModes);
       if (solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.grouped !== false) {
         setGroupByFieldName(solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.groupBy)
       } else {
@@ -721,8 +719,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     if (solidKanbanViewMetaData) {
       const createActionUrl = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.type === "custom" ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.customComponent : "form/new";
       const editActionUrl = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.type === "custom" ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.customComponent : "form";
-      const viewModes = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.length > 0 && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view } });
-      setViewModes(viewModes);
       if (createActionUrl) {
         setCreateButtonUrl(createActionUrl)
       }
