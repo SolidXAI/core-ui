@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import dayjs from "dayjs";
 
@@ -6,20 +6,21 @@ type DateFieldViewProps = {
   value: unknown;
   format?: string; // dayjs format tokens (optional)
   fallback?: string; // optional fallback text (default: "-")
+  showTime?: boolean;
 };
 
 export const DateFieldViewComponent = ({
   value,
   format,
   fallback = "-",
+  showTime = false,
 }: DateFieldViewProps) => {
   if (!value) {
     return <>{fallback}</>;
   }
 
   // Normalize value to Date
-  const date =
-    value instanceof Date ? value : new Date(value as any);
+  const date = value instanceof Date ? value : new Date(value as any);
 
   // Invalid date → render raw value
   if (isNaN(date.getTime())) {
@@ -32,5 +33,5 @@ export const DateFieldViewComponent = ({
   }
 
   // Default → browser locale
-  return <>{date.toLocaleDateString()}</>;
+  return <>{showTime ? date.toLocaleString() : date.toLocaleDateString()}</>;
 };

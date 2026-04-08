@@ -20,146 +20,191 @@ import SolidTimeColumn from "./columns/SolidTimeColumn";
 import SolidUuidColumn from "./columns/SolidUuidColumn";
 
 export type SolidListViewColumnParams = {
-    solidListViewMetaData: any;
-    fieldMetadata: any,
-    column: any,
-    setLightboxUrls?: any,
-    setOpenLightbox?: any
+  solidListViewMetaData: any;
+  fieldMetadata: any;
+  column: any;
+  setLightboxUrls?: any;
+  setOpenLightbox?: any;
 };
 
 export const getNumberOfInputs = (matchMode: any): number | null => {
-    if (matchMode.label && matchMode.label === 'Not In') {
-        matchMode = 'notIn';
-    }
+  if (matchMode.label && matchMode.label === "Not In") {
+    matchMode = "notIn";
+  }
 
-    switch (matchMode) {
-        case 'between':
-            return 2;
-        case 'in':
-        case 'notIn':
-            return null;
-        case 'startsWith':
-        case 'contains':
-        case 'notContains':
-        case 'endsWith':
-        case 'equals':
-        case 'notEquals':
-        case 'lt':
-        case 'lte':
-        case 'gt':
-        case 'gte':
-            return 1;
-        default:
-            return 1; // Default to single input if no specific match is found
-    }
-}
+  switch (matchMode) {
+    case "between":
+      return 2;
+    case "in":
+    case "notIn":
+      return null;
+    case "startsWith":
+    case "contains":
+    case "notContains":
+    case "endsWith":
+    case "equals":
+    case "notEquals":
+    case "lt":
+    case "lte":
+    case "gt":
+    case "gte":
+      return 1;
+    default:
+      return 1;
+  }
+};
 
-// // @ts-ignore
-// const components = require.context('./columns', false, /Solid.*Column\.tsx$/);
+// ✅ FIX: field names that are actually datetime but typed as 'date' in metadata
+const DATETIME_FIELD_NAMES = [
+  "lastRunAt",
+  "nextRunAt",
+  "createdAt",
+  "updatedAt",
+];
 
-// // Define a function to dynamically load components based on type
-// const loadComponentByType = async (type: string) => {
-//     try {
-//         const componentName = `./columns/Solid${type.charAt(0).toUpperCase() + type.slice(1)}Column.tsx`;
+export const SolidListViewColumn = ({
+  solidListViewMetaData,
+  fieldMetadata,
+  column,
+  setLightboxUrls,
+  setOpenLightbox,
+}: SolidListViewColumnParams) => {
+  console.log("COLUMN ROUTING →", fieldMetadata.name, fieldMetadata.type);
 
-//         // Dynamically import the component based on type
-//         const componentModule = await import(componentName);
+  if (fieldMetadata.name === "id") {
+    return SolidIntColumn({ solidListViewMetaData, fieldMetadata, column });
+  }
 
-//         return componentModule.default;
-//     } catch (error) {
-//         console.error(`Failed to load component for type: ${type}`, error);
-//         return null;
-//     }
-// };
-
-export const SolidListViewColumn = ({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox }: SolidListViewColumnParams) => {
-
-    // And finally we can implement additional switching logic based on certain special fields. 
-    if (fieldMetadata.name === 'id') {
-        return SolidIntColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-
-    if (fieldMetadata.type === 'int') {
-        return SolidIntColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-    if (fieldMetadata.type === 'bigint') {
-        return SolidBigintColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-    if (fieldMetadata.type === 'float') {
-        return SolidFloatColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-    if (fieldMetadata.type === 'decimal') {
-        return SolidDecimalColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-    if (fieldMetadata.type === 'shortText') {
-        return SolidShortTextColumn({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox });
-    }
-    if (fieldMetadata.type === 'longText') {
-        return SolidLongTextColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-    if (fieldMetadata.type === 'richText') {
-        return SolidRichTextColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-    if (fieldMetadata.type === 'email') {
-        return SolidShortTextColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-    if (fieldMetadata.type === 'boolean') {
-        return SolidBooleanColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-    if (fieldMetadata.type === 'date') {
-        return SolidDateColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-    if (fieldMetadata.type === 'datetime') {
-        return SolidDatetimeColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-    if (fieldMetadata.type === 'time') {
-        return SolidTimeColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-    if (fieldMetadata.type === 'relation') {
-        return SolidRelationColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-    if (fieldMetadata.type === 'mediaSingle') {
-        return SolidMediaSingleColumn({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox });
-    }
-    if (fieldMetadata.type === 'mediaMultiple') {
-        return SolidMediaMultipleColumn({ solidListViewMetaData, fieldMetadata, column, setLightboxUrls, setOpenLightbox });
-    }
-    if (fieldMetadata.type === 'selectionStatic') {
-        return SolidSelectionStaticColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-    if (fieldMetadata.type === 'selectionDynamic') {
-        return SolidSelectionDynamicColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-    if (fieldMetadata.type === 'computed') {
-        return SolidComputedColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-    if (fieldMetadata.type === 'externalId') {
-        return SolidExternalIdColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-    if (fieldMetadata.type === 'uuid') {
-        return SolidUuidColumn({ solidListViewMetaData, fieldMetadata, column });
-    }
-    // // Load everything else based on type and dynamically.
-    // else {
-    //     const ComponentFound = await loadComponentByType(fieldMetadata.type);
-    //     const ComponentNotFound = ({ solidListViewMetaData, fieldMetadata, column }: SolidListViewColumnParams) => (
-    //         <Column
-    //             key={fieldMetadata.name}
-    //             field={fieldMetadata.name}
-    //             header={fieldMetadata.displayName}
-    //             className="text-sm"
-    //             sortable={false}
-    //             filter={false}
-    //             showFilterOperator={false}
-    //             body={() => (<span>Type not supported</span>)}
-    //             style={{ minWidth: "12rem" }}
-    //             headerClassName="table-header-fs"
-    //         ></Column>
-    //     );
-
-    //     return ComponentFound ? ComponentFound({ solidListViewMetaData, fieldMetadata, column }) : ComponentNotFound({ solidListViewMetaData, fieldMetadata, column });
+  if (fieldMetadata.type === "int") {
+    return SolidIntColumn({ solidListViewMetaData, fieldMetadata, column });
+  }
+  if (fieldMetadata.type === "bigint") {
+    return SolidBigintColumn({ solidListViewMetaData, fieldMetadata, column });
+  }
+  if (fieldMetadata.type === "float") {
+    return SolidFloatColumn({ solidListViewMetaData, fieldMetadata, column });
+  }
+  if (fieldMetadata.type === "decimal") {
+    return SolidDecimalColumn({ solidListViewMetaData, fieldMetadata, column });
+  }
+  if (fieldMetadata.type === "shortText") {
+    return SolidShortTextColumn({
+      solidListViewMetaData,
+      fieldMetadata,
+      column,
+      setLightboxUrls,
+      setOpenLightbox,
+    });
+  }
+  if (fieldMetadata.type === "longText") {
+    return SolidLongTextColumn({
+      solidListViewMetaData,
+      fieldMetadata,
+      column,
+    });
+  }
+  if (fieldMetadata.type === "richText") {
+    return SolidRichTextColumn({
+      solidListViewMetaData,
+      fieldMetadata,
+      column,
+    });
+  }
+  if (fieldMetadata.type === "email") {
+    return SolidShortTextColumn({
+      solidListViewMetaData,
+      fieldMetadata,
+      column,
+    });
+  }
+  if (fieldMetadata.type === "boolean") {
+    return SolidBooleanColumn({ solidListViewMetaData, fieldMetadata, column });
+  }
+  if (fieldMetadata.type === "date") {
+    // // ✅ FIX: some fields are typed as 'date' in metadata but are actually
+    // // datetime fields (e.g. lastRunAt, nextRunAt). Route them to SolidDatetimeColumn.
+    // if (DATETIME_FIELD_NAMES.includes(fieldMetadata.name)) {
+    //   return SolidDatetimeColumn({
+    //     solidListViewMetaData,
+    //     fieldMetadata,
+    //     column,
+    //   });
     // }
+    return SolidDateColumn({ solidListViewMetaData, fieldMetadata, column });
+  }
+  if (fieldMetadata.type === "datetime") {
+    return SolidDatetimeColumn({
+      solidListViewMetaData,
+      fieldMetadata,
+      column,
+    });
 
-    // TODO: we can implement additional switching logic based on the widget type being used to render the list view column.
-
+    // My implementation
+    // return (
+    //   <SolidDatetimeColumn
+    //     solidListViewMetaData={solidListViewMetaData}
+    //     fieldMetadata={fieldMetadata}
+    //     column={column}
+    //   />
+    // );
+  }
+  if (fieldMetadata.type === "time") {
+    return SolidTimeColumn({ solidListViewMetaData, fieldMetadata, column });
+  }
+  if (fieldMetadata.type === "relation") {
+    return SolidRelationColumn({
+      solidListViewMetaData,
+      fieldMetadata,
+      column,
+    });
+  }
+  if (fieldMetadata.type === "mediaSingle") {
+    return SolidMediaSingleColumn({
+      solidListViewMetaData,
+      fieldMetadata,
+      column,
+      setLightboxUrls,
+      setOpenLightbox,
+    });
+  }
+  if (fieldMetadata.type === "mediaMultiple") {
+    return SolidMediaMultipleColumn({
+      solidListViewMetaData,
+      fieldMetadata,
+      column,
+      setLightboxUrls,
+      setOpenLightbox,
+    });
+  }
+  if (fieldMetadata.type === "selectionStatic") {
+    return SolidSelectionStaticColumn({
+      solidListViewMetaData,
+      fieldMetadata,
+      column,
+    });
+  }
+  if (fieldMetadata.type === "selectionDynamic") {
+    return SolidSelectionDynamicColumn({
+      solidListViewMetaData,
+      fieldMetadata,
+      column,
+    });
+  }
+  if (fieldMetadata.type === "computed") {
+    return SolidComputedColumn({
+      solidListViewMetaData,
+      fieldMetadata,
+      column,
+    });
+  }
+  if (fieldMetadata.type === "externalId") {
+    return SolidExternalIdColumn({
+      solidListViewMetaData,
+      fieldMetadata,
+      column,
+    });
+  }
+  if (fieldMetadata.type === "uuid") {
+    return SolidUuidColumn({ solidListViewMetaData, fieldMetadata, column });
+  }
 };
