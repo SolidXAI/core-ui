@@ -2985,7 +2985,7 @@ li.header-li-px {
 .solid-filter-rule-row {
   display: grid;
   grid-template-columns: minmax(0, 1fr) auto;
-  align-items: center;
+  align-items: start;
   gap: 6px 8px;
   padding: 5px 0;
 }
@@ -2995,7 +2995,7 @@ li.header-li-px {
   grid-template-columns: minmax(130px, 0.8fr) minmax(230px, 1.2fr);
   gap: 6px;
   width: 100%;
-  align-items: center;
+  align-items: start;
 }
 
 .solid-filter-rule-field,
@@ -3025,6 +3025,7 @@ li.header-li-px {
 .solid-filter-rule-actions {
   display: inline-flex;
   align-items: center;
+  align-self: start;
   gap: 4px;
   padding-top: 0;
 }
@@ -3136,7 +3137,7 @@ li.header-li-px {
 
 .solid-filter-var-input-between {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: 1fr;
   gap: 6px;
   width: 100%;
 }
