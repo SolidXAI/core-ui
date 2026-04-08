@@ -3,7 +3,6 @@ import { SolidDataTable as DataTable, DataTableStateEvent, Column } from "./Soli
 import { FilterMatchMode } from "primereact/api";
 import qs from "qs";
 import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { SolidListViewColumn } from "./SolidListViewColumn";
@@ -16,7 +15,6 @@ import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { ListViewRowActionPopup } from "./ListViewRowActionPopup";
 import { showToast } from "../../../redux/features/toastSlice";
-import { Divider } from "primereact/divider";
 import CompactImage from '../../../resources/images/layout/images/compact.png';
 import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
@@ -42,6 +40,16 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 import { SolidListViewRowActionsMenu } from "./SolidListViewRowActionsMenu";
+import {
+  SolidButton,
+  SolidDialog,
+  SolidDialogBody,
+  SolidDialogClose,
+  SolidDialogFooter,
+  SolidDialogHeader,
+  SolidDialogSeparator,
+  SolidDialogTitle,
+} from "../../shad-cn-ui";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -1007,6 +1015,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     setSelectedRecoverRecords([]);
   };
 
+  const entityDisplayName =
+    solidListViewMetaData?.data?.solidView?.model?.displayName || params?.modelName;
+
   const [openLightbox, setOpenLightbox] = useState(false);
   const [lightboxUrls, setLightboxUrls] = useState({});
 
@@ -1709,92 +1720,108 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           }
         </div>
       </div>
-      <Dialog
-        visible={isDialogVisible}
-        header="Confirm Delete"
-        onHide={() => setDialogVisible(false)}
-        headerClassName="py-2"
-        contentClassName="px-0 pb-0"
-        // style={{ width: '20vw' }}
-        breakpoints={{ '1199px': '30rem', '550px': '85vw' }}
+      <SolidDialog
+        open={isDialogVisible}
+        onOpenChange={(open) => {
+          if (!open) {
+            onDeleteClose();
+          }
+        }}
+        className="solid-shadcn-confirm-dialog solid-delete-confirm-dialog"
       >
-        <Divider className="m-0" />
-        <div className="p-4">
-          <p className={`m-0 solid-primary-title ${styles.confirmDialogTitle}`}>Are you sure you want to delete the selected records?</p>
-          <div className="flex align-items-center gap-2 mt-3">
-            <Button label="Delete" severity="danger" size="small" autoFocus onClick={deleteBulk} />
-            <Button label="Cancel" size="small" onClick={onDeleteClose} outlined className='bg-primary-reverse' />
-          </div>
-        </div>
-      </Dialog>
-      <Dialog
-        visible={isRecoverDialogVisible}
-        header="Confirm Recover"
-        modal
-        className="solid-confirm-dialog"
-        footer={() => (
-          <div className="flex justify-content-center">
-            <Button
-              label="Yes"
-              icon="pi pi-check"
-              severity="danger"
-              autoFocus
-              onClick={recoverAll}
-            />
-            <Button
-              label="No"
-              icon="pi pi-times"
-              onClick={() => setRecoverDialogVisible(false)}
-            />
-          </div>
-        )}
-        onHide={() => setRecoverDialogVisible(false)}
+        <SolidDialogHeader className="solid-shadcn-dialog-head">
+          <SolidDialogTitle>Confirm Delete</SolidDialogTitle>
+          <SolidDialogClose />
+        </SolidDialogHeader>
+        <SolidDialogSeparator className="solid-shadcn-dialog-sep" />
+        <SolidDialogBody className="solid-shadcn-dialog-body">
+          <p className="solid-shadcn-dialog-text">Are you sure you want to delete the selected records?</p>
+        </SolidDialogBody>
+        <SolidDialogFooter className="solid-shadcn-dialog-actions">
+          <SolidButton variant="destructive" size="sm" autoFocus onClick={deleteBulk}>
+            Delete
+          </SolidButton>
+          <SolidButton variant="outline" size="sm" onClick={onDeleteClose}>
+            Cancel
+          </SolidButton>
+        </SolidDialogFooter>
+      </SolidDialog>
+      <SolidDialog
+        open={isRecoverDialogVisible}
+        onOpenChange={(open) => {
+          if (!open) {
+            setRecoverDialogVisible(false);
+          }
+        }}
+        className="solid-shadcn-confirm-dialog solid-delete-confirm-dialog"
       >
-        <p>Are you sure you want to recover all records?</p>
-      </Dialog>
+        <SolidDialogHeader className="solid-shadcn-dialog-head">
+          <SolidDialogTitle>Confirm Recover</SolidDialogTitle>
+          <SolidDialogClose />
+        </SolidDialogHeader>
+        <SolidDialogSeparator className="solid-shadcn-dialog-sep" />
+        <SolidDialogBody className="solid-shadcn-dialog-body">
+          <p className="solid-shadcn-dialog-text">Are you sure you want to recover all records?</p>
+        </SolidDialogBody>
+        <SolidDialogFooter className="solid-shadcn-dialog-actions">
+          <SolidButton variant="destructive" size="sm" autoFocus onClick={recoverAll}>
+            Yes
+          </SolidButton>
+          <SolidButton variant="outline" size="sm" onClick={() => setRecoverDialogVisible(false)}>
+            No
+          </SolidButton>
+        </SolidDialogFooter>
+      </SolidDialog>
 
       {
         listViewRowActionData && (
-          <Dialog
-            visible={listViewRowActionPopupState}
-            modal
-            onHide={closeListViewRowActionPopup}
+          <SolidDialog
+            open={listViewRowActionPopupState}
+            onOpenChange={(open) => {
+              if (!open) {
+                closeListViewRowActionPopup();
+              }
+            }}
           >
+            <SolidDialogHeader>
+              <SolidDialogTitle>{listViewRowActionData?.rowAction?.label || "Action"}</SolidDialogTitle>
+              <SolidDialogClose />
+            </SolidDialogHeader>
+            <SolidDialogSeparator />
+            <SolidDialogBody>
             <ListViewRowActionPopup
               context={listViewRowActionData}
             ></ListViewRowActionPopup>
-          </Dialog>
+            </SolidDialogBody>
+          </SolidDialog>
         )
       }
-      <Dialog
-        header={`Delete ${solidListViewMetaData?.data?.solidView?.model?.displayName
-          ? solidListViewMetaData?.data?.solidView?.model?.displayName
-          : params?.modelName
-          }`}
-        headerClassName="py-2"
-        contentClassName="px-0 pb-0"
-        visible={deleteEntity}
-        className={`solid-confirm-dialog ${styles.deleteEntityDialog}`}
-        onHide={() => {
-          if (!deleteEntity) return;
-          setDeleteEntity(false);
+      <SolidDialog
+        open={deleteEntity}
+        onOpenChange={(open) => {
+          if (!open) {
+            setDeleteEntity(false);
+          }
         }}
+        className="solid-shadcn-confirm-dialog solid-delete-confirm-dialog"
       >
-        <Divider className="m-0" />
-        <div className="p-4">
-          <p className={`m-0 solid-primary-title ${styles.confirmDialogTitle}`}>
-            {`Are you sure you want to delete this ${solidListViewMetaData?.data?.solidView?.model?.displayName
-              ? solidListViewMetaData?.data?.solidView?.model?.displayName
-              : params?.modelName
-              }?`}
-          </p>
-          {/* <p className="" style={{ color: 'var{--solid-grey-500}' }}>{selectedSolidViewData?.singularName}</p> */}
-          <div className="flex align-items-center gap-2 mt-3">
-            <Button label="Delete" severity="danger" size="small" onClick={handleDeleteEntity} />
-            <Button label="Cancel" size="small" onClick={() => setDeleteEntity(false)} outlined className='bg-primary-reverse' />
-          </div>
-        </div>
-      </Dialog>
+        <SolidDialogHeader className="solid-shadcn-dialog-head">
+          <SolidDialogTitle>{`Delete ${entityDisplayName}`}</SolidDialogTitle>
+          <SolidDialogClose />
+        </SolidDialogHeader>
+        <SolidDialogSeparator className="solid-shadcn-dialog-sep" />
+        <SolidDialogBody className="solid-shadcn-dialog-body">
+          <p className="solid-shadcn-dialog-text">{`Are you sure you want to delete this ${entityDisplayName}?`}</p>
+        </SolidDialogBody>
+        <SolidDialogFooter className="solid-shadcn-dialog-actions">
+          <SolidButton variant="destructive" size="sm" onClick={handleDeleteEntity}>
+            Delete
+          </SolidButton>
+          <SolidButton variant="outline" size="sm" onClick={() => setDeleteEntity(false)}>
+            Cancel
+          </SolidButton>
+        </SolidDialogFooter>
+      </SolidDialog>
       {
         openLightbox && (
           <Lightbox

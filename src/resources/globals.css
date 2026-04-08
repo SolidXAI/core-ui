@@ -3444,7 +3444,10 @@ li.header-li-px {
   line-height: 1.2;
 }
 
-.solid-saved-filter-main.p-button .p-button-label {
+.solid-saved-filter-main .solid-btn-label {
+  display: block;
+  width: 100%;
+  text-align: left;
   text-overflow: ellipsis;
   overflow: hidden;
   white-space: nowrap;

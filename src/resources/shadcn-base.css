@@ -923,6 +923,39 @@ body {
   padding: 0 14px 14px;
 }
 
+.solid-delete-confirm-dialog {
+  width: min(296px, calc(100vw - 32px));
+}
+
+.solid-delete-confirm-dialog .solid-shadcn-dialog-head {
+  padding: 9px 12px;
+}
+
+.solid-delete-confirm-dialog .solid-shadcn-dialog-head h3 {
+  font-size: 13px;
+  line-height: 1.25;
+}
+
+.solid-delete-confirm-dialog .solid-shadcn-dialog-body {
+  padding: 11px 12px 8px;
+}
+
+.solid-delete-confirm-dialog .solid-shadcn-dialog-text {
+  font-size: 13px;
+  line-height: 1.4;
+}
+
+.solid-delete-confirm-dialog .solid-shadcn-dialog-actions {
+  gap: 6px;
+  padding: 0 12px 10px;
+}
+
+.solid-delete-confirm-dialog .solid-radix-dialog-close {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+}
+
 .solid-popup-backdrop {
   position: fixed;
   inset: 0;
@@ -2877,8 +2910,19 @@ body {
   display: inline-flex;
   align-items: center;
   justify-content: center;
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+  border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
   border-radius: 8px;
+  background: var(--background);
+  color: var(--foreground);
   cursor: pointer;
+}
+
+.solid-list-toolbar .solid-header-cog-trigger:hover {
+  background: color-mix(in srgb, var(--accent) 65%, transparent);
 }
 
 .solid-list-table-area {
@@ -3493,6 +3537,72 @@ body {
   padding: 6px 0 0;
   display: flex;
   gap: 6px;
+}
+
+.solid-save-filter-dialog .solid-filter-dialog-body {
+  padding-top: 14px;
+}
+
+.solid-save-filter-form {
+  display: flex;
+  flex-direction: column;
+  gap: 14px;
+}
+
+.solid-save-filter-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.solid-save-filter-label {
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.solid-save-filter-input {
+  width: 100%;
+}
+
+.solid-save-filter-input::placeholder {
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.solid-save-filter-checkbox-row {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
+  padding: 10px 12px;
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+  cursor: pointer;
+}
+
+.solid-save-filter-checkbox {
+  margin: 2px 0 0;
+}
+
+.solid-save-filter-checkbox-copy {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+  min-width: 0;
+}
+
+.solid-save-filter-hint {
+  font-size: 12px;
+  line-height: 1.4;
+  color: var(--muted-foreground);
+}
+
+.solid-save-filter-actions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding-top: 2px;
 }
 
 .solid-compact-action-button {

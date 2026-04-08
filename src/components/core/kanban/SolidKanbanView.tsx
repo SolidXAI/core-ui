@@ -29,6 +29,7 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 import { showToast } from "../../../redux/features/toastSlice";
+import { usePathname } from "../../../hooks/usePathname";
 
 type SolidKanbanViewParams = {
   moduleName: string;
@@ -219,6 +220,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
   const [maxSwimLanesCount, setMaxSwimLanesCount] = useState<number>(0);
+  const pathname = usePathname();
   // @ts-ignore
   const editBaseUrl = normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form");
   // Get the kanban view data.
