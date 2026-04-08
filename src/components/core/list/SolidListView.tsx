@@ -1426,26 +1426,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   </div>
 
                 )}
-              {/* <Dialog
-            visible={showGlobalSearchElement}
-            // header="Confirm Delete"
-            onHide={() => setShowGlobalSearchElement(false)}
-            headerClassName="py-2"
-            contentClassName="px-0 pb-0"
-            // style={{ width: '20vw' }}
-            style={{height:'50vw'}}
-            breakpoints={{ '1199px': '20vw', '1024px': '30vw', '767px': '90vw', '250px': '80vw' }}
-          >
-            <SolidGlobalSearchElement
-              showSaveFilterPopup={showSaveFilterPopup}
-              setShowSaveFilterPopup={setShowSaveFilterPopup}
-              filters={filters}
-              clearFilter={clearFilter}
-              ref={solidGlobalSearchElementRef}
-              viewData={solidListViewMetaData}
-              handleApplyCustomFilter={handleApplyCustomFilter}>
-            </SolidGlobalSearchElement>
-          </Dialog> */}
             </div>
           }
 
