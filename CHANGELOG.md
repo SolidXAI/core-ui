@@ -4,6 +4,82 @@ All notable changes to this project will be documented in this file.
 
 ---
 
+## [1.5.0] - 2026-04-08
+
+### Added
+
+**Global toast system**
+- `GlobalToast` component, `toastSlice` Redux state, and `sticky` parameter for persistent notifications. Integrated into `Layout` and exported from the library.
+
+**Dashboard filter**
+- New `DashboardFilter` component integrated into `SolidDashboard`, enabling variable-based filtering across dashboard pages.
+
+**Dashboard layout API**
+- `dashboardLayoutApi` — new RTK Query API for fetching and persisting dashboard layout data.
+- `PrimeDataTableWrapper` — new shared wrapper component for data tables within dashboards.
+- Extension handlers: `dashboardFormViewChangeHandler`, `dashboardQuestionFieldChangeHandler`, and `dashboardQuestionOnFormLoadHandler` — registered in `registry.ts` and exported from the library.
+
+**`DefaultDateTimeListWidget` registration**
+- `SolidDateColumn` and `SolidDatetimeColumn` now register `DefaultDateTimeListWidget` as their default view widget, enabling configurable date formatting in list views.
+
+**Keyboard navigation in global search overlay**
+- Arrow keys and Enter now navigate and select items in the global search overlay (`SolidGlobalSearchElement`).
+
+---
+
+### Changed
+
+**Filter management refactored to `SolidGlobalSearchElement`**
+- Active filter state has been extracted from `SolidListView` and consolidated into `SolidGlobalSearchElement`, reducing duplication and improving separation of concerns.
+
+**`SolidListView` — back-button filter restoration**
+- When navigating back, the list view now correctly reads and reapplies the previously active filters from local storage.
+
+**`SolidListView` — default filters for embedded views**
+- Embedded list views now apply their configured default filters on initial load.
+
+**`SolidMediaSingleField` — granular disabled/readonly states**
+- `disabled` and `readonly` props are now handled independently, allowing fine-grained control over field interactivity.
+
+**`SolidChatterDateDivider` — human-readable date format**
+- Date dividers in the chatter are now formatted to a human-readable string instead of a raw ISO value.
+
+**`SolidChatterAuditMessage` — local time zone**
+- Audit field values in the chatter are now displayed consistently in the user's local time zone.
+
+**`SolidDashboard` / `SolidDashboardBody` / `SolidQuestionRenderer` — layout rework**
+- Major layout restructuring; improved responsive sizing and rendering. `ChartJsRenderer` updated with better chart configuration.
+
+**Dashboard filter UI**
+- `DashboardFilter` UI redesigned; filter inputs and layout reorganised.
+
+**Auth components — dispatch refactor**
+- Standardized Redux dispatch pattern across all auth flow components: `SolidLogin`, `SolidRegister`, `SolidForgotPassword`, `SolidResetPassword`, `SolidInitialLoginOtp`, `SolidInitiateRegisterOtp`, `SolidChangeForcePassword`, `GoogleAuthChecking`, `SolidChangePassword`, `SolidNotifications`, `SolidPersonalInfo`, `GeneralSettings`, `SolidExport`, `SolidFormStepper`, `SolidImportDropzone`, `SolidImportTransaction`.
+
+**`SolidAdmin` — layout restructure**
+- Internal layout and component structure of `SolidAdmin` refactored.
+
+**`FormPage` — remount on param change**
+- `FormPage` now uses a `key` prop derived from route params, triggering a clean component remount when navigating between different form pages.
+
+**`SolidFormView` — audit defaults to chatter**
+- The audit button now navigates to the chatter tab by default.
+
+---
+
+### Fixed
+
+- **Navbar path error** — corrected an incorrect path in `navbar-two-menu` that caused broken navigation from menu items.
+- **Menu item highlight** — active menu item highlighting now correctly tracks the current route in `navbar-two-menu`.
+- **Chatter date not displayed** — fixed chatter messages not showing their date header properly.
+- **Date edge cases** — corrected boundary-value handling in date display logic.
+- **Audit values in wrong timezone** — audit log field values now display in the user's local time zone.
+- **Delete module action** — fixed import/usage error in `DeleteModelRowAction`.
+- **M2M unsaved entity guard** — many-to-many relation widgets (`SolidRelationManyToManyField`, `RolePermissionsManyToManyFieldWidget`) now block modifications when the parent entity has not yet been saved, and display an appropriate warning message.
+- **Tree view CSS** — additional `globals.css` fixes for tree table wrapper layout.
+
+---
+
 ## [0.1.4] - 2026-03-13
 
 ### Added
