@@ -11,7 +11,6 @@ import { useSearchParams } from "../../../hooks/useSearchParams";
 import "primeflex/primeflex.css";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
-import { TabPanel, TabView } from "primereact/tabview";
 import qs from "qs";
 import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import * as Yup from "yup";
@@ -299,49 +298,59 @@ const SolidSheet = ({ children }: any) => (
     </div>
 );
 
+// Internal tab data carrier — SolidNotebook reads props from this
+const SolidPageTab = ({ children }: any) => <>{children}</>;
+
 const SolidNotebook = ({ children, activeTab, embeded }: any) => {
-    // const childrenArray = children;
-    // const childrenArray = React.Children.toArray(children).filter(Boolean);
-    const childrenArray = React.Children.toArray(children).filter(child => !!child);
+    const childrenArray = React.Children.toArray(children).filter(child => !!child) as any[];
 
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
-
-    // Local state to manage active tab in embedded context
     const [localActiveTab, setLocalActiveTab] = useState(activeTab);
 
+    const effectiveTab = embeded ? localActiveTab : activeTab;
+
     const activeIndex = useMemo(() => {
-        return childrenArray.findIndex((child: any) => {
-            return child.key === (embeded ? localActiveTab : activeTab);
-        });
-    }, [childrenArray, activeTab, localActiveTab, embeded]);
+        const idx = childrenArray.findIndex((child: any) => child.props?.tabKey === effectiveTab);
+        return idx >= 0 ? idx : 0;
+    }, [childrenArray, effectiveTab]);
 
-    const handleTabChange = (e: any) => {
-        const selectedChild = childrenArray[e.index] as any;
-        const newTabLabel = selectedChild?.key;
-
-        if (newTabLabel) {
+    const handleTabChange = (index: number) => {
+        const selectedChild = childrenArray[index];
+        const newTabKey = selectedChild?.props?.tabKey;
+        if (newTabKey) {
             if (!embeded) {
                 const queryParams = new URLSearchParams(searchParams.toString());
-                queryParams.set('activeTab', newTabLabel);
+                queryParams.set('activeTab', newTabKey);
                 router.push(`${pathname}?${queryParams.toString()}`);
             } else {
-                // Update the active tab state locally for embedded view
-                setLocalActiveTab(newTabLabel);
+                setLocalActiveTab(newTabKey);
             }
         }
     };
 
-
     return (
-        <div className="solid-tab-view w-full">
-            <TabView activeIndex={activeIndex >= 0 ? activeIndex : 0} onTabChange={handleTabChange}>
-                {/* {children} */}
-                {childrenArray}
-            </TabView>
+        <div className="solid-notebook w-full">
+            <div className="solid-notebook-tablist" role="tablist">
+                {childrenArray.map((child: any, index: number) => (
+                    <button
+                        key={index}
+                        type="button"
+                        role="tab"
+                        aria-selected={index === activeIndex}
+                        onClick={() => handleTabChange(index)}
+                        className={`solid-notebook-tab-trigger${index === activeIndex ? ' active' : ''}${child.props?.hasError ? ' error' : ''}`}
+                    >
+                        {child.props?.label}
+                    </button>
+                ))}
+            </div>
+            <div className="solid-notebook-content" role="tabpanel">
+                {childrenArray[activeIndex]}
+            </div>
         </div>
-    )
+    );
 };
 
 const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData, solidFormViewData }: any) => {
@@ -369,20 +378,13 @@ const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData, 
 const SolidPage = ({ attrs, children, key, formik, fields }: any) => {
     const fieldsName = fields.map((f: any) => f.attrs.name);
     const errorCount = formik.submitCount > 0 ? fieldsName.filter((name: any) => !!formik.errors[name]).length : 0;
-    const label = (
-        <span style={{ color: errorCount > 0 ? 'red' : 'inherit' }}>
-            {attrs.label}{errorCount > 0 && ` (${errorCount})`}
-        </span>
-    );
-
+    const label = `${attrs.label}${errorCount > 0 ? ` (${errorCount})` : ''}`;
 
     return (
-
-        <TabPanel key={key} header={label} >
+        <SolidPageTab key={key} label={label} tabKey={key} hasError={errorCount > 0}>
             <div className="p-fluid">{children}</div>
-        </TabPanel>
-    )
-
+        </SolidPageTab>
+    );
 };
 
 // Original code...

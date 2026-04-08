@@ -418,8 +418,10 @@ a {
 }
 
 .form-wrapper-title {
-  color: var(--solid-form-title) !important;
+  color: var(--solid-title) !important;
   font-weight: 600;
+  font-size: 16px;
+
 }
 
 .table-header-fs {}
