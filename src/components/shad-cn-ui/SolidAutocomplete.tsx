@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import { createPortal } from "react-dom";
 
 type SolidAutocompleteProps = {
@@ -49,6 +49,7 @@ export function SolidAutocomplete({
 }: SolidAutocompleteProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const controlRef = useRef<HTMLDivElement | null>(null);
+  const panelRef = useRef<HTMLDivElement | null>(null);
   const completeTimerRef = useRef<number | null>(null);
   const [open, setOpen] = useState(false);
   const [manageOpen, setManageOpen] = useState(false);
@@ -181,11 +182,17 @@ export function SolidAutocomplete({
     setActiveIndex(-1);
   };
 
-  const getPanelStyle = () => {
-    const rect = controlRef.current?.getBoundingClientRect();
-    if (!rect) return {};
-    return { position: "fixed" as const, top: rect.bottom + 4, left: rect.left, width: rect.width, zIndex: 9999 };
-  };
+  useLayoutEffect(() => {
+    const panel = panelRef.current;
+    const control = controlRef.current;
+    if (!panel || !control) return;
+    const rect = control.getBoundingClientRect();
+    const spaceBelow = window.innerHeight - rect.bottom;
+    const openUpward = spaceBelow < panel.offsetHeight + 8 && rect.top > panel.offsetHeight + 8;
+    panel.style.top = openUpward ? `${rect.top - panel.offsetHeight - 4}px` : `${rect.bottom + 4}px`;
+    panel.style.left = `${rect.left}px`;
+    panel.style.width = `${rect.width}px`;
+  });
 
   return (
     <div ref={rootRef} className={cx("solid-autocomplete", className)}>
@@ -322,7 +329,7 @@ export function SolidAutocomplete({
       )}
 
       {open && normalizedSuggestions.length > 0 && createPortal(
-        <div className="solid-autocomplete-panel" style={getPanelStyle()} role="listbox">
+        <div ref={panelRef} className="solid-autocomplete-panel" style={{ position: "fixed", zIndex: 9999 }} role="listbox">
           {normalizedSuggestions.map((item, index) => (
             <button
               key={`${item.label}-${index}`}
