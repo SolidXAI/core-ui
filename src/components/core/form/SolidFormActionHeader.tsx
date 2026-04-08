@@ -124,8 +124,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                         }
                     />
                 </div>
-                <OverlayPanel ref={op} className="solid-custom-overlay">
-                    <div className="flex flex-column gap-1 p-1">
+                <OverlayPanel ref={op} className="solid-custom-overlay listview-cogwheel-panel">
+                    <div className="solid-row-actions-menu flex flex-column gap-1 p-1">
                         {params.embeded !== true &&
                             params.id !== "new" &&
                             actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
@@ -133,25 +133,19 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             solidView?.layout?.attrs?.showDeleteFormButton !== false &&
                             !formViewLayout.attrs.readonly &&
                             <Button
-                                text
                                 type="button"
-                                className="w-8rem text-left gap-2"
+                                className="solid-row-action-button solid-row-action-button-danger"
                                 label="Delete"
-                                size="small"
                                 iconPos="left"
-                                severity="danger"
                                 icon={'pi pi-trash'}
                                 onClick={() => setDeleteDialogVisible(true)}
                             />
                         }
                         <Button
-                            text
                             type="button"
-                            className="w-8rem text-left gap-2 purple-200"
+                            className="solid-row-action-button"
                             label="Layout"
-                            size="small"
                             iconPos="left"
-                            severity="contrast"
                             icon={'pi pi-objects-column'}
                             onClick={() => setLayoutDialogVisible(true)}
                         />
@@ -159,13 +153,10 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             <>
                                 {!isPublished && canPublish && (
                                     <Button
-                                        text
                                         type="button"
-                                        className="w-8rem text-left gap-2 purple-200"
+                                        className="solid-row-action-button"
                                         label="Publish"
-                                        size="small"
                                         iconPos="left"
-                                        severity="contrast"
                                         icon="pi pi-cloud-upload"
                                         onClick={() => handleDraftPublishWorkFlow('publish')}
                                     />
@@ -173,20 +164,16 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
 
                                 {isPublished && canUnpublish && (
                                     <Button
-                                        text
                                         type="button"
-                                        className="w-8rem text-left gap-2 purple-200"
+                                        className="solid-row-action-button"
                                         label="Unpublish"
-                                        size="small"
                                         iconPos="left"
-                                        severity="contrast"
                                         icon="pi pi-cloud-download"
                                         onClick={() => handleDraftPublishWorkFlow('unpublish')}
                                     />
                                 )}
                             </>
                         )}
-
 
                         {contextMenuHeaderButtons.map((button: any, index: number) => {
                             return (
@@ -199,10 +186,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     solidFormViewMetaData={solidFormViewMetaData}
                                     handleCustomButtonClick={handleCustomButtonClick}
                                 />
-
                             )
-                        })
-                        }
+                        })}
                         <div className="lg:hidden flex flex-column gap-1">
                             {normalHeaderButtons.map((button: any, index: number) => {
                                 return (
@@ -215,20 +200,16 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                         solidFormViewMetaData={solidFormViewMetaData}
                                         handleCustomButtonClick={handleCustomButtonClick}
                                     />
-
                                 )
-                            })
-                            }
+                            })}
                             {params.embeded !== true && params.draftEnabled &&
                                 !formViewLayout.attrs.readonly && params.publish !== 'null' &&
                                 formik.dirty &&
-                                <div>
-                                    <Button
-                                        label="Draft"
-                                        size="small"
-                                        type="button"
-                                    />
-                                </div>
+                                <Button
+                                    type="button"
+                                    className="solid-row-action-button"
+                                    label="Draft"
+                                />
                             }
                         </div>
                     </div>
@@ -238,14 +219,15 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     }
     return (
         <>
-            <div className="solid-form-header">
+            <div className="page-header solid-list-toolbar flex-column lg:flex-row">
+              <div className="flex justify-content-between w-full solid-list-toolbar-row">
                 {params.id === "new" ? (
                     <>
-                        <div className="flex align-items-center gap-3">
+                        <div className="flex gap-3 align-items-center solid-list-toolbar-left">
                             {params.embeded !== true && <BackButton />}
-                            <div className="form-wrapper-title solid-text-wrapper"> {createHeaderTitle}</div>
+                            <p className="m-0 view-title solid-text-wrapper">{createHeaderTitle}</p>
                         </div>
-                        <div className="flex solid-header-buttons-wrapper">
+                        <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
                             <div className="hidden lg:flex solid-header-buttons-wrapper">
                                 {normalHeaderButtons.map((button: any, index: number) => {
                                     return (
@@ -353,12 +335,12 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                     </>
                 ) : (
                     <>
-                        <div className="flex align-items-center gap-3">
+                        <div className="flex gap-3 align-items-center solid-list-toolbar-left">
                             {params.embeded !== true && <BackButton />}
-                            <div className="form-wrapper-title solid-text-wrapper"> {viewMode === "edit" ? editHeaderTitle : solidView.model.displayName}</div>
+                            <p className="m-0 view-title solid-text-wrapper">{viewMode === "edit" ? editHeaderTitle : solidView.model.displayName}</p>
                         </div>
 
-                        <div className="flex solid-header-buttons-wrapper">
+                        <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
                             <div className="hidden lg:flex solid-header-buttons-wrapper">
                                 {normalHeaderButtons.map((button: any, index: number) => {
                                     return (
@@ -499,6 +481,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                         </div>
                     </>
                 )}
+              </div>
             </div>
             {params.embeded !== true &&
                 <SolidFormHeader
