@@ -16,39 +16,13 @@ interface GroupData {
     records: Post[];
 }
 
-interface ApiResponse {
-    data: {
-        groupedData: Record<string, GroupData>;
-    };
-}
-
-const getKanbanCardConfigurationIssue = (nodes: any[] = []): any => {
+const findKanbanCardNode = (nodes: any[] = []): any => {
     for (const node of nodes) {
         if (!node) continue;
-
-        const cardWidget = node?.attrs?.cardWidget || node?.cardWidget;
-        const hasChildren = Array.isArray(node?.children) && node.children.length > 0;
-
-        if (node.type === "card") {
-            if (cardWidget && !getExtensionComponent(cardWidget)) {
-                return {
-                    type: "missing_widget",
-                    cardWidget,
-                };
-            }
-
-            if (!cardWidget && !hasChildren) {
-                return {
-                    type: "missing_content",
-                };
-            }
-        }
-
+        if (node.type === "card") return node;
         if (Array.isArray(node?.children) && node.children.length > 0) {
-            const nestedIssue = getKanbanCardConfigurationIssue(node.children);
-            if (nestedIssue) {
-                return nestedIssue;
-            }
+            const nestedCard = findKanbanCardNode(node.children);
+            if (nestedCard) return nestedCard;
         }
     }
 
@@ -59,9 +33,14 @@ export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, max
     const [loading, setLoading] = useState<boolean>(true);
     // State to manage the folded status of each column
     const [foldedStates, setFoldedStates] = useState<Record<string, boolean>>({});
-    const kanbanCardConfigurationIssue = getKanbanCardConfigurationIssue(
-        solidKanbanViewMetaData?.solidView?.layout?.children || []
-    );
+    const cardNode = findKanbanCardNode(solidKanbanViewMetaData?.solidView?.layout?.children || []);
+    const cardWidget = cardNode?.attrs?.cardWidget || cardNode?.cardWidget;
+    const DynamicCardWidget = cardWidget ? getExtensionComponent(cardWidget) : null;
+    const kanbanCardConfigurationIssue = !cardWidget
+        ? { type: "missing_widget_reference" }
+        : !DynamicCardWidget
+            ? { type: "missing_widget", cardWidget }
+            : null;
 
     // Toggle fold (not yet implemented)
     const toggleFold = (status: string): void => {
@@ -82,7 +61,7 @@ export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, max
                         <div className="solid-kanban-config-placeholder-title">
                             {kanbanCardConfigurationIssue.type === "missing_widget"
                                 ? "Kanban card widget could not be resolved"
-                                : "Kanban card layout is incomplete"}
+                                : "Kanban card widget is not configured"}
                         </div>
                         <div className="solid-kanban-config-placeholder-description">
                             {kanbanCardConfigurationIssue.type === "missing_widget" ? (
@@ -91,14 +70,14 @@ export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, max
                                 </>
                             ) : (
                                 <>
-                                    This kanban view does not define card layout children and no <code>cardWidget</code> is configured on the card node.
+                                    This kanban view does not define a <code>cardWidget</code> on the card node.
                                 </>
                             )}
                         </div>
                         <div className="solid-kanban-config-placeholder-hint">
                             {kanbanCardConfigurationIssue.type === "missing_widget"
                                 ? "Register the widget in the extension registry or update the kanban metadata to point at a valid component."
-                                : "Add child row/column/field layout nodes or configure attrs.cardWidget on the card metadata."}
+                                : "Configure attrs.cardWidget on the kanban card metadata so the board can render each record."}
                         </div>
                     </div>
                 </div>
@@ -164,6 +143,8 @@ export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, max
                                 setLightboxUrls={setLightboxUrls}
                                 setOpenLightbox={setOpenLightbox}
                                 editButtonUrl={editButtonUrl}
+                                cardNode={cardNode}
+                                DynamicCardWidget={DynamicCardWidget}
                             />
                         );
                     })}

@@ -2839,7 +2839,8 @@ body {
   gap: 8px !important;
 }
 
-.solid-list-toolbar .solid-global-search-element {
+.solid-list-toolbar .solid-global-search-element,
+.solid-kanban-toolbar .solid-global-search-element {
   height: 36px;
   border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
   border-radius: 10px;
@@ -2847,16 +2848,19 @@ body {
   padding: 0 0 0 6px;
 }
 
-.solid-list-toolbar .solid-global-search-element:focus-within {
+.solid-list-toolbar .solid-global-search-element:focus-within,
+.solid-kanban-toolbar .solid-global-search-element:focus-within {
   border-color: color-mix(in srgb, var(--ring) 60%, var(--border) 40%);
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 18%, transparent);
 }
 
-.solid-list-toolbar .solid-global-search-element-wrapper {
+.solid-list-toolbar .solid-global-search-element-wrapper,
+.solid-kanban-toolbar .solid-global-search-element-wrapper {
   width: min(460px, 42vw);
 }
 
-.solid-list-toolbar .solid-global-search-element input {
+.solid-list-toolbar .solid-global-search-element input,
+.solid-kanban-toolbar .solid-global-search-element input {
   height: 34px;
   max-width: none !important;
   width: 100%;
@@ -2868,11 +2872,13 @@ body {
   padding-right: 40px;
 }
 
-.solid-list-toolbar .solid-global-search-element input::placeholder {
+.solid-list-toolbar .solid-global-search-element input::placeholder,
+.solid-kanban-toolbar .solid-global-search-element input::placeholder {
   color: color-mix(in srgb, var(--muted-foreground) 78%, transparent);
 }
 
-.solid-list-toolbar .custom-filter-button {
+.solid-list-toolbar .custom-filter-button,
+.solid-kanban-toolbar .custom-filter-button {
   border: 0;
   background: transparent;
   height: 34px;
@@ -2906,7 +2912,21 @@ body {
   padding: 0 !important;
 }
 
-.solid-list-toolbar .solid-header-cog-trigger {
+.solid-list-toolbar .solid-btn.solid-icon-button,
+.solid-kanban-toolbar .solid-btn.solid-icon-button {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+}
+
+.solid-list-toolbar .solid-btn.solid-icon-button .solid-btn-label,
+.solid-kanban-toolbar .solid-btn.solid-icon-button .solid-btn-label {
+  justify-content: center;
+}
+
+.solid-list-toolbar .solid-header-cog-trigger,
+.solid-header-cog-trigger {
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -2921,7 +2941,8 @@ body {
   cursor: pointer;
 }
 
-.solid-list-toolbar .solid-header-cog-trigger:hover {
+.solid-list-toolbar .solid-header-cog-trigger:hover,
+.solid-header-cog-trigger:hover {
   background: color-mix(in srgb, var(--accent) 65%, transparent);
 }
 
@@ -3343,6 +3364,15 @@ body {
   text-align: left;
 }
 
+.solid-dropdown-menu-item > a {
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  gap: 6px;
+  color: inherit;
+  text-decoration: none;
+}
+
 .solid-dropdown-menu-separator {
   height: 1px;
   margin: 4px 0;
@@ -3527,6 +3557,15 @@ body {
 
 .solid-column-selector-dialog .solid-radix-dialog-body {
   padding: 8px 8px 12px;
+}
+
+.solid-kanban-layout-dialog .solid-radix-dialog-body,
+.solid-kanban-export-dialog .solid-radix-dialog-body {
+  padding-top: 14px;
+}
+
+.solid-kanban-export-dialog-body {
+  padding-bottom: 14px;
 }
 
 .solid-column-selector-dialog .solid-filter-dialog-head {

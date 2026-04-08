@@ -1596,11 +1596,13 @@ li.header-li-px {
   flex-grow: 0;
   background: #F4F4F4;
   border: 8px;
-  padding: 5px;
+  padding: 2px 0;
   height: 100%;
   min-width: fit-content;
   width: 100%;
   max-width: fit-content;
+  align-self: stretch;
+  display: flex;
 }
 
 .kaban-heading-area {
@@ -1609,7 +1611,7 @@ li.header-li-px {
   align-items: center;
   color: #4b4d52;
   gap: 8px;
-  padding: 0 2px 6px;
+  padding: 0 1px 3px;
 }
 
 .kaban-heading-area .count {
@@ -1634,16 +1636,19 @@ li.header-li-px {
 .kanban-column-folded .kaban-heading-area {
   /* transform-origin: left bottom 0; */
   /* transform: rotate(90deg); */
-  margin-top: 10px;
+  margin-top: 0;
   display: flex;
-  justify-content: space-between;
+  justify-content: flex-start;
   overflow: visible;
-  min-height: 250px;
+  min-height: 100%;
+  height: 100%;
   color: #a0a0a0;
   writing-mode: vertical-rl;
   /* Make text vertical */
   text-align: center;
   /* Center the text vertically */
+  gap: 6px;
+  padding: 6px 0;
 
 }
 
@@ -1661,7 +1666,7 @@ li.header-li-px {
 .kanban-arrow-icon-container {
   transform: rotate(90deg);
   transition: transform 0.2s ease;
-  margin-bottom: 20px;
+  margin-bottom: 10px;
 }
 
 .kanban-arrow-icon-container .pi {
@@ -3847,7 +3852,7 @@ li.header-li-px {
 }
 
 .kanban-card-container {
-  margin-top: 12px;
+  margin-top: 8px;
 }
 
 .kanban-ungrouped-column .kanban-card-container {
@@ -3883,21 +3888,21 @@ li.header-li-px {
   background: transparent;
 }
 
-.solid-kanban-action .p-button {
-  width: 24px !important;
-  height: 24px !important;
-  border-radius: 8px !important;
-  border: 1px solid color-mix(in srgb, var(--border) 82%, transparent) !important;
-  background: color-mix(in srgb, var(--background) 88%, var(--card) 12%) !important;
-  color: color-mix(in srgb, var(--foreground) 62%, transparent) !important;
+.solid-kanban-action-trigger.solid-header-cog-trigger {
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 8px;
+  border-color: color-mix(in srgb, var(--border) 82%, transparent);
+  background: color-mix(in srgb, var(--background) 88%, var(--card) 12%);
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
   box-shadow: 0 1px 2px color-mix(in srgb, hsl(222 47% 11%) 8%, transparent);
 }
 
-.solid-kanban-action .p-button:hover,
-.solid-kanban-action .p-button:focus {
-  background: color-mix(in srgb, var(--accent) 60%, var(--card) 40%) !important;
-  border-color: color-mix(in srgb, var(--border) 88%, transparent) !important;
-  color: color-mix(in srgb, var(--foreground) 82%, transparent) !important;
+.solid-kanban-action-trigger.solid-header-cog-trigger:hover {
+  background: color-mix(in srgb, var(--accent) 60%, var(--card) 40%);
+  border-color: color-mix(in srgb, var(--border) 88%, transparent);
+  color: color-mix(in srgb, var(--foreground) 82%, transparent);
 }
 
 .solid-kanban-config-placeholder-container {
@@ -4230,26 +4235,98 @@ flex-shrink: 0; */
 }
 
 .solid-kanban-board-wrapper {
+  display: flex;
+  flex-direction: column;
   overflow: hidden;
-  height: calc(100vh - 65px) !important;
+  height: 100% !important;
+  min-height: 0;
+  min-width: 0;
+  flex: 1 1 auto;
 }
 
 .solid-kanban-board-scroll-context {
+  align-items: flex-start;
   overflow: auto;
+  flex: 1 1 auto;
+  width: max-content;
+  min-width: 100%;
   height: 100%;
+  min-height: 0;
 }
 
-.kanban-column-cogwheel.p-button.p-button-icon-only.p-button-rounded {
-  height: 1.75rem;
-  width: 1.75rem;
-}
-
-.kanban-column-cogwheel.p-button.p-button-secondary.p-button-text:not(:disabled):active {
+.kanban-column-cogwheel.solid-header-cog-trigger {
+  width: 24px;
+  min-width: 24px;
+  height: 24px;
+  border-radius: 7px;
   background: transparent;
+  border-color: transparent;
+  color: color-mix(in srgb, var(--foreground) 56%, transparent);
+  box-shadow: none;
 }
 
-.kanban-column-cogwheel.p-button.p-button-secondary.p-button-text:not(:disabled):hover {
-  background: transparent;
+.kanban-column-cogwheel.solid-header-cog-trigger:hover {
+  background: color-mix(in srgb, var(--accent) 75%, transparent);
+  border-color: color-mix(in srgb, var(--border) 78%, transparent);
+  color: var(--foreground);
+}
+
+.kanban-fold-action-button {
+  min-height: 25px;
+  font-size: 12px;
+  font-weight: 500;
+}
+
+.kaban-load-more {
+  margin-top: 8px;
+  width: 100%;
+  justify-content: center;
+  color: color-mix(in srgb, var(--primary) 88%, var(--foreground) 12%);
+}
+
+.solid-kanban-preview-dialog {
+  width: min(780px, calc(100vw - 32px));
+}
+
+.solid-kanban-preview-dialog-header {
+  padding-bottom: 10px;
+}
+
+.solid-kanban-preview-dialog-body {
+  padding-top: 8px;
+  display: flex;
+  justify-content: center;
+  overflow: auto;
+}
+
+.solid-kanban-preview-dialog-title-row {
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  flex: 1;
+}
+
+.solid-kanban-preview-dialog-title-row .solid-radix-dialog-title {
+  flex: 1;
+  min-width: 0;
+}
+
+.solid-kanban-preview-download {
+  width: 28px;
+  height: 28px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
+  background: var(--background);
+  color: var(--foreground);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  text-decoration: none;
+}
+
+.solid-kanban-preview-download:hover {
+  background: color-mix(in srgb, var(--accent) 68%, transparent);
 }
 
 .view-widget-chip.p-chip {

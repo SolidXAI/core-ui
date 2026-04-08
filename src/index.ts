@@ -77,7 +77,7 @@ export type { SolidListViewColumnParams } from './components/core/list/SolidList
 export { SolidManyToOneFilterElement } from './components/core/list/SolidManyToOneFilterElement';
 export { SolidSelectionDynamicFilterElement } from './components/core/list/SolidSelectionDynamicFilterElement';
 export { SolidSelectionStaticFilterElement } from './components/core/list/SolidSelectionStaticFilterElement';
-export { SolidVarInputsFilterElement } from './components/core/list/SolidVarInputsFilterElement';
+export { SolidVarInputsFilterElement } from './components/core/filter/SolidVarInputsFilterElement';
 
 export { default as SolidDashboard } from './components/core/dashboard/SolidDashboard';
 
