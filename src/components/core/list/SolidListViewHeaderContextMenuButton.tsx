@@ -1,8 +1,8 @@
 import { hasAnyRole } from "../../../helpers/rolesHelper";
-import { Button } from "primereact/button";
 import { useSession } from "../../../hooks/useSession";
+import { SolidDropdownMenuItem } from "../../shad-cn-ui";
 
-export const SolidListViewHeaderContextMenuButton = ({ button, params, solidListViewMetaData, handleCustomButtonClick }: any) => {
+export const SolidListViewHeaderContextMenuButton = ({ button, params, solidListViewMetaData, handleCustomButtonClick, onActionComplete }: any) => {
 
     const { data: session, status } = useSession();
     const user = session?.user;
@@ -12,21 +12,19 @@ export const SolidListViewHeaderContextMenuButton = ({ button, params, solidList
     if (!hasRole) return null;
 
     return (
-        <Button
-            text
-            type="button"
-            className="w-full text-left gap-2"
-            label={button.attrs.label}
-            size="small"
-            iconPos="left"
-            icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
-            onClick={() => {
+        <SolidDropdownMenuItem
+            className="solid-header-dropdown-item"
+            onSelect={() => {
                 const event = {
                     params,
                     solidListViewMetaData: solidListViewMetaData.data,
                 };
                 handleCustomButtonClick(button.attrs, event);
+                onActionComplete?.();
             }}
-        />
+        >
+            <i className={`${button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"} solid-header-action-button-icon`} />
+            <span className="solid-header-action-button-label">{button.attrs.label}</span>
+        </SolidDropdownMenuItem>
     );
 };

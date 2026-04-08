@@ -2511,6 +2511,10 @@ li.header-li-px {
 }
 
 
+.listview-cogwheel-panel {
+  min-width: 220px;
+}
+
 .listview-cogwheel-panel .p-overlaypanel-content {
   min-width: 220px;
 }
@@ -2519,12 +2523,8 @@ li.header-li-px {
   font-size: 14px;
 }
 
-.customize-layout-panel.p-overlaypanel {
-  position: absolute;
-  /* left: 1400px !important;
-  top: 21% !important; */
-  left: 73.5% !important;
-  top: 15% !important;
+.customize-layout-panel {
+  width: min(320px, calc(100vw - 2rem));
 }
 
 .p-button.p-button-icon-only.custom-add-button {
@@ -3552,44 +3552,6 @@ li.header-li-px {
   font-weight: 500;
   color: color-mix(in srgb, var(--foreground) 62%, transparent);
   text-align: center;
-}
-
-.solid-layout-accordion .p-accordion .p-accordion-header .p-accordion-header-link {
-  padding: 1.25rem 1.25rem 0.875rem 1.25rem;
-}
-
-.solid-layout-accordion .p-accordion .p-accordion-tab {
-  margin-bottom: 0;
-}
-
-.solid-layout-accordion a {
-  color: var(--solid-title);
-}
-
-.solid-layout-accordion .p-accordion .p-accordion-header .p-accordion-header-link {
-  border: none;
-  background-color: transparent;
-}
-
-.solid-layout-accordion .p-accordion-tab:not(:last-child) {
-  border-bottom: 1px solid var(--primary-light-color);
-}
-
-.solid-layout-accordion .p-accordion-content {
-  border: none;
-  padding: 0;
-  border-radius: 0;
-}
-
-.solid-layout-accordion .p-accordion-header a {
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  flex-direction: row-reverse;
-}
-
-.solid-layout-accordion label {
-  font-weight: 400;
 }
 
 .solid-standard-autocomplete .p-inputtext {

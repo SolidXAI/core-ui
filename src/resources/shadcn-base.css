@@ -2873,6 +2873,14 @@ body {
   padding: 0 !important;
 }
 
+.solid-list-toolbar .solid-header-cog-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  cursor: pointer;
+}
+
 .solid-list-table-area {
   display: flex;
   flex-direction: column;
@@ -3167,7 +3175,7 @@ body {
 
 .solid-popover-content {
   z-index: 70;
-  padding: 3px;
+  padding: 2px;
   border-radius: 8px;
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
   background: var(--card);
@@ -3235,6 +3243,304 @@ body {
 .solid-row-action-button.solid-row-action-button-danger:hover {
   background: color-mix(in srgb, hsl(0 72% 45%) 11%, transparent);
   border-color: color-mix(in srgb, hsl(0 72% 45%) 40%, transparent);
+}
+
+.solid-header-actions-panel {
+  padding: 4px;
+}
+
+.solid-dropdown-menu-content {
+  z-index: 70;
+  width: 146px;
+  min-width: 146px;
+  padding: 4px 4px;
+  border-radius: 8px;
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  background: var(--card);
+  box-shadow: 0 10px 24px color-mix(in srgb, hsl(222 47% 11%) 18%, transparent);
+}
+
+.solid-dropdown-menu-subcontent {
+  width: 126px;
+  min-width: 126px;
+}
+
+.solid-dropdown-menu-item {
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  min-height: 27px;
+  gap: 6px;
+  padding: 0 3px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 12px;
+  line-height: 1.2;
+  cursor: pointer;
+  user-select: none;
+}
+
+.solid-dropdown-menu-item:hover,
+.solid-dropdown-menu-item[data-highlighted] {
+  background: var(--accent);
+  border-color: color-mix(in srgb, var(--border) 82%, transparent);
+  outline: none;
+}
+
+.solid-dropdown-menu-item[data-disabled] {
+  opacity: 0.5;
+  pointer-events: none;
+}
+
+.solid-dropdown-menu-item-text {
+  flex: 1;
+  text-align: left;
+}
+
+.solid-dropdown-menu-separator {
+  height: 1px;
+  margin: 4px 0;
+  background: color-mix(in srgb, var(--border) 78%, transparent);
+}
+
+.solid-dropdown-menu-label {
+  padding: 6px 3px 4px;
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.04em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--foreground) 58%, transparent);
+}
+
+.solid-dropdown-menu-subtrigger {
+  justify-content: space-between;
+}
+
+.solid-dropdown-menu-subtrigger-icon {
+  font-size: 10px;
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+}
+
+.solid-dropdown-menu-indicator {
+  width: 12px;
+  min-width: 12px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--primary);
+}
+
+.solid-dropdown-menu-radio-dot {
+  width: 6px;
+  height: 6px;
+  border-radius: 999px;
+  background: currentColor;
+}
+
+.solid-dropdown-menu-checkbox-item,
+.solid-dropdown-menu-radio-item {
+  padding-left: 4px;
+}
+
+.solid-header-dropdown-item-danger {
+  color: hsl(0 72% 45%);
+}
+
+.solid-header-dropdown-item-danger:hover,
+.solid-header-dropdown-item-danger[data-highlighted] {
+  background: color-mix(in srgb, hsl(0 72% 45%) 11%, transparent);
+  border-color: color-mix(in srgb, hsl(0 72% 45%) 40%, transparent);
+}
+
+.solid-header-actions-group {
+  display: flex;
+  flex-direction: column;
+  gap: 2px;
+}
+
+.solid-header-action-button {
+  display: inline-flex;
+  align-items: center;
+  width: 100%;
+  min-height: 27px;
+  gap: 6px;
+  padding: 0 8px;
+  border: 1px solid transparent;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--foreground);
+  font-size: 12px;
+  line-height: 1.2;
+  cursor: pointer;
+}
+
+.solid-header-action-button:hover {
+  background: var(--accent);
+  border-color: color-mix(in srgb, var(--border) 82%, transparent);
+}
+
+.solid-header-action-button:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 24%, transparent);
+}
+
+.solid-header-action-button-icon {
+  width: 12px;
+  min-width: 12px;
+  display: inline-flex;
+  justify-content: center;
+  font-size: 11px;
+}
+
+.solid-header-action-button-label {
+  flex: 1;
+  text-align: left;
+}
+
+.solid-header-action-button-submenu {
+  margin-right: -2px;
+}
+
+.solid-header-action-button-danger {
+  color: hsl(0 72% 45%);
+}
+
+.solid-header-action-button-danger:hover {
+  background: color-mix(in srgb, hsl(0 72% 45%) 11%, transparent);
+  border-color: color-mix(in srgb, hsl(0 72% 45%) 40%, transparent);
+}
+
+.solid-accordion-item {
+  overflow: hidden;
+}
+
+.solid-accordion-header {
+  display: flex;
+}
+
+.solid-accordion-trigger {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  background: transparent;
+  border: 0;
+  color: inherit;
+  cursor: pointer;
+}
+
+.solid-accordion-trigger-icon {
+  font-size: 10px;
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+  transition: transform 160ms ease;
+}
+
+.solid-accordion-trigger[data-state="open"] .solid-accordion-trigger-icon {
+  transform: rotate(180deg);
+}
+
+.solid-accordion-content {
+  overflow: hidden;
+}
+
+.solid-accordion-content[data-state="open"] {
+  animation: solid-accordion-down 160ms ease-out;
+}
+
+.solid-accordion-content[data-state="closed"] {
+  animation: solid-accordion-up 140ms ease-out;
+}
+
+.solid-accordion-content-inner {
+  min-width: 0;
+}
+
+.solid-header-action-button.is-active {
+  background: color-mix(in srgb, var(--accent) 82%, transparent);
+  border-color: color-mix(in srgb, var(--border) 82%, transparent);
+}
+
+.solid-column-selector-item-main {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  flex: 1;
+}
+
+.solid-column-selector-checkbox {
+  margin: 0;
+}
+
+.solid-column-selector-label {
+  min-width: 0;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.solid-column-selector-dialog .solid-radix-dialog-body {
+  padding: 8px 8px 12px;
+}
+
+.solid-column-selector-dialog .solid-filter-dialog-head {
+  padding: 10px 8px 8px;
+}
+
+.solid-column-selector-actions {
+  padding: 6px 0 0;
+  display: flex;
+  gap: 6px;
+}
+
+.solid-compact-action-button {
+  min-height: 28px;
+  padding: 0 9px;
+  border-radius: 7px;
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  background: transparent;
+  color: var(--foreground);
+  font-size: 12px;
+  font-weight: 500;
+  cursor: pointer;
+}
+
+.solid-compact-action-button:hover {
+  background: var(--accent);
+}
+
+.solid-compact-action-button-primary {
+  background: var(--primary);
+  border-color: var(--primary);
+  color: var(--primary-foreground);
+}
+
+.solid-compact-action-button-primary:hover {
+  background: color-mix(in srgb, var(--primary) 92%, black 8%);
+}
+
+@keyframes solid-accordion-down {
+  from {
+    height: 0;
+    opacity: 0;
+  }
+  to {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+}
+
+@keyframes solid-accordion-up {
+  from {
+    height: var(--radix-accordion-content-height);
+    opacity: 1;
+  }
+  to {
+    height: 0;
+    opacity: 0;
+  }
 }
 
 .solid-inline-row-button.p-button {
