@@ -118,7 +118,7 @@ const KanbanColumn = ({ groupedView, groupByField, solidKanbanViewMetaData, grou
             >
               {groupData.map((data, index) => (
                 // @ts-ignore
-                <KanbanCard groupedView={groupedView} key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl} />
+                <KanbanCard groupedView={groupedView} key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl} groupByFieldName={groupByField} group={group} />
               ))}
               {provided.placeholder}
               {group.count > 0 && (group.count > (group.limit * group.currentPage)) &&

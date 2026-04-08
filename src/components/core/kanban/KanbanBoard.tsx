@@ -2,6 +2,7 @@
 import { useState } from "react";
 import { DragDropContext } from "@hello-pangea/dnd";
 import KanbanColumn from "./KanbanColumn";
+import { getExtensionComponent } from "../../../helpers/registry";
 
 // Define types for groupData and Grouped Data
 interface Post {
@@ -21,10 +22,46 @@ interface ApiResponse {
     };
 }
 
+const getKanbanCardConfigurationIssue = (nodes: any[] = []): any => {
+    for (const node of nodes) {
+        if (!node) continue;
+
+        const cardWidget = node?.attrs?.cardWidget || node?.cardWidget;
+        const hasChildren = Array.isArray(node?.children) && node.children.length > 0;
+
+        if (node.type === "card") {
+            if (cardWidget && !getExtensionComponent(cardWidget)) {
+                return {
+                    type: "missing_widget",
+                    cardWidget,
+                };
+            }
+
+            if (!cardWidget && !hasChildren) {
+                return {
+                    type: "missing_content",
+                };
+            }
+        }
+
+        if (Array.isArray(node?.children) && node.children.length > 0) {
+            const nestedIssue = getKanbanCardConfigurationIssue(node.children);
+            if (nestedIssue) {
+                return nestedIssue;
+            }
+        }
+    }
+
+    return null;
+};
+
 export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, maxSwimLanesCount, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLanePagination, setLightboxUrls, setOpenLightbox, editButtonUrl }: any) => {
     const [loading, setLoading] = useState<boolean>(true);
     // State to manage the folded status of each column
     const [foldedStates, setFoldedStates] = useState<Record<string, boolean>>({});
+    const kanbanCardConfigurationIssue = getKanbanCardConfigurationIssue(
+        solidKanbanViewMetaData?.solidView?.layout?.children || []
+    );
 
     // Toggle fold (not yet implemented)
     const toggleFold = (status: string): void => {
@@ -38,8 +75,36 @@ export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, max
     return (
         //@ts-ignore
         <div className="solid-kanban-board-wrapper">
+            {kanbanCardConfigurationIssue ? (
+                <div className="solid-kanban-config-placeholder-container">
+                    <div className="solid-kanban-config-placeholder-panel">
+                        <div className="solid-kanban-config-placeholder-badge">KANBAN CONFIGURATION</div>
+                        <div className="solid-kanban-config-placeholder-title">
+                            {kanbanCardConfigurationIssue.type === "missing_widget"
+                                ? "Kanban card widget could not be resolved"
+                                : "Kanban card layout is incomplete"}
+                        </div>
+                        <div className="solid-kanban-config-placeholder-description">
+                            {kanbanCardConfigurationIssue.type === "missing_widget" ? (
+                                <>
+                                    This kanban view references <code>{kanbanCardConfigurationIssue.cardWidget}</code>, but no matching card widget is registered.
+                                </>
+                            ) : (
+                                <>
+                                    This kanban view does not define card layout children and no <code>cardWidget</code> is configured on the card node.
+                                </>
+                            )}
+                        </div>
+                        <div className="solid-kanban-config-placeholder-hint">
+                            {kanbanCardConfigurationIssue.type === "missing_widget"
+                                ? "Register the widget in the extension registry or update the kanban metadata to point at a valid component."
+                                : "Add child row/column/field layout nodes or configure attrs.cardWidget on the card metadata."}
+                        </div>
+                    </div>
+                </div>
+            ) : (
             <DragDropContext onDragEnd={onDragEnd}>
-                <div className="flex gap-4 px-4 md:px-5 py-3 md:py-4 solid-kanban-board-scroll-context">
+                <div className="flex gap-3 px-3 md:px-4 py-2 md:py-3 solid-kanban-board-scroll-context">
                     {/* {Object.entries(kanbanViewData).map(([groupVal, data]) => {
                     const group = {
                         label: groupVal,
@@ -109,6 +174,7 @@ export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, max
                     }
                 </div>
             </DragDropContext>
+            )}
         </div>
     );
 }

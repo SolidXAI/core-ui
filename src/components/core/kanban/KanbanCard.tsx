@@ -1,12 +1,11 @@
 // @ts-nocheck
 import React, { useRef } from "react";
 import { SolidKanbanViewFields } from "./SolidKanbanViewFields";
-import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
-import { useSearchParams } from "../../../hooks/useSearchParams";
 import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { Draggable, DraggableProvided } from "@hello-pangea/dnd";
+import { getExtensionComponent } from "../../../helpers/registry";
 
 // Define the types for the data and props
 interface Data {
@@ -19,6 +18,12 @@ interface KanbanCardProps {
   data: Data;
   solidKanbanViewMetaData: any;
   index: number;
+  groupedView: boolean;
+  setLightboxUrls?: any;
+  setOpenLightbox?: any;
+  editButtonUrl?: string;
+  groupByFieldName?: string;
+  group?: any;
 }
 
 // Render columns dynamically based on metadata
@@ -46,10 +51,18 @@ const renderFieldsDynamically = (field: any, data: any, solidKanbanViewMetaData:
   // });
 };
 
-const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, setLightboxUrls, setOpenLightbox, editButtonUrl, groupedView }) => {
+const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, setLightboxUrls, setOpenLightbox, editButtonUrl, groupedView, groupByFieldName, group }) => {
   const router = useRouter()
-  const pathname = usePathname();
-  const searchParams = useSearchParams();
+  const openRecord = () => {
+    if (typeof window !== "undefined") {
+      sessionStorage.setItem("fromView", "kanban");
+    }
+    router.push(`${editButtonUrl}/${data?.id}`);
+  };
+
+  const openEdit = () => {
+    router.push(`${editButtonUrl}/${data?.id}`);
+  };
   const SolidRow = ({ children, attrs }: any) => {
     const className = attrs.className;
     return (
@@ -146,8 +159,37 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
         return <ul key={key} {...attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidFormViewMetaData, formik))}</ul>
       case "li":
         return <li key={key} {...attrs}>{body}</li>
-      case "card":
-        return <SolidCard key={key}>{children.map((element: any) => renderFormElementDynamically(element, solidKanbanViewMetaData))}</SolidCard>;
+      case "card": {
+        const cardWidget = attrs?.cardWidget || element?.cardWidget;
+        const DynamicCardWidget = cardWidget ? getExtensionComponent(cardWidget) : null;
+        const hasChildren = Array.isArray(children) && children.length > 0;
+
+        if (DynamicCardWidget) {
+          return (
+            <DynamicCardWidget
+              key={key}
+              rowData={data}
+              solidKanbanViewMetaData={solidKanbanViewMetaData}
+              solidView={solidKanbanViewMetaData?.solidView}
+              solidFieldsMetadata={solidKanbanViewMetaData?.solidFieldsMetadata}
+              card={element}
+              layoutAttrs={solidKanbanViewMetaData?.solidView?.layout?.attrs || {}}
+              groupedView={groupedView}
+              groupByFieldName={groupByFieldName}
+              group={group}
+              editButtonUrl={editButtonUrl}
+              setLightboxUrls={setLightboxUrls}
+              setOpenLightbox={setOpenLightbox}
+              openRecord={openRecord}
+              openEdit={openEdit}
+            />
+          );
+        }
+
+        if (!hasChildren) return null;
+
+        return <SolidCard key={key}>{children.map((childElement: any) => renderFormElementDynamically(childElement, solidKanbanViewMetaData))}</SolidCard>;
+      }
       case "row":
         return <SolidRow key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, solidKanbanViewMetaData))}</SolidRow>;
       case "column":
@@ -251,16 +293,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
             }}
             elevation={snapshot.isDragging ? 3 : 1}
             className={`${!groupedView ? 'solid-media-card' : 'solid-kanban-card'}`}
-            onClick={() => {
-              if (typeof window !== "undefined") {
-                // const queryString = searchParams.toString();
-                // const finalUrl = queryString ? `${pathname}?${queryString}` : pathname;
-                // sessionStorage.setItem("fromView", finalUrl);
-                sessionStorage.setItem("fromView", "kanban");
-
-              }
-              router.push(`${editButtonUrl}/${data?.id}`)
-            }}
+            onClick={openRecord}
           >
             {renderKanbanAction(data, groupedView)}
             {renderFormDynamically(solidKanbanViewMetaData)}

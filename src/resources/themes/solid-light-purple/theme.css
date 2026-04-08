@@ -6224,14 +6224,14 @@
 
   .solid-kanban-card,
   .solid-media-card {
-    border: 1px solid var(--solid-kanban-wrapper);
-    background: var(--hightlight-bg-secondary);
+    border: none;
+    background: transparent;
   }
 
   .solid-kanban-card:hover,
   .solid-media-card:hover {
-    border: 1px solid #722ED1;
-    background: #F9F0FF;
+    border: none;
+    background: transparent;
   }
 
 
