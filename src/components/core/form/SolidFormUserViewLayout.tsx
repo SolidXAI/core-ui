@@ -1,14 +1,12 @@
 
 import { useFormik } from "formik";
 import { Button } from "primereact/button";
-import { useSelector, useDispatch } from "react-redux";
+import { useDispatch } from "react-redux";
 import React from "react";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
-import { javascript } from "@codemirror/lang-javascript";
-import { oneDark } from "@codemirror/theme-one-dark";
-import CodeMirror, { EditorView } from "@uiw/react-codemirror";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showToast } from "../../../redux/features/toastSlice";
+import { SolidCodeEditor } from "../../shad-cn-ui";
 
 export const SolidFormUserViewLayout = ({ solidFormViewMetaData, setLayoutDialogVisible }: any) => {
     const dispatch = useDispatch();
@@ -47,12 +45,11 @@ export const SolidFormUserViewLayout = ({ solidFormViewMetaData, setLayoutDialog
     return (
         <>
             <form onSubmit={formik.handleSubmit}>
-                <CodeMirror
+                <SolidCodeEditor
                     value={formik.values.layoutString}
                     height="500px"
-                    theme={oneDark}
-                    style={{ fontSize: '10px' }}
-                    extensions={[javascript(), EditorView.lineWrapping]}
+                    fontSize={12}
+                    language="json"
                     onChange={(value) => {
                         formik.setFieldValue("layoutString", value);
                     }}

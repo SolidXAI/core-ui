@@ -524,20 +524,14 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
                             <div className="flex align-items-start justify-content-between">
                                 <p className="font-normal w-9 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails)}>{fileDetails.name}</p>
                                 <div className="flex align-items-center md:gap-2">
-                                    <div>
-                                        <SolidButton
-                                            type="button"
-                                            text
-                                            icon={"pi pi-download"}
-                                            size="small"
-                                            severity="secondary"
-                                            style={{
-                                                height: 16,
-                                                width: 16
-                                            }}
-                                            onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
-                                        />
-                                    </div>
+                                    <button
+                                        type="button"
+                                        className="solid-file-icon-btn"
+                                        aria-label="Download file"
+                                        onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
+                                    >
+                                        <i className="pi pi-download" />
+                                    </button>
                                 </div>
                             </div>
                             <div className="flex align-items-center gap-2 text-sm">

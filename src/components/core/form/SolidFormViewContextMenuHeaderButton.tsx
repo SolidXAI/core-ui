@@ -9,6 +9,8 @@ interface SolidFormViewContextMenuHeaderButtonProps {
     solidFormViewMetaData: any;
     handleCustomButtonClick: (attrs: any, event: any) => void;
     formData: any;
+    onActionComplete?: () => void;
+    variant?: "default" | "menu";
 }
 
 export function SolidFormViewContextMenuHeaderButton({
@@ -17,7 +19,9 @@ export function SolidFormViewContextMenuHeaderButton({
     formik,
     solidFormViewMetaData,
     handleCustomButtonClick,
-    formData
+    formData,
+    onActionComplete,
+    variant = "default"
 }: SolidFormViewContextMenuHeaderButtonProps) {
 
     const { data: session, status } = useSession();
@@ -27,6 +31,31 @@ export function SolidFormViewContextMenuHeaderButton({
 
     if (!hasRole) return null;
     if (button.attrs?.visible == false) return null
+    const handleClick = () => {
+        const event = {
+            action: button.attrs.action,
+            params,
+            formik,
+            solidFormViewMetaData: solidFormViewMetaData.data,
+            formData
+        };
+        handleCustomButtonClick(button.attrs, event);
+        onActionComplete?.();
+    };
+
+    if (variant === "menu") {
+        return (
+            <button
+                type="button"
+                className={`solid-row-action-button ${button?.attrs?.className ? button?.attrs?.className : ''}`}
+                onClick={handleClick}
+            >
+                <i className={`${button?.attrs?.icon ? button?.attrs?.icon : "pi pi-pencil"} solid-row-action-button-icon`} />
+                <span className="solid-row-action-button-label">{button.attrs.label}</span>
+            </button>
+        );
+    }
+
     return (
         <div>
             <Button
@@ -37,16 +66,7 @@ export function SolidFormViewContextMenuHeaderButton({
                 size="small"
                 iconPos="left"
                 icon={button?.attrs?.icon ? button?.attrs?.icon : "pi pi-pencil"}
-                onClick={() => {
-                    const event = {
-                        action: button.attrs.action,
-                        params,
-                        formik,
-                        solidFormViewMetaData: solidFormViewMetaData.data,
-                        formData
-                    }
-                    handleCustomButtonClick(button.attrs, event)
-                }}
+                onClick={handleClick}
             />
         </div>
     );

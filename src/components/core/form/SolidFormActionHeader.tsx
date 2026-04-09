@@ -7,23 +7,23 @@ import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { normalizeSolidFormActionPath } from "../../../helpers/routePaths";
 import { Button } from "primereact/button";
-import { OverlayPanel } from "primereact/overlaypanel";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import { SolidFormViewNormalHeaderButton } from "./SolidFormViewNormalHeaderButton";
 import { SolidFormViewContextMenuHeaderButton } from "./SolidFormViewContextMenuHeaderButton";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { useSession } from '../../../hooks/useSession'
 import { SolidFormStepper } from "../../../components/common/SolidFormStepper";
+import { SolidPopover, SolidPopoverContent, SolidPopoverTrigger } from "../../shad-cn-ui/SolidPopover";
 
 export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate, formData, isSubmitting }: any) => {
     const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
-    const op = useRef(null);
     const [contextMenuHeaderButtons, setContextMenuHeaderButtons] = useState<any>([]);
     const [normalHeaderButtons, setNormalHeaderButtons] = useState<any>([]);
     const [isNavigating, setIsNavigating] = useState(false);
+    const [formActionsMenuOpen, setFormActionsMenuOpen] = useState(false);
     const createHeaderTitle = `Create ${solidView.model.displayName}`;
     const editHeaderTitle = `Edit ${solidView.model.displayName}`;
 
@@ -86,91 +86,109 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
         // router.push(`${pathname}?${params.toString()}`, { scroll: false });
 
     };
+    const menuButtonClassNames = (...parts: Array<string | false | undefined>) => parts.filter(Boolean).join(" ");
+
+    const FormActionMenuButton = ({
+        label,
+        icon,
+        onClick,
+        danger,
+    }: {
+        label: string;
+        icon?: string;
+        onClick: () => void;
+        danger?: boolean;
+    }) => (
+        <button
+            type="button"
+            className={menuButtonClassNames("solid-row-action-button", danger && "solid-row-action-button-danger")}
+            onClick={onClick}
+        >
+            {icon && <i className={`${icon} solid-row-action-button-icon`} />}
+            <span className="solid-row-action-button-label">{label}</span>
+        </button>
+    );
+
     const FormActionDropdown = () => {
         const canPublish = actionsAllowed.includes(permissionExpression(params.modelName, 'publish'));
         const canUnpublish = actionsAllowed.includes(permissionExpression(params.modelName, 'unpublish'));
+        const closeMenu = () => setFormActionsMenuOpen(false);
 
         return (
-            <div>
-                <div>
-                    <Button
-                        outlined
-                        severity="secondary"
-                        type="button"
-                        icon={'pi pi-cog'}
-                        size="small"
-                        className="surface-card solid-icon-button hidden md:flex"
-                        // style={{
-                        //     height: 33.06,
-                        //     width: 33.06
-                        // }}
-                        onClick={(e) =>
-                            // @ts-ignore 
-                            op.current.toggle(e)
-                        }
-                    />
-                    <Button
-                        outlined
-                        type="button"
-                        icon={'pi pi-cog'}
-                        size="small"
-                        className="surface-card solid-icon-button md:hidden"
-                        // style={{
-                        //     height: 33.06,
-                        //     width: 33.06
-                        // }}
-                        onClick={(e) =>
-                            // @ts-ignore 
-                            op.current.toggle(e)
-                        }
-                    />
+            <SolidPopover open={formActionsMenuOpen} onOpenChange={setFormActionsMenuOpen}>
+                <div className="flex gap-2">
+                    <SolidPopoverTrigger asChild>
+                        <Button
+                            outlined
+                            severity="secondary"
+                            type="button"
+                            icon={'pi pi-cog'}
+                            size="small"
+                            className="surface-card solid-icon-button hidden md:flex"
+                        />
+                    </SolidPopoverTrigger>
+                    <SolidPopoverTrigger asChild>
+                        <Button
+                            outlined
+                            type="button"
+                            icon={'pi pi-cog'}
+                            size="small"
+                            className="surface-card solid-icon-button md:hidden"
+                        />
+                    </SolidPopoverTrigger>
                 </div>
-                <OverlayPanel ref={op} className="solid-custom-overlay listview-cogwheel-panel">
-                    <div className="solid-row-actions-menu flex flex-column gap-1 p-1">
+                <SolidPopoverContent
+                    side="bottom"
+                    align="end"
+                    className="solid-form-actions-popover"
+                    onClick={(event) => event.stopPropagation()}
+                >
+                    <div className="solid-row-actions-menu solid-form-actions-menu">
                         {params.embeded !== true &&
                             params.id !== "new" &&
                             actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
                             !isPublished &&
                             solidView?.layout?.attrs?.showDeleteFormButton !== false &&
-                            !formViewLayout.attrs.readonly &&
-                            <Button
-                                type="button"
-                                className="solid-row-action-button solid-row-action-button-danger"
-                                label="Delete"
-                                iconPos="left"
-                                icon={'pi pi-trash'}
-                                onClick={() => setDeleteDialogVisible(true)}
-                            />
-                        }
-                        <Button
-                            type="button"
-                            className="solid-row-action-button"
+                            !formViewLayout.attrs.readonly && (
+                                <FormActionMenuButton
+                                    label="Delete"
+                                    icon="pi pi-trash"
+                                    danger
+                                    onClick={() => {
+                                        setDeleteDialogVisible(true);
+                                        closeMenu();
+                                    }}
+                                />
+                            )}
+                        <FormActionMenuButton
                             label="Layout"
-                            iconPos="left"
-                            icon={'pi pi-objects-column'}
-                            onClick={() => setLayoutDialogVisible(true)}
+                            icon="pi pi-objects-column"
+                            onClick={() => {
+                                setLayoutDialogVisible(true);
+                                closeMenu();
+                            }}
                         />
                         {draftEnabled && params.id !== 'new' && (
                             <>
                                 {!isPublished && canPublish && (
-                                    <Button
-                                        type="button"
-                                        className="solid-row-action-button"
+                                    <FormActionMenuButton
                                         label="Publish"
-                                        iconPos="left"
                                         icon="pi pi-cloud-upload"
-                                        onClick={() => handleDraftPublishWorkFlow('publish')}
+                                        onClick={() => {
+                                            handleDraftPublishWorkFlow('publish');
+                                            closeMenu();
+                                        }}
                                     />
                                 )}
 
                                 {isPublished && canUnpublish && (
-                                    <Button
-                                        type="button"
-                                        className="solid-row-action-button"
+                                    <FormActionMenuButton
                                         label="Unpublish"
-                                        iconPos="left"
                                         icon="pi pi-cloud-download"
-                                        onClick={() => handleDraftPublishWorkFlow('unpublish')}
+                                        onClick={() => {
+                                            handleDraftPublishWorkFlow('unpublish');
+                                            closeMenu();
+                                        }}
                                     />
                                 )}
                             </>
@@ -186,6 +204,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     formData={formData}
                                     solidFormViewMetaData={solidFormViewMetaData}
                                     handleCustomButtonClick={handleCustomButtonClick}
+                                    variant="menu"
+                                    onActionComplete={closeMenu}
                                 />
                             )
                         })}
@@ -200,22 +220,23 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                         formData={formData}
                                         solidFormViewMetaData={solidFormViewMetaData}
                                         handleCustomButtonClick={handleCustomButtonClick}
+                                        variant="menu"
+                                        onActionComplete={closeMenu}
                                     />
                                 )
                             })}
                             {params.embeded !== true && params.draftEnabled &&
                                 !formViewLayout.attrs.readonly && params.publish !== 'null' &&
-                                formik.dirty &&
-                                <Button
-                                    type="button"
-                                    className="solid-row-action-button"
-                                    label="Draft"
-                                />
-                            }
+                                formik.dirty && (
+                                    <FormActionMenuButton
+                                        label="Draft"
+                                        onClick={() => { }}
+                                    />
+                                )}
                         </div>
                     </div>
-                </OverlayPanel>
-            </div>
+                </SolidPopoverContent>
+            </SolidPopover>
         )
     }
     return (
