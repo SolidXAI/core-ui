@@ -1,6 +1,5 @@
 import { forwardRef, useState, useEffect, useRef, useMemo, useImperativeHandle } from "react";
 import { SolidDataTable as DataTable, DataTableStateEvent, Column } from "./SolidDataTable";
-import { FilterMatchMode } from "primereact/api";
 import qs from "qs";
 import { Button } from "primereact/button";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
@@ -38,6 +37,7 @@ import { useSession } from "../../../hooks/useSession";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 // import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper"; // moved to SolidX Studio panel
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
+import { FilterMatchMode } from "../filter/filterMatchMode";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 import { SolidListViewRowActionsMenu } from "./SolidListViewRowActionsMenu";
 import {
