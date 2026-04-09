@@ -1,5 +1,6 @@
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { useSession } from "../../../hooks/useSession";
+import { SquarePen } from "lucide-react";
 import { SolidDropdownMenuItem } from "../../shad-cn-ui";
 
 export const SolidListViewHeaderContextMenuButton = ({ button, params, solidListViewMetaData, handleCustomButtonClick, onActionComplete }: any) => {
@@ -23,7 +24,9 @@ export const SolidListViewHeaderContextMenuButton = ({ button, params, solidList
                 onActionComplete?.();
             }}
         >
-            <i className={`${button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"} solid-header-action-button-icon`} />
+            {button?.attrs?.icon
+                ? <i className={`${button.attrs.icon} solid-header-action-button-icon`} />
+                : <SquarePen size={14} className="solid-header-action-button-icon" />}
             <span className="solid-header-action-button-label">{button.attrs.label}</span>
         </SolidDropdownMenuItem>
     );

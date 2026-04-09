@@ -1,13 +1,13 @@
 
-import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { useState } from "react";
+import { SolidAutocomplete } from "../../shad-cn-ui";
 
 
 export const SolidSelectionStaticFilterElement = ({ value, updateInputs, index, fieldMetadata }: any) => {
 
     // selection dynamic specific code. 
     const [selectionStaticItems, setSelectionStaticItems] = useState([]);
-    const selectionStaticSearch = (event: AutoCompleteCompleteEvent) => {
+    const selectionStaticSearch = (event: { query: string }) => {
         const selectionStaticData = fieldMetadata.selectionStaticValues.map((i: string) => {
             return {
                 label: i.split(":")[1],
@@ -20,11 +20,12 @@ export const SolidSelectionStaticFilterElement = ({ value, updateInputs, index, 
 
     return (
 
-        <AutoComplete
+        <SolidAutocomplete
             field="label"
             value={value}
             dropdown
             className="w-full solid-standard-autocomplete"
+            inputClassName="solid-filter-compact-control"
             suggestions={selectionStaticItems}
             completeMethod={selectionStaticSearch}
             onChange={(e) => updateInputs(index, e.value)} />

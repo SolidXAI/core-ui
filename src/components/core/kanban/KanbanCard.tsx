@@ -20,7 +20,6 @@ interface KanbanCardProps {
   data: Data;
   solidKanbanViewMetaData: any;
   index: number;
-  groupedView: boolean;
   setLightboxUrls?: any;
   setOpenLightbox?: any;
   editButtonUrl?: string;
@@ -30,7 +29,7 @@ interface KanbanCardProps {
   DynamicCardWidget?: any;
 }
 
-const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, setLightboxUrls, setOpenLightbox, editButtonUrl, groupedView, groupByFieldName, group, cardNode, DynamicCardWidget }) => {
+const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, setLightboxUrls, setOpenLightbox, editButtonUrl, groupByFieldName, group, cardNode, DynamicCardWidget }) => {
   const router = useRouter()
   const openRecord = () => {
     if (typeof window !== "undefined") {
@@ -43,7 +42,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
     router.push(`${editButtonUrl}/${data?.id}`);
   };
 
-  const renderKanbanAction = (data, groupedView) => {
+  const renderKanbanAction = (data) => {
     return (
       <div className="solid-kanban-action" onClick={(e) => e.stopPropagation()}>
         <SolidDropdownMenu>
@@ -64,19 +63,6 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
               <i className="pi pi-pencil solid-header-action-button-icon" />
               <span className="solid-header-action-button-label">Edit</span>
             </SolidDropdownMenuItem>
-            {!groupedView && (
-              <SolidDropdownMenuItem asChild className="solid-header-dropdown-item">
-                <a
-                  href={data?.relativeUri}
-                  download={data?.originalFileName}
-                  target="_blank"
-                  rel="noopener noreferrer"
-                >
-                  <i className="pi pi-download solid-header-action-button-icon" />
-                  <span className="solid-header-action-button-label">Download</span>
-                </a>
-              </SolidDropdownMenuItem>
-            )}
           </SolidDropdownMenuContent>
         </SolidDropdownMenu>
       </div>
@@ -84,7 +70,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
   }
 
   return (
-    <Draggable draggableId={String(data.id)} index={index} isDragDisabled={!groupedView}>
+    <Draggable draggableId={String(data.id)} index={index}>
       {(provided: DraggableProvided, snapshot) => (
         <div
           className=""
@@ -103,10 +89,10 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
               cursor: 'pointer'
             }}
             elevation={snapshot.isDragging ? 3 : 1}
-            className={`${!groupedView ? 'solid-media-card' : 'solid-kanban-card'}`}
+            className="solid-kanban-card"
             onClick={openRecord}
           >
-            {renderKanbanAction(data, groupedView)}
+            {renderKanbanAction(data)}
             {DynamicCardWidget ? (
               <DynamicCardWidget
                 rowData={data}
@@ -115,7 +101,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
                 solidFieldsMetadata={solidKanbanViewMetaData?.solidFieldsMetadata}
                 card={cardNode}
                 layoutAttrs={solidKanbanViewMetaData?.solidView?.layout?.attrs || {}}
-                groupedView={groupedView}
+                groupedView={true}
                 groupByFieldName={groupByFieldName}
                 group={group}
                 editButtonUrl={editButtonUrl}

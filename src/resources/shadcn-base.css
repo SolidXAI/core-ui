@@ -2880,7 +2880,8 @@ body {
   background: color-mix(in srgb, var(--accent) 65%, transparent);
 }
 
-.solid-list-toolbar .p-button {
+.solid-list-toolbar .p-button,
+.solid-list-toolbar .solid-btn {
   height: 32px;
   border-radius: 8px;
   font-size: 12px;
@@ -2889,6 +2890,8 @@ body {
 
 .solid-list-toolbar .p-button.p-button-secondary,
 .solid-list-toolbar .p-button.p-button-outlined,
+.solid-list-toolbar .solid-btn--secondary,
+.solid-list-toolbar .solid-btn--outline,
 .solid-list-toolbar .solid-icon-button {
   border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
   background: var(--background);
@@ -3601,6 +3604,7 @@ body {
   width: 12px;
   min-width: 12px;
   display: inline-flex;
+  align-items: center;
   justify-content: center;
   font-size: 11px;
 }
@@ -3845,7 +3849,8 @@ body {
   }
 }
 
-.solid-inline-row-button.p-button {
+.solid-inline-row-button.p-button,
+.solid-inline-row-button.solid-btn {
   min-height: 28px;
   border-radius: 8px;
   border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
@@ -3854,14 +3859,17 @@ body {
   font-size: 12px;
   font-weight: 500;
   padding: 0 9px;
+  gap: 0.35rem;
 }
 
-.solid-inline-row-button.p-button:hover {
+.solid-inline-row-button.p-button:hover,
+.solid-inline-row-button.solid-btn:hover {
   background: var(--accent);
   border-color: color-mix(in srgb, var(--border) 78%, transparent);
 }
 
-.solid-inline-row-button.solid-inline-row-button-icon.p-button {
+.solid-inline-row-button.solid-inline-row-button-icon.p-button,
+.solid-inline-row-button.solid-inline-row-button-icon.solid-btn {
   width: 28px;
   min-width: 28px;
   padding: 0;

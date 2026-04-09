@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { Ellipsis, SquarePen, Trash2 } from "lucide-react";
 import { SolidPopover, SolidPopoverContent, SolidPopoverTrigger } from "../../shad-cn-ui/SolidPopover";
 import { SolidListViewRowActionMenuItem } from "./SolidListViewRowActionMenuItem";
 
@@ -48,7 +49,7 @@ export function SolidListViewRowActionsMenu({
           }}
           aria-label="Open row actions"
         >
-          <i className="pi pi-ellipsis-h" />
+          <Ellipsis size={16} />
         </button>
       </SolidPopoverTrigger>
       <SolidPopoverContent
@@ -67,7 +68,7 @@ export function SolidListViewRowActionsMenu({
                 setOpen(false);
               }}
             >
-              <i className="pi pi-pencil solid-row-action-button-icon" />
+              <SquarePen size={14} className="solid-row-action-button-icon" />
               <span className="solid-row-action-button-label">Edit</span>
             </button>
           )}
@@ -81,7 +82,7 @@ export function SolidListViewRowActionsMenu({
                 setOpen(false);
               }}
             >
-              <i className="pi pi-trash solid-row-action-button-icon" />
+              <Trash2 size={14} className="solid-row-action-button-icon" />
               <span className="solid-row-action-button-label">Delete</span>
             </button>
           )}

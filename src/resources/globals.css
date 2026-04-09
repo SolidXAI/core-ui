@@ -1814,33 +1814,52 @@ li.header-li-px {
 }
 
 
-.solid-breadcrumb.p-breadcrumb {
-  /* border-bottom: 1px solid #CED0D6; */
-  border-bottom: none;
-  border-right: none;
-  border-left: none;
-  border-top: none;
-  border-radius: 0;
+.solid-breadcrumb {
   padding: 0;
-  /* padding: 0.8rem 1.5rem; */
   font-size: 14px;
   font-weight: 500;
   text-transform: capitalize;
 }
 
-.solid-breadcrumb.p-breadcrumb .p-menuitem a {
-  text-decoration: none;
+.solid-breadcrumb-list {
+  list-style: none;
+  display: flex;
+  align-items: center;
+  gap: 0.35rem;
+  margin: 0;
+  padding: 0;
 }
 
-.solid-breadcrumb.p-breadcrumb .p-menuitem a p {
-  font-weight: 600 !important;
+.solid-breadcrumb-item {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
 }
 
-.solid-breadcrumb.p-breadcrumb .p-menuitem .p-menuitem-link .p-menuitem-text {
+.solid-breadcrumb-link,
+.solid-breadcrumb-current {
   max-width: clamp(120px, 50vw, 600px);
   white-space: nowrap;
   overflow: hidden;
   text-overflow: ellipsis;
+}
+
+.solid-breadcrumb-link {
+  border: none;
+  background: transparent;
+  padding: 0;
+  text-decoration: none;
+  color: inherit;
+  cursor: pointer;
+}
+
+.solid-breadcrumb-separator {
+  color: var(--muted-foreground);
+}
+
+.solid-breadcrumb-current {
+  max-width: clamp(120px, 50vw, 600px);
+  font-weight: 600;
 }
 
 .solid-dropzone {
@@ -4627,7 +4646,9 @@ flex-shrink: 0; */
 }
 
 .solid-empty-listview-actions .solid-empty-listview-create-action .p-button,
-.solid-empty-listview-actions .p-button {
+.solid-empty-listview-actions .solid-empty-listview-create-action .solid-btn,
+.solid-empty-listview-actions .p-button,
+.solid-empty-listview-actions .solid-btn {
   height: 30px;
   border-radius: 8px;
   font-weight: 600;
@@ -4635,24 +4656,28 @@ flex-shrink: 0; */
   padding: 0 11px;
 }
 
-.solid-empty-listview-actions .solid-empty-listview-create-action .p-button {
+.solid-empty-listview-actions .solid-empty-listview-create-action .p-button,
+.solid-empty-listview-actions .solid-empty-listview-create-action .solid-btn {
   background: var(--foreground);
   border-color: var(--foreground);
   color: var(--background);
 }
 
-.solid-empty-listview-actions .solid-empty-listview-create-action .p-button:hover {
+.solid-empty-listview-actions .solid-empty-listview-create-action .p-button:hover,
+.solid-empty-listview-actions .solid-empty-listview-create-action .solid-btn:hover {
   background: color-mix(in srgb, var(--foreground) 90%, transparent);
   border-color: color-mix(in srgb, var(--foreground) 90%, transparent);
 }
 
-.solid-empty-listview-import-button.p-button {
+.solid-empty-listview-import-button.p-button,
+.solid-empty-listview-import-button.solid-btn {
   background: transparent;
   border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
   color: color-mix(in srgb, var(--foreground) 92%, transparent);
 }
 
-.solid-empty-listview-import-button.p-button:hover {
+.solid-empty-listview-import-button.p-button:hover,
+.solid-empty-listview-import-button.solid-btn:hover {
   background: color-mix(in srgb, var(--accent) 45%, transparent);
 }
 
@@ -4665,7 +4690,8 @@ flex-shrink: 0; */
   gap: 6px;
 }
 
-.solid-empty-listview-secondary-action.p-button {
+.solid-empty-listview-secondary-action.p-button,
+.solid-empty-listview-secondary-action.solid-btn {
   border-radius: 8px;
   min-height: 26px;
   font-size: 0.76rem;
@@ -4708,7 +4734,9 @@ flex-shrink: 0; */
   }
 
   .solid-empty-listview-actions .solid-empty-listview-create-action .p-button,
-  .solid-empty-listview-actions .p-button {
+  .solid-empty-listview-actions .solid-empty-listview-create-action .solid-btn,
+  .solid-empty-listview-actions .p-button,
+  .solid-empty-listview-actions .solid-btn {
     width: 100%;
     justify-content: center;
   }
@@ -4767,9 +4795,59 @@ flex-shrink: 0; */
   vertical-align: middle;
 }
 
-.solid-list-skeleton-row td .p-skeleton {
+.solid-list-skeleton-block {
+  position: relative;
+  overflow: hidden;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 72%, white);
   height: 1rem;
-  /* Set skeleton height to 0.75rem */
+}
+
+.solid-list-skeleton-block::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  transform: translateX(-100%);
+  background: linear-gradient(90deg, transparent, rgba(255, 255, 255, 0.7), transparent);
+  animation: solid-list-skeleton-shimmer 1.3s infinite;
+}
+
+.solid-list-skeleton-block-fluid {
+  width: 50%;
+}
+
+.solid-list-skeleton-block-lg {
+  width: 5rem;
+}
+
+.solid-list-skeleton-block-md {
+  width: 5.5rem;
+}
+
+.solid-list-skeleton-block-sm {
+  width: 4.5rem;
+}
+
+.solid-list-skeleton-block-xs {
+  width: 1rem;
+  height: 1rem;
+}
+
+.solid-list-skeleton-block-xxs {
+  width: 0.625rem;
+  height: 1rem;
+}
+
+.solid-list-skeleton-block-circle {
+  width: 0.9375rem;
+  height: 0.9375rem;
+  border-radius: 999px;
+}
+
+@keyframes solid-list-skeleton-shimmer {
+  100% {
+    transform: translateX(100%);
+  }
 }
 
 .solid-list-skeleton-footer {

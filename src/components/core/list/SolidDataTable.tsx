@@ -1,4 +1,5 @@
 import React from "react";
+import { ArrowDownWideNarrow, ArrowUpDown, ArrowUpWideNarrow } from "lucide-react";
 
 export type DataTableStateEvent = {
   sortField?: string;
@@ -67,9 +68,11 @@ function normalizeColumns(children: React.ReactNode): React.ReactElement<SolidCo
   });
 }
 
-function resolveSortIcon(active: boolean, order: 1 | -1 | 0): string {
-  if (!active || order === 0) return "pi pi-sort-alt";
-  return order === 1 ? "pi pi-sort-amount-up-alt" : "pi pi-sort-amount-down";
+function resolveSortIcon(active: boolean, order: 1 | -1 | 0): React.ReactNode {
+  if (!active || order === 0) return <ArrowUpDown size={14} aria-hidden="true" />;
+  return order === 1
+    ? <ArrowUpWideNarrow size={14} aria-hidden="true" />
+    : <ArrowDownWideNarrow size={14} aria-hidden="true" />;
 }
 
 function nextSortOrder(active: boolean, order: 1 | -1 | 0, removableSort = true): 1 | -1 | 0 {
@@ -171,7 +174,7 @@ export function SolidDataTable({
                 const isSelectionColumn = props.selectionMode === "multiple";
                 const isSortable = Boolean(props.sortable && props.field && !isSelectionColumn);
                 const isActiveSort = isSortable && sortField === props.field;
-                const iconClass = resolveSortIcon(Boolean(isActiveSort), sortOrder);
+                const iconNode = resolveSortIcon(Boolean(isActiveSort), sortOrder);
                 return (
                   <th
                     key={`header-${index}`}
@@ -203,7 +206,7 @@ export function SolidDataTable({
                         }}
                       >
                         {renderHeaderNode(props.header)}
-                        {isSortable ? <i className={iconClass} aria-hidden="true" /> : null}
+                        {isSortable ? iconNode : null}
                       </button>
                     )}
                   </th>

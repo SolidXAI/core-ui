@@ -1,4 +1,5 @@
-import { Tooltip } from "primereact/tooltip";
+import { Info } from "lucide-react";
+import { SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../shad-cn-ui";
 
 const SolidTableRowCell = ({ value, truncateAfter }: { value: string; truncateAfter?: number }) => {
     const safeValue = value !== null && value !== undefined ? String(value) : "";
@@ -20,12 +21,14 @@ const SolidTableRowCell = ({ value, truncateAfter }: { value: string; truncateAf
                 {displayValue}
             </div>
             {truncateAfter && displayValue.length > truncateAfter &&
-                <>
-                    <Tooltip target=".solid-field-tooltip-icon" />
-                    <i className="pi pi-info-circle solid-field-tooltip-icon"
-                        data-pr-tooltip={displayValue}
-                    />
-                </>
+                <SolidTooltip>
+                    <SolidTooltipTrigger asChild>
+                        <button type="button" className="solid-field-tooltip-icon" aria-label="Show full value">
+                            <Info size={14} />
+                        </button>
+                    </SolidTooltipTrigger>
+                    <SolidTooltipContent>{displayValue}</SolidTooltipContent>
+                </SolidTooltip>
             }
         </div>
     );

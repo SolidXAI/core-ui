@@ -1,6 +1,5 @@
-
-import { AutoComplete } from "primereact/autocomplete";
 import { useState } from "react";
+import { SolidAutocomplete } from "../../shad-cn-ui";
 
 
 export const SolidSearchBox = ({ viewData }: any) => {
@@ -11,7 +10,7 @@ export const SolidSearchBox = ({ viewData }: any) => {
     }
     return (
         <div className="card flex justify-content-center">
-            <AutoComplete value={value} suggestions={items} completeMethod={search} onChange={(e) => setValue(e.value)} />
+            <SolidAutocomplete value={value} suggestions={items} completeMethod={search} onChange={(e) => setValue(e.value)} />
         </div>
     )
 }

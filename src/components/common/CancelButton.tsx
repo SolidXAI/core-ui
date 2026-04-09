@@ -2,7 +2,8 @@
 
 import { usePathname } from "../../hooks/usePathname";
 import { useRouter } from "../../hooks/useRouter";
-import { Button } from 'primereact/button';
+import { X } from "lucide-react";
+import { SolidButton } from "../shad-cn-ui";
 
 
 export const CancelButton = () => {
@@ -19,7 +20,9 @@ export const CancelButton = () => {
     };
     return (
         <div>
-            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse' style={{ minWidth: 66 }} />
+            <SolidButton variant="outline" size="small" type="button" onClick={handleGoBack} className='bg-primary-reverse' style={{ minWidth: 66 }}>
+                Close
+            </SolidButton>
         </div>
     )
 }
@@ -52,10 +55,12 @@ export const SolidCancelButton = () => {
         <>
             {/* <div className="hidden lg:flex"> */}
             {/* <div> */}
-            <Button outlined size="small" type="button" label="Close" onClick={handleGoBack} className='bg-primary-reverse hidden lg:flex' style={{ minWidth: 66 }} />
+            <SolidButton variant="outline" size="small" type="button" onClick={handleGoBack} className='bg-primary-reverse hidden lg:flex' style={{ minWidth: 66 }}>
+                Close
+            </SolidButton>
             {/* </div> */}
             {/* </div> */}
-            <Button size="small" type="button" icon="pi pi-times" onClick={handleGoBack} className='bg-primary-reverse solid-icon-button flex lg:hidden' />
+            <SolidButton size="small" type="button" leftIcon={<X size={14} />} onClick={handleGoBack} className='bg-primary-reverse solid-icon-button flex lg:hidden' />
         </>
     )
 }
