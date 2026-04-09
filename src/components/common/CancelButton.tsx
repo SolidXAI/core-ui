@@ -35,7 +35,7 @@ export const SolidCancelButton = () => {
         }
 
         // Default to 'list' if not available
-        const view = fromView === "kanban" ? "kanban" : "list";
+        const view = fromView === "kanban" || fromView === "card" ? fromView : "list";
 
         // Navigate back to the previous path with the appropriate view type
         const newPath = pathname.replace(/\/form\/[^/]+$/, `/${view}`);
@@ -59,4 +59,3 @@ export const SolidCancelButton = () => {
         </>
     )
 }
-

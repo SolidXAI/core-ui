@@ -1,4 +1,12 @@
 import { Session } from "../adapters/auth";
+import type {
+    ExtensionComponentType,
+    ExtensionFunctionType,
+} from "./extension-registry";
+export type {
+    ExtensionComponentType,
+    ExtensionFunctionType,
+} from "./extension-registry";
 
 // Base type of all Solid entities
 export type CommonEntity = {
@@ -109,31 +117,7 @@ export type ListLayoutType = {
 };
 
 // Event type
-export type SolidUiEvents =
-    // Implemented
-    "onFieldChange" |
-    // Implemented
-    "onFieldBlur" |
-    // Implemented
-    "onFormDataLoad" |
-    // Implemented
-    "onFormLayoutLoad" |
-    // Implemented
-    "onFormLoad" |
-    // Implemented
-    "onListLoad" |
-    // Implemented
-    "onBeforeTreeDataLoad" |
-    // Implemented
-    "onTreeLoad" |
-    // Implemented
-    "onBeforeListDataLoad" |
-    // Not Implemented
-    "afterLogin" |
-    // Not Implemented
-    "beforeLogout" |
-    // Implemented
-    "onApplicationMount";
+export type SolidUiEvents = ExtensionFunctionType;
 export type SolidUiEvent = {
     type: SolidUiEvents;
     modifiedField?: string;

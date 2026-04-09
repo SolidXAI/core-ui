@@ -93,7 +93,7 @@ export const getFilterObjectFromLocalStorageByUrl = (url: string) => {
   }
 };
 
-export const setFilterObjectToLocalStorage = (queryObject: string) => {
+export const setFilterObjectToLocalStorage = (queryObject: any) => {
   if (queryObject) {
     const stringifiedObject = JSON.stringify(queryObject);
     // const stringifiedObject = qs.stringify(queryObject, { encodeValuesOnly: true, arrayFormat: "brackets" });
@@ -106,7 +106,7 @@ export const setFilterObjectToLocalStorage = (queryObject: string) => {
 };
 
 
-export const setFilterObjectToLocalStorageByUrl = (url: string, queryObject: string) => {
+export const setFilterObjectToLocalStorageByUrl = (url: string, queryObject: any) => {
   if (queryObject) {
     const stringifiedObject = JSON.stringify(queryObject);
     // const stringifiedObject = qs.stringify(queryObject, { encodeValuesOnly: true, arrayFormat: "brackets" });

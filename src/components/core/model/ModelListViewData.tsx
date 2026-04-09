@@ -6,7 +6,6 @@ import {
   useLazyGetModelsQuery,
 } from "../../../redux/api/modelApi";
 import Link from "../../common/Link";
-import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import {
@@ -17,6 +16,7 @@ import {
 import { Dialog } from "primereact/dialog";
 import qs from "qs";
 import { useEffect, useState } from "react";
+import { FilterMatchMode } from "../filter/filterMatchMode";
 
 export interface ModelMetaData {
   id: string;

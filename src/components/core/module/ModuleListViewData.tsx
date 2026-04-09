@@ -3,7 +3,6 @@ import { CreateButton } from "../../../components/common/CreateButton";
 import { useDeleteMultiplemodulesMutation, useGenerateCodeFormoduleMutation, useLazyGetmodulesQuery, useRefreshPermissionsMutation } from "../../../redux/api/moduleApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
 import Link from "../../common/Link";
-import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import {
@@ -16,6 +15,7 @@ import qs from "qs";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { showToast } from "../../../redux/features/toastSlice";
+import { FilterMatchMode } from "../filter/filterMatchMode";
 
 export interface ModelMetaData {
   id: string;

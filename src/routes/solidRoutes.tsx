@@ -10,6 +10,7 @@ import { AdminPage } from "./pages/admin/AdminPage";
 import { ModuleHomePage } from "./pages/admin/core/ModuleHomePage";
 import { ListPage } from "./pages/admin/core/ListPage";
 import { KanbanPage } from "./pages/admin/core/KanbanPage";
+import { CardPage } from "./pages/admin/core/CardPage";
 import { FormPage } from "./pages/admin/core/FormPage";
 import { SettingsPage } from "./pages/admin/core/SettingsPage";
 import { LoginPage } from "./pages/auth/LoginPage";
@@ -76,6 +77,7 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     { path: "/admin/core/:moduleName/:modelName/list", element: pick("list", <ListPage />) },
     { path: "/admin/core/:moduleName/:modelName/tree", element: pick("tree", <TreePage />) },
     { path: "/admin/core/:moduleName/:modelName/kanban", element: pick("kanban", <KanbanPage />) },
+    { path: "/admin/core/:moduleName/:modelName/card", element: pick("card", <CardPage />) },
     { path: "/admin/core/:moduleName/:modelName/form/:id", element: pick("form", <FormPage />) },
     { path: "/admin/core/:moduleName/settings/:settings", element: pick("settings", <SettingsPage />) },
     ...extraAdminRoutes,

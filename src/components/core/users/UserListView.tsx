@@ -1,7 +1,6 @@
 
 import { useDeleteMultipleUsersMutation, useLazyGetusersQuery } from '../../../redux/api/userApi';
 import Link from "../../common/Link";
-import { FilterMatchMode } from "primereact/api";
 import { Button } from "primereact/button";
 import { Column } from "primereact/column";
 import {
@@ -18,6 +17,7 @@ import { Dialog } from "primereact/dialog";
 import qs from "qs";
 import { ERROR_MESSAGES } from '../../../constants/error-messages';
 import { showToast } from '../../../redux/features/toastSlice';
+import { FilterMatchMode } from "../filter/filterMatchMode";
 
 interface Users {
     id: string;

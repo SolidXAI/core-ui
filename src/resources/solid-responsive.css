@@ -12,6 +12,10 @@
     flex: 1 1 calc(20% - 20px);
     max-width: calc(20% - 20px);
   }
+
+  .solid-card-view-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
 }
 
 @media (max-width: 1199px) {
@@ -152,6 +156,10 @@
     .kanban-ungrouped-column .kanban-card-container {
         flex: 1 1 calc(33.33% - 20px);
         max-width: calc(33.33% - 20px);
+      }
+
+    .solid-card-view-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
       }
 
 }
@@ -586,6 +594,10 @@
         max-width: calc(50% - 20px);
       }
 
+      .solid-card-view-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      }
+
       .solid-img-text-wrapper{
         max-width: clamp(180px, 60vw, 600px);
         white-space: nowrap;
@@ -685,6 +697,16 @@
     .kanban-ungrouped-column .kanban-card-container {
         flex: 1 1 100%;
         max-width: 100%;
+      }
+
+    .solid-card-view-body {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+    .solid-card-view-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
       }
     
 

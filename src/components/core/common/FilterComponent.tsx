@@ -6,6 +6,7 @@ import { SolidButton } from '../../shad-cn-ui/SolidButton';
 import { SolidAutocomplete } from '../../shad-cn-ui/SolidAutocomplete';
 import { SolidInput } from '../../shad-cn-ui/SolidInput';
 import { SolidSelect } from '../../shad-cn-ui/SolidSelect';
+import { FilterMatchMode, type FilterMatchModeValue } from '../filter/filterMatchMode';
 
 export enum FilterRuleType {
   RULE = 'rule',
@@ -17,20 +18,12 @@ export enum FilterOperator {
   OR = 'or'
 }
 
-export enum FilterMatchMode {
-  STARTS_WITH = 'startsWith',
-  CONTAINS = 'contains',
-  EQUALS = 'equals',
-  GREATER_THAN = 'gt',
-  LESS_THAN = 'lt',
-}
-
 export interface FilterRule {
   id: number;
   type: FilterRuleType;
   matchOperator?: FilterOperator;
   fieldName?: string | null;
-  matchMode?: FilterMatchMode | null;
+  matchMode?: FilterMatchModeValue | null;
   value?: any;
   parentRule: number | null;
   children?: FilterRule[];

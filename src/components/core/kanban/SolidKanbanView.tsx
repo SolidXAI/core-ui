@@ -3,7 +3,6 @@ import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { DropResult } from "@hello-pangea/dnd";
-import { FilterMatchMode } from "primereact/api";
 import qs from "qs";
 import { useEffect, useRef, useState } from "react";
 import { SolidCreateButton } from "../common/SolidCreateButton";
@@ -12,7 +11,6 @@ import KanbanBoard from "./KanbanBoard";
 import CompactImage from '../../../resources/images/layout/images/compact.png';
 import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
-import { capitalize } from "lodash";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import Download from "yet-another-react-lightbox/plugins/download";
@@ -28,6 +26,7 @@ import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 import { showToast } from "../../../redux/features/toastSlice";
 import { usePathname } from "../../../hooks/usePathname";
+import { useSearchParams } from "../../../hooks/useSearchParams";
 import {
   SolidButton,
   SolidDialog,
@@ -38,6 +37,7 @@ import {
   SolidDialogSeparator,
   SolidDialogTitle,
 } from "../../shad-cn-ui";
+import { FilterMatchMode } from "../filter/filterMatchMode";
 
 type SolidKanbanViewParams = {
   moduleName: string;
@@ -53,6 +53,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
   const solidGlobalSearchElementRef = useRef();
   const router = useRouter();
+  const searchParams = useSearchParams();
   // TODO: The initial filter state will be created based on the fields which are present on this kanban view. 
   const [filters, setFilters] = useState<any>();
   const [toPopulate, setToPopulate] = useState<string[]>([]);
@@ -122,10 +123,26 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     usePatchUpdateSolidEntityMutation
   } = entityApi;
 
+  const menuItemId = searchParams.get("menuItemId");
+  const menuItemName = searchParams.get("menuItemName");
+  const actionId = searchParams.get("actionId");
+  const actionName = searchParams.get("actionName");
+
   // Get the kanban view layout & metadata first. 
-  const kanbanViewMetaDataQs = qs.stringify({ ...params, viewType: 'kanban' }, {
-    encodeValuesOnly: true,
-  });
+  const kanbanViewMetaDataQs = qs.stringify(
+    {
+      modelName: params.modelName,
+      moduleName: params.moduleName,
+      viewType: "kanban",
+      menuItemId: menuItemId,
+      menuItemName: menuItemName,
+      actionId: actionId,
+      actionName: actionName,
+    },
+    {
+      encodeValuesOnly: true,
+    }
+  );
   const [kanbanViewMetaData, setKanbanViewMetaData] = useState<any>({});
 
   const {
