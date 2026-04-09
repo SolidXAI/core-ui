@@ -1093,8 +1093,8 @@ export const GeneralSettings = () => {
 }
 
 const AI_TABS = [
-    { key: "fastModel" as const, label: "Fast Model", icon: "⚡", title: "Fast Model" },
-    { key: "defaultProvider" as const, label: "Intelligent Model", icon: "🧠", title: "Intelligent Model (Reasoning & tool use)" },
+    { key: "fastModel" as const, label: "Fast Model", title: "Fast Model" },
+    { key: "defaultProvider" as const, label: "Intelligent Model", title: "Intelligent Model (Reasoning & tool use)" },
 ];
 
 interface AiSettingsSectionProps {
@@ -1138,7 +1138,6 @@ const AiSettingsSection = ({ fastModelConfig, intelligentModelConfig, onFastMode
                             transition: "color 0.15s",
                         }}
                     >
-                        <span>{tab.icon}</span>
                         {tab.label}
                     </button>
                 ))}
