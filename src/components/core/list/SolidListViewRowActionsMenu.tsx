@@ -36,7 +36,7 @@ export function SolidListViewRowActionsMenu({
   if (!hasAnyItems) return null;
 
   return (
-    <SolidPopover open={open} onOpenChange={handleOpenChange}>
+    <SolidPopover open={open} onOpenChange={handleOpenChange} autoCloseGroup="solid-list-row-actions">
       <SolidPopoverTrigger asChild>
         <button
           type="button"
@@ -52,6 +52,8 @@ export function SolidListViewRowActionsMenu({
         </button>
       </SolidPopoverTrigger>
       <SolidPopoverContent
+        side="left"
+        align="center"
         className={contentClassName}
         onClick={(event) => event.stopPropagation()}
       >

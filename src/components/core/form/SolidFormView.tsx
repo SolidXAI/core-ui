@@ -54,6 +54,14 @@ import { SolidFormFooter } from "./SolidFormFooter";
 import { normalizeSolidFormActionPath } from "../../../helpers/routePaths";
 import { showToast } from "../../../redux/features/toastSlice";
 import { useDispatch } from "react-redux";
+import {
+    SolidDialog,
+    SolidDialogBody,
+    SolidDialogClose,
+    SolidDialogHeader,
+    SolidDialogSeparator,
+    SolidDialogTitle
+} from "../../shad-cn-ui/SolidDialog";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -1359,11 +1367,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
         }
 
         // Now render the form dynamically...
-        const renderFormElementDynamically: any = (element: any, recursiveFVMD: any) => {
+        const renderFormElementDynamically: any = (element: any, recursiveFVMD: any, path = "root") => {
             let { type, attrs, body, children } = element;
 
             // const key = attrs?.name ?? generateRandomKey();
-            const key = attrs?.label;
+            const key = attrs?.key ?? attrs?.name ?? attrs?.label ?? `${type}-${path}`;
             let visible = attrs?.visible;
             if (visible === undefined || visible === null) {
                 visible = true;
@@ -1382,11 +1390,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 case "form":
                     if (!children)
                         children = [];
-                    return <div key={key}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</div>;
+                    return <div key={key}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</div>;
                 case "div":
                     if (!children)
                         children = [];
-                    return <div key={key} {...attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</div>
+                    return <div key={key} {...attrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</div>
                 case "span":
                     return <span key={key} {...attrs}>{body}</span>
                 case "p":
@@ -1398,24 +1406,24 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 case "ul":
                     if (!children)
                         children = [];
-                    return <ul key={key} {...attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</ul>
+                    return <ul key={key} {...attrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</ul>
                 case "li":
                     return <li key={key} {...attrs}>{body}</li>
                 case "sheet":
-                    return <SolidSheet key={key}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidSheet>;
+                    return <SolidSheet key={key}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidSheet>;
                 case "group":
                     if (visible === true) {
-                        return <SolidGroup key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidGroup>;
+                        return <SolidGroup key={key} attrs={attrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidGroup>;
                     }
                     break;
                 case "row":
                     if (visible === true) {
-                        return <SolidRow key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidRow>;
+                        return <SolidRow key={key} attrs={attrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidRow>;
                     }
                     break;
                 case "column":
                     if (visible === true) {
-                        return <SolidColumn key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidColumn>;
+                        return <SolidColumn key={key} attrs={attrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidColumn>;
                     }
                     break;
                 case "field":
@@ -1448,13 +1456,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
                 case "notebook":
                     if (visible === true) {
-                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidNotebook>;
+                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidNotebook>;
                     }
                     break;
                 case "page":
                     if (visible === true) {
                         const fields = children.flatMap((child: any) => getLayoutFields(child));
-                        const pageChildren = children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD));
+                        const pageChildren = children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`));
                         return SolidPage({ children: pageChildren, attrs: attrs, key: key, formik: formik, fields });
                     }
                     break;
@@ -1496,7 +1504,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 return;
             }
             const updatedLayout = [formViewLayout];
-            const dynamicForm = updatedLayout.map((element: any) => renderFormElementDynamically(element, recursiveFVMD));
+            const dynamicForm = updatedLayout.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `root-${index}`));
 
             return dynamicForm;
         };
@@ -1677,7 +1685,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             onStepperUpdate={() => setRefreshChatterMessage(true)}
                             isSubmitting={isSubmitting}
                         />
-                        <div className={`px-4 py-3 md:p-4 solid-form-content ${createMode ? 'solid-create-mode-form-content' : ''} ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
+                        <div className={`px-4 py-3 md:p-4 solid-form-content md:pt-1 ${createMode ? 'solid-create-mode-form-content' : ''} ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
                             {params.id === 'new' && DynamicFormComponentNew ? (
                                 <DynamicFormComponentNew params={params} />
@@ -1772,20 +1780,20 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 >
                     <p>Are you sure you want to delete?</p>
                 </Dialog>
-                <Dialog
-                    visible={isLayoutDialogVisible}
-                    header="Change Form Layout"
-                    modal
-                    onHide={() => setLayoutDialogVisible(false)}
-                    style={{ width: '50vw' }}
-                    breakpoints={{
-                        '960px': '80vw',
-                        '641px': '95vw'
-                    }}
-                    contentClassName="p-3 pt-0 lg:p-4"
+                <SolidDialog
+                    open={isLayoutDialogVisible}
+                    onOpenChange={setLayoutDialogVisible}
+                    className="solid-form-layout-dialog"
                 >
-                    <SolidFormUserViewLayout solidFormViewMetaData={solidFormViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
-                </Dialog>
+                    <SolidDialogHeader className="solid-shadcn-dialog-head">
+                        <SolidDialogTitle>Change Form Layout</SolidDialogTitle>
+                        <SolidDialogClose />
+                    </SolidDialogHeader>
+                    <SolidDialogSeparator />
+                    <SolidDialogBody className="p-3 pt-0 lg:p-4">
+                        <SolidFormUserViewLayout solidFormViewMetaData={solidFormViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
+                    </SolidDialogBody>
+                </SolidDialog>
                 {openLightbox &&
                     <Lightbox
                         open={openLightbox}

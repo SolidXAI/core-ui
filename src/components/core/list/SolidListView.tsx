@@ -37,7 +37,6 @@ import { useSession } from "../../../hooks/useSession";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 // import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper"; // moved to SolidX Studio panel
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
-import { FilterMatchMode } from "../filter/filterMatchMode";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 import { SolidListViewRowActionsMenu } from "./SolidListViewRowActionsMenu";
 import {
@@ -50,6 +49,7 @@ import {
   SolidDialogSeparator,
   SolidDialogTitle,
 } from "../../shad-cn-ui";
+import { FilterMatchMode } from "../common/FilterComponent";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {

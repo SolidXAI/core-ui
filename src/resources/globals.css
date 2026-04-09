@@ -1732,7 +1732,7 @@ li.header-li-px {
 }
 
 .solid-form-wrapper .solid-form-content {
-  height: calc(100vh - 197px);
+  height: calc(100vh - 145px);
   /* calc(100dvh - 128px) */
   /* height: calc(100vh - 145px); */
   /* height: calc(100vh - 111px); */
