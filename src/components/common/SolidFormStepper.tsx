@@ -30,9 +30,9 @@ export const SolidFormStepper = (props: Props) => {
     const solidFormViewWorkflowData = solidFormViewMetaData?.data?.solidFormViewWorkflowData;
     const solidWorkflowField = solidFormViewMetaData?.data?.solidView?.layout?.attrs?.workflowField;
     const solidWorkflowFieldEnabled = solidFormViewMetaData?.data?.solidView?.layout?.attrs?.workflowFieldUpdateEnabled;
-    const defaultWorkflowFieldValue = solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.defaultValue
-    const defaultWorkflowFieldDisplayName = solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.displayName
-    const activeStep = solidFormViewMetaData?.data?.solidFormViewWorkflowData[0].value
+    const defaultWorkflowFieldValue = solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.defaultValue;
+    const defaultWorkflowFieldDisplayName = solidFormViewMetaData?.data?.solidFieldsMetadata?.[solidWorkflowField]?.displayName;
+    const activeStep = solidFormViewWorkflowData?.[0]?.value;
     const [solidWorkflowFieldKey, setSolidWorkflowFieldKey] = useState<string>("");
     const [visibleStepsCount, setVisibleStepsCount] = useState<number>(1);
 

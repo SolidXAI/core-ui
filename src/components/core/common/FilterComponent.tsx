@@ -23,6 +23,7 @@ export enum FilterMatchMode {
   EQUALS = 'equals',
   GREATER_THAN = 'gt',
   LESS_THAN = 'lt',
+  IN='in' 
 }
 
 export interface FilterRule {
