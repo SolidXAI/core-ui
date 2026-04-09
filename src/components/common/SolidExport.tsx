@@ -261,6 +261,8 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
 
   const selectedTemplateFieldsCount = selectedColumns.length;
   const selectedFormatMeta = exportFormatMeta(selectedFormat.code);
+  const selectionSummary = selectedTemplate ? `Template: ${selectedTemplate.name}` : "Current field selection";
+  const filterSummary = checkApplyFilter ? "Filters applied" : "All records";
 
   return (
     <>
@@ -291,49 +293,54 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
             </label>
           </div>
 
-          <div className="solid-export-toolbar-actions">
-            <SolidCheckbox
-              checked={checkApplyFilter}
-              onChange={(event) => setCheckedApplyFilter(event.target.checked)}
-              label="Apply Filters"
-            />
-            <SolidButton
-              variant="outline"
-              size="small"
-              leftIcon={<Save size={14} />}
-              onClick={() => setIsSaveDialogVisible(true)}
-            >
-              Save Template
-            </SolidButton>
-            <SolidButton
-              variant="ghost"
-              size="small"
-              leftIcon={<Trash2 size={14} />}
-              onClick={handleDeleteTemplate}
-              disabled={!selectedTemplate || isDeletingTemplate}
-            >
-              Delete
-            </SolidButton>
-            <SolidButton
-              size="small"
-              leftIcon={<Download size={14} />}
-              onClick={handleDownload}
-              disabled={selectedColumns.length === 0}
-            >
-              Export
-            </SolidButton>
+          <div className="solid-export-toolbar-side">
+            <div className="solid-export-toolbar-options">
+              <SolidCheckbox
+                checked={checkApplyFilter}
+                onChange={(event) => setCheckedApplyFilter(event.target.checked)}
+                label="Apply Filters"
+              />
+            </div>
+            <div className="solid-export-toolbar-actions">
+              <SolidButton
+                variant="outline"
+                size="small"
+                leftIcon={<Save size={14} />}
+                onClick={() => setIsSaveDialogVisible(true)}
+              >
+                Save Template
+              </SolidButton>
+              <SolidButton
+                variant="ghost"
+                size="small"
+                leftIcon={<Trash2 size={14} />}
+                onClick={handleDeleteTemplate}
+                disabled={!selectedTemplate || isDeletingTemplate}
+              >
+                Delete
+              </SolidButton>
+              <SolidButton
+                size="small"
+                leftIcon={<Download size={14} />}
+                onClick={handleDownload}
+                disabled={selectedColumns.length === 0}
+              >
+                Export
+              </SolidButton>
+            </div>
           </div>
         </div>
 
         <div className="solid-export-summary">
           <div className="solid-export-summary-card">
-            <span className="solid-export-summary-kicker">Current export</span>
             <div className="solid-export-summary-title-row">
               <div className="solid-export-summary-format-icon">{selectedFormatMeta.icon}</div>
-              <div>
+              <div className="solid-export-summary-copy-block">
                 <div className="solid-export-summary-title">{selectedFormatMeta.label} export</div>
-                <div className="solid-export-summary-copy">
-                  {selectedTemplate ? `Using template "${selectedTemplate.name}"` : "Using the current field selection"}
+                <div className="solid-export-summary-meta">
+                  <span className="solid-export-summary-copy">{selectionSummary}</span>
+                  <span className="solid-export-summary-dot" aria-hidden="true" />
+                  <span className="solid-export-summary-copy">{filterSummary}</span>
                 </div>
               </div>
             </div>
@@ -359,8 +366,10 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
                 availableColumns.map((item) => (
                   <div key={item.key} className="solid-export-list-row">
                     <div className="solid-export-list-row-copy">
-                      <div className="solid-export-list-row-title">{item.name}</div>
-                      <div className="solid-export-list-row-key">{item.key}</div>
+                      <div className="solid-export-list-row-title">
+                        {item.name}
+                        <span className="solid-export-list-row-key">({item.key})</span>
+                      </div>
                     </div>
                     <SolidButton
                       variant="ghost"
@@ -395,8 +404,10 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
                 selectedColumns.map((item) => (
                   <div key={item.key} className="solid-export-list-row">
                     <div className="solid-export-list-row-copy">
-                      <div className="solid-export-list-row-title">{item.name}</div>
-                      <div className="solid-export-list-row-key">{item.key}</div>
+                      <div className="solid-export-list-row-title">
+                        {item.name}
+                        <span className="solid-export-list-row-key">({item.key})</span>
+                      </div>
                     </div>
                     <SolidButton
                       variant="ghost"
