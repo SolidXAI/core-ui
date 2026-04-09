@@ -2828,6 +2828,38 @@ body {
   justify-content: flex-end;
 }
 
+.solid-header-request-status {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.45rem;
+  min-height: 32px;
+  padding: 0.35rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
+  background: color-mix(in srgb, var(--background) 88%, var(--accent));
+  color: color-mix(in srgb, var(--foreground) 84%, transparent);
+}
+
+.solid-header-request-status-label {
+  font-size: 0.78rem;
+  font-weight: 600;
+  line-height: 1;
+}
+
+.solid-header-request-status-spinner.solid-spinner {
+  display: inline-flex;
+  gap: 0;
+  color: inherit;
+}
+
+.solid-header-request-status-spinner .solid-spinner-icon {
+  animation-duration: 0.8s;
+}
+
+.solid-view-loading-body-spacer {
+  min-height: calc(100vh - 190px);
+}
+
 .solid-list-toolbar .solid-global-search-element,
 .solid-kanban-toolbar .solid-global-search-element {
   height: 36px;

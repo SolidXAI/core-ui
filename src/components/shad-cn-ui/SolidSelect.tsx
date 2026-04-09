@@ -1,4 +1,5 @@
 import React from "react";
+import { ChevronDown } from "lucide-react";
 
 type SolidSelectOption = Record<string, any>;
 
@@ -57,9 +58,8 @@ export function SolidSelect({
         ))}
       </select>
       <span className="solid-select-icon" aria-hidden="true">
-        <i className="pi pi-chevron-down" />
+        <ChevronDown size={14} />
       </span>
     </div>
   );
 }
-

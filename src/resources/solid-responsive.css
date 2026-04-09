@@ -639,6 +639,10 @@
         font-size: 0.9rem !important;
     }
 
+    .solid-header-request-status-label {
+        display: none;
+    }
+
 
     .solid-common-dialog {
         max-width: 90% !important;

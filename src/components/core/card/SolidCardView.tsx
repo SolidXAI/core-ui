@@ -14,6 +14,7 @@ import { useDispatch, useSelector } from "react-redux";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { usePathname } from "../../../hooks/usePathname";
 import { useSearchParams } from "../../../hooks/useSearchParams";
+import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
 import { SolidCreateButton } from "../common/SolidCreateButton";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
 import { SolidEmptyListViewPlaceholder } from "../list/SolidEmptyListViewPlaceholder";
@@ -304,6 +305,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   const cardViewTitle = solidCardViewMetaDataResponse?.data?.solidView?.displayName;
   const enableGlobalSearch = solidCardViewMetaDataResponse?.data?.solidView?.layout?.attrs?.enableGlobalSearch === true;
   const showEmptyState = !loading && cards.length === 0;
+  const headerRequestStatusLabel = loading || !queryDataLoaded ? "Loading..." : null;
 
   return (
     <div className="page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden">
@@ -333,6 +335,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
               </div>
 
               <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
+                <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
                 {enableGlobalSearch && (
                   <div className="flex lg:hidden">
                     <SolidButton

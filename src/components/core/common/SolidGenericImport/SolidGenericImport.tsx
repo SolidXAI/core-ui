@@ -1,5 +1,3 @@
-
-import { Dialog } from 'primereact/dialog';
 import React, { useState } from 'react'
 import { SolidImportStepper } from './SolidImportStepper';
 import { SolidImportInstructions } from './SolidImportInstructions';
@@ -7,6 +5,14 @@ import { SolidImportInstructions } from './SolidImportInstructions';
 import { SolidImportDropzone } from './SolidImportDropzone';
 import { SolidImportTransaction } from './SolidImportTransaction';
 import { SolidImportTransactionStatus } from './SolidImportTransactionStatus';
+import {
+    SolidDialog,
+    SolidDialogBody,
+    SolidDialogClose,
+    SolidDialogHeader,
+    SolidDialogSeparator,
+    SolidDialogTitle,
+} from "../../../shad-cn-ui";
 
 export const SolidGenericImport = ({
     openImportDialog,
@@ -19,23 +25,24 @@ export const SolidGenericImport = ({
     const [importStatusResult, setImportStatusResult] = useState<any>(null)
     const modelMetadataId = listViewMetaData?.data?.solidView?.model?.id;
     return (
-        <Dialog
-            header={<h5 className='m-0'>Import Data</h5>}
-            visible={openImportDialog}
-            style={{ width: '60vw' }}
-            onHide={() => { if (!openImportDialog) return; setOpenImportDialog(false); }}
-            headerClassName="px-4 py-2 secondary-border-bottom solid-import-dialog-header"
-            contentClassName="p-0"
+        <SolidDialog
+            open={openImportDialog}
+            onOpenChange={setOpenImportDialog}
             className='solid-import-dialog'
+            style={{ width: "min(880px, calc(100vw - 2rem))" }}
         >
+            <SolidDialogHeader className="solid-filter-dialog-head solid-import-dialog-head">
+                <div>
+                    <SolidDialogTitle className="solid-filter-dialog-title m-0">Import Data</SolidDialogTitle>
+                </div>
+                <SolidDialogClose className="solid-filter-dialog-close" />
+            </SolidDialogHeader>
+            <SolidDialogSeparator className="solid-filter-dialog-sep" />
             <SolidImportStepper importStep={importStep} setImportStep={setImportStep} />
-            <div className='px-3 md:px-4 py-3'>
+            <SolidDialogBody className='solid-import-dialog-body'>
                 {importStep === 1 &&
                     <SolidImportInstructions setImportStep={setImportStep} listViewMetaData={listViewMetaData} />
                 }
-                {/* {importStep === 2 &&
-                    <SolidImportWrapper handleFetchUpdatedRecords={handleFetchUpdatedRecords} setImportStep={setImportStep} listViewMetaData={listViewMetaData} setOpenImportDialog={setOpenImportDialog} />
-                } */}
                 {importStep === 2 &&
                     <SolidImportDropzone
                         setImportStep={setImportStep}
@@ -58,7 +65,7 @@ export const SolidGenericImport = ({
                         handleFetchUpdatedRecords={handleFetchUpdatedRecords}
                     />
                 }
-            </div>
-        </Dialog>
+            </SolidDialogBody>
+        </SolidDialog>
     )
 }

@@ -27,6 +27,7 @@ import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePa
 import { showToast } from "../../../redux/features/toastSlice";
 import { usePathname } from "../../../hooks/usePathname";
 import { useSearchParams } from "../../../hooks/useSearchParams";
+import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
 import {
   SolidButton,
   SolidDialog,
@@ -272,11 +273,15 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [
     deleteManySolidEntities,
     {
+      isLoading: isDeleteSolidEntitiesLoading,
       isSuccess: isDeleteSolidEntitiesSucess,
     },
   ] = useDeleteMultipleSolidEntitiesMutation();
   const [
     patchKanbanView,
+    {
+      isLoading: isPatchKanbanViewLoading,
+    },
   ] = usePatchUpdateSolidEntityMutation();
 
   // After data is fetched populate the kanban view state so as to be able to render the data. 
@@ -759,6 +764,14 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   }, [solidKanbanViewMetaData])
 
   const kanbanViewTitle = solidKanbanViewMetaData?.data?.solidView?.displayName
+  const headerRequestStatusLabel =
+    isDeleteSolidEntitiesLoading
+      ? "Deleting..."
+      : isPatchKanbanViewLoading
+        ? "Updating..."
+        : loading || !queryDataLoaded
+          ? "Loading..."
+          : null;
 
 
   const toggleBothSidebars = () => {
@@ -791,6 +804,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
               </div>
 
               <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
+                <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
                 {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
                   <div className="flex lg:hidden">
                     <SolidButton

@@ -1,4 +1,5 @@
 import { BackButton } from "../../../components/common/BackButton";
+import { SolidHeaderRequestStatus } from "../../../components/common/SolidHeaderRequestStatus";
 import { SolidFormHeader } from "../../../components/common/SolidFormHeader";
 import { useHandleFormCustomButtonClickaction } from "../../../components/common/useHandleFormCustomButtonClick";
 import { permissionExpression } from "../../../helpers/permissions";
@@ -15,7 +16,7 @@ import { useSession } from '../../../hooks/useSession'
 import { SolidFormStepper } from "../../../components/common/SolidFormStepper";
 import { SolidPopover, SolidPopoverContent, SolidPopoverTrigger } from "../../shad-cn-ui/SolidPopover";
 
-export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate, formData, isSubmitting }: any) => {
+export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate, formData, isSubmitting, headerRequestStatusLabel }: any) => {
     const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
     const router = useRouter();
     const pathname = usePathname();
@@ -31,6 +32,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     const user = session?.user;
 
     const isPublished = publish && publish !== 'null';   // record is published if publish has value
+    const activeHeaderRequestStatusLabel = headerRequestStatusLabel || (isNavigating ? "Loading..." : null);
 
     useEffect(() => {
         if (solidView) {
@@ -263,6 +265,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 }
                             </div>
                             <div className="flex align-items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
+                                <SolidHeaderRequestStatus label={activeHeaderRequestStatusLabel} />
                                 <div className="hidden lg:flex solid-header-buttons-wrapper">
                                     {normalHeaderButtons.map((button: any, index: number) => {
                                         return (
@@ -389,6 +392,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                             </div>
 
                             <div className="flex align-items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
+                                <SolidHeaderRequestStatus label={activeHeaderRequestStatusLabel} />
                                 <div className="hidden lg:flex solid-header-buttons-wrapper">
                                     {normalHeaderButtons.map((button: any, index: number) => {
                                         return (
