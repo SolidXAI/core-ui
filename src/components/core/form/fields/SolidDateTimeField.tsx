@@ -10,6 +10,7 @@ import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { DateFieldViewComponent } from '../../../../components/core/common/DateFieldViewComponent';
+import styles from "./solidFields.module.css";
 
 const toDateValue = (value: any) => {
     if (!value) return null;
@@ -135,7 +136,7 @@ export const DefaultDateTimeFormEditWidget = ({ formik, fieldContext }: SolidFor
         <div className="relative">
             <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
@@ -178,17 +179,14 @@ export const DefaultDateTimeFormViewWidget = ({
     const format = fieldLayoutInfo.attrs?.format as string | undefined;
 
     return (
-        <div className="mt-2 flex flex-column gap-2">
+        <div className={styles.fieldViewWrapper}>
             {showFieldLabel !== false && (
-                <p className="m-0 form-field-label font-medium">
+                <p className={`${styles.fieldViewLabel} form-field-label`}>
                     {fieldLabel}
                 </p>
             )}
-
-            <p className="m-0">
-                {/* {displayValue ?? "-"} */}
+            <p className={styles.fieldViewValue}>
                 <DateFieldViewComponent value={rawValue} format={format} fallback="-"></DateFieldViewComponent>
-
             </p>
         </div>
     );

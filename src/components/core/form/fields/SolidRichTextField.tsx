@@ -8,6 +8,7 @@ import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import styles from "./solidFields.module.css";
 
 export class SolidRichTextField implements ISolidField {
 
@@ -129,28 +130,24 @@ export const DefaultRichTextFormEditWidget = ({ formik, fieldContext }: SolidFor
 
 
     return (
-        <div className="relative">
-            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
-                {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                        <SolidFieldTooltip fieldContext={fieldContext} />
-                        {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                    </label>
-                }
-                <Editor
-                    readOnly={formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled}
-                    id={fieldLayoutInfo.attrs.name}
-                    value={formik.values[fieldLayoutInfo.attrs.name] || ""}
-                    onTextChange={(e) => formik.setFieldValue(fieldLayoutInfo.attrs.name, e.htmlValue ?? e.textValue ?? "")}
-                    className="solid-custom-editor"
-                    style={{ minHeight: 180 }}
-                />
-            </div>
+        <div className={`${styles.fieldWrapper} relative`}>
+            {showFieldLabel != false &&
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                    {fieldLabel}
+                    {fieldMetadata.required && <span className="text-red-500"> *</span>}
+                    <SolidFieldTooltip fieldContext={fieldContext} />
+                </label>
+            }
+            <Editor
+                readOnly={formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled}
+                id={fieldLayoutInfo.attrs.name}
+                value={formik.values[fieldLayoutInfo.attrs.name] || ""}
+                onTextChange={(e) => formik.setFieldValue(fieldLayoutInfo.attrs.name, e.htmlValue ?? e.textValue ?? "")}
+                className="solid-custom-editor"
+                style={{ minHeight: 180 }}
+            />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <div className="absolute mt-1">
-                    <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                </div>
+                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
             )}
         </div>
     );
@@ -163,21 +160,15 @@ export const DefaultRichTextFormViewWidget = ({ formik, fieldContext }: SolidFor
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const [isText, setIsText] = useState(false)
     return (
-        <div className="relative">
-            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
-                {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                        <SolidFieldTooltip fieldContext={fieldContext} />
-                        {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                    </label>
-                }
-                <div
-                    className="solid-custom-editor solid-custom-editor-view"
-                    id={fieldLabel}
-                    dangerouslySetInnerHTML={{ __html: formik.values[fieldLayoutInfo.attrs.name] || "" }}
-                />
-            </div>
+        <div className={styles.fieldViewWrapper}>
+            {showFieldLabel != false &&
+                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
+            }
+            <div
+                className="solid-custom-editor solid-custom-editor-view"
+                id={fieldLabel}
+                dangerouslySetInnerHTML={{ __html: formik.values[fieldLayoutInfo.attrs.name] || "" }}
+            />
         </div>
     );
 }

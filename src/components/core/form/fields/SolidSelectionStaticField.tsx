@@ -213,7 +213,7 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
     return (
         <div className={`${styles.fieldWrapper} ${isFormFieldValid(formik, fieldLayoutInfo.attrs.name) ? styles.fieldInvalid : ""}`}>
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={styles.fieldLabel}>
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500">*</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -238,11 +238,11 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
                 }}
             />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <div className={styles.fieldErrorBadge}>
+                <p className={styles.fieldError}>
                     {typeof formik.errors[fieldLayoutInfo?.attrs?.name] === 'object'
                         ? (formik.errors[fieldLayoutInfo?.attrs?.name] as any)?.value?.toString()
                         : formik.errors[fieldLayoutInfo?.attrs?.name]?.toString()}
-                </div>
+                </p>
             )}
         </div>
     );
@@ -380,7 +380,7 @@ export const DefaultSelectionStaticFormViewWidget = ({ formik, fieldContext }: S
     return (
         <div className={styles.fieldViewWrapper}>
             {showFieldLabel !== false && (
-                <p className={styles.fieldViewLabel}>{fieldLabel}</p>
+                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
             )}
             <p className={styles.fieldViewValue}>
                 {isMultiSelect

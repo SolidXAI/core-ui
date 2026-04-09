@@ -146,16 +146,17 @@
     height: 32px;
     width: 32px;
     border-radius: 8px;
-    border: 1px solid #d9e2f3;
-    background: #f4f7fb;
-    color: #0f2c81;
+    border: 1px solid #d6dae5;
+    background: #ffffff;
+    color: #1f2937;
     transition: all 0.12s ease;
+    box-shadow: 0 1px 2px rgba(0,0,0,0.04);
 }
 
 .solid-file-icon-btn:hover:not(:disabled) {
-    background: #e8f0ff;
-    border-color: #adc8ff;
-    color: #0b1f63;
+    background: #f3f4f6;
+    border-color: #cfd4e3;
+    color: #111827;
 }
 
 .solid-file-icon-btn:disabled {
@@ -165,14 +166,14 @@
 
 .solid-file-icon-btn.is-danger {
     color: #b91c1c;
-    border-color: #fbcfe8;
-    background: #fff1f2;
+    border-color: #f1c1c1;
+    background: #fff5f5;
 }
 
 .solid-file-icon-btn.is-danger:hover:not(:disabled) {
     color: #7f1d1d;
-    border-color: #fda4af;
-    background: #ffe4e6;
+    border-color: #f59fa0;
+    background: #ffe9e9;
 }
 
 .fieldViewWrapper {

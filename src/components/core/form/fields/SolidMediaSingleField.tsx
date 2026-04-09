@@ -22,6 +22,7 @@ import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import styles from "./solidFields.module.css";
 
 export class SolidMediaSingleField implements ISolidField {
 
@@ -333,7 +334,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
         <div style={(isFieldDisabled === true || isFieldReadonly === true) ? { filter: 'opacity(50%)', pointerEvents: 'none' } : {}}>
             <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4 relative">
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
@@ -364,30 +365,30 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                     <div className="solid-file-upload-wrapper mt-4">
                         <div className="flex align-items-center md:gap-2">
                             <FileReaderExt fileDetails={fileDetails} />
-                            <div className="w-full flex flex-column gap-1">
-                                <div className="flex align-items-start justify-content-between">
-                                    <p className="font-normal w-9 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails)}>{fileDetails.name}</p>
-                                    <div className="flex align-items-center md:gap-2">
-                                        <button
-                                            type="button"
-                                            className="solid-file-icon-btn"
-                                            disabled={isFieldDisabled || isFieldReadonly}
-                                            aria-label="Download file"
-                                            onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
-                                        >
-                                            <i className="pi pi-download" />
-                                        </button>
-                                        <button
-                                            type="button"
-                                            className="solid-file-icon-btn is-danger"
-                                            disabled={isFieldDisabled || isFieldReadonly}
-                                            aria-label="Remove file"
-                                            onClick={() => setDeleteImageDialogVisible(true)}
-                                        >
-                                            <i className="pi pi-times" />
-                                        </button>
-                                    </div>
-                                </div>
+                                    <div className="w-full flex flex-column gap-1">
+                                        <div className="flex align-items-start justify-content-between">
+                                            <p className="font-normal w-9 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails)}>{fileDetails.name}</p>
+                                            <div className="flex align-items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    className="solid-file-icon-btn"
+                                                    disabled={isFieldDisabled || isFieldReadonly}
+                                                    aria-label="Download file"
+                                                    onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
+                                                >
+                                                    <i className="pi pi-download" />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="solid-file-icon-btn is-danger"
+                                                    disabled={isFieldDisabled || isFieldReadonly}
+                                                    aria-label="Remove file"
+                                                    onClick={() => setDeleteImageDialogVisible(true)}
+                                                >
+                                                    <i className="pi pi-times" />
+                                                </button>
+                                            </div>
+                                        </div>
                                 <div className="flex align-items-center gap-2 text-sm">
                                     {fileDetails && formatFileSize(fileDetails.fileSize)}
                                 </div>
@@ -510,7 +511,7 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
     return (
         <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4 relative">
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label font-medium">{fieldLabel}
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}
                     <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
             }

@@ -239,7 +239,7 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
     return (
         <div className="mt-4">
             {fieldLayoutInfo?.attrs?.showLabel !== false && (
-                <label className="form-field-label mb-10">
+                <label className={`${styles.fieldLabel} form-field-label mb-10`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -401,7 +401,7 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
     return (
         <div className="mt-4">
             {fieldLayoutInfo?.attrs?.showLabel !== false && (
-                <label className="form-field-label mb-10">
+                <label className={`${styles.fieldLabel} form-field-label mb-10`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -483,7 +483,7 @@ export const CodeEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFiel
     return (
         <div className="mt-4">
             {fieldLayoutInfo?.attrs?.showLabel !== false && (
-                <label className="form-field-label mb-10">
+                <label className={`${styles.fieldLabel} form-field-label mb-10`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />

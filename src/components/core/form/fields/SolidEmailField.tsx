@@ -144,7 +144,7 @@ export const DefaultEmailFormEditWidget = ({ formik, fieldContext }: SolidFormFi
     return (
         <div className={styles.fieldWrapper}>
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={styles.fieldLabel}>
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500">*</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />

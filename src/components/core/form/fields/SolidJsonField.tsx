@@ -10,6 +10,7 @@ import { oneDark } from '@codemirror/theme-one-dark';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct import
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import styles from "./solidFields.module.css";
 export class SolidJsonField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
@@ -116,7 +117,7 @@ export const DefaultJsonFormEditWidget = ({ formik, fieldContext }: SolidFormFie
         <div className="relative">
             <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={styles.fieldLabel}>{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
@@ -167,9 +168,9 @@ export const DefaultJsonFormViewWidget = ({ formik, fieldContext }: SolidFormFie
     return (
 
 
-        <div className="mt-2 flex-column gap-2">
+        <div className={styles.fieldViewWrapper}>
             {showFieldLabel != false &&
-                <p className="m-0"><span className="form-field-label font-medium">{fieldLabel}</span></p>
+                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
             }
             <CodeMirror
                 id={fieldLabel}

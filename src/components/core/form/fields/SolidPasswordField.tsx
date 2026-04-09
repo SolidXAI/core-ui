@@ -166,7 +166,7 @@ export const DefaultPasswordFormViewWidget = ({ formik, fieldContext }: SolidFor
     return (
         <div className={styles.fieldViewWrapper}>
             {showFieldLabel !== false && (
-                <p className={styles.fieldViewLabel}>{fieldLabel}</p>
+                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
             )}
             <div className="flex align-items-center gap-3">
                 <p className={styles.fieldViewValue}>
@@ -204,7 +204,7 @@ export const DefaultPasswordFormCreateWidget = ({ formik, fieldContext }: SolidF
         <div>
             <div className={styles.fieldWrapper}>
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className={styles.fieldLabel}>
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
                         {fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500">*</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
@@ -228,7 +228,7 @@ export const DefaultPasswordFormCreateWidget = ({ formik, fieldContext }: SolidF
             </div>
 
             <div className={styles.fieldWrapper}>
-                <label htmlFor={`${fieldLayoutInfo.attrs.name}Confirm`} className={styles.fieldLabel}>
+                <label htmlFor={`${fieldLayoutInfo.attrs.name}Confirm`} className={`${styles.fieldLabel} form-field-label`}>
                     Confirm {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500">*</span>}
                 </label>
@@ -320,7 +320,7 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
     return (
         <div className={styles.fieldWrapper}>
             {showFieldLabel !== false && (
-                <label htmlFor={fieldName} className={styles.fieldLabel}>
+                <label htmlFor={fieldName} className={`${styles.fieldLabel} form-field-label`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500">*</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -346,7 +346,7 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
                 <SolidDialogBody>
                 <form onSubmit={modalFormik.handleSubmit} className="p-fluid">
                     <div className={styles.fieldWrapper}>
-                        <label htmlFor={fieldName} className={styles.fieldLabel}>New {fieldLabel}</label>
+                        <label htmlFor={fieldName} className={`${styles.fieldLabel} form-field-label`}>New {fieldLabel}</label>
                         <SolidPasswordInput
                             id={fieldName}
                             name={fieldName}
@@ -363,7 +363,7 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
                     </div>
 
                     <div className={styles.fieldWrapper}>
-                        <label htmlFor={confirmFieldName} className={styles.fieldLabel}>Confirm {fieldLabel}</label>
+                        <label htmlFor={confirmFieldName} className={`${styles.fieldLabel} form-field-label`}>Confirm {fieldLabel}</label>
                         <SolidPasswordInput
                             id={confirmFieldName}
                             name={confirmFieldName}

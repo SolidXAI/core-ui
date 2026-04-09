@@ -123,7 +123,7 @@ export const DefaultIntegerFormViewWidget = ({ formik, fieldContext }: SolidForm
     return (
         <div className={styles.fieldViewWrapper}>
             {showFieldLabel !== false && (
-                <p className={styles.fieldViewLabel}>{fieldLabel}</p>
+                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
             )}
             <p className={styles.fieldViewValue}>{value != null && typeof value !== "object" ? value : ''}</p>
         </div>
@@ -154,7 +154,7 @@ export const DefaultIntegerFormEditWidget = ({ formik, fieldContext }: SolidForm
     return (
         <div className={styles.fieldWrapper}>
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className={styles.fieldLabel}>
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500">*</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
