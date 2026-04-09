@@ -20,7 +20,7 @@ const SolidDateColumn = ({ solidListViewMetaData, fieldMetadata, column }: Solid
             body={(rowData) => {
                 let viewWidget = column.attrs.viewWidget;
                 if (!viewWidget) {
-                    viewWidget = 'DefaultDateTimeListWidget';
+                    viewWidget = 'DefaultDateListWidget';
                 }
                 let DynamicWidget = getExtensionComponent(viewWidget);
                 const widgetProps: SolidListFieldWidgetProps = {
@@ -45,11 +45,20 @@ export default SolidDateColumn;
 
 
 
-export const DefaultDateTimeListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
+export const DefaultDateListWidget = ({ rowData, solidListViewMetaData, fieldMetadata }: SolidListFieldWidgetProps) => {
     let displayValue = rowData[fieldMetadata.name];
     const format = solidListViewMetaData?.data?.solidView?.layout?.attrs?.format;
 
     return (
         <DateFieldViewComponent value={displayValue} format={format} fallback="-"></DateFieldViewComponent>
+    );
+};
+
+export const DefaultDateTimeListWidget = ({ rowData, solidListViewMetaData, fieldMetadata, column }: SolidListFieldWidgetProps) => {
+    let displayValue = rowData[fieldMetadata.name];
+    const format = solidListViewMetaData?.data?.solidView?.layout?.attrs?.format;
+
+    return (
+        <DateFieldViewComponent value={displayValue} format={format} fallback="-" showTime={true}></DateFieldViewComponent>
     );
 };
