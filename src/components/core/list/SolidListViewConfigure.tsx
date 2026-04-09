@@ -5,7 +5,6 @@ import { useRouter } from "../../../hooks/useRouter";
 import { useEffect, useRef, useState } from "react";
 import { SolidListColumnSelector } from "./SolidColumnSelector/SolidListColumnSelector";
 import { SolidExport } from "../../../components/common/SolidExport";
-import { Dialog } from "primereact/dialog";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
 import { SolidListViewHeaderContextMenuButton } from "./SolidListViewHeaderContextMenuButton";
 import "../../common/solid-export.css";
@@ -318,9 +317,26 @@ export const SolidListViewConfigure = (
                     )}
                 </SolidDropdownMenuContent>
             </SolidDropdownMenu>
-            <Dialog header="Export" visible={exportView} headerClassName="solid-export-dialog-header" className="ExportDialog p-0 m-0" onHide={() => { if (!exportView) return; setExportView(false); }}>
-                <SolidExport listViewMetaData={listViewMetaData} filters={filters} />
-            </Dialog>
+            <SolidDialog
+                open={exportView}
+                onOpenChange={setExportView}
+                className="solid-kanban-export-dialog solid-list-export-dialog"
+                style={{ width: "min(980px, calc(100vw - 32px))" }}
+            >
+                <SolidDialogHeader className="solid-export-dialog-header">
+                    <div>
+                        <SolidDialogTitle>Export</SolidDialogTitle>
+                        <SolidDialogDescription className="solid-filter-dialog-subtitle m-0">
+                            Choose the file format, refine the field set, and save reusable export templates.
+                        </SolidDialogDescription>
+                    </div>
+                    <SolidDialogClose />
+                </SolidDialogHeader>
+                <SolidDialogSeparator />
+                <SolidDialogBody className="solid-kanban-export-dialog-body">
+                    <SolidExport listViewMetaData={listViewMetaData} filters={filters} />
+                </SolidDialogBody>
+            </SolidDialog>
             <SolidDialog
                 open={showColumnSelectorDialog}
                 onOpenChange={setShowColumnSelectorDialog}

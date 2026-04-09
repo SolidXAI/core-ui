@@ -1,10 +1,11 @@
-import { Button } from 'primereact/button'
+import { Download, FileSpreadsheet, MoveRight } from 'lucide-react';
 import styles from './SolidImport.module.css'
 import { useLazyGetImportInstructionsQuery } from '../../../../redux/api/importTransactionApi';
 import { useEffect } from 'react';
 import { getSession } from "../../../../adapters/auth/index";
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
 import { env } from "../../../../adapters/env";
+import { SolidButton, SolidSpinner } from '../../../shad-cn-ui';
 
 export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any) => {
     const [getImportInstructions, { data: importInstructionsData, isLoading, isError }] =
@@ -54,69 +55,92 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
         }
     };
 
+    const customInstructions = importInstructionsData?.data?.custom ?? [];
+    const standardInstructions = importInstructionsData?.data?.standard ?? {};
+
     return (
         <div>
             <div className={styles.SolidImportContextWrapper}>
-                <div className='p-3 h-full'>
-                    <div className='grid'>
-                        <div className={`${importInstructionsData?.data?.custom.length > 0 ? 'col-7' : 'col-12'}`} style={{ borderRight: importInstructionsData?.data?.custom.length > 0 ? '1px solid var(--primary-light-color)' : '', overflowY: 'auto', height: '48vh' }}>
-                            <h5 className='solid-primary-black-text'>Standard Instructions</h5>
-                            <ol className='p-0' style={{ listStyleType: 'none' }}>
-                                <li>
-                                    <p className='font-medium solid-primary-black-text'>1. CSV or Excel (based on radio button selected) template:</p>
-                                    <div className='flex align-items-centerm gap-3'>
-                                        <Button label='CSV Download' icon="pi pi-download" iconPos='right' size='small' onClick={() => handleTemplateDownload('csv')} />
-                                        <Button label='Excel Download' icon="pi pi-download" iconPos='right' size='small' onClick={() => handleTemplateDownload('excel')} />
-                                    </div>
-                                </li>
-                                {(() => {
-                                    let count = 2; // Start numbering from 2
-                                    return (importInstructionsData?.data?.standard &&
-                                        (Object.entries(importInstructionsData.data.standard) as [string, string[]][])
-                                            .map(([key, values]) => {
-                                                if (!values?.length) return null;
+                {isLoading ? (
+                    <div className="solid-import-loading-state">
+                        <SolidSpinner size={22} label="Loading import instructions" />
+                    </div>
+                ) : isError ? (
+                    <div className='solid-import-empty-state'>
+                        <h4 className='text-center px-2'>Could not load import instructions</h4>
+                        <p>Try again or continue if you already know the expected format.</p>
+                    </div>
+                ) : (
+                    <div className={`solid-import-panel-grid ${customInstructions.length === 0 ? 'is-single-column' : ''}`}>
+                        <div className={`solid-import-panel solid-import-panel-main ${customInstructions.length > 0 ? 'has-side-panel' : 'is-full-width'}`}>
+                                <h5 className='solid-primary-black-text solid-import-section-title'>Standard Instructions</h5>
+                                <ol className='solid-import-instruction-list'>
+                                    <li>
+                                        <p className='font-medium solid-primary-black-text solid-import-instruction-title'>Download a starter template</p>
+                                        <div className='flex gap-3 flex-wrap'>
+                                            <SolidButton type="button" variant="outline" size="small" leftIcon={<Download size={14} />} onClick={() => handleTemplateDownload('csv')}>
+                                                CSV Template
+                                            </SolidButton>
+                                            <SolidButton type="button" variant="outline" size="small" leftIcon={<FileSpreadsheet size={14} />} onClick={() => handleTemplateDownload('excel')}>
+                                                Excel Template
+                                            </SolidButton>
+                                        </div>
+                                    </li>
+                                    {(() => {
+                                        return (
+                                            Object.entries(standardInstructions as Record<string, string[]>)
+                                                .map(([key, values]) => {
+                                                    if (!values?.length) return null;
 
-                                                const titleCaseKey = key
-                                                    .replace(/([A-Z])/g, ' $1')
-                                                    .replace(/^./, str => str.toUpperCase());
+                                                    const titleCaseKey = key
+                                                        .replace(/([A-Z])/g, ' $1')
+                                                        .replace(/^./, str => str.toUpperCase());
 
-                                                const rendered = (
-                                                    <li key={key} className='mt-3'>
-                                                        <p className='font-medium solid-primary-black-text mb-1'>
-                                                            {count}. {titleCaseKey}:
-                                                        </p>
-                                                        <div className='flex flex-wrap'>
-                                                            {values.map((item: any, i) => (
-                                                                <span key={i} className='mr-2'>
-                                                                    {typeof item === 'string'
-                                                                        ? item
-                                                                        : item?.fieldName
-                                                                            ? `${item.fieldName} (Regex: ${item.regexPattern})`
-                                                                            : JSON.stringify(item)}
-                                                                    {i < values.length - 1 ? ', ' : ''}
-                                                                </span>
-                                                            ))}
-                                                        </div>
-                                                    </li>
-                                                );
-
-                                                count++;
-                                                return rendered;
-                                            }));
-                                })()}
-                            </ol>
+                                                    const rendered = (
+                                                        <li key={key} className='solid-import-instruction-item'>
+                                                            <p className='font-medium solid-primary-black-text mb-1 solid-import-instruction-title'>
+                                                                {titleCaseKey}
+                                                            </p>
+                                                            <div className='flex flex-wrap solid-import-instruction-copy'>
+                                                                {values.map((item: any, i) => (
+                                                                    <span key={i} className='mr-2'>
+                                                                        {typeof item === 'string'
+                                                                            ? item
+                                                                            : item?.fieldName
+                                                                                ? `${item.fieldName} (Regex: ${item.regexPattern})`
+                                                                                : JSON.stringify(item)}
+                                                                        {i < values.length - 1 ? ', ' : ''}
+                                                                    </span>
+                                                                ))}
+                                                            </div>
+                                                        </li>
+                                                    );
+                                                    return rendered;
+                                                })
+                                        );
+                                    })()}
+                                </ol>
                         </div>
-                        {importInstructionsData?.data?.custom.length > 0 &&
-                            <div className='col-5' style={{ overflowY: 'auto', height: '48vh' }}>
-                                <h5 className='solid-primary-black-text'>Custom Instructions</h5>
+                        {customInstructions.length > 0 &&
+                            <div className='solid-import-panel solid-import-panel-side'>
+                                <h5 className='solid-primary-black-text solid-import-section-title'>Custom Instructions</h5>
+                                <div className='solid-import-instruction-copy'>
+                                    {customInstructions.map((instruction: any, index: number) => (
+                                        <p key={index} className='solid-import-custom-instruction'>
+                                            {typeof instruction === "string" ? instruction : JSON.stringify(instruction)}
+                                        </p>
+                                    ))}
+                                </div>
                             </div>
                         }
                     </div>
-                </div>
+                )}
             </div>
-            <div className='mt-3 flex align-items-center gap-3'>
-                <Button label='Continue' size='small' onClick={() => setImportStep(2)} />
-                {/* <Button label='Cancel' size='small' outlined /> */}
+            <div className='solid-import-actions'>
+                <p className="solid-import-actions-copy">Review the template guidance before uploading your file.</p>
+                <SolidButton type="button" size='small' onClick={() => setImportStep(2)} rightIcon={<MoveRight size={14} />}>
+                    Continue
+                </SolidButton>
             </div>
         </div>
     )
