@@ -479,7 +479,6 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
 
 export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity, formViewParams, handlePopupClose }: any) => {
     const router = useRouter();
-    const fieldLabel = fieldLayoutInfo?.attrs?.label ?? fieldLayoutInfo?.displayName ?? "Item";
 
     const params: FormViewParams = {
         moduleName: formViewParams.moduleName,
@@ -509,8 +508,8 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
                 onClick={() => setvisibleCreateRelationEntity(true)}
             /> */}
             <SolidDialog
-                header={`Create ${fieldLabel}`}
                 visible={visibleCreateRelationEntity}
+                showHeader={false}
                 className="solid-dialog"
                 style={{
                     width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw",

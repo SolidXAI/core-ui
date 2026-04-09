@@ -246,19 +246,21 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                     {params.id === "new" ? (
                         <>
                             <div className="flex gap-3 align-items-center solid-form-toolbar-left">
-                                {/* {params.embeded !== true && <BackButton />}
-                            <p className="m-0 view-title solid-text-wrapper">{createHeaderTitle}</p> */}
-                             {params.embeded !== true && 
-                                <SolidFormStepper
-                                    solidFormViewMetaData={solidFormViewMetaData}
-                                    initialEntityData={initialEntityData}
-                                    modelName={params.modelName}
-                                    id={params.id}
-                                    solidWorkflowFieldValue={solidWorkflowFieldValue}
-                                    setSolidWorkflowFieldValue={setSolidWorkflowFieldValue}
-                                    onStepperUpdate={onStepperUpdate}
-                                ></SolidFormStepper>
-                             }
+                                {/* {params.embeded !== true && <BackButton />}*/}
+                                {params.embeded == true &&
+                                    <p className="m-0 view-title solid-text-wrapper">{createHeaderTitle}</p>
+                                }
+                                {params.embeded !== true &&
+                                    <SolidFormStepper
+                                        solidFormViewMetaData={solidFormViewMetaData}
+                                        initialEntityData={initialEntityData}
+                                        modelName={params.modelName}
+                                        id={params.id}
+                                        solidWorkflowFieldValue={solidWorkflowFieldValue}
+                                        setSolidWorkflowFieldValue={setSolidWorkflowFieldValue}
+                                        onStepperUpdate={onStepperUpdate}
+                                    ></SolidFormStepper>
+                                }
                             </div>
                             <div className="flex align-items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
                                 <div className="hidden lg:flex solid-header-buttons-wrapper">
@@ -369,19 +371,21 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                     ) : (
                         <>
                             <div className="flex gap-3 align-items-center solid-form-toolbar-left">
-                             {params.embeded !== true && 
-                                <SolidFormStepper
-                                solidFormViewMetaData={solidFormViewMetaData}
-                                initialEntityData={initialEntityData}
-                                modelName={params.modelName}
-                                id={params.id}
-                                solidWorkflowFieldValue={solidWorkflowFieldValue}
-                                setSolidWorkflowFieldValue={setSolidWorkflowFieldValue}
-                                onStepperUpdate={onStepperUpdate}
-                                ></SolidFormStepper>
-                            }
+                                {params.embeded !== true &&
+                                    <SolidFormStepper
+                                        solidFormViewMetaData={solidFormViewMetaData}
+                                        initialEntityData={initialEntityData}
+                                        modelName={params.modelName}
+                                        id={params.id}
+                                        solidWorkflowFieldValue={solidWorkflowFieldValue}
+                                        setSolidWorkflowFieldValue={setSolidWorkflowFieldValue}
+                                        onStepperUpdate={onStepperUpdate}
+                                    ></SolidFormStepper>
+                                }
                                 {/* {params.embeded !== true && <BackButton />} */}
-                                {/* <p className="m-0 view-title solid-text-wrapper">{viewMode === "edit" ? editHeaderTitle : solidView.model.displayName}</p> */}
+                                {params.embeded == true &&
+                                    <p className="m-0 view-title solid-text-wrapper">{viewMode === "edit" ? editHeaderTitle : solidView.model.displayName}</p>
+                                }
                             </div>
 
                             <div className="flex align-items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
@@ -390,7 +394,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                         return (
                                             // <Button
                                             //     text
-                                            //     type="button"
+                                            //      type="button"
                                             //     className="w-full text-left gap-2"
                                             //     label={button.attrs.label}
                                             //     size="small"
@@ -475,8 +479,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                 }
 
                                 {/* Inline */}
-                               
-                               
+
+
                                 {
                                     params.embeded == true &&
                                     actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&

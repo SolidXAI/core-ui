@@ -2817,6 +2817,8 @@ body {
 .solid-form-toolbar-left {
   flex: 1 1 50%;
   min-width: 0;
+  display: flex;
+  justify-content: flex-start;
 }
 
 .solid-form-toolbar-actions {
@@ -3923,6 +3925,7 @@ body {
   justify-content: center;
   cursor: pointer;
   transition: background 0.15s ease, color 0.15s ease;
+  padding: 0;
 }
 
 .solid-studio-island-btn:hover {

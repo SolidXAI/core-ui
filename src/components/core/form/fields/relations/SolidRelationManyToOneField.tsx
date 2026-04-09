@@ -483,10 +483,8 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 }
 
 export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity, formViewParams }: any) => {
-    const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4';
-    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const parentModelName = fieldLayoutInfo?.attrs?.parentModelName;
     const childModelName = fieldLayoutInfo?.attrs?.childModelName;
     const parentFieldName = fieldLayoutInfo?.attrs?.parentFieldName;
@@ -524,8 +522,8 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
                 />
             </div>
             <SolidDialog
-                header={`Create ${fieldLabel}`}
                 visible={visibleCreateRelationEntity}
+                showHeader={false}
                 style={{
                     width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw",
                     height: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.height ?? "auto"
