@@ -196,7 +196,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
 
     return (
         <div className="relative">
-            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
+            <div className={styles.fieldWrapper}>
                 {showFieldLabel !== false && (
                     <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
                         {fieldLabel}
