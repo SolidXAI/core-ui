@@ -1732,8 +1732,8 @@ li.header-li-px {
 }
 
 .solid-form-wrapper .solid-form-content {
-  height: calc(100vh - var(--solid-studio-header-height, 0px) - 197px);
-  /* calc(100dvh - var(--solid-studio-header-height, 0px) - 128px) */
+  height: calc(100vh - 197px);
+  /* calc(100dvh - 128px) */
   /* height: calc(100vh - 145px); */
   /* height: calc(100vh - 111px); */
   /* If No Breadcrumb */
@@ -1744,7 +1744,7 @@ li.header-li-px {
 }
 
 .solid-create-mode-form-content {
-  height: calc(100vh - var(--solid-studio-header-height, 0px) - 162px) !important;
+  height: calc(100vh - 162px) !important;
 }
 
 .chatter-collapse-btn {
@@ -4257,7 +4257,7 @@ flex-shrink: 0; */
   display: flex;
   flex-direction: column;
   overflow: auto;
-  height: 100% !important;
+  height: calc(100vh - 120px) !important;
   min-height: 0;
   min-width: 0;
   flex: 1 1 auto;
