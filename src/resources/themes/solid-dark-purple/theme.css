@@ -6170,14 +6170,14 @@
 
   .solid-kanban-card,
   .solid-media-card {
-    border: 1px solid var(--primary-light-color);
-    background: #171717;
+    border: none;
+    background: transparent;
   }
 
   .solid-kanban-card:hover,
   .solid-media-card:hover {
-    border: 1px solid var(--purple-900);
-    background: var(--surface-hover);
+    border: none;
+    background: transparent;
   }
 
   .solid-mimetype-chip {

@@ -1,5 +1,4 @@
 import { useFormik } from "formik";
-import { Button } from "primereact/button";
 import { useDispatch } from "react-redux";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { javascript } from "@codemirror/lang-javascript";
@@ -7,6 +6,7 @@ import { oneDark } from "@codemirror/theme-one-dark";
 import CodeMirror, { EditorView } from "@uiw/react-codemirror";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showToast } from "../../../redux/features/toastSlice";
+import { SolidButton } from "../../shad-cn-ui";
 
 export const KanbanUserViewLayout = ({ solidKanbanViewMetaData, setLayoutDialogVisible }: any) => {
     const dispatch = useDispatch();
@@ -56,14 +56,17 @@ export const KanbanUserViewLayout = ({ solidKanbanViewMetaData, setLayoutDialogV
                     }}
                 />
                 <div className="pt-3 flex gap-2">
-                    <Button type="submit" label="Apply" size="small" />
-                    <Button
+                    <SolidButton type="submit" size="sm">
+                        Apply
+                    </SolidButton>
+                    <SolidButton
                         type="button"
-                        outlined
-                        label="Cancel"
-                        size="small"
+                        variant="outline"
+                        size="sm"
                         onClick={() => setLayoutDialogVisible(false)}
-                    />
+                    >
+                        Cancel
+                    </SolidButton>
                 </div>
             </form>
         </>

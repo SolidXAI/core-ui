@@ -1,4 +1,19 @@
 export { SolidButton } from "./SolidButton";
+export { SolidAccordion, SolidAccordionContent, SolidAccordionItem, SolidAccordionTrigger } from "./SolidAccordion";
+export {
+  SolidDropdownMenu,
+  SolidDropdownMenuCheckboxItem,
+  SolidDropdownMenuContent,
+  SolidDropdownMenuItem,
+  SolidDropdownMenuLabel,
+  SolidDropdownMenuRadioGroup,
+  SolidDropdownMenuRadioItem,
+  SolidDropdownMenuSeparator,
+  SolidDropdownMenuSub,
+  SolidDropdownMenuSubContent,
+  SolidDropdownMenuSubTrigger,
+  SolidDropdownMenuTrigger,
+} from "./SolidDropdownMenu";
 export { SolidInput } from "./SolidInput";
 export { SolidNumberInput } from "./SolidNumberInput";
 export { SolidAutocomplete } from "./SolidAutocomplete";

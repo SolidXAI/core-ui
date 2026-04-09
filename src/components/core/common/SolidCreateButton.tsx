@@ -1,7 +1,7 @@
 import Link from "../../common/Link";
 import { usePathname } from "../../../hooks/usePathname";
-import { Button } from 'primereact/button';
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
+import { SolidButton } from "../../shad-cn-ui";
 
 export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, solidListViewLayout, responsiveIconOnly = false }: any) => {
     const pathName = usePathname();
@@ -27,30 +27,31 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
             <Link href={createPath}>
                 {responsiveIconOnly ? (
                     <>
-                        <Button
+                        <SolidButton
                             type="button"
-                            icon={icon}
+                            leftIcon={<i className={icon} />}
                             className={`${className} p-button-sm lg:hidden solid-icon-button `}
-                            size='small'
+                            size='sm'
                         />
 
-                        <Button
+                        <SolidButton
                             type="button"
-                            icon={icon}
-                            label={label}
+                            leftIcon={<i className={icon} />}
                             className={`${className} hidden lg:inline-flex`}
-                            size='small'
-
-                        />
+                            size='sm'
+                        >
+                            {label}
+                        </SolidButton>
                     </>
                 ) : (
-                    <Button
+                    <SolidButton
                         type="button"
-                        icon={icon}
-                        label={label}
+                        leftIcon={<i className={icon} />}
                         className={`${className}`}
-                        size='small'
-                    />
+                        size='sm'
+                    >
+                        {label}
+                    </SolidButton>
                 )}
 
             </Link>

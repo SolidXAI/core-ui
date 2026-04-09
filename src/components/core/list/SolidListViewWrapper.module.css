@@ -45,14 +45,6 @@
   width: 30px;
 }
 
-.confirmDialogTitle {
-  font-size: 16px;
-}
-
-.deleteEntityDialog {
-  width: 20vw !important;
-}
-
 .SolidXAIFloatingBtn {
   position: absolute;
   top: 50%;

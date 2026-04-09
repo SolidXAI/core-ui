@@ -50,8 +50,9 @@ import { DefaultDateTimeListWidget } from "../components/core/list/columns/Solid
 import dashboardFormViewChangeHandler from "../components/core/extension/solid-core/dashboard/dashboardFormViewChangeHandler";
 import dashboardQuestionFieldChangeHandler from "../components/core/extension/solid-core/dashboard/dashboardQuestionFieldChangeHandler";
 import dashboardQuestionOnFormLoadHandler from "../components/core/extension/solid-core/dashboard/dashboardQuestionOnFormLoadHandler";
+import MqMessageKanbanCardWidget from "../components/core/extension/solid-core/mqMessage/kanban/MqMessageKanbanCardWidget";
 
-type ExtensionComponentType = null | 'list_field_widget' | 'form_field_view_widget' | 'form_field_edit_widget' | 'list_row_action ' | 'list_header_action' | 'form_action' | 'form_widget';
+type ExtensionComponentType = null | 'list_field_widget' | 'form_field_view_widget' | 'form_field_edit_widget' | 'list_row_action ' | 'list_header_action' | 'form_action' | 'form_widget' | 'kanban_card_widget';
 
 type ExtensionComponentMetadata = {
     component: React.ComponentType<any>;
@@ -336,6 +337,9 @@ registerExtensionComponent("RolePermissionsManyToManyFieldWidget", RolePermissio
 // Solid Google Material Symbols Icon
 registerExtensionComponent("SolidIconEditWidget", SolidIconEditWidget, []);
 registerExtensionComponent("SolidIconViewWidget", SolidIconViewWidget, []);
+
+// Kanban
+registerExtensionComponent("MqMessageKanbanCardWidget", MqMessageKanbanCardWidget, [], "kanban_card_widget");
 
 // # Extension functions 
 // Email Template

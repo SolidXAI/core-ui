@@ -1,152 +1,262 @@
+import { permissionExpression } from "../../../helpers/permissions";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
-import { Accordion, AccordionTab } from 'primereact/accordion';
-import { Button } from 'primereact/button';
-import { Divider } from 'primereact/divider';
-import { OverlayPanel } from 'primereact/overlaypanel';
-import { RadioButton } from 'primereact/radiobutton';
-import { useEffect, useRef, useState } from 'react'
+import { useSearchParams } from "../../../hooks/useSearchParams";
+import { useEffect, useState } from "react";
+import { SolidExport } from "../../../components/common/SolidExport";
+import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
+import {
+    SolidDropdownMenu,
+    SolidDropdownMenuContent,
+    SolidDropdownMenuItem,
+    SolidDropdownMenuLabel,
+    SolidDropdownMenuRadioGroup,
+    SolidDropdownMenuRadioItem,
+    SolidDropdownMenuSeparator,
+    SolidDropdownMenuSub,
+    SolidDropdownMenuSubContent,
+    SolidDropdownMenuSubTrigger,
+    SolidDropdownMenuTrigger,
+    SolidDialog,
+    SolidDialogBody,
+    SolidDialogClose,
+    SolidDialogHeader,
+    SolidDialogSeparator,
+    SolidDialogTitle,
+} from "../../shad-cn-ui";
 
-export const SolidKanbanViewConfigure = ({ solidKanbanViewMetaData, actionsAllowed, setLayoutDialogVisible, viewModes, setShowSaveFilterPopup }: any) => {
-    const op = useRef(null);
-    const customizeLayout = useRef<OverlayPanel | null>(null);
+const normalizeViewModes = (viewModes: any[] = []) => {
+    return viewModes
+        .map((option: any) => {
+            if (!option) return null;
+
+            if (typeof option === "string") {
+                return {
+                    type: option,
+                    label: option.charAt(0).toUpperCase() + option.slice(1),
+                };
+            }
+
+            const type = option.type || option.value;
+            if (!type) return null;
+
+            return {
+                ...option,
+                type,
+                label: option.label || (type.charAt(0).toUpperCase() + type.slice(1)),
+            };
+        })
+        .filter(Boolean);
+};
+
+export const SolidKanbanViewConfigure = ({
+    solidKanbanViewMetaData,
+    modelName,
+    actionsAllowed,
+    setLayoutDialogVisible,
+    viewModes,
+    setShowSaveFilterPopup,
+    filters,
+    handleRefreshView,
+}: any) => {
     const pathname = usePathname();
     const router = useRouter();
+    const searchParams = useSearchParams();
     const [view, setView] = useState<string>("");
+    const [isCogMenuOpen, setIsCogMenuOpen] = useState(false);
+    const [openImportDialog, setOpenImportDialog] = useState(false);
+    const [exportView, setExportView] = useState(false);
 
-    const handleViewChange = (newView: string) => {
-        if (view === newView) return; // Prevent unnecessary updates
-        const pathSegments = pathname.split('/').filter(Boolean);
-        pathSegments[pathSegments.length - 1] = newView; // Replace the last part with new view
-        const newPath = '/' + pathSegments.join('/');
-        router.push(newPath);
-    };
+    const visibleViewModes = normalizeViewModes(Array.isArray(viewModes) ? viewModes : []);
+    const showSwitchType = visibleViewModes.length > 1;
+    const layoutAttrs = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs ?? {};
 
     useEffect(() => {
-        if (typeof pathname === 'string') {
-            const pathSegments = pathname.split('/').filter(Boolean);
+        if (typeof pathname === "string") {
+            const pathSegments = pathname.split("/").filter(Boolean);
             if (pathSegments.length > 0) {
                 setView(pathSegments[pathSegments.length - 1]);
             }
         }
-    }, [])
+    }, [pathname]);
 
+    const handleViewChange = (newViewType: string) => {
+        if (view === newViewType) return;
 
-    const [isOverlayOpen, setIsOverlayOpen] = useState(false);
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                customizeLayout.current &&
-                !customizeLayout.current.getElement()?.contains(event.target as Node)
-            ) {
-                setIsOverlayOpen(false);
-            }
+        const nextView = visibleViewModes.find((option: any) => option.type === newViewType);
+        const pathSegments = pathname.split("/").filter(Boolean);
+        pathSegments[pathSegments.length - 1] = newViewType;
+        const nextSearchParams = new URLSearchParams(searchParams.toString());
+        const currentQuery = {
+            menuItemId: searchParams.get("menuItemId"),
+            menuItemName: searchParams.get("menuItemName"),
+            actionId: searchParams.get("actionId"),
+            actionName: searchParams.get("actionName"),
         };
 
-        if (isOverlayOpen) {
-            document.addEventListener("click", handleClickOutside);
-        } else {
-            document.removeEventListener("click", handleClickOutside);
-        }
+        const queryFields = {
+            menuItemId: nextView?.menuItemId ?? currentQuery.menuItemId,
+            menuItemName: nextView?.menuItemName ?? currentQuery.menuItemName,
+            actionId: nextView?.actionId ?? currentQuery.actionId,
+            actionName: nextView?.actionName ?? currentQuery.actionName,
+        };
 
-        return () => document.removeEventListener("click", handleClickOutside);
-    }, [isOverlayOpen])
+        Object.entries(queryFields).forEach(([key, value]) => {
+            if (value) {
+                nextSearchParams.set(key, value);
+            } else {
+                nextSearchParams.delete(key);
+            }
+        });
 
+        const newPath = "/" + pathSegments.join("/");
+        const nextQueryString = nextSearchParams.toString();
+        router.push(nextQueryString ? `${newPath}?${nextQueryString}` : newPath);
+    };
 
+    const clearLocalstorageCache = () => {
+        const currentPageUrl = window.location.pathname;
+        localStorage.removeItem(currentPageUrl);
+        window.location.reload();
+    };
 
+    const canImport =
+        Boolean(modelName) &&
+        actionsAllowed.includes(`${permissionExpression(modelName, "create")}`) &&
+        actionsAllowed.includes(`${permissionExpression("importTransaction", "create")}`);
 
+    const canExport =
+        Boolean(modelName) &&
+        actionsAllowed.includes(`${permissionExpression(modelName, "findMany")}`) &&
+        actionsAllowed.includes(`${permissionExpression("exportTransaction", "create")}`);
 
-
+    const canCustomizeLayout = actionsAllowed.includes(`${permissionExpression("userViewMetadata", "create")}`);
+    const canSaveCustomFilter = actionsAllowed.includes(`${permissionExpression("savedFilters", "create")}`);
 
     return (
         <div className="position-relative">
-            <Button
-                type="button"
-                size="small"
-                icon="pi pi-cog"
-                severity="secondary"
-                outlined
-                className='solid-icon-button'
-                // @ts-ignore
-                onClick={(e) => op.current.toggle(e)}
-            />
-            <OverlayPanel ref={op}>
-                <div className="p-2">
-                    <div className="flex flex-column">
-                        <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2 text-base" />
-                        <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base" />
-                        <Button
-                            text
-                            type="button"
-                            className="w-8rem text-left text-base gap-2 purple-200"
-                            label="Layout"
-                            size="small"
-                            iconPos="left"
-                            severity="contrast"
-                            icon={'pi pi-objects-column'}
-                            onClick={() => setLayoutDialogVisible(true)}
-                        />
-                    </div>
-                </div>
-                <Divider className="m-0" />
-                <div className="p-2 relative flex flex-column gap-1">
-                    <Button
-                        icon='pi pi-sliders-h'
-                        label="Customize Layout"
-                        severity={isOverlayOpen ? undefined : "secondary"}
-                        size="small"
-                        text={isOverlayOpen ? false : true}
-                        className="text-left gap-2 w-full text-base"
-                        // @ts-ignore
-                        onClick={(e) => {
-                            customizeLayout.current?.toggle(e);
-                            setIsOverlayOpen((prev) => !prev); // ✅ Ensure state updates when toggled
-                        }}
+            <SolidDropdownMenu open={isCogMenuOpen} onOpenChange={setIsCogMenuOpen}>
+                <SolidDropdownMenuTrigger asChild>
+                    <button
+                        type="button"
+                        className="solid-icon-button solid-header-cog-trigger"
+                        aria-label="Open kanban options"
                     >
-                        <i className="pi pi-chevron-right text-sm"></i>
-                    </Button>
-                    <Button text icon='pi pi-save' label="Save Custom Filter" size="small" severity="secondary" className="text-left gap-2 text-base" onClick={() => setShowSaveFilterPopup(true)} />
-                    <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}
-                        onShow={() => setIsOverlayOpen(true)}
-                        onHide={() => {
-                            setTimeout(() => setIsOverlayOpen(false), 50); // ✅ Ensure state updates
-                        }}
-                    >
+                        <i className="pi pi-cog" />
+                    </button>
+                </SolidDropdownMenuTrigger>
+                <SolidDropdownMenuContent className="listview-cogwheel-panel">
+                    {canImport && (
+                        <SolidDropdownMenuItem
+                            className="solid-header-dropdown-item"
+                            onSelect={() => {
+                                setOpenImportDialog(true);
+                                setIsCogMenuOpen(false);
+                            }}
+                        >
+                            <i className="pi pi-download solid-header-action-button-icon" />
+                            <span className="solid-header-action-button-label">Import</span>
+                        </SolidDropdownMenuItem>
+                    )}
 
-                        <div className="solid-layout-accordion">
-                            <Accordion expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up" activeIndex={[0]}>
-                                {viewModes && viewModes.length > 0 &&
-                                    <AccordionTab header="Switch Type">
-                                        <div className="flex flex-column gap-1 p-1">
-                                            {viewModes.map((option: any) => (
-                                                <div key={option.value} className={`flex align-items-center ${option.value === view ? 'solid-active-view' : 'solid-view'}`}>
-                                                    <RadioButton
-                                                        inputId={option.value}
-                                                        name="views"
-                                                        value={option.value}
-                                                        // onChange={(e) => router}
-                                                        onChange={() => handleViewChange(option.value)}
-                                                        checked={option.value === view}
-                                                    />
-                                                    <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
-                                                        {option.label}
-                                                        {/* <Image
-                                                        src={option.image}
-                                                        alt={option.value}
-                                                        fill
-                                                        className='relative row-spacing-img'
-                                                    /> */}
-                                                    </label>
-                                                </div>
+                    {canExport && (
+                        <SolidDropdownMenuItem
+                            className="solid-header-dropdown-item"
+                            onSelect={() => {
+                                setExportView(true);
+                                setIsCogMenuOpen(false);
+                            }}
+                        >
+                            <i className="pi pi-upload solid-header-action-button-icon" />
+                            <span className="solid-header-action-button-label">Export</span>
+                        </SolidDropdownMenuItem>
+                    )}
+
+                    {(canCustomizeLayout || canSaveCustomFilter) && <SolidDropdownMenuSeparator />}
+
+                    {canCustomizeLayout && (
+                        <SolidDropdownMenuSub>
+                            <SolidDropdownMenuSubTrigger className="solid-header-dropdown-item">
+                                <i className="pi pi-sliders-h solid-header-action-button-icon" />
+                                <span className="solid-header-action-button-label">Customize Layout</span>
+                            </SolidDropdownMenuSubTrigger>
+                            <SolidDropdownMenuSubContent className="customize-layout-panel">
+                                {showSwitchType && (
+                                    <>
+                                        <SolidDropdownMenuLabel>Switch Type</SolidDropdownMenuLabel>
+                                        <SolidDropdownMenuRadioGroup value={view} onValueChange={handleViewChange}>
+                                            {visibleViewModes.map((option: any) => (
+                                                <SolidDropdownMenuRadioItem key={option.type} value={option.type}>
+                                                    {option.label}
+                                                </SolidDropdownMenuRadioItem>
                                             ))}
-                                        </div>
-                                    </AccordionTab>
-                                }
-                            </Accordion>
-                        </div>
-                    </OverlayPanel>
-                </div>
-            </OverlayPanel>
+                                        </SolidDropdownMenuRadioGroup>
+                                        <SolidDropdownMenuSeparator />
+                                    </>
+                                )}
+                                <SolidDropdownMenuItem
+                                    onSelect={() => {
+                                        setLayoutDialogVisible(true);
+                                        setIsCogMenuOpen(false);
+                                    }}
+                                >
+                                    <i className="pi pi-code solid-header-action-button-icon" />
+                                    <span className="solid-header-action-button-label">Layout Editor</span>
+                                </SolidDropdownMenuItem>
+                            </SolidDropdownMenuSubContent>
+                        </SolidDropdownMenuSub>
+                    )}
+
+                    {canSaveCustomFilter && (
+                        <SolidDropdownMenuItem
+                            className="solid-header-dropdown-item"
+                            onSelect={() => {
+                                setShowSaveFilterPopup(true);
+                                setIsCogMenuOpen(false);
+                            }}
+                        >
+                            <i className="pi pi-save solid-header-action-button-icon" />
+                            <span className="solid-header-action-button-label">Save Custom Filter</span>
+                        </SolidDropdownMenuItem>
+                    )}
+
+                    <SolidDropdownMenuItem
+                        className="solid-header-dropdown-item"
+                        onSelect={() => {
+                            clearLocalstorageCache();
+                            setIsCogMenuOpen(false);
+                        }}
+                    >
+                        <i className="pi pi-trash solid-header-action-button-icon" />
+                        <span className="solid-header-action-button-label">Clear cache</span>
+                    </SolidDropdownMenuItem>
+                </SolidDropdownMenuContent>
+            </SolidDropdownMenu>
+
+            <SolidDialog
+                open={exportView}
+                onOpenChange={setExportView}
+                className="solid-kanban-export-dialog"
+                style={{ width: "min(960px, calc(100vw - 32px))" }}
+            >
+                <SolidDialogHeader className="solid-export-dialog-header">
+                    <SolidDialogTitle>Export</SolidDialogTitle>
+                    <SolidDialogClose />
+                </SolidDialogHeader>
+                <SolidDialogSeparator />
+                <SolidDialogBody className="solid-kanban-export-dialog-body">
+                    <SolidExport listViewMetaData={solidKanbanViewMetaData} filters={filters} />
+                </SolidDialogBody>
+            </SolidDialog>
+
+            {openImportDialog && (
+                <SolidGenericImport
+                    openImportDialog={openImportDialog}
+                    setOpenImportDialog={setOpenImportDialog}
+                    listViewMetaData={solidKanbanViewMetaData}
+                    handleFetchUpdatedRecords={handleRefreshView}
+                />
+            )}
         </div>
-    )
-}
+    );
+};

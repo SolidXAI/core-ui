@@ -2081,15 +2081,16 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                         }
                     </SolidDialogBody>
                 </SolidDialog>
-                <SolidDialog open={showSaveFilterPopup} onOpenChange={setShowSaveFilterPopup} className="solid-custom-filter-dialog" style={{ width: "min(500px, calc(100vw - 2rem))" }}>
-                    <SolidDialogHeader>
+                <SolidDialog open={showSaveFilterPopup} onOpenChange={setShowSaveFilterPopup} className="solid-custom-filter-dialog solid-save-filter-dialog" style={{ width: "min(420px, calc(100vw - 2rem))" }}>
+                    <SolidDialogHeader className="solid-filter-dialog-head">
                         <div>
-                            <SolidDialogTitle>Save Custom Filter</SolidDialogTitle>
+                            <SolidDialogTitle className="solid-filter-dialog-title m-0">Save Custom Filter</SolidDialogTitle>
+                            <SolidDialogDescription className="solid-filter-dialog-subtitle m-0">Name this filter so you can reuse it later.</SolidDialogDescription>
                         </div>
-                        <SolidDialogClose />
+                        <SolidDialogClose className="solid-filter-dialog-close" />
                     </SolidDialogHeader>
-                    <SolidDialogSeparator />
-                    <SolidDialogBody>
+                    <SolidDialogSeparator className="solid-filter-dialog-sep" />
+                    <SolidDialogBody className="solid-filter-dialog-body">
                         <SolidSaveCustomFilterForm currentSavedFilterData={currentSavedFilterData} handleSaveFilter={handleSaveFilter} closeDialog={() => setShowSaveFilterPopup(false)}></SolidSaveCustomFilterForm>
                     </SolidDialogBody>
                 </SolidDialog>

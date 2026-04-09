@@ -30,9 +30,9 @@ export const SolidSaveCustomFilterForm: React.FC<SolidSaveCustomFilterFormProps>
     };
 
     return (
-        <form onSubmit={handleSubmit}>
-            <div className="flex flex-column gap-2">
-                <label htmlFor="name">Name:</label>
+        <form onSubmit={handleSubmit} className="solid-save-filter-form">
+            <div className="solid-save-filter-field">
+                <label htmlFor="name" className="solid-save-filter-label">Name</label>
                 <SolidInput
                     id="name"
                     name="name"
@@ -40,19 +40,24 @@ export const SolidSaveCustomFilterForm: React.FC<SolidSaveCustomFilterFormProps>
                     value={formValues.name}
                     onChange={handleChange}
                     readOnly={currentSavedFilterData}
+                    className="solid-save-filter-input"
                 />
             </div>
-            <div className="mt-3 flex align-items-center ">
+            <label htmlFor="isPrivate" className="solid-save-filter-checkbox-row">
                 <input
                     id="isPrivate"
                     name="isPrivate"
                     type="checkbox"
+                    className="solid-save-filter-checkbox"
                     checked={formValues.isPrivate}
                     onChange={handleChange}
                 />
-                <label htmlFor="isPrivate" className="ml-2">Is Private</label>
-            </div>
-            <div className="mt-3 flex align-items-center gap-2">
+                <span className="solid-save-filter-checkbox-copy">
+                    <span className="solid-save-filter-label">Private Filter</span>
+                    <span className="solid-save-filter-hint">Only you will be able to access this saved filter.</span>
+                </span>
+            </label>
+            <div className="solid-save-filter-actions">
                 <SolidButton
                     type="submit"
                     size="sm"
