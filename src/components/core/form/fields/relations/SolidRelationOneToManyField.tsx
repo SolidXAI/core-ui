@@ -1,7 +1,6 @@
 
 import { SolidListView } from "../../../../../components/core/list/SolidListView";
 import { camelCase, capitalize } from "lodash";
-import { Dialog } from "primereact/dialog";
 import { useEffect, useState } from "react";
 import * as Yup from 'yup';
 import SolidFormView from '../../../../../components/core/form/SolidFormView';
@@ -10,12 +9,10 @@ import { usePathname } from "../../../../../hooks/usePathname";
 import { useRouter } from "../../../../../hooks/useRouter";
 import { getExtensionComponent } from "../../../../../helpers/registry";
 import { SolidFormFieldWidgetProps, SolidFormWidgetProps } from "../../../../../types/solid-core";
-import { Message } from "primereact/message";
-import FieldMetaData from "../../../../../components/core/model/FieldMetaData";
-import { Chip } from "primereact/chip";
 import { SolidFieldTooltip } from "../../../../../components/common/SolidFieldTooltip";
-import { Divider } from "primereact/divider";
-import { Button } from "primereact/button";
+import { SolidButton } from "../../../../shad-cn-ui/SolidButton";
+import { SolidDialog } from "../../../../shad-cn-ui/SolidDialog";
+import { SolidMessage } from "../../../../shad-cn-ui/SolidMessage";
 import { ERROR_MESSAGES } from "../../../../../constants/error-messages";
 
 export type FormViewParams = {
@@ -338,18 +335,18 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
                 <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
             }
 
-            <Dialog showHeader={false} headerClassName="py-2" contentClassName="px-0 pb-0" className="solid-confirm-dialog" contentStyle={{ borderRadius: 6 }} visible={showSaveParentEntityConfirmationPopup} style={{ width: '20vw' }} onHide={() => { if (!showSaveParentEntityConfirmationPopup) return; setShowSaveParentEntityConfirmationPopup(false); }}>
+            <SolidDialog showHeader={false} headerClassName="py-2" contentClassName="px-0 pb-0" className="solid-confirm-dialog" contentStyle={{ borderRadius: 6 }} visible={showSaveParentEntityConfirmationPopup} style={{ width: '20vw' }} onHide={() => { if (!showSaveParentEntityConfirmationPopup) return; setShowSaveParentEntityConfirmationPopup(false); }}>
                 <div className="p-4">
                     <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
                         Before Creating {fieldLabel} you need to save {solidFormViewMetaData?.data?.solidView?.model?.displayName ? solidFormViewMetaData?.data?.solidView?.model?.displayName : capitalize(fieldContext.modelName)}.
                         Please click save if you wish to proceed ?
                     </p>
                     <div className="flex align-items-center justify-content-start gap-2 mt-3">
-                        <Button label="Save" size="small" onClick={saveParentEntity} />
-                        <Button label="Cancel" size="small" onClick={() => setShowSaveParentEntityConfirmationPopup(false)} outlined className='bg-primary-reverse' />
+                        <SolidButton label="Save" size="small" onClick={saveParentEntity} />
+                        <SolidButton label="Cancel" size="small" onClick={() => setShowSaveParentEntityConfirmationPopup(false)} variant="outline" className='bg-primary-reverse' />
                     </div>
                 </div>
-            </Dialog>
+            </SolidDialog>
 
         </div>
     );
@@ -509,7 +506,7 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
                 type="button"
                 onClick={() => setvisibleCreateRelationEntity(true)}
             /> */}
-            <Dialog
+            <SolidDialog
                 header=""
                 showHeader={false}
                 visible={visibleCreateRelationEntity}
@@ -528,7 +525,7 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
                 {params &&
                     <SolidFormView {...params} />
                 }
-            </Dialog>
+            </SolidDialog>
         </div>
     )
 }

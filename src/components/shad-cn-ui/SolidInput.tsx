@@ -6,7 +6,9 @@ function cx(...parts: Array<string | false | undefined>) {
   return parts.filter(Boolean).join(" ");
 }
 
-export function SolidInput({ className, ...props }: SolidInputProps) {
-  return <input className={cx("solid-input", className)} {...props} />;
-}
-
+export const SolidInput = React.forwardRef<HTMLInputElement, SolidInputProps>(function SolidInput(
+  { className, ...props },
+  ref
+) {
+  return <input ref={ref} className={cx("solid-input", className)} {...props} />;
+});

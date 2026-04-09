@@ -1,15 +1,21 @@
 
 import { DropzonePlaceholder } from "../../../../components/common/DropzonePlaceholder";
 import { useDeleteMediaMutation } from "../../../../redux/api/mediaApi";
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
-import { Message } from "primereact/message";
+import { SolidButton } from "../../../shad-cn-ui/SolidButton";
+import {
+  SolidDialog,
+  SolidDialogBody,
+  SolidDialogFooter,
+  SolidDialogHeader,
+  SolidDialogTitle,
+} from "../../../shad-cn-ui/SolidDialog";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
+import { SolidProgressBar } from "../../../shad-cn-ui/SolidProgressBar";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { FileReaderExt } from "../../../../components/common/FileReaderExt";
-import { ProgressBar } from "primereact/progressbar";
 import getAcceptedFileTypes from "../../../../helpers/getAcceptedFileTypes";
 import { downloadMediaFile } from "../../../../helpers/downloadMediaFile";
 import { getExtensionComponent } from "../../../../helpers/registry";
@@ -346,13 +352,13 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                     </div>
                     {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                         <div className="absolute mt-1">
-                            <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                            <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                         </div>
                     )}
                 </div>
                 {
                     fileSizeError &&
-                    <Message severity="error" text={fileSizeError?.toString()} />
+                    <SolidMessage severity="error" text={fileSizeError?.toString()} />
                 }
                 {fileDetails && (
                     <div className="solid-file-upload-wrapper mt-4">
@@ -362,38 +368,24 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                                 <div className="flex align-items-start justify-content-between">
                                     <p className="font-normal w-9 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails)}>{fileDetails.name}</p>
                                     <div className="flex align-items-center md:gap-2">
-                                        <div>
-                                            <Button
-                                                type="button"
-                                                text
-                                                icon={"pi pi-download"}
-                                                size="small"
-                                                severity="secondary"
-                                                // className="p-2"
-                                                disabled={isFieldDisabled || isFieldReadonly}
-                                                style={{
-                                                    height: 16,
-                                                    width: 16
-                                                }}
-                                                onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
-                                            />
-                                        </div>
-                                        <div>
-                                            <Button
-                                                type="button"
-                                                text
-                                                icon={"pi pi-times"}
-                                                size="small"
-                                                severity="secondary"
-                                                // className="p-2"
-                                                disabled={isFieldDisabled || isFieldReadonly}
-                                                style={{
-                                                    height: 16,
-                                                    width: 16
-                                                }}
-                                                onClick={() => setDeleteImageDialogVisible(true)}
-                                            />
-                                        </div>
+                                        <button
+                                            type="button"
+                                            className="solid-file-icon-btn"
+                                            disabled={isFieldDisabled || isFieldReadonly}
+                                            aria-label="Download file"
+                                            onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
+                                        >
+                                            <i className="pi pi-download" />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="solid-file-icon-btn is-danger"
+                                            disabled={isFieldDisabled || isFieldReadonly}
+                                            aria-label="Remove file"
+                                            onClick={() => setDeleteImageDialogVisible(true)}
+                                        >
+                                            <i className="pi pi-times" />
+                                        </button>
                                     </div>
                                 </div>
                                 <div className="flex align-items-center gap-2 text-sm">
@@ -404,36 +396,38 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                     </div>
                 )}
             </div>
-            <Dialog
+            <SolidDialog
                 visible={isDeleteImageDialogVisible}
                 header="Confirm Delete"
-                modal
                 className="solid-confirm-dialog"
-                footer={() => (
-                    <div className="flex justify-content-center">
-                        <Button type="button" label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={handleCancelUpload} />
-                        <Button type="button" label="No" icon="pi pi-times" className='small-button' onClick={() => setDeleteImageDialogVisible(false)} />
-                    </div>
-                )}
                 onHide={() => setDeleteImageDialogVisible(false)}
             >
-                <p>Are you sure you want to delete media?</p>
-            </Dialog>
-            <Dialog
+                <SolidDialogBody>
+                    <p>Are you sure you want to delete media?</p>
+                </SolidDialogBody>
+                <SolidDialogFooter>
+                    <div className="flex justify-content-center">
+                        <SolidButton type="button" label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={handleCancelUpload} />
+                        <SolidButton type="button" label="No" icon="pi pi-times" className='small-button' onClick={() => setDeleteImageDialogVisible(false)} />
+                    </div>
+                </SolidDialogFooter>
+            </SolidDialog>
+            <SolidDialog
                 visible={isReplaceImageDialogVisible}
                 header="Replace Image"
-                modal
                 className="solid-confirm-dialog"
-                footer={() => (
-                    <div className="flex justify-content-center">
-                        <Button type="button" label="Yes, Replace" icon="pi pi-check" className='small-button' severity="danger" onClick={handleReplaceFile} />
-                        <Button type="button" label="Cancel" icon="pi pi-times" className='small-button' onClick={() => setReplaceImageDialogVisible(false)} />
-                    </div>
-                )}
                 onHide={() => setReplaceImageDialogVisible(false)}
             >
-                <p>An media is already uploaded. Do you want to delete it and upload a new one?</p>
-            </Dialog>
+                <SolidDialogBody>
+                    <p>An media is already uploaded. Do you want to delete it and upload a new one?</p>
+                </SolidDialogBody>
+                <SolidDialogFooter>
+                    <div className="flex justify-content-center">
+                        <SolidButton type="button" label="Yes, Replace" icon="pi pi-check" className='small-button' severity="danger" onClick={handleReplaceFile} />
+                        <SolidButton type="button" label="Cancel" icon="pi pi-times" className='small-button' onClick={() => setReplaceImageDialogVisible(false)} />
+                    </div>
+                </SolidDialogFooter>
+            </SolidDialog>
         </div>
     );
 }
@@ -530,13 +524,12 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
                                 <p className="font-normal w-9 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails)}>{fileDetails.name}</p>
                                 <div className="flex align-items-center md:gap-2">
                                     <div>
-                                        <Button
+                                        <SolidButton
                                             type="button"
                                             text
                                             icon={"pi pi-download"}
                                             size="small"
                                             severity="secondary"
-                                            // className="p-2"
                                             style={{
                                                 height: 16,
                                                 width: 16

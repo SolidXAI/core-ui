@@ -6,6 +6,12 @@ type SolidAutocompleteProps = {
   completeMethod?: (event: { query: string }) => void | Promise<void>;
   onChange?: (event: { value: any }) => void;
   onSelect?: (event: { value: any }) => void;
+  onUnselect?: (event: { value: any }) => void;
+  disabled?: boolean;
+  readOnly?: boolean;
+  emptyMessage?: string;
+  id?: string;
+  virtualScrollerOptions?: any;
   field?: string;
   placeholder?: string;
   className?: string;
@@ -37,6 +43,11 @@ export function SolidAutocomplete({
   completeMethod,
   onChange,
   onSelect,
+  onUnselect,
+  id,
+  disabled,
+  readOnly,
+  emptyMessage,
   field = "label",
   placeholder,
   className,
@@ -109,13 +120,19 @@ export function SolidAutocomplete({
   );
 
   const selectedItems = useMemo(() => {
+    const isRenderable = (item: any) => {
+      if (item === null || item === undefined || item === "") return false;
+      const label = getDisplayValue(item, field);
+      return typeof label === "string" ? label.trim().length > 0 : !!label;
+    };
+
     if (multiple) {
       if (!Array.isArray(value)) return [];
-      return value.filter((item) => item !== null && item !== undefined && item !== "");
+      return value.filter(isRenderable);
     }
     if (!value || typeof value === "string") return [];
-    return [value];
-  }, [multiple, value]);
+    return isRenderable(value) ? [value] : [];
+  }, [multiple, value, field]);
 
   const visibleSelectedItems = selectedItems.slice(0, maxVisibleChips);
   const hiddenSelectedItems = selectedItems.slice(maxVisibleChips);
@@ -180,7 +197,7 @@ export function SolidAutocomplete({
   };
 
   return (
-    <div ref={rootRef} className={cx("solid-autocomplete", className)}>
+    <div ref={rootRef} id={id} className={cx("solid-autocomplete", className)}>
       <div className={cx("solid-autocomplete-control solid-autocomplete-chip-control", isFocused && "is-focused")}>
         {visibleSelectedItems.map((item, index) => (
           <span key={toItemKey(item, index)} className="solid-autocomplete-chip">
@@ -189,7 +206,10 @@ export function SolidAutocomplete({
               type="button"
               className="solid-autocomplete-chip-remove"
               onMouseDown={(event) => event.preventDefault()}
-              onClick={() => removeSelectedAt(index)}
+            onClick={() => {
+              onUnselect?.({ value: item });
+              removeSelectedAt(index);
+            }}
               aria-label="Remove selection"
             >
               <i className="pi pi-times" />
@@ -212,6 +232,8 @@ export function SolidAutocomplete({
         <input
           className={cx("solid-input solid-autocomplete-input solid-autocomplete-inline-input", inputClassName)}
           value={query}
+          disabled={disabled}
+          readOnly={readOnly}
           placeholder={selectedItems.length > 0 ? "" : placeholder}
           onFocus={() => {
             setIsFocused(true);

@@ -1,7 +1,7 @@
 
+import React, { useState } from "react";
 import { Editor } from "primereact/editor";
-import { Message } from "primereact/message";
-import { useState } from "react";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "../../../../helpers/registry";
@@ -139,19 +139,17 @@ export const DefaultRichTextFormEditWidget = ({ formik, fieldContext }: SolidFor
                     </label>
                 }
                 <Editor
-                    readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                    disabled={formDisabled || fieldDisabled}
-                    key={fieldLayoutInfo.attrs.name}  // React will re-render the component whenever this value changes
+                    readOnly={formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled}
                     id={fieldLayoutInfo.attrs.name}
-                    value={formik.values[fieldLayoutInfo.attrs.name]}
-                    onTextChange={e => formik.setFieldValue(fieldLayoutInfo.attrs.name, e.htmlValue)}
-                    style={{ height: "320px" }}
+                    value={formik.values[fieldLayoutInfo.attrs.name] || ""}
+                    onTextChange={(e) => formik.setFieldValue(fieldLayoutInfo.attrs.name, e.htmlValue ?? e.textValue ?? "")}
                     className="solid-custom-editor"
+                    style={{ minHeight: 180 }}
                 />
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <div className="absolute mt-1">
-                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 </div>
             )}
         </div>
@@ -174,13 +172,10 @@ export const DefaultRichTextFormViewWidget = ({ formik, fieldContext }: SolidFor
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
-                <Editor
-                    readOnly={true}
-                    key={fieldLabel}  // React will re-render the component whenever this value changes
+                <div
+                    className="solid-custom-editor solid-custom-editor-view"
                     id={fieldLabel}
-                    value={formik.values[fieldLayoutInfo.attrs.name]}
-                    style={{ height: "320px" }}
-                    className="solid-custom-editor"
+                    dangerouslySetInnerHTML={{ __html: formik.values[fieldLayoutInfo.attrs.name] || "" }}
                 />
             </div>
         </div>

@@ -1,6 +1,7 @@
 
-import { Calendar } from "primereact/calendar";
-import { Message } from "primereact/message";
+import { SolidDatePicker } from "../../../shad-cn-ui/SolidDatePicker";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
+import { buildSyntheticChangeEvent } from "./fieldEventUtils";
 import { useRef } from "react";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
@@ -181,29 +182,24 @@ export const DefaultTimeFormEditWidget = ({ formik, fieldContext }: SolidFormFie
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
-                <Calendar
+                <SolidDatePicker
+                    selected={fieldValue instanceof Date ? fieldValue : typeof fieldValue === "string" ? parseTimeStringToDate(fieldValue) ?? undefined : undefined}
+                    onChange={(date: Date | null) => {
+                        const nextValue = (date as Date | null) ?? null;
+                        const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, nextValue, "time", nextValue ? true : undefined);
+                        fieldContext.onChange(syntheticEvent, "onFieldChange");
+                    }}
                     disabled={formDisabled || fieldDisabled || readOnlyPermission}
-                    ref={calendarRef} // Attach ref to Calendar
-                    id={fieldLayoutInfo.attrs.name}
-                    aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                    // onChange={formik.handleChange}
-                    onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-
-                    //@ts-ignore
-                    // value={formik.values[fieldLayoutInfo.attrs.name] ? formik.values[fieldLayoutInfo.attrs.name] : Date()}
-                    value={fieldValue instanceof Date ? fieldValue : typeof fieldValue === "string" ? parseTimeStringToDate(fieldValue) : null}
-                    // dateFormat="mm/dd/yy"
-                    // placeholder="mm/dd/yyyy hh:mm"
-                    hideOnDateTimeSelect
+                    readOnly={readOnlyPermission}
                     timeOnly
-                    showTime className=""
-                    hourFormat="24"
-
+                    showTimeSelect
+                    dateFormat="HH:mm"
+                    className=""
                 />
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <div className="absolute mt-1">
-                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 </div>
             )}
         </div>

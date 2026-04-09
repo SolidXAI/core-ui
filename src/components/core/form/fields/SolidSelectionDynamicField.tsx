@@ -1,7 +1,8 @@
 
 import { useLazyGetSelectionDynamicValuesQuery } from "../../../../redux/api/fieldApi";
-import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
-import { Message } from "primereact/message";
+import { SolidAutocomplete } from "../../../shad-cn-ui/SolidAutocomplete";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
+import { buildSyntheticChangeEvent } from "./fieldEventUtils";
 import qs from "qs";
 import { useState } from "react";
 import * as Yup from 'yup';
@@ -11,6 +12,8 @@ import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { formikValuestoQueryString } from "../../../../helpers/helpers";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+
+type AutoCompleteCompleteEvent = { query: string };
 
 
 export class SolidSelectionDynamicField implements ISolidField {
@@ -252,28 +255,29 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
-                <AutoComplete
+                <SolidAutocomplete
                     multiple={isMultiSelect}
-                    readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                    disabled={formDisabled || fieldDisabled}
-                    {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
-                    id={fieldLayoutInfo.attrs.name}
                     field="label"
-                    // value={formik.values[fieldLayoutInfo.attrs.name] || null}
+                    className="solid-standard-autocomplete"
                     value={formik.values[fieldLayoutInfo.attrs.name] || (isMultiSelect ? [] : null)}
                     dropdown
                     suggestions={selectionDynamicItems}
-                    completeMethod={selectionDynamicSearch}
-                    // onChange={(e) => updateInputs(index, e.value)} />
-                    // onChange={formik.handleChange}
-                    onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-                    className="solid-standard-autocomplete"
+                    completeMethod={(e) => selectionDynamicSearch(e)}
                     emptyMessage="No records found"
+                    onChange={({ value }) => {
+                        if (formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled) return;
+                        const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
+                        fieldContext.onChange(syntheticEvent, "onFieldChange");
+                    }}
+                    onSelect={({ value }) => {
+                        const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
+                        fieldContext.onChange(syntheticEvent, "onFieldChange");
+                    }}
                 />
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <div className="absolute mt-1">
-                    <Message severity="error"
+                    <SolidMessage severity="error"
                         text={
                             // formik?.errors[fieldLayoutInfo.attrs.name]?.toString()
                             typeof formik.errors[fieldLayoutInfo?.attrs?.name] === 'object'
@@ -337,4 +341,3 @@ export const DefaultSelectionDynamicFormViewWidget = ({ formik, fieldContext }: 
         </div>
     );
 }
-

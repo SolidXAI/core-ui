@@ -1,15 +1,16 @@
-import { Message } from "primereact/message";
 import { useEffect, useState } from "react";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
 import { getExtensionComponent } from "../../../../../helpers/registry";
-import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
-import { Button } from "primereact/button";
+import { SolidAutocomplete } from "../../../../shad-cn-ui/SolidAutocomplete";
+import { SolidButton } from "../../../../shad-cn-ui/SolidButton";
+import { SolidCheckbox } from "../../../../shad-cn-ui/SolidCheckbox";
+import { SolidDialog } from "../../../../shad-cn-ui/SolidDialog";
+import { SolidMessage } from "../../../../shad-cn-ui/SolidMessage";
+import { SolidPanel } from "../../../../shad-cn-ui/SolidPanel";
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
-import { useRelationEntityHandler } from "./widgets/helpers/useRelationEntityHandler";
+import { useRelationEntityHandler, RelationItem } from "./widgets/helpers/useRelationEntityHandler";
 import { InlineRelationEntityDialog } from "./widgets/helpers/InlineRelationEntityDialog";
-import { Checkbox } from "primereact/checkbox";
-import { Panel } from "primereact/panel";
 import { SolidFieldTooltip } from "../../../../../components/common/SolidFieldTooltip";
 import qs from 'qs';
 import * as Handlebars from "handlebars";
@@ -19,7 +20,9 @@ import { usePathname } from "../../../../../hooks/usePathname";
 import { camelCase, capitalize } from "lodash";
 import { SolidListView } from "../../../../core/list/SolidListView";
 import { RenderSolidFormEmbededView } from "./SolidRelationManyToOneField";
-import { Dialog } from "primereact/dialog";
+import { buildSyntheticChangeEvent } from "../fieldEventUtils";
+
+type AutoCompleteCompleteEvent = { query: string };
 
 export type FormViewParams = {
     moduleName: any;
@@ -202,11 +205,11 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                 )}
                 {isUnsaved && (
                     <div className="mb-2">
-                        <Message severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-content-start" />
+                        <SolidMessage severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-content-start" />
                     </div>
                 )}
                 <div className="flex align-items-center gap-3">
-                    <AutoComplete
+                    <SolidAutocomplete
                         readOnly={readOnly || readOnlyPermission || isUnsaved}
                         disabled={disabled || readOnlyPermission || isUnsaved}
                         multiple
@@ -219,17 +222,17 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                         onChange={() => {
                             // Intentionally empty — currentValues is managed via onSelect/onUnselect
                         }}
-                        onSelect={(e) => linkItem(e.value)}
-                        onUnselect={(e) => unlinkItem(e.value)}
+                        onSelect={(e: { value: RelationItem }) => linkItem(e.value)}
+                        onUnselect={(e: { value: RelationItem }) => unlinkItem(e.value)}
                         className="solid-standard-autocomplete w-full"
                     />
                     {fieldContext.field.attrs.inlineCreate && (
                         <>
                             <div>
-                                <Button
+                                <SolidButton
                                     icon="pi pi-plus"
                                     rounded
-                                    outlined
+                                    variant="outline"
                                     aria-label="Filter"
                                     type="button"
                                     size="small"
@@ -250,7 +253,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <div className="absolute mt-1">
-                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 </div>
             )}
         </div>
@@ -352,8 +355,8 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
         }
     };
 
-    const headerTemplate = (options: any) => (
-        <div className={`${options.className} justify-content-space-between`}>
+    const panelHeader = (
+        <div className="flex align-items-center gap-3 justify-content-space-between">
             <div className="flex align-items-center gap-3">
                 {showFieldLabel !== false && (
                     <label className="form-field-label">
@@ -364,10 +367,10 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
                 )}
                 {fieldContext.field.attrs.inlineCreate && (
                     <>
-                        <Button
+                        <SolidButton
                             icon="pi pi-plus"
                             rounded
-                            outlined
+                            variant="outline"
                             aria-label="Filter"
                             type="button"
                             size="small"
@@ -384,7 +387,6 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
                     </>
                 )}
             </div>
-            <div>{options.togglerElement}</div>
         </div>
     );
 
@@ -392,17 +394,17 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
         <div>
             {isUnsaved && (
                 <div className="mb-2">
-                    <Message severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-content-start" />
+                    <SolidMessage severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-content-start" />
                 </div>
             )}
-            <Panel toggleable headerTemplate={headerTemplate}>
+            {panelHeader}
+            <SolidPanel>
                 <div className="formgrid grid">
                     {allOptions.map((item: any, i: number) => (
                         <div key={item.value} className={`field col-6 flex gap-2 ${i >= 2 ? 'mt-3' : ''}`}>
-                            <Checkbox
-                                readOnly={readOnlyPermission || isUnsaved}
-                                disabled={isUnsaved}
-                                inputId={item.label}
+                            <SolidCheckbox
+                                disabled={readOnlyPermission || isUnsaved}
+                                id={item.label}
                                 checked={currentValues.some((s) => s.value === item.value)}
                                 onChange={() => handleCheckboxChange(item)}
                             />
@@ -412,7 +414,7 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
                         </div>
                     ))}
                 </div>
-            </Panel>
+            </SolidPanel>
         </div>
     );
 };
@@ -608,7 +610,7 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
             )}
             {isUnsaved && (
                 <div className="mb-2">
-                    <Message severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-content-start" />
+                    <SolidMessage severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-content-start" />
                 </div>
             )}
             {listViewParams && (
@@ -625,24 +627,24 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                 />
             )}
 
-            <Dialog
+            <SolidDialog
                 header={`Link existing ${fieldLabel}`}
                 visible={visibleLinkDialog}
                 style={{ width: '30vw', minWidth: 320 }}
                 onHide={() => setVisibleLinkDialog(false)}
                 footer={
                     <div className="flex gap-2 justify-content-end">
-                        <Button
+                        <SolidButton
                             label="Link"
                             size="small"
                             disabled={!selectedLinkItem || isLinking}
                             loading={isLinking}
                             onClick={handleLinkConfirm}
                         />
-                        <Button
+                        <SolidButton
                             label="Cancel"
                             size="small"
-                            outlined
+                            variant="outline"
                             className="bg-primary-reverse"
                             onClick={() => setVisibleLinkDialog(false)}
                         />
@@ -653,22 +655,22 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                     <label className="form-field-label">
                         Search {fieldLabel}
                     </label>
-                    <AutoComplete
+                    <SolidAutocomplete
                         field="label"
                         value={selectedLinkItem}
                         suggestions={suggestions}
                         completeMethod={handleLinkSearch}
-                        onChange={(e) => setSelectedLinkItem(e.value)}
-                        onSelect={(e) => setSelectedLinkItem(e.value)}
+                        onChange={({ value }: { value: any }) => setSelectedLinkItem(value)}
+                        onSelect={({ value }: { value: any }) => setSelectedLinkItem(value)}
                         placeholder={`Type to search...`}
                         className="w-full"
                         dropdown
                     />
                 </div>
-            </Dialog>
+            </SolidDialog>
 
 
-            <Dialog
+            <SolidDialog
                 showHeader={false}
                 headerClassName="py-2"
                 contentClassName="px-0 pb-0"
@@ -690,17 +692,17 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                         . Please click save if you wish to proceed?
                     </p>
                     <div className="flex align-items-center justify-content-start gap-2 mt-3">
-                        <Button label="Save" size="small" onClick={saveParentEntity} />
-                        <Button
+                        <SolidButton label="Save" size="small" onClick={saveParentEntity} />
+                        <SolidButton
                             label="Cancel"
                             size="small"
                             onClick={() => setShowSaveParentEntityConfirmationPopup(false)}
-                            outlined
+                            variant="outline"
                             className="bg-primary-reverse"
                         />
                     </div>
                 </div>
-            </Dialog>
+            </SolidDialog>
         </div>
     );
 };

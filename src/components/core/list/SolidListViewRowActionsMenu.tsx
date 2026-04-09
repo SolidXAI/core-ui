@@ -1,4 +1,4 @@
-import { useState } from "react";
+import React, { useState } from "react";
 import { SolidPopover, SolidPopoverContent, SolidPopoverTrigger } from "../../shad-cn-ui/SolidPopover";
 import { SolidListViewRowActionMenuItem } from "./SolidListViewRowActionMenuItem";
 
@@ -42,7 +42,7 @@ export function SolidListViewRowActionsMenu({
           type="button"
           className="solid-row-menu-trigger"
           data-no-row-click="true"
-          onClick={(event) => {
+          onClick={(event: React.MouseEvent<HTMLButtonElement>) => {
             event.stopPropagation();
             onSelectRow?.(rowData);
           }}

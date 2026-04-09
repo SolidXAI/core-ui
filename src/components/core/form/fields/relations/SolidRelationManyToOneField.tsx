@@ -1,14 +1,14 @@
 
 import { createSolidEntityApi } from "../../../../../redux/api/solidEntityApi";
-import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
-import { Message } from "primereact/message";
+import { SolidAutocomplete } from "../../../../shad-cn-ui/SolidAutocomplete";
+import { SolidButton } from "../../../../shad-cn-ui/SolidButton";
+import { SolidDialog } from "../../../../shad-cn-ui/SolidDialog";
+import { SolidMessage } from "../../../../shad-cn-ui/SolidMessage";
 import qs from "qs";
-import { useEffect, useState } from "react";
+import React, { useEffect, useState } from "react";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "../ISolidField";
 import { camelCase } from "lodash";
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
 import SolidFormView from '../../../../../components/core/form/SolidFormView';
 import { getExtensionComponent } from "../../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
@@ -19,6 +19,9 @@ import * as Handlebars from "handlebars";
 import { SolidFieldTooltip } from "../../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../../constants/error-messages";
 import { getVirtualScrollerOptions } from "../../../../../helpers/autoCompleteVirtualScroll";
+import { buildSyntheticChangeEvent } from "../fieldEventUtils";
+
+type AutoCompleteCompleteEvent = { query: string };
 
 
 export type FormViewParams = {
@@ -431,18 +434,27 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
                     </label>
                 }
                 <div className="flex align-items-center gap-3">
-                    <AutoComplete
+                    <SolidAutocomplete
                         readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                         disabled={formDisabled || fieldDisabled || readOnlyPermission}
-                        {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                         id={fieldLayoutInfo.attrs.name}
                         field="solidManyToOneLabel"
                         value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                         dropdown={!readOnlyPermission}
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}
-                        onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-                        onFocus={(e) => e.target.select()}
+                        onChange={({ value }: { value: any }) =>
+                            fieldContext.onChange(
+                                buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text"),
+                                'onFieldChange'
+                            )
+                        }
+                        onSelect={({ value }: { value: any }) =>
+                            fieldContext.onChange(
+                                buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text"),
+                                'onFieldChange'
+                            )
+                        }
                         className="w-full solid-standard-autocomplete"
                         // virtualScrollerOptions={{
                         //     itemSize: 38,
@@ -462,7 +474,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <div className="absolute mt-1">
-                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 </div>
             )}
         </div>
@@ -499,10 +511,10 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
     return (
         <div>
             <div>
-                <Button
+                <SolidButton
                     icon="pi pi-plus"
                     rounded
-                    outlined
+                    variant="outline"
                     aria-label="Filter"
                     type="button"
                     size="small"
@@ -510,7 +522,7 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
                     className="custom-add-button"
                 />
             </div>
-            <Dialog
+            <SolidDialog
                 header=""
                 showHeader={false}
                 visible={visibleCreateRelationEntity}
@@ -528,7 +540,7 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
             >
                 <SolidFormView {...params} />
 
-            </Dialog>
+            </SolidDialog>
         </div>
     )
 }
@@ -964,18 +976,27 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
                     </label>
                 }
                 <div className="flex align-items-center gap-3" >
-                    <AutoComplete
+                    <SolidAutocomplete
                         readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                         disabled={formDisabled || fieldDisabled || readOnlyPermission || viewMode === "view"}
                         field="solidManyToOneLabel"
-                        {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
                         id={fieldLayoutInfo.attrs.name}
                         value={resolvedValue || null}
                         dropdown={!readOnlyPermission}
                         suggestions={autoCompleteItems}
                         completeMethod={autoCompleteSearch}
-                        onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-                        onFocus={(e) => e.target.select()}
+                        onChange={({ value }: { value: any }) =>
+                            fieldContext.onChange(
+                                buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text"),
+                                'onFieldChange'
+                            )
+                        }
+                        onSelect={({ value }: { value: any }) =>
+                            fieldContext.onChange(
+                                buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text"),
+                                'onFieldChange'
+                            )
+                        }
                         className="w-full solid-standard-autocomplete"
                         // virtualScrollerOptions={{
                         //     itemSize: 38,
@@ -997,11 +1018,10 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
             {
                 isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                     <div className="absolute mt-1" >
-                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                        <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                     </div>
                 )
             }
         </div>
     );
 }
-

@@ -1,6 +1,6 @@
 
 import CodeEditor from "../../../../components/common/CodeEditor";
-import { Message } from "primereact/message";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "../../../../helpers/registry";
@@ -133,7 +133,7 @@ export const DefaultJsonFormEditWidget = ({ formik, fieldContext }: SolidFormFie
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <div className="absolute mt-1">
-                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 </div>
             )}
         </div>

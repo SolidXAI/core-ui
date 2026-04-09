@@ -1,19 +1,15 @@
 
-import { InputTextarea } from "primereact/inputtextarea";
-import { Message } from "primereact/message";
 import * as Yup from 'yup';
+import styles from './solidFields.module.css';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-// import { Editor } from "primereact/editor";
 import { useEffect, useRef, useState } from "react";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import Editor from '@monaco-editor/react';
-import { Calendar } from "primereact/calendar";
-import { Dropdown } from "primereact/dropdown";
-import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import { SolidButton, SolidDatePicker, SolidSelect, SolidInput } from "../../../shad-cn-ui";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 
 
 export class SolidLongTextField implements ISolidField {
@@ -137,31 +133,26 @@ export const DefaultLongTextFormEditWidget = ({ formik, fieldContext }: SolidFor
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
     return (
-        <div className="relative">
-            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
-                {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                        <SolidFieldTooltip fieldContext={fieldContext} />
-                        {/* &nbsp;   {fieldDescription && <span>({fieldDescription}) </span>} */}
-                    </label>
-                }
-                <InputTextarea
-                    readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                    disabled={formDisabled || fieldDisabled}
-                    id={fieldLayoutInfo.attrs.name}
-                    aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                    // onChange={formik.handleChange}
-                    onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                    rows={5}
-                    cols={30}
-                />
-            </div>
+        <div className={styles.fieldWrapper}>
+            {showFieldLabel != false &&
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={styles.fieldLabel}>
+                    {fieldLabel}
+                    {fieldMetadata.required && <span className="text-red-500">*</span>}
+                    <SolidFieldTooltip fieldContext={fieldContext} />
+                </label>
+            }
+            <textarea
+                readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                disabled={formDisabled || fieldDisabled}
+                id={fieldLayoutInfo.attrs.name}
+                aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => fieldContext.onChange(e, 'onFieldChange')}
+                value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                rows={5}
+                className={styles.fieldTextarea}
+            />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <div className="absolute mt-1">
-                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                </div>
+                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
             )}
         </div>
     );
@@ -202,7 +193,7 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
     // };
     const fieldJsonSchema = fieldLayoutInfo.attrs?.jsonSchema;
     if (!fieldJsonSchema) {
-        return <Message severity="error" text="Field Layout Attributes are missing jsonSchema, cannot render with widget jsonEditor without specifying the schema" />
+        return <SolidMessage severity="error" text="Field Layout Attributes are missing jsonSchema, cannot render with widget jsonEditor without specifying the schema" />
     }
     const [data, setData] = useState(JSON.parse(value || '[]'));
 
@@ -212,22 +203,19 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
         if (!meta) return null;
 
         if (meta.type === "string" || meta.type === "shortText") {
-            return (
-                <InputText value={value} readOnly disabled />
-            );
+            return <SolidInput value={value} readOnly disabled />;
         }
         if (meta.type === "longText") {
             return (
-                <InputTextarea value={value} rows={10} cols={100} readOnly />
+                <textarea value={value} rows={10} cols={100} readOnly className={styles.fieldTextarea} />
             );
         }
         if (meta.type === "date" || meta.type === "datetime") {
             return (
-                <Calendar
-                    value={value ? new Date(value) : null}
-                    showTime={meta.type === "datetime"}
-                    dateFormat="yy-mm-dd"
-                    readOnlyInput
+                <SolidDatePicker
+                    selected={value ? new Date(value) : null}
+                    onChange={() => {}}
+                    showTimeSelect={meta.type === "datetime"}
                     disabled
                 />
             );
@@ -235,12 +223,11 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
 
         if (meta.type === "selectionStatic") {
             return (
-                <Dropdown
+                <SolidSelect
                     value={value}
                     // @ts-ignore
                     options={meta.allowedValues.map((v) => ({ label: v, value: v }))}
                     placeholder="Select."
-                    readOnly
                     disabled
                 />
             );
@@ -324,7 +311,7 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
     // };
     const fieldJsonSchema = fieldLayoutInfo.attrs?.jsonSchema;
     if (!fieldJsonSchema) {
-        return <Message severity="error" text="Field Layout Attributes are missing jsonSchema, cannot render with widget jsonEditor without specifying the schema" />
+        return <SolidMessage severity="error" text="Field Layout Attributes are missing jsonSchema, cannot render with widget jsonEditor without specifying the schema" />
     }
     const [data, setData] = useState(JSON.parse(value || '[]'));
 
@@ -363,7 +350,7 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
 
         if (meta.type === "string" || meta.type === "shortText") {
             return (
-                <InputText
+                <SolidInput
                     value={value}
                     onChange={(e) => handleChange(index, key, e.target.value)}
                     disabled={!!disabled}
@@ -374,38 +361,36 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
 
         if (meta.type === "longText") {
             return (
-                <InputTextarea
+                <textarea
                     onChange={(e) => handleChange(index, key, e.target.value)}
                     value={value}
                     rows={10}
                     cols={100}
+                    className={styles.fieldTextarea}
                 />
             );
         }
 
         if (meta.type === "date" || meta.type === "datetime") {
             return (
-                <Calendar
-                    value={value ? new Date(value) : null}
-                    onChange={(e) => handleChange(index, key, e.value)}
-                    showTime={meta.type === "datetime"}
-                    dateFormat="yy-mm-dd"
+                <SolidDatePicker
+                    selected={value ? new Date(value) : null}
+                    onChange={(date: Date | null) => handleChange(index, key, date)}
+                    showTimeSelect={meta.type === "datetime"}
                     disabled={!!disabled}
-                    readOnlyInput={!!readOnly}
                 />
             );
         }
 
         if (meta.type === "selectionStatic") {
             return (
-                <Dropdown
+                <SolidSelect
                     value={value}
                     // @ts-ignore
                     options={meta.allowedValues.map((v) => ({ label: v, value: v }))}
                     onChange={(e) => handleChange(index, key, e.value)}
                     placeholder="Select."
                     disabled={!!disabled}
-                    readOnly={!!readOnly}
                 />
             );
         }
@@ -426,12 +411,13 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
             <div className="p-4 border-round surface-card shadow-1">
                 <div className="flex justify-content-between align-items-center mb-3">
                     {!disabled && !readOnly ? (
-                        <Button
+                        <SolidButton
                             type="button"
-                            label="Add"
-                            icon="pi pi-plus"
+                            leftIcon={<i className="pi pi-plus" aria-hidden />}
                             onClick={handleAdd}
-                        />
+                        >
+                            Add
+                        </SolidButton>
                     ) : null}
                 </div>
 
@@ -455,9 +441,9 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                                     ))}
                                 </div>
                                 {!disabled && !readOnly ? (
-                                    <Button
+                                    <SolidButton
                                         type="button"
-                                        icon="pi pi-minus"
+                                        leftIcon={<i className="pi pi-minus" aria-hidden />}
                                         className="ml-2 h-2rem w-2rem rounded-circle"
                                         onClick={() => handleRemove(idx)}
                                     />
@@ -522,7 +508,7 @@ export const CodeEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFiel
 
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <div className="mt-1">
-                    <Message text={formik.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    <SolidMessage text={formik.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 </div>
             )}
         </div>
@@ -554,7 +540,7 @@ export const DynamicSelectionStaticEditWidget = ({
 
         if (meta?.type === "selectionStatic") {
             return (
-                <Dropdown
+                <SolidSelect
                     value={val}
                     options={meta.allowedValues.map((v:any) => ({
                         label: v,
@@ -563,7 +549,6 @@ export const DynamicSelectionStaticEditWidget = ({
                     onChange={(e) => handleChange(key, e.value)}
                     placeholder={meta.placeHolder || "Select."}
                     disabled={!!disabled}
-                    readOnly={!!readOnly}
                     className="w-full"
                 />
             );
@@ -615,4 +600,3 @@ export const DynamicSelectionStaticEditWidget = ({
       </div>
     );
 };
-

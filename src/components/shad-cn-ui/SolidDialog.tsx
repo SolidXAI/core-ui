@@ -3,13 +3,23 @@ import * as Dialog from "@radix-ui/react-dialog";
 import { X } from "lucide-react";
 
 type SolidDialogProps = {
-  open: boolean;
-  onOpenChange: (open: boolean) => void;
+  open?: boolean;
+  onOpenChange?: (open: boolean) => void;
   children: React.ReactNode;
   className?: string;
   contentClassName?: string;
   overlayClassName?: string;
   style?: React.CSSProperties;
+  // Compatibility props
+  visible?: boolean;
+  onHide?: () => void;
+  modal?: boolean;
+  header?: React.ReactNode;
+  footer?: React.ReactNode;
+  showHeader?: boolean;
+  headerClassName?: string;
+  contentStyle?: React.CSSProperties;
+  breakpoints?: Record<string, string>;
 };
 
 type SolidDialogSectionProps = {
@@ -29,16 +39,36 @@ export function SolidDialog({
   contentClassName,
   overlayClassName,
   style,
+  visible,
+  onHide,
+  header,
+  footer,
+  showHeader = true,
+  headerClassName,
+  contentStyle,
 }: SolidDialogProps) {
+  const controlledOpen = open ?? visible ?? false;
+  const handleOpenChange = (next: boolean) => {
+    onOpenChange?.(next);
+    if (!next) onHide?.();
+  };
+
   return (
-    <Dialog.Root open={open} onOpenChange={onOpenChange}>
+    <Dialog.Root open={controlledOpen} onOpenChange={handleOpenChange}>
       <Dialog.Portal>
         <Dialog.Overlay className={cx("solid-radix-dialog-overlay", overlayClassName)} />
         <Dialog.Content
           className={cx("solid-radix-dialog-content", className, contentClassName)}
-          style={style}
+          style={style ?? contentStyle}
         >
+          {showHeader && (header || onHide) ? (
+            <SolidDialogHeader className={headerClassName}>
+              {header ? <SolidDialogTitle>{header}</SolidDialogTitle> : null}
+              <SolidDialogClose aria-label="Close" />
+            </SolidDialogHeader>
+          ) : null}
           {children}
+          {footer ? <SolidDialogFooter>{footer}</SolidDialogFooter> : null}
         </Dialog.Content>
       </Dialog.Portal>
     </Dialog.Root>

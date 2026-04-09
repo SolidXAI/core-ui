@@ -1,6 +1,7 @@
 
-import { Calendar } from "primereact/calendar";
-import { Message } from "primereact/message";
+import { SolidDatePicker } from "../../../shad-cn-ui/SolidDatePicker";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
+import { buildSyntheticChangeEvent } from "./fieldEventUtils";
 import { useEffect, useRef, useState } from "react";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
@@ -9,6 +10,12 @@ import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { DateFieldViewComponent } from '../../../../components/core/common/DateFieldViewComponent';
+
+const toDateValue = (value: any) => {
+    if (!value) return null;
+    const date = value instanceof Date ? value : new Date(value);
+    return Number.isNaN(date.getTime()) ? null : date;
+};
 
 export class SolidDateTimeField implements ISolidField {
 
@@ -102,13 +109,10 @@ export class SolidDateTimeField implements ISolidField {
 
 export const DefaultDateTimeFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
 
-    const [overlayVisible, setOverlayVisible] = useState(false);
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const className = fieldLayoutInfo.attrs?.className || 'field col-12';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-    const calendarRef = useRef<any>(null); // Reference for the Calendar component
-    const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const readOnlyPermission = fieldContext.readOnly;
@@ -116,26 +120,15 @@ export const DefaultDateTimeFormEditWidget = ({ formik, fieldContext }: SolidFor
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
     const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
+    const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
+    const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
-    useEffect(() => {
-        const handleDocumentClick = (event: MouseEvent) => {
-            const inputElement = calendarRef.current?.getInput();
-            const overlayElement = calendarRef.current?.getOverlay();
+    const parsedValue = toDateValue(formik.values[fieldLayoutInfo.attrs.name]);
 
-            if (overlayVisible && inputElement && !inputElement.contains(event.target as Node) && overlayElement && !overlayElement.contains(event.target as Node)) {
-                setOverlayVisible(false);
-            }
-        };
-
-        document.addEventListener('mousedown', handleDocumentClick);
-        return () => {
-            document.removeEventListener('mousedown', handleDocumentClick);
-        };
-    }, [overlayVisible]);
-
-    const handleInputClick = () => {
-        setOverlayVisible(true);
+    const handleChange = (date: Date | null) => {
+        const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, date, "datetime-local");
+        fieldContext.onChange(syntheticEvent, "onFieldChange");
     };
 
     return (
@@ -148,47 +141,20 @@ export const DefaultDateTimeFormEditWidget = ({ formik, fieldContext }: SolidFor
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
-                <div onClick={handleInputClick} id={fieldLayoutInfo.attrs.name}>
-                    <Calendar
-                        disabled={formDisabled || fieldDisabled || readOnlyPermission}
-                        ref={calendarRef} // Attach ref to Calendar
-                        id={fieldLayoutInfo.attrs.name}
-                        aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                        // onChange={formik.handleChange}
-                        onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-                        //@ts-ignore
-                        value={formik.values[fieldLayoutInfo.attrs.name] ? new Date(formik.values[fieldLayoutInfo.attrs.name]) : Date()}
-                        // dateFormat="mm/dd/yy"
-                        // placeholder="mm/dd/yyyy hh:mm"
-                        mask="99/99/9999 99:99"
-                        appendTo="self"
-                        showTime
-                        hourFormat="24"
-                        hideOnDateTimeSelect
-                        onFocus={() => setOverlayVisible(true)}
-                        visible={overlayVisible}
-                        onVisibleChange={(e) => {
-                            console.log("Overlay visibility changed:", e.visible);
-                            setOverlayVisible(e.visible);
-                        }}
-                        onBlur={(e: React.FocusEvent) => {
-                            if (calendarRef.current?.getOverlay()?.contains(e.relatedTarget as Node)) {
-                                return;
-                            }
-                            setOverlayVisible(false);
-                        }}
-                        onKeyDown={(e: React.KeyboardEvent<HTMLInputElement>) => {
-                            if (e.key === "Tab") {
-                                setOverlayVisible(false);
-                            }
-                        }
-                        }
-                    />
-                </div>
+                <SolidDatePicker
+                    selected={parsedValue ?? undefined}
+                    onChange={(date: Date | null) => handleChange(date as Date | null)}
+                    disabled={formDisabled || fieldDisabled || readOnlyPermission}
+                    readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                    showTimeSelect
+                    dateFormat="yyyy-MM-dd h:mm aa"
+                    placeholderText={fieldLayoutInfo.attrs.placeholder}
+                    className=""
+                />
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <div className="absolute mt-1">
-                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 </div>
             )}
         </div>
