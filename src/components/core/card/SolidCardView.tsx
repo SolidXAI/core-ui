@@ -396,43 +396,45 @@ export const SolidCardView = (params: SolidCardViewParams) => {
             )}
           </div>
 
-          <div className="solid-card-view-body flex-1 min-h-0 overflow-auto">
-            {showEmptyState ? (
-              <SolidEmptyListViewPlaceholder
-                createButtonUrl={createButtonUrl}
-                createActionQueryParams={createActionQueryParams}
-                actionsAllowed={actionsAllowed}
-                params={params}
-                solidListViewMetaData={solidCardViewMetaDataResponse}
-                handleFetchUpdatedRecords={handleFetchUpdatedRecords}
-              />
-            ) : (
-              <CardGrid
-                records={cards}
-                solidCardViewMetaData={solidCardViewMetaDataResponse?.data}
-                editButtonUrl={editBaseUrl}
-                setLightboxUrls={setLightboxUrls}
-                setOpenLightbox={setOpenLightbox}
-              />
+          <div className="solid-card-view-content">
+            <div className="solid-card-view-body">
+              {showEmptyState ? (
+                <SolidEmptyListViewPlaceholder
+                  createButtonUrl={createButtonUrl}
+                  createActionQueryParams={createActionQueryParams}
+                  actionsAllowed={actionsAllowed}
+                  params={params}
+                  solidListViewMetaData={solidCardViewMetaDataResponse}
+                  handleFetchUpdatedRecords={handleFetchUpdatedRecords}
+                />
+              ) : (
+                <CardGrid
+                  records={cards}
+                  solidCardViewMetaData={solidCardViewMetaDataResponse?.data}
+                  editButtonUrl={editBaseUrl}
+                  setLightboxUrls={setLightboxUrls}
+                  setOpenLightbox={setOpenLightbox}
+                />
+              )}
+            </div>
+
+            {totalRecords > 0 && (
+              <div className="solid-card-view-pagination">
+                <Paginator
+                  first={first}
+                  rows={rows}
+                  totalRecords={totalRecords}
+                  rowsPerPageOptions={rowsPerPageOptions}
+                  onPageChange={(event) => {
+                    setFirst(event.first);
+                    setRows(event.rows);
+                  }}
+                  template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink"
+                  currentPageReportTemplate="{first} - {last} of {totalRecords}"
+                />
+              </div>
             )}
           </div>
-
-          {totalRecords > 0 && (
-            <div className="solid-card-view-pagination">
-              <Paginator
-                first={first}
-                rows={rows}
-                totalRecords={totalRecords}
-                rowsPerPageOptions={rowsPerPageOptions}
-                onPageChange={(event) => {
-                  setFirst(event.first);
-                  setRows(event.rows);
-                }}
-                template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink"
-                currentPageReportTemplate="{first} - {last} of {totalRecords}"
-              />
-            </div>
-          )}
         </div>
       </div>
 
