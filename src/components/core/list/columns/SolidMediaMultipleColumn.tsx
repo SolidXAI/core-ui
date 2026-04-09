@@ -1,13 +1,12 @@
 
 import React, { useState } from 'react';
+import { Download, File, Volume2 } from "lucide-react";
 import { Column } from "../SolidDataTable";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
-import { Button } from 'primereact/button';
 import { SolidMediaListFieldWidgetProps } from '../../../../types/solid-core';
 import { getExtensionComponent } from '../../../../helpers/registry';
-import { classNames } from 'primereact/utils';
 import { FileReaderExt } from '../../../../components/common/FileReaderExt';
-import { Dialog } from 'primereact/dialog';
+import { SolidButton, SolidDialog } from "../../../shad-cn-ui";
 
 const getCleanUrl = (url: string) => url.split("?")[0];
 
@@ -88,7 +87,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
                     style={{ width: 40, height: 40 }}
                     onClick={handleClick}
                 >
-                    <i className="pi pi-volume-up text-xl text-gray-600"></i>
+                    <Volume2 size={18} className="text-gray-600" />
                 </div>
             );
         }
@@ -99,7 +98,7 @@ const MediaPreview = ({ src, onClick }: { src: string; onClick: (event: React.Mo
             style={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center" }}
             onClick={handleClick}
         >
-            <i className={classNames("pi pi-file", "text-3xl text-gray-400")}></i>
+            <File size={24} className="text-gray-400" />
         </div>
     );
 };
@@ -239,15 +238,11 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
 
 
             {/* VIEW ALL DIALOG */}
-            <Dialog
-                visible={isShowAllFiles}
+            <SolidDialog
+                open={isShowAllFiles}
+                onOpenChange={setShowAllFiles}
                 header="Items Uploaded"
-                modal
-                onHide={() => setShowAllFiles(false)}
-                // style={{ minWidth: 450 }}
-                style={{ width: '32rem' }}
-                onClick={(event) => event.stopPropagation()}
-                breakpoints={{ '591px': '94vw' }}
+                style={{ width: '32rem', maxWidth: '94vw' }}
             >
                 {fullrecord?.map((file: any) => {
                     const fileId = `${file.name}-${file.size}`;
@@ -268,11 +263,11 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                                             {file?.name}
                                         </p>
 
-                                        <Button
+                                        <SolidButton
                                             type="button"
-                                            text
-                                            icon="pi pi-download"
                                             size="small"
+                                            variant="ghost"
+                                            leftIcon={<Download size={14} />}
                                             onClick={() => {
                                                 downloadFile(file?.fileUrl, "")
                                             }}
@@ -288,7 +283,7 @@ export const DefaultMediaMultipleListWidget = ({ rowData, fieldMetadata, setLigh
                     )
                 }
                 )}
-            </Dialog>
+            </SolidDialog>
         </div>
     ) : (
         <div style={{ height: 40, width: 40 }} />

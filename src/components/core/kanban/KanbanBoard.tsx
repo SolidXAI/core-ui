@@ -29,7 +29,7 @@ const findKanbanCardNode = (nodes: any[] = []): any => {
     return null;
 };
 
-export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, maxSwimLanesCount, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLanePagination, setLightboxUrls, setOpenLightbox, editButtonUrl }: any) => {
+export const KanbanBoard = ({ groupByFieldName, kanbanViewData, maxSwimLanesCount, solidKanbanViewMetaData, setKanbanViewData, handleLoadMore, onDragEnd, handleSwimLanePagination, setLightboxUrls, setOpenLightbox, editButtonUrl }: any) => {
     const [loading, setLoading] = useState<boolean>(true);
     // State to manage the folded status of each column
     const [foldedStates, setFoldedStates] = useState<Record<string, boolean>>({});
@@ -133,7 +133,6 @@ export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, max
                         return (
                             <KanbanColumn
                                 key={data.groupName}
-                                groupedView={groupedView}
                                 groupByField={data.groupName}
                                 group={group}
                                 solidKanbanViewMetaData={solidKanbanViewMetaData}
@@ -148,7 +147,7 @@ export const KanbanBoard = ({ groupByFieldName, groupedView, kanbanViewData, max
                             />
                         );
                     })}
-                    {groupedView !== false && kanbanViewData.length < maxSwimLanesCount &&
+                    {kanbanViewData.length < maxSwimLanesCount &&
                         <div>
                             <a size="small" className="kaban-swimlane-load-more" style={{ textWrap: 'nowrap' }} text onClick={handleSwimLanePagination}>Load More...({maxSwimLanesCount - kanbanViewData.length})</a>
                         </div>

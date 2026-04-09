@@ -69,7 +69,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [size, setSize] = useState<string | any>(sizeOptions[1].value);
   const [viewModes, setViewModes] = useState<any>([]);
   const [groupByFieldName, setGroupByFieldName] = useState<string>("");
-  const [groupedView, setGroupedView] = useState(true);
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
   const [openLightbox, setOpenLightbox] = useState(false);
   const [lightboxUrls, setLightboxUrls] = useState({});
@@ -158,17 +157,36 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     const initialFilters: any = {};
     const toPopulate: string[] = [];
     const toPopulateMedia: string[] = [];
-    function extractFields(node: any, result: any = []) {
-      if (node.type === "field") {
-        result.push(node);
+    function findCardNode(nodes: any[] = []): any {
+      for (const node of nodes) {
+        if (!node) continue;
+        if (node.type === "card") return node;
+        if (Array.isArray(node.children) && node.children.length > 0) {
+          const nestedCard = findCardNode(node.children);
+          if (nestedCard) return nestedCard;
+        }
       }
-      if (node.children) {
-        node.children.forEach((child: any) => extractFields(child, result));
+
+      return null;
+    }
+    function extractFields(nodes: any, result: any = []) {
+      if (!nodes) return result;
+      if (Array.isArray(nodes)) {
+        nodes.forEach((node: any) => extractFields(node, result));
+        return result;
+      }
+      if (nodes.type === "field") {
+        result.push(nodes);
+      }
+      if (nodes.children) {
+        nodes.children.forEach((child: any) => extractFields(child, result));
       }
       return result;
     }
 
-    const layoutFields = extractFields(solidView.layout);
+    const cardNode = findCardNode(solidView?.layout?.children || []);
+    const fieldSource = cardNode?.children?.length ? cardNode.children : solidView.layout;
+    const layoutFields = extractFields(fieldSource);
 
     for (let i = 0; i < layoutFields.length; i++) {
       const column = layoutFields[i];
@@ -223,12 +241,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     if (solidKanbanViewMetaData) {
       setKanbanViewMetaData(solidKanbanViewMetaData);
       setViewModes(solidKanbanViewMetaData?.data?.viewModes);
-      if (solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.grouped !== false) {
-        setGroupByFieldName(solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.groupBy)
-      } else {
-        setGroupByFieldName("deletedTracker");
-        setGroupedView(false);
-      }
+      setGroupByFieldName(solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.groupBy || "");
     }
   }, [solidKanbanViewMetaData]);
 
@@ -836,7 +849,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
           <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
           {solidKanbanViewMetaData && kanbanViewData &&
-            <KanbanBoard groupByFieldName={groupByFieldName} groupedView={groupedView} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl}></KanbanBoard>
+            <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl}></KanbanBoard>
           }
         </div>
       </div>

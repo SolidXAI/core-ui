@@ -1,4 +1,5 @@
 import React, { useEffect, useMemo, useRef, useState } from "react";
+import { ChevronDown, ChevronUp, X } from "lucide-react";
 
 type SolidAutocompleteProps = {
   value?: any;
@@ -212,7 +213,7 @@ export function SolidAutocomplete({
             }}
               aria-label="Remove selection"
             >
-              <i className="pi pi-times" />
+              <X size={12} />
             </button>
           </span>
         ))}
@@ -306,7 +307,7 @@ export function SolidAutocomplete({
             }}
             aria-label="Toggle suggestions"
           >
-            <i className={open ? "pi pi-chevron-up" : "pi pi-chevron-down"} />
+            {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>
         )}
       </div>
@@ -329,7 +330,7 @@ export function SolidAutocomplete({
                   onClick={() => removeSelectedAt(index)}
                   aria-label="Remove selection"
                 >
-                  <i className="pi pi-times" />
+                  <X size={12} />
                 </button>
               </span>
             ))}

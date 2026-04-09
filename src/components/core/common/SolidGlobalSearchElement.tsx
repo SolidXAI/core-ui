@@ -1311,11 +1311,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     </div>
 
                     {/* button to clear filter */}
-                    <a onClick={clearCustomFilter}
-                        style={{ cursor: "pointer" }}
-                    >
-                        <i className="pi pi-times ml-1">
-                        </i></a>
+                    <button type="button" onClick={clearCustomFilter} style={{ cursor: "pointer" }} className="ml-1">
+                        <X size={14} />
+                    </button>
                 </div>
             </li>
         )
@@ -1387,11 +1385,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     </div>
 
                     {/* button to clear filter */}
-                    <a onClick={removeSavedFilter}
-                        style={{ cursor: "pointer" }}
-                    >
-                        <i className="pi pi-times ml-1">
-                        </i></a>
+                    <button type="button" onClick={removeSavedFilter} style={{ cursor: "pointer" }} className="ml-1">
+                        <X size={14} />
+                    </button>
                 </div>
             </li>
         )
@@ -1421,11 +1417,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     </div>
 
                     {/* button to clear filter */}
-                    <a onClick={removeGrouping}
-                        style={{ cursor: "pointer" }}
-                    >
-                        <i className="pi pi-times ml-1">
-                        </i></a>
+                    <button type="button" onClick={removeGrouping} style={{ cursor: "pointer" }} className="ml-1">
+                        <X size={14} />
+                    </button>
                 </div>
             </li>
         )
@@ -1675,11 +1669,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                 </React.Fragment>
                             ))}
                             {/* button to clear filter */}
-                            <i className="pi pi-times ml-1"
-                                style={{ cursor: "pointer" }}
-                                onClick={() => handleRemoveChipGroup(column)}
-                            >
-                            </i>
+                            <button type="button" className="ml-1" style={{ cursor: "pointer" }} onClick={() => handleRemoveChipGroup(column)}>
+                                <X size={14} />
+                            </button>
                         </div>
                     </li>
                 )
@@ -1749,11 +1741,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     <span className="custom-chip-value">{predefinedSearchChip?.value}</span>
                 </div>
                 {/* button to clear filter */}
-                <i className="pi pi-times ml-1"
-                    style={{ cursor: "pointer" }}
-                    onClick={removePredefinedSearchChip}
-                >
-                </i>
+                <button type="button" className="ml-1" style={{ cursor: "pointer" }} onClick={removePredefinedSearchChip}>
+                    <X size={14} />
+                </button>
             </div>
         </li>
     );
@@ -2116,17 +2106,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     </SolidDialogFooter>
                 </SolidDialog>
             </div >
-            {/* <div>
-                <Button
-                    icon="pi pi-save"
-                    style={{ fontSize: 10 }}
-                    severity="secondary"
-                    outlined size="small"
-                    onClick={() => {
-                        setShowSaveFilterPopup(true)
-                    }}
-                />
-            </div> */}
         </>
     )
 });

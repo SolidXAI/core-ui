@@ -3,8 +3,8 @@
 import { usePathname } from "../../hooks/usePathname";
 import { useRouter } from "../../hooks/useRouter";
 import { useSearchParams } from "../../hooks/useSearchParams";
-import { BreadCrumb } from "primereact/breadcrumb";
 import { useEffect, useState } from "react";
+import { ChevronRight } from "lucide-react";
 
 interface BreadcrumbItem {
   label: string;
@@ -89,18 +89,17 @@ export const SolidBreadcrumb = (props: Props) => {
     });
   }
 
-  const items = breadcrumbItems.map((item, index) => ({
-    label: item.label,
-    ...(item.link
-      ? {
-        template: () => {
+  return (
+    <nav className="solid-breadcrumb" aria-label="Breadcrumb">
+      <ol className="solid-breadcrumb-list">
+        {breadcrumbItems.map((item, index) => {
           const fullLabel = item.label;
           const truncatedLabel = truncateText(fullLabel, 10);
           const shouldTruncate = fullLabel.length > 10;
+          const isLast = index === breadcrumbItems.length - 1;
 
-          const handleClick = (e: any) => {
-            e.preventDefault();
-            // prefer stored full return url which preserves query params (action/menu)
+          const handleClick = () => {
+            if (!item.link) return;
             if (typeof window !== "undefined") {
               const storedFullUrl = sessionStorage.getItem("fromViewUrl");
               if (storedFullUrl) {
@@ -108,23 +107,30 @@ export const SolidBreadcrumb = (props: Props) => {
                 return;
               }
             }
-            router.push(item.link!);
+            router.push(item.link);
           };
 
           return (
-            <a onClick={handleClick}>
-              <p
-                className={`${index === 1 ? 'font-bold' : 'font-normal'} ${shouldTruncate ? 'cursor-pointer' : ''}`}
-                title={shouldTruncate ? fullLabel : undefined}
-              >
-                {truncatedLabel}
-              </p>
-            </a>
+            <li key={`${item.label}-${index}`} className="solid-breadcrumb-item">
+              {item.link ? (
+                <button
+                  type="button"
+                  className="solid-breadcrumb-link"
+                  onClick={handleClick}
+                  title={shouldTruncate ? fullLabel : undefined}
+                >
+                  <span className={isLast ? "font-bold" : "font-normal"}>{truncatedLabel}</span>
+                </button>
+              ) : (
+                <span className="solid-breadcrumb-current" title={shouldTruncate ? fullLabel : undefined}>
+                  {truncatedLabel}
+                </span>
+              )}
+              {!isLast ? <ChevronRight size={14} className="solid-breadcrumb-separator" /> : null}
+            </li>
           );
-        },
-      }
-      : {}),
-  }));
-
-  return <BreadCrumb model={items} className="solid-breadcrumb" />;
+        })}
+      </ol>
+    </nav>
+  );
 };

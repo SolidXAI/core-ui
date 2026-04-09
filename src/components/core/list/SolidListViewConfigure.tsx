@@ -2,7 +2,6 @@ import { useSession } from "../../../hooks/useSession";
 import { permissionExpression } from "../../../helpers/permissions";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
-import { Button } from "primereact/button";
 import { useEffect, useRef, useState } from "react";
 import { SolidListColumnSelector } from "./SolidColumnSelector/SolidListColumnSelector";
 import { SolidExport } from "../../../components/common/SolidExport";
@@ -14,6 +13,7 @@ import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImp
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { capitalize } from "lodash";
+import { Cog, Download, RefreshCw, Save, SlidersHorizontal, Table, Trash2, Upload } from "lucide-react";
 import {
     SolidDialog,
     SolidDialogBody,
@@ -159,7 +159,7 @@ export const SolidListViewConfigure = (
                         className="solid-icon-button solid-header-cog-trigger"
                         aria-label="Open list options"
                     >
-                        <i className="pi pi-cog" />
+                        <Cog size={16} />
                     </button>
                 </SolidDropdownMenuTrigger>
                 <SolidDropdownMenuContent className="listview-cogwheel-panel">
@@ -184,7 +184,7 @@ export const SolidListViewConfigure = (
                                         setIsCogMenuOpen(false);
                                     }}
                                 >
-                                    <i className="pi pi-trash solid-header-action-button-icon" />
+                                    <Trash2 size={14} className="solid-header-action-button-icon" />
                                     <span className="solid-header-action-button-label">Delete</span>
                                 </SolidDropdownMenuItem>
                             )}
@@ -196,7 +196,7 @@ export const SolidListViewConfigure = (
                                         setIsCogMenuOpen(false);
                                     }}
                                 >
-                                    <i className="pi pi-download solid-header-action-button-icon" />
+                                    <Download size={14} className="solid-header-action-button-icon" />
                                     <span className="solid-header-action-button-label">Import</span>
                                 </SolidDropdownMenuItem>
                             )}
@@ -208,7 +208,7 @@ export const SolidListViewConfigure = (
                                         setIsCogMenuOpen(false);
                                     }}
                                 >
-                                    <i className="pi pi-upload solid-header-action-button-icon" />
+                                    <Upload size={14} className="solid-header-action-button-icon" />
                                     <span className="solid-header-action-button-label">Export</span>
                                 </SolidDropdownMenuItem>
                             )}
@@ -240,7 +240,7 @@ export const SolidListViewConfigure = (
                                         setIsCogMenuOpen(false);
                                     }}
                                 >
-                                    <i className="pi pi-refresh solid-header-action-button-icon" />
+                                    <RefreshCw size={14} className="solid-header-action-button-icon" />
                                     <span className="solid-header-action-button-label">Recover</span>
                                 </SolidDropdownMenuItem>
                             )}
@@ -254,7 +254,7 @@ export const SolidListViewConfigure = (
                             {isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`) && (
                                 <SolidDropdownMenuSub>
                                     <SolidDropdownMenuSubTrigger className="solid-header-dropdown-item">
-                                        <i className="pi pi-sliders-h solid-header-action-button-icon" />
+                                        <SlidersHorizontal size={14} className="solid-header-action-button-icon" />
                                         <span className="solid-header-action-button-label">Customize Layout</span>
                                     </SolidDropdownMenuSubTrigger>
                                     <SolidDropdownMenuSubContent className="customize-layout-panel">
@@ -286,7 +286,7 @@ export const SolidListViewConfigure = (
                                                 setIsCogMenuOpen(false);
                                             }}
                                         >
-                                            <i className="pi pi-table solid-header-action-button-icon" />
+                                            <Table size={14} className="solid-header-action-button-icon" />
                                             <span className="solid-header-action-button-label">Column Selector</span>
                                         </SolidDropdownMenuItem>
                                     </SolidDropdownMenuSubContent>
@@ -300,7 +300,7 @@ export const SolidListViewConfigure = (
                                         setIsCogMenuOpen(false);
                                     }}
                                 >
-                                    <i className="pi pi-save solid-header-action-button-icon" />
+                                    <Save size={14} className="solid-header-action-button-icon" />
                                     <span className="solid-header-action-button-label">Save Custom Filter</span>
                                 </SolidDropdownMenuItem>
                             )}
@@ -311,7 +311,7 @@ export const SolidListViewConfigure = (
                                     setIsCogMenuOpen(false);
                                 }}
                             >
-                                <i className="pi pi-trash solid-header-action-button-icon" />
+                                <Trash2 size={14} className="solid-header-action-button-icon" />
                                 <span className="solid-header-action-button-label">Clear cache</span>
                             </SolidDropdownMenuItem>
                         </>

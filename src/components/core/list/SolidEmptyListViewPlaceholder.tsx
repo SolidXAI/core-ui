@@ -1,13 +1,13 @@
 import { permissionExpression } from '../../../helpers/permissions'
 import { SolidCreateButton } from '../common/SolidCreateButton'
-import { Button } from 'primereact/button'
 import { useHandleListCustomButtonClick } from '../../../components/common/useHandleListCustomButtonClick'
 import { hasAnyRole } from '../../../helpers/rolesHelper'
 import { env } from "../../../adapters/env";
 import { useSession } from "../../../hooks/useSession";
 import { useState } from "react";
-import { FolderOpen } from "lucide-react";
+import { Download, SquarePen } from "lucide-react";
 import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
+import { SolidButton } from "../../shad-cn-ui";
 
 export const SolidEmptyListViewPlaceholder = ({
     createButtonUrl,
@@ -62,15 +62,14 @@ export const SolidEmptyListViewPlaceholder = ({
                     if (!hasRole) return null;
 
                     return (
-                        <Button
+                        <SolidButton
                             key={button?.attrs?.name || button?.attrs?.label}
-                            text={button?.attrs?.showText ?? true}
                             type="button"
                             className={`solid-empty-listview-secondary-action ${button?.attrs?.className ?? ''}`}
-                            label={button.attrs.label}
+                            variant={button?.attrs?.showText === false ? "primary" : "ghost"}
                             size="small"
-                            iconPos="left"
-                            icon={button?.attrs?.icon ? button?.attrs?.icon : "pi pi-pencil"}
+                            icon={button?.attrs?.icon}
+                            leftIcon={!button?.attrs?.icon ? <SquarePen size={14} /> : undefined}
                             onClick={() => {
                                 const event = {
                                     params,
@@ -78,7 +77,9 @@ export const SolidEmptyListViewPlaceholder = ({
                                 };
                                 handleCustomButtonClick(button.attrs, event);
                             }}
-                        />
+                        >
+                            {button.attrs.label}
+                        </SolidButton>
                     );
                 })}
             </div>
@@ -113,15 +114,15 @@ export const SolidEmptyListViewPlaceholder = ({
                                 </div>
                             )}
                             {canImport && (
-                                <Button
+                                <SolidButton
                                     type="button"
-                                    outlined
-                                    icon="pi pi-download"
-                                    iconPos="left"
-                                    label="Import"
+                                    variant="outline"
+                                    leftIcon={<Download size={14} />}
                                     className="solid-empty-listview-import-button"
                                     onClick={() => setOpenImportDialog(true)}
-                                />
+                                >
+                                    Import
+                                </SolidButton>
                             )}
                         </div>
 

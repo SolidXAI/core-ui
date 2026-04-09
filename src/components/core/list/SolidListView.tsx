@@ -1,7 +1,6 @@
 import { forwardRef, useState, useEffect, useRef, useMemo, useImperativeHandle } from "react";
 import { SolidDataTable as DataTable, DataTableStateEvent, Column } from "./SolidDataTable";
 import qs from "qs";
-import { Button } from "primereact/button";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { SolidListViewColumn } from "./SolidListViewColumn";
@@ -50,6 +49,7 @@ import {
   SolidDialogTitle,
 } from "../../shad-cn-ui";
 import { FilterMatchMode } from "../filter/filterMatchMode";
+import { LayoutGrid, Pencil, Plus, RefreshCw, RotateCcw, Search, SquarePen, Trash2 } from "lucide-react";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {
@@ -1248,7 +1248,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   <div className='flex align-items-center gap-2'>
                     {params.embeded !== true &&
                       <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
-                        <i className="pi pi-th-large"></i>
+                        <LayoutGrid size={18} />
                       </div>
                     }
                     <p className="m-0 view-title solid-text-wrapper">
@@ -1278,16 +1278,14 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                   {solidListViewLayout?.attrs?.enableGlobalSearch === true &&
                     params.embeded === false && (
                       <div className="flex lg:hidden">
-                        <Button
+                        <SolidButton
                           type="button"
                           size="small"
-                          icon="pi pi-search"
-                          severity="secondary"
-                          outlined
+                          variant="outline"
                           className="solid-icon-button"
                           onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
-                        >
-                        </Button>
+                          leftIcon={<Search size={14} />}
+                        />
                       </div>
 
                     )}
@@ -1326,39 +1324,41 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     params.inlineCreate == true &&
                     searchParams.get("viewMode") !== "view" && (
 
-                      <Button
+                      <SolidButton
                         type="button"
-                        icon={solidListViewLayout?.attrs?.addButtonIcon ? solidListViewLayout?.attrs?.addButtonIcon : "pi pi-plus"}
-                        label={solidListViewLayout?.attrs?.addButtonTitle ? solidListViewLayout?.attrs?.addButtonTitle : "Add"}
+                        icon={solidListViewLayout?.attrs?.addButtonIcon}
+                        leftIcon={!solidListViewLayout?.attrs?.addButtonIcon ? <Plus size={14} /> : undefined}
                         className={`${solidListViewLayout?.attrs?.addButtonClassName}`}
                         size="small"
                         onClick={() => params.handleAddClickForEmbeddedView("new")}
-                      ></Button>
+                      >
+                        {solidListViewLayout?.attrs?.addButtonTitle ? solidListViewLayout?.attrs?.addButtonTitle : "Add"}
+                      </SolidButton>
                     )}
                   {/* Button For Manual Refresh */}
                   {params.embeded !== true && (
-                    <Button
+                    <SolidButton
                       type="button"
                       size="small"
-                      icon="pi pi-refresh"
-                      severity="secondary"
+                      variant="outline"
                       className="solid-icon-button "
-                      outlined
                       onClick={() => {
                         setQueryString();
                       }}
+                      leftIcon={<RefreshCw size={14} />}
                     />
                   )}
                   {showArchived && (
-                    <Button
+                    <SolidButton
                       type="button"
-                      icon="pi pi-refresh"
-                      label="Recover"
                       size="small"
-                      severity="secondary"
+                      variant="secondary"
                       className="hidden lg:flex solid-icon-button "
                       onClick={() => setRecoverDialogVisible(true)}
-                    ></Button>
+                      leftIcon={<RotateCcw size={14} />}
+                    >
+                      Recover
+                    </SolidButton>
                   )}
 
                   {params.embeded === false &&
@@ -1454,7 +1454,6 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                     sortOrder={sortOrder}
                     loading={false}
                     // loading={loading || isLoading}
-                    // loadingIcon="pi pi-spinner"
                     selection={
                       params.embeded === true
                         ? []
@@ -1532,24 +1531,16 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                               header={button.attrs.label}
                               body={(rowData) => {
                                 return (
-                                  <Button
+                                  <SolidButton
                                     type="button"
-                                    icon={
-                                      button?.attrs?.icon
-                                        ? button?.attrs?.icon
-                                        : "pi pi-pencil"
-                                    }
+                                    icon={button?.attrs?.icon}
+                                    leftIcon={!button?.attrs?.icon ? <SquarePen size={14} /> : undefined}
                                     className={`solid-inline-row-button w-full text-left gap-2 ${button?.attrs?.className
                                       ? button?.attrs?.className
                                       : ""
                                       }`}
-                                    label={
-                                      button.attrs.showLabel !== false
-                                        ? button.attrs.label
-                                        : ""
-                                    }
                                     size="small"
-                                    iconPos="left"
+                                    variant="ghost"
                                     onClick={() => {
                                       const event = {
                                         params,
@@ -1559,7 +1550,11 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                                       };
                                       handleCustomButtonClick(button.attrs, event);
                                     }}
-                                  />
+                                  >
+                                    {button.attrs.showLabel !== false
+                                      ? button.attrs.label
+                                      : ""}
+                                  </SolidButton>
                                 );
                               }}
                             />
@@ -1579,15 +1574,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                             return (
                               <>
                                 {!shouldHideEditOrDeleteButton && (
-                                  <Button
-                                    text
+                                  <SolidButton
                                     type="button"
-                                    severity="secondary"
+                                    variant="ghost"
                                     className="solid-inline-row-button solid-inline-row-button-icon"
-                                    label=""
                                     size="small"
-                                    iconPos="left"
-                                    icon={"pi pi-pencil"}
+                                    leftIcon={<Pencil size={14} />}
                                     onClick={() => {
                                       if (params.embeded == true) {
                                         params.handleEditClickForEmbeddedView(rowData?.id);
@@ -1628,14 +1620,12 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                             return (
                               <>
                                 {(!shouldHideEditOrDeleteButton) && (
-                                  <Button
-                                    text
+                                  <SolidButton
                                     type="button"
                                     className="solid-inline-row-button solid-inline-row-button-icon"
                                     size="small"
-                                    iconPos="left"
-                                    severity="danger"
-                                    icon={"pi pi-trash"}
+                                    variant="ghost"
+                                    leftIcon={<Trash2 size={14} />}
                                     onClick={() => {
                                       if (params?.embededFieldRelationType === "many-to-many") {
                                         params?.handleDeleteClick(rowData.id);
@@ -1665,9 +1655,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                               }}
                               className="retrieve-button solid-row-menu-trigger"
                             >
-                              <i
-                                className={`pi pi-refresh ${styles.retrieveIcon}`}
-                              />
+                              <RotateCcw size={14} className={styles.retrieveIcon} />
                             </a>
                           ) : (
                             <>

@@ -1,4 +1,5 @@
 import React from "react";
+import { Loader2 } from "lucide-react";
 
 type SolidButtonVariant = "primary" | "secondary" | "ghost" | "outline" | "destructive";
 type SolidButtonSize = "sm" | "md" | "lg" | "small" | "medium" | "large";
@@ -15,6 +16,7 @@ type SolidButtonProps = React.ButtonHTMLAttributes<HTMLButtonElement> & {
   iconPos?: "left" | "right";
   label?: string;
   text?: boolean;
+  outlined?: boolean;
   severity?: "primary" | "secondary" | "danger" | "success" | "info" | "warning";
   rounded?: boolean;
   tooltip?: string;
@@ -25,7 +27,7 @@ function cx(...parts: Array<string | false | undefined>) {
 }
 
 export function SolidButton({
-  variant = "primary",
+  variant,
   size = "md",
   fullWidth,
   loading,
@@ -39,6 +41,7 @@ export function SolidButton({
   iconPos = "left",
   label,
   text,
+  outlined,
   severity,
   rounded,
   tooltip,
@@ -46,14 +49,16 @@ export function SolidButton({
 }: SolidButtonProps) {
   const isDisabled = disabled || loading;
   const resolvedVariant: SolidButtonVariant =
-    variant ??
-    (severity === "danger"
-      ? "destructive"
-      : severity === "secondary"
-        ? "secondary"
-        : text
-          ? "ghost"
-          : "primary");
+    variant
+      ?? (outlined
+        ? "outline"
+        : severity === "danger"
+          ? "destructive"
+          : severity === "secondary"
+            ? "secondary"
+            : text
+              ? "ghost"
+              : "primary");
   const resolvedSize: "sm" | "md" | "lg" =
     size === "small" ? "sm" : size === "large" ? "lg" : size === "medium" ? "md" : size === "lg" ? "lg" : size === "sm" ? "sm" : "md";
   const iconNode = icon ? <i className={icon} aria-hidden /> : null;
@@ -75,7 +80,11 @@ export function SolidButton({
       title={tooltip}
       {...props}
     >
-      {loading && <span className="solid-btn-spinner" aria-hidden="true" />}
+      {loading && (
+        <span className="solid-btn-spinner" aria-hidden="true">
+          <Loader2 size={14} className="animate-spin" />
+        </span>
+      )}
       {!loading && (leftIcon || (iconNode && iconPos === "left")) ? (
         <span className="solid-btn-icon">{leftIcon ?? iconNode}</span>
       ) : null}

@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
+import { File, Volume2 } from "lucide-react";
 import { Column } from "../SolidDataTable";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
-import { classNames } from 'primereact/utils';
 import { SolidMediaListFieldWidgetProps } from '../../../../types/solid-core';
 import { getExtensionComponent } from '../../../../helpers/registry';
 
@@ -83,7 +83,7 @@ const MediaWithFallback = ({ src, alt, onClick }: { src: string; alt: string; on
                     style={{ width: 40, height: 40, cursor: "pointer" }}
                     onClick={handleClick}
                 >
-                    <i className="pi pi-volume-up text-xl text-gray-600"></i>
+                    <Volume2 size={18} className="text-gray-600" />
                 </div>
             );
         }
@@ -95,7 +95,7 @@ const MediaWithFallback = ({ src, alt, onClick }: { src: string; alt: string; on
             style={{ width: 40, height: 40, display: "flex", alignItems: "center", justifyContent: "center", cursor: "pointer" }}
             onClick={handleClick}
         >
-            <i className={classNames("pi pi-file", "text-3xl text-gray-400")}></i>
+            <File size={24} className="text-gray-400" />
         </div>
     );
 };

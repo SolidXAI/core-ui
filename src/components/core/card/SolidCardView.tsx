@@ -58,13 +58,19 @@ const deriveCardViewConfig = (solidCardViewMetaData: any) => {
     return null;
   };
 
-  const extractFields = (node: any, result: any[] = []) => {
-    if (!node) return result;
-    if (node.type === "field") {
-      result.push(node);
+  const extractFields = (nodes: any, result: any[] = []) => {
+    if (!nodes) return result;
+
+    if (Array.isArray(nodes)) {
+      nodes.forEach((node: any) => extractFields(node, result));
+      return result;
     }
-    if (Array.isArray(node.children)) {
-      node.children.forEach((child: any) => extractFields(child, result));
+
+    if (nodes.type === "field") {
+      result.push(nodes);
+    }
+    if (Array.isArray(nodes.children)) {
+      nodes.children.forEach((child: any) => extractFields(child, result));
     }
     return result;
   };

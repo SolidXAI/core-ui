@@ -626,7 +626,8 @@
     }
 
     /* ========================== BreadCrum ===================== */
-    .solid-breadcrumb.p-breadcrumb .p-menuitem a p {
+    .solid-breadcrumb-link,
+    .solid-breadcrumb-current {
         font-weight: 500 !important;
     }
 

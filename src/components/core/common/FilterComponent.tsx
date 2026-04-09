@@ -104,7 +104,7 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
               dropdown
               forceSelection // only values from list
               placeholder="Select Field"
-              className="w-full p-inputtext-sm solid-filter-auto-complete-field solid-filter-compact-control"
+              className="w-full solid-filter-auto-complete-field solid-filter-compact-control"
               onChange={(e) => {
                 setFieldName({ name: e.value }); // e.value will be an object or null
                 if (e.value && typeof e.value === "object" && e.value.value) {
@@ -125,13 +125,13 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
                   disabled
                   value={rule.value || ''}
                   placeholder="Operator"
-                  className='w-full p-inputtext-sm solid-filter-compact-control'
+                  className='w-full solid-filter-compact-control'
                 />
                 <SolidInput
                   disabled
                   value={rule.value || ''}
                   placeholder="Value"
-                  className='w-full p-inputtext-sm solid-filter-compact-control'
+                  className='w-full solid-filter-compact-control'
                 />
               </div>
             }
@@ -158,7 +158,6 @@ const FilterRuleComponent = ({ viewData, fields, rule, onChange, onAddRule, onAd
           }
         </div>
       ))}
-      {/* <Button text label='Add Condition' icon="pi pi-plus" size='small' onClick={() => onAddRule(rule.parentRule)} /> */}
     </div>
   );
 };
@@ -184,12 +183,6 @@ const FilterGroupComponent = ({ viewData, fields, group, onChange, onAddRule, on
           ? <FilterRuleComponent key={rule.id} viewData={viewData} fields={fields} rule={rule} onChange={onChange} onAddRule={onAddRule} onAddGroup={onAddGroup} onDelete={onDelete} level={level + 1} />
           : <FilterGroupComponent key={rule.id} viewData={viewData} fields={fields} group={rule} onChange={onChange} onAddRule={onAddRule} onAddGroup={onAddGroup} onDelete={onDelete} level={level + 1} />
       ))}
-      {/* {level > 0 &&
-        <div className='mt-2'>
-          <Button size="small" severity='danger' icon="pi pi-trash " onClick={() => onDelete(group.id)} />
-        </div>
-      } */}
-
       {/* Add Condition Button to add parent rule */}
       {level === 0 &&
         <SolidButton variant="ghost" size='sm' onClick={() => onAddRule(group.id)} className='px-0 mt-2 solid-filter-add-condition-btn'>

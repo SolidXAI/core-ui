@@ -1,6 +1,7 @@
 import { useSession } from "../../../hooks/useSession";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
-import { Button } from "primereact/button";
+import { SquarePen } from "lucide-react";
+import { SolidButton } from "../../shad-cn-ui";
 
 export const SolidListViewHeaderButton = ({ button, params, solidListViewMetaData, handleCustomButtonClick, selectedRecords, filters }: any) => {
     const { data: session, status } = useSession();
@@ -11,13 +12,12 @@ export const SolidListViewHeaderButton = ({ button, params, solidListViewMetaDat
     if (!hasRole) return null;
 
     return (
-        <Button
+        <SolidButton
             type="button"
             className={`text-left ${button?.attrs?.className ?? "gap-2"}`}
-            label={button.attrs.label}
             size="small"
-            iconPos="left"
-            icon={button?.attrs?.icon ?? button?.attrs?.icon}
+            icon={button?.attrs?.icon}
+            leftIcon={!button?.attrs?.icon ? <SquarePen size={14} /> : undefined}
             onClick={() => {
                 const event = {
                     params,
@@ -27,6 +27,8 @@ export const SolidListViewHeaderButton = ({ button, params, solidListViewMetaDat
                 };
                 handleCustomButtonClick(button.attrs, event);
             }}
-        />
+        >
+            {button.attrs.label}
+        </SolidButton>
     );
 };
