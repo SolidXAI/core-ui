@@ -49,7 +49,7 @@ import {
   SolidDialogSeparator,
   SolidDialogTitle,
 } from "../../shad-cn-ui";
-import { FilterMatchMode } from "../common/FilterComponent";
+import { FilterMatchMode } from "../filter/filterMatchMode";
 // import { ERROR_MESSAGES } from "../../../constants/error-messages";
 
 const getRandomInt = (min: number, max: number) => {

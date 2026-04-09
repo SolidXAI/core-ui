@@ -1721,6 +1721,8 @@ li.header-li-px {
 .solid-form-wrapper {
   overflow: hidden;
   display: flex;
+  padding: 12px;
+  background-color: var(--background) !important;
 }
 
 .solid-form-section {
@@ -1729,10 +1731,13 @@ li.header-li-px {
   transition: width 0.3s ease;
   min-width: 0;
   overflow-x: auto;
+  background-color: var(--card);
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  border-radius: 12px;
 }
 
 .solid-form-wrapper .solid-form-content {
-  height: calc(100vh - 145px);
+  height: calc(100vh - 170px);
   /* calc(100dvh - 128px) */
   /* height: calc(100vh - 145px); */
   /* height: calc(100vh - 111px); */
