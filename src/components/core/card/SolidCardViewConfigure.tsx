@@ -237,7 +237,7 @@ export const SolidCardViewConfigure = ({
         open={exportView}
         onOpenChange={setExportView}
         className="solid-kanban-export-dialog"
-        style={{ width: "min(1060px, calc(100vw - 32px))" }}
+        style={{ width: "min(960px, calc(100vw - 32px))" }}
       >
         <SolidDialogHeader className="solid-export-dialog-header">
           <div>

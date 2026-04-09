@@ -232,8 +232,8 @@
   display: flex;
   align-items: center;
   justify-content: space-between;
-  gap: 10px;
-  padding: 10px 14px;
+  gap: 8px;
+  padding: 8px 12px;
   border-top: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
   transition: background-color 0.15s ease;
 }
@@ -256,9 +256,9 @@
   align-items: baseline;
   gap: 6px;
   min-width: 0;
-  font-size: 12px;
+  font-size: 11.5px;
   font-weight: 600;
-  line-height: 1.3;
+  line-height: 1.15;
   color: var(--foreground);
   white-space: nowrap;
   overflow: hidden;
@@ -266,7 +266,7 @@
 }
 
 .solid-export-list-row-key {
-  font-size: 11px;
+  font-size: 10.5px;
   line-height: 1.2;
   color: color-mix(in srgb, var(--foreground) 68%, transparent);
   flex: 0 1 auto;
@@ -277,14 +277,20 @@
 
 .solid-export-list-row-action.solid-btn {
   flex: 0 0 auto;
-  min-width: 78px;
+  min-width: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
   justify-content: center;
-  border-radius: 9px;
+  border-radius: 8px;
 }
 
 .solid-export-list-row-action.solid-btn .solid-btn-label {
-  font-size: 11.5px;
-  font-weight: 600;
+  display: none;
+}
+
+.solid-export-list-row-action.solid-btn .solid-btn-icon {
+  margin: 0;
 }
 
 .solid-export-list-row-action.is-remove.solid-btn {

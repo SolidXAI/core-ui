@@ -90,10 +90,14 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
   if (!solidView || !solidFieldsMetadata) return null;
 
   const layoutChildren = Array.isArray(solidView?.layout?.children) ? solidView.layout.children : [];
-  const checkedFieldNames = new Set(
-    layoutChildren
-      .map((col: { attrs?: { name?: string } }) => col?.attrs?.name)
-      .filter(Boolean)
+  const checkedFieldNames = useMemo(
+    () =>
+      new Set(
+        layoutChildren
+          .map((col: { attrs?: { name?: string } }) => col?.attrs?.name)
+          .filter(Boolean)
+      ),
+    [layoutChildren]
   );
 
   const allColumns = useMemo<FilterColumn[]>(
@@ -152,7 +156,7 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
   const availableColumns = allColumns.filter((col) => !selectedKeys.has(col.key));
 
   const moveToSelected = (col: FilterColumn) => {
-    setSelectedColumns((current) => [...current, col]);
+    setSelectedColumns((current) => (current.some((item) => item.key === col.key) ? current : [...current, col]));
   };
 
   const moveToAvailable = (col: FilterColumn) => {
@@ -376,10 +380,10 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
                       size="small"
                       className="solid-export-list-row-action"
                       leftIcon={<Plus size={14} />}
+                      aria-label={`Add ${item.name}`}
+                      tooltip={`Add ${item.name}`}
                       onClick={() => moveToSelected(item)}
-                    >
-                      Add
-                    </SolidButton>
+                    />
                   </div>
                 ))
               ) : (
@@ -414,10 +418,10 @@ export const SolidExport = ({ listViewMetaData, filters }: any) => {
                       size="small"
                       className="solid-export-list-row-action is-remove"
                       leftIcon={<Trash2 size={14} />}
+                      aria-label={`Remove ${item.name}`}
+                      tooltip={`Remove ${item.name}`}
                       onClick={() => moveToAvailable(item)}
-                    >
-                      Remove
-                    </SolidButton>
+                    />
                   </div>
                 ))
               ) : (
