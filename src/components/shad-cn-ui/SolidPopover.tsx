@@ -35,6 +35,7 @@ export function SolidPopover({
   children,
   autoCloseGroup,
 }: SolidPopoverProps) {
+  const rootRef = React.useRef<HTMLDivElement | null>(null);
   const popoverId = React.useId();
   const [internalOpen, setInternalOpen] = React.useState(false);
   const isControlled = typeof open === "boolean";
@@ -66,9 +67,24 @@ export function SolidPopover({
     };
   }, [autoCloseGroup, handleSetOpen, popoverId]);
 
+  React.useEffect(() => {
+    if (!currentOpen || typeof document === "undefined") return;
+    const handlePointerDown = (event: MouseEvent) => {
+      const root = rootRef.current;
+      if (!root || root.contains(event.target as Node)) return;
+      handleSetOpen(false);
+    };
+    document.addEventListener("pointerdown", handlePointerDown);
+    return () => {
+      document.removeEventListener("pointerdown", handlePointerDown);
+    };
+  }, [currentOpen, handleSetOpen]);
+
   return (
     <SolidPopoverContext.Provider value={{ open: currentOpen, setOpen: handleSetOpen }}>
-      <div className="solid-popover-root">{children}</div>
+      <div className="solid-popover-root" ref={rootRef}>
+        {children}
+      </div>
     </SolidPopoverContext.Provider>
   );
 }

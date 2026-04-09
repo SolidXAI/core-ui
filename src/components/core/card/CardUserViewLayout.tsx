@@ -1,12 +1,9 @@
 import { useFormik } from "formik";
 import { useDispatch } from "react-redux";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
-import { javascript } from "@codemirror/lang-javascript";
-import { oneDark } from "@codemirror/theme-one-dark";
-import CodeMirror, { EditorView } from "@uiw/react-codemirror";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showToast } from "../../../redux/features/toastSlice";
-import { SolidButton } from "../../shad-cn-ui";
+import { SolidButton, SolidCodeEditor } from "../../shad-cn-ui";
 
 export const CardUserViewLayout = ({ solidCardViewMetaData, setLayoutDialogVisible }: any) => {
   const dispatch = useDispatch();
@@ -44,14 +41,13 @@ export const CardUserViewLayout = ({ solidCardViewMetaData, setLayoutDialogVisib
 
   return (
     <form onSubmit={formik.handleSubmit}>
-      <CodeMirror
+      <SolidCodeEditor
         value={formik.values.layoutString}
         height="500px"
-        theme={oneDark}
-        style={{ fontSize: "10px" }}
-        extensions={[javascript(), EditorView.lineWrapping]}
+        fontSize="10px"
+        language="json"
         onChange={(value) => {
-          formik.setFieldValue("layoutString", value);
+          formik.setFieldValue("layoutString", value ?? "");
         }}
       />
       <div className="pt-3 flex gap-2">

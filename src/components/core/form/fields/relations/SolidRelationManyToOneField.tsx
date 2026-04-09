@@ -426,7 +426,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
     }
     return (
         <div className="relative">
-            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
+            <div className={styles.fieldWrapper}>
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
                         {fieldLabel}
@@ -484,7 +484,7 @@ export const DefaultRelationManyToOneFormEditWidget = ({ formik, fieldContext }:
 
 export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateHandler, visibleCreateRelationEntity, setvisibleCreateRelationEntity, formViewParams }: any) => {
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-6 flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4';
+    const className = fieldLayoutInfo.attrs?.className || 'field col-6';
     const parentModelName = fieldLayoutInfo?.attrs?.parentModelName;
     const childModelName = fieldLayoutInfo?.attrs?.childModelName;
     const parentFieldName = fieldLayoutInfo?.attrs?.parentFieldName;
@@ -965,7 +965,7 @@ export const PseudoRelationManyToOneFormWidget = ({ formik, fieldContext }: Soli
     }
     return (
         <div className="relative" >
-            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
+            <div className={styles.fieldWrapper}>
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
                         {fieldLabel}

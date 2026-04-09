@@ -4,9 +4,6 @@ import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
-import { javascript } from '@codemirror/lang-javascript';
-import { oneDark } from '@codemirror/theme-one-dark';
-import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct import
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { SolidCodeEditor } from "../../../shad-cn-ui";
@@ -115,7 +112,7 @@ export const DefaultJsonFormEditWidget = ({ formik, fieldContext }: SolidFormFie
 
     return (
         <div className="relative">
-            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
+            <div className={styles.fieldWrapper}>
                 {showFieldLabel != false &&
                     <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
@@ -177,14 +174,12 @@ export const DefaultJsonFormViewWidget = ({ formik, fieldContext }: SolidFormFie
             {showFieldLabel != false &&
                 <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
             }
-            <CodeMirror
-                id={fieldLabel}
+            <SolidCodeEditor
                 value={code}
                 height={fieldLayoutInfo.attrs?.height ?? '300px'}
-                style={{ fontSize: '10px' }}
-                theme={oneDark}
+                fontSize={fieldLayoutInfo.attrs?.fontSize ?? '10px'}
                 readOnly={true}
-                extensions={[javascript(), EditorView.lineWrapping]}
+                language="json"
             />
         </div>
     );
