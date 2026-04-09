@@ -84,45 +84,15 @@ body {
   color: var(--foreground);
 }
 
-/* Studio Mode Sandbox Constraints */
-#solid-studio-root {
-  position: relative;
-  height: 100vh;
-  overflow: hidden;
-}
-
-/* Studio Mode Sandbox Utility Overrides */
-.h-screen {
-  height: calc(100vh - var(--solid-studio-header-height, 0px)) !important;
-}
-
-.min-h-screen {
-  min-height: calc(100vh - var(--solid-studio-header-height, 0px)) !important;
-}
-
-.max-h-screen {
-  max-height: calc(100vh - var(--solid-studio-header-height, 0px)) !important;
-}
-
-#solid-studio-app-container {
-  position: relative;
-  /* CRITICAL: creates containing block, scoping position: fixed elements inside it */
-  transform: translate(0, 0);
-  height: calc(100vh - 44px);
-  /* adjust for studio header */
-  margin-top: 44px;
-  overflow: auto;
-  /* prevent stacking issues */
-  isolation: isolate;
-}
+/* Legacy studio sandbox removed */
 
 .solid-shell {
-  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
+  min-height: 100vh;
   background: radial-gradient(circle at 0 0, rgba(37, 99, 235, 0.08), transparent 38%), var(--background);
 }
 
 .solid-main {
-  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
+  min-height: 100vh;
   margin-left: var(--solid-sidebar-width);
   transition: margin-left 200ms ease;
   display: flex;
@@ -278,7 +248,7 @@ body {
   position: fixed;
   inset: 0 auto 0 0;
   top: 0;
-  height: calc(100vh - var(--solid-studio-header-height, 0px));
+  height: 100vh;
   width: var(--sidebar-width);
   background: var(--sidebar-background);
   color: var(--sidebar-foreground);
@@ -456,7 +426,7 @@ body {
   top: 0;
   left: 0;
   width: 14px;
-  height: calc(100vh - var(--solid-studio-header-height, 0px));
+  height: 100vh;
   border: 0;
   background: transparent;
   z-index: 61;
@@ -1398,7 +1368,7 @@ body {
 }
 
 .solid-error-page {
-  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
+  min-height: 100vh;
   display: grid;
   grid-template-columns: 1fr;
   background: var(--background);
@@ -1493,7 +1463,7 @@ body {
 
 /* Auth (ShadCN-style shell while preserving existing auth logic) */
 .solid-auth-theme-wrapper {
-  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
+  min-height: 100vh;
   position: relative;
   display: grid;
   place-items: center;
@@ -1855,7 +1825,7 @@ body {
 
 /* Auth visual alignment (match shadcn login blocks) */
 .solid-auth-theme-wrapper {
-  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
+  min-height: 100vh;
   background: #020204;
   color: #f4f4f5;
   padding: 0;
@@ -1878,7 +1848,7 @@ body {
 .solid-auth-theme-wrapper.left>.grid,
 .solid-auth-theme-wrapper.right>.grid {
   width: 100%;
-  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
+  min-height: 100vh;
   display: grid !important;
   grid-template-columns: 1fr 1fr;
   border: 0;
@@ -2412,7 +2382,7 @@ body {
 
 .solid-auth-theme-wrapper .solid-auth-split {
   width: 100%;
-  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
+  min-height: 100vh;
   display: grid;
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
   background: #020204;
@@ -2448,7 +2418,7 @@ body {
 
 .solid-auth-theme-wrapper .solid-auth-image-pane {
   position: relative;
-  min-height: calc(100vh - var(--solid-studio-header-height, 0px));
+  min-height: 100vh;
   background-color: #27272a;
   background-size: cover;
   background-position: center;
@@ -2473,7 +2443,7 @@ body {
   }
 
   .solid-auth-theme-wrapper .solid-auth-form-pane {
-    min-height: calc(100vh - var(--solid-studio-header-height, 0px));
+    min-height: 100vh;
     padding: 20px;
   }
 }
@@ -2787,8 +2757,8 @@ body {
 
 /* List table (non-Prime table layer) */
 .solid-list-page-wrapper {
-  height: calc(100dvh - var(--solid-studio-header-height, 0px) - 46px) !important;
-  max-height: calc(100dvh - var(--solid-studio-header-height, 0px) - 46px) !important;
+  height: calc(100dvh - 46px) !important;
+  max-height: calc(100dvh - 46px) !important;
   min-height: 0;
   flex: 1 1 auto;
   overflow: hidden !important;
@@ -3781,276 +3751,170 @@ body {
 
 /* ── SolidX Studio Mode ───────────────────────────────────────────────────── */
 
-/* Global studio header — fixed full-width bar at top, z-index above everything */
-.solid-studio-header {
+/* Studio dynamic island */
+.solid-studio-island {
   position: fixed;
   top: 0;
-  left: 0;
-  right: 0;
-  height: 44px;
-  display: flex;
-  align-items: center;
-  justify-content: space-between;
-  padding: 0 16px;
-  background: #722ED1;
-  color: #ffffff;
-  z-index: 999999;
-  gap: 12px;
-  box-shadow: 0 1px 0 rgba(0, 0, 0, 0.12);
-}
-
-.solid-studio-header-brand {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  font-size: 13px;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  flex-shrink: 0;
-  background: none;
+  left: 50%;
+  transform: translateX(-50%);
+  padding: 2px 10px 4px;
+  border-radius: 0 0 14px 14px;
+  background: rgba(6, 8, 18, 0.92);
   border: none;
-  color: inherit;
-  cursor: pointer;
-  padding: 0;
-  font-family: inherit;
-  opacity: 1;
-  transition: opacity 0.15s;
+  backdrop-filter: blur(18px);
+  min-height: 26px;
 }
 
-.solid-studio-header-brand:hover {
-  opacity: 0.8;
+.solid-studio-island::after {
+  content: "";
+  position: absolute;
+  inset: 0;
+  border-radius: inherit;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.12), inset 0 -1px 0 rgba(0, 0, 0, 0.4);
+  pointer-events: none;
 }
 
-.solid-studio-header-nav {
-  display: flex;
-  align-items: center;
-  gap: 4px;
+.solid-studio-island::before {
+  content: "";
+  position: absolute;
+  top: -4px;
+  left: 50%;
+  transform: translateX(-50%);
+  width: 70%;
+  height: 8px;
+  background: rgba(6, 8, 18, 0.92);
+  border-radius: 999px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.08);
+  z-index: -1;
 }
 
-.solid-studio-view-btn {
+.solid-studio-island-inner {
   display: inline-flex;
   align-items: center;
-  font-size: 12px;
-  font-weight: 500;
-  font-family: inherit;
-  padding: 0 14px;
-  height: 28px;
-  background: transparent;
+  gap: 2px;
+}
+
+.solid-studio-island-btn {
+  width: 26px;
+  height: 26px;
+  border-radius: 10px;
+  border: none;
+  background: rgba(255, 255, 255, 0.04);
+  color: rgba(255, 255, 255, 0.9);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.solid-studio-island-btn:hover {
+  background: rgba(255, 255, 255, 0.14);
+  color: #fff;
+}
+
+.solid-studio-island-btn.active {
+  background: var(--primary);
   color: var(--primary-foreground);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.15s, border-color 0.15s;
-  opacity: 0.75;
+  box-shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
 }
 
-.solid-studio-view-btn:hover {
-  background: rgba(255, 255, 255, 0.12);
-  opacity: 1;
-}
-
-.solid-studio-view-btn.active {
-  background: rgba(255, 255, 255, 0.2);
-  border-color: rgba(255, 255, 255, 0.45);
-  opacity: 1;
-}
-
-.solid-studio-header-actions {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  flex-shrink: 0;
-}
-
-/* Fixed AI chat panel — starts below the studio header */
-.solid-studio-panel-fixed {
-  position: fixed;
-  top: 44px;
-  right: 0;
-  width: 420px;
-  height: calc(100vh - 44px);
-  display: flex;
-  flex-direction: column;
-  border-left: 1px solid var(--border);
-  background: var(--background);
-  z-index: 1050;
-  box-shadow: -4px 0 24px rgba(0, 0, 0, 0.08);
-  transform: translateX(0);
-  transition: transform 220ms ease;
-}
-
-.solid-studio-panel-fixed.collapsed {
-  transform: translateX(100%);
-}
-
-.solid-studio-panel-body {
-  flex: 1;
-  min-height: 0;
-  display: flex;
-  flex-direction: column;
-  overflow: hidden;
-}
-
-.solid-studio-bar-badge {
-  display: inline-flex;
-  align-items: center;
-  font-size: 10px;
-  font-weight: 700;
-  letter-spacing: 0.08em;
-  text-transform: uppercase;
-  padding: 2px 6px;
-  background: rgba(255, 255, 255, 0.18);
-  border-radius: 4px;
-}
-
-/* 3-dot menu */
-.solid-studio-menu {
+.solid-studio-island-menu {
   position: relative;
 }
 
-.solid-studio-menu-trigger {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: transparent;
-  color: var(--primary-foreground);
-  /* adapts to both light (white fg) and dark (navy fg) primary backgrounds */
-  border: 1px solid color-mix(in srgb, var(--primary-foreground) 25%, transparent);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.15s;
-  font-family: inherit;
-}
-
-.solid-studio-menu-trigger:hover {
-  background: color-mix(in srgb, var(--primary-foreground) 12%, transparent);
-}
-
-.solid-studio-menu-dropdown {
+.solid-studio-island-dropdown {
   position: absolute;
-  top: calc(100% + 6px);
+  top: calc(100% + 8px);
   right: 0;
-  min-width: 168px;
-  background: var(--card);
-  border: 1px solid var(--border);
-  border-radius: 8px;
-  box-shadow: var(--shadow-soft);
-  z-index: 1200;
-  overflow: hidden;
-  padding: 4px;
-}
-
-.solid-studio-menu-item {
-  display: flex;
-  align-items: center;
-  gap: 8px;
-  width: 100%;
-  padding: 7px 10px;
-  font-size: 13px;
-  font-weight: 500;
-  font-family: inherit;
-  background: none;
-  border: none;
-  border-radius: 6px;
-  color: var(--card-foreground);
-  cursor: pointer;
-  text-align: left;
-  transition: background 0.12s, color 0.12s;
-}
-
-.solid-studio-menu-item:hover {
-  background: var(--accent);
-  color: var(--accent-foreground);
-}
-
-/* danger uses a literal red that reads well on --card in both light and dark */
-.solid-studio-menu-item.danger {
-  color: #ef4444;
-}
-
-.solid-studio-menu-item.danger:hover {
-  background: color-mix(in srgb, #ef4444 12%, var(--card));
-  color: #ef4444;
-}
-
-.solid-studio-panel-toggle-btn {
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 28px;
-  height: 28px;
-  background: transparent;
-  color: var(--primary-foreground);
-  border: 1px solid rgba(255, 255, 255, 0.2);
-  border-radius: 6px;
-  cursor: pointer;
-  transition: background 0.15s;
-  flex-shrink: 0;
-}
-
-.solid-studio-panel-toggle-btn:hover {
-  background: rgba(255, 255, 255, 0.15);
-}
-
-/* Drag handle on the left edge of the panel */
-.solid-studio-resize-handle {
-  position: absolute;
-  left: -4px;
-  top: 0;
-  width: 8px;
-  height: 100%;
-  cursor: col-resize;
+  min-width: 180px;
+  padding: 6px;
+  border-radius: 14px;
+  background: rgba(6, 8, 18, 0.95);
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  box-shadow: 0 30px 80px rgba(0, 0, 0, 0.4);
   z-index: 10;
 }
 
-.solid-studio-resize-handle::after {
+.solid-studio-island-dropdown::before {
   content: "";
   position: absolute;
-  left: 3px;
-  top: 50%;
-  transform: translateY(-50%);
-  width: 2px;
-  height: 32px;
-  border-radius: 2px;
-  background: rgba(255, 255, 255, 0.0);
-  transition: background 0.15s;
+  top: -6px;
+  right: 12px;
+  width: 12px;
+  height: 12px;
+  background: inherit;
+  transform: rotate(45deg);
+  border-top: 1px solid rgba(255, 255, 255, 0.08);
+  border-left: 1px solid rgba(255, 255, 255, 0.08);
 }
 
-.solid-studio-resize-handle:hover::after,
-.solid-studio-resize-handle.dragging::after {
-  background: var(--primary);
+.solid-studio-island-dropdown-item {
+  width: 100%;
+  border: none;
+  background: transparent;
+  color: rgba(255, 255, 255, 0.85);
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-size: 13px;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
-/* Studio trigger button in AdminTopHeader */
+.solid-studio-island-dropdown-item svg {
+  color: var(--primary);
+}
+
+.solid-studio-island-dropdown-item:hover {
+  background: rgba(255, 255, 255, 0.08);
+  color: #fff;
+}
+
+.solid-studio-island-dropdown-item.danger {
+  color: #f97316;
+}
+
+.solid-studio-island-dropdown-item.danger svg {
+  color: #f97316;
+}
+
+.solid-studio-island-dropdown-item.danger:hover {
+  background: rgba(249, 115, 22, 0.2);
+  color: #fff4ec;
+}
+
 .solid-studio-trigger-btn {
   display: inline-flex;
   align-items: center;
   gap: 6px;
   font-size: 12px;
   font-weight: 500;
-  font-family: inherit;
-  padding: 0 10px;
-  height: 28px;
+  padding: 0 12px;
+  height: 32px;
+  border-radius: 999px;
+  border: none;
   background: var(--primary);
   color: var(--primary-foreground);
-  border: none;
-  border-radius: 6px;
   cursor: pointer;
-  transition: opacity 0.15s;
-  white-space: nowrap;
+  transition: opacity 0.15s ease;
 }
 
 .solid-studio-trigger-btn:hover {
   opacity: 0.85;
 }
 
-/* ── Studio-active layout note ────────────────────────────────────────────────
-   Layout shifts are handled via the --solid-studio-header-height CSS variable
-   set on :root by SolidStudio when studio mode is active. All affected
-   elements (sidebar, hotspot, admin header, shell, main) consume this variable
-   directly in their base rules above — no class overrides needed.            */
+@media (max-width: 640px) {
+  .solid-studio-island {
+    top: auto;
+    bottom: 20px;
+    transform: translateX(-50%);
+  }
+}
+
+/* Studio note: dynamic island sits on top of the app; no layout offsets */
 
 /* Studio home page — /studio */
 .solid-studio-home {
@@ -4082,7 +3946,7 @@ body {
   align-items: flex-start;
   justify-content: flex-start;
   padding: 28px 24px;
-  height: calc(100vh - var(--solid-studio-header-height, 0px));
+  height: 100vh;
   overflow-y: auto;
 }
 

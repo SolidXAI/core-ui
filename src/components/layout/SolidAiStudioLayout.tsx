@@ -1,55 +1,19 @@
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
-// import { SolidAiChat } from "../core/solid-ai/SolidAiChat";
 import { exitStudioMode, setStudioView, type StudioView } from "../../redux/features/solidStudioSlice";
 import { useSession } from "../../hooks/useSession";
 import { signOut } from "../../adapters/auth/index";
 import { createPortal } from "react-dom";
-import { enableStudioMode, disableStudioMode } from "../../helpers/studioSandbox";
 import { env } from "../../adapters/env";
 
-const HEADER_HEIGHT = "44px";
-const PANEL_WIDTH_DEFAULT = 420;
-
 // ── Icons ──────────────────────────────────────────────────────────────────────
-
-const StudioIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <path d="M2 8a6 6 0 1 1 12 0A6 6 0 0 1 2 8Z" stroke="currentColor" strokeWidth="1.4" />
-    <path d="M8 5v3l2 1.5" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" strokeLinejoin="round" />
-    <path d="M8 2V1M8 15v-1M1 8H0M16 8h-1" stroke="currentColor" strokeWidth="1.4" strokeLinecap="round" />
-  </svg>
-);
-
-const PanelOpenIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <rect x="1" y="1" width="14" height="14" rx="2.5" stroke="currentColor" strokeWidth="1.3" />
-    <path d="M10 1v14" stroke="currentColor" strokeWidth="1.3" />
-    <path d="M12.5 6l1.5 2-1.5 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
-
-const PanelCloseIcon = () => (
-  <svg width="15" height="15" viewBox="0 0 16 16" fill="none" aria-hidden="true">
-    <rect x="1" y="1" width="14" height="14" rx="2.5" stroke="currentColor" strokeWidth="1.3" />
-    <path d="M10 1v14" stroke="currentColor" strokeWidth="1.3" />
-    <path d="M13.5 6L12 8l1.5 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
-  </svg>
-);
 
 const DotsIcon = () => (
   <svg width="15" height="15" viewBox="0 0 16 16" fill="currentColor" aria-hidden="true">
     <circle cx="8" cy="3" r="1.3" />
     <circle cx="8" cy="8" r="1.3" />
     <circle cx="8" cy="13" r="1.3" />
-  </svg>
-);
-
-const ExitStudioIcon = () => (
-  <svg width="13" height="13" viewBox="0 0 14 14" fill="none" aria-hidden="true">
-    <path d="M9.5 4.5 5 9M5 4.5l4.5 4.5" stroke="currentColor" strokeWidth="1.5" strokeLinecap="round" />
-    <rect x="1" y="1" width="12" height="12" rx="3" stroke="currentColor" strokeWidth="1.2" />
   </svg>
 );
 
@@ -73,6 +37,24 @@ export const ChatIcon = () => (
   </svg>
 );
 
+const BackendIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <rect x="2.2" y="3" width="11.6" height="4" rx="1" stroke="currentColor" strokeWidth="1.2" />
+    <rect x="2.2" y="9" width="11.6" height="4" rx="1" stroke="currentColor" strokeWidth="1.2" />
+    <circle cx="4.5" cy="5" r="0.7" fill="currentColor" />
+    <circle cx="4.5" cy="11" r="0.7" fill="currentColor" />
+  </svg>
+);
+
+const FrontendIcon = () => (
+  <svg width="16" height="16" viewBox="0 0 16 16" fill="none" aria-hidden="true">
+    <rect x="1.8" y="2" width="12.4" height="9.5" rx="1.5" stroke="currentColor" strokeWidth="1.2" />
+    <path d="M6 13.5 5 15h6l-1-1.5" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="M5.5 5 7.5 7l-2 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+    <path d="m10.5 5 2 2-2 2" stroke="currentColor" strokeWidth="1.2" strokeLinecap="round" strokeLinejoin="round" />
+  </svg>
+);
+
 // ── SolidStudio ────────────────────────────────────────────────────────────────
 // Single component that renders both the Studio header and the AI panel.
 // Mount this ONCE at the app root via AppEventListener.
@@ -84,14 +66,10 @@ export function SolidStudio() {
   const dispatch = useDispatch();
   const navigate = useNavigate();
   const { pathname, search } = useLocation();
-  const isOnStudioPage = pathname === "/studio";
   const isPreviewMode = new URLSearchParams(search).get("preview") === "true" || (typeof sessionStorage !== "undefined" && sessionStorage.getItem("solid-preview") === "true");
-  const isPreviewable = !isOnStudioPage && pathname !== "/landing";
+  const isPreviewable = pathname !== "/studio" && pathname !== "/landing";
   const { status } = useSession();
   const isAuthenticated = status === "authenticated";
-  const [isPanelOpen, setIsPanelOpen] = useState(true);
-  const [panelWidth] = useState(PANEL_WIDTH_DEFAULT);
-  const [isDragging] = useState(false);
   const [isMenuOpen, setIsMenuOpen] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
@@ -107,47 +85,6 @@ export function SolidStudio() {
     return () => document.removeEventListener("mousedown", handler);
   }, [isMenuOpen]);
 
-  // Apply sandbox wrapper isolating app root so all fixed/sticky elements shift correctly
-  useEffect(() => {
-    const active = isStudioMode && isAuthenticated && !isPreviewMode;
-
-    if (active) {
-      enableStudioMode();
-    } else {
-      disableStudioMode();
-    }
-
-    // CSS variable consumed by sidebar, hotspot, admin-header, shell, main
-    document.documentElement.style.setProperty(
-      "--solid-studio-header-height",
-      active ? HEADER_HEIGHT : "0px"
-    );
-
-    return () => {
-      disableStudioMode();
-      document.documentElement.style.setProperty("--solid-studio-header-height", "0px");
-    };
-  }, [isStudioMode, isAuthenticated, isPreviewMode]);
-
-  // const onDragStart = useCallback((e: React.MouseEvent) => {
-  //   e.preventDefault();
-  //   dragStartX.current = e.clientX;
-  //   dragStartWidth.current = panelWidth;
-  //   setIsDragging(true);
-  //   const onMove = (ev: MouseEvent) => {
-  //     const delta = dragStartX.current - ev.clientX;
-  //     const next = Math.min(PANEL_WIDTH_MAX, Math.max(PANEL_WIDTH_MIN, dragStartWidth.current + delta));
-  //     setPanelWidth(next);
-  //   };
-  //   const onUp = () => {
-  //     setIsDragging(false);
-  //     window.removeEventListener("mousemove", onMove);
-  //     window.removeEventListener("mouseup", onUp);
-  //   };
-  //   window.addEventListener("mousemove", onMove);
-  //   window.addEventListener("mouseup", onUp);
-  // }, [panelWidth]);
-
   // Auto-exit studio if the user logs out
   useEffect(() => {
     if (status === "unauthenticated" && isStudioMode) {
@@ -156,12 +93,6 @@ export function SolidStudio() {
   }, [status, isStudioMode, dispatch]);
 
   if (!isStudioMode || !isAuthenticated || isPreviewMode) return null;
-
-  const handleExit = () => {
-    setIsMenuOpen(false);
-    dispatch(exitStudioMode());
-    navigate("/studio");
-  };
 
   const handleLogout = () => {
     setIsMenuOpen(false);
@@ -175,116 +106,73 @@ export function SolidStudio() {
   };
 
   const studioUI = (
-    <div style={{ zIndex: "var(--z-studio)", position: "fixed", top: 0, left: 0, right: 0 }}>
-      {/* ── Studio global header ─────────────────────────────────────────────── */}
-      <div className="solid-studio-header">
+    <div className="solid-studio-island" style={{ zIndex: "var(--z-studio)" }}>
+      <div className="solid-studio-island-inner">
         <button
           type="button"
-          className="solid-studio-header-brand"
-          onClick={() => navigate("/studio")}
-          title="Go to Studio home"
+          className={`solid-studio-island-btn${studioView === "backend" ? " active" : ""}`}
+          onClick={() => handleViewSwitch("backend")}
+          aria-label="Backend studio"
         >
-          <StudioIcon />
-          <span>SolidX Studio</span>
-          <span className="solid-studio-bar-badge">BETA</span>
+          <BackendIcon />
         </button>
-
-        <nav className="solid-studio-header-nav">
+        <button
+          type="button"
+          className={`solid-studio-island-btn${studioView === "frontend" ? " active" : ""}`}
+          onClick={() => handleViewSwitch("frontend")}
+          aria-label="Frontend studio"
+        >
+          <FrontendIcon />
+        </button>
+        <button
+          type="button"
+          className="solid-studio-island-btn"
+          onClick={() => {
+            const aiUrl = env("VITE_SOLIDX_AI_URL");
+            if (aiUrl) window.open(aiUrl, "_blank");
+          }}
+          aria-label="AI chat"
+        >
+          <ChatIcon />
+        </button>
+        <div className="solid-studio-island-menu" ref={menuRef}>
           <button
             type="button"
-            className={`solid-studio-view-btn${studioView === "backend" ? " active" : ""}`}
-            onClick={() => handleViewSwitch("backend")}
+            className={`solid-studio-island-btn${isMenuOpen ? " active" : ""}`}
+            onClick={() => setIsMenuOpen((o) => !o)}
+            aria-label="Studio options"
           >
-            Backend
+            <DotsIcon />
           </button>
-          <button
-            type="button"
-            className={`solid-studio-view-btn${studioView === "frontend" ? " active" : ""}`}
-            onClick={() => handleViewSwitch("frontend")}
-          >
-            Frontend
-          </button>
-        </nav>
-
-        <div className="solid-studio-header-actions">
-          {/* <button
-            type="button"
-            className="solid-studio-panel-toggle-btn"
-            onClick={() => setIsPanelOpen((o) => !o)}
-            title={isPanelOpen ? "Collapse AI panel" : "Expand AI panel"}
-          >
-            {isPanelOpen ? <PanelCloseIcon /> : <PanelOpenIcon />}
-          </button> */}
-
-          {/* ── 3-dot menu ─────────────────────────────────────────────────── */}
-          <div className="solid-studio-menu" ref={menuRef}>
-            <button
-              type="button"
-              className="solid-studio-menu-trigger"
-              onClick={() => setIsMenuOpen((o) => !o)}
-              title="More options"
-            >
-              <DotsIcon />
-            </button>
-            {isMenuOpen && (
-              <div className="solid-studio-menu-dropdown">
-                {isPreviewable && (
-                  <button
-                    type="button"
-                    className="solid-studio-menu-item"
-                    onClick={() => {
-                      setIsMenuOpen(false);
-                      const params = new URLSearchParams(search);
-                      params.set("preview", "true");
-                      window.open(`${pathname}?${params.toString()}`, "_blank");
-                    }}
-                  >
-                    <PreviewIcon />
-                    Preview page
-                  </button>
-                )}
-                {/* {!isOnStudioPage && (
-                  <button type="button" className="solid-studio-menu-item" onClick={handleExit}>
-                    <ExitStudioIcon />
-                    Exit Studio
-                  </button>
-                )} */}
-                <button type="button" className="solid-studio-menu-item danger" onClick={handleLogout}>
-                  <LogoutIcon />
-                  Logout
+          {isMenuOpen && (
+            <div className="solid-studio-island-dropdown">
+              {isPreviewable && (
+                <button
+                  type="button"
+                  className="solid-studio-island-dropdown-item"
+                  onClick={() => {
+                    setIsMenuOpen(false);
+                    const params = new URLSearchParams(search);
+                    params.set("preview", "true");
+                    window.open(`${pathname}?${params.toString()}`, "_blank");
+                  }}
+                >
+                  <PreviewIcon />
+                  Preview page
                 </button>
-              </div>
-            )}
-          </div>
-
-          <button
-            type="button"
-            className="solid-studio-menu-trigger"
-            style={{ color: "var(--primary-foreground)" }}
-            onClick={() => {
-              const aiUrl = env("VITE_SOLIDX_AI_URL");
-              if (aiUrl) window.open(aiUrl, "_blank");
-            }}
-            title="Open AI Chat"
-          >
-            <ChatIcon />
-          </button>
+              )}
+              <button
+                type="button"
+                className="solid-studio-island-dropdown-item danger"
+                onClick={handleLogout}
+              >
+                <LogoutIcon />
+                Logout
+              </button>
+            </div>
+          )}
         </div>
       </div>
-
-      {/* ── AI chat panel (commented out — moved to agent-ui) ───────────────── */}
-      {/* <div
-        className={`solid-studio-panel-fixed${isPanelOpen ? "" : " collapsed"}`}
-        style={{ width: `${panelWidth}px` }}
-      >
-        <div
-          className={`solid-studio-resize-handle${isDragging ? " dragging" : ""}`}
-          onMouseDown={onDragStart}
-        />
-        <div className="solid-studio-panel-body">
-          <SolidAiChat />
-        </div>
-      </div> */}
     </div>
   );
 

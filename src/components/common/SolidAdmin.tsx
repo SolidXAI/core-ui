@@ -12,7 +12,7 @@ export const SolidAdmin = () => {
         @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap');
 
         .solid-welcome {
-          min-height: calc(100vh - var(--solid-studio-header-height, 0px));
+          min-height: 100vh;
           background: #FFF;
           display: flex;
           align-items: center;
