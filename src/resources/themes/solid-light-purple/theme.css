@@ -6173,7 +6173,13 @@
   }
 
   .form-field-label {
-    color: rgba(0, 0, 0, 0.88) !important;
+    font-size: 12px;
+    color: var(--muted-foreground);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin: 0;
   }
 
   .solid-standard-autocomplete .p-autocomplete-dropdown.p-button {

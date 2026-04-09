@@ -13,8 +13,9 @@ import { SolidFormViewNormalHeaderButton } from "./SolidFormViewNormalHeaderButt
 import { SolidFormViewContextMenuHeaderButton } from "./SolidFormViewContextMenuHeaderButton";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { useSession } from '../../../hooks/useSession'
+import { SolidFormStepper } from "../../../components/common/SolidFormStepper";
 
-export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate,formData, isSubmitting }: any) => {
+export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate, formData, isSubmitting }: any) => {
     const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
     const router = useRouter();
     const pathname = usePathname();
@@ -220,270 +221,282 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
     return (
         <>
             <div className="page-header solid-list-toolbar flex-column lg:flex-row">
-              <div className="flex justify-content-between w-full solid-list-toolbar-row">
-                {params.id === "new" ? (
-                    <>
-                        <div className="flex gap-3 align-items-center solid-list-toolbar-left">
-                            {params.embeded !== true && <BackButton />}
-                            <p className="m-0 view-title solid-text-wrapper">{createHeaderTitle}</p>
-                        </div>
-                        <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
-                            <div className="hidden lg:flex solid-header-buttons-wrapper">
-                                {normalHeaderButtons.map((button: any, index: number) => {
-                                    return (
-                                        <SolidFormViewNormalHeaderButton
-                                            key={index}
-                                            button={button}
-                                            params={params}
-                                            formik={formik}
-                                            formData={formData}
-                                            solidFormViewMetaData={solidFormViewMetaData}
-                                            handleCustomButtonClick={handleCustomButtonClick}
-                                        />
-
-                                    )
-                                })
-                                }
+                <div className="flex justify-content-between w-full solid-form-toolbar-row">
+                    {params.id === "new" ? (
+                        <>
+                            <div className="flex gap-3 align-items-center solid-form-toolbar-left">
+                                {/* {params.embeded !== true && <BackButton />}
+                            <p className="m-0 view-title solid-text-wrapper">{createHeaderTitle}</p> */}
+                             {params.embeded !== true && 
+                                <SolidFormStepper
+                                    solidFormViewMetaData={solidFormViewMetaData}
+                                    initialEntityData={initialEntityData}
+                                    modelName={params.modelName}
+                                    id={params.id}
+                                    solidWorkflowFieldValue={solidWorkflowFieldValue}
+                                    setSolidWorkflowFieldValue={setSolidWorkflowFieldValue}
+                                    onStepperUpdate={onStepperUpdate}
+                                ></SolidFormStepper>
+                             }
                             </div>
-                            {params.embeded !== true &&
-                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
-                                !formViewLayout.attrs.readonly &&
-                                formik.dirty &&
-                                <div>
-                                    <Button
-                                        label="Save"
-                                        size="small"
-                                        type="submit"
-                                        className="hidden lg:flex"
-                                        loading={isSubmitting}
-                                        disabled={isSubmitting}
-                                    />
-                                    <Button
-                                        size="small"
-                                        type="submit"
-                                        className="lg:hidden solid-icon-button"
-                                        icon="pi pi-check"
-                                        loading={isSubmitting}
-                                        disabled={isSubmitting}
-                                    />
+                            <div className="flex align-items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
+                                <div className="hidden lg:flex solid-header-buttons-wrapper">
+                                    {normalHeaderButtons.map((button: any, index: number) => {
+                                        return (
+                                            <SolidFormViewNormalHeaderButton
+                                                key={index}
+                                                button={button}
+                                                params={params}
+                                                formik={formik}
+                                                formData={formData}
+                                                solidFormViewMetaData={solidFormViewMetaData}
+                                                handleCustomButtonClick={handleCustomButtonClick}
+                                            />
+
+                                        )
+                                    })
+                                    }
                                 </div>
-                            }
-                            <div className="hidden lg:flex">
-                                {params.embeded !== true && params.draftEnabled &&
-                                    !formViewLayout.attrs.readonly && params.publish !== 'null' &&
+                                {params.embeded !== true &&
+                                    actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
+                                    !formViewLayout.attrs.readonly &&
                                     formik.dirty &&
                                     <div>
                                         <Button
-                                            label="Draft"
+                                            label="Save"
                                             size="small"
-                                            type="button"
+                                            type="submit"
+                                            className="hidden lg:flex"
+                                            loading={isSubmitting}
+                                            disabled={isSubmitting}
+                                        />
+                                        <Button
+                                            size="small"
+                                            type="submit"
+                                            className="lg:hidden solid-icon-button"
+                                            icon="pi pi-check"
+                                            loading={isSubmitting}
+                                            disabled={isSubmitting}
                                         />
                                     </div>
                                 }
-                            </div>
-                            {params.embeded == true &&
-                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
-                                !formViewLayout.attrs.readonly &&
-                                formik.dirty &&
-                                <div>
-                                    <Button
-                                        label="Save"
-                                        size="small"
-                                        onClick={() => {
-                                            setRedirectToList(params.redirectToPath ? true : false);
-                                        }}
-                                        type="submit"
-                                        className="hidden lg:flex"
-                                        loading={isSubmitting}
-                                        disabled={isSubmitting}
-                                    />
-                                    <Button
-                                        size="small"
-                                        onClick={() => {
-                                            setRedirectToList(params.redirectToPath ? true : false);
-                                        }}
-                                        type="submit"
-                                        className="lg:hidden solid-icon-button"
-                                        icon="pi pi-check"
-                                        loading={isSubmitting}
-                                        disabled={isSubmitting}
-                                    />
-                                </div>
-                            }
-                            {params.embeded == true &&
-                                <>
-                                    <div className="hidden lg:flex">
+                                <div className="hidden lg:flex">
+                                    {params.embeded !== true && params.draftEnabled &&
+                                        !formViewLayout.attrs.readonly && params.publish !== 'null' &&
+                                        formik.dirty &&
                                         <div>
-                                            <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse ' style={{ minWidth: 66 }} />
+                                            <Button
+                                                label="Draft"
+                                                size="small"
+                                                type="button"
+                                            />
                                         </div>
-                                    </div>
-                                    <div className="lg:hidden">
-                                        <Button outlined size="small" type="button" icon="pi pi-times" onClick={() => params.handlePopupClose()} className='bg-primary-reverse solid-icon-button' />
-                                    </div>
-                                </>
-                            }
-                            {/* {params.embeded !== true &&
-                                <SolidCancelButton />
-                            } */}
-                            {
-                                formViewLayout?.attrs?.showCogWheelFormButton !== false &&
-                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
-                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
-                                <FormActionDropdown />
-                            }
-                        </div>
-                    </>
-                ) : (
-                    <>
-                        <div className="flex gap-3 align-items-center solid-list-toolbar-left">
-                            {params.embeded !== true && <BackButton />}
-                            <p className="m-0 view-title solid-text-wrapper">{viewMode === "edit" ? editHeaderTitle : solidView.model.displayName}</p>
-                        </div>
-
-                        <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
-                            <div className="hidden lg:flex solid-header-buttons-wrapper">
-                                {normalHeaderButtons.map((button: any, index: number) => {
-                                    return (
-                                        // <Button
-                                        //     text
-                                        //     type="button"
-                                        //     className="w-full text-left gap-2"
-                                        //     label={button.attrs.label}
-                                        //     size="small"
-                                        //     iconPos="left"
-                                        //     severity="contrast"
-                                        //     icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
-                                        //     onClick={() => {
-                                        //         const event = {
-                                        //             action: button.attrs.action,
-                                        //             params,
-                                        //             formik,
-                                        //             solidFormViewMetaData: solidFormViewMetaData.data
-                                        //         }
-                                        //         handleCustomButtonClick(button.attrs, event)
-                                        //     }}
-                                        // />
-                                        <SolidFormViewNormalHeaderButton
-                                            key={index}
-                                            button={button}
-                                            params={params}
-                                            formik={formik}
-                                            formData={formData}
-                                            solidFormViewMetaData={solidFormViewMetaData}
-                                            handleCustomButtonClick={handleCustomButtonClick}
-                                        />
-                                    )
-                                })
-                                }
-                            </div>
-                            {
-                                !formViewLayout.attrs.readonly &&
-                                formViewLayout.attrs?.showAddFormButton !== false &&
-                                params.embeded !== true &&
-                                viewMode === "view" &&
-                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
-                                <>
-                                    <div className="hidden lg:flex">
+                                    }
+                                </div>
+                                {params.embeded == true &&
+                                    actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
+                                    !formViewLayout.attrs.readonly &&
+                                    formik.dirty &&
                                     <div>
-                                        <Button type="button" label="Add" size='small' onClick={() => {
-                                            setIsNavigating(true);
-                                            router.replace(`${normalizeSolidFormActionPath(pathname, "form")}/new?viewMode=edit`);
-                                        }} loading={isNavigating} disabled={isNavigating} />
+                                        <Button
+                                            label="Save"
+                                            size="small"
+                                            onClick={() => {
+                                                setRedirectToList(params.redirectToPath ? true : false);
+                                            }}
+                                            type="submit"
+                                            className="hidden lg:flex"
+                                            loading={isSubmitting}
+                                            disabled={isSubmitting}
+                                        />
+                                        <Button
+                                            size="small"
+                                            onClick={() => {
+                                                setRedirectToList(params.redirectToPath ? true : false);
+                                            }}
+                                            type="submit"
+                                            className="lg:hidden solid-icon-button"
+                                            icon="pi pi-check"
+                                            loading={isSubmitting}
+                                            disabled={isSubmitting}
+                                        />
                                     </div>
-                                    </div>
-                                    <div className="lg:hidden">
-                                        <Button type="button" icon="pi pi-plus" size='small' onClick={() => {
-                                            setIsNavigating(true);
-                                            router.replace(`${normalizeSolidFormActionPath(pathname, "form")}/new?viewMode=edit`);
-                                        }} className="p-button-sm solid-icon-button" loading={isNavigating} disabled={isNavigating} />
-                                    </div>
-                                </>
-                            }
-                            {
-                                !formViewLayout.attrs.readonly &&
-                                formViewLayout.attrs?.showEditFormButton !== false &&
-                                params.embeded !== true &&
-                                viewMode === "view" &&
-                                !isPublished &&
-                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
-                                <>
-                                    <div className="hidden lg:flex">
-                                        <div>
-                                            <Button label="Edit" size="small" onClick={() => updateViewMode("edit")} type="button" />
+                                }
+                                {params.embeded == true &&
+                                    <>
+                                        <div className="hidden lg:flex">
+                                            <div>
+                                                <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse ' style={{ minWidth: 66 }} />
+                                            </div>
                                         </div>
-                                    </div>
-                                    <div className="lg:hidden">
-                                        <Button icon="pi pi-pencil" size="small" onClick={() => updateViewMode("edit")} type="button" className="p-button-sm solid-icon-button " />
-                                    </div>
-                                </>
-                            }
-
-                            {
-                                params.embeded !== true &&
-                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
-                                !formViewLayout.attrs.readonly &&
-                                formik.dirty &&
-
-                                <div>
-                                    <Button label="Save" size="small" type="submit"  className="hidden lg:flex" loading={isSubmitting} disabled={isSubmitting}/>
-                                    <Button  size="small" type="submit" className="lg:hidden solid-icon-button" icon="pi pi-check" loading={isSubmitting} disabled={isSubmitting}/>
-                                </div>
-                            }
-
-                            {/* Inline */}
-                            {
-                                params.embeded == true &&
-                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
-                                !formViewLayout.attrs.readonly &&
-                                formik.dirty &&
-
-                                <div>
-                                    <Button label="Save" size="small" type="submit" className="hidden lg:flex" />
-                                    <Button size="small" type="submit" className="lg:hidden solid-icon-button" icon="pi pi-check" />
-
-                                </div>
-                            }
-                            {
-                                params.embeded == true &&
-                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
-                                formViewLayout.attrs?.showDeleteFormButton !== false &&
-                                !formViewLayout.attrs.readonly &&
-                                !isPublished &&
-                                <div>
-                                    <Button size="small" type="button" label="Delete" severity="danger" onClick={() => setDeleteDialogVisible(true)} />
-                                </div>
-                            }
-                            {
-                                params.embeded == true &&
-                                <>
-                                    <div className="hidden lg:flex">
-                                        <div>
-                                            <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse ' style={{ minWidth: 66 }} />
+                                        <div className="lg:hidden">
+                                            <Button outlined size="small" type="button" icon="pi pi-times" onClick={() => params.handlePopupClose()} className='bg-primary-reverse solid-icon-button' />
                                         </div>
-                                    </div>
-                                    <div className="lg:hidden">
-                                        <Button outlined size="small" type="button" icon="pi pi-times" onClick={() => params.handlePopupClose()} className='bg-primary-reverse solid-icon-button' />
-                                    </div>
-                                </>
+                                    </>
+                                }
+                                {/* {params.embeded !== true &&
+                                <SolidCancelButton />
+                            } */}
+                                {
+                                    formViewLayout?.attrs?.showCogWheelFormButton !== false &&
+                                    actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
+                                    actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
+                                    <FormActionDropdown />
+                                }
+                            </div>
+                        </>
+                    ) : (
+                        <>
+                            <div className="flex gap-3 align-items-center solid-form-toolbar-left">
+                             {params.embeded !== true && 
+                                <SolidFormStepper
+                                solidFormViewMetaData={solidFormViewMetaData}
+                                initialEntityData={initialEntityData}
+                                modelName={params.modelName}
+                                id={params.id}
+                                solidWorkflowFieldValue={solidWorkflowFieldValue}
+                                setSolidWorkflowFieldValue={setSolidWorkflowFieldValue}
+                                onStepperUpdate={onStepperUpdate}
+                                ></SolidFormStepper>
                             }
-                            {/* {
+                                {/* {params.embeded !== true && <BackButton />} */}
+                                {/* <p className="m-0 view-title solid-text-wrapper">{viewMode === "edit" ? editHeaderTitle : solidView.model.displayName}</p> */}
+                            </div>
+
+                            <div className="flex align-items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
+                                <div className="hidden lg:flex solid-header-buttons-wrapper">
+                                    {normalHeaderButtons.map((button: any, index: number) => {
+                                        return (
+                                            // <Button
+                                            //     text
+                                            //     type="button"
+                                            //     className="w-full text-left gap-2"
+                                            //     label={button.attrs.label}
+                                            //     size="small"
+                                            //     iconPos="left"
+                                            //     severity="contrast"
+                                            //     icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
+                                            //     onClick={() => {
+                                            //         const event = {
+                                            //             action: button.attrs.action,
+                                            //             params,
+                                            //             formik,
+                                            //             solidFormViewMetaData: solidFormViewMetaData.data
+                                            //         }
+                                            //         handleCustomButtonClick(button.attrs, event)
+                                            //     }}
+                                            // />
+                                            <SolidFormViewNormalHeaderButton
+                                                key={index}
+                                                button={button}
+                                                params={params}
+                                                formik={formik}
+                                                formData={formData}
+                                                solidFormViewMetaData={solidFormViewMetaData}
+                                                handleCustomButtonClick={handleCustomButtonClick}
+                                            />
+                                        )
+                                    })
+                                    }
+                                </div>
+                                {
+                                    !formViewLayout.attrs.readonly &&
+                                    formViewLayout.attrs?.showAddFormButton !== false &&
+                                    params.embeded !== true &&
+                                    viewMode === "view" &&
+                                    actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
+                                    <>
+                                        <div className="hidden lg:flex">
+                                            <div>
+                                                <Button type="button" label="Add" size='small' onClick={() => {
+                                                    setIsNavigating(true);
+                                                    router.replace(`${normalizeSolidFormActionPath(pathname, "form")}/new?viewMode=edit`);
+                                                }} loading={isNavigating} disabled={isNavigating} />
+                                            </div>
+                                        </div>
+                                        <div className="lg:hidden">
+                                            <Button type="button" icon="pi pi-plus" size='small' onClick={() => {
+                                                setIsNavigating(true);
+                                                router.replace(`${normalizeSolidFormActionPath(pathname, "form")}/new?viewMode=edit`);
+                                            }} className="p-button-sm solid-icon-button" loading={isNavigating} disabled={isNavigating} />
+                                        </div>
+                                    </>
+                                }
+                                {
+                                    !formViewLayout.attrs.readonly &&
+                                    formViewLayout.attrs?.showEditFormButton !== false &&
+                                    params.embeded !== true &&
+                                    viewMode === "view" &&
+                                    !isPublished &&
+                                    actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
+                                    <>
+                                        <div className="hidden lg:flex">
+                                            <div>
+                                                <Button label="Edit" size="small" onClick={() => updateViewMode("edit")} type="button" />
+                                            </div>
+                                        </div>
+                                        <div className="lg:hidden">
+                                            <Button icon="pi pi-pencil" size="small" onClick={() => updateViewMode("edit")} type="button" className="p-button-sm solid-icon-button " />
+                                        </div>
+                                    </>
+                                }
+
+                                {
+                                    params.embeded !== true &&
+                                    actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
+                                    !formViewLayout.attrs.readonly &&
+                                    formik.dirty &&
+
+                                    <div>
+                                        <Button label="Save" size="small" type="submit" className="hidden lg:flex" loading={isSubmitting} disabled={isSubmitting} />
+                                        <Button size="small" type="submit" className="lg:hidden solid-icon-button" icon="pi pi-check" loading={isSubmitting} disabled={isSubmitting} />
+                                    </div>
+                                }
+
+                                {/* Inline */}
+                               
+                               
+                                {
+                                    params.embeded == true &&
+                                    actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
+                                    formViewLayout.attrs?.showDeleteFormButton !== false &&
+                                    !formViewLayout.attrs.readonly &&
+                                    !isPublished &&
+                                    <div>
+                                        <Button size="small" type="button" label="Delete" severity="danger" onClick={() => setDeleteDialogVisible(true)} />
+                                    </div>
+                                }
+                                {
+                                    params.embeded == true &&
+                                    <>
+                                        <div className="hidden lg:flex">
+                                            <div>
+                                                <Button outlined size="small" type="button" label="Close" onClick={() => params.handlePopupClose()} className='bg-primary-reverse ' style={{ minWidth: 66 }} />
+                                            </div>
+                                        </div>
+                                        <div className="lg:hidden">
+                                            <Button outlined size="small" type="button" icon="pi pi-times" onClick={() => params.handlePopupClose()} className='bg-primary-reverse solid-icon-button' />
+                                        </div>
+                                    </>
+                                }
+                                {/* {
                                 params.embeded !== true &&
 
                                 <SolidCancelButton />
                             } */}
-                            {
-                                formViewLayout?.attrs?.showCogWheelFormButton !== false &&
-                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
-                                actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
+                                {
+                                    formViewLayout?.attrs?.showCogWheelFormButton !== false &&
+                                    actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
+                                    actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
 
-                                <FormActionDropdown />
-                            }
-                        </div>
-                    </>
-                )}
-              </div>
+                                    <FormActionDropdown />
+                                }
+                            </div>
+                        </>
+                    )}
+                </div>
             </div>
-            {params.embeded !== true &&
+            {/* {params.embeded !== true &&
                 <SolidFormHeader
                     solidFormViewMetaData={solidFormViewMetaData}
                     initialEntityData={initialEntityData}
@@ -493,7 +506,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                     setSolidWorkflowFieldValue={setSolidWorkflowFieldValue}
                     onStepperUpdate={onStepperUpdate}
                 />
-            }
+            } */}
         </>
     )
 }

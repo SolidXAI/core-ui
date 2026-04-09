@@ -18,6 +18,7 @@ import { ERROR_MESSAGES } from "../../../../../constants/error-messages";
 import { useRouter } from "../../../../../hooks/useRouter";
 import { usePathname } from "../../../../../hooks/usePathname";
 import { camelCase, capitalize } from "lodash";
+import styles from "../solidFields.module.css";
 import { SolidListView } from "../../../../core/list/SolidListView";
 import { RenderSolidFormEmbededView } from "./SolidRelationManyToOneField";
 import { buildSyntheticChangeEvent } from "../fieldEventUtils";
@@ -197,7 +198,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
         <div className="relative">
             <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                 {showFieldLabel !== false && (
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
                         {fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
@@ -359,7 +360,7 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
         <div className="flex align-items-center gap-3 justify-content-space-between">
             <div className="flex align-items-center gap-3">
                 {showFieldLabel !== false && (
-                    <label className="form-field-label">
+                    <label className={`${styles.fieldLabel} form-field-label`}>
                         {fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
@@ -408,7 +409,7 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
                                 checked={currentValues.some((s) => s.value === item.value)}
                                 onChange={() => handleCheckboxChange(item)}
                             />
-                            <label htmlFor={item.label} className="form-field-label m-0">
+                            <label htmlFor={item.label} className={`${styles.fieldLabel} form-field-label m-0`}>
                                 {item.label}
                             </label>
                         </div>
@@ -602,7 +603,7 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
     return (
         <div>
             {showFieldLabel !== false && (
-                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -627,11 +628,12 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                 />
             )}
 
-            <SolidDialog
-                header={`Link existing ${fieldLabel}`}
-                visible={visibleLinkDialog}
-                style={{ width: '30vw', minWidth: 320 }}
-                onHide={() => setVisibleLinkDialog(false)}
+                <SolidDialog
+                    header={`Link existing ${fieldLabel}`}
+                    showHeader={true}
+                    visible={visibleLinkDialog}
+                    style={{ width: '30vw', minWidth: 320 }}
+                    onHide={() => setVisibleLinkDialog(false)}
                 footer={
                     <div className="flex gap-2 justify-content-end">
                         <SolidButton
@@ -671,7 +673,7 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
 
 
             <SolidDialog
-                showHeader={false}
+                header="Save Required"
                 headerClassName="py-2"
                 contentClassName="px-0 pb-0"
                 className="solid-confirm-dialog"

@@ -2839,6 +2839,23 @@ body {
   gap: 8px !important;
 }
 
+/* Form header specific layout */
+.solid-form-toolbar-row {
+  align-items: center;
+}
+
+.solid-form-toolbar-left {
+  flex: 1 1 50%;
+  min-width: 0;
+}
+
+.solid-form-toolbar-actions {
+  gap: 8px !important;
+  flex: 1 1 50%;
+  min-width: 0;
+  justify-content: flex-end;
+}
+
 .solid-list-toolbar .solid-global-search-element,
 .solid-kanban-toolbar .solid-global-search-element {
   height: 36px;
@@ -4911,34 +4928,30 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  padding: 8px 10px;
-  border-radius: 8px;
+  padding: 0;
+  border-radius: 0;
   font-size: 12px;
-  border: 1px solid transparent;
+  border: none;
 }
 
 .solid-message-info {
-  background: color-mix(in srgb, var(--primary-color, var(--primary)) 8%, transparent);
-  border-color: color-mix(in srgb, var(--primary-color, var(--primary)) 25%, var(--border));
+  background: transparent;
   color: var(--foreground);
 }
 
 .solid-message-success {
-  background: color-mix(in srgb, #10b981 12%, transparent);
-  border-color: color-mix(in srgb, #10b981 35%, var(--border));
-  color: var(--foreground);
+  background: transparent;
+  color: #15803d;
 }
 
 .solid-message-warn {
-  background: color-mix(in srgb, #f59e0b 16%, transparent);
-  border-color: color-mix(in srgb, #f59e0b 38%, var(--border));
-  color: var(--foreground);
+  background: transparent;
+  color: #d97706;
 }
 
 .solid-message-error {
-  background: color-mix(in srgb, #ef4444 16%, transparent);
-  border-color: color-mix(in srgb, #ef4444 40%, var(--border));
-  color: var(--foreground);
+  background: transparent;
+  color: #ef4444;
 }
 
 .solid-tag {

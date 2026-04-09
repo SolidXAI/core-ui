@@ -1,5 +1,5 @@
 export { SolidButton } from "./SolidButton";
-export { SolidAccordion, SolidAccordionContent, SolidAccordionItem, SolidAccordionTrigger } from "./SolidAccordion";
+export { SolidAccordion,SolidAccordionItem, SolidAccordionContent, SolidAccordionTrigger } from "./SolidAccordion";
 export {
   SolidDropdownMenu,
   SolidDropdownMenuCheckboxItem,
@@ -38,10 +38,11 @@ export { SolidSegmentedControl } from "./SolidSegmentedControl";
 export { SolidRadioGroup } from "./SolidRadioGroup";
 export { SolidDatePicker } from "./SolidDatePicker";
 export { SolidPanel } from "./SolidPanel";
-export { SolidAccordion, SolidAccordionItem } from "./SolidAccordion";
 export { SolidConfirmDialog } from "./SolidConfirmDialog";
 export { SolidProgressBar } from "./SolidProgressBar";
 export { SolidSlider } from "./SolidSlider";
 export { SolidTag } from "./SolidTag";
 export { SolidMessage } from "./SolidMessage";
 export { SolidDivider } from "./SolidDivider";
+export { SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "./SolidTooltip";
+export { SolidCodeEditor } from "./SolidCodeEditor";

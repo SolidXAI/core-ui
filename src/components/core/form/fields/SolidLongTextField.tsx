@@ -6,9 +6,8 @@ import { useEffect, useRef, useState } from "react";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
-import Editor from '@monaco-editor/react';
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
-import { SolidButton, SolidDatePicker, SolidSelect, SolidInput } from "../../../shad-cn-ui";
+import { SolidButton, SolidDatePicker, SolidSelect, SolidInput, SolidCodeEditor } from "../../../shad-cn-ui";
 import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 
 
@@ -165,11 +164,8 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
 
     const readOnly = fieldLayoutInfo.attrs?.readonly || fieldContext.readOnly;
     const disabled = fieldLayoutInfo.attrs?.disabled;
-
-    // Default to SQL
-    const language = fieldLayoutInfo.attrs.editorLanguage || 'ts';
-
     const value = formik.values[fieldLayoutInfo.attrs.name] || '';
+    const codeLanguage = fieldLayoutInfo.attrs.editorLanguage || 'ts';
 
     const isFormFieldValid = (formik: any, fieldName: string) =>
         formik.touched[fieldName] && formik.errors[fieldName];
@@ -283,9 +279,6 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
 
     const readOnly = fieldLayoutInfo.attrs?.readonly || fieldContext.readOnly;
     const disabled = fieldLayoutInfo.attrs?.disabled;
-
-    // Default to SQL
-    const language = fieldLayoutInfo.attrs.editorLanguage || 'ts';
 
     const value = formik.values[fieldLayoutInfo.attrs.name] || '';
 
@@ -471,9 +464,7 @@ export const CodeEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFiel
 
     const readOnly = fieldLayoutInfo.attrs?.readonly || fieldContext.readOnly;
     const disabled = fieldLayoutInfo.attrs?.disabled;
-
-    // Default to SQL
-    const language = fieldLayoutInfo.attrs.editorLanguage || 'ts';
+    const codeLanguage = fieldLayoutInfo.attrs.editorLanguage || 'ts';
 
     const value = formik.values[fieldLayoutInfo.attrs.name] || '';
 
@@ -491,18 +482,13 @@ export const CodeEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFiel
             )}
 
             <div className="border border-gray-300 rounded overflow-hidden">
-                <Editor
-                    height="200px"
-                    defaultLanguage={language}
+                <SolidCodeEditor
                     value={value}
                     onChange={(val) => formik.setFieldValue(fieldLayoutInfo.attrs.name, val)}
-                    options={{
-                        readOnly,
-                        minimap: { enabled: false },
-                        lineNumbers: 'on',
-                        fontSize: 14,
-                        scrollBeyondLastLine: false,
-                    }}
+                    height={fieldLayoutInfo.attrs?.height ?? "200px"}
+                    fontSize={fieldLayoutInfo.attrs?.fontSize ?? "14px"}
+                    readOnly={readOnly || disabled}
+                    language={codeLanguage}
                 />
             </div>
 

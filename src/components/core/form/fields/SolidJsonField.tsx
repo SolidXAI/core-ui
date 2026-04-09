@@ -1,5 +1,4 @@
 
-import CodeEditor from "../../../../components/common/CodeEditor";
 import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
@@ -10,6 +9,7 @@ import { oneDark } from '@codemirror/theme-one-dark';
 import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct import
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import { SolidCodeEditor } from "../../../shad-cn-ui";
 import styles from "./solidFields.module.css";
 export class SolidJsonField implements ISolidField {
 
@@ -117,20 +117,25 @@ export const DefaultJsonFormEditWidget = ({ formik, fieldContext }: SolidFormFie
         <div className="relative">
             <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className={styles.fieldLabel}>{fieldLabel}
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
-                <CodeEditor
-                    formik={formik}
-                    field={fieldLayoutInfo.attrs.name}
+                <SolidCodeEditor
+                    value={(() => {
+                        const val = formik.values[fieldLayoutInfo.attrs.name];
+                        if (val == null) return "";
+                        if (typeof val === "string") return val;
+                        return JSON.stringify(val, null, 2);
+                    })()}
+                    onChange={(next) => formik.setFieldValue(fieldLayoutInfo.attrs.name, next)}
                     height={fieldLayoutInfo.attrs?.height}
                     fontSize={fieldLayoutInfo.attrs?.fontSize}
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                >
-                </CodeEditor>
+                    language="json"
+                />
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <div className="absolute mt-1">
