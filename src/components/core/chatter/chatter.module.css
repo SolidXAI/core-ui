@@ -64,10 +64,11 @@
 
 .solidMessageWrapper {
     border: 1px solid #D8E2EA;
-    padding: 8px 10px;
+    padding: 5px;
     border-radius: 0.4rem;
     width: 100%;
     background: #fff;
+    font-size: 12px;
     line-height: 1.45;
     color: var(--solid-text-secondary, #475569);
     font-weight: 400;
@@ -111,11 +112,11 @@
 }
 
 .solidChatterAvatar {
-    width: 30px;
-    height: 30px;
+    width: 25px;
+    height: 25px;
     border-radius: 50%;
-    font-size: 0.75rem;
-    font-weight: 600;
+    font-size: 0.55rem;
+    font-weight: 500;
     display: inline-flex;
     align-items: center;
     justify-content: center;

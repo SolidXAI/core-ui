@@ -136,7 +136,7 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
             className="flex justify-content-end align-items-center gap-2 p-1"
             style={{ borderTop: "1px solid var(--surface-border)" }}
         >{meta &&
-            <span>{`${meta.currentIndexGlobal} of ${meta.totalRecords}`}</span>
+            <span className="solid-form-footer-pagination-meta">{`${meta.currentIndexGlobal} of ${meta.totalRecords}`}</span>
             }
             {prevNav && (
                 <Button

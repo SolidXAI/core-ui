@@ -108,7 +108,7 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
   ];
 
   return (
-    <div style={{paddingLeft:"10px",backgroundColor:"#fff"}}>
+    <div style={{marginLeft:"10px",backgroundColor:"#fff"}}>
 
     <SolidTabGroup
       className="solid-locale-tabs h-full"

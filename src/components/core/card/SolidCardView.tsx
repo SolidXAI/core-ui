@@ -3,13 +3,12 @@ import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import qs from "qs";
-import { useEffect, useRef, useState } from "react";
+import { ChangeEvent, useEffect, useRef, useState } from "react";
 import Lightbox from "yet-another-react-lightbox";
 import Counter from "yet-another-react-lightbox/plugins/counter";
 import Download from "yet-another-react-lightbox/plugins/download";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
-import { Paginator } from "primereact/paginator";
 import { useDispatch, useSelector } from "react-redux";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { usePathname } from "../../../hooks/usePathname";
@@ -156,6 +155,30 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   const { data: solidCardViewMetaDataResponse } = useGetSolidViewLayoutQuery(cardViewMetaDataQs);
 
   const editBaseUrl = normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form");
+  const rowsOptions = rowsPerPageOptions && rowsPerPageOptions.length > 0 ? rowsPerPageOptions : [12, 24, 48];
+  const paginationStart = totalRecords === 0 ? 0 : first + 1;
+  const paginationEnd = Math.min(first + rows, totalRecords);
+  const totalPages = rows > 0 ? Math.max(1, Math.ceil(totalRecords / rows)) : 1;
+  const currentPage = rows > 0 ? Math.floor(first / rows) + 1 : 1;
+  const paginationReport = `${paginationStart} - ${paginationEnd} of ${totalRecords}`;
+  const canGoPrev = currentPage > 1;
+  const canGoNext = currentPage < totalPages;
+
+  const handleRowsChange = (event: ChangeEvent<HTMLSelectElement>) => {
+    const nextRows = Number(event.target.value);
+    setRows(nextRows);
+    setFirst(0);
+  };
+
+  const handlePrevPage = () => {
+    if (!canGoPrev) return;
+    setFirst(Math.max(0, first - rows));
+  };
+
+  const handleNextPage = () => {
+    if (!canGoNext) return;
+    setFirst(Math.min((totalPages - 1) * rows, first + rows));
+  };
 
   useEffect(() => {
     const fetchPermissions = async () => {
@@ -420,18 +443,41 @@ export const SolidCardView = (params: SolidCardViewParams) => {
 
             {totalRecords > 0 && (
               <div className="solid-card-view-pagination">
-                <Paginator
-                  first={first}
-                  rows={rows}
-                  totalRecords={totalRecords}
-                  rowsPerPageOptions={rowsPerPageOptions}
-                  onPageChange={(event) => {
-                    setFirst(event.first);
-                    setRows(event.rows);
-                  }}
-                  template="RowsPerPageDropdown CurrentPageReport PrevPageLink NextPageLink"
-                  currentPageReportTemplate="{first} - {last} of {totalRecords}"
-                />
+                <div className="solid-card-view-pagination-bar solid-table-paginator flex items-center justify-center gap-3 text-sm rounded-md border border-border/60 px-3 py-1.5 bg-background">
+                  <div className="solid-paginator-meta flex items-center gap-2">
+                    <span className="solid-paginator-label">Records</span>
+                    <select
+                      value={rows}
+                      onChange={handleRowsChange}
+                      className="solid-paginator-select"
+                    >
+                      {rowsOptions.map((option) => (
+                        <option key={option} value={option}>
+                          {option}
+                        </option>
+                      ))}
+                    </select>
+                    <span className="solid-paginator-report">{paginationReport}</span>
+                  </div>
+                  <div className="solid-paginator-actions flex items-center gap-2">
+                    <button
+                      type="button"
+                      className="solid-paginator-btn"
+                      onClick={handlePrevPage}
+                      disabled={!canGoPrev}
+                    >
+                      Previous
+                    </button>
+                    <button
+                      type="button"
+                      className="solid-paginator-btn"
+                      onClick={handleNextPage}
+                      disabled={!canGoNext}
+                    >
+                      Next
+                    </button>
+                  </div>
+                </div>
               </div>
             )}
           </div>

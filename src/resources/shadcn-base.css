@@ -3182,7 +3182,7 @@ body {
 
 .solid-paginator-label,
 .solid-paginator-report {
-  font-size: 12px;
+  font-size: 0.9rem;
   line-height: 1;
   color: color-mix(in srgb, var(--foreground) 82%, transparent);
   font-weight: 500;
@@ -3195,7 +3195,7 @@ body {
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
   background: var(--background);
   color: var(--foreground);
-  font-size: 12px;
+  font-size: 0.9rem;
   font-weight: 500;
   line-height: 1;
   padding: 0 26px 0 8px;
@@ -3211,7 +3211,7 @@ body {
   border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
   background: var(--background);
   color: var(--foreground);
-  font-size: 12px;
+  font-size: 0.9rem;
   font-weight: 500;
   line-height: 1;
   padding: 0 12px;
