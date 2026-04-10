@@ -1,13 +1,21 @@
-
-import { Button } from 'primereact/button'
-import { Calendar } from 'primereact/calendar'
-import { Dialog } from 'primereact/dialog'
-import { AutoComplete } from 'primereact/autocomplete'
 import { useEffect, useState } from 'react'
 import styles from './chatter.module.css'
 import { SolidMessageComposer } from './SolidMessageComposer'
 import { useLazyGetusersQuery } from '../../../redux/api/userApi'
 import { ERROR_MESSAGES } from '../../../constants/error-messages'
+import {
+    SolidButton,
+    SolidDialog,
+    SolidDialogBody,
+    SolidDialogClose,
+    SolidDialogFooter,
+    SolidDialogHeader,
+    SolidDialogSeparator,
+    SolidDialogTitle,
+    SolidAutocomplete,
+    SolidDatePicker
+} from '../../shad-cn-ui'
+import { Filter, RefreshCw } from 'lucide-react'
 interface FilterState {
     name: string;
     startDate: Date | null;
@@ -22,10 +30,11 @@ interface Props {
     refetch: any,
     id: any,
     onFilterChange?: (filters: FilterState) => void;
+    onComposerCancel?: () => void;
 }
 
 export const SolidChatterHeader = (props: Props) => {
-    const { activeTab, visibleBox, handleTabClick, modelSingularName, refetch, id, onFilterChange } = props;
+    const { activeTab, visibleBox, handleTabClick, modelSingularName, refetch, id, onFilterChange, onComposerCancel } = props;
     const [showFilterDialog, setShowFilterDialog] = useState(false);
     const [filters, setFilters] = useState<FilterState>({
         name: '',
@@ -65,7 +74,20 @@ export const SolidChatterHeader = (props: Props) => {
         setShowFilterDialog(false);
     };
 
+    const updateNameFilter = (value: string) => {
+        setFilters(prev => {
+            if (prev.name === value) {
+                return prev;
+            }
+            return {
+                ...prev,
+                name: value
+            };
+        });
+    };
+
     const searchUsers = async (event: { query: string }) => {
+        updateNameFilter(event.query || '');
         try {
             const response = await getUsers(`filters[fullName][$containsi]=${event.query}`).unwrap();
             setSuggestions(response?.data?.records || []);
@@ -75,21 +97,25 @@ export const SolidChatterHeader = (props: Props) => {
         }
     };
 
-    const itemTemplate = (item: any) => {
-        return (
-            <div className="flex align-items-center">
-                <div>{item.fullName}</div>
-            </div>
-        );
+    const handleUserChange = (value: any) => {
+        if (!value) {
+            updateNameFilter('');
+            return;
+        }
+        if (typeof value === 'object') {
+            updateNameFilter(value.fullName || '');
+            return;
+        }
+        updateNameFilter(value);
     };
 
     return (
-        <div className={styles.chatterTitle}>
-            <div className='flex justify-content-between align-items-center'>
-                <div className="form-wrapper-title ">
+        <div className={`${styles.chatterTitle} solid-list-toolbar`}>
+            <div className='flex justify-content-between align-items-center solid-list-toolbar-row'>
+                <p className="m-0 view-title solid-text-wrapper form-wrapper-title">
                     Activity
-                </div>
-                <div className='flex align-items-center gap-2'>
+                </p>
+                <div className='flex align-items-center solid-header-buttons-wrapper'>
                     {/* <Button
                         label="Send Message"
                         size="small"
@@ -100,38 +126,32 @@ export const SolidChatterHeader = (props: Props) => {
                             outlined: true,
                         })}
                     /> */}
-                    <Button
+                    <SolidButton
                         label="Log Note"
-                        size="small"
+                        size="sm"
                         type="button"
+                        variant="primary"
+                        className="solid-purple-button"
                         onClick={() => handleTabClick('log')}
-                        {...(activeTab !== 'log' && {
-                            severity: 'secondary',
-                            outlined: true,
-                        }
-                        )}
                     />
-                    <Button
-                        icon="pi pi-filter-fill"
-                        text
-                        size='small'
-                        severity="secondary"
+                    <SolidButton
+                        size="sm"
+                        type="button"
                         aria-label="Filter"
-                        style={{
-                            width: 20,
-                            color: hasActiveFilters ? '#722ED1' : undefined
-                        }}
+                        variant={hasActiveFilters ? 'primary' : 'outline'}
+                        className="solid-icon-button"
+                        style={{ gap: 0 }}
+                        leftIcon={<Filter size={14} />}
                         onClick={handleFilterClick}
                     />
-                    <Button
-                        icon="pi pi-refresh"
-                        text
-                        size='small'
-                        severity="secondary"
+                    <SolidButton
+                        size="sm"
+                        type="button"
                         aria-label="Refresh"
-                        style={{
-                            width: 20
-                        }}
+                        variant="outline"
+                        className="solid-icon-button"
+                        style={{ gap: 0 }}
+                        leftIcon={<RefreshCw size={14} />}
                         onClick={refetch}
                     />
                 </div>
@@ -139,80 +159,86 @@ export const SolidChatterHeader = (props: Props) => {
             {visibleBox &&
                 <div className='mt-4'>
                     {visibleBox === "email-message" &&
-                        <SolidMessageComposer id={id} refetch={refetch} modelSingularName={modelSingularName} type={"email"} />
+                        <SolidMessageComposer id={id} refetch={refetch} modelSingularName={modelSingularName} type={"email"} onCancel={onComposerCancel} />
                     }
 
                     {visibleBox === "log" &&
-                        <SolidMessageComposer id={id} refetch={refetch} modelSingularName={modelSingularName} />
+                        <SolidMessageComposer id={id} refetch={refetch} modelSingularName={modelSingularName} onCancel={onComposerCancel} />
                     }
                 </div>
             }
-            <Dialog 
-                header="Filter Messages" 
-                visible={showFilterDialog} 
-                style={{ width: 500 }} 
-                onHide={() => setShowFilterDialog(false)}
-                className='solid-chatter-filter-main'
+            <SolidDialog
+                open={showFilterDialog}
+                onOpenChange={setShowFilterDialog}
+                className='solid-filter-dialog-shell solid-chatter-filter-main'
+                style={{ width: 500 }}
+                showHeader={false}
             >
-                <div className="p-fluid">
-                    <div className="flex flex-column gap-2">
-                        <label htmlFor="name">Name:</label>
-                        <AutoComplete
-                            id="fullName"
-                            value={filters.name}
-                            suggestions={suggestions}
-                            completeMethod={searchUsers}
-                            field="fullName"
-                            onChange={(e) => setFilters(prev => ({ 
-                                ...prev, 
-                                name: typeof e.value === 'object' ? e.value.fullName : e.value 
-                            }))}
-                            placeholder="Filter By User"
-                            itemTemplate={itemTemplate}
-                            className="w-full"
-                        />
+                <SolidDialogHeader className="solid-filter-dialog-head">
+                    <div>
+                        <SolidDialogTitle className="solid-filter-dialog-title m-0">Filter Messages</SolidDialogTitle>
                     </div>
-                    <div className="flex flex-column gap-2 mt-3">
-                        <label htmlFor="dateRange">Date Range</label>
-                        <div className="flex gap-2">
-                            <div className="flex-1">
-                                <Calendar
-                                    id="startDate"
-                                    value={filters.startDate}
-                                    onChange={(e) => setFilters(prev => ({ ...prev, startDate: e.value as Date }))}
-                                    placeholder="Start Date"
-                                    showIcon
-                                    dateFormat="dd/mm/yy"
-                                    className="w-full"
-                                />
-                            </div>
-                            <div className="flex-1">
-                                <Calendar
-                                    id="endDate"
-                                    value={filters.endDate}
-                                    onChange={(e) => setFilters(prev => ({ ...prev, endDate: e.value as Date }))}
-                                    placeholder="End Date"
-                                    showIcon
-                                    dateFormat="dd/mm/yy"
-                                    className="w-full"
-                                />
+                    <SolidDialogClose className="solid-filter-dialog-close" />
+                </SolidDialogHeader>
+                <SolidDialogSeparator className="solid-filter-dialog-sep" />
+                <SolidDialogBody className="solid-filter-dialog-body">
+                    <div className="flex flex-column gap-3">
+                        <div className="flex flex-column gap-2">
+                            <label htmlFor="fullName" className="form-field-label">User</label>
+                            <SolidAutocomplete
+                                id="fullName"
+                                value={filters.name}
+                                suggestions={suggestions}
+                                field="fullName"
+                                completeMethod={searchUsers}
+                                onChange={(e) => handleUserChange(e.value)}
+                                placeholder="Filter by user"
+                                className="w-full"
+                                inputClassName="w-full"
+                            />
+                        </div>
+                        <div className="flex flex-column gap-2">
+                            <label htmlFor="dateRange" className="form-field-label">Date Range</label>
+                            <div className="flex gap-2 flex-column md:flex-row">
+                                <div className="flex-1">
+                                    <SolidDatePicker
+                                        selected={filters.startDate ?? undefined}
+                                        onChange={(date: Date | null) => setFilters(prev => ({ ...prev, startDate: date ?? null }))}
+                                        placeholderText="Start Date"
+                                        className="w-full"
+                                        wrapperClassName="w-full"
+                                        inputClassName="w-full"
+                                    />
+                                </div>
+                                <div className="flex-1">
+                                    <SolidDatePicker
+                                        selected={filters.endDate ?? undefined}
+                                        onChange={(date: Date | null) => setFilters(prev => ({ ...prev, endDate: date ?? null }))}
+                                        placeholderText="End Date"
+                                        className="w-full"
+                                        wrapperClassName="w-full"
+                                        inputClassName="w-full"
+                                    />
+                                </div>
                             </div>
                         </div>
                     </div>
-                    <div className="flex justify-content-end gap-2 mt-4">
-                        <Button 
+                </SolidDialogBody>
+                <SolidDialogFooter>
+                        <SolidButton 
                             label="Clear" 
-                            severity="secondary" 
-                            outlined 
+                            size="sm"
+                            variant="outline"
                             onClick={handleClearFilters}
                         />
-                        <Button 
+                        <SolidButton 
                             label="Apply" 
+                            size="sm"
+                            className="solid-purple-button"
                             onClick={handleApplyFilters}
                         />
-                    </div>
-                </div>
-            </Dialog>
+                </SolidDialogFooter>
+            </SolidDialog>
         </div>
     )
 }

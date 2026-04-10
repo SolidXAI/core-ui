@@ -1,36 +1,57 @@
-.SolidCustomLocaleTabviewPanels {
-  padding: 0 !important;
-}
-
-.SolidCustomLocaleTabHighlight .p-tabview-nav-link {
-  border: none !important;
-}
-
-.SolidCustomLocaleTabviewPanels .p-unselectable-text.p-tabview-selected {
-  border-bottom: 2px solid var(--border-color) !important;
-}
-.SolidCustomLocaleTabviewPanels .p-unselectable-text.p-tabview-selected.p-highlight {
-  border-bottom: 2px solid var(--primary-color) !important;
-}
-
-.SolidCustomLocaleTabviewPanels .p-tabview-nav li .p-tabview-nav-link {
-  border: none !important;
-  text-align: center !important;
-  align-content: center !important;
-  justify-content: center !important;
-} 
-
-.SolidCustomLocaleTab {
-  flex: 1;
-  /* text-align: center !important; */
-}
-
-.SolidCustomLocaleTabviewPanels .p-tabview-panels{
-  width: 100% !important;
+.solid-locale-tabs {
+  display: flex;
+  flex-direction: column;
   height: 100%;
-  padding: 0 !important;
 }
 
-.SolidCustomLocaleTabviewPanels .p-tabview-nav-link{
-  border: none !important;
+.solid-locale-tabs-list {
+  display: flex;
+  align-items: center;
+  gap: 1rem;
+  padding: 0 1rem;
+  border-bottom: 1px solid var(--border);
+  background: color-mix(in srgb, var(--solid-surface-1) 90%, transparent);
+  justify-content: flex-start;
+}
+
+.solid-locale-tabs .solid-tabs-trigger {
+  position: relative;
+  background: transparent;
+  border: none;
+  padding: 0.75rem 0;
+  font-size: 0.875rem;
+  font-weight: 600;
+  color: var(--muted-foreground);
+  cursor: pointer;
+  border-bottom: 2px solid transparent;
+  transition: color 150ms ease, border-color 150ms ease;
+}
+
+.solid-locale-tabs .solid-tabs-trigger:hover {
+  color: var(--foreground);
+}
+
+.solid-locale-tabs .solid-tabs-trigger.is-active {
+  color: var(--foreground);
+  border-bottom-color: var(--primary);
+}
+
+.solid-locale-tabs-panel {
+  flex: 1;
+  min-height: 0;
+  padding: 0;
+  display: flex;
+  flex-direction: column;
+}
+
+.solid-locale-tab-content {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  padding: 0;
+}
+
+.solid-locale-tab-content--padded {
+  padding: 0.75rem;
 }

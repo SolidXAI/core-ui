@@ -63,6 +63,7 @@ export function SolidButton({
     size === "small" ? "sm" : size === "large" ? "lg" : size === "medium" ? "md" : size === "lg" ? "lg" : size === "sm" ? "sm" : "md";
   const iconNode = icon ? <i className={icon} aria-hidden /> : null;
   const resolvedChildren = label ?? children;
+  const hasOnlyIcon = !loading && !resolvedChildren && !label && (leftIcon || rightIcon || iconNode);
 
   return (
     <button
@@ -88,7 +89,7 @@ export function SolidButton({
       {!loading && (leftIcon || (iconNode && iconPos === "left")) ? (
         <span className="solid-btn-icon">{leftIcon ?? iconNode}</span>
       ) : null}
-      <span className="solid-btn-label">{resolvedChildren}</span>
+      {!hasOnlyIcon && <span className="solid-btn-label">{resolvedChildren}</span>}
       {!loading && (rightIcon || (iconNode && iconPos === "right")) ? (
         <span className="solid-btn-icon">{rightIcon ?? iconNode}</span>
       ) : null}

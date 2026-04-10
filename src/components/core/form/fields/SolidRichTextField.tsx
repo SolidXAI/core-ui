@@ -1,7 +1,7 @@
 
-import React, { useState } from "react";
-import { Editor } from "primereact/editor";
+import React from "react";
 import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
+import { SolidRichTextEditor } from "../../../shad-cn-ui/SolidRichTextEditor";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "../../../../helpers/registry";
@@ -138,11 +138,11 @@ export const DefaultRichTextFormEditWidget = ({ formik, fieldContext }: SolidFor
                     <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
             }
-            <Editor
+            <SolidRichTextEditor
                 readOnly={formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled}
                 id={fieldLayoutInfo.attrs.name}
                 value={formik.values[fieldLayoutInfo.attrs.name] || ""}
-                onTextChange={(e) => formik.setFieldValue(fieldLayoutInfo.attrs.name, e.htmlValue ?? e.textValue ?? "")}
+                onChange={(value) => formik.setFieldValue(fieldLayoutInfo.attrs.name, value ?? "")}
                 className="solid-custom-editor"
                 style={{ minHeight: 180 }}
             />
@@ -158,7 +158,6 @@ export const DefaultRichTextFormViewWidget = ({ formik, fieldContext }: SolidFor
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
-    const [isText, setIsText] = useState(false)
     return (
         <div className={styles.fieldViewWrapper}>
             {showFieldLabel != false &&

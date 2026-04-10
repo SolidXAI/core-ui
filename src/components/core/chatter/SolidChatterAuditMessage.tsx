@@ -42,14 +42,14 @@ export const SolidChatterAuditMessage: React.FC<SolidChatterAuditMessageProps> =
         <div className='flex flex-column gap-2'>
             {auditRecord.map((item: AuditRecord, index: number) => (
                 <div key={index} className='flex gap-2'>
-                    <span className='m-0 text-sm'>
+                    <span className='m-0 '>
                         {"(" + (item.fieldDisplayName || item.field) + ")"}
                     </span>
-                    <span className='m-0 text-sm font-bold'>
+                    <span className='m-0  font-bold'>
                         {formatAuditValue(item.previous, item.previousDisplay, item.fieldType)}
                     </span>
                     <RightArrowSvg />
-                    <span className='m-0 text-sm font-bold text-primary'>
+                    <span className='m-0 font-bold text-primary'>
                         {formatAuditValue(item.current, item.currentDisplay, item.fieldType)}
                     </span>
                 </div>

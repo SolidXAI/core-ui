@@ -13,6 +13,7 @@ type SolidTabGroupProps = {
   className?: string;
   listClassName?: string;
   panelClassName?: string;
+  tabPosition?: "left" | "center" | "right";
 };
 
 function cx(...parts: Array<string | false | undefined>) {
@@ -30,9 +31,10 @@ export function SolidTabGroup({
   className,
   listClassName,
   panelClassName,
+  tabPosition = "left",
 }: SolidTabGroupProps) {
   return (
-    <div className={cx("solid-tabs", className)}>
+    <div className={cx("solid-tabs", `solid-tabs--${tabPosition}`, className)}>
       <div className={cx("solid-tabs-list", listClassName)} role="tablist">
         {tabs.map((tab) => {
           const isActive = tab.value === value;

@@ -5,9 +5,10 @@ import { SolidInput } from "./SolidInput";
 
 type SolidDatePickerProps = React.ComponentProps<typeof ReactDatePicker> & {
   timeOnly?: boolean;
+  inputClassName?: string;
 };
 
-export function SolidDatePicker({ timeOnly, showTimeSelect, ...props }: SolidDatePickerProps) {
+export function SolidDatePicker({ timeOnly, showTimeSelect, inputClassName, ...props }: SolidDatePickerProps) {
   const resolvedShowTime = timeOnly ? true : showTimeSelect;
 
   return (
@@ -15,7 +16,7 @@ export function SolidDatePicker({ timeOnly, showTimeSelect, ...props }: SolidDat
       {...props}
       showTimeSelect={resolvedShowTime}
       showTimeSelectOnly={timeOnly}
-      customInput={<SolidInput />}
+      customInput={<SolidInput className={inputClassName} />}
       className="solid-datepicker"
     />
   );

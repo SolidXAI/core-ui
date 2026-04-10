@@ -7,6 +7,8 @@ import { useLazyGetchatterMessageQuery } from '../../../redux/api/solidChatterMe
 import qs from "qs";
 import { ERROR_MESSAGES } from '../../../constants/error-messages'
 import { permissionExpression } from '../../../helpers/permissions'
+import { SolidButton, SolidMessage } from '../../shad-cn-ui'
+import { Inbox, Loader2 } from 'lucide-react'
 
 interface FilterState {
     name: string;
@@ -158,6 +160,72 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
         setLimit(prevLimit => prevLimit + 25);
     };
 
+    const canViewMessages = actionsAllowed.includes(`${permissionExpression('chatterMessage', 'findMany')}`);
+
+    const renderLoadingState = () => (
+        <div className='flex flex-column align-items-center justify-content-center gap-2 h-full text-center text-color-secondary'>
+            <Loader2 size={20} className='text-primary animate-spin' />
+            <span className='text-sm'>Loading recent activity…</span>
+        </div>
+    );
+
+    const renderEmptyState = () => (
+        <div className='flex align-items-center justify-content-center h-full'>
+            <div className='flex flex-column align-items-center gap-2 text-center text-color-secondary px-3'>
+                <div className='p-3 border-round bg-primary-reverse text-primary'>
+                    <Inbox size={20} />
+                </div>
+                <p className='m-0 text-base font-medium text-color'>No activity yet</p>
+                <p className='m-0 text-sm'>Log your first internal note or send a message to get things started.</p>
+                <SolidButton size='sm' variant='outline' onClick={() => handleTabClick('log')}>
+                    Log a note
+                </SolidButton>
+            </div>
+        </div>
+    );
+
+    const permissionError = () => (
+        <div className='p-3'>
+            <SolidMessage severity='warn' text="You do not have permission to view these messages." className='justify-content-start' />
+        </div>
+    );
+
+    const renderMessages = () => (
+        <div className='flex flex-column gap-3'>
+            {messages.map((message, index) => {
+                const showDateDivider = index === 0 || message.date !== messages[index - 1].date;
+                return (
+                    <div key={message.id}>
+                        {showDateDivider && <SolidChatterDateDivider date={message.date} />}
+                        <SolidChatterMessageBox
+                            user={message.user}
+                            messageType={message.messageType}
+                            message={message.message}
+                            time={message.time}
+                            auditRecord={message.auditRecord}
+                            media={message.media}
+                            messageSubType={message.messageSubType}
+                            modelDisplayName={message.modelDisplayName}
+                            modelUserKey={message.modelUserKey}
+                        />
+                    </div>
+                );
+            })}
+            {totalRecords > messages.length && (
+                <div className='flex justify-content-center'>
+                    <SolidButton
+                        type='button'
+                        size='sm'
+                        variant='outline'
+                        onClick={handleLoadMore}
+                    >
+                        Load more
+                    </SolidButton>
+                </div>
+            )}
+        </div>
+    );
+
     return (
         <div className='h-full'>
             <SolidChatterHeader
@@ -168,79 +236,26 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                 handleTabClick={handleTabClick}
                 visibleBox={visibleBox}
                 onFilterChange={handleFilterChange}
+                onComposerCancel={() => setVisibleBox(null)}
             />
-            <div className='p-3' style={{
+            <div className=' solid-chatter-body' style={{
+                paddingRight: '10px',
                 overflowY: 'scroll',
                 height:
                     visibleBox === 'email-message'
                         ? 'calc(100vh - 196px)'
                         : visibleBox === 'log'
-                            ? 'calc(100vh - 172px)'
-                            : 'calc(100vh - 65px)',
+                            ? 'calc(100vh - 350px)'
+                            : 'calc(100vh - 175px)',
             }}>
-                {isChatterLoading ? (
-                    <div className='flex align-items-center justify-content-center h-full font-medium'>
-                        Loading...
-                    </div>
-                ) : messages.length === 0 ? (
-                    <div className='flex align-items-center justify-content-center h-full font-medium'>
-                        No Data Available
-                    </div>
-                ) : (
-                    <>
-                        {actionsAllowed.includes(`${permissionExpression('chatterMessage', 'findMany')}`) ?
-                            (messages.map((message, index) => {
-                                const showDateDivider = index === 0 || message.date !== messages[index - 1].date;
-                                return (
-                                    <div key={message.id}>
-                                        {showDateDivider && <SolidChatterDateDivider date={message.date} />}
-                                        <SolidChatterMessageBox
-                                            user={message.user}
-                                            messageType={message.messageType}
-                                            message={message.message}
-                                            time={message.time}
-                                            auditRecord={message.auditRecord}
-                                            media={message.media}
-                                            messageSubType={message.messageSubType}
-                                            modelDisplayName={message.modelDisplayName}
-                                            modelUserKey={message.modelUserKey}
-                                        />
-                                    </div>
-                                );
-                            }))
-                            : <div className="p-3">
-                                <div className='p-3 border-round text-red-500 bg-red-50 flex align-items-center gap-3'>
-                                    <i className="pi pi-exclamation-triangle" />
-                                    You do not have permission to view these messages.
-                                </div>
-                            </div>
-                        }
-                        {totalRecords > messages.length && (
-                            <div className='flex justify-content-center mt-3 mb-3'>
-                                <span
-                                    onClick={handleLoadMore}
-                                    className='cursor-pointer text-primary font-medium px-4 py-2'
-                                    style={{
-                                        userSelect: 'none',
-                                        borderRadius: '6px',
-                                        transition: 'all 0.2s ease',
-                                        display: 'inline-block'
-                                    }}
-                                    onMouseEnter={(e) => {
-                                        e.currentTarget.style.backgroundColor = 'rgba(59, 130, 246, 0.1)';
-                                        e.currentTarget.style.transform = 'translateY(-1px)';
-                                    }}
-                                    onMouseLeave={(e) => {
-                                        e.currentTarget.style.backgroundColor = 'transparent';
-                                        e.currentTarget.style.transform = 'translateY(0)';
-                                    }}
-                                >
-                                    Load More...
-                                </span>
-                            </div>
-                        )}
-                    </>
-                )}
+                {isChatterLoading
+                    ? renderLoadingState()
+                    : !canViewMessages
+                        ? permissionError()
+                        : messages.length === 0
+                            ? renderEmptyState()
+                            : renderMessages()
+                }
             </div>
         </div>
     )

@@ -1,6 +1,7 @@
 
 import React from 'react'
 import MarkdownViewer from '../../../components/common/MarkdownViewer'
+import styles from './chatter.module.css'
 
 interface SolidChatterCustomMessageProps {
     message: string;
@@ -38,9 +39,5 @@ export const SolidChatterCustomMessage: React.FC<SolidChatterCustomMessageProps>
         );
     }
 
-    return (
-        <p className='m-0 text-sm'>
-            {message}
-        </p>
-    );
+    return <p className={styles.solidMessageText}>{message}</p>;
 };

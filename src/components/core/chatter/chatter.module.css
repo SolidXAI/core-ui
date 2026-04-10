@@ -64,11 +64,152 @@
 
 .solidMessageWrapper {
     border: 1px solid #D8E2EA;
-    padding: 10px;
-    border-radius: 0.25rem;
+    padding: 8px 10px;
+    border-radius: 0.4rem;
     width: 100%;
+    background: #fff;
+    line-height: 1.45;
+    color: var(--solid-text-secondary, #475569);
+    font-weight: 400;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
-.solidChatterMessageBox{
-    margin-top: 15px;
+:global(.solidMessageWrapper p) {
+    margin: 0;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+}
+
+:global(.solid-purple-button) {
+    --solid-btn-bg: #722ED1;
+    --solid-btn-border: #722ED1;
+    --solid-btn-fg: #fff;
+}
+
+:global(.solid-purple-button:hover) {
+    --solid-btn-bg: #5b1bb7;
+    --solid-btn-border: #5b1bb7;
+}
+
+.solidChatterMessageBox {
+    margin-top: 0px;
+    padding-left: 0.75rem;
+}
+
+.solidChatterMessageCard {
+    border-radius: 0.5rem;
+    background: transparent;
+    padding: 0.2rem 0;
+}
+
+.solidChatterMessageLayout {
+    display: flex;
+    gap: 0.65rem;
+    align-items: flex-start;
+}
+
+.solidChatterAvatar {
+    width: 30px;
+    height: 30px;
+    border-radius: 50%;
+    font-size: 0.75rem;
+    font-weight: 600;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    border: 1px solid #fff;
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+}
+
+.solidChatterMessageContent {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.solidChatterMessageHeader {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.solidChatterUser {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.solidChatterMeta {
+    margin: 0;
+    font-size: 0.70rem;
+    color: var(--muted-foreground);
+}
+
+.solidChatterTime {
+    font-size: 0.70rem;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+}
+
+.solidChatterAttachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.solidChatterAttachment {
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    border-radius: 0.4rem;
+    padding: 0.25rem 0.45rem;
+    background: rgba(145, 158, 171, 0.06);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.solidChatterAttachment img {
+    border-radius: 0.45rem;
+}
+
+.solidChatterBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.65rem;
+    padding: 0 0.3rem;
+    border-radius: 0.3rem;
+    border: 1px solid rgba(0, 0, 0, 0.08);
+    background: rgba(15, 23, 42, 0.03);
+}
+
+.solidChatterBadge.audit {
+    color: #9333ea;
+    border-color: rgba(147, 51, 234, 0.2);
+    background: rgba(147, 51, 234, 0.08);
+}
+
+.solidChatterBadge.custom {
+    color: #2563eb;
+    border-color: rgba(37, 99, 235, 0.2);
+    background: rgba(37, 99, 235, 0.08);
+}
+:global(.solidMessageWrapper .solidMessageText) {
+    margin: 0;
+    font-size: inherit;
+    color: inherit;
+    line-height: inherit;
+}
+.solidMessageText {
+    margin: 0;
+    font-size: inherit;
+    color: inherit;
+    line-height: inherit;
 }

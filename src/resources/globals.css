@@ -1956,14 +1956,14 @@ li.header-li-px {
   position: relative;
   padding: 0.35rem 1.1rem;
   border: none;
-  background: var(--solid-light-grey);
-  color: #0D0B26;
+  background: #F6F7FB;
+  color: #44495C;
   font-weight: 500 !important;
   cursor: pointer;
   transition: all 0.3s ease;
   min-width: 90px;
   white-space: nowrap;
-  font-size: 0.78rem;
+  font-size: 0.70rem;
   line-height: 1.2;
   clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
   margin-right: -10px;
@@ -2016,14 +2016,15 @@ li.header-li-px {
 }
 
 .arrow-step-button:hover:not(.arrow-step-active):not(.arrow-step-completed) {
-  background: #e9ecef;
+  background: #E6E9F4;
   z-index: 2;
 }
 
 .arrow-step-button.arrow-step-completed {
-  background: var(--solid-light-grey);
-  color: #0D0B26;
+  background: #E1E4F2;
+  color: #2E3149;
   z-index: 2;
+  box-shadow: inset 0 0 0 1px rgba(76, 70, 131, 0.2);
 }
 
 .arrow-step-button.arrow-step-active {
@@ -2033,7 +2034,7 @@ li.header-li-px {
 }
 
 .arrow-step-button.arrow-step-completed:hover {
-  background: var(--solid-light-grey);
+  background: #D6DAEC;
 }
 
 .overflow-button {
