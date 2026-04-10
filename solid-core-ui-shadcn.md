@@ -67,6 +67,7 @@
 # Chatter
 
 - [ ] jenendar
+- [ ] reduced padding on the rhs, the button panel to be more sleek, remove the log note text replace with icon remove bottom border and reduce overall height.
 
 # Form View 
 
