@@ -79,12 +79,16 @@
 
 # General 
 
+- [ ] light box primitive (ref: mswipe)
+    - [ ] media single list & form view to use this new primitive 
+    - [ ] chatter log note to use this new primitive 
+    - [ ] media card to use this primitive
 - [ ] fix the account settings context menu 
 - [x] registry.ts we can make the registerExtensionComponent > type not default to null 
 - [x] registry.ts we can make the registerExtensionFunction > carry a type field to control the types of extension functions that we support by introducing a new type whose values are as follows ...  not default to null 
 - [ ] cleanup and remove all references of old json editor replacing it with the one we are using in dashboard for sql editor (monaco editor)
-- [ ] rich text editor using https://github.com/htmujahid/shadcn-editor
-- [ ] cleanup spinner, remove shimer 
+- [x] rich text editor using https://github.com/htmujahid/shadcn-editor
+- [x] cleanup spinner, remove shimer 
 - [ ] cleanup toast 
 - [ ] backend studio landing page
 - [ ] core user interfaces 
@@ -95,6 +99,8 @@
     - [ ] generate model 
     - [ ] delete model
     - [ ] user form view 
+- [ ] command palette (cmd-p) for global navigation
+- [ ] command palette (cmd-shift-p) for view specific commands 
 
 
 # Cleanup run
