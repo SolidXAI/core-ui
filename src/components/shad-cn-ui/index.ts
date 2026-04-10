@@ -41,6 +41,7 @@ export { SolidPanel } from "./SolidPanel";
 export { SolidConfirmDialog } from "./SolidConfirmDialog";
 export { SolidProgressBar } from "./SolidProgressBar";
 export { SolidSpinner } from "./SolidSpinner";
+export { SolidToast } from "./SolidToast";
 export { SolidSlider } from "./SolidSlider";
 export { SolidTag } from "./SolidTag";
 export { SolidMessage } from "./SolidMessage";

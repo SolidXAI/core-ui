@@ -20,6 +20,7 @@ type SolidDialogProps = {
   headerClassName?: string;
   contentStyle?: React.CSSProperties;
   breakpoints?: Record<string, string>;
+  dismissible?: boolean;
 };
 
 type SolidDialogSectionProps = {
@@ -46,9 +47,11 @@ export function SolidDialog({
   showHeader = true,
   headerClassName,
   contentStyle,
+  dismissible = true,
 }: SolidDialogProps) {
   const controlledOpen = open ?? visible ?? false;
   const handleOpenChange = (next: boolean) => {
+    if (!dismissible && !next) return;
     onOpenChange?.(next);
     if (!next) onHide?.();
   };
@@ -60,6 +63,15 @@ export function SolidDialog({
         <Dialog.Content
           className={cx("solid-radix-dialog-content", className, contentClassName)}
           style={style ?? contentStyle}
+          onEscapeKeyDown={(event) => {
+            if (!dismissible) event.preventDefault();
+          }}
+          onPointerDownOutside={(event) => {
+            if (!dismissible) event.preventDefault();
+          }}
+          onInteractOutside={(event) => {
+            if (!dismissible) event.preventDefault();
+          }}
         >
           {showHeader && (header || onHide) ? (
             <SolidDialogHeader className={headerClassName}>

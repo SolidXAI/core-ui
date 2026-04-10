@@ -2933,6 +2933,312 @@ li.header-li-px {
   padding: 10px 12px 12px;
 }
 
+.solid-delete-model-popup__head {
+  padding-bottom: 12px;
+}
+
+.solid-delete-model-popup__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.solid-delete-model-popup__intro {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--foreground) 78%, transparent);
+}
+
+.solid-delete-model-popup__table-wrap {
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 12px;
+  overflow: hidden;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 97%, white 3%), var(--card));
+}
+
+.solid-delete-model-popup__table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.solid-delete-model-popup__table th,
+.solid-delete-model-popup__table td {
+  padding: 10px 12px;
+  text-align: left;
+  vertical-align: top;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  font-size: 12px;
+  line-height: 1.45;
+}
+
+.solid-delete-model-popup__table th {
+  background: color-mix(in srgb, var(--accent) 34%, transparent);
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.02em;
+  color: color-mix(in srgb, var(--foreground) 78%, transparent);
+}
+
+.solid-delete-model-popup__table tbody tr:last-child td {
+  border-bottom: 0;
+}
+
+.solid-delete-model-popup__file {
+  width: 19%;
+  min-width: 140px;
+  font-weight: 600;
+  color: color-mix(in srgb, var(--foreground) 92%, transparent);
+  overflow-wrap: anywhere;
+}
+
+.solid-delete-model-popup__intervention {
+  width: 16%;
+  min-width: 110px;
+  font-weight: 600;
+  color: color-mix(in srgb, #15803d 90%, var(--foreground));
+}
+
+.solid-delete-model-popup__intervention.is-manual {
+  color: color-mix(in srgb, #b45309 88%, var(--foreground));
+}
+
+.solid-delete-model-popup__confirm {
+  padding: 10px 12px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 34%, transparent);
+}
+
+.solid-delete-model-popup__confirm .solid-checkbox {
+  align-items: flex-start;
+  gap: 8px;
+}
+
+.solid-delete-model-popup__confirm .solid-checkbox-label {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--foreground) 80%, transparent);
+}
+
+.solid-delete-model-popup__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.solid-delete-module-popup__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, #f59e0b 30%, var(--border));
+  background: color-mix(in srgb, #f59e0b 10%, transparent);
+  color: color-mix(in srgb, #92400e 92%, var(--foreground));
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+.solid-delete-module-popup__notice svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.solid-delete-module-popup__error {
+  padding: 10px 12px;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, #ef4444 32%, var(--border));
+  background: color-mix(in srgb, #ef4444 8%, transparent);
+  color: color-mix(in srgb, #b91c1c 92%, var(--foreground));
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+.solid-user-form-input-invalid {
+  border-color: color-mix(in srgb, #ef4444 62%, var(--border)) !important;
+  box-shadow: 0 0 0 1px color-mix(in srgb, #ef4444 14%, transparent);
+}
+
+.solid-user-form-titleblock {
+  min-width: 0;
+}
+
+.solid-user-form-subtitle {
+  margin-top: 3px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+}
+
+.solid-user-form-helper {
+  margin: 0;
+  font-size: 11px;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+}
+
+.solid-user-form-panel.solid-panel {
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.solid-user-form-panel .solid-panel-header {
+  padding: 11px 12px;
+  background: color-mix(in srgb, var(--accent) 26%, transparent);
+}
+
+.solid-user-form-panel .solid-panel-title {
+  font-size: 12.5px;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--foreground) 92%, transparent);
+}
+
+.solid-user-form-panel .solid-panel-content {
+  padding: 12px;
+}
+
+.solid-user-form-panel-copy {
+  margin: 0 0 10px;
+  font-size: 11px;
+  line-height: 1.4;
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+}
+
+.solid-user-role-grid .solid-checkbox {
+  width: 100%;
+  gap: 9px;
+}
+
+.solid-user-role-item {
+  margin-bottom: 2px;
+}
+
+.solid-user-role-item .solid-checkbox {
+  min-height: 38px;
+  align-items: center;
+  padding: 8px 10px;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--card) 98%, white 2%);
+  color: color-mix(in srgb, var(--foreground) 84%, transparent);
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.solid-user-role-item .solid-checkbox:hover {
+  border-color: color-mix(in srgb, var(--primary) 28%, var(--border));
+  background: color-mix(in srgb, var(--accent) 30%, transparent);
+}
+
+.solid-user-role-item .solid-checkbox-box {
+  flex: 0 0 18px;
+}
+
+.solid-user-role-item .solid-checkbox-label {
+  font-size: 11.5px;
+  font-weight: 500;
+  line-height: 1.3;
+  color: color-mix(in srgb, var(--foreground) 88%, transparent);
+}
+
+.solid-generate-code-popup__head {
+  padding-bottom: 12px;
+}
+
+.solid-generate-code-popup__body {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.solid-generate-code-popup__body--loading {
+  min-height: 210px;
+  align-items: center;
+  justify-content: center;
+  text-align: center;
+}
+
+.solid-generate-code-popup__intro {
+  margin: 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--foreground) 78%, transparent);
+}
+
+.solid-generate-code-popup__panel {
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 12px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 97%, white 3%), var(--card));
+  padding: 12px;
+}
+
+.solid-generate-code-popup__panel-title {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: color-mix(in srgb, var(--foreground) 92%, transparent);
+}
+
+.solid-generate-code-popup__list {
+  margin: 10px 0 0;
+  padding-left: 18px;
+  display: grid;
+  gap: 6px;
+}
+
+.solid-generate-code-popup__list li {
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--foreground) 80%, transparent);
+}
+
+.solid-generate-code-popup__notice {
+  display: flex;
+  align-items: flex-start;
+  gap: 8px;
+  padding: 10px 12px;
+  border-radius: 10px;
+  font-size: 11.5px;
+  line-height: 1.45;
+}
+
+.solid-generate-code-popup__notice svg {
+  flex: 0 0 auto;
+  margin-top: 1px;
+}
+
+.solid-generate-code-popup__notice.is-warning {
+  border: 1px solid color-mix(in srgb, #f59e0b 30%, var(--border));
+  background: color-mix(in srgb, #f59e0b 10%, transparent);
+  color: color-mix(in srgb, #92400e 92%, var(--foreground));
+}
+
+.solid-generate-code-popup__actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  justify-content: flex-start;
+}
+
+.solid-generate-code-popup__loading-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: color-mix(in srgb, var(--foreground) 92%, transparent);
+}
+
+.solid-generate-code-popup__loading-copy {
+  max-width: 320px;
+  margin: 0;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--foreground) 72%, transparent);
+}
+
 .solid-filter-dialog-shell-grouping .solid-filter-dialog-body {
   padding: 8px 10px 10px;
 }

@@ -2,7 +2,7 @@ import { ChildContainerProps } from '../../types';
 import React, { useEffect, useRef } from 'react';
 import AppSidebar from './AppSidebar';
 import SolidPopupContainer from '../common/SolidPopupContainer';
-import { GlobalToast } from '../common/GlobalToast';
+import { SolidToastProvider } from '../common/SolidToastProvider';
 import { useSession } from "../../hooks/useSession";
 import { getExtensionFunction } from '../../helpers/registry';
 import { SolidOnApplicationMountEvent } from '../../types/solid-core';
@@ -52,7 +52,7 @@ export const Layout = ({ children }: ChildContainerProps) => {
         <div className="solid-shell">
             <AppSidebar />
             <SolidPopupContainer />
-            <GlobalToast />
+            <SolidToastProvider />
             <main className="solid-main">
                 <AdminTopHeader />
                 <div className="solid-main-content">

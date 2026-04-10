@@ -386,6 +386,7 @@ export { default as UserProfile } from './components/layout/user-profile';
 export { default as UserSidebar } from './components/layout/UserSidebar';
 export { default as SolidPopupContainer } from './components/common/SolidPopupContainer';
 export { GlobalToast } from './components/common/GlobalToast';
+export { SolidToastProvider } from './components/common/SolidToastProvider';
 
 // Auth
 export { AuthLayout } from './components/auth/AuthLayout';
@@ -398,7 +399,7 @@ export { default as SolidInitialLoginOtp } from './components/auth/SolidInitialL
 export { default as SolidInitiateRegisterOtp } from './components/auth/SolidInitiateRegisterOtp';
 export { GoogleAuthChecking } from './components/auth/GoogleAuthChecking';
 export { ForgotPasswordThankYou } from './components/auth/ForgotPasswordThankYou';
-export { SolidButton, SolidTab, SolidTabGroup } from './components/shad-cn-ui';
+export { SolidButton, SolidTab, SolidTabGroup, SolidToast } from './components/shad-cn-ui';
 
 // redux
 export { default as authenticationReducer } from './redux/features/authSlice';

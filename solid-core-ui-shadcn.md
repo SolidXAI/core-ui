@@ -90,16 +90,16 @@
 - [x] cleanup and remove all references of old json editor replacing it with the one we are using in dashboard for sql editor (monaco editor)
 - [x] rich text editor using https://github.com/htmujahid/shadcn-editor
 - [x] cleanup spinner, remove shimer 
-- [ ] cleanup toast 
+- [x] cleanup toast 
 - [x] backend studio landing page
 - [ ] core user interfaces 
     - [ ] module form view 
-    - [ ] generate module 
-    - [ ] delete module
-    - [ ] model form view > field popups 
-    - [ ] generate model 
-    - [ ] delete model
-    - [ ] user form view 
+    - [ ] model form view > field popups
+    - [x] user form view 
+    - [x] generate module 
+    - [x] delete module
+    - [x] generate model
+    - [x] delete model
 - [ ] command palette (cmd-p) for global navigation
 - [ ] command palette (cmd-shift-p) for view specific commands 
 
