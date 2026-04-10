@@ -852,7 +852,7 @@ body {
 }
 
 .solid-shadcn-confirm-dialog {
-  width: min(360px, calc(100vw - 32px));
+  width: min(320px, calc(100vw - 40px));
   border: 1px solid var(--border);
   border-radius: 12px;
   background: var(--card);
@@ -891,6 +891,18 @@ body {
   justify-content: flex-end;
   gap: 8px;
   padding: 0 14px 14px;
+}
+
+.solid-shadcn-confirm-dialog .solid-shadcn-dialog-head {
+  text-align: center;
+}
+
+.solid-shadcn-confirm-dialog .solid-shadcn-dialog-body {
+  text-align: center;
+}
+
+.solid-shadcn-confirm-dialog .solid-shadcn-dialog-actions {
+  justify-content: center;
 }
 
 .solid-delete-confirm-dialog {
@@ -1136,6 +1148,7 @@ body {
   border: 1px solid var(--border);
   background: var(--card);
   color: var(--card-foreground);
+  font-family: inherit;
   font-size: 12px;
   line-height: 1.2;
   padding: 0 10px;
@@ -4663,30 +4676,29 @@ body {
 }
 
 .solid-studio-empty-cta-button {
+  border: none;
+  background-color: #111827;
+  color: #fff;
+  border-radius: 999px;
+  padding: 0.6rem 1.35rem;
+  font-size: 0.94rem;
+  font-weight: 500;
   display: inline-flex;
   align-items: center;
-  gap: 10px;
-  height: 44px;
-  padding: 0 20px;
-  background-color: var(--primary);
-  color: var(--primary-foreground);
-  border: none;
-  border-radius: 10px;
-  font-size: 14px;
-  font-weight: 600;
+  gap: 0.55rem;
   cursor: pointer;
-  transition: all 0.2s ease;
-  box-shadow: 0 4px 10px color-mix(in srgb, var(--primary) 25%, transparent);
+  transition: transform 0.15s ease, box-shadow 0.15s ease;
+  box-shadow: 0 8px 15px rgba(17, 24, 39, 0.2);
 }
 
 .solid-studio-empty-cta-button:hover {
-  background-color: color-mix(in srgb, var(--primary) 90%, black);
-  transform: translateY(-2px);
-  box-shadow: 0 6px 15px color-mix(in srgb, var(--primary) 35%, transparent);
+  transform: translateY(-1px);
+  box-shadow: 0 12px 22px rgba(17, 24, 39, 0.25);
 }
 
 .solid-studio-empty-cta-button:active {
   transform: translateY(0);
+  box-shadow: 0 6px 12px rgba(17, 24, 39, 0.2);
 }
 
 .solid-studio-landing-empty-divider {

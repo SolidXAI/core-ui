@@ -1,13 +1,13 @@
 
 import { getTextColor, stringToColor } from '../../../helpers/getRandomColors'
 import Image from "../../common/Image"
-import { Dialog } from 'primereact/dialog'
 import { useMemo, useState } from 'react'
 import styles from './chatter.module.css'
 import { SolidChatterCustomMessage } from './SolidChatterCustomMessage'
 import { SolidChatterAuditMessage } from './SolidChatterAuditMessage'
 import { GitBranch, MessageSquare } from 'lucide-react'
-import { SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from '../../shad-cn-ui'
+import { SolidLightbox, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from '../../shad-cn-ui'
+import type { SolidLightboxSlide } from '../../shad-cn-ui/SolidLightbox'
 
 interface Props {
     user: string,
@@ -51,8 +51,8 @@ const getFileIcon = (mimeType: string) => {
 
 export const SolidChatterMessageBox = (props: Props) => {
     const { user, messageType, message, time, auditRecord, media, messageSubType, modelDisplayName, modelUserKey } = props;
-    const [selectedImage, setSelectedImage] = useState<string | null>(null);
-    const [isImageDialogVisible, setIsImageDialogVisible] = useState(false);
+    const [lightboxSlides, setLightboxSlides] = useState<SolidLightboxSlide[]>([]);
+    const [openLightbox, setOpenLightbox] = useState(false);
 
     const avatarStyle = useMemo(() => {
         const bg = stringToColor(user)
@@ -72,8 +72,20 @@ export const SolidChatterMessageBox = (props: Props) => {
     }, [user]);
 
     const handleImageClick = (url: string) => {
-        setSelectedImage(url);
-        setIsImageDialogVisible(true);
+        const imageAttachments = media?.messageAttachments?.filter(att => att.mimeType?.startsWith('image/')) || [];
+        if (imageAttachments.length === 0) return;
+
+        const startIndex = imageAttachments.findIndex(att => att._full_url === url);
+        const ordered = startIndex >= 0
+            ? [...imageAttachments.slice(startIndex), ...imageAttachments.slice(0, startIndex)]
+            : imageAttachments;
+
+        const slides: SolidLightboxSlide[] = ordered.map(att => ({
+            src: att._full_url
+        }));
+
+        setLightboxSlides(slides);
+        setOpenLightbox(true);
     };
 
     const renderMessageContent = () => {
@@ -172,22 +184,13 @@ export const SolidChatterMessageBox = (props: Props) => {
                     </div>
                 </div>
             </div>
-            <Dialog
-                visible={isImageDialogVisible}
-                onHide={() => setIsImageDialogVisible(false)}
-                className='w-9 '
-                modal
-            >
-                {selectedImage && (
-                    <Image
-                        src={selectedImage}
-                        alt="Preview"
-                        width={800}
-                        height={600}
-                        style={{ width: '100%', height: 'auto' }}
-                    />
-                )}
-            </Dialog>
+            {openLightbox && (
+                <SolidLightbox
+                    open={openLightbox}
+                    slides={lightboxSlides}
+                    onClose={() => setOpenLightbox(false)}
+                />
+            )}
         </div>
     )
 }

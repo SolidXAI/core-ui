@@ -180,6 +180,54 @@
     border-radius: 0.45rem;
 }
 
+.chatterSelectedFiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.chatterSelectedFileCard {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid rgba(15, 23, 42, 0.08);
+    background: rgba(15, 23, 42, 0.02);
+    min-width: 220px;
+}
+
+.chatterSelectedFileIcon {
+    width: 28px;
+    height: 28px;
+    border-radius: 0.45rem;
+    background: rgba(114, 46, 209, 0.12);
+    color: #722ED1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.chatterSelectedFileMeta {
+    flex: 1;
+    min-width: 0;
+}
+
+.chatterSelectedFileName {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--foreground);
+    word-break: break-word;
+}
+
+.chatterSelectedFileSize {
+    font-size: 0.7rem;
+    color: var(--muted-foreground);
+}
+
 .solidChatterBadge {
     display: inline-flex;
     align-items: center;

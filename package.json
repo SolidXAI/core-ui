@@ -78,7 +78,6 @@
     "uuid": "^10.0.0",
     "viewerjs": "^1.11.7",
     "xlsx": "^0.18.5",
-    "yet-another-react-lightbox": "^3.21.8",
     "yup": "^1.4.0"
   },
   "peerDependencies": {

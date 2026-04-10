@@ -11,11 +11,8 @@ import KanbanBoard from "./KanbanBoard";
 import CompactImage from '../../../resources/images/layout/images/compact.png';
 import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
-import Lightbox from "yet-another-react-lightbox";
-import Counter from "yet-another-react-lightbox/plugins/counter";
-import Download from "yet-another-react-lightbox/plugins/download";
-import "yet-another-react-lightbox/styles.css";
-import "yet-another-react-lightbox/plugins/counter.css";
+import { SolidLightbox } from "../../shad-cn-ui/SolidLightbox";
+import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
 import { useRouter } from "../../../hooks/useRouter";
 import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
 import { KanbanUserViewLayout } from "./KanbanUserViewLayout";
@@ -24,6 +21,7 @@ import { setFilterObjectToLocalStorage, getFilterObjectFromLocalStorage } from "
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
+import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
 import { showToast } from "../../../redux/features/toastSlice";
 import { usePathname } from "../../../hooks/usePathname";
 import { useSearchParams } from "../../../hooks/useSearchParams";
@@ -72,9 +70,26 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [groupByFieldName, setGroupByFieldName] = useState<string>("");
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
   const [openLightbox, setOpenLightbox] = useState(false);
-  const [lightboxUrls, setLightboxUrls] = useState({});
+  const [lightboxUrls, setLightboxUrls] = useState<any[]>([]);
   const [filterQueryString, setFilterQueryString] = useState<any>();
   const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
+  const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
+    ? lightboxUrls
+      .map((item: any) => {
+        const src = item?.src || item?.downloadUrl || "";
+        if (!src) {
+          return null;
+        }
+        const mediaType = getMediaTypeFromUrl(src);
+        const slide: SolidLightboxSlide = { src };
+        if (mediaType !== "image") {
+          slide.type = mediaType;
+        }
+        return slide;
+      })
+      .filter((slide): slide is SolidLightboxSlide => !!slide)
+    : [];
+
   const pushFiltersToRouter = (filterQueryString: any) => {
     // @ts-ignore
     router.push(`?${filterQueryString}`, undefined, { shallow: true });
@@ -894,15 +909,13 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
           </SolidButton>
         </SolidDialogFooter>
       </SolidDialog>
-      {openLightbox &&
-        <Lightbox
+      {openLightbox && (
+        <SolidLightbox
           open={openLightbox}
-          plugins={[Counter, Download]}
-          close={() => setOpenLightbox(false)}
-          // @ts-ignore
-          slides={lightboxUrls}
+          slides={lightboxSlides}
+          onClose={() => setOpenLightbox(false)}
         />
-      }
+      )}
       <SolidDialog
         open={isLayoutDialogVisible}
         onOpenChange={setLayoutDialogVisible}

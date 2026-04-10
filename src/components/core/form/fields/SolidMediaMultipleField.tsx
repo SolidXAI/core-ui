@@ -6,8 +6,10 @@ import { SolidButton } from "../../../shad-cn-ui/SolidButton";
 import {
   SolidDialog,
   SolidDialogBody,
+  SolidDialogClose,
   SolidDialogFooter,
   SolidDialogHeader,
+  SolidDialogSeparator,
   SolidDialogTitle,
 } from "../../../shad-cn-ui/SolidDialog";
 import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
@@ -456,19 +458,25 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                 }
             </SolidDialog>
             <SolidDialog
-                visible={isDeleteImageDialogVisible}
-                header="Confirm Delete"
-                className="solid-confirm-dialog"
-                onHide={() => setDeleteImageDialogVisible(false)}
+                open={isDeleteImageDialogVisible}
+                onOpenChange={setDeleteImageDialogVisible}
+                className="solid-shadcn-confirm-dialog"
             >
-                <SolidDialogBody>
-                    <p>Are you sure you want to delete image?</p>
+                <SolidDialogHeader className="solid-shadcn-dialog-head">
+                    <SolidDialogTitle>Confirm Delete</SolidDialogTitle>
+                    <SolidDialogClose />
+                </SolidDialogHeader>
+                <SolidDialogSeparator className="solid-shadcn-dialog-sep" />
+                <SolidDialogBody className="solid-shadcn-dialog-body">
+                    <p className="solid-shadcn-dialog-text">Are you sure you want to delete this file?</p>
                 </SolidDialogBody>
-                <SolidDialogFooter>
-                    <div className="flex justify-content-center">
-                        <SolidButton type="button" label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteFile} />
-                        <SolidButton type="button" label="No" icon="pi pi-times" className='small-button' onClick={() => setDeleteImageDialogVisible(false)} />
-                    </div>
+                <SolidDialogFooter className="solid-shadcn-dialog-actions">
+                    <SolidButton variant="destructive" size="sm" autoFocus onClick={deleteFile}>
+                        Delete
+                    </SolidButton>
+                    <SolidButton variant="outline" size="sm" onClick={() => setDeleteImageDialogVisible(false)}>
+                        Cancel
+                    </SolidButton>
                 </SolidDialogFooter>
             </SolidDialog>
         </div>

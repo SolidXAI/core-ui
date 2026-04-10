@@ -48,3 +48,4 @@ export { SolidDivider } from "./SolidDivider";
 export { SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "./SolidTooltip";
 export { SolidCodeEditor } from "./SolidCodeEditor";
 export { SolidRichTextEditor } from "./SolidRichTextEditor";
+export { SolidLightbox } from "./SolidLightbox";

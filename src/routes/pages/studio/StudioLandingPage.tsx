@@ -177,7 +177,7 @@ function EmptyState() {
             >
               <ChatIcon />
               <span>Open AI Chat</span>
-              <ArrowIcon />
+              {/* <ArrowIcon /> */}
             </button>
           </div>
 

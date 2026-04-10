@@ -4,7 +4,7 @@ import { useEffect, useState, useRef } from 'react'
 import { ERROR_MESSAGES } from '../../../constants/error-messages'
 import { useSession } from '../../../hooks/useSession'
 import { SolidButton, SolidTextarea } from '../../shad-cn-ui'
-import { Paperclip, X } from 'lucide-react'
+import { FileText, Paperclip, X } from 'lucide-react'
 
 interface SolidMessageComposerProps {
     type?: string;
@@ -68,6 +68,13 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
             refetch()
         }
     }, [isSuccess]);
+
+    const formatFileSize = (size: number) => {
+        if (!size) return "";
+        return size >= 1024 * 1024
+            ? `${(size / (1024 * 1024)).toFixed(1)} MB`
+            : `${(size / 1024).toFixed(1)} KB`;
+    };
 
     return (
         <form className={styles.chatterMessageComposer} onSubmit={handleSubmit}>
@@ -152,10 +159,16 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
                 </div>
             </div>
             {selectedFiles.length > 0 && (
-                <div className='flex flex-wrap gap-2 mt-2'>
+                <div className={styles.chatterSelectedFiles}>
                     {selectedFiles.map((file, index) => (
-                        <div key={index} className='flex align-items-center gap-2 px-2 py-1 border-round border-1 surface-border bg-card'>
-                            <span className='text-sm'>{file.name}</span>
+                        <div key={index} className={styles.chatterSelectedFileCard}>
+                            <div className={styles.chatterSelectedFileIcon}>
+                                <FileText size={16} />
+                            </div>
+                            <div className={styles.chatterSelectedFileMeta}>
+                                <p className={styles.chatterSelectedFileName}>{file.name}</p>
+                                <span className={styles.chatterSelectedFileSize}>{formatFileSize(file.size)}</span>
+                            </div>
                             <SolidButton
                                 type="button"
                                 variant="ghost"

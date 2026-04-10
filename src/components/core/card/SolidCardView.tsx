@@ -4,11 +4,9 @@ import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import qs from "qs";
 import { ChangeEvent, useEffect, useRef, useState } from "react";
-import Lightbox from "yet-another-react-lightbox";
-import Counter from "yet-another-react-lightbox/plugins/counter";
-import Download from "yet-another-react-lightbox/plugins/download";
-import "yet-another-react-lightbox/styles.css";
-import "yet-another-react-lightbox/plugins/counter.css";
+import { SolidLightbox } from "../../shad-cn-ui/SolidLightbox";
+import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
+import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
 import { useDispatch, useSelector } from "react-redux";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { usePathname } from "../../../hooks/usePathname";
@@ -122,11 +120,28 @@ export const SolidCardView = (params: SolidCardViewParams) => {
   const [editButtonUrl, setEditButtonUrl] = useState<string>();
   const [createActionQueryParams, setCreateActionQueryParams] = useState<Record<string, string>>({});
   const [openLightbox, setOpenLightbox] = useState(false);
-  const [lightboxUrls, setLightboxUrls] = useState({});
+  const [lightboxUrls, setLightboxUrls] = useState<any[]>([]);
   const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
   const [solidCardViewMetaData, setSolidCardViewMetaData] = useState<any>();
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
+
+  const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
+    ? lightboxUrls
+      .map((item: any) => {
+        const src = item?.src || item?.downloadUrl || "";
+        if (!src) {
+          return null;
+        }
+        const mediaType = getMediaTypeFromUrl(src);
+        const slide: SolidLightboxSlide = { src };
+        if (mediaType !== "image") {
+          slide.type = mediaType;
+        }
+        return slide;
+      })
+      .filter((slide): slide is SolidLightboxSlide => !!slide)
+    : [];
 
   const entityApi = createSolidEntityApi(params.modelName);
   const { useLazyGetSolidEntitiesQuery } = entityApi;
@@ -485,11 +500,10 @@ export const SolidCardView = (params: SolidCardViewParams) => {
       </div>
 
       {openLightbox && (
-        <Lightbox
+        <SolidLightbox
           open={openLightbox}
-          plugins={[Counter, Download]}
-          close={() => setOpenLightbox(false)}
-          slides={lightboxUrls as any}
+          slides={lightboxSlides}
+          onClose={() => setOpenLightbox(false)}
         />
       )}
 

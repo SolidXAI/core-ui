@@ -16,12 +16,8 @@ import { showToast } from "../../../redux/features/toastSlice";
 import CompactImage from '../../../resources/images/layout/images/compact.png';
 import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
-import Lightbox from "yet-another-react-lightbox";
-import Counter from "yet-another-react-lightbox/plugins/counter";
-import Download from "yet-another-react-lightbox/plugins/download";
-import Video from "yet-another-react-lightbox/plugins/video";
-import "yet-another-react-lightbox/styles.css";
-import "yet-another-react-lightbox/plugins/counter.css";
+import { SolidLightbox } from "../../shad-cn-ui/SolidLightbox";
+import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
 import { SolidListViewConfigure } from "./SolidListViewConfigure";
 import { SolidEmptyListViewPlaceholder } from "./SolidEmptyListViewPlaceholder";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
@@ -36,6 +32,7 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 // import { SolidAiMainWrapper } from "../solid-ai/SolidAiMainWrapper"; // moved to SolidX Studio panel
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
+import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
 import { SolidListViewRowActionsMenu } from "./SolidListViewRowActionsMenu";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
 import {
@@ -1019,7 +1016,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     solidListViewMetaData?.data?.solidView?.model?.displayName || params?.modelName;
 
   const [openLightbox, setOpenLightbox] = useState(false);
-  const [lightboxUrls, setLightboxUrls] = useState({});
+  const [lightboxUrls, setLightboxUrls] = useState<any[]>([]);
 
   // Render columns dynamically based on metadata
   const renderColumnsDynamically = (solidListViewMetaData: any, solidListViewLayout: any) => {
@@ -1199,32 +1196,22 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     }
   };
 
-  const isVideoOrAudio = (url: string) => {
-    // Remove query params if present
-    const cleanUrl = url.split("?")[0];
-    const ext = cleanUrl.split(".").pop()?.toLowerCase();
-
-    const mediaExt = ["mp4", "webm", "ogg", "mov", "mp3", "wav", "m4a", "aac"];
-
-    return ext ? mediaExt.includes(ext) : false;
-  };
-
-  const controlsList = ["nodownload", "nofullscreen", "noremoteplayback"];
-
-  const slides = Array.isArray(lightboxUrls)
-    ? lightboxUrls.map((item: any) => {
-      const url = item?.src || item?.downloadUrl || "";
-      if (isVideoOrAudio(url)) {
-        return {
-          type: "video" as const,
-          sources: [{ src: url, type: "video/mp4" }],
-        };
-      }
-      return { src: url };
-    })
+  const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
+    ? lightboxUrls
+      .map((item: any) => {
+        const src = item?.src || item?.downloadUrl || "";
+        if (!src) {
+          return null;
+        }
+        const mediaType = getMediaTypeFromUrl(src);
+        const slide: SolidLightboxSlide = { src };
+        if (mediaType !== "image") {
+          slide.type = mediaType;
+        }
+        return slide;
+      })
+      .filter((slide): slide is SolidLightboxSlide => !!slide)
     : [];
-
-  const hasMedia = slides.some((s) => (s as any).type === "video");
 
   const hasEditInContextMenu = actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
     solidListViewLayout?.attrs?.edit !== false &&
@@ -1827,34 +1814,13 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           </SolidButton>
         </SolidDialogFooter>
       </SolidDialog>
-      {
-        openLightbox && (
-          <Lightbox
-            open={openLightbox}
-            plugins={
-              hasMedia
-                ? [Counter, Download, Video] // add Video plugin if needed
-                : [Counter, Download]
-            }
-            close={() => setOpenLightbox(false)}
-            slides={[...slides]}
-            {...(hasMedia && {
-              video: {
-                controls: true,
-                playsInline: true,
-                autoPlay: false,
-                loop: false,
-                muted: false,
-                disablePictureInPicture: false,
-                disableRemotePlayback: false,
-                controlsList: controlsList.join(" "),
-                crossOrigin: "anonymous",
-                preload: "auto",
-              },
-            })}
-          />
-        )
-      }
+      {openLightbox && (
+        <SolidLightbox
+          open={openLightbox}
+          slides={lightboxSlides}
+          onClose={() => setOpenLightbox(false)}
+        />
+      )}
     </div >
   );
 });

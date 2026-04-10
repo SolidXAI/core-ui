@@ -12,6 +12,7 @@ import "primeflex/primeflex.css";
 import { Button } from "primereact/button";
 import { Dialog } from "primereact/dialog";
 import qs from "qs";
+import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
 import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import * as Yup from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./fields/ISolidField";
@@ -37,12 +38,8 @@ import { SolidPasswordField } from "./fields/SolidPasswordField";
 import { SolidEmailField } from "./fields/SolidEmailField";
 import { Panel } from "primereact/panel";
 import { SolidFormUserViewLayout } from "./SolidFormUserViewLayout";
-import Lightbox from "yet-another-react-lightbox";
-import Counter from "yet-another-react-lightbox/plugins/counter";
-import Download from "yet-another-react-lightbox/plugins/download";
-import Video from "yet-another-react-lightbox/plugins/video";
-import "yet-another-react-lightbox/styles.css";
-import "yet-another-react-lightbox/plugins/counter.css";
+import { SolidLightbox } from "../../shad-cn-ui/SolidLightbox";
+import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
 import { SolidFormActionHeader } from "./SolidFormActionHeader";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
@@ -1647,30 +1644,20 @@ const SolidFormView = (params: SolidFormViewProps) => {
         };
 
 
-        const isVideoOrAudio = (url: string) => {
-            // Remove query params if present
-            const cleanUrl = url.split("?")[0];
-            const ext = cleanUrl.split(".").pop()?.toLowerCase();
-
-            // Combined list of supported media extensions
-            const mediaExt = ["mp4", "webm", "ogg", "mov", "mp3", "wav", "m4a", "aac"];
-
-            return ext ? mediaExt.includes(ext) : false;
-        };
-
-        const controlsList = ["nodownload", "nofullscreen", "noremoteplayback"];
-        const slides = lightboxUrls.map((item: any) => {
-            const url = item.src || item.downloadUrl || "";
-            if (isVideoOrAudio(url)) {
-                return {
-                    type: "video" as const,
-                    sources: [{ src: url, type: "video/mp4", }],
-                };
-            }
-            return { src: url };
-        });
-
-        const hasMedia = slides.some((s) => s.type === "video");
+        const lightboxSlides: SolidLightboxSlide[] = lightboxUrls
+            .map((item: any) => {
+                const src = item?.src || item?.downloadUrl || "";
+                if (!src) {
+                    return null;
+                }
+                const mediaType = getMediaTypeFromUrl(src);
+                const slide: SolidLightboxSlide = { src };
+                if (mediaType !== "image") {
+                    slide.type = mediaType;
+                }
+                return slide;
+            })
+            .filter((slide): slide is SolidLightboxSlide => !!slide);
 
 
 
@@ -1811,32 +1798,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
                         <SolidFormUserViewLayout solidFormViewMetaData={solidFormViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
                     </SolidDialogBody>
                 </SolidDialog>
-                {openLightbox &&
-                    <Lightbox
+                {openLightbox && (
+                    <SolidLightbox
                         open={openLightbox}
-                        plugins={
-                            hasMedia
-                                ? [Counter, Download, Video] // add Video plugin if needed
-                                : [Counter, Download]
-                        }
-                        close={() => setOpenLightbox(false)}
-                        slides={[...slides]}
-                        {...(hasMedia && {
-                            video: {
-                                controls: true,
-                                playsInline: true,
-                                autoPlay: false,
-                                loop: false,
-                                muted: false,
-                                disablePictureInPicture: false,
-                                disableRemotePlayback: false,
-                                controlsList: controlsList.join(" "),
-                                crossOrigin: "anonymous",
-                                preload: "auto",
-                            },
-                        })}
+                        slides={lightboxSlides}
+                        onClose={() => setOpenLightbox(false)}
                     />
-                }
+                )}
 
                 <ConfirmDialog
                     visible={confirmVisible}

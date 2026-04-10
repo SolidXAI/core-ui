@@ -1,3 +1,4 @@
+import { getMediaTypeFromUrl } from "../../../../../../helpers/mediaType";
 import { SolidKanbanCardWidgetProps } from "../../../../../../types/solid-core";
 
 const renderText = (value: any, fallback = "--") => {
@@ -62,7 +63,8 @@ export default function MediaCardWidget({
     if (!fileUrl) return;
 
     if (showPreview) {
-      setLightboxUrls?.([{ src: fileUrl, downloadUrl: fileUrl }]);
+      const mediaType = getMediaTypeFromUrl(fileUrl);
+      setLightboxUrls?.([{ src: fileUrl, type: mediaType !== "image" ? mediaType : undefined }]);
       setOpenLightbox?.(true);
       return;
     }
