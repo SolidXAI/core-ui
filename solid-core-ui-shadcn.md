@@ -51,7 +51,7 @@
 # Card View 
 
 - [x] scroll is not working
-- [ ] bottom pagination to be like list view RHS and more compact.
+- [x] bottom pagination to be like list view RHS and more compact.
 - [ ] introduce events onCardLayoutLoad, onBeforeCardLayoutDataLoad
 - [ ] testing implementation of onCardLayoutLoad, onBeforeCardLayoutDataLoad using some solid core model
 - [ ] add support for imperative handle
@@ -66,14 +66,14 @@
 
 # Chatter
 
-- [ ] jenendar
-- [ ] reduced padding on the rhs, the button panel to be more sleek, remove the log note text replace with icon remove bottom border and reduce overall height.
+- [x] jenendar
+- [x] reduced padding on the rhs, the button panel to be more sleek, remove the log note text replace with icon remove bottom border and reduce overall height.
 
 # Form View 
 
 - [x] wrapper like we have in list view 
 - [x] workflow field stepper to be improved
-- [ ] rich text field alternative
+- [x] rich text field alternative
 - [ ] bottom pagination / navigation not working when we open form view from anything other than list view
 - [ ] testing implementations of all types of form events
 - [ ] testing implementations of a custom widget

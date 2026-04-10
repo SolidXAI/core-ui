@@ -174,7 +174,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
         return (
         <div className='flex align-items-center justify-content-center h-full'>
             <div className='flex flex-column align-items-center gap-2 text-center text-color-secondary px-3'>
-                <div className='p-3 border-round bg-primary-reverse text-primary'>
+                <div className='p-2 border-round bg-primary-reverse text-primary'>
                     <Inbox size={20} />
                 </div>
                 <p className='m-0 text-base font-medium text-color'>No activity yet</p>
@@ -249,7 +249,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                         ? 'calc(100vh - 196px)'
                         : visibleBox === 'log'
                             ? 'calc(100vh - 350px)'
-                            : 'calc(100vh - 175px)',
+                            : 'calc(100vh - 170px)',
             }}>
                 {isChatterLoading
                     ? renderLoadingState()
