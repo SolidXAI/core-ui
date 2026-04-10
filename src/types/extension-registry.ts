@@ -7,6 +7,7 @@ export const ExtensionComponentTypes = {
     form_action: "form_action",
     form_widget: "form_widget",
     kanban_card_widget: "kanban_card_widget",
+    card_widget: "card_widget",
 } as const;
 
 export type ExtensionComponentType =
