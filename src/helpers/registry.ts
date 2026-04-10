@@ -349,7 +349,7 @@ registerExtensionComponent("SolidIconViewWidget", SolidIconViewWidget, Extension
 
 // Kanban
 registerExtensionComponent("MqMessageKanbanCardWidget", MqMessageKanbanCardWidget, ExtensionComponentTypes.kanban_card_widget);
-registerExtensionComponent("MediaCardWidget", MediaCardWidget, ExtensionComponentTypes.kanban_card_widget);
+registerExtensionComponent("MediaCardWidget", MediaCardWidget, ExtensionComponentTypes.card_widget);
 
 // # Extension functions 
 // Email Template
