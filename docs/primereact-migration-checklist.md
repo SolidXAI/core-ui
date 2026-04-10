@@ -46,8 +46,8 @@ This file contains only actionable checklist items grouped by phase and risk.
   - `src/components/common/SolidPopupContainer.tsx`
 - [ ] Replace autocomplete wrappers:
   - `src/components/common/AutoCompleteField.tsx`
-  - `src/components/common/SingleSelectAutoCompleteField.tsx`
   - `src/components/common/MultipleSelectAutoCompleteField.tsx`
+  - *(DONE)* `SingleSelectAutoCompleteField` removed in favor of direct `SolidAutocomplete` usage.
 - [ ] Replace global search shell dependencies:
   - `src/components/core/common/SolidGlobalSearchElement.tsx`
   - `src/components/core/common/SolidSearchBox.tsx`

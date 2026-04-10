@@ -4,6 +4,7 @@ type SolidTabProps = {
   value: string;
   label: React.ReactNode;
   content: React.ReactNode;
+  hasError?: boolean;
 };
 
 type SolidTabGroupProps = {
@@ -34,8 +35,11 @@ export function SolidTabGroup({
   tabPosition = "left",
 }: SolidTabGroupProps) {
   return (
-    <div className={cx("solid-tabs", `solid-tabs--${tabPosition}`, className)}>
-      <div className={cx("solid-tabs-list", listClassName)} role="tablist">
+    <div className={cx("solid-notebook", "solid-tabs", `solid-tabs--${tabPosition}`, className)}>
+      <div
+        className={cx("solid-notebook-tablist", "solid-tabs-list", listClassName)}
+        role="tablist"
+      >
         {tabs.map((tab) => {
           const isActive = tab.value === value;
           return (
@@ -46,7 +50,13 @@ export function SolidTabGroup({
               aria-selected={isActive}
               aria-controls={`solid-tab-panel-${tab.value}`}
               id={`solid-tab-${tab.value}`}
-              className={cx("solid-tabs-trigger", isActive && "is-active")}
+              className={cx(
+                "solid-notebook-tab-trigger",
+                "solid-tabs-trigger",
+                tab.hasError && "error",
+                isActive && "active",
+                isActive && "is-active",
+              )}
               onClick={() => onValueChange(tab.value)}
             >
               {tab.label}
@@ -64,7 +74,7 @@ export function SolidTabGroup({
             id={`solid-tab-panel-${tab.value}`}
             aria-labelledby={`solid-tab-${tab.value}`}
             hidden={!isActive}
-            className={cx("solid-tabs-panel", panelClassName)}
+            className={cx("solid-notebook-content", "solid-tabs-panel", panelClassName)}
           >
             {isActive ? tab.content : null}
           </div>

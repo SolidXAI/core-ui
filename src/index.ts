@@ -10,7 +10,6 @@ export { DropzoneUpload } from './components/common/DropzoneUpload';
 export { HeaderDynamicTitles } from './components/common/HeaderDynamicTitles';
 // export * from './components/common/MarkdownViewer';
 export { MultipleSelectAutoCompleteField } from './components/common/MultipleSelectAutoCompleteField';
-export { SingleSelectAutoCompleteField } from './components/common/SingleSelectAutoCompleteField';
 export { SocialMediaLogin } from './components/common/SocialMediaLogin';
 export { BackButton } from './components/common/BackButton';
 export { FileReaderExt } from './components/common/FileReaderExt';

@@ -6,7 +6,7 @@
 | Dialog (`primereact/dialog`) | `SolidPopupContainer`, many direct dialogs in features/forms | `src/components/common/SolidPopupContainer.tsx`, `src/components/core/list/SolidListView.tsx`, `src/components/core/tree/SolidTreeView.tsx`, `src/components/core/form/fields/relations/SolidRelationManyToOneField.tsx` |
 | OverlayPanel (`primereact/overlaypanel`) | No single adapter; used in config/actions/menus | `src/components/core/list/SolidListViewConfigure.tsx`, `src/components/layout/user-profile-menu.tsx`, `src/components/core/form/SolidFormActionHeader.tsx`, `src/components/core/kanban/KanbanCard.tsx` |
 | Toast (`primereact/toast`) | `showToast` helper + global `ToastContainer` pattern | `src/helpers/showToast.ts`, `src/helpers/ToastContainer.tsx`, `src/components/core/list/SolidListView.tsx`, `src/components/core/tree/SolidTreeView.tsx` |
-| AutoComplete (`primereact/autocomplete`) | `AutoCompleteField`, `SingleSelectAutoCompleteField`, `MultipleSelectAutoCompleteField`; relation-field widgets | `src/components/common/AutoCompleteField.tsx`, `src/components/common/SingleSelectAutoCompleteField.tsx`, `src/components/core/form/fields/relations/SolidRelationManyToOneField.tsx`, `src/components/core/form/fields/SolidSelectionDynamicField.tsx` |
+| AutoComplete (`primereact/autocomplete`) | `AutoCompleteField`, `MultipleSelectAutoCompleteField`; relation-field widgets *(single-select now uses `SolidAutocomplete` directly)* | `src/components/common/AutoCompleteField.tsx`, `src/components/core/form/fields/relations/SolidRelationManyToOneField.tsx`, `src/components/core/form/fields/SolidSelectionDynamicField.tsx` |
 | DataTable / Column (`primereact/datatable`, `primereact/column`) | No true adapter; list architecture built on Prime APIs | `src/components/core/list/SolidListView.tsx`, `src/components/core/field/FieldListViewData.tsx`, `src/components/core/model/ModelListViewData.tsx`, `src/components/core/module/ModuleListViewData.tsx`, `src/components/core/users/UserListView.tsx` |
 | TreeTable (`primereact/treetable`) | No adapter; tree logic directly coupled | `src/components/core/tree/SolidTreeView.tsx` |
 | TabView (`primereact/tabview`) | Used in auth and metadata forms, mostly direct imports | `src/components/auth/SolidLogin.tsx`, `src/components/auth/SolidRegister.tsx`, `src/components/core/model/CreateModel.tsx`, `src/components/core/model/FieldMetaDataForm.tsx` |
@@ -165,10 +165,10 @@ Introduce internal primitives before mass edits:
 Migrate wrappers and shared interaction patterns:
 - Toast layer: `src/helpers/showToast.ts`, `src/helpers/ToastContainer.tsx`
 - Popup/modal container: `src/components/common/SolidPopupContainer.tsx`
-- Autocomplete wrappers: 
+- Autocomplete wrappers:
   - `src/components/common/AutoCompleteField.tsx`
-  - `src/components/common/SingleSelectAutoCompleteField.tsx`
   - `src/components/common/MultipleSelectAutoCompleteField.tsx`
+  - *(Single-select now implemented via `SolidAutocomplete` + form hooks)*
 - Overlay/filter shell components:
   - `src/components/core/common/SolidGlobalSearchElement.tsx`
   - `src/components/core/common/SolidSearchBox.tsx`

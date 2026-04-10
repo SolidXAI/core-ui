@@ -1793,11 +1793,11 @@ li.header-li-px {
 }
 
 .solid-form-header {
-  padding: 15px 14px 15px 24px;
+  padding: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--solid-light-grey);
+  background: white;
   border-bottom: 1px solid var(--primary-light-color);
 }
 

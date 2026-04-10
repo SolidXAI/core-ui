@@ -2946,7 +2946,8 @@ body {
 .solid-list-toolbar .p-button.p-button-outlined,
 .solid-list-toolbar .solid-btn--secondary,
 .solid-list-toolbar .solid-btn--outline,
-.solid-list-toolbar .solid-icon-button {
+.solid-list-toolbar .solid-icon-button,
+.solid-icon-button {
   border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
   background: var(--background);
   color: var(--foreground);
@@ -4813,6 +4814,10 @@ body {
   padding: 18px 22px 22px;
 }
 
+.solid-radix-dialog-body.solid-dialog-body-flush {
+  padding: 0;
+}
+
 .solid-radix-dialog-footer {
   display: flex;
   justify-content: flex-end;
@@ -4878,14 +4883,60 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 6px;
+  font-size: 12px;
+  color: var(--muted-foreground);
 }
 
 .solid-checkbox-input,
 .solid-radio-input {
-  width: 16px;
-  height: 16px;
-  accent-color: var(--primary-color, var(--primary));
   cursor: pointer;
+}
+
+.solid-checkbox {
+  position: relative;
+}
+
+.solid-checkbox-input {
+  position: absolute;
+  opacity: 0;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+}
+
+.solid-checkbox-box {
+  width: 18px;
+  height: 18px;
+  border-radius: 5px;
+  border: 1px solid var(--border);
+  background: var(--background);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  position: relative;
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
+}
+
+.solid-checkbox-input:focus-visible + .solid-checkbox-box {
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+.solid-checkbox-input:checked + .solid-checkbox-box {
+  background: var(--primary-color, var(--primary));
+  border-color: var(--primary-color, var(--primary));
+}
+
+.solid-checkbox-input:checked + .solid-checkbox-box::after {
+  content: "";
+  width: 8px;
+  height: 4px;
+  border: 2px solid #fff;
+  border-top: none;
+  border-right: none;
+  position: absolute;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -60%) rotate(-45deg);
 }
 
 .solid-switch {
@@ -4976,6 +5027,155 @@ body {
   border-radius: 0;
   font-size: 12px;
   border: none;
+}
+
+.solid-placeholder-card-wrapper {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  min-height: 240px;
+  padding: 28px;
+}
+
+.solid-placeholder-card {
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  border: 1px dashed color-mix(in srgb, var(--border) 70%, transparent);
+  border-radius: 14px;
+  padding: 20px 22px;
+  background: color-mix(in srgb, var(--muted) 22%, transparent);
+  box-shadow: 0 10px 30px -16px rgba(15, 23, 42, 0.35);
+  max-width: 520px;
+  width: 100%;
+}
+
+.solid-placeholder-card-icon {
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary-color, var(--primary)) 16%, transparent);
+  color: var(--primary-color, var(--primary));
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex-shrink: 0;
+}
+
+.solid-placeholder-card-title {
+  margin: 0;
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.solid-placeholder-card-text {
+  margin: 4px 0 0;
+  font-size: 12.5px;
+  color: var(--muted-foreground);
+  line-height: 1.4;
+}
+
+.solid-field-selector-container {
+  padding: 20px;
+  max-height: min(520px, calc(100vh - 220px));
+  overflow-y: auto;
+}
+
+.solid-field-selector-header {
+  margin-bottom: 16px;
+}
+
+.solid-field-selector-subheading {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.solid-field-selector-grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+  gap: 12px;
+}
+
+.solid-field-selector-card {
+  border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+  border-radius: 12px;
+  padding: 14px;
+  background: var(--card);
+  color: inherit;
+  text-align: left;
+  transition: border-color 0.15s ease, box-shadow 0.15s ease, transform 0.15s ease;
+}
+
+.solid-field-selector-card:hover {
+  border-color: color-mix(in srgb, var(--primary-color, var(--primary)) 36%, var(--border));
+  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
+  transform: translateY(-1px);
+}
+
+.solid-field-selector-card.is-active {
+  border-color: color-mix(in srgb, var(--primary-color, var(--primary)) 45%, var(--border));
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color, var(--primary)) 22%, transparent);
+}
+
+.solid-field-selector-card-inner {
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.solid-field-selector-icon {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  color: var(--foreground);
+}
+
+.solid-field-selector-icon-blue {
+  background: color-mix(in srgb, var(--primary-color, var(--primary)) 16%, transparent);
+  color: color-mix(in srgb, var(--primary-color, var(--primary)) 68%, #0f172a);
+}
+
+.solid-field-selector-icon-violet {
+  background: color-mix(in srgb, #7c3aed 18%, transparent);
+  color: #4c1d95;
+}
+
+.solid-field-selector-icon-green {
+  background: color-mix(in srgb, #10b981 18%, transparent);
+  color: #065f46;
+}
+
+.solid-field-selector-icon-orange {
+  background: color-mix(in srgb, #f97316 18%, transparent);
+  color: #9a3412;
+}
+
+.solid-field-selector-icon-cyan {
+  background: color-mix(in srgb, #06b6d4 18%, transparent);
+  color: #0f172a;
+}
+
+.solid-field-selector-text {
+  display: flex;
+  flex-direction: column;
+  gap: 4px;
+}
+
+.solid-field-selector-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--foreground);
+}
+
+.solid-field-selector-description {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  line-height: 1.4;
 }
 
 .solid-message-info {

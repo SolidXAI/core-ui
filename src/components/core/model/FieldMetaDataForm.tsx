@@ -1,6 +1,5 @@
 
 import CodeEditor from "../../../components/common/CodeEditor";
-import { SingleSelectAutoCompleteField } from "../../../components/common/SingleSelectAutoCompleteField";
 import { getSingularAndPlural } from "../../../helpers/helpers";
 import { useGetFieldDefaultMetaDataQuery } from "../../../redux/api/fieldApi";
 import { useLazyGetMediaStorageProvidersQuery } from "../../../redux/api/mediaStorageProviderApi";
@@ -31,6 +30,8 @@ import * as Yup from "yup";
 import FieldSelector from "./FieldSelector";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { getVirtualScrollerOptions } from "../../../helpers/autoCompleteVirtualScroll";
+import { SolidAutocomplete } from "../../shad-cn-ui/SolidAutocomplete";
+import { useSolidAutocompleteField } from "../../../hooks/useSolidAutocompleteField";
 
 
 
@@ -200,6 +201,48 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
     );
   };
 
+  const triggerModuleField = useSolidAutocompleteField({
+    formik,
+    fieldName: `computedFieldTriggerConfig[${index}].moduleName`,
+    fieldNameId: `computedFieldTriggerConfig[${index}].moduleName`,
+    labelKey: "displayName",
+    valueKey: "name",
+    searchData: searchModuleName,
+    existingData: row.moduleName
+      ? {
+        name: row.moduleName,
+        displayName: row.displayName || formatDisplayName(row.moduleName),
+      }
+      : modelMetaData?.module?.name
+        ? {
+          name: modelMetaData.module.name,
+          displayName: modelMetaData.module.displayName || formatDisplayName(modelMetaData.module.name),
+        }
+        : null,
+    relationField: true,
+  });
+
+  const triggerModelField = useSolidAutocompleteField({
+    formik,
+    fieldName: `computedFieldTriggerConfig[${index}].modelName`,
+    fieldNameId: `computedFieldTriggerConfig[${index}].modelName`,
+    labelKey: "displayName",
+    valueKey: "singularName",
+    searchData: searchModelName,
+    existingData: row.modelName
+      ? {
+        singularName: row.modelName,
+        displayName: row.displayName || formatDisplayName(row.modelName),
+      }
+      : modelMetaData?.singularName
+        ? {
+          singularName: modelMetaData?.singularName,
+          displayName: modelMetaData?.displayName || formatDisplayName(modelMetaData.displayName),
+        }
+        : null,
+    relationField: true,
+  });
+
   return (
     <div className="flex align-items-start gap-3 mt-2 flex-wrap md:flex-nowrap">
 
@@ -210,29 +253,15 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
         >
           Module
         </label>
-        <div className="mt-2">
-          <SingleSelectAutoCompleteField
-            key={`moduleName-${index}`}
-            formik={formik}
-            isFormFieldValid={isFormFieldValid}
-            fieldName={`computedFieldTriggerConfig[${index}].moduleName`}
-            fieldNameId={`computedFieldTriggerConfig[${index}].moduleName`}
-            labelKey="displayName"
-            valueKey="name"
-            searchData={searchModuleName}
-            existingData={
-              row.moduleName
-                ? {
-                  name: row.moduleName,
-                  displayName: row.displayName || formatDisplayName(row.moduleName),
-                }
-                : modelMetaData?.module?.name
-                  ? {
-                    name: modelMetaData.module.name,
-                    displayName: modelMetaData.module.displayName || formatDisplayName(modelMetaData.module.name),
-                  }
-                  : null
-            }
+        <div className="mt-2 solid-standard-autocomplete">
+          <SolidAutocomplete
+            value={triggerModuleField.selectedItem}
+            suggestions={triggerModuleField.filteredItems}
+            completeMethod={triggerModuleField.searchItems}
+            onChange={triggerModuleField.handleChange}
+            dropdown
+            field="displayName"
+            className="w-full"
           />
         </div>
         {errors?.moduleName && (
@@ -247,29 +276,15 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
         >
           Model
         </label>
-        <div className="mt-2">
-          <SingleSelectAutoCompleteField
-            key={`modelName-${index}`}
-            formik={formik}
-            isFormFieldValid={isFormFieldValid}
-            fieldName={`computedFieldTriggerConfig[${index}].modelName`}
-            fieldNameId={`computedFieldTriggerConfig[${index}].modelName`}
-            labelKey="displayName"
-            valueKey="singularName"
-            searchData={searchModelName}
-            existingData={
-              row.modelName
-                ? {
-                  singularName: row.modelName,
-                  displayName: row.displayName || formatDisplayName(row.modelName),
-                }
-                : modelMetaData?.singularName
-                  ? {
-                    singularName: modelMetaData?.singularName,
-                    displayName: modelMetaData?.displayName || formatDisplayName(modelMetaData.displayName),
-                  }
-                  : null
-            }
+        <div className="mt-2 solid-standard-autocomplete">
+          <SolidAutocomplete
+            value={triggerModelField.selectedItem}
+            suggestions={triggerModelField.filteredItems}
+            completeMethod={triggerModelField.searchItems}
+            onChange={triggerModelField.handleChange}
+            dropdown
+            field="displayName"
+            className="w-full"
           />
         </div>
         {errors?.modelName && (
@@ -1456,6 +1471,97 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
     );
   }, [formik.values.computedFieldTriggerConfig]);
 
+  const mediaStorageProviderField = useSolidAutocompleteField({
+    formik,
+    fieldName: "mediaStorageProvider",
+    fieldNameId: "mediaStorageProviderId",
+    labelKey: "name",
+    valueKey: "value",
+    searchData: searchMediaStorageProvIderId,
+    existingData: formik.values.mediaStorageProvider,
+    relationField: true,
+  });
+
+  const relationModelModuleField = useSolidAutocompleteField({
+    formik,
+    fieldName: "relationModelModuleName",
+    fieldNameId: "relationModelModuleName",
+    labelKey: "name",
+    valueKey: "name",
+    searchData: searchRelationModelModuleNames,
+    existingData: formik.values.relationModelModuleName,
+    relationField: true,
+    additionalAction: () => {
+      formik.setFieldValue("relationCoModelSingularName", "");
+      formik.setFieldValue("relationCoModelColumnName", "");
+      formik.setFieldValue("relationJoinTableName", "");
+    }
+  });
+
+  const relationCoModelField = useSolidAutocompleteField({
+    formik,
+    fieldName: "relationCoModelSingularName",
+    fieldNameId: "relationCoModelSingularName",
+    labelKey: "displayName",
+    valueKey: "singularName",
+    searchData: searchrelationCoModelSingularNames,
+    existingData: formik.values.relationCoModelSingularName,
+    relationField: true,
+  });
+
+  const userKeyField = useSolidAutocompleteField({
+    formik,
+    fieldName: "userKey",
+    fieldNameId: "userKey",
+    labelKey: "displayName",
+    valueKey: "name",
+    searchData: searchUserKeyField,
+    existingData: formik.values.userKey,
+    relationField: true,
+  });
+
+  const selectionDynamicProviderField = useSolidAutocompleteField({
+    formik,
+    fieldName: "selectionDynamicProvider",
+    labelKey: "label",
+    valueKey: "value",
+    searchData: searchSelectionDynamicProvider,
+    existingData: formik.values.selectionDynamicProvider,
+    additionalAction: (e: any) => setMarkdownText(e.target.value.help),
+  });
+
+  const computedFieldValueProviderField = useSolidAutocompleteField({
+    formik,
+    fieldName: "computedFieldValueProvider",
+    labelKey: "label",
+    valueKey: "value",
+    searchData: searchComputedProvider,
+    existingData: formik.values.computedFieldValueProvider,
+    additionalAction: (e: any) => setMarkdownText(e.target.value.help),
+  });
+
+  const encryptionTypeField = useSolidAutocompleteField({
+    formik,
+    fieldName: "encryptionType",
+    fieldNameId: "encryptionType",
+    labelKey: "label",
+    valueKey: "value",
+    searchData: searchSelectionEncryptionType,
+    existingData: formik.values.encryptionType,
+    relationField: true,
+  });
+
+  const decryptWhenField = useSolidAutocompleteField({
+    formik,
+    fieldName: "decryptWhen",
+    fieldNameId: "decryptWhen",
+    labelKey: "label",
+    valueKey: "value",
+    searchData: searchSelectionDecryptWhen,
+    existingData: formik.values.decryptWhen,
+    relationField: true,
+  });
+
 
   return (
     <div>
@@ -1885,16 +1991,10 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 /> */}
 
                               {/* {selectedType.value === "mediaSingle" &&
-                                  <SingleSelectAutoCompleteField
+                                  <SolidAutocomplete
                                     key="mediaTypes"
-                                    formik={formik}
-                                    isFormFieldValid={isFormFieldValid}
-                                    fieldName="mediaTypes"
-                                    fieldNameId="mediaTypes"
-                                    labelKey="label"
-                                    valueKey="value"
-                                    searchData={searchMediaTypes}
-                                    existingData={formik.values.mediaTypes}
+                                    value={formik.values.mediaTypes}
+                                    suggestions={[]}
                                   />
                                 } */}
 
@@ -1967,18 +2067,17 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 Media  Storage Provider
                               </label>
 
-                              <SingleSelectAutoCompleteField
-                                key="mediaStorageProviderId"
-                                formik={formik}
-                                isFormFieldValid={isFormFieldValid}
-                                relationField={true}
-                                fieldName="mediaStorageProvider"
-                                fieldNameId="mediaStorageProviderId"
-                                labelKey="name"
-                                valueKey="value"
-                                searchData={searchMediaStorageProvIderId}
-                                existingData={formik.values.mediaStorageProvider}
-                              />
+                              <div className="solid-standard-autocomplete">
+                                <SolidAutocomplete
+                                  value={mediaStorageProviderField.selectedItem}
+                                  suggestions={mediaStorageProviderField.filteredItems}
+                                  completeMethod={mediaStorageProviderField.searchItems}
+                                  onChange={mediaStorageProviderField.handleChange}
+                                  dropdown
+                                  field="name"
+                                  className="w-full"
+                                />
+                              </div>
 
                               {isFormFieldValid(
                                 formik,
@@ -2152,22 +2251,17 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 Co-Module Name
                               </label>
 
-                              <SingleSelectAutoCompleteField
-                                key="relationModelModuleName"
-                                formik={formik}
-                                isFormFieldValid={isFormFieldValid}
-                                fieldName="relationModelModuleName"
-                                fieldNameId="relationModelModuleName"
-                                labelKey="name"
-                                valueKey="name"
-                                searchData={searchRelationModelModuleNames}
-                                existingData={formik.values.relationModelModuleName}
-                                additionalAction={(e: any) => {
-                                  formik.setFieldValue("relationCoModelSingularName", "");
-                                  formik.setFieldValue("relationCoModelColumnName", "");
-                                  formik.setFieldValue("relationJoinTableName", "");
-                                }}
-                              />
+                              <div className="solid-standard-autocomplete">
+                                <SolidAutocomplete
+                                  value={relationModelModuleField.selectedItem}
+                                  suggestions={relationModelModuleField.filteredItems}
+                                  completeMethod={relationModelModuleField.searchItems}
+                                  onChange={relationModelModuleField.handleChange}
+                                  dropdown
+                                  field="name"
+                                  className="w-full"
+                                />
+                              </div>
 
                               {/* <AutoComplete
                                   value={selectedRelationModelModuleName}
@@ -2213,18 +2307,17 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   Co-Model Name
                                 </label>
 
-
-                                <SingleSelectAutoCompleteField
-                                  key="relationCoModelSingularName"
-                                  formik={formik}
-                                  isFormFieldValid={isFormFieldValid}
-                                  fieldName="relationCoModelSingularName"
-                                  fieldNameId="relationCoModelSingularName"
-                                  labelKey="displayName"
-                                  valueKey="singularName"
-                                  searchData={searchrelationCoModelSingularNames}
-                                  existingData={formik.values.relationCoModelSingularName}
-                                />
+                                <div className="solid-standard-autocomplete">
+                                  <SolidAutocomplete
+                                    value={relationCoModelField.selectedItem}
+                                    suggestions={relationCoModelField.filteredItems}
+                                    completeMethod={relationCoModelField.searchItems}
+                                    onChange={relationCoModelField.handleChange}
+                                    dropdown
+                                    field="displayName"
+                                    className="w-full"
+                                  />
+                                </div>
 
                                 {isFormFieldValid(
                                   formik,
@@ -2284,17 +2377,17 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 Set User Key
                               </label>
 
-                              <SingleSelectAutoCompleteField
-                                key="userKey"
-                                formik={formik}
-                                isFormFieldValid={isFormFieldValid}
-                                fieldName="userKey"
-                                fieldNameId="userKey"
-                                labelKey="displayName"
-                                valueKey="name"
-                                searchData={searchUserKeyField}
-                                existingData={formik.values.userKey}
-                              />
+                              <div className="solid-standard-autocomplete">
+                                <SolidAutocomplete
+                                  value={userKeyField.selectedItem}
+                                  suggestions={userKeyField.filteredItems}
+                                  completeMethod={userKeyField.searchItems}
+                                  onChange={userKeyField.handleChange}
+                                  dropdown
+                                  field="displayName"
+                                  className="w-full"
+                                />
+                              </div>
                               <p className="fieldSubTitle">The co-model you have selected does not have a user key specified. Use the above dropdown to choose from one of the "unique" fields in this co-model to be set as its userkey. User keys are required in co-models being used in many-to-one or one-to-many relations as in SolidX when a many-to-one field is rendered it uses an autocomplete dropdown, and the user key value is what is displayed as the label in the dropdown.</p>
                               {isFormFieldValid(
                                 formik,
@@ -2500,19 +2593,17 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 Selection Dynamic Provider
                               </label>
 
-                              <SingleSelectAutoCompleteField
-                                key="selectionDynamicProvider"
-                                formik={formik}
-                                isFormFieldValid={isFormFieldValid}
-                                // relationField={false}
-                                fieldName="selectionDynamicProvider"
-                                fieldNameId={null}
-                                labelKey="label"
-                                valueKey="value"
-                                searchData={searchSelectionDynamicProvider}
-                                existingData={formik.values.selectionDynamicProvider}
-                                additionalAction={(e: any) => setMarkdownText(e.target.value.help)}
-                              />
+                              <div className="solid-standard-autocomplete">
+                                <SolidAutocomplete
+                                  value={selectionDynamicProviderField.selectedItem}
+                                  suggestions={selectionDynamicProviderField.filteredItems}
+                                  completeMethod={selectionDynamicProviderField.searchItems}
+                                  onChange={selectionDynamicProviderField.handleChange}
+                                  dropdown
+                                  field="label"
+                                  className="w-full"
+                                />
+                              </div>
 
 
                               {/* <AutoComplete
@@ -2695,20 +2786,17 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 >
                                   Computed Field Provider
                                 </label>
-                                <SingleSelectAutoCompleteField
-                                  key="computedFieldValueProvider"
-                                  formik={formik}
-                                  isFormFieldValid={isFormFieldValid}
-                                  // relationField={false}
-                                  fieldName="computedFieldValueProvider"
-                                  fieldNameId={null}
-                                  labelKey="label"
-                                  valueKey="value"
-                                  searchData={searchComputedProvider}
-                                  existingData={formik.values.computedFieldValueProvider}
-                                  additionalAction={(e: any) => setMarkdownText(e.target.value.help)}
-
-                                />
+                                <div className="solid-standard-autocomplete">
+                                  <SolidAutocomplete
+                                    value={computedFieldValueProviderField.selectedItem}
+                                    suggestions={computedFieldValueProviderField.filteredItems}
+                                    completeMethod={computedFieldValueProviderField.searchItems}
+                                    onChange={computedFieldValueProviderField.handleChange}
+                                    dropdown
+                                    field="label"
+                                    className="w-full"
+                                  />
+                                </div>
                                 {isFormFieldValid(
                                   formik,
                                   "computedFieldValueProvider"
@@ -2782,18 +2870,10 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 >
                                   External Id Provider
                                 </label>
-                                <SingleSelectAutoCompleteField
+                                <SolidAutocomplete
                                   key="externalIdProvider"
-                                  formik={formik}
-                                  isFormFieldValid={isFormFieldValid}
-                                  // relationField={false}
-                                  fieldName="externalIdProvider"
-                                  fieldNameId={null}
-                                  labelKey="label"
-                                  valueKey="value"
-                                  searchData={searchExternalIdProvider}
-                                  existingData={formik.values.externalIdProvider}
-                                  additionalAction={(e: any) => setMarkdownText(e.target.value.help)}
+                                  value={formik.values.externalIdProvider}
+                                  suggestions={[]}
                                 />
                                
 
@@ -3105,9 +3185,9 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                     <label htmlFor="ormType" className="form-field-label">
                                       Type
                                     </label>
-                                    {/* <SingleSelectAutoCompleteField
-                                key="ormType"
-                                formik={formik}
+                                    {/* <SolidAutocomplete
+                                        key="ormType"
+                                        formik={formik}
                                 isFormFieldValid={isFormFieldValid}
                                 fieldName="ormType"
                                 fieldNameId="ormType"
@@ -3441,17 +3521,17 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 }}
                               /> */}
 
-                              <SingleSelectAutoCompleteField
-                                key="encryptionType"
-                                formik={formik}
-                                isFormFieldValid={isFormFieldValid}
-                                fieldName="encryptionType"
-                                fieldNameId="encryptionType"
-                                labelKey="label"
-                                valueKey="value"
-                                searchData={searchSelectionEncryptionType}
-                                existingData={formik.values.encryptionType}
-                              />
+                              <div className="solid-standard-autocomplete">
+                                <SolidAutocomplete
+                                  value={encryptionTypeField.selectedItem}
+                                  suggestions={encryptionTypeField.filteredItems}
+                                  completeMethod={encryptionTypeField.searchItems}
+                                  onChange={encryptionTypeField.handleChange}
+                                  dropdown
+                                  field="label"
+                                  className="w-full"
+                                />
+                              </div>
                               {isFormFieldValid(formik, "encryptionType") && (
                                 <Message
                                   severity="error"
@@ -3480,17 +3560,17 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                 }}
                               /> */}
 
-                              <SingleSelectAutoCompleteField
-                                key="decryptWhen"
-                                formik={formik}
-                                isFormFieldValid={isFormFieldValid}
-                                fieldName="decryptWhen"
-                                fieldNameId="decryptWhen"
-                                labelKey="label"
-                                valueKey="value"
-                                searchData={searchSelectionDecryptWhen}
-                                existingData={formik.values.decryptWhen}
-                              />
+                              <div className="solid-standard-autocomplete">
+                                <SolidAutocomplete
+                                  value={decryptWhenField.selectedItem}
+                                  suggestions={decryptWhenField.filteredItems}
+                                  completeMethod={decryptWhenField.searchItems}
+                                  onChange={decryptWhenField.handleChange}
+                                  dropdown
+                                  field="label"
+                                  className="w-full"
+                                />
+                              </div>
                               {isFormFieldValid(formik, "decryptWhen") && (
                                 <Message
                                   severity="error"

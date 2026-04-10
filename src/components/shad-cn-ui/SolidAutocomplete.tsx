@@ -65,14 +65,17 @@ export function SolidAutocomplete({
   const [query, setQuery] = useState("");
   const [activeIndex, setActiveIndex] = useState(-1);
   const [isFocused, setIsFocused] = useState(false);
+  const [hasCustomQuery, setHasCustomQuery] = useState(false);
 
   useEffect(() => {
     if (multiple) return;
     if (!value || typeof value === "string") {
       setQuery(typeof value === "string" ? value : "");
+      setHasCustomQuery(false);
       return;
     }
     setQuery("");
+    setHasCustomQuery(false);
   }, [value, field, multiple]);
 
   useEffect(() => {
@@ -169,6 +172,8 @@ export function SolidAutocomplete({
       return;
     }
     onChange?.({ value: null });
+    setQuery("");
+    setHasCustomQuery(false);
   };
 
   const clearAllSelected = () => {
@@ -195,26 +200,29 @@ export function SolidAutocomplete({
     setOpen(false);
     setManageOpen(false);
     setActiveIndex(-1);
+    setHasCustomQuery(false);
   };
 
   return (
     <div ref={rootRef} id={id} className={cx("solid-autocomplete", className)}>
       <div className={cx("solid-autocomplete-control solid-autocomplete-chip-control", isFocused && "is-focused")}>
-        {visibleSelectedItems.map((item, index) => (
+        {(multiple || (!multiple && selectedItems.length > 0)) && visibleSelectedItems.map((item, index) => (
           <span key={toItemKey(item, index)} className="solid-autocomplete-chip">
             <span className="solid-autocomplete-chip-label">{getDisplayValue(item, field)}</span>
-            <button
-              type="button"
-              className="solid-autocomplete-chip-remove"
-              onMouseDown={(event) => event.preventDefault()}
-            onClick={() => {
-              onUnselect?.({ value: item });
-              removeSelectedAt(index);
-            }}
-              aria-label="Remove selection"
-            >
-              <X size={12} />
-            </button>
+            {!(disabled || readOnly) && (
+              <button
+                type="button"
+                className="solid-autocomplete-chip-remove"
+                onMouseDown={(event) => event.preventDefault()}
+                onClick={() => {
+                  onUnselect?.({ value: item });
+                  removeSelectedAt(index);
+                }}
+                aria-label="Remove selection"
+              >
+                <X size={12} />
+              </button>
+            )}
           </span>
         ))}
         {multiple && hiddenSelectedItems.length > 0 && (
@@ -240,11 +248,12 @@ export function SolidAutocomplete({
             setIsFocused(true);
             setOpen(true);
             setManageOpen(false);
-            runCompleteMethod(query, true);
+            runCompleteMethod(hasCustomQuery ? query : "", true);
           }}
           onChange={(event) => {
             const next = event.target.value;
             setQuery(next);
+            setHasCustomQuery(true);
             setOpen(true);
             setManageOpen(false);
             runCompleteMethod(next, false);
@@ -302,10 +311,11 @@ export function SolidAutocomplete({
                 setManageOpen(false);
               }
               if (nextOpen) {
-                runCompleteMethod(query, true);
+                runCompleteMethod(hasCustomQuery ? query : "", true);
               }
             }}
             aria-label="Toggle suggestions"
+            disabled={disabled || readOnly}
           >
             {open ? <ChevronUp size={14} /> : <ChevronDown size={14} />}
           </button>

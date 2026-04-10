@@ -1,33 +1,21 @@
 import { usePathname } from "../../../hooks/usePathname";
-import { Button } from "primereact/button";
-import { Column } from "primereact/column";
-import { DataTable } from "primereact/datatable";
-import { Dialog } from "primereact/dialog";
-import { useMountEffect } from "primereact/hooks";
-import { Messages } from "primereact/messages";
-import { useRef, useState } from "react";
+import { SolidDataTable as DataTable, Column } from "../list/SolidDataTable";
+import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { showToast } from "../../../redux/features/toastSlice";
 import FieldMetaDataForm from "./FieldMetaDataForm";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
+import { AlertTriangle, Info, Pencil, Plus, Trash2 } from "lucide-react";
+import {
+  SolidButton,
+  SolidDialog,
+  SolidDialogBody,
+  SolidDialogFooter,
+} from "../../shad-cn-ui";
 
 
 const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaData, deleteModelFunction, nextTab, formikFieldsMetadataRef, params }: any) => {
   const pathname = usePathname();
-  const msgs = useRef<Messages>(null);
-
-  useMountEffect(() => {
-    if (msgs.current) {
-      msgs.current.clear();
-      msgs.current.show({
-        id: '1',
-        sticky: true,
-        severity: 'info',
-        detail: `Please select Module and Datasource from the models Tab.`,
-        closable: false,
-      });
-    }
-  });
   const dispatch = useDispatch();
   const [visiblePopup, setVisiblePopup] = useState(false);
   const [isRequiredPopUp, setIsRequiredPopUp] = useState(false);
@@ -46,14 +34,16 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
       <>
 
         {rowData.isSystem !== true && rowData.isMarkedForRemoval !== true &&
-          <Button
-            icon="pi pi-pencil"
-            text
+          <SolidButton
+            variant="ghost"
+            size="sm"
+            className="solid-icon-button"
+            aria-label="Edit field"
+            leftIcon={<Pencil size={14} />}
             onClick={() => {
               setSelectedFieldMetaData(rowData);
               setVisiblePopup(true);
             }}
-            size="small"
           />
         }
       </>
@@ -94,7 +84,15 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
     return (
       <>
         {(pathname.includes('create') || (rowData.isSystem !== true && rowData.isMarkedForRemoval !== true)) &&
-          <Button icon="pi pi-trash" text severity="danger" onClick={() => { setRowToDelete(rowData); setDeleteAlertPopup(true) }} size="small" />
+          <SolidButton
+            variant="ghost"
+            size="sm"
+            className="solid-icon-button"
+            style={{ color: "var(--solid-danger, #ef4444)" }}
+            aria-label="Delete field"
+            leftIcon={<Trash2 size={14} />}
+            onClick={() => { setRowToDelete(rowData); setDeleteAlertPopup(true) }}
+          />
 
         }
       </>
@@ -116,21 +114,31 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
   // };
 
 
+  const needsModelSetup = !modelMetaData.moduleId || !modelMetaData.dataSource;
+
   return (
     <>
 
-      {!modelMetaData.moduleId || !modelMetaData.dataSource ?
-        <div className="card flex justify-content-center">
-          <Messages ref={msgs} />
+      {needsModelSetup ?
+        <div className="solid-placeholder-card-wrapper">
+          <div className="solid-placeholder-card">
+            <div className="solid-placeholder-card-icon">
+              <Info size={18} />
+            </div>
+            <div className="solid-placeholder-card-body">
+              <p className="solid-placeholder-card-title">Model setup incomplete</p>
+              <p className="solid-placeholder-card-text">Please select Module and Datasource from the models tab before managing fields.</p>
+            </div>
+          </div>
         </div>
         :
         <>
           <div className="absolute" style={{ top: -3, right: 0 }}>
             {/* <h3>All Fields</h3> */}
             {modelMetaData.isSystem !== true &&
-              <Button
-                label="Add"
-                // icon="pi pi-external-link"
+              <SolidButton
+                size="sm"
+                leftIcon={<Plus size={14} />}
                 onClick={() => {
                   if (!modelMetaData?.dataSourceType) {
                     dispatch(showToast({ severity: 'error', summary: ERROR_MESSAGES.ERROR, detail: ERROR_MESSAGES.ORM_TYPE_REQUIRED }));
@@ -138,77 +146,95 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
                     setSelectedFieldMetaData(null);
                     setVisiblePopup(true)
                   }
-                }} size="small"
-              />
+                }}
+              >
+                Add
+              </SolidButton>
             }
           </div>
-          <DataTable value={fieldMetaData} dataKey="id" tableStyle={{ minWidth: '50rem' }} size="small">
-            <Column field="displayName" header="Display Name" body={bodyTemplate} headerClassName="table-header-fs"></Column>
-            <Column field="name" header="Name" headerClassName="table-header-fs"></Column>
-            <Column field="type" header="Type" headerClassName="table-header-fs"></Column>
+          <div className="solid-datatable-wrapper solid-list-table-area flex-1 min-h-0 overflow-hidden">
+            <DataTable
+              value={fieldMetaData}
+              dataKey="id"
+              size="small"
+              emptyMessage="No fields configured"
+              rowClassName={(rowData) => rowData.isMarkedForRemoval === true ? "greyed-out-row" : ""}
+            >
+              <Column field="displayName" header="Display Name" body={bodyTemplate}></Column>
+              <Column field="name" header="Name"></Column>
+              <Column field="type" header="Type"></Column>
 
-            {modelMetaData.isSystem !== true &&
-              <Column body={editTemplate} header="Edit" headerClassName="table-header-fs" style={{ width: '10%' }} />
-            }
-            {modelMetaData.isSystem !== true &&
-              <Column body={deleteTemplate} header="Delete" headerClassName="table-header-fs" style={{ width: '10%' }} />
-            }
-          </DataTable>
-          <Dialog
-            header=""
-            visible={visiblePopup}
-            style={{ width: "40vw" }}
-            className="solid-dialog solid-field-dialog"
-            onHide={() => {
-              if (!visiblePopup) return;
-
-              setVisiblePopup(false);
+              {modelMetaData.isSystem !== true &&
+                <Column body={editTemplate} header="Edit" style={{ width: '80px' }} />
+              }
+              {modelMetaData.isSystem !== true &&
+                <Column body={deleteTemplate} header="Delete" style={{ width: '90px' }} />
+              }
+            </DataTable>
+          </div>
+          <SolidDialog
+            open={visiblePopup}
+            onOpenChange={(open) => {
+              if (!open) {
+                setVisiblePopup(false);
+              }
             }}
+            className="solid-dialog solid-field-dialog"
+            style={{ width: "40vw" }}
             showHeader={false}
           >
-            <FieldMetaDataForm setIsDirty={setIsDirty} modelMetaData={modelMetaData} fieldMetaData={selectedFieldMetaData} allFields={fieldMetaData} setFieldMetaData={setFieldMetaData} deleteModelFunction={deleteModelFunction} setVisiblePopup={setVisiblePopup} formikFieldsMetadataRef={formikFieldsMetadataRef} params={params} setIsRequiredPopUp={setIsRequiredPopUp} showToaster={showToaster}></FieldMetaDataForm>
-          </Dialog>
-          <Dialog
-            visible={isRequiredPopUp}
-            header={(
-              <div className="flex align-items-center">
-                <i className="pi pi-exclamation-triangle text-yellow-500 text-xl mr-2"></i>
-                <span>Warning</span>
-              </div>
-            )}
-            headerClassName="text-center warning-header-popup"
-            modal
-            style={{ width: '20vw' }}
-            onHide={() => setIsRequiredPopUp(false)}
-            className="solid-dialog solid-confirm-dialog"
-          >
-            <p className="p-3 mb-0">If there is data against this model this operation might not work and manual intervention will be required</p>
-            <div className="flex justify-content-start p-3">
-              <Button label="Ok" className='small-button' onClick={() => setIsRequiredPopUp(false)} />
-            </div>
-          </Dialog>
-          <Dialog
-            visible={deleteAlertPopup}
-            header={(
-              <div className="flex align-items-center justify-content-center">
-                <i className="pi pi-exclamation-triangle text-yellow-500 text-xl mr-2"></i>
-                <span>Warning</span>
-              </div>
-            )}
-            headerClassName="text-center warning-header-popup"
-            modal
-            style={{ width: '20vw' }}
-            onHide={() => {
-              setDeleteAlertPopup(false);
-              setRowToDelete(null);
+            <SolidDialogBody className="solid-dialog-body-flush">
+              <FieldMetaDataForm setIsDirty={setIsDirty} modelMetaData={modelMetaData} fieldMetaData={selectedFieldMetaData} allFields={fieldMetaData} setFieldMetaData={setFieldMetaData} deleteModelFunction={deleteModelFunction} setVisiblePopup={setVisiblePopup} formikFieldsMetadataRef={formikFieldsMetadataRef} params={params} setIsRequiredPopUp={setIsRequiredPopUp} showToaster={showToaster}></FieldMetaDataForm>
+            </SolidDialogBody>
+          </SolidDialog>
+          <SolidDialog
+            open={isRequiredPopUp}
+            onOpenChange={(open) => {
+              if (!open) {
+                setIsRequiredPopUp(false);
+              }
             }}
             className="solid-dialog solid-confirm-dialog"
+            style={{ width: "20vw" }}
+            header={
+              <div className="flex align-items-center gap-2">
+                <AlertTriangle size={18} className="text-yellow-500" />
+                <span>Warning</span>
+              </div>
+            }
           >
-            <p className="p-3 mb-0 text-center">Are you sure you want to delete this field?</p>
-            <div className="flex justify-content-start p-3 align-items-center justify-content-center gap-3">
-              <Button
-                label="Ok"
-                className='small-button'
+            <SolidDialogBody>
+              <p className="mb-0">If there is data against this model this operation might not work and manual intervention will be required.</p>
+            </SolidDialogBody>
+            <SolidDialogFooter className="justify-content-start">
+              <SolidButton size="sm" onClick={() => setIsRequiredPopUp(false)}>
+                Ok
+              </SolidButton>
+            </SolidDialogFooter>
+          </SolidDialog>
+          <SolidDialog
+            open={deleteAlertPopup}
+            onOpenChange={(open) => {
+              if (!open) {
+                setDeleteAlertPopup(false);
+                setRowToDelete(null);
+              }
+            }}
+            className="solid-dialog solid-confirm-dialog"
+            style={{ width: "20vw" }}
+            header={
+              <div className="flex align-items-center justify-content-center gap-2">
+                <AlertTriangle size={18} className="text-yellow-500" />
+                <span>Warning</span>
+              </div>
+            }
+          >
+            <SolidDialogBody>
+              <p className="mb-0 text-center">Are you sure you want to delete this field?</p>
+            </SolidDialogBody>
+            <SolidDialogFooter className="flex justify-content-center gap-2">
+              <SolidButton
+                size="sm"
                 onClick={() => {
                   if (rowToDelete) {
                     deleteRow(rowToDelete);
@@ -216,19 +242,21 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
                   setDeleteAlertPopup(false);
                   setRowToDelete(null);
                 }}
-              />
-              <Button
-                label="Cancel"
-                className='small-button'
-                outlined
-                severity="danger"
+              >
+                Ok
+              </SolidButton>
+              <SolidButton
+                size="sm"
+                variant="outline"
                 onClick={() => {
                   setDeleteAlertPopup(false);
                   setRowToDelete(null);
                 }}
-              />
-            </div>
-          </Dialog>
+              >
+                Cancel
+              </SolidButton>
+            </SolidDialogFooter>
+          </SolidDialog>
 
         </>
       }

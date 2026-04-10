@@ -33,7 +33,7 @@ This document captures the repository-wide factual inventory used for migration 
 | Dialog | `SolidPopupContainer` (partial) | `src/components/common/SolidPopupContainer.tsx`, `src/components/core/list/SolidListView.tsx`, `src/components/core/tree/SolidTreeView.tsx` |
 | OverlayPanel | No central adapter | `src/components/core/list/SolidListViewConfigure.tsx`, `src/components/layout/user-profile-menu.tsx`, `src/components/core/form/SolidFormActionHeader.tsx` |
 | Toast | `showToast`, `ToastContainer` | `src/helpers/showToast.ts`, `src/helpers/ToastContainer.tsx`, `src/components/core/list/SolidListView.tsx` |
-| AutoComplete | `AutoCompleteField`, `SingleSelectAutoCompleteField`, `MultipleSelectAutoCompleteField` | `src/components/common/AutoCompleteField.tsx`, `src/components/core/form/fields/relations/SolidRelationManyToOneField.tsx` |
+| AutoComplete | `AutoCompleteField`, `MultipleSelectAutoCompleteField` *(single-select now uses `SolidAutocomplete` directly)* | `src/components/common/AutoCompleteField.tsx`, `src/components/core/form/fields/relations/SolidRelationManyToOneField.tsx` |
 | DataTable/Column | No abstraction layer (direct architecture dependency) | `src/components/core/list/SolidListView.tsx`, `src/components/core/field/FieldListViewData.tsx`, `src/components/core/model/ModelListViewData.tsx` |
 | TreeTable | No abstraction layer | `src/components/core/tree/SolidTreeView.tsx` |
 | Theme / `.p-*` styles | `styles.ts` imports resource style stack | `src/styles.ts`, `src/resources/solid-primereact.css`, `src/resources/globals.css`, `src/resources/themes/*/theme.css` |
@@ -150,8 +150,8 @@ Potentially helpful abstraction points:
   - `src/components/common/SolidPopupContainer.tsx`
 - Autocomplete wrappers:
   - `src/components/common/AutoCompleteField.tsx`
-  - `src/components/common/SingleSelectAutoCompleteField.tsx`
   - `src/components/common/MultipleSelectAutoCompleteField.tsx`
+  - *(single-select now handled via direct `SolidAutocomplete` usage + `useSolidAutocompleteField`)*
 - Form field class system:
   - `src/components/core/form/fields/ISolidField.ts` and concrete field classes
 
