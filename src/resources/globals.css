@@ -1722,6 +1722,7 @@ li.header-li-px {
   overflow: hidden;
   display: flex;
   padding: 12px;
+  padding-right: 0;
   background-color: var(--background) !important;
 }
 
@@ -1801,7 +1802,7 @@ li.header-li-px {
 }
 
 .solid-header-buttons-wrapper {
-  gap: 1rem !important;
+  gap: 0.5rem !important;
 }
 
 .solid-form-stepper {
@@ -2391,7 +2392,7 @@ li.header-li-px {
 }
 
 .solid-form-footer-pagination-meta {
-  font-size: 0.9rem;
+  font-size: 0.75rem;
 }
 
 .layout-config-button {
@@ -4495,7 +4496,7 @@ flex-shrink: 0; */
 
 .solid-card-view-pagination {
   border-top: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
-  padding: 12px 16px;
+  padding: 0;
   flex-shrink: 0;
   display: flex;
   justify-content: center;

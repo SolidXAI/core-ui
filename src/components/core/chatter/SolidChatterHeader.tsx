@@ -15,7 +15,7 @@ import {
     SolidAutocomplete,
     SolidDatePicker
 } from '../../shad-cn-ui'
-import { Filter, RefreshCw } from 'lucide-react'
+import { Filter, RefreshCw,Edit } from 'lucide-react'
 interface FilterState {
     name: string;
     startDate: Date | null;
@@ -113,7 +113,7 @@ export const SolidChatterHeader = (props: Props) => {
         <div className={`${styles.chatterTitle} solid-list-toolbar`}>
             <div className='flex justify-content-between align-items-center solid-list-toolbar-row'>
                 <p className="m-0 view-title solid-text-wrapper form-wrapper-title">
-                    Activity
+                    {/* Activity */}
                 </p>
                 <div className='flex align-items-center solid-header-buttons-wrapper'>
                     {/* <Button
@@ -126,12 +126,22 @@ export const SolidChatterHeader = (props: Props) => {
                             outlined: true,
                         })}
                     /> */}
-                    <SolidButton
+                    {/* <SolidButton
                         label="Log Note"
                         size="sm"
                         type="button"
                         variant="primary"
                         className="solid-purple-button"
+                        onClick={() => handleTabClick('log')}
+                    /> */}
+                    <SolidButton
+                        size="sm"
+                        type="button"
+                        aria-label="Log Note"
+                        variant={hasActiveFilters ? 'primary' : 'outline'}
+                        className="solid-icon-button"
+                        style={{ gap: 0 }}
+                        leftIcon={<Edit size={14} />}
                         onClick={() => handleTabClick('log')}
                     />
                     <SolidButton
@@ -157,7 +167,7 @@ export const SolidChatterHeader = (props: Props) => {
                 </div>
             </div>
             {visibleBox &&
-                <div className='mt-4'>
+                <div className='mt-2'>
                     {visibleBox === "email-message" &&
                         <SolidMessageComposer id={id} refetch={refetch} modelSingularName={modelSingularName} type={"email"} onCancel={onComposerCancel} />
                     }

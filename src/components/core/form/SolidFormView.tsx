@@ -1743,7 +1743,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             />
                         }
                         {isShowChatter === false ?
-                            <div className="flex flex-column gap-2 justify-content-center p-2">
+                            <div className="flex flex-column gap-2 justify-content-center p-1">
                                 {/*if solidview Internationalisation is enabled then show the locale tab */}
                                 {solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow &&
                                     <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('info')}>

@@ -3182,28 +3182,28 @@ body {
 
 .solid-paginator-label,
 .solid-paginator-report {
-  font-size: 0.9rem;
+  font-size: 0.7rem;
   line-height: 1;
   color: color-mix(in srgb, var(--foreground) 82%, transparent);
   font-weight: 500;
 }
 
 .solid-paginator-select {
-  height: 32px;
+  height: 24px;
   min-width: 46px;
   border-radius: 8px;
   border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
   background: var(--background);
   color: var(--foreground);
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   font-weight: 500;
   line-height: 1;
-  padding: 0 26px 0 8px;
+  padding: 0 12px 0 8px;
 }
 
 .solid-paginator-btn {
-  height: 32px;
-  min-width: 72px;
+  height: 28px;
+  min-width: 50px;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -3211,10 +3211,10 @@ body {
   border: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
   background: var(--background);
   color: var(--foreground);
-  font-size: 0.9rem;
+  font-size: 0.75rem;
   font-weight: 500;
   line-height: 1;
-  padding: 0 12px;
+  padding: 0 0;
   transition: background 120ms ease, border-color 120ms ease, color 120ms ease;
 }
 

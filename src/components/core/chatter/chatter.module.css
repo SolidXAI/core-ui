@@ -1,6 +1,6 @@
 .chatterTitle {
-    padding: 15px;
-    border-bottom: 1px solid #D8E2EA;
+    padding-top: 10px;
+    border-bottom: 0px solid #D8E2EA;
 }
 
 .chatterMessageComposer .chatterMessageInput {

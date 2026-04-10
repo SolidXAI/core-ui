@@ -169,7 +169,9 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
         </div>
     );
 
-    const renderEmptyState = () => (
+    const renderEmptyState = () => {
+        const isLogComposerOpen = visibleBox === 'log';
+        return (
         <div className='flex align-items-center justify-content-center h-full'>
             <div className='flex flex-column align-items-center gap-2 text-center text-color-secondary px-3'>
                 <div className='p-3 border-round bg-primary-reverse text-primary'>
@@ -178,11 +180,12 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                 <p className='m-0 text-base font-medium text-color'>No activity yet</p>
                 <p className='m-0 text-sm'>Log your first internal note or send a message to get things started.</p>
                 <SolidButton size='sm' variant='outline' onClick={() => handleTabClick('log')}>
-                    Log a note
+                    {isLogComposerOpen ? 'Cancel' : 'Log a note'}
                 </SolidButton>
             </div>
         </div>
-    );
+        );
+    };
 
     const permissionError = () => (
         <div className='p-3'>
