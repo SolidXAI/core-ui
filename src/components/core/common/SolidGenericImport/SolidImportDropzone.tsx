@@ -1,13 +1,14 @@
 
 import { useCallback, useState } from 'react';
 import { useDropzone } from 'react-dropzone';
-import { Button } from 'primereact/button'
+import { FileSpreadsheet, FileText, Trash2, Upload } from 'lucide-react';
 import { useDispatch } from 'react-redux';
 import { showToast } from '../../../../redux/features/toastSlice';
 import styles from './SolidImport.module.css'
 import { DocumentSvg } from './DocumentSvg';
 import { useCreateImportTransactionMutation } from '../../../../redux/api/importTransactionApi';
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
+import { SolidButton } from '../../../shad-cn-ui';
 export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMetadataId }: any) => {
     const dispatch = useDispatch();
 
@@ -52,6 +53,8 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
         multiple: false,
     });
 
+    const rootProps = getRootProps({ className: 'solid-import-dropzone-shell' });
+
     const removeFile = () => {
         setFile(null);
     };
@@ -66,39 +69,55 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
     return (
         <div>
             <div className={styles.SolidImportContextWrapper}>
-                <div {...getRootProps({ className: styles.dropzone })} className='h-full flex flex-column align-items-center justify-content-center'>
+                <div {...rootProps}>
                     <input {...getInputProps()} />
-                    {/* {!file ? ( */}
-                    <div className={""}>
+                    <div className="solid-import-dropzone-copy">
                         <div className='flex justify-content-center'>
                             <DocumentSvg />
                         </div>
-                        <h5 className='text-center solid-primary-black-text'>Drop or upload a file to import</h5>
-                        <p className='text-center m-0'>Excel files are recommended as formatting is automatic.<br />
-                            But, you can also use .csv files</p>
+                        <div className="solid-import-dropzone-kicker">Accepted formats</div>
+                        <h5 className='text-center solid-primary-black-text solid-import-section-title solid-import-dropzone-title'>Drop or upload a file to import</h5>
+                        <p className='text-center m-0 solid-import-section-copy'>Excel files are recommended as formatting is automatic. You can also import plain <code>.csv</code> files.</p>
+                        <div className="solid-import-dropzone-format-list" aria-hidden="true">
+                            <span className="solid-import-dropzone-format-pill">
+                                <FileSpreadsheet size={13} />
+                                Excel
+                            </span>
+                            <span className="solid-import-dropzone-format-pill">
+                                <FileText size={13} />
+                                CSV
+                            </span>
+                        </div>
                         <div className='flex justify-content-center mt-3'>
-                            <Button label="Click to browse" size="small" severity='secondary' outlined />
+                            <SolidButton type="button" variant="outline" size="small" leftIcon={<Upload size={14} />} onClick={(event) => {
+                                event.stopPropagation();
+                                open();
+                            }}>
+                                Browse Files
+                            </SolidButton>
                         </div>
                     </div>
-                    {/* ) : ( */}
                     {file &&
-                        <div className="flex align-items-start justify-content-between gap-3 p-3 mt-4 w-full md:w-8" style={{ border: '1px solid var(--primary-light-color)', borderRadius: 6 }} onClick={(e) => e.stopPropagation()}>
-                            <div>
-                                <p className='m-0'><strong>File:</strong> {file.name}</p>
-                                <p className='m-0'><strong>Type:</strong> {file.type || 'Unknown'}</p>
-                                <p className='m-0'><strong>Size:</strong> {formatBytes(file.size)}</p>
+                        <div className="solid-import-file-card" onClick={(e) => e.stopPropagation()}>
+                            <div className="solid-import-file-card-main">
+                                <div className="solid-import-file-icon">
+                                    <FileSpreadsheet size={18} />
+                                </div>
+                                <div className="solid-import-file-meta">
+                                    <p className='m-0 solid-import-file-name'>{file.name}</p>
+                                    <p className='m-0 solid-import-file-caption'>{file.type || 'Unknown type'}</p>
+                                    <p className='m-0 solid-import-file-caption'>{formatBytes(file.size)}</p>
+                                </div>
                             </div>
-                            <div>
-                                <Button size="small" icon="pi pi-trash" text onClick={removeFile} />
-                            </div>
+                            <SolidButton type="button" variant="ghost" size="small" className="solid-import-file-remove" leftIcon={<Trash2 size={14} />} onClick={removeFile} />
                         </div>
                     }
-                    {/* )} */}
                 </div>
             </div>
-            <div className='mt-3 flex align-items-center gap-3'>
-                <Button
-                    label='Continue'
+            <div className='solid-import-actions'>
+                <p className="solid-import-actions-copy">Upload one source file and continue to field mapping.</p>
+                <SolidButton
+                    type="button"
                     size='small'
                     onClick={() => {
                         if (!file) {
@@ -107,8 +126,11 @@ export const SolidImportDropzone = ({ setImportStep, setTransactionId, modelMeta
                         }
                         setImportStep(3);
                     }}
-                    disabled={!file}
-                />
+                    disabled={!file || isLoading}
+                    loading={isLoading}
+                >
+                    Continue
+                </SolidButton>
             </div>
         </div>
     )

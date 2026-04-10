@@ -113,15 +113,8 @@
 
     /* ======================= Solid Import  ================================ */
     .solid-import-dialog {
-        width: 75rem !important;
-        max-width: 80% !important;
-    }
-
-    /* ======================= Solid Export ============================  */
-    .ExportDialog {
-        width: 75rem !important;
-        max-width: 80% !important;
-        height: auto !important;
+        width: min(840px, calc(100vw - 24px)) !important;
+        max-width: calc(100vw - 24px) !important;
     }
 
     /* ========================= Home ========================== */
@@ -203,13 +196,8 @@
 
     /* ======================= Solid Import  ================================ */
     .solid-import-dialog {
-        max-width: 94% !important;
-    }
-
-
-    /* ======================= Solid Export ============================  */
-    .ExportDialog {
-        max-width: 94% !important;
+        width: min(820px, calc(100vw - 20px)) !important;
+        max-width: calc(100vw - 20px) !important;
     }
 
     /* =================  cog wheel ================== */
@@ -445,33 +433,11 @@
     } */
 
     .solid-import-dialog {
-        /* width: 100% !important; */
-        max-width: 95% !important;
+        width: calc(100vw - 12px) !important;
+        max-width: calc(100vw - 12px) !important;
     }
 
 
-
-
-    /* ======================= Solid Export  ================================ */
-
-    /* .ExportDialog {
-        overflow-x: auto !important;
-    }
-
-    .ExportDialog .p-dialog-content,
-    .solid-export-dialog-header {
-        width: 44rem !important;
-    } */
-    .ExportDialog .p-dialog-content {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-    }
-
-    .SolidExportControls {
-        /* justify-self: flex-start !important; */
-        flex-wrap: wrap;
-        justify-content: start !important;
-    }
 
     .SolidExportProgressToaster {
         min-width: auto;
@@ -637,6 +603,10 @@
 
     .text-base {
         font-size: 0.9rem !important;
+    }
+
+    .solid-header-request-status-label {
+        display: none;
     }
 
 

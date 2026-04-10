@@ -23,7 +23,6 @@ import Video from "yet-another-react-lightbox/plugins/video";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 import { SolidListViewConfigure } from "./SolidListViewConfigure";
-import { SolidListViewShimmerLoading } from "./SolidListViewShimmerLoading";
 import { SolidEmptyListViewPlaceholder } from "./SolidEmptyListViewPlaceholder";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
@@ -38,6 +37,7 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 import { SolidListViewRowActionsMenu } from "./SolidListViewRowActionsMenu";
+import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
 import {
   SolidButton,
   SolidDialog,
@@ -1121,9 +1121,25 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
   const isListViewEmptyWithoutFilters =
     !loading &&
+    !isLoading &&
     listViewData.length === 0 &&
     !hasAppliedFilterValues &&
     !hasFilterPredicatesApplied;
+
+  const headerRequestStatusLabel =
+    isSolidEntitiesDeleted
+      ? "Deleting..."
+      : recoverByIdIsLoading || recoverByIsLoading
+        ? "Recovering..."
+        : loading || isLoading || solidListViewMetaDataIsLoading || !queryDataLoaded
+          ? "Loading..."
+          : null;
+
+  const showListBodyLoadingPlaceholder =
+    (loading || isLoading || solidListViewMetaDataIsLoading || !queryDataLoaded) &&
+    listViewData.length === 0 &&
+    params.embeded === false &&
+    viewMode !== "view";
 
   // useEffect(() => {
   //   console.log("[SolidListView] Re-rendering list view with empty-state inputs:", {
@@ -1240,7 +1256,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
     <div className="page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden">
       <div className={`solid-list-content h-full flex flex-column flex-grow-1 ${styles.ListContentWrapper}`}>
         <div className="solid-list-surface flex flex-column flex-1 min-h-0">
-          {solidListViewInitialMetaData && queryDataLoaded &&
+          {solidListViewInitialMetaData &&
             <div className="page-header solid-list-toolbar flex-column lg:flex-row">
               {/* <div> */}
               <div className="flex justify-content-between w-full solid-list-toolbar-row">
@@ -1275,6 +1291,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
 
                 </div>
                 <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
+                  <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
                   {solidListViewLayout?.attrs?.enableGlobalSearch === true &&
                     params.embeded === false && (
                       <div className="flex lg:hidden">
@@ -1406,9 +1423,9 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
             </div>
           }
 
-          {(loading || isLoading) && params.embeded == false && viewMode !== "view" ?
-            < SolidListViewShimmerLoading />
-            :
+          {showListBodyLoadingPlaceholder ? (
+            <div className="solid-view-loading-body-spacer flex-1 min-h-0" />
+          ) : (
             <>
               {isListViewEmptyWithoutFilters ? (
                 <SolidEmptyListViewPlaceholder
@@ -1705,7 +1722,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                 </div>
               )}
             </>
-          }
+          )}
         </div>
       </div>
       <SolidDialog

@@ -9,6 +9,7 @@ import {
   SolidDialog,
   SolidDialogBody,
   SolidDialogClose,
+  SolidDialogDescription,
   SolidDialogHeader,
   SolidDialogSeparator,
   SolidDialogTitle,
@@ -239,7 +240,12 @@ export const SolidCardViewConfigure = ({
         style={{ width: "min(960px, calc(100vw - 32px))" }}
       >
         <SolidDialogHeader className="solid-export-dialog-header">
-          <SolidDialogTitle>Export</SolidDialogTitle>
+          <div>
+            <SolidDialogTitle>Export</SolidDialogTitle>
+            <SolidDialogDescription className="solid-filter-dialog-subtitle m-0">
+              Choose the file format, refine the field set, and save reusable export templates.
+            </SolidDialogDescription>
+          </div>
           <SolidDialogClose />
         </SolidDialogHeader>
         <SolidDialogSeparator />

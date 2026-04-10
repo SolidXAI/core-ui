@@ -44,7 +44,6 @@ import Video from "yet-another-react-lightbox/plugins/video";
 import "yet-another-react-lightbox/styles.css";
 import "yet-another-react-lightbox/plugins/counter.css";
 import { SolidFormActionHeader } from "./SolidFormActionHeader";
-import { SolidFormViewShimmerLoading } from "./SolidFormViewShimmerLoading";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
 import { ConfirmDialog } from "primereact/confirmdialog";
@@ -62,6 +61,7 @@ import {
     SolidDialogSeparator,
     SolidDialogTitle
 } from "../../shad-cn-ui/SolidDialog";
+import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -1230,7 +1230,23 @@ const SolidFormView = (params: SolidFormViewProps) => {
             onSubmit: onFormikSubmit,
         });
 
-        return <SolidFormViewShimmerLoading />;
+        return (
+            <div className="solid-form-wrapper">
+                <div className="solid-form-section" style={{ borderRight: params.embeded !== true ? '1px solid var(--primary-light-color)' : '' }}>
+                    <div className="page-header solid-list-toolbar flex-column lg:flex-row">
+                        <div className="flex justify-content-between w-full solid-form-toolbar-row">
+                            <div className="flex gap-3 align-items-center solid-form-toolbar-left">
+                                <p className="m-0 view-title solid-text-wrapper">Loading form</p>
+                            </div>
+                            <div className="flex align-items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
+                                <SolidHeaderRequestStatus label="Loading..." />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="solid-view-loading-body-spacer flex-1 min-h-0" />
+                </div>
+            </div>
+        );
     }
     // At this point everything required to render the form is loaded, so we go ahead and start rendering things dynamically...
     else {
@@ -1684,6 +1700,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             handleDraftPublishWorkFlow={handleDraftPublishWorkFlow}
                             onStepperUpdate={() => setRefreshChatterMessage(true)}
                             isSubmitting={isSubmitting}
+                            headerRequestStatusLabel={isSubmitting ? "Saving..." : null}
                         />
                         <div className={`px-4 py-3 md:p-4 solid-form-content md:pt-1 ${createMode ? 'solid-create-mode-form-content' : ''} ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
