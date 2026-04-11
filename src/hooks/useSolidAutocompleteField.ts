@@ -39,11 +39,25 @@ export const useSolidAutocompleteField = ({
         }
     }, [searchData]);
 
+    const shouldStorePrimitiveValue = relationField && (!fieldNameId || fieldNameId === fieldName);
+
     const handleFormUpdates = useCallback((value: any) => {
         if (relationField) {
-            formik.setFieldValue(fieldName, value || null);
-            if (fieldNameId) {
-                formik.setFieldValue(fieldNameId, value ? value.id : null);
+            if (shouldStorePrimitiveValue) {
+                if (value && typeof value === "object") {
+                    const resolved = valueKey && value[valueKey] !== undefined ? value[valueKey] : value;
+                    formik.setFieldValue(fieldName, resolved ?? null);
+                } else {
+                    formik.setFieldValue(fieldName, value ?? null);
+                }
+            } else {
+                formik.setFieldValue(fieldName, value || null);
+            }
+            if (fieldNameId && fieldNameId !== fieldName) {
+                const resolvedId = value && typeof value === "object"
+                    ? value.id ?? value[valueKey]
+                    : value ?? null;
+                formik.setFieldValue(fieldNameId, resolvedId ?? null);
             }
         } else {
             if (value && typeof value === "object") {
@@ -52,7 +66,7 @@ export const useSolidAutocompleteField = ({
                 formik.setFieldValue(fieldName, value ?? "");
             }
         }
-    }, [fieldName, fieldNameId, formik, relationField, valueKey]);
+    }, [fieldName, fieldNameId, formik, relationField, shouldStorePrimitiveValue, valueKey]);
 
     const handleChange = useCallback(({ value }: { value: any }) => {
         setSelectedItem(value);

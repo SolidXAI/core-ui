@@ -134,7 +134,10 @@ export function SolidAutocomplete({
       if (!Array.isArray(value)) return [];
       return value.filter(isRenderable);
     }
-    if (!value || typeof value === "string") return [];
+    if (value === null || value === undefined || value === "") return [];
+    if (typeof value === "string" || typeof value === "number") {
+      return isRenderable(value) ? [value] : [];
+    }
     return isRenderable(value) ? [value] : [];
   }, [multiple, value, field]);
 

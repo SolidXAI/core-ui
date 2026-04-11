@@ -49,6 +49,8 @@ export function SolidSegmentedControl({
           type="button"
           className={cx("solid-segmented-item", isSelected(opt.value) && "is-active", disabled && "is-disabled")}
           onClick={() => handleClick(opt.value)}
+          aria-pressed={isSelected(opt.value)}
+          aria-disabled={disabled || readOnly}
         >
           {opt.label}
         </button>

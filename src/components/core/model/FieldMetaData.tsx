@@ -180,7 +180,7 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
               }
             }}
             className="solid-dialog solid-field-dialog"
-            style={{ width: "40vw" }}
+            style={{ width: "30vw" }}
             showHeader={false}
           >
             <SolidDialogBody className="solid-dialog-body-flush">
