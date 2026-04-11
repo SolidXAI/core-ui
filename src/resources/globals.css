@@ -457,6 +457,20 @@ a {
   margin: 0;
 }
 
+.solid-settings-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--solid-form-title, #0f172a);
+  margin: 1.25rem 0 0.35rem;
+}
+
+.solid-settings-subheading {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--solid-form-title, #0f172a);
+  margin: 0 0 0.35rem;
+}
+
 .solid-field-tooltip-icon {
   margin-left: 8px;
   color: var(--text-color);

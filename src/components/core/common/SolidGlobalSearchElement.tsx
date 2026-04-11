@@ -1494,6 +1494,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 type: "grouping",
                 label: `${groupingRules.length} grouping rules applied`,
                 onRemove: () => removeGrouping(),
+                onOpen:() => setShowGroupFilterElement(true)
+
             });
         }
 
@@ -1849,7 +1851,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                         <div className="solid-chip-manager-body">
                             {managedChipItems.map((chip) => (
                                 <div key={`manage-${chip.id}`} className={`solid-chip-manager-item solid-chip-tone-${chip.type}`} onClick={() => {
-                                    if (chip.id == "custom-filter") {
+                                    if (chip.id == "custom-filter" || chip.id == "grouping-rules") {
                                         if(chip.onOpen){
                                             chip.onOpen()
                                         }
@@ -1990,13 +1992,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             }
                         </div>
 
-                        <div className="px-3 py-2 flex flex-column solid-search-overlay-footer cursor-pointer" onClick={() => {
-                            if (viewType === "tree") {
-                                setShowGroupFilterElement(true)
-                            } else {
-                                setShowGlobalSearchElement(true)
-                            }
-                        }}>
+                        <div
+                            className="px-3 py-2 flex flex-column solid-search-overlay-footer cursor-pointer"
+                            onClick={() => setShowGlobalSearchElement(true)}
+                        >
                             <div className="solid-search-overlay-footer-title solid-search-overlay-section-title">Or click here to custom filter</div>
                             <div className="solid-search-overlay-footer-subtitle">
                                 Use custom filters to apply filters on any field using any operator for a more flexible approach to filtering data.
@@ -2014,6 +2013,17 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                 }
                             </div> */}
                         </div>
+                        {viewType === "tree" && (
+                            <div
+                                className="px-3 py-2 flex flex-column solid-search-overlay-footer cursor-pointer solid-search-overlay-footer-grouping"
+                                onClick={() => setShowGroupFilterElement(true)}
+                            >
+                                <div className="solid-search-overlay-footer-title solid-search-overlay-section-title">Or click here to open grouping filter</div>
+                                <div className="solid-search-overlay-footer-subtitle">
+                                    Group tree results and configure aggregations without leaving this view.
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )
                 }
