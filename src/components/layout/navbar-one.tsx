@@ -7,6 +7,7 @@ import { useDispatch } from "react-redux";
 import NavbarTwoMenu from "./navbar-two-menu";
 import UserProfileMenu from "./user-profile-menu";
 import { SolidButton } from "../shad-cn-ui";
+import { SolidIcon } from "../shad-cn-ui/SolidIcon";
 
 const NavbarOne = () => {
     const dispatch = useDispatch();
@@ -126,13 +127,13 @@ const NavbarOne = () => {
                                 aria-label="Search"
                                 className="transparent-background min-w-0 px-2 py-1 border-1 border-round border-200"
                                 onClick={() => setSearchShow(true)}
-                                leftIcon={<i className="pi pi-search" />}
+                                leftIcon={<SolidIcon name="si-search" />}
                             />
                         )}
                         {isSearchShow && (
                             <div className="w-full" style={{ position: 'relative' }} ref={searchRef}>
                                 <div className="input-icon inputDiv navtwo-searchbox">
-                                    <i className="pi pi-search text-sm" />
+                                    <SolidIcon name="si-search" className="text-sm" />
                                     <input
                                         type="text"
                                         placeholder="Search"

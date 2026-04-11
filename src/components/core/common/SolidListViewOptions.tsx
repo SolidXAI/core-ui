@@ -1,6 +1,7 @@
 
 import { useState } from "react";
 import { SolidDialog } from "../../shad-cn-ui";
+import { SolidIcon } from "../../shad-cn-ui/SolidIcon";
 
 
 export const SolidListViewOptions = ({ }: any) => {
@@ -11,7 +12,7 @@ export const SolidListViewOptions = ({ }: any) => {
 
     return (
         <div className="card flex justify-content-center">
-            <i className="pi pi-cog" onClick={() => setVisible(true)}></i>
+            <SolidIcon name="si-cog" onClick={() => setVisible(true)} style={{ cursor: 'pointer' }} />
 
             <SolidDialog header="Header" visible={visible} onHide={() => setVisible(false)} contentClassName="w-full" className="solid-dialog-lg">
                 <p className="m-0">
@@ -21,7 +22,7 @@ export const SolidListViewOptions = ({ }: any) => {
                     Excepteur sint occaecat cupidatat non proident, sunt in culpa qui officia deserunt mollit anim id est laborum.
                 </p>
                 <div>
-                   
+
                 </div>
 
             </SolidDialog>

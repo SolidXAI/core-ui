@@ -7,6 +7,7 @@ import { usePathname } from "../../hooks/usePathname";
 import { useRouter } from "../../hooks/useRouter";
 import { HeaderDynamicTitles } from "../common/HeaderDynamicTitles";
 import FilterMenu from "./FilterMenu";
+import { SolidIcon, parseSolidIconMeta } from "../shad-cn-ui/SolidIcon";
 
 const ListingHeader = () => {
   const dispatch = useDispatch();
@@ -103,7 +104,8 @@ const ListingHeader = () => {
   ];
 
   const justifyTemplate = (option: any) => {
-    return <i className={option.icon}></i>;
+    const m = parseSolidIconMeta(option.icon);
+    return m ? <SolidIcon name={m.name} spin={m.spin} /> : <i className={option.icon}></i>;
   };
 
 

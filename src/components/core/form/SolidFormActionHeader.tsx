@@ -14,6 +14,7 @@ import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { useSession } from '../../../hooks/useSession'
 import { SolidFormStepper } from "../../../components/common/SolidFormStepper";
 import { SolidButton, SolidPopover, SolidPopoverContent, SolidPopoverTrigger } from "../../shad-cn-ui";
+import { SolidIcon, parseSolidIconMeta } from "../../shad-cn-ui/SolidIcon";
 
 export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formViewLayout, solidView, solidFormViewMetaData, initialEntityData, setDeleteDialogVisible, setLayoutDialogVisible, setRedirectToList, viewMode, setViewMode, solidWorkflowFieldValue, setSolidWorkflowFieldValue, internationalisationEnabled, handleDraftPublishWorkFlow, publish, draftEnabled, onStepperUpdate, formData, isSubmitting, headerRequestStatusLabel }: any) => {
     const handleCustomButtonClick = useHandleFormCustomButtonClickaction();
@@ -105,7 +106,7 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
             className={menuButtonClassNames("solid-row-action-button", danger && "solid-row-action-button-danger")}
             onClick={onClick}
         >
-            {icon && <i className={`${icon} solid-row-action-button-icon`} />}
+            {icon && (() => { const m = parseSolidIconMeta(icon); return m ? <SolidIcon name={m.name} spin={m.spin} className="solid-row-action-button-icon" /> : <i className={`${icon} solid-row-action-button-icon`} />; })()}
             <span className="solid-row-action-button-label">{label}</span>
         </button>
     );

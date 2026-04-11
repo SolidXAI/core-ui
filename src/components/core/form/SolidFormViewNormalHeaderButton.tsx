@@ -1,6 +1,7 @@
 import { hasAnyRole } from '../../../helpers/rolesHelper';
 import { useSession } from "../../../hooks/useSession";
 import { SolidButton } from '../../shad-cn-ui';
+import { SolidIcon, parseSolidIconMeta } from "../../shad-cn-ui/SolidIcon";
 
 interface SolidFormViewNormalHeaderButtonProps {
     button: any;
@@ -51,7 +52,7 @@ export function SolidFormViewNormalHeaderButton({
                 onClick={handleClick}
             >
                 {button?.attrs?.icon && (
-                    <i className={`${button.attrs.icon} solid-row-action-button-icon`} />
+                    (() => { const m = parseSolidIconMeta(button.attrs.icon); return m ? <SolidIcon name={m.name} spin={m.spin} className="solid-row-action-button-icon" /> : <i className={`${button.attrs.icon} solid-row-action-button-icon`} />; })()
                 )}
                 <span className="solid-row-action-button-label">{button.attrs.label}</span>
             </button>

@@ -6,6 +6,7 @@ import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { useDispatch } from 'react-redux';
 import { showToast } from '../../redux/features/toastSlice';
 import { SolidPopover, SolidPopoverContent, SolidPopoverTrigger } from '../shad-cn-ui';
+import { SolidIcon } from '../shad-cn-ui/SolidIcon';
 
 interface Props {
     solidFormViewMetaData?: any;
@@ -217,7 +218,7 @@ export const SolidFormStepper = (props: Props) => {
                                 type='button'
                                 className="overflow-button overflow-left-button"
                             >
-                                <i className="pi pi-ellipsis-h" />
+                                <SolidIcon name="si-ellipsis-h" />
                             </button>
                         </SolidPopoverTrigger>
                         <SolidPopoverContent className="solid-custom-overlay solid-form-stepper-overlay">
@@ -278,7 +279,7 @@ export const SolidFormStepper = (props: Props) => {
                                 type='button'
                                 className="overflow-button overflow-right-button"
                             >
-                                <i className="pi pi-ellipsis-h" />
+                                <SolidIcon name="si-ellipsis-h" />
                             </button>
                         </SolidPopoverTrigger>
                         <SolidPopoverContent className="solid-custom-overlay solid-form-stepper-overlay">

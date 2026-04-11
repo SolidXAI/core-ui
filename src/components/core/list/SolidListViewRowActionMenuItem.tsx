@@ -1,6 +1,7 @@
 import { useSession } from "../../../hooks/useSession";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { SquarePen } from "lucide-react";
+import { SolidIcon, parseSolidIconMeta } from "../../shad-cn-ui/SolidIcon";
 
 export const SolidListViewRowActionMenuItem = ({ button, params, rowData, solidListViewMetaData, handleCustomButtonClick, onActionComplete }: any) => {
 
@@ -34,7 +35,7 @@ export const SolidListViewRowActionMenuItem = ({ button, params, rowData, solidL
             }}
         >
             {button?.attrs?.icon
-                ? <i className={`${button.attrs.icon} solid-row-action-button-icon`} />
+                ? (() => { const m = parseSolidIconMeta(button.attrs.icon); return m ? <SolidIcon name={m.name} spin={m.spin} className="solid-row-action-button-icon" /> : <i className={`${button.attrs.icon} solid-row-action-button-icon`} />; })()
                 : <SquarePen size={14} className="solid-row-action-button-icon" />}
             <span className="solid-row-action-button-label">{button.attrs.label}</span>
         </button>

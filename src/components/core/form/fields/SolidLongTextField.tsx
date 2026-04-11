@@ -8,6 +8,7 @@ import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { SolidButton, SolidDatePicker, SolidSelect, SolidInput, SolidCodeEditor, SolidIcon } from "../../../shad-cn-ui";
+import { parseSolidIconMeta } from "../../../shad-cn-ui/SolidIcon";
 import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 
 
@@ -50,10 +51,10 @@ export class SolidLongTextField implements ISolidField {
         }
         // 2. length (min/max)
         if (fieldMetadata.min && fieldMetadata.min > 0) {
-            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel,fieldMetadata.min));
+            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel, fieldMetadata.min));
         }
         if (fieldMetadata.max && fieldMetadata.max > 0) {
-            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel,fieldMetadata.max));
+            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel, fieldMetadata.max));
         }
         // 3. regular expression
         if (fieldMetadata.regexPattern) {
@@ -210,7 +211,7 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
             return (
                 <SolidDatePicker
                     selected={value ? new Date(value) : null}
-                    onChange={() => {}}
+                    onChange={() => { }}
                     showTimeSelect={meta.type === "datetime"}
                     disabled
                 />
@@ -528,7 +529,7 @@ export const DynamicSelectionStaticEditWidget = ({
             return (
                 <SolidSelect
                     value={val}
-                    options={meta.allowedValues.map((v:any) => ({
+                    options={meta.allowedValues.map((v: any) => ({
                         label: v,
                         value: v,
                     }))}
@@ -556,33 +557,33 @@ export const DynamicSelectionStaticEditWidget = ({
     };
 
     return (
-      <div className="flex gap-3 align-items-center">
-        {Object.keys(fieldJsonSchema).map((key) => {
-          const meta: any = fieldJsonSchema[key];
-           if (!shouldShowField(key)) return null;
-          return (
-            <div key={key} className={"flex flex-column gap-2 " + (meta.className || '')}>
-              {/*load prime header icon and headerText */}
-              {(meta.headerText || meta.headerIcon) && (
-                <div className="flex align-items-center gap-2">
-                  {meta.headerIcon && <i className={meta.headerIcon}></i>}
-                  <span className="font-semibold form-field-label font-medium">
-                    {meta.headerText ?? key}
-                  </span>
-                </div>
-              )}
-              {/* Notes below input */}
-                {meta.noteText && (
-                    <small className="text-secondary mt-2">{meta.noteText}</small>
-                )}
-              {/*load note here */}
-              <label className="form-field-label font-medium">{key.charAt(0).toUpperCase() + key.slice(1)} {meta.required && <span className="text-red-500">*</span>}</label>
-              <div className="w-full mt-1 flex flex-row gap-2">
-              {renderInput(key)}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+        <div className="flex gap-3 align-items-center">
+            {Object.keys(fieldJsonSchema).map((key) => {
+                const meta: any = fieldJsonSchema[key];
+                if (!shouldShowField(key)) return null;
+                return (
+                    <div key={key} className={"flex flex-column gap-2 " + (meta.className || '')}>
+                        {/*load prime header icon and headerText */}
+                        {(meta.headerText || meta.headerIcon) && (
+                            <div className="flex align-items-center gap-2">
+                                {meta.headerIcon && (() => { const m = parseSolidIconMeta(meta.headerIcon); return m ? <SolidIcon name={m.name} spin={m.spin} /> : <i className={meta.headerIcon}></i>; })()}
+                                <span className="font-semibold form-field-label font-medium">
+                                    {meta.headerText ?? key}
+                                </span>
+                            </div>
+                        )}
+                        {/* Notes below input */}
+                        {meta.noteText && (
+                            <small className="text-secondary mt-2">{meta.noteText}</small>
+                        )}
+                        {/*load note here */}
+                        <label className="form-field-label font-medium">{key.charAt(0).toUpperCase() + key.slice(1)} {meta.required && <span className="text-red-500">*</span>}</label>
+                        <div className="w-full mt-1 flex flex-row gap-2">
+                            {renderInput(key)}
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
     );
 };

@@ -46,6 +46,7 @@ import { usePathname } from "../../../hooks/usePathname";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
 import { OverlayPanel } from "primereact/overlaypanel";
 import { SolidListViewRowActionMenuItem } from "../list/SolidListViewRowActionMenuItem";
+import { SolidIcon } from "../../shad-cn-ui/SolidIcon";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -1264,7 +1265,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
         {truncateAfter && label.length > truncateAfter &&
           <>
             <Tooltip target=".solid-field-tooltip-icon" />
-            <i className="pi pi-info-circle solid-field-tooltip-icon"
+            <SolidIcon name="si-info-circle" className="solid-field-tooltip-icon"
               data-pr-tooltip={label}
             />
           </>
@@ -1562,7 +1563,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           <div className="flex align-items-center solid-header-buttons-wrapper">
             {params.embeded !== true && (
               <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
-                <i className="pi pi-th-large"></i>
+                <SolidIcon name="si-th-large" />
               </div>
             )}
 

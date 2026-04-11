@@ -4,6 +4,7 @@ import {
     SolidTooltipContent,
     SolidTooltipTrigger,
 } from "../shad-cn-ui/SolidTooltip";
+import { SolidIcon } from "../shad-cn-ui";
 
 export const SolidFieldTooltip = ({ fieldContext }: any) => {
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
@@ -24,7 +25,7 @@ export const SolidFieldTooltip = ({ fieldContext }: any) => {
                     className="solid-field-tooltip-icon"
                     aria-label="Field info"
                 >
-                    <i className="pi pi-info-circle" />
+                    <SolidIcon name="si-info-circle" />
                 </button>
             </SolidTooltipTrigger>
             <SolidTooltipContent side="top" align="center">
