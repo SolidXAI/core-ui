@@ -1,7 +1,7 @@
 
 
 import { SolidFormWidgetProps } from "../../../../../types";
-import { Message } from 'primereact/message';
+import { SolidMessage } from "../../../../../components/shad-cn-ui";
 import { SolidQuestionRenderer } from "../../../../../components/core/dashboard/SolidQuestionRenderer";
 
 const ChartFormPreviewWidget = ({ formData, field, fieldsMetadata, viewMetadata, formViewData }: SolidFormWidgetProps) => {
@@ -19,7 +19,7 @@ const ChartFormPreviewWidget = ({ formData, field, fieldsMetadata, viewMetadata,
     if (!formData || !formData.visualisedAs) {
         return (
             <>
-                <Message text="Preview Unavailable" />
+                <SolidMessage text="Preview Unavailable" />
             </>
         )
     }

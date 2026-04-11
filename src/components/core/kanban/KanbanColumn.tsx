@@ -7,6 +7,7 @@ import {
   SolidDropdownMenuContent,
   SolidDropdownMenuItem,
   SolidDropdownMenuTrigger,
+  SolidIcon,
 } from "../../shad-cn-ui";
 
 // Define types for props
@@ -45,8 +46,8 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
           <a onClick={e => toggleFold(groupByField)}>
             <div className="flex align-items-center">
               <div className="kanban-arrow-icon-container">
-                <i className="pi pi-sort-up-fill"></i>
-                <i className="pi pi-sort-down-fill"></i>
+                <SolidIcon name="si-sort-up-fill" aria-hidden />
+                <SolidIcon name="si-sort-down-fill" aria-hidden />
               </div>
               <p className="kanban-group-heading">{`${group.label}`}<span className="kanban-count-badge">{group.count}</span></p>
             </div>
@@ -66,7 +67,7 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
                 className="solid-header-cog-trigger kanban-column-cogwheel"
                 aria-label={`Open ${group.label} lane options`}
               >
-                <i className="pi pi-cog" />
+                <SolidIcon name="si-cog" aria-hidden />
               </button>
             </SolidDropdownMenuTrigger>
             <SolidDropdownMenuContent className="solid-custom-overlay kanban-options-panel" align="start">
@@ -74,7 +75,7 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
                 className="solid-header-dropdown-item kanban-fold-action-button"
                 onSelect={() => toggleFold(groupByField)}
               >
-                <i className="pi pi-angle-double-left solid-header-action-button-icon" />
+                <SolidIcon name="si-angle-double-left" className="solid-header-action-button-icon" aria-hidden />
                 <span className="solid-header-action-button-label">Fold</span>
               </SolidDropdownMenuItem>
             </SolidDropdownMenuContent>

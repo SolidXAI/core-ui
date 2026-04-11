@@ -1,8 +1,7 @@
 
-
-import { AutoComplete } from "primereact/autocomplete";
 import { useEffect, useState } from "react";
 import { getVirtualScrollerOptions } from "../../helpers/autoCompleteVirtualScroll";
+import { SolidAutocomplete } from "../shad-cn-ui";
 
 
 
@@ -28,11 +27,10 @@ export const AutoCompleteField = ({ multiple, isFormFieldValid, formik, fieldNam
 
     return (
 
-        <AutoComplete
+        <SolidAutocomplete
             value={selectedItem}
             multiple={multiple ? multiple : false}
             suggestions={filteredItem}
-            invalid={isFormFieldValid(formik, fieldName)}
             completeMethod={searchItems}
             // virtualScrollerOptions={{ itemSize: 38 }}
             virtualScrollerOptions={getVirtualScrollerOptions({
@@ -46,7 +44,7 @@ export const AutoCompleteField = ({ multiple, isFormFieldValid, formik, fieldNam
             dropdown
             onBlur={onBlur}
             onChange={(e) => {
-                let data = {};
+                let data: any = {};
 
               
                 if (typeof (e.value) == "string") {

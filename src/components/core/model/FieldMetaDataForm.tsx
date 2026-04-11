@@ -198,7 +198,7 @@ const SelectionStaticValues = ({ enumValue, onUpdate, onDelete, onAdd }: any) =>
 
       {/* Plus Button to add a new row */}
       <SolidButton
-        icon="pi pi-plus"
+        icon="si si-plus"
         size="small"
         onClick={onAdd}
         type="button"
@@ -206,7 +206,7 @@ const SelectionStaticValues = ({ enumValue, onUpdate, onDelete, onAdd }: any) =>
 
       {/* Trash Button to delete the row */}
       <SolidButton
-        icon="pi pi-trash"
+        icon="si si-trash"
         size="small"
         onClick={onDelete}
         outlined
@@ -420,7 +420,7 @@ const SelectComputedFieldTriggerValues: React.FC<SelectComputedFieldTriggerValue
 
       {/* Trash Button to delete the row */}
       <SolidButton
-        icon="pi pi-trash"
+        icon="si si-trash"
         size="small"
         onClick={() => onDelete(index)}
         disabled={disableDelete}
@@ -1777,7 +1777,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                     <>
                       <SolidButton
                         text
-                        icon='pi pi-arrow-left'
+                        icon='si si-arrow-left'
                         size="small"
                         type="button"
                         aria-label="Back"
@@ -1801,7 +1801,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                   }
                 </div>
                 <div className="flex align-items-center gap-3 close-popup">
-                  <SolidButton icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setVisiblePopup(false)}
+                  <SolidButton icon="si si-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setVisiblePopup(false)}
                     className='max-w-2rem bg-primary-reverse text-color' />
                 </div>
               </>
@@ -1811,7 +1811,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                   {!fieldMetaData?.id &&
                     <SolidButton
                       text
-                      icon='pi pi-arrow-left'
+                      icon='si si-arrow-left'
                       size="small"
                       type="button"
                       aria-label="Back"
@@ -1834,7 +1834,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                   }
                 </div>
                 <div className="flex align-items-center gap-3 close-popup">
-                  <SolidButton icon="pi pi-times" text aria-label="Cancel" type="reset" size="small" onClick={() => setVisiblePopup(false)}
+                  <SolidButton icon="si si-times" text aria-label="Cancel" type="reset" size="small" onClick={() => setVisiblePopup(false)}
                     className='max-w-2rem bg-primary-reverse text-color'
                   />
                 </div>
@@ -1857,7 +1857,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                     <TabPanel
                       header="Basic Info"
                       className={(formik.touched.hasOwnProperty("name") && formik.errors.hasOwnProperty("name")) || (formik.touched.hasOwnProperty("displayName") && formik.errors.hasOwnProperty("displayName")) || (formik.touched.hasOwnProperty("displayName") && formik.errors.hasOwnProperty("ormType")) ? "tab-error-heading" : ""}
-                    // rightIcon="pi pi-info-circle ml-2"
+                    // rightIcon="si si-info-circle ml-2"
                     >
                       <div className="formgrid grid">
                         {currentFields.includes("displayName") && (
@@ -2033,7 +2033,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
 
                     <TabPanel header="Advanced Config"
 
-                    //  rightIcon="pi pi-cog ml-2"
+                    //  rightIcon="si si-cog ml-2"
                     >
                       {formik?.values?.type?.length > 0 && (
                         <div className="formgrid grid">
@@ -2981,7 +2981,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                                   </label>
                                   <div>
                                     <SolidButton
-                                      icon="pi pi-plus"
+                                      icon="si si-plus"
                                       size="small"
                                       onClick={handleAdd}
                                       type="button"
@@ -3710,7 +3710,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
           <div className="solid-field-confirm-actions">
             <SolidButton
               label="Yes"
-              icon="pi pi-check"
+              icon="si si-check"
               size="small"
               type="reset"
               severity="danger"
@@ -3721,7 +3721,7 @@ const FieldMetaDataForm = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldM
                 setShowTypeFilter(true);
               }}
             />
-            <SolidButton label="No" icon="pi pi-times" size="small" onClick={() => setIsBackPopupVisible(false)} />
+            <SolidButton label="No" icon="si si-times" size="small" onClick={() => setIsBackPopupVisible(false)} />
           </div>
         }
       >

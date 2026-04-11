@@ -8,9 +8,6 @@ import { useFormik } from "formik";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
-import "primeflex/primeflex.css";
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
 import qs from "qs";
 import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
 import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
@@ -36,20 +33,19 @@ import { getExtensionComponent, getExtensionFunction } from "../../../helpers/re
 import { SolidFormWidgetProps, SolidUiEventResponse } from "../../../types/solid-core";
 import { SolidPasswordField } from "./fields/SolidPasswordField";
 import { SolidEmailField } from "./fields/SolidEmailField";
-import { Panel } from "primereact/panel";
 import { SolidFormUserViewLayout } from "./SolidFormUserViewLayout";
 import { SolidLightbox } from "../../shad-cn-ui/SolidLightbox";
 import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
 import { SolidFormActionHeader } from "./SolidFormActionHeader";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
-import { ConfirmDialog } from "primereact/confirmdialog";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 import { SolidFormFooter } from "./SolidFormFooter";
 import { normalizeSolidFormActionPath } from "../../../helpers/routePaths";
 import { showToast } from "../../../redux/features/toastSlice";
 import { useDispatch } from "react-redux";
+import { SolidButton, SolidConfirmDialog, SolidPanel } from "../../shad-cn-ui";
 import {
     SolidDialog,
     SolidDialogBody,
@@ -280,9 +276,9 @@ const SolidColumn = ({ children, attrs }: any) => {
         //figma fieldset ui
         attrs.label ?
             <div className={`${className}`}>
-                <Panel header={attrs.label} className="solid-column-panel">
+                <SolidPanel header={attrs.label} className="solid-column-panel">
                     <div className="grid">{children}</div>
-                </Panel>
+                </SolidPanel>
                 {/* <div className="p-fieldset">
                     <div className="solid-fieldset-header">
                         <div>{attrs.label}</div>
@@ -1720,9 +1716,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             />
                         )}
                         {isShowChatter === true &&
-                            <Button
-                                icon="pi pi-angle-double-right"
-                                size="small"
+                            <SolidButton
+                                icon="si si-angle-double-right"
+                                size="sm"
                                 text
                                 className="chatter-collapse-btn"
                                 style={{ width: 30, height: 30, aspectRatio: '1/1' }}
@@ -1739,9 +1735,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('chatter')}>
                                     Audit Trail
                                 </div>
-                                <Button
-                                    icon="pi pi-chevron-left"
-                                    size="small"
+                                <SolidButton
+                                    icon="si si-chevron-left"
+                                    size="sm"
                                     className="px-0"
                                     style={{ width: 30 }}
                                     onClick={() => handleChatterExpandClick('chatter')}
@@ -1769,21 +1765,20 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     </div>
                 }
 
-                <Dialog
+                <SolidDialog
                     visible={isDeleteDialogVisible}
                     header="Confirm Delete"
                     className="solid-confirm-dialog"
-                    modal
-                    footer={() => (
-                        <div className="flex justify-content-center">
-                            <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={() => handleDeleteEntity()} />
-                            <Button label="No" icon="pi pi-times" className='small-button' onClick={onDeleteClose} />
-                        </div>
-                    )}
                     onHide={() => setDeleteDialogVisible(false)}
+                    footer={
+                        <div className="flex justify-content-center gap-2">
+                            <SolidButton label="Yes" icon="si si-check" className='small-button' severity="danger" autoFocus onClick={() => handleDeleteEntity()} />
+                            <SolidButton label="No" icon="si si-times" className='small-button' variant="outline" onClick={onDeleteClose} />
+                        </div>
+                    }
                 >
                     <p>Are you sure you want to delete?</p>
-                </Dialog>
+                </SolidDialog>
                 <SolidDialog
                     open={isLayoutDialogVisible}
                     onOpenChange={setLayoutDialogVisible}
@@ -1806,17 +1801,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     />
                 )}
 
-                <ConfirmDialog
-                    visible={confirmVisible}
-                    onHide={() => setConfirmVisible(false)}
-                    header="Confirmation"
-                    acceptLabel="Yes, confrim"
-                    rejectLabel="No, cancel"
-                    acceptClassName="p-button-danger"
-                    rejectClassName="p-button-text"
-                    position="center"
-                    accept={handleConfirmAccept}
-                    reject={handleConfirmReject}
+                <SolidConfirmDialog
+                    open={confirmVisible}
+                    title="Confirmation"
+                    confirmLabel="Yes, confirm"
+                    cancelLabel="No, cancel"
+                    onConfirm={handleConfirmAccept}
+                    onCancel={handleConfirmReject}
                     message={
                         <div className="flex flex-col items-center justify-center text-center space-y-3">
                             <p className="text-gray-800 text-base">

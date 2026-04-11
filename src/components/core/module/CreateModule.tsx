@@ -26,6 +26,7 @@ import {
   SolidPopoverTrigger,
   SolidProgressBar,
   SolidTextarea,
+  SolidIcon,
 } from "../../shad-cn-ui";
 import { useSolidAutocompleteField } from "../../../hooks/useSolidAutocompleteField";
 import { Settings, Trash2 } from "lucide-react";
@@ -520,7 +521,7 @@ const CreateModule = ({ params, data }: any) => {
                                 className="solid-file-icon-btn is-danger"
                                 onClick={handleCancelUpload}
                               >
-                                <i className="pi pi-times" />
+                                <SolidIcon name="si-times" aria-hidden />
                               </button>
                             </div>
                             {uploadCompleted ? (

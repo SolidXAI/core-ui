@@ -1211,6 +1211,27 @@ body {
     display: flex;
 }
 
+.solid-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  line-height: 1;
+  vertical-align: middle;
+}
+
+.solid-icon--spin {
+  animation: solid-icon-spin 1s linear infinite;
+}
+
+@keyframes solid-icon-spin {
+  from {
+    transform: rotate(0deg);
+  }
+  to {
+    transform: rotate(360deg);
+  }
+}
+
 .solid-select-wrap {
   position: relative;
   width: 100%;
@@ -2726,6 +2747,100 @@ body {
   color: var(--solid-text-primary) !important;
 }
 
+.solid-radio-native {
+  position: absolute;
+  opacity: 0;
+  pointer-events: none;
+}
+
+.solid-skeleton {
+  display: block;
+  border-radius: 8px;
+  background: linear-gradient(90deg, #ececec 25%, #f5f5f5 37%, #ececec 63%);
+  background-size: 400% 100%;
+  animation: solid-skeleton-shimmer 1.4s ease infinite;
+  min-height: 1rem;
+}
+
+@keyframes solid-skeleton-shimmer {
+  0% {
+    background-position: 100% 0;
+  }
+  100% {
+    background-position: -100% 0;
+  }
+}
+
+.solid-simple-table {
+  width: 100%;
+  overflow-x: auto;
+}
+
+.solid-simple-table table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 40rem;
+}
+
+.solid-simple-table th,
+.solid-simple-table td {
+  padding: 0.75rem;
+  border: 1px solid var(--solid-border-subtle);
+  text-align: left;
+}
+
+.solid-simple-table th {
+  background: var(--solid-surface-subtle);
+  font-weight: 600;
+}
+
+.solid-simple-table tr:nth-child(even) {
+  background: var(--solid-surface-contrast);
+}
+
+.solid-meter-group {
+  display: flex;
+  flex-direction: column;
+  gap: 0.75rem;
+}
+
+.solid-meter-group-row {
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+}
+
+.solid-meter-group-label {
+  min-width: 120px;
+  font-weight: 500;
+}
+
+.solid-meter-group-bar {
+  flex: 1;
+  height: 8px;
+  border-radius: 999px;
+  background: var(--solid-surface-muted);
+  overflow: hidden;
+}
+
+.solid-meter-group-bar-fill {
+  height: 100%;
+  border-radius: inherit;
+  transition: width 0.3s ease;
+}
+
+.solid-meter-group-value {
+  min-width: 60px;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.solid-global-search {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
 .solid-auth-theme-wrapper .solid-auth-helper-emphasis {
   color: var(--solid-text-primary);
   font-weight: 600;
@@ -2762,6 +2877,7 @@ body {
   color: var(--solid-text-muted);
 }
 
+.solid-auth-theme-wrapper .solid-auth-otp-input,
 .solid-auth-theme-wrapper .solid-auth-otp-input.p-inputotp {
   display: flex;
   align-items: center;
@@ -2770,6 +2886,7 @@ body {
   width: 100%;
 }
 
+.solid-auth-theme-wrapper .solid-auth-otp-input .solid-otp-input-field,
 .solid-auth-theme-wrapper .solid-auth-otp-input.p-inputotp .p-inputotp-input {
   width: 42px;
   min-width: 42px;
@@ -2783,29 +2900,35 @@ body {
   font-weight: 600;
 }
 
+.solid-auth-theme-wrapper .solid-auth-otp-input .solid-otp-input-field:focus,
 .solid-auth-theme-wrapper .solid-auth-otp-input.p-inputotp .p-inputotp-input:focus {
   outline: none;
   border-color: var(--solid-border-strong) !important;
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--solid-focus-ring) 60%, transparent);
 }
 
+.solid-auth-theme-wrapper .solid-auth-otp-input .solid-otp-input-field:nth-child(3),
 .solid-auth-theme-wrapper .solid-auth-otp-input.p-inputotp .p-inputotp-input:nth-child(3) {
   margin-right: 10px;
 }
 
+.solid-auth-theme-wrapper .solid-auth-otp-input .solid-otp-input-field:nth-child(4),
 .solid-auth-theme-wrapper .solid-auth-otp-input.p-inputotp .p-inputotp-input:nth-child(4) {
   margin-left: 10px;
 }
 
+.solid-auth-theme-wrapper .solid-auth-otp-input.is-invalid .solid-otp-input-field,
 .solid-auth-theme-wrapper .solid-auth-otp-input.p-inputotp.p-invalid .p-inputotp-input {
   border-color: #ef4444 !important;
 }
 
 @media (max-width: 480px) {
+  .solid-auth-theme-wrapper .solid-auth-otp-input,
   .solid-auth-theme-wrapper .solid-auth-otp-input.p-inputotp {
     gap: 6px;
   }
 
+  .solid-auth-theme-wrapper .solid-auth-otp-input .solid-otp-input-field,
   .solid-auth-theme-wrapper .solid-auth-otp-input.p-inputotp .p-inputotp-input {
     width: 36px;
     min-width: 36px;
@@ -5446,6 +5569,7 @@ body {
 
 .solid-settings-segmented {
   width: fit-content;
+  --solid-segmented-item-font-size: 0.75rem;
 }
 
 .solid-segmented-item {
@@ -5453,7 +5577,7 @@ body {
   background: transparent;
   padding: 6px 16px;
   border-radius: 999px;
-  font-size: 0.85rem;
+  font-size: var(--solid-segmented-item-font-size, 0.85rem);
   font-weight: 600;
   color: color-mix(in srgb, var(--card-foreground) 88%, #64748b);
   transition: background 0.18s ease, color 0.18s ease, box-shadow 0.18s ease, border-color 0.18s ease;

@@ -1,11 +1,8 @@
 import { capitalize } from "lodash";
-import { Message } from "primereact/message";
-import { Panel } from "primereact/panel";
 import { useEffect, useState } from "react";
-import { Button } from "primereact/button";
+import { SolidButton, SolidCheckbox, SolidMessage, SolidPanel } from "../../../../shad-cn-ui";
 import { useRelationEntityHandler } from "../../../../../components/core/form/fields/relations/widgets/helpers/useRelationEntityHandler";
 import { InlineRelationEntityDialog } from "../../../../../components/core/form/fields/relations/widgets/helpers/InlineRelationEntityDialog";
-import { Checkbox } from "primereact/checkbox";
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
 import qs from 'qs';
 
@@ -24,7 +21,6 @@ const groupByController = (items: any[]) => {
 export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldLayoutInfo = fieldContext.field;
     const readOnlyPermission = fieldContext.readOnly;
-    const [visibleCreateDialog, setVisibleCreateDialog] = useState(false);
 
     const [visibleDialogs, setVisibleDialogs] = useState<{ [key: string]: boolean }>({});
 
@@ -58,47 +54,6 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
         }
     };
 
-    const getHeaderTemplate = (controllerName: string) => (options: any) => {
-        const className = `${options.className} justify-content-space-between`;
-
-        return (
-            <div className={className}>
-                <div className="flex align-items-center gap-3">
-                    <label className="form-field-label text-base lg:text-lg font-bold">
-                        {controllerName}
-                    </label>
-                    {fieldContext.field.attrs.inlineCreate && (
-                        <>
-                            <Button
-                                icon="pi pi-plus"
-                                rounded
-                                outlined
-                                aria-label="Add"
-                                type="button"
-                                size="small"
-                                onClick={() =>
-                                    setVisibleDialogs((prev) => ({
-                                        ...prev,
-                                        [controllerName]: true,
-                                    }))
-                                }
-                                className="custom-add-button"
-                                disabled={isUnsaved}
-                            />
-                            <InlineRelationEntityDialog
-                                visible={visibleCreateDialog}
-                                setVisible={setVisibleCreateDialog}
-                                fieldContext={fieldContext}
-                                onCreate={addNewRelation}
-                            />
-                        </>
-                    )}
-                </div>
-                <div>{options.togglerElement}</div>
-            </div>
-        );
-    };
-
     const isUnsaved = fieldContext.data?.id === undefined || fieldContext.data?.id === "new";
     const entityName = fieldContext.solidFormViewMetaData?.data?.solidView?.model?.displayName || capitalize(fieldContext.modelName);
     const fieldLabel = fieldLayoutInfo.attrs.label || "Permissions";
@@ -108,14 +63,38 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
         <div>
             {isUnsaved && (
                 <div className="mb-2">
-                    <Message severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-content-start" />
+                    <SolidMessage severity="warn" text={`Please save the ${entityName} first to assign ${fieldLabel}.`} className="w-full justify-content-start" />
                 </div>
             )}
             {Object.keys(groupedEntities).map((controllerName) => (
-                <Panel
+                <SolidPanel
                     key={controllerName}
                     toggleable
-                    headerTemplate={getHeaderTemplate(controllerName)}
+                    header={
+                        <div className="flex align-items-center gap-3 justify-content-between w-full">
+                            <span className="form-field-label text-base lg:text-lg font-bold">
+                                {controllerName}
+                            </span>
+                            {fieldContext.field.attrs.inlineCreate && (
+                                <SolidButton
+                                    icon="si si-plus"
+                                    rounded
+                                    outlined
+                                    aria-label="Add"
+                                    type="button"
+                                    size="sm"
+                                    onClick={() =>
+                                        setVisibleDialogs((prev) => ({
+                                            ...prev,
+                                            [controllerName]: true,
+                                        }))
+                                    }
+                                    className="custom-add-button"
+                                    disabled={isUnsaved}
+                                />
+                            )}
+                        </div>
+                    }
                     className="mt-3 lg:mt-4"
                 >
                     <div className="formgrid grid gap-3 lg:gap-0">
@@ -124,10 +103,10 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
                                 key={entity.value}
                                 className={`field col-12 lg:col-6 flex gap-2 ${i >= 2 ? 'lg:mt-3' : ''}`}
                             >
-                                <Checkbox
+                                <SolidCheckbox
                                     readOnly={readOnlyPermission || isUnsaved}
                                     disabled={isUnsaved}
-                                    inputId={entity.label}
+                                    id={entity.label}
                                     checked={currentValues.some((s) => s.value === entity.value)}
                                     onChange={() => handleCheckboxChange(entity)}
                                 />
@@ -137,7 +116,7 @@ export const RolePermissionsManyToManyFieldWidget = ({ formik, fieldContext }: S
                             </div>
                         ))}
                     </div>
-                </Panel>
+                </SolidPanel>
             ))}
             {Object.keys(groupedEntities).map((controllerName) => (
                 <InlineRelationEntityDialog

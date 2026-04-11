@@ -26,6 +26,7 @@ import { SolidFormFieldWidgetProps, SolidMediaFormFieldWidgetProps } from "../..
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import styles from "./solidFields.module.css";
+import { SolidIcon } from "../../../shad-cn-ui";
 export class SolidMediaMultipleField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
@@ -378,7 +379,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                             aria-label="Download file"
                                             onClick={() => downloadMediaFile(fileDetails[0]?.fileUrl, fileDetails[0]?.name)}
                                         >
-                                            <i className="pi pi-download" />
+                                            <SolidIcon name="si-download" aria-hidden />
                                         </button>
                                         <button
                                             type="button"
@@ -387,7 +388,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                             aria-label="Remove file"
                                             onClick={() => confirmDeleteFile(`${fileDetails[0].name}-${fileDetails[0].size}`, fileDetails[0].id)}
                                         >
-                                            <i className="pi pi-times" />
+                                            <SolidIcon name="si-times" aria-hidden />
                                         </button>
                                     </div>
                                 </div>
@@ -434,7 +435,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                                     aria-label="Download file"
                                                     onClick={() => downloadMediaFile(file?.fileUrl, file?.name)}
                                                 >
-                                                    <i className="pi pi-download" />
+                                                    <SolidIcon name="si-download" aria-hidden />
                                                 </button>
                                                 <button
                                                     type="button"
@@ -443,7 +444,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                                     aria-label="Remove file"
                                                     onClick={() => confirmDeleteFile(fileId, file?.id)}
                                                 >
-                                                    <i className="pi pi-times" />
+                                                    <SolidIcon name="si-times" aria-hidden />
                                                 </button>
                                             </div>
                                         </div>
@@ -585,7 +586,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                                         <SolidButton
                                             type="button"
                                             text
-                                            icon={"pi pi-download"}
+                                            icon="si si-download"
                                             size="small"
                                             style={{
                                                 height: 16,
@@ -636,7 +637,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                                                     <SolidButton
                                                         type="button"
                                                         text
-                                                        icon={"pi pi-download"}
+                                                        icon="si si-download"
                                                         size="small"
                                                         style={{
                                                             height: 16,

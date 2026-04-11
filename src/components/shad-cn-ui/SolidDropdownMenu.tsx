@@ -1,5 +1,6 @@
 import * as React from "react";
 import * as DropdownMenu from "@radix-ui/react-dropdown-menu";
+import { SolidIcon } from "./SolidIcon";
 
 function cx(...parts: Array<string | false | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -47,7 +48,7 @@ export const SolidDropdownMenuCheckboxItem = React.forwardRef<
     >
       <span className="solid-dropdown-menu-indicator">
         <DropdownMenu.ItemIndicator>
-          <i className="pi pi-check" />
+          <SolidIcon name="si-check" aria-hidden />
         </DropdownMenu.ItemIndicator>
       </span>
       <span className="solid-dropdown-menu-item-text">{children}</span>
@@ -100,7 +101,7 @@ export const SolidDropdownMenuSubTrigger = React.forwardRef<
       {...props}
     >
       {children}
-      <i className="pi pi-chevron-right solid-dropdown-menu-subtrigger-icon" />
+      <SolidIcon name="si-chevron-right" className="solid-dropdown-menu-subtrigger-icon" aria-hidden />
     </DropdownMenu.SubTrigger>
   );
 });

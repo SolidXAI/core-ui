@@ -1,4 +1,3 @@
-import { OverlayPanel } from 'primereact/overlaypanel';
 import { useEffect, useRef, useState } from 'react'
 import { createSolidEntityApi } from '../../redux/api/solidEntityApi';
 import { useFormik } from 'formik';
@@ -6,6 +5,7 @@ import { useSearchParams } from "../../hooks/useSearchParams";
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { useDispatch } from 'react-redux';
 import { showToast } from '../../redux/features/toastSlice';
+import { SolidPopover, SolidPopoverContent, SolidPopoverTrigger } from '../shad-cn-ui';
 
 interface Props {
     solidFormViewMetaData?: any;
@@ -20,9 +20,7 @@ interface Props {
 export const SolidFormStepper = (props: Props) => {
     const { solidFormViewMetaData, modelName, initialEntityData, id, solidWorkflowFieldValue, setSolidWorkflowFieldValue, onStepperUpdate } = props;
     const dispatch = useDispatch();
-    const formStepperOverlay = useRef(null);
     const containerRef = useRef<HTMLDivElement>(null);
-    const leftFormStepperOverlay = useRef(null);
 
     const searchParams = useSearchParams();
     const viewMode = searchParams.get('viewMode');
@@ -213,21 +211,16 @@ export const SolidFormStepper = (props: Props) => {
         <>
             <div ref={containerRef} className='arrow-stepper-container'>
                 {hasPreviousSteps && (
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <button
-                            type='button'
-                            className="overflow-button overlow-left-button"
-                            onClick={(e) => {
-                                // @ts-ignore
-                                leftFormStepperOverlay.current.toggle(e)
-                            }}
-                        >
-                            <i className="pi pi-ellipsis-h" />
-                        </button>
-                        <OverlayPanel
-                            ref={leftFormStepperOverlay}
-                            className="solid-custom-overlay solid-form-stepper-overlay"
-                        >
+                    <SolidPopover autoCloseGroup="solid-form-stepper-overflow">
+                        <SolidPopoverTrigger asChild>
+                            <button
+                                type='button'
+                                className="overflow-button overflow-left-button"
+                            >
+                                <i className="pi pi-ellipsis-h" />
+                            </button>
+                        </SolidPopoverTrigger>
+                        <SolidPopoverContent className="solid-custom-overlay solid-form-stepper-overlay">
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', padding: '0.5rem' }}>
                                 {previousSteps.map((step: any, index: number) => {
                                     const stepIndex = index;
@@ -239,19 +232,15 @@ export const SolidFormStepper = (props: Props) => {
                                             key={stepIndex}
                                             type='button'
                                             className={`overlay-step-button ${isStepActive ? 'active' : ''} ${isStepBeforeActive ? 'completed' : ''}`}
-                                            onClick={() => {
-                                                handleButtonClick(step.value);
-                                                // @ts-ignore
-                                                leftFormStepperOverlay.current.hide();
-                                            }}
+                                            onClick={() => handleButtonClick(step.value)}
                                         >
                                             {step.label}
                                         </button>
                                     )
                                 })}
                             </div>
-                        </OverlayPanel>
-                    </div>
+                        </SolidPopoverContent>
+                    </SolidPopover>
                 )}
 
                 {visibleSteps.map((step: any) => {
@@ -283,21 +272,16 @@ export const SolidFormStepper = (props: Props) => {
                 })}
 
                 {hasNextSteps && (
-                    <div style={{ display: 'flex', alignItems: 'center' }}>
-                        <button
-                            type='button'
-                            className="overflow-button overflow-right-button"
-                            onClick={(e) => {
-                                // @ts-ignore
-                                formStepperOverlay.current.toggle(e)
-                            }}
-                        >
-                            <i className="pi pi-ellipsis-h" />
-                        </button>
-                        <OverlayPanel
-                            ref={formStepperOverlay}
-                            className="solid-custom-overlay solid-form-stepper-overlay"
-                        >
+                    <SolidPopover autoCloseGroup="solid-form-stepper-overflow">
+                        <SolidPopoverTrigger asChild>
+                            <button
+                                type='button'
+                                className="overflow-button overflow-right-button"
+                            >
+                                <i className="pi pi-ellipsis-h" />
+                            </button>
+                        </SolidPopoverTrigger>
+                        <SolidPopoverContent className="solid-custom-overlay solid-form-stepper-overlay">
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', padding: '0.5rem' }}>
                                 {(isSingleVisibleStep
                                     ? [...previousSteps, ...nextSteps]
@@ -315,19 +299,15 @@ export const SolidFormStepper = (props: Props) => {
                                                 key={stepIndex}
                                                 type='button'
                                                 className={`overlay-step-button ${isStepActive ? 'active' : ''} ${isStepBeforeActive ? 'completed' : ''}`}
-                                                onClick={() => {
-                                                    handleButtonClick(step.value);
-                                                    // @ts-ignore
-                                                    formStepperOverlay.current.hide();
-                                                }}
+                                                onClick={() => handleButtonClick(step.value)}
                                             >
                                                 {step.label}
                                             </button>
                                         )
                                     })}
                             </div>
-                        </OverlayPanel>
-                    </div>
+                        </SolidPopoverContent>
+                    </SolidPopover>
                 )}
             </div>
         </>

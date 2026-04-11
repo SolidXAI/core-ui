@@ -1,15 +1,13 @@
 import Link from "../common/Link";
 import { usePathname } from "../../hooks/usePathname";
 import { useRouter } from "../../hooks/useRouter";
-import { Dialog } from "primereact/dialog";
 import { useEffect, useState } from "react";
 import Image from "../common/Image";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
-import { Divider } from "primereact/divider";
 import AuthScreenCenterBackgroundImage from '../../resources/images/auth/solid-login-light.png';
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
-import { SolidButton } from "../shad-cn-ui";
+import { SolidButton, SolidDialog, SolidDivider } from "../shad-cn-ui";
 
 const SHADCN_PLACEHOLDER_IMAGE = "https://ui.shadcn.com/placeholder.svg";
 
@@ -205,7 +203,7 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
             </div >
 
             {/* } */}
-            < Dialog
+            <SolidDialog
                 visible={isRestricted}
                 onHide={handleRegistration}
                 header="Access Restricted"
@@ -216,13 +214,12 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
                         <SolidButton size="sm" onClick={handleRegistration}>Close</SolidButton>
                     </div >
                 }
-                draggable={false}
             >
-                <Divider className="m-0" />
+                <SolidDivider className="m-0" />
                 <div className="p-4">
                     <p>Sign-up is not available. Please contact the admin.</p>
                 </div>
-            </Dialog >
+            </SolidDialog >
         </div >
     )
 }

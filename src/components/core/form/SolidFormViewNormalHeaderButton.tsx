@@ -1,6 +1,6 @@
-import { Button } from 'primereact/button';
 import { hasAnyRole } from '../../../helpers/rolesHelper';
 import { useSession } from "../../../hooks/useSession";
+import { SolidButton } from '../../shad-cn-ui';
 
 interface SolidFormViewNormalHeaderButtonProps {
     button: any;
@@ -60,11 +60,11 @@ export function SolidFormViewNormalHeaderButton({
 
     return (
         <div>
-            <Button
+            <SolidButton
                 type="button"
-                className={`w-full text-left gap-2 p-button-sm solid-icon-button ${button?.attrs?.className ? button?.attrs?.className : ''}`}
+                className={`w-full text-left gap-2 solid-icon-button ${button?.attrs?.className ? button?.attrs?.className : ''}`}
                 label={button.attrs.label}
-                size="small"
+                size="sm"
                 iconPos="left"
                 icon={button?.attrs?.icon ? button?.attrs?.icon : ""}
                 onClick={handleClick}

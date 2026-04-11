@@ -28,6 +28,7 @@ import {
   SolidDialogHeader,
   SolidDialogSeparator,
   SolidDialogTitle,
+  SolidIcon,
 } from "../../shad-cn-ui";
 
 type SolidCardViewParams = {
@@ -354,7 +355,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
               <div className="flex gap-3 align-items-center w-full solid-list-toolbar-left">
                 {params.embeded !== true && (
                   <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
-                    <i className="pi pi-th-large"></i>
+                    <SolidIcon name="si-th-large" aria-hidden />
                   </div>
                 )}
                 <p className="m-0 view-title solid-text-wrapper">{cardViewTitle}</p>
@@ -382,9 +383,9 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                       size="sm"
                       className="solid-icon-button"
                       onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
-                    >
-                      <i className="pi pi-search" />
-                    </SolidButton>
+                      aria-label="Toggle search"
+                      leftIcon={<SolidIcon name="si-search" aria-hidden />}
+                    />
                   </div>
                 )}
 
@@ -403,9 +404,9 @@ export const SolidCardView = (params: SolidCardViewParams) => {
                   size="sm"
                   className="solid-icon-button"
                   onClick={() => handleFetchUpdatedRecords()}
-                >
-                  <i className="pi pi-refresh" />
-                </SolidButton>
+                  aria-label="Refresh cards"
+                  leftIcon={<SolidIcon name="si-refresh" aria-hidden />}
+                />
 
                 <SolidCardViewConfigure
                   solidCardViewMetaData={solidCardViewMetaDataResponse}

@@ -1,6 +1,6 @@
 
-import { Dialog } from "primereact/dialog";
 import { useState } from "react";
+import { SolidDialog } from "../../shad-cn-ui";
 
 
 export const SolidListViewOptions = ({ }: any) => {
@@ -13,7 +13,7 @@ export const SolidListViewOptions = ({ }: any) => {
         <div className="card flex justify-content-center">
             <i className="pi pi-cog" onClick={() => setVisible(true)}></i>
 
-            <Dialog header="Header" visible={visible} style={{ width: '50vw' }} onHide={() => { if (!visible) return; setVisible(false); }}>
+            <SolidDialog header="Header" visible={visible} onHide={() => setVisible(false)} contentClassName="w-full" className="solid-dialog-lg">
                 <p className="m-0">
                     ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua.
                     Ut enim ad minim veniam, quis nostrud exercitation ullamco laboris nisi ut aliquip ex ea commodo
@@ -24,7 +24,7 @@ export const SolidListViewOptions = ({ }: any) => {
                    
                 </div>
 
-            </Dialog>
+            </SolidDialog>
         </div>
     )
 

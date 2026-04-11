@@ -1,5 +1,4 @@
 
-import { Menu } from "primereact/menu";
 import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 // import { RootState } from "../../redux/store";
@@ -19,7 +18,6 @@ const ListingHeader = () => {
     (state: any) => state.popup.visibleFieldsPopup
   );
 
-  const menu = useRef<Menu>(null);
   const items = [
     {
       label: "Settings",
@@ -125,12 +123,6 @@ const ListingHeader = () => {
     //     dispatch(showModulePopup());
     //     break;
     // }
-  };
-
-  const toggleMenu = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    if (menu.current) {
-      menu.current.toggle(e);
-    }
   };
 
 

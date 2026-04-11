@@ -8,6 +8,7 @@ type SolidAutocompleteProps = {
   onChange?: (event: { value: any }) => void;
   onSelect?: (event: { value: any }) => void;
   onUnselect?: (event: { value: any }) => void;
+  onBlur?: (event: React.FocusEvent<HTMLInputElement>) => void;
   disabled?: boolean;
   readOnly?: boolean;
   emptyMessage?: string;
@@ -21,6 +22,7 @@ type SolidAutocompleteProps = {
   forceSelection?: boolean;
   multiple?: boolean;
   maxVisibleChips?: number;
+  style?: React.CSSProperties;
 };
 
 function cx(...parts: Array<string | false | undefined>) {
@@ -57,6 +59,8 @@ export function SolidAutocomplete({
   forceSelection,
   multiple,
   maxVisibleChips = 2,
+  style,
+  onBlur,
 }: SolidAutocompleteProps) {
   const rootRef = useRef<HTMLDivElement | null>(null);
   const completeTimerRef = useRef<number | null>(null);
@@ -202,7 +206,7 @@ export function SolidAutocomplete({
   };
 
   return (
-    <div ref={rootRef} id={id} className={cx("solid-autocomplete", className)}>
+    <div ref={rootRef} id={id} className={cx("solid-autocomplete", className)} style={style}>
       <div className={cx("solid-autocomplete-control solid-autocomplete-chip-control", isFocused && "is-focused")}>
         {(multiple || (!multiple && selectedItems.length > 0)) && visibleSelectedItems.map((item, index) => (
           <span key={toItemKey(item, index)} className="solid-autocomplete-chip">
@@ -260,7 +264,7 @@ export function SolidAutocomplete({
             setOpen(true);
             setManageOpen(false);
           }}
-          onBlur={() => {
+          onBlur={(event) => {
             setIsFocused(false);
             if (!forceSelection) return;
             const matched = normalizedSuggestions.find(
@@ -270,6 +274,7 @@ export function SolidAutocomplete({
               onChange?.({ value: matched.raw });
               setQuery("");
             }
+            onBlur?.(event);
           }}
           onKeyDown={(event) => {
             if (!open && (event.key === "ArrowDown" || event.key === "ArrowUp")) {

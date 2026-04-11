@@ -147,7 +147,7 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
                 <div className="flex gap-3 items-center">
                     {(isImage || isPDF) && (
                         <SolidButton
-                            icon="pi pi-eye"
+                            icon="si si-eye"
                             type="button"
                             style={{ minWidth: 66 }}
                             loading={isLoading}
@@ -163,7 +163,7 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
                         <SolidButton
                             size="small"
                             type="button"
-                            icon="pi pi-download"
+                            icon="si si-download"
                             tooltip={`Download ${value?.split("/").pop()}`}
                             loading={isLoading}
                             onClick={handleDownload}

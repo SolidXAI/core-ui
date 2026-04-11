@@ -7,6 +7,7 @@ import {
   SolidDropdownMenuContent,
   SolidDropdownMenuItem,
   SolidDropdownMenuTrigger,
+  SolidIcon,
 } from "../../shad-cn-ui";
 
 // Define the types for the data and props
@@ -52,7 +53,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
               className="solid-header-cog-trigger solid-kanban-action-trigger"
               aria-label="Open card actions"
             >
-              <i className="pi pi-ellipsis-v" />
+              <SolidIcon name="si-ellipsis-v" aria-hidden />
             </button>
           </SolidDropdownMenuTrigger>
           <SolidDropdownMenuContent className="solid-custom-overlay" align="end">
@@ -60,7 +61,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
               className="solid-header-dropdown-item"
               onSelect={() => router.push(`${editButtonUrl}/${data?.id}`)}
             >
-              <i className="pi pi-pencil solid-header-action-button-icon" />
+              <SolidIcon name="si-pencil" className="solid-header-action-button-icon" aria-hidden />
               <span className="solid-header-action-button-label">Edit</span>
             </SolidDropdownMenuItem>
           </SolidDropdownMenuContent>

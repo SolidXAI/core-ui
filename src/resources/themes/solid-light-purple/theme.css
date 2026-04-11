@@ -335,7 +335,7 @@
   color: #722ED1;
 }
 
-@layer primereact {
+@layer solid-theme {
   .p-error {
     color: #e24c4c;
   }
@@ -6035,7 +6035,7 @@
   }
 }
 
-@layer primereact {
+@layer solid-theme {
   .p-carousel .p-carousel-indicators .p-carousel-indicator.p-highlight button {
     background-color: #722ED1;
   }

@@ -1,5 +1,6 @@
 import React from "react";
 import { Loader2 } from "lucide-react";
+import { SolidIcon, parseSolidIconMeta } from "./SolidIcon";
 
 type SolidButtonVariant = "primary" | "secondary" | "ghost" | "outline" | "destructive";
 type SolidButtonSize = "sm" | "md" | "lg" | "small" | "medium" | "large";
@@ -61,7 +62,8 @@ export function SolidButton({
               : "primary");
   const resolvedSize: "sm" | "md" | "lg" =
     size === "small" ? "sm" : size === "large" ? "lg" : size === "medium" ? "md" : size === "lg" ? "lg" : size === "sm" ? "sm" : "md";
-  const iconNode = icon ? <i className={icon} aria-hidden /> : null;
+  const iconMeta = icon ? parseSolidIconMeta(icon) : undefined;
+  const iconNode = iconMeta ? <SolidIcon name={iconMeta.name} spin={iconMeta.spin} aria-hidden /> : null;
   const resolvedChildren = label ?? children;
   const hasOnlyIcon = !loading && !resolvedChildren && !label && (leftIcon || rightIcon || iconNode);
 

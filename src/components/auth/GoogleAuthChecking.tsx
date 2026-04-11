@@ -2,13 +2,13 @@ import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { signInWithOAuthAccessCode } from "../../adapters/auth/index";
 import { useRouter } from "../../hooks/useRouter";
 import { useSearchParams } from "../../hooks/useSearchParams";
-import { ProgressSpinner } from 'primereact/progressspinner';
 import { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
 import { loadSession } from "../../adapters/auth/storage";
 import { hasAnyRole } from "../../helpers/rolesHelper";
+import { SolidSpinner } from "../shad-cn-ui";
 
 export const GoogleAuthChecking = () => {
     const searchParams = useSearchParams();
@@ -57,8 +57,6 @@ export const GoogleAuthChecking = () => {
         );
     }
     return (
-        <div>
-            <ProgressSpinner />
-        </div>
+        <SolidSpinner className="flex items-center justify-center min-h-screen" />
     )
 }

@@ -1,6 +1,6 @@
 
 
-import { Button } from "primereact/button";
+import { SolidButton } from "../shad-cn-ui";
 interface DropzonePlaceholderProps {
     mediaTypes?: string[];
     mediaMaxSizeKb?: number;
@@ -24,7 +24,7 @@ export const DropzonePlaceholder = ({ mediaTypes, mediaMaxSizeKb }: DropzonePlac
             </div>
             <p>Supported format: {supportedFormats} | Max size: {maxSizeMB} MB</p>
             <div>
-                <Button outlined size='small' severity='secondary' label='Click to Browse' type="button" />
+                <SolidButton outlined size='small' severity='secondary' label='Click to Browse' type="button" />
             </div>
         </div>
     )

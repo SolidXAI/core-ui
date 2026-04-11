@@ -1,32 +1,28 @@
-import { useRef } from "react";
-import { Toast } from "primereact/toast";
 import { useRouter } from "../../hooks/useRouter";
 import { env } from "../../adapters/env";
 import { SolidButton } from "../shad-cn-ui";
+import { useDispatch } from "react-redux";
+import { showToast } from "../../redux/features/toastSlice";
 
 export const SocialMediaLogin = () => {
     const router = useRouter();
-    const toast = useRef<Toast>(null);
+    const dispatch = useDispatch();
 
     const googleApiConnectRedirectUrl = `${env("NEXT_PUBLIC_BACKEND_API_URL")}/api/iam/google/connect`;
 
     const showNotEnabledToast = (provider: "Apple" | "Meta") => {
-        toast.current?.show({
-            severity: "info",
-            life: 2200,
-            className: "solid-shadcn-toast",
-            content: () => (
-                <div className="solid-shadcn-toast-content">
-                    <div className="solid-shadcn-toast-title">{provider} login</div>
-                    <div className="solid-shadcn-toast-description">This provider is not enabled yet.</div>
-                </div>
-            ),
-        });
+        dispatch(
+            showToast({
+                severity: "info",
+                summary: `${provider} login`,
+                detail: "This provider is not enabled yet.",
+                life: 2200,
+            })
+        );
     };
 
     return (
         <div className="mt-4">
-            <Toast ref={toast} />
             <div className="solid-auth-social-grid">
                 <SolidButton
                     type="button"

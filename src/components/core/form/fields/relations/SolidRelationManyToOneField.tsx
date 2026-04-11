@@ -511,7 +511,7 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
         <div>
             <div>
                 <SolidButton
-                    icon="pi pi-plus"
+                    icon="si si-plus"
                     rounded
                     variant="outline"
                     aria-label="Filter"

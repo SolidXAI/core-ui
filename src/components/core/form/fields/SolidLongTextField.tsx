@@ -7,7 +7,7 @@ import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
-import { SolidButton, SolidDatePicker, SolidSelect, SolidInput, SolidCodeEditor } from "../../../shad-cn-ui";
+import { SolidButton, SolidDatePicker, SolidSelect, SolidInput, SolidCodeEditor, SolidIcon } from "../../../shad-cn-ui";
 import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 
 
@@ -406,7 +406,7 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                     {!disabled && !readOnly ? (
                         <SolidButton
                             type="button"
-                            leftIcon={<i className="pi pi-plus" aria-hidden />}
+                            leftIcon={<SolidIcon name="si-plus" aria-hidden />}
                             onClick={handleAdd}
                         >
                             Add
@@ -436,7 +436,7 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                                 {!disabled && !readOnly ? (
                                     <SolidButton
                                         type="button"
-                                        leftIcon={<i className="pi pi-minus" aria-hidden />}
+                                        leftIcon={<SolidIcon name="si-minus" aria-hidden />}
                                         className="ml-2 h-2rem w-2rem rounded-circle"
                                         onClick={() => handleRemove(idx)}
                                     />

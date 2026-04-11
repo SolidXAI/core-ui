@@ -25,6 +25,7 @@ import { SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import styles from "./solidFields.module.css";
+import { SolidIcon } from "../../../shad-cn-ui";
 
 export class SolidMediaSingleField implements ISolidField {
 
@@ -378,7 +379,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                                                     aria-label="Download file"
                                                     onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
                                                 >
-                                                    <i className="pi pi-download" />
+                                                    <SolidIcon name="si-download" aria-hidden />
                                                 </button>
                                                 <button
                                                     type="button"
@@ -387,7 +388,7 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                                                     aria-label="Remove file"
                                                     onClick={() => setDeleteImageDialogVisible(true)}
                                                 >
-                                                    <i className="pi pi-times" />
+                                                    <SolidIcon name="si-times" aria-hidden />
                                                 </button>
                                             </div>
                                         </div>
@@ -544,7 +545,7 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
                                         aria-label="Download file"
                                         onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
                                     >
-                                        <i className="pi pi-download" />
+                                        <SolidIcon name="si-download" aria-hidden />
                                     </button>
                                 </div>
                             </div>

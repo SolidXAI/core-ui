@@ -1,6 +1,6 @@
-import { Button } from 'primereact/button';
-import { hasAnyRole } from '../../../helpers/rolesHelper';
+import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { useSession } from "../../../hooks/useSession";
+import { SolidButton, SolidIcon, parseSolidIconMeta } from "../../shad-cn-ui";
 
 interface SolidFormViewContextMenuHeaderButtonProps {
     button: any;
@@ -31,6 +31,7 @@ export function SolidFormViewContextMenuHeaderButton({
 
     if (!hasRole) return null;
     if (button.attrs?.visible == false) return null
+    const iconMeta = parseSolidIconMeta(button?.attrs?.icon ?? "si si-pencil");
     const handleClick = () => {
         const event = {
             action: button.attrs.action,
@@ -50,7 +51,14 @@ export function SolidFormViewContextMenuHeaderButton({
                 className={`solid-row-action-button ${button?.attrs?.className ? button?.attrs?.className : ''}`}
                 onClick={handleClick}
             >
-                <i className={`${button?.attrs?.icon ? button?.attrs?.icon : "pi pi-pencil"} solid-row-action-button-icon`} />
+                {iconMeta ? (
+                    <SolidIcon
+                        name={iconMeta.name}
+                        spin={iconMeta.spin}
+                        className="solid-row-action-button-icon"
+                        aria-hidden
+                    />
+                ) : null}
                 <span className="solid-row-action-button-label">{button.attrs.label}</span>
             </button>
         );
@@ -58,14 +66,15 @@ export function SolidFormViewContextMenuHeaderButton({
 
     return (
         <div>
-            <Button
+            <SolidButton
                 text
                 type="button"
                 className={`w-full text-left gap-2 ${button?.attrs?.className ? button?.attrs?.className : ''}`}
                 label={button.attrs.label}
-                size="small"
-                iconPos="left"
-                icon={button?.attrs?.icon ? button?.attrs?.icon : "pi pi-pencil"}
+                size="sm"
+                leftIcon={
+                    iconMeta ? <SolidIcon name={iconMeta.name} spin={iconMeta.spin} aria-hidden /> : undefined
+                }
                 onClick={handleClick}
             />
         </div>

@@ -6,7 +6,7 @@ import styles from './chatter.module.css'
 import { SolidChatterCustomMessage } from './SolidChatterCustomMessage'
 import { SolidChatterAuditMessage } from './SolidChatterAuditMessage'
 import { GitBranch, MessageSquare } from 'lucide-react'
-import { SolidLightbox, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from '../../shad-cn-ui'
+import { SolidLightbox, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger, SolidIcon, type SolidIconName } from '../../shad-cn-ui'
 import type { SolidLightboxSlide } from '../../shad-cn-ui/SolidLightbox'
 
 interface Props {
@@ -29,23 +29,23 @@ interface Props {
     };
 }
 
-const getFileIcon = (mimeType: string) => {
+const getFileIcon = (mimeType: string): SolidIconName => {
     if (mimeType.startsWith('image/')) {
-        return 'pi pi-image';
+        return 'si-image';
     }
     switch (mimeType) {
         case 'application/pdf':
-            return 'pi pi-file-pdf';
+            return 'si-file-pdf';
         case 'application/vnd.ms-excel':
         case 'application/vnd.openxmlformats-officedocument.spreadsheetml.sheet':
-            return 'pi pi-file-excel';
+            return 'si-file-excel';
         case 'application/msword':
         case 'application/vnd.openxmlformats-officedocument.wordprocessingml.document':
-            return 'pi pi-file-word';
+            return 'si-file-word';
         case 'text/plain':
-            return 'pi pi-file';
+            return 'si-file';
         default:
-            return 'pi pi-file';
+            return 'si-file';
     }
 };
 
@@ -170,11 +170,11 @@ export const SolidChatterMessageBox = (props: Props) => {
                                                     href={encodeURI(attachment._full_url)}
                                                     target="_blank"
                                                     rel="noopener noreferrer"
-                                                    className='flex align-items-center gap-2 text-decoration-none text-sm'
-                                                >
-                                                    <i className={getFileIcon(attachment.mimeType)} />
-                                                    <span>{attachment.originalFileName}</span>
-                                                </a>
+                                                className='flex align-items-center gap-2 text-decoration-none text-sm'
+                                            >
+                                                <SolidIcon name={getFileIcon(attachment.mimeType)} aria-hidden />
+                                                <span>{attachment.originalFileName}</span>
+                                            </a>
                                             )}
                                         </div>
                                     );

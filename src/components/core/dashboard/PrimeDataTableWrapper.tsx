@@ -1,6 +1,6 @@
 import { useGetDashboardQuestionDataByIdQuery } from '../../../redux/api/dashboardQuestionApi';
 import PrimeReactDatatableRenderer from "./chart-renderers/PrimeReactDatatableRenderer";
-import { ProgressSpinner } from "primereact/progressspinner";
+import { SolidSpinner } from "../../shad-cn-ui";
 import styles from './SolidDashboard.module.css'
 import qs from 'qs';
 
@@ -15,7 +15,7 @@ const PrimeDataTableWrapper = ({ question, filters }: any) => {
         qs: queryParams,
     });
 
-    if (isLoading) return <ProgressSpinner />;
+    if (isLoading) return <SolidSpinner />;
 
     const textAlign = question?.textAlign ?? 'start';
 

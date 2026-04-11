@@ -1,7 +1,6 @@
 import { DashboardResponse, useGetDashboardQuery } from '../../../redux/api/dashboardApi';
 import { SqlExpression } from '../../../types/solid-core';
-import { Button } from 'primereact/button';
-import { Tooltip } from "primereact/tooltip";
+import { SolidButton, SolidIcon, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from '../../shad-cn-ui';
 import qs from 'qs';
 import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import styles from './SolidDashboard.module.css';
@@ -187,58 +186,56 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
             <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
               <div className='flex align-items-center gap-2'>
                 <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
-                  <i className="pi pi-th-large"></i>
+                  <SolidIcon name="si-th-large" aria-hidden />
                 </div>
                 <p className={`view-title solid-text-wrapper flex align-items-center gap-1 ${styles.SolidDashboardTitle}`}>
                   {data?.records[0]?.displayName ? data?.records[0]?.displayName : data?.records[0]?.name}
-                  {data?.records[0]?.description &&
-                    <>
-                      <Tooltip className='solid-field-tooltip' target=".solid-field-tooltip-icon" />
-                      <i className="pi pi-info-circle solid-field-tooltip-icon"
-                        data-pr-tooltip={data?.records[0]?.description}
-                        data-pr-position={'right'}
-                      />
-                    </>
-                  }
+                  {data?.records[0]?.description && (
+                    <SolidTooltip>
+                      <SolidTooltipTrigger asChild>
+                        <SolidIcon name="si-info-circle" className="solid-field-tooltip-icon" aria-hidden />
+                      </SolidTooltipTrigger>
+                      <SolidTooltipContent side="right">{data?.records[0]?.description}</SolidTooltipContent>
+                    </SolidTooltip>
+                  )}
                 </p>
               </div>
               {dashboardVariables && dashboardVariables.length > 0 && (
                 <>
                   <div className='flex gap-2'>
-                    <a onClick={() => setIsDashboardFilterVisible(true)}>
-                      <>
-                        <Button
-                          type="button"
-                          icon={filters.length > 0 ? "pi pi-filter-fill" : "pi pi-filter"}
-                          className={`p-button-sm lg:hidden solid-icon-button `}
-                          size='small'
-                        />
+                    <SolidButton
+                      type="button"
+                      icon={filters.length > 0 ? "si si-filter-fill" : "si si-filter"}
+                      className="lg:hidden solid-icon-button"
+                      size='sm'
+                      variant='secondary'
+                      onClick={() => setIsDashboardFilterVisible(true)}
+                    />
 
-                        <Button
-                          type="button"
-                          icon={filters.length > 0 ? "pi pi-filter-fill" : "pi pi-filter"}
-                          label={"Filter"}
-                          className={`hidden lg:inline-flex`}
-                          size='small'
-
-                        />
-                      </>
-                    </a>
+                    <SolidButton
+                      type="button"
+                      icon={filters.length > 0 ? "si si-filter-fill" : "si si-filter"}
+                      label={"Filter"}
+                      className="hidden lg:inline-flex"
+                      size='sm'
+                      variant='secondary'
+                      onClick={() => setIsDashboardFilterVisible(true)}
+                    />
                     {filters.length > 0 && (
-                      <Button
+                      <SolidButton
                         type="button"
-                        size="small"
-                        icon="pi pi-filter-slash"
+                        size="sm"
+                        icon="si si-filter-slash"
                         severity="secondary"
                         className="solid-icon-button "
                         outlined
                         onClick={() => { setFilters([]); setIsDashboardFilterVisible(false); }}
                       />
                     )}
-                    <Button
+                    <SolidButton
                       type="button"
-                      size="small"
-                      icon="pi pi-save"
+                      size="sm"
+                      icon="si si-save"
                       severity="secondary"
                       className="solid-icon-button "
                       outlined

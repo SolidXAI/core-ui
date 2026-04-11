@@ -2,14 +2,11 @@ import { useGetSolidMenuBasedOnRoleQuery } from "../../redux/api/solidMenuApi";
 import { setIsAuthenticated, setUser } from "../../redux/features/userSlice";
 import { env } from "../../adapters/env";
 import { useSession } from "../../hooks/useSession";
-import { Button } from "primereact/button";
-import { IconField } from "primereact/iconfield";
-import { InputIcon } from "primereact/inputicon";
-import { InputText } from "primereact/inputtext";
 import { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
 import NavbarTwoMenu from "./navbar-two-menu";
 import UserProfileMenu from "./user-profile-menu";
+import { SolidButton } from "../shad-cn-ui";
 
 const NavbarOne = () => {
     const dispatch = useDispatch();
@@ -122,26 +119,37 @@ const NavbarOne = () => {
                     <div className="flex relative justify-content-between align-items-center pt-4 px-3 pb-3 mb-3">
                         <div className="absolute bottom-0" style={{ width: 50, height: 0.8, background: '#d8e2ea' }}></div>
                         {!isSearchShow && <div className="text-base font-semibold">{currentMainMenu && currentMainMenu}</div>}
-                        {isSearchShow === false && <Button outlined icon="pi pi-search" severity="secondary" aria-label="Search" size="small" style={{ maxWidth: 32, maxHeight: 32, border: '1px solid #d1d5db' }}
-                            onClick={() => setSearchShow(true)}
-                        />
-                        }
-                        {isSearchShow &&
+                        {isSearchShow === false && (
+                            <SolidButton
+                                variant="ghost"
+                                size="sm"
+                                aria-label="Search"
+                                className="transparent-background min-w-0 px-2 py-1 border-1 border-round border-200"
+                                onClick={() => setSearchShow(true)}
+                                leftIcon={<i className="pi pi-search" />}
+                            />
+                        )}
+                        {isSearchShow && (
                             <div className="w-full" style={{ position: 'relative' }} ref={searchRef}>
-                                <IconField iconPosition="left">
-                                    <InputIcon className="pi pi-search text-sm"> </InputIcon>
-                                    <InputText placeholder="Search" className="small-input text-sm w-full pr-6" />
-                                </IconField>
+                                <div className="input-icon inputDiv navtwo-searchbox">
+                                    <i className="pi pi-search text-sm" />
+                                    <input
+                                        type="text"
+                                        placeholder="Search"
+                                        className="small-input text-sm w-full pr-6"
+                                        value={searchTerm}
+                                        onChange={(event) => setSearchTerm(event.target.value)}
+                                    />
+                                </div>
                                 <div className="absolute max-h-1rem" style={{ top: 5, right: 5 }}>
                                     <img
-                                        // className="absolute right-0 top-0 max-h-1rem"
                                         style={{ cursor: "pointer", maxHeight: '1.3rem' }}
                                         src="/images/icons/jump-to-icon.png"
                                         alt="Solid"
                                     />
                                 </div>
                             </div>
-                        }
+                        )}
                         {/* <div className="input-icon inputDiv navtwo-searchbox">
                             <i className="pi pi-search " style={{ color: '#8D9199' }}></i>
                             <input

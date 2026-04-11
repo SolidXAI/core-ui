@@ -1,42 +1,46 @@
 
-import { Button } from "primereact/button";
-import { Menu } from "primereact/menu";
-import { useRef } from "react";
+import { useState } from "react";
+import { SolidButton, SolidPopover, SolidPopoverContent, SolidPopoverTrigger } from "../shad-cn-ui";
 
 const DashboardHeader = () => {
 
-    const menuLeft = useRef<any>(null);
-    const toast = useRef(null);
+    const [menuOpen, setMenuOpen] = useState(false);
     const items = [
         {
-            label: 'Options',
-            items: [
-                {
-                    label: 'Refresh',
-                    icon: 'pi pi-refresh'
-                },
-                {
-                    label: 'Export',
-                    icon: 'pi pi-upload'
-                }
-            ]
+            label: 'Refresh',
+            icon: 'pi pi-refresh'
+        },
+        {
+            label: 'Export',
+            icon: 'pi pi-upload'
         }
     ];
 
     return (
         <div className="flex justify-content-between  align-items-center px-5 surface-0 border-bottom-1 surface-border relative lg:static" style={{ height: "60px" }}>
             <div className="flex align-items-center">
-                <Button label="New" size="small" type="submit" className="small-button" />
-                <Menu model={items} popup ref={menuLeft} id="popup_menu_left" />
-                <div className="ml-2">
-                    <div style={{ position: "relative" }}>
-                        <a onClick={(event: any) => menuLeft.current.toggle(event)}>
-                            <i className="pi pi-cog"></i>
-                        </a>
-
-                    </div>
-                </div>
-
+                <SolidButton label="New" size="sm" type="submit" className="small-button" />
+                <SolidPopover open={menuOpen} onOpenChange={setMenuOpen}>
+                    <SolidPopoverTrigger asChild>
+                        <SolidButton
+                            type="button"
+                            icon="pi pi-cog"
+                            variant="ghost"
+                            size="sm"
+                            className="ml-2"
+                        />
+                    </SolidPopoverTrigger>
+                    <SolidPopoverContent side="bottom" align="start" className="solid-form-actions-popover">
+                        <div className="solid-row-actions-menu">
+                            {items.map((item) => (
+                                <button key={item.label} type="button" className="solid-row-action-button" onClick={() => setMenuOpen(false)}>
+                                    <i className={`${item.icon} solid-row-action-button-icon`} />
+                                    <span className="solid-row-action-button-label">{item.label}</span>
+                                </button>
+                            ))}
+                        </div>
+                    </SolidPopoverContent>
+                </SolidPopover>
             </div>
             <div className="flex align-items-center">
                 <div className="bgCircle">

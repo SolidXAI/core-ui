@@ -5,10 +5,9 @@ import { useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
 import { showToast } from '../../redux/features/toastSlice';
 import { Layout } from "./Layout";
-import { Dialog } from "primereact/dialog";
-import { Divider } from "primereact/divider";
 import SolidChangeForcePassword from "../auth/SolidChangeForcePassword";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
+import { SolidDialog, SolidDivider } from "../shad-cn-ui";
 
 export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
     // const theme = useSelector((state: any) => state.theme.mode);
@@ -33,18 +32,16 @@ export const AdminLayout = ({ children }: { children: React.ReactNode }) => {
         <>
             <Layout>{children}</Layout>
             {isForcePasswordChange && (
-                <Dialog
+                <SolidDialog
                     header="Change Default Password"
                     className="solid-change-dialog"
                     visible={isForcePasswordChange}
-                    closable={false}
-                    draggable={false}
                     style={{ width: "25vw" }}
                     onHide={() => setIsForcePasswordChange(false)}
                 >
-                    <Divider className="mt-0" />
+                    <SolidDivider className="mt-0" />
                     <SolidChangeForcePassword />
-                </Dialog>
+                </SolidDialog>
             )}
         </>
     );

@@ -24,6 +24,7 @@ import {
     SolidDialogHeader,
     SolidDialogSeparator,
     SolidDialogTitle,
+    SolidIcon,
 } from "../../shad-cn-ui";
 
 const normalizeViewModes = (viewModes: any[] = []) => {
@@ -143,7 +144,7 @@ export const SolidKanbanViewConfigure = ({
                         className="solid-icon-button solid-header-cog-trigger"
                         aria-label="Open kanban options"
                     >
-                        <i className="pi pi-cog" />
+                        <SolidIcon name="si-cog" aria-hidden />
                     </button>
                 </SolidDropdownMenuTrigger>
                 <SolidDropdownMenuContent className="listview-cogwheel-panel">
@@ -155,7 +156,7 @@ export const SolidKanbanViewConfigure = ({
                                 setIsCogMenuOpen(false);
                             }}
                         >
-                            <i className="pi pi-download solid-header-action-button-icon" />
+                            <SolidIcon name="si-download" className="solid-header-action-button-icon" aria-hidden />
                             <span className="solid-header-action-button-label">Import</span>
                         </SolidDropdownMenuItem>
                     )}
@@ -168,7 +169,7 @@ export const SolidKanbanViewConfigure = ({
                                 setIsCogMenuOpen(false);
                             }}
                         >
-                            <i className="pi pi-upload solid-header-action-button-icon" />
+                            <SolidIcon name="si-upload" className="solid-header-action-button-icon" aria-hidden />
                             <span className="solid-header-action-button-label">Export</span>
                         </SolidDropdownMenuItem>
                     )}
@@ -178,7 +179,7 @@ export const SolidKanbanViewConfigure = ({
                     {canCustomizeLayout && (
                         <SolidDropdownMenuSub>
                             <SolidDropdownMenuSubTrigger className="solid-header-dropdown-item">
-                                <i className="pi pi-sliders-h solid-header-action-button-icon" />
+                                <SolidIcon name="si-sliders-h" className="solid-header-action-button-icon" aria-hidden />
                                 <span className="solid-header-action-button-label">Customize Layout</span>
                             </SolidDropdownMenuSubTrigger>
                             <SolidDropdownMenuSubContent className="customize-layout-panel">
@@ -201,7 +202,7 @@ export const SolidKanbanViewConfigure = ({
                                         setIsCogMenuOpen(false);
                                     }}
                                 >
-                                    <i className="pi pi-code solid-header-action-button-icon" />
+                                    <SolidIcon name="si-code" className="solid-header-action-button-icon" aria-hidden />
                                     <span className="solid-header-action-button-label">Layout Editor</span>
                                 </SolidDropdownMenuItem>
                             </SolidDropdownMenuSubContent>
@@ -216,7 +217,7 @@ export const SolidKanbanViewConfigure = ({
                                 setIsCogMenuOpen(false);
                             }}
                         >
-                            <i className="pi pi-save solid-header-action-button-icon" />
+                            <SolidIcon name="si-save" className="solid-header-action-button-icon" aria-hidden />
                             <span className="solid-header-action-button-label">Save Custom Filter</span>
                         </SolidDropdownMenuItem>
                     )}
@@ -228,7 +229,7 @@ export const SolidKanbanViewConfigure = ({
                             setIsCogMenuOpen(false);
                         }}
                     >
-                        <i className="pi pi-trash solid-header-action-button-icon" />
+                        <SolidIcon name="si-trash" className="solid-header-action-button-icon" aria-hidden />
                         <span className="solid-header-action-button-label">Clear cache</span>
                     </SolidDropdownMenuItem>
                 </SolidDropdownMenuContent>

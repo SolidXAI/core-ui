@@ -8,7 +8,7 @@ import { SolidFormViewProps } from "./SolidFormView";
 import { usePathname } from "../../../hooks/usePathname";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { useRouter } from "../../../hooks/useRouter";
-import { Button } from "primereact/button";
+import { SolidButton, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../shad-cn-ui";
 
 export type SolidFormFooterProps = {
     params: SolidFormViewProps;
@@ -139,25 +139,33 @@ export const SolidFormFooter = ({ params }: SolidFormFooterProps) => {
             <span className="solid-form-footer-pagination-meta">{`${meta.currentIndexGlobal} of ${meta.totalRecords}`}</span>
             }
             {prevNav && (
-                <Button
-                    icon="pi pi-angle-left"
-                    className="p-button-sm p-button-text"
-                    onClick={() => handlePrev()}
-                    disabled={isLoading}
-                    tooltip="Previous"
-                    tooltipOptions={{ position: "top" }}
-                />
+                <SolidTooltip>
+                    <SolidTooltipTrigger asChild>
+                        <SolidButton
+                            icon="si si-angle-left"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handlePrev()}
+                            disabled={isLoading}
+                        />
+                    </SolidTooltipTrigger>
+                    <SolidTooltipContent side="top">Previous</SolidTooltipContent>
+                </SolidTooltip>
             )}
 
             {nextNav && (
-                <Button
-                    icon="pi pi-angle-right"
-                    className="p-button-sm p-button-text"
-                    onClick={() => handleNext()}
-                    disabled={isLoading}
-                    tooltip="Next"
-                    tooltipOptions={{ position: "top" }}
-                />
+                <SolidTooltip>
+                    <SolidTooltipTrigger asChild>
+                        <SolidButton
+                            icon="si si-angle-right"
+                            variant="ghost"
+                            size="sm"
+                            onClick={() => handleNext()}
+                            disabled={isLoading}
+                        />
+                    </SolidTooltipTrigger>
+                    <SolidTooltipContent side="top">Next</SolidTooltipContent>
+                </SolidTooltip>
             )}
         </div>
     );
