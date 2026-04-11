@@ -69,11 +69,6 @@ export function SolidAutocomplete({
 
   useEffect(() => {
     if (multiple) return;
-    if (!value || typeof value === "string") {
-      setQuery(typeof value === "string" ? value : "");
-      setHasCustomQuery(false);
-      return;
-    }
     setQuery("");
     setHasCustomQuery(false);
   }, [value, field, multiple]);

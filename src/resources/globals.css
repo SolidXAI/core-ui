@@ -194,12 +194,18 @@ a {
 }
 
 .react-datepicker {
-  width: 100%;
+  width: auto;
+  min-width: 240px;
 }
 
 .react-datepicker__month-container {
   float: left;
-  width: 100%;
+  width: auto;
+}
+
+.react-datepicker__time-container {
+  min-width: 160px;
+  border-left: 1px solid rgba(15, 23, 42, 0.1);
 }
 
 /* Avatar */
@@ -501,20 +507,19 @@ a {
   font-weight: 700;
   color: var(--solid-form-title, #0f172a) !important;
   letter-spacing: 0.05em;
-  text-transform: uppercase;
-  margin: 32px 0 16px;
+  margin: 0;
   display: flex;
   align-items: center;
   gap: 0.75rem;
   width: 100%;
-  padding: 0.6rem 0.9rem;
-  border-radius: 8px;
-  background: color-mix(in srgb, var(--primary-color, #6366f1) 12%, #fff);
-  border: 1px solid color-mix(in srgb, var(--primary-color, #6366f1) 28%, transparent);
-  box-shadow: 0 6px 18px rgba(15, 23, 42, 0.08);
+  /* padding: 0.6rem 0.9rem; */
+  padding-top: 20px;
+  /* border-radius: 8px; */
+  /* background: color-mix(in srgb, var(--primary-color, #6366f1) 12%, #fff); */
+  /* border-bottom: 1px solid color-mix(in srgb, var(--primary-color, #6366f1) 28%, transparent); */
 }
 
-.form-wrapper-heading::before {
+/* .form-wrapper-heading::before {
   content: "";
   width: 14px;
   height: 14px;
@@ -522,9 +527,9 @@ a {
   background: radial-gradient(circle at 30% 30%, #fff 5%, var(--primary-color, #6366f1));
   box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color, #6366f1) 20%, transparent);
   flex: 0 0 auto;
-}
+} */
 
-.form-wrapper-heading::after {
+/* .form-wrapper-heading::after {
   content: "";
   flex: 1;
   height: 2px;
@@ -536,7 +541,7 @@ a {
   );
   max-width: 160px;
   opacity: 0.75;
-}
+} */
 
 .boolean-switch .p-button {
   max-height: 2rem;
@@ -1465,6 +1470,7 @@ li.header-li-px {
 .fieldSubTitle {
   font-size: 0.8em;
   margin-top: 5px;
+  color: grey;
 }
 
 .tab-error-heading .p-tabview-title {
@@ -2642,11 +2648,11 @@ li.header-li-px {
 }
 
 .solid-field-metadata-form-header {
-  padding: 10px 14px 10px 24px;
+  padding: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--primary-color);
+  /* background: var(--primary-color); */
 }
 
 .solid-global-search-element {
