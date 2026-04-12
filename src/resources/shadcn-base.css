@@ -3663,7 +3663,7 @@ body {
 }
 
 .solid-tree-group-body-cell {
-  min-width: 20rem;
+  min-width: 10rem;
 }
 
 .solid-tree-group-body-cell .solid-tree-cell-content {
