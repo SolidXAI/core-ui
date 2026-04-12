@@ -3663,7 +3663,11 @@ body {
 }
 
 .solid-tree-group-body-cell {
-  min-width: 24rem;
+  min-width: 20rem;
+}
+
+.solid-tree-group-body-cell .solid-tree-cell-content {
+  padding-right: 0.875rem;
 }
 
 .solid-tree-aggregate-header-cell,

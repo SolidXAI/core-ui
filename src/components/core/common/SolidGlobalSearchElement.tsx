@@ -11,7 +11,7 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { hydrateRelationRules } from "../../../helpers/hydrateRelationRules";
 import { useSession } from '../../../hooks/useSession'
 import GroupingComponent, { AggregationRule, GroupingRule, DateGroupingFormat } from "./GroupingComponent";
-import { Check, Filter, Pencil, Plus, Search, SearchX, Trash2, X } from "lucide-react";
+import { Bookmark, Check, Filter, Pencil, Plus, Search, SearchX, Trash2, X } from "lucide-react";
 import { SolidButton } from "../../shad-cn-ui/SolidButton";
 import { SolidInput } from "../../shad-cn-ui/SolidInput";
 import {
@@ -1978,12 +1978,18 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             ) :
                                 <>
                                     <div className="p-3 solid-search-overlay-empty">
-                                        <div className="solid-search-overlay-empty-title solid-search-overlay-heading-with-icon">
-                                            <Search size={13} />
-                                            <span>Start typing to search</span>
-                                        </div>
-                                        <div className="solid-search-overlay-empty-subtitle">
-                                            Start typing in search input to see all fields on which you can search {searchableEntityLabel} by.
+                                        <div className="solid-search-overlay-panel-callout">
+                                            <div className="solid-search-overlay-panel-callout-icon">
+                                                <Search size={13} />
+                                            </div>
+                                            <div className="solid-search-overlay-panel-callout-copy">
+                                                <div className="solid-search-overlay-empty-title">
+                                                    Start typing to search
+                                                </div>
+                                                <div className="solid-search-overlay-empty-subtitle">
+                                                    Start typing in search input to see all fields on which you can search {searchableEntityLabel} by.
+                                                </div>
+                                            </div>
                                         </div>
                                     </div>
                                     <div className="solid-filter-dialog-sep" />
@@ -1992,7 +1998,17 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             {savedFilters.length > 0 &&
                                 <>
                                     <div className="p-3 solid-search-overlay-section">
-                                        <p className="solid-search-overlay-heading solid-search-overlay-section-title">Saved filters</p>
+                                        <div className="solid-search-overlay-panel-callout solid-search-overlay-panel-callout-compact">
+                                            <div className="solid-search-overlay-panel-callout-icon">
+                                                <Bookmark size={13} />
+                                            </div>
+                                            <div className="solid-search-overlay-panel-callout-copy">
+                                                <p className="solid-search-overlay-heading solid-search-overlay-section-title">Saved filters</p>
+                                                <div className="solid-search-overlay-empty-subtitle">
+                                                    Reusable filter sets available for this view.
+                                                </div>
+                                            </div>
+                                        </div>
                                         <div className="flex flex-column solid-search-overlay-saved-list">
                                             {savedFilters.map((savedfilter: any, index: number) => (
                                                 <SavedFilterList
@@ -2023,8 +2039,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                 onClick={openCustomFilterDialog}
                             >
                                 <div className="solid-search-overlay-footer-action-main">
-                                    <Filter size={14} />
-                                    <div>
+                                    <div className="solid-search-overlay-panel-callout-icon">
+                                        <Filter size={14} />
+                                    </div>
+                                    <div className="solid-search-overlay-panel-callout-copy">
                                         <div className="solid-search-overlay-footer-title solid-search-overlay-section-title">
                                             Click here to apply custom filters
                                         </div>
@@ -2041,8 +2059,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                     onClick={openGroupingDialog}
                                 >
                                     <div className="solid-search-overlay-footer-action-main">
-                                        <Plus size={14} />
-                                        <div>
+                                        <div className="solid-search-overlay-panel-callout-icon">
+                                            <Plus size={14} />
+                                        </div>
+                                        <div className="solid-search-overlay-panel-callout-copy">
                                             <div className="solid-search-overlay-footer-title solid-search-overlay-section-title">
                                                 Click here to do custom grouping
                                             </div>

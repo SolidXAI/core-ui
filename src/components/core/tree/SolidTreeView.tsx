@@ -1862,7 +1862,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
               body={groupColumnBody}
               headerClassName="solid-tree-group-header-cell"
               bodyClassName="solid-tree-group-body-cell"
-              style={{ width: "max-content", minWidth: "24rem" }}
+              style={{ width: "max-content", minWidth: "20rem" }}
             />
 
             {renderColumnsDynamically()}
