@@ -1504,6 +1504,8 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 type: "grouping",
                 label: `${groupingRules.length} grouping rules applied`,
                 onRemove: () => removeGrouping(),
+                onOpen:() => setShowGroupFilterElement(true)
+
             });
         }
 
@@ -1859,7 +1861,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                         <div className="solid-chip-manager-body">
                             {managedChipItems.map((chip) => (
                                 <div key={`manage-${chip.id}`} className={`solid-chip-manager-item solid-chip-tone-${chip.type}`} onClick={() => {
-                                    if (chip.id == "custom-filter") {
+                                    if (chip.id == "custom-filter" || chip.id == "grouping-rules") {
                                         if(chip.onOpen){
                                             chip.onOpen()
                                         }
@@ -2038,6 +2040,17 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                 </button>
                             )}
                         </div>
+                        {viewType === "tree" && (
+                            <div
+                                className="px-3 py-2 flex flex-column solid-search-overlay-footer cursor-pointer solid-search-overlay-footer-grouping"
+                                onClick={() => setShowGroupFilterElement(true)}
+                            >
+                                <div className="solid-search-overlay-footer-title solid-search-overlay-section-title">Or click here to open grouping filter</div>
+                                <div className="solid-search-overlay-footer-subtitle">
+                                    Group tree results and configure aggregations without leaving this view.
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )
                 }

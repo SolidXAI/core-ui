@@ -88,7 +88,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
                             </span>
                         ))}
                     </div>
-                    <div className={`pi pi-sort-down-fill text-primary ${styles.emailTooltipIcon}`} style={{ fontSize: 8 }}>
+                    <div className={`si si-sort-down-fill text-primary ${styles.emailTooltipIcon}`} style={{ fontSize: 8 }}>
                         <div className={styles.emailsTooltip}>
                             {tempEmails.map((mail, index) => (
                                 <span key={index} className='text-color text-sm'>

@@ -3,22 +3,17 @@ import { FetchBaseQueryError } from "@reduxjs/toolkit/query/react";
 import { Form, Formik } from "formik";
 import Link from "../common/Link";
 import { useRouter } from "../../hooks/useRouter";
-import { Button } from "primereact/button";
-import { Divider } from "primereact/divider";
-import { InputText } from "primereact/inputtext";
-import { Message } from "primereact/message";
-import { Password } from "primereact/password";
 import { useEffect, useState } from "react";
 import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import { formatTimeLeft } from "../../helpers/resendOtpHelper";
-import { ProgressSpinner } from "primereact/progressspinner";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
 import { AuthTabs } from "./AuthTabs";
 import { useDispatch } from "react-redux";
+import { SolidButton, SolidDivider, SolidInput, SolidMessage, SolidPasswordInput, SolidSpinner } from "../shad-cn-ui";
 
 interface AuthModesProps {
     passwordBasedAuth: boolean;
@@ -168,31 +163,31 @@ const SolidRegister = () => {
                                 <div className="flex gap-2 mt-3">
                                     <div className="flex flex-column w-full gap-2">
                                         <label className="solid-auth-input-label">First Name</label>
-                                        <InputText
+                                        <SolidInput
                                             id="firstName"
                                             name="firstName"
                                             placeholder="First Name"
                                             onChange={formik.handleChange}
                                             value={formik.values.firstName}
-                                            invalid={!!formik.errors.firstName}
+                                            aria-invalid={!!formik.errors.firstName}
                                         />
                                         {isFormFieldValid(formik, "firstName") && (
-                                            <Message severity="error" text={formik.errors.firstName?.toString()} />
+                                            <SolidMessage severity="error" text={formik.errors.firstName?.toString()} />
                                         )}
                                     </div>
 
                                     <div className="flex flex-column w-full gap-2">
                                         <label className="solid-auth-input-label">Last Name</label>
-                                        <InputText
+                                        <SolidInput
                                             id="lastName"
                                             name="lastName"
                                             placeholder="Last Name"
                                             onChange={formik.handleChange}
                                             value={formik.values.lastName}
-                                            invalid={!!formik.errors.lastName}
+                                            aria-invalid={!!formik.errors.lastName}
                                         />
                                         {isFormFieldValid(formik, "lastName") && (
-                                            <Message severity="error" text={formik.errors.lastName?.toString()} />
+                                            <SolidMessage severity="error" text={formik.errors.lastName?.toString()} />
                                         )}
                                     </div>
                                 </div>
@@ -203,17 +198,17 @@ const SolidRegister = () => {
                                 <div>
                                     <div className="flex flex-column gap-2 mt-3">
                                         <label className="solid-auth-input-label">Username</label>
-                                        <InputText
+                                        <SolidInput
                                             id="username"
                                             name="username"
                                             placeholder="username"
                                             onChange={formik.handleChange}
                                             value={formik.values.username}
-                                            invalid={!!formik.errors.username}
+                                            aria-invalid={!!formik.errors.username}
                                         />
                                     </div>
                                     {isFormFieldValid(formik, "username") &&
-                                        <Message severity="error" text={formik.errors.username?.toString()} />}
+                                        <SolidMessage severity="error" text={formik.errors.username?.toString()} />}
                                 </div>
                             </>
                         )}
@@ -222,40 +217,39 @@ const SolidRegister = () => {
                         <div>
                             <div className="flex flex-column gap-2 mt-3">
                                 <label className="solid-auth-input-label">Email</label>
-                                <InputText
+                                <SolidInput
                                     id="email"
                                     name="email"
                                     placeholder="Yourgmail@123.com"
                                     onChange={formik.handleChange}
                                     value={formik.values.email}
-                                    invalid={!!formik.errors.email}
+                                    aria-invalid={!!formik.errors.email}
                                 />
                             </div>
                             {isFormFieldValid(formik, "email") &&
-                                <Message severity="error" text={formik.errors.email?.toString()} />}
+                                <SolidMessage severity="error" text={formik.errors.email?.toString()} />}
                         </div>
 
                         {/* Password */}
                         <div>
                             <div className="flex flex-column gap-2 mt-3">
                                 <label className="solid-auth-input-label">Password</label>
-                                <Password
+                                <SolidPasswordInput
                                     id="password"
                                     name="password"
                                     value={formik.values.password}
                                     onChange={formik.handleChange}
-                                    toggleMask
-                                    inputClassName="w-full"
-                                    feedback={false}
-                                    invalid={!!formik.errors.password}
+                                    toggle
+                                    className="w-full"
+                                    aria-invalid={!!formik.errors.password}
                                 />
                             </div>
                             {isFormFieldValid(formik, "password") &&
-                                <Message severity="error" text={formik.errors.password?.toString()} />}
+                                <SolidMessage severity="error" text={formik.errors.password?.toString()} />}
                         </div>
                         {/* <SolidPasswordHelperText text={solidSettingsData?.data?.authenticationPasswordComplexityDescription} /> */}
                         <div className="mt-4">
-                            <Button className="w-full font-light auth-submit-button" label="Sign Up" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
+                            <SolidButton className="w-full font-light auth-submit-button" label="Sign Up" disabled={formik.isSubmitting} loading={formik.isSubmitting} type="submit" />
                         </div>
                     </Form>
                 )}
@@ -321,15 +315,15 @@ const SolidRegister = () => {
                     <Form>
                         <div className="flex flex-column gap-2 mt-3">
                             <label htmlFor="email" className="solid-auth-input-label">Username</label>
-                            <InputText
+                            <SolidInput
                                 id="username"
                                 name="username"
                                 placeholder="username"
                                 onChange={formik.handleChange}
                                 value={formik.values.username}
-                                invalid={!!formik.errors.username}
+                                aria-invalid={!!formik.errors.username}
                             />
-                            {isFormFieldValid(formik, "username") && <Message
+                            {isFormFieldValid(formik, "username") && <SolidMessage
                                 className="text-red-500 text-sm"
                                 severity="error"
                                 text={formik?.errors?.username?.toString()}
@@ -337,22 +331,22 @@ const SolidRegister = () => {
                         </div>
                         <div className="flex flex-column gap-2 mt-3">
                             <label htmlFor="email" className="solid-auth-input-label">Email</label>
-                            <InputText
+                            <SolidInput
                                 id="email"
                                 name="email"
                                 placeholder="Yourgmail@123.com"
                                 onChange={formik.handleChange}
                                 value={formik.values.email}
-                                invalid={!!formik.errors.email}
+                                aria-invalid={!!formik.errors.email}
                             />
-                            {isFormFieldValid(formik, "email") && <Message
+                            {isFormFieldValid(formik, "email") && <SolidMessage
                                 className="text-red-500 text-sm"
                                 severity="error"
                                 text={formik?.errors?.email?.toString()}
                             />}
                         </div>
                         <div className="mt-4">
-                            <Button className="w-full font-light auth-submit-button" label="Sign Up" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
+                            <SolidButton className="w-full font-light auth-submit-button" label="Sign Up" disabled={formik.isSubmitting} loading={formik.isSubmitting} type="submit" />
                         </div>
                     </Form>
                 )}
@@ -391,7 +385,7 @@ const SolidRegister = () => {
                 {showOverlay && (
                     <div className="absolute top-0 left-0 w-full h-full flex align-items-center justify-content-center register-success-popup">
                         <div className="inline-flex flex-column align-items-center justify-content-center text-center">
-                            <ProgressSpinner style={{ width: '50px', height: '50px' }} strokeWidth="4" />
+                            <SolidSpinner className="auth-success-spinner" />
                             <p className="mt-3 text-lg font-medium text-700">
                                 Registration successful,<br />you will be redirected...
                             </p>
@@ -402,16 +396,16 @@ const SolidRegister = () => {
                 <p className="solid-auth-helper">Enter your details below to create your account</p>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
                 <RenderAuthModes passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} showNameFieldsForRegistration={solidSettingsData?.data?.showNameFieldsForRegistration} />
-                {solidSettingsData?.data?.iamGoogleOAuthEnabled &&
+                {solidSettingsData?.data?.iamGoogleOAuthEnabled && (
                     <>
-                        <Divider align="center">
-                            <div className="inline-flex align-items-center">
-                                Or continue with
-                            </div>
-                        </Divider>
+                        <div className="solid-auth-divider flex align-items-center gap-2 my-4">
+                            <SolidDivider className="flex-1" />
+                            <span className="text-sm text-500">Or continue with</span>
+                            <SolidDivider className="flex-1" />
+                        </div>
                         <SocialMediaLogin />
                     </>
-                }
+                )}
             </div>
             <div className="text-center mt-3 md:mt-4">
                 <div className="text-sm text-400 secondary-dark-color">

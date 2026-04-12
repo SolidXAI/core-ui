@@ -94,7 +94,7 @@ const FieldSelector = ({ handleTypeSelect }: FieldSelectorProps) => {
   return (
     <div className="solid-field-selector-container">
       <div className="solid-field-selector-header">
-        <p className="form-wrapper-heading text-base m-0">Select Field Type</p>
+        <p className="form-wrapper-heading">Select Field Type</p>
         <p className="solid-field-selector-subheading">Choose the data type you want to add to the model.</p>
       </div>
       <div className="solid-field-selector-grid">

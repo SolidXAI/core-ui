@@ -3,25 +3,26 @@
 import Link from "../common/Link";
 import { usePathname } from "../../hooks/usePathname";
 import { useState } from "react";
+import { SolidIcon } from "../shad-cn-ui";
 
 const UserSidebar = () => {
   const pathname = usePathname();
 
-  const menuItem = [
+  const menuItem: { name: string; url: string; icon: import("../shad-cn-ui").SolidIconName }[] = [
     {
       name: "Update Profile",
       url: "/me/update",
-      icon: "fas fa-user",
+      icon: "si-user",
     },
     {
       name: "Upload Avatar",
       url: "/me/upload_avatar",
-      icon: "fas fa-user-circle",
+      icon: "si-user",
     },
     {
       name: "Update Password",
       url: "/me/update_password",
-      icon: "fas fa-lock",
+      icon: "si-lock",
     },
   ];
 
@@ -42,7 +43,7 @@ const UserSidebar = () => {
           onClick={() => handleMenuItemClick(menuItem.url)}
           aria-current={activeMenuItem === menuItem.url ? "true" : "false"}
         >
-          <i className={`${menuItem.icon} fa-fw pe-2`}></i> {menuItem.name}
+          <SolidIcon name={menuItem.icon} className="fa-fw pe-2" /> {menuItem.name}
         </Link>
       ))}
     </div>

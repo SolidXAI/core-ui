@@ -1,8 +1,6 @@
 
-
 import React, { useEffect, useState } from 'react';
-import { Divider } from 'primereact/divider';
-import { Dropdown } from 'primereact/dropdown';
+import { SolidDivider, SolidSelect } from "../../shad-cn-ui";
 import "./solid-locale.css";
 const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLocale, viewMode, createMode, handleLocaleChangeRedirect,
     applicableLocales, defaultEntityLocaleId, solidFormViewData, published }: { solidFormViewMetaData: any, id: string, selectedLocale: any, setSelectedLocale: any, viewMode: string, createMode: boolean, handleLocaleChangeRedirect: any, applicableLocales: any, defaultEntityLocaleId: string | null, solidFormViewData: any, published: string | null }) => {
@@ -35,9 +33,7 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
         }
     }, [applicableLocales, id, viewMode, createMode]);
 
-    const handleLocaleChange = (e: any) => {
-
-        const newLocale = e.value;
+    const handleLocaleChange = (newLocale: string) => {
         if (newLocale === selectedLocale) return;
         setSelectedLocale(newLocale);
         const targetDefaultEntityLocaleId = id === 'new' ? defaultEntityLocaleId : defaultEntityLocaleId || id;
@@ -81,7 +77,7 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
             }
             <div className="flex flex-column gap-2 mt-2" style={{ backgroundColor: 'var(--surface-ground)', padding: '0.5rem' }}>
                 <h3 className="text-lg font-semibold p-0 m-0">Information</h3>
-                <Divider className="my-2" />
+                <SolidDivider className="my-2" />
                 <div className="space-y-2">
                     <div className='flex align-items-center justify-content-between gap-2 p-2'>
                         <p className="text-sm font-bold text-gray-500 m-0">Created At</p>
@@ -103,14 +99,12 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
                     <>
                         <h3 className="text-lg font-semibold mt-6 mb-2">Internationalisation</h3>
                         <label className="form-field-label">Locales</label>
-                        <Dropdown
+                        <SolidSelect
                             value={selectedLocale}
-                            onChange={(e) => handleLocaleChange(e)}
+                            onChange={(e) => handleLocaleChange(e.value)}
                             options={localeOptions}
-                            optionLabel="label"
                             placeholder="Select locale"
                             className="w-full"
-                            //TODO: disable if createMode is true
                             disabled={createMode}
                         />
                         {viewMode === 'view' || createMode && (

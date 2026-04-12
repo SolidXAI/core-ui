@@ -2,6 +2,7 @@ import React, { useState, useEffect, useRef, useCallback } from "react";
 import ReactMarkdown from "react-markdown";
 import remarkGfm from "remark-gfm";
 import { loadSession } from "../../../adapters/auth/storage";
+import { SolidIcon, type SolidIconMeta, type SolidIconName } from "../../shad-cn-ui";
 import styles from "./SolidAiChat.module.css";
 
 // ── Types ─────────────────────────────────────────────────────────────────────
@@ -88,7 +89,11 @@ function CopyButton({ text }: { text: string }) {
     };
     return (
         <button className={styles.CopyBtn} onClick={handleCopy} title="Copy" aria-label="Copy message">
-            <i className={`pi ${copied ? "pi-check" : "pi-copy"}`} style={{ fontSize: "11px" }} />
+            <SolidIcon
+                name={copied ? "si-check" : "si-copy"}
+                style={{ fontSize: "11px" }}
+                aria-hidden
+            />
         </button>
     );
 }
@@ -107,7 +112,11 @@ function CodeBlock({ children, className }: { children?: React.ReactNode; classN
             <div className={styles.CodeBlockHeader}>
                 <span className={styles.CodeLang}>{lang || "code"}</span>
                 <button className={styles.CodeCopyBtn} onClick={handleCopy}>
-                    <i className={`pi ${copied ? "pi-check" : "pi-copy"}`} style={{ fontSize: "11px" }} />
+                    <SolidIcon
+                        name={copied ? "si-check" : "si-copy"}
+                        style={{ fontSize: "11px" }}
+                        aria-hidden
+                    />
                     {copied ? "Copied" : "Copy"}
                 </button>
             </div>
@@ -153,13 +162,13 @@ function getToolCategory(name: string): string {
     return "Tool";
 }
 
-function getToolIconClass(name: string): string {
-    if (name === "bash") return "pi-terminal";
+function getToolIconName(name: string): SolidIconName {
+    if (name === "bash") return "si-terminal";
     const cat = getToolCategory(name);
-    if (cat === "Read") return "pi-search";
-    if (cat === "Create") return "pi-file-edit";
-    if (cat === "Chat") return "pi-comments";
-    return "pi-cog";
+    if (cat === "Read") return "si-search";
+    if (cat === "Create") return "si-file-edit";
+    if (cat === "Chat") return "si-comments";
+    return "si-cog";
 }
 
 function describeToolArgs(args: Record<string, unknown>): string {
@@ -919,34 +928,38 @@ export const SolidAiChat: React.FC = () => {
             <header className={styles.Header}>
                 <span className={`${styles.StatusDot} ${isProcessing ? styles.StatusRunning : isConnected ? styles.StatusOnline : styles.StatusOffline}`} />
                 <span className={styles.StatusLabel}>
-                    <i className={`pi ${isConnected ? "pi-wifi" : "pi-times-circle"}`} style={{ fontSize: "11px" }} />
+                    <SolidIcon
+                        name={isConnected ? "si-wifi" : "si-times-circle"}
+                        style={{ fontSize: "11px" }}
+                        aria-hidden
+                    />
                     {isConnected ? (isProcessing ? "Running…" : sessionId ? "Connected" : "Starting…") : "Offline"}
                 </span>
 
                 <div className={styles.HeaderSpacer} />
 
                 <button className={styles.NewChatHeaderBtn} onClick={handleNewChat} title="New conversation">
-                    <i className="pi pi-plus" style={{ fontSize: "10px" }} />
+                    <SolidIcon name="si-plus" style={{ fontSize: "10px" }} aria-hidden />
                     New Chat
                 </button>
 
                 {/* Hamburger + sessions dropdown — rightmost */}
                 <div className={styles.SessionMenuAnchor} ref={sessionMenuRef}>
                     <button className={styles.HamburgerBtn} onClick={handleToggleSessionMenu} title="Session history" aria-label="Open session history">
-                        <i className="pi pi-bars" style={{ fontSize: "13px" }} />
+                        <SolidIcon name="si-bars" style={{ fontSize: "13px" }} aria-hidden />
                     </button>
 
                     {showSessionMenu && (
                         <div className={styles.SessionMenu}>
                             <button className={styles.SessionMenuNewChat} onClick={handleNewChat}>
-                                <i className="pi pi-plus" style={{ fontSize: "12px" }} />
+                                <SolidIcon name="si-plus" style={{ fontSize: "12px" }} aria-hidden />
                                 New Chat
                             </button>
                             <div className={styles.SessionMenuSectionLabel}>Recent Sessions</div>
                             <div className={styles.SessionList}>
                                 {isLoadingSessions ? (
                                     <div className={styles.SessionMenuLoading}>
-                                        <i className="pi pi-spin pi-spinner" style={{ fontSize: "11px" }} />
+                                        <SolidIcon name="si-spinner" spin style={{ fontSize: "11px" }} aria-hidden />
                                         Loading…
                                     </div>
                                 ) : sessions.length === 0 ? (
@@ -971,7 +984,12 @@ export const SolidAiChat: React.FC = () => {
                                                 disabled={isDeletingSessionId === s.session_id}
                                                 title="Delete conversation"
                                             >
-                                                <i className={`pi ${isDeletingSessionId === s.session_id ? "pi-spin pi-spinner" : "pi-trash"}`} style={{ fontSize: "11px" }} />
+                                                <SolidIcon
+                                                    name={isDeletingSessionId === s.session_id ? "si-spinner" : "si-trash"}
+                                                    spin={isDeletingSessionId === s.session_id}
+                                                    style={{ fontSize: "11px" }}
+                                                    aria-hidden
+                                                />
                                             </button>
                                         </div>
                                     ))
@@ -985,7 +1003,7 @@ export const SolidAiChat: React.FC = () => {
             {/* ── Reconnecting banner ── */}
             {!isConnected && (
                 <div className={styles.ReconnectBanner}>
-                    <i className="pi pi-spin pi-spinner" style={{ fontSize: "11px" }} />
+                    <SolidIcon name="si-spinner" spin style={{ fontSize: "11px" }} aria-hidden />
                     Reconnecting…
                 </div>
             )}
@@ -996,8 +1014,18 @@ export const SolidAiChat: React.FC = () => {
                     <div className={styles.LoadOlderWrap}>
                         <button className={styles.LoadOlderBtn} onClick={handleLoadOlder} disabled={isLoadingHistory}>
                             {isLoadingHistory
-                                ? <><i className="pi pi-spin pi-spinner" style={{ fontSize: "11px" }} /> Loading…</>
-                                : <><i className="pi pi-history" style={{ fontSize: "11px" }} /> Load older messages</>
+                                ? (
+                                    <>
+                                        <SolidIcon name="si-spinner" spin style={{ fontSize: "11px" }} aria-hidden />
+                                        {" "}Loading…
+                                    </>
+                                )
+                                : (
+                                    <>
+                                        <SolidIcon name="si-history" style={{ fontSize: "11px" }} aria-hidden />
+                                        {" "}Load older messages
+                                    </>
+                                )
                             }
                         </button>
                     </div>
@@ -1005,7 +1033,7 @@ export const SolidAiChat: React.FC = () => {
 
                 {isLoadingHistory && messages.length === 0 && (
                     <div className={styles.HistoryLoading}>
-                        <i className="pi pi-spin pi-spinner" style={{ fontSize: "16px" }} />
+                        <SolidIcon name="si-spinner" spin style={{ fontSize: "16px" }} aria-hidden />
                         <span>Loading conversation…</span>
                     </div>
                 )}
@@ -1013,7 +1041,7 @@ export const SolidAiChat: React.FC = () => {
                 {messages.length === 0 && !isLoadingHistory && (
                     <div className={styles.EmptyState}>
                         <div className={styles.EmptyIcon}>
-                            <i className="pi pi-comments" style={{ fontSize: "28px" }} />
+                            <SolidIcon name="si-comments" style={{ fontSize: "28px" }} aria-hidden />
                         </div>
                         <p className={styles.EmptyTitle}>How can I help you today?</p>
                         <p className={styles.EmptySubtitle}>Ask me anything about your SolidX project.</p>
@@ -1028,7 +1056,7 @@ export const SolidAiChat: React.FC = () => {
                             <div key={msg.id} className={`${styles.Row} ${styles.RowUser}`}>
                                 {/* Avatar first in DOM → rightmost with row-reverse */}
                                 <div className={`${styles.Avatar} ${styles.AvatarUser}`}>
-                                    <i className="pi pi-user" style={{ fontSize: "12px" }} />
+                                    <SolidIcon name="si-user" style={{ fontSize: "12px" }} aria-hidden />
                                 </div>
                                 <div className={styles.BubbleGroup}>
                                     <div className={`${styles.Bubble} ${styles.BubbleUser}`}>
@@ -1049,7 +1077,7 @@ export const SolidAiChat: React.FC = () => {
                     return (
                         <div key={group.groupKey} className={styles.AiTurnGroup}>
                             <div className={styles.Avatar}>
-                                <i className="pi pi-android" style={{ fontSize: "12px" }} />
+                                <SolidIcon name="si-android" style={{ fontSize: "12px" }} aria-hidden />
                             </div>
                             <div className={styles.AiTurnContent}>
                                 {group.msgs.flatMap((msg) => {
@@ -1066,10 +1094,13 @@ export const SolidAiChat: React.FC = () => {
                                                     status === "error" ? styles.ToolCardError :
                                                         styles.ToolCardDone;
 
-                                            const statusIcon = status === "running" ? "pi-spin pi-spinner" :
-                                                status === "warning" ? "pi-exclamation-triangle" :
-                                                    status === "error" ? "pi-times-circle" :
-                                                        "pi-check-circle";
+                                            const statusIcon: SolidIconMeta = status === "running"
+                                                ? { name: "si-spinner", spin: true }
+                                                : status === "warning"
+                                                    ? { name: "si-exclamation-triangle" }
+                                                    : status === "error"
+                                                        ? { name: "si-times-circle" }
+                                                        : { name: "si-check-circle" };
 
                                             const statusIconClass = status === "warning" ? styles.ToolCardStatusWarning :
                                                 status === "error" ? styles.ToolCardStatusError :
@@ -1093,8 +1124,17 @@ export const SolidAiChat: React.FC = () => {
                                                         onClick={toggleExpand}
                                                         data-expandable={hasExpandable && status !== "running" ? "true" : undefined}
                                                     >
-                                                        <i className={`pi ${statusIcon} ${statusIconClass}`} />
-                                                        <i className={`pi ${getToolIconClass(msg.toolName)} ${styles.ToolCardToolIcon}`} />
+                                                        <SolidIcon
+                                                            name={statusIcon.name}
+                                                            spin={statusIcon.spin}
+                                                            className={statusIconClass}
+                                                            aria-hidden
+                                                        />
+                                                        <SolidIcon
+                                                            name={getToolIconName(msg.toolName ?? "")}
+                                                            className={styles.ToolCardToolIcon}
+                                                            aria-hidden
+                                                        />
                                                         <span className={styles.ToolCardName}>{msg.toolName}</span>
                                                         {msg.toolDesc && <span className={styles.ToolCardDesc} title={msg.toolDesc}>{msg.toolDesc}</span>}
                                                         <span className={styles.ToolCardBadge}>{getToolCategory(msg.toolName)}</span>
@@ -1102,7 +1142,11 @@ export const SolidAiChat: React.FC = () => {
                                                             <span className={styles.ToolCardDuration}>{formatDuration(msg.durationMs)}</span>
                                                         )}
                                                         {hasExpandable && status !== "running" && (
-                                                            <i className={`pi pi-chevron-right ${styles.ToolCardChevron} ${isExpanded ? styles.ToolCardChevronOpen : ""}`} />
+                                                            <SolidIcon
+                                                                name="si-chevron-right"
+                                                                className={`${styles.ToolCardChevron} ${isExpanded ? styles.ToolCardChevronOpen : ""}`}
+                                                                aria-hidden
+                                                            />
                                                         )}
                                                     </button>
                                                     {/* Progress substeps: always visible */}
@@ -1110,7 +1154,12 @@ export const SolidAiChat: React.FC = () => {
                                                         <div className={styles.ToolCardProgress}>
                                                             {msg.toolProgress.map((p, i) => (
                                                                 <div key={i} className={`${styles.ToolProgressItem} ${p.status === "running" ? styles.ToolProgressRunning : styles.ToolProgressDone}`}>
-                                                                    <i className={`pi ${p.status === "running" ? "pi-spin pi-spinner" : "pi-check-circle"}`} style={{ fontSize: "10px" }} />
+                                                                    <SolidIcon
+                                                                        name={p.status === "running" ? "si-spinner" : "si-check-circle"}
+                                                                        spin={p.status === "running"}
+                                                                        style={{ fontSize: "10px" }}
+                                                                        aria-hidden
+                                                                    />
                                                                     <span className={styles.ToolProgressLabel}>{p.label}</span>
                                                                     {p.durationMs != null && p.status === "done" && (
                                                                         <span className={styles.ToolProgressDuration}>{formatDuration(p.durationMs)}</span>
@@ -1169,7 +1218,7 @@ export const SolidAiChat: React.FC = () => {
                                         items.push(
                                             <div key={msg.id} className={styles.ErrorBubble}>
                                                 <div className={styles.ErrorIcon}>
-                                                    <i className="pi pi-exclamation-circle" style={{ fontSize: "13px" }} />
+                                                    <SolidIcon name="si-exclamation-circle" style={{ fontSize: "13px" }} aria-hidden />
                                                 </div>
                                                 <div className={styles.ErrorContent}>
                                                     <p className={styles.ErrorTitle}>Error</p>
@@ -1227,7 +1276,7 @@ export const SolidAiChat: React.FC = () => {
                         onClick={handleSend}
                         aria-label="Send message"
                     >
-                        <i className="pi pi-send" style={{ fontSize: "12px" }} />
+                        <SolidIcon name="si-send" style={{ fontSize: "12px" }} aria-hidden />
                     </button>
                 </div>
             </div>

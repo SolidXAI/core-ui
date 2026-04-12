@@ -95,7 +95,6 @@ export { Layout } from './components/layout/Layout';
 
 export { FilterIcon } from './components/modelsComponents/filterIcon';
 
-export { ToastContainer, handleError, handleSuccess } from './helpers/ToastContainer';
 // export { getAuthCookieName, getAuthHeader } from './helpers/authHeader';
 export { AppTitle } from './helpers/AppTitle';
 export { addCommasToAmount, calculateDaysOfStay, getSingularAndPlural } from './helpers/helpers';
@@ -107,7 +106,6 @@ export { hasAnyRole } from './helpers/rolesHelper';
 export { registerExtensionComponent, registerExtensionFunction } from './helpers/registry';
 export { env } from './adapters/env';
 export { logger } from './helpers/logger';
-export { default as showToast } from './helpers/showToast';
 
 export {
     authApi,

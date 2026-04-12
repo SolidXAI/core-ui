@@ -1,21 +1,18 @@
-
 import { CreateButton } from "../../../components/common/CreateButton";
-import { useDeleteMultiplemodulesMutation, useGenerateCodeFormoduleMutation, useLazyGetmodulesQuery, useRefreshPermissionsMutation } from "../../../redux/api/moduleApi";
-import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
-import Link from "../../common/Link";
-import { Button } from "primereact/button";
-import { Column } from "primereact/column";
 import {
-  DataTable,
-  DataTableFilterMeta,
-  DataTableStateEvent,
-} from "primereact/datatable";
-import { Dialog } from "primereact/dialog";
+  useDeleteMultiplemodulesMutation,
+  useGenerateCodeFormoduleMutation,
+  useLazyGetmodulesQuery,
+  useRefreshPermissionsMutation,
+} from "../../../redux/api/moduleApi";
+import Link from "../../common/Link";
 import qs from "qs";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { showToast } from "../../../redux/features/toastSlice";
 import { FilterMatchMode } from "../filter/filterMatchMode";
+import { SolidButton, SolidDialog, SolidIcon, SolidInput, SolidSpinner } from "../../shad-cn-ui";
+import { Column, DataTableStateEvent, SolidDataTable } from "../list/SolidDataTable";
 
 export interface ModelMetaData {
   id: string;
@@ -23,120 +20,82 @@ export interface ModelMetaData {
   isSystem: boolean;
 }
 
-interface ErrorResponseData {
-  message: string;
-  statusCode: number;
-  error: string;
-}
+type FilterMeta = Record<string, { value: string | null; matchMode: string }>;
+
+const createDefaultFilters = (): FilterMeta => ({
+  displayName: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
+});
+
 export const ModuleListViewData = () => {
   const dispatch = useDispatch();
-
   const [moduleMetadata, setModuleMetadata] = useState<ModelMetaData[]>([]);
-
-  const [filters, setFilters] = useState<DataTableFilterMeta>({
-    displayName: { value: null, matchMode: FilterMatchMode.STARTS_WITH },
-  });
-  // Lazy loading datatable
+  const [filters, setFilters] = useState<FilterMeta>(() => createDefaultFilters());
+  const [pendingFilters, setPendingFilters] = useState<FilterMeta>(() => createDefaultFilters());
   const [first, setFirst] = useState(0);
   const [rows, setRows] = useState(25);
   const [totalRecords, setTotalRecords] = useState(0);
   const [sortField, setSortField] = useState("");
-  const [sortOrder, setSortOrder] = useState(0);
+  const [sortOrder, setSortOrder] = useState<1 | -1 | 0>(0);
   const [selectedMenus, setSelectedMenus] = useState<ModelMetaData[]>([]);
   const [loading, setLoading] = useState<boolean>(true);
   const [isDialogVisible, setDialogVisible] = useState(false);
   const [isGenerateCodeVisible, setGenerateCodeVisible] = useState(false);
-  const [generateCodeForModule, setGenerateCodeForModule] = useState<any>();
+  const [generateCodeForModule, setGenerateCodeForModule] = useState<string | null>(null);
 
-
-  const [triggerGetModule, { data: module, isLoading, error }] =
-    useLazyGetmodulesQuery();
-
-  const [
-    generateCode,
-    { isLoading: isGenerateCodeUpdating, isSuccess: isGenerateCodeSuceess, isError: isGenerateCodeError, error: generateCodeError, data: generateCodeData },
-  ] = useGenerateCodeFormoduleMutation();
-
-  const [
-    refreshPermission,
-    { isLoading: isRefreshPermissionUpdating, isSuccess: isRefreshPermissionSuceess, isError: isRefreshPermissionError, error: refreshPermissionError, data: refreshPermissionData },
-  ] = useRefreshPermissionsMutation()
-  const [
-    deleteManyModules,
-    {
-      isLoading: isModuleDeleted,
-      isSuccess: isDeleteModuleSuceess,
-      isError: isModuleDeleteError,
-      error: ModuleDeleteError,
-      data: DeletedModule,
-    },
-  ] = useDeleteMultiplemodulesMutation();
+  const [triggerGetModule, { data: module, isLoading }] = useLazyGetmodulesQuery();
+  const [generateCode, { isError: isGenerateCodeError, isSuccess: isGenerateCodeSuceess, error: generateCodeError }] =
+    useGenerateCodeFormoduleMutation();
+  const [refreshPermission] = useRefreshPermissionsMutation();
+  const [deleteManyModules] = useDeleteMultiplemodulesMutation();
 
   useEffect(() => {
     if (module) {
-      setModuleMetadata(module?.records);
-      setTotalRecords(module?.meta.totalRecords);
+      setModuleMetadata(module?.records ?? []);
+      setTotalRecords(module?.meta?.totalRecords ?? 0);
       setLoading(false);
     }
   }, [module]);
 
-
   useEffect(() => {
     const queryData = {
       offset: 0,
-      limit: 25,
+      limit: rows,
       sort: [`id:desc`],
     };
-    const queryString = qs.stringify(queryData, {
-      encodeValuesOnly: true
-    });
+    const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
     triggerGetModule(queryString);
     setSelectedMenus([]);
-  }, [isDeleteModuleSuceess]);
+  }, []); // eslint-disable-line react-hooks/exhaustive-deps
 
-  const onPageChange = (event: any) => {
+  const onPageChange = (event: { first: number; rows: number }) => {
     setFirst(event.first);
     setRows(event.rows);
     setQueryString(event.first, event.rows, sortField, sortOrder, filters);
   };
 
   const onSort = (event: DataTableStateEvent) => {
-    const { sortField, sortOrder } = event;
-    const validSortOrder = sortOrder === 1 || sortOrder === -1 ? sortOrder : 0;
-    setSortField(sortField);
+    const nextSortField = event.sortField ?? "";
+    const validSortOrder = event.sortOrder === 1 || event.sortOrder === -1 ? event.sortOrder : 0;
+    setSortField(nextSortField);
     setSortOrder(validSortOrder);
     setFirst(0);
-    setQueryString(
-      0,
-      rows,
-      sortField,
-      sortOrder === 1 || sortOrder === -1 ? sortOrder : 0,
-      filters
-    );
+    setQueryString(0, rows, nextSortField, validSortOrder, filters);
   };
 
-  const onSelectionChange = (event: any) => {
-    const value = event.value;
-    setSelectedMenus(value);
-  };
-
-
-
-  // Filter fuctions
   const setQueryString = async (
     offset?: number,
-    row?: number,
+    rowCount?: number,
     field?: string,
-    order?: number,
-    filterQuery?: any
+    order?: 1 | -1 | 0,
+    filterQuery?: FilterMeta
   ) => {
-    const formattedFilters: any = {};
+    const formattedFilters: Record<string, any> = {};
 
-    Object.keys(filterQuery).forEach((field) => {
-      const filterValue = filterQuery[field].value;
-      const matchMode = filterQuery[field].matchMode;
+    Object.keys(filterQuery ?? {}).forEach((fieldName) => {
+      const filterValue = filterQuery?.[fieldName]?.value;
+      const matchMode = filterQuery?.[fieldName]?.matchMode;
 
-      if (filterValue !== null && filterValue !== undefined) {
+      if (filterValue !== null && filterValue !== undefined && matchMode) {
         let operator = matchMode;
         switch (matchMode) {
           case FilterMatchMode.CONTAINS:
@@ -161,273 +120,208 @@ export const ModuleListViewData = () => {
             operator = matchMode;
         }
 
-        if (field.includes(".")) {
-          const fieldParts = field.split(".");
-          if (!formattedFilters[fieldParts[0]]) {
-            formattedFilters[fieldParts[0]] = {};
-          }
-          formattedFilters[fieldParts[0]][fieldParts[1]] = {
-            [operator]: filterValue,
-          };
-        } else {
-          formattedFilters[field] = { [operator]: filterValue };
-        }
+        formattedFilters[fieldName] = { [operator]: filterValue };
       }
     });
 
-    const queryData: any = {
+    const queryData: Record<string, any> = {
       offset: offset ?? first,
-      limit: row ?? rows,
+      limit: rowCount ?? rows,
       filters: formattedFilters,
     };
 
     if (field) {
-      queryData.sort = [
-        `${field}:${order == 0 ? null : order == 1 ? "asc" : "desc"}`,
-      ];
+      queryData.sort = [`${field}:${order === 0 ? null : order === 1 ? "asc" : "desc"}`];
     }
 
-    const queryString = qs.stringify(queryData, {
-      encodeValuesOnly: true,
-    });
-
-    triggerGetModule(queryString);
+    const queryString = qs.stringify(queryData, { encodeValuesOnly: true });
+    return triggerGetModule(queryString);
   };
 
-  const onFilter = (e: any) => {
-    setFilters(e.filters);
-    setQueryString(
-      0,
-      rows,
-      sortField,
-      sortOrder === 1 || sortOrder === -1 ? sortOrder : 0,
-      e.filters
-    );
+  const handleFilterInputChange = (fieldName: string, value: string) => {
+    setPendingFilters((prev) => ({
+      ...prev,
+      [fieldName]: { ...prev[fieldName], value },
+    }));
   };
 
-  const detailsBodyTemplate = (moduleMetadata: ModelMetaData) => {
-    return (
-      <Link
-        href={`${moduleMetadata.id}`}
-        rel="noopener noreferrer"
-        className="text-sm font-bold p-0"
-        style={{ color: "#12415D" }}
-      >
-        {moduleMetadata.isSystem === true &&
-          < i className="pi pi-eye" style={{ fontSize: "1rem" }}></i>
-        }
-        {moduleMetadata.isSystem === false &&
-          < i className="pi pi-pencil" style={{ fontSize: "1rem" }}></i>
-        }
-      </Link >
-    );
+  const applyFilters = () => {
+    setFirst(0);
+    setFilters(pendingFilters);
+    setQueryString(0, rows, sortField, sortOrder, pendingFilters);
   };
 
-  const generateCodeBodyTemplate = (moduleMetadata: ModelMetaData) => {
-
-    return (
-      <a onClick={() => {
-        setGenerateCodeForModule(moduleMetadata.id);
-        setGenerateCodeVisible(true);
-      }}
-        rel="noopener noreferrer"
-        className="text-sm font-bold p-0"
-        style={{ color: "#12415D" }}
-      >
-        {moduleMetadata.isSystem === false &&
-          < i className="pi pi-cog" style={{ fontSize: "1rem" }}></i>
-        }
-      </a >
-    );
+  const clearFilters = () => {
+    const defaults = createDefaultFilters();
+    setPendingFilters(defaults);
+    setFilters(defaults);
+    setFirst(0);
+    setQueryString(0, rows, sortField, sortOrder, defaults);
   };
 
   const deleteBulk = () => {
-    let deleteList: any = [];
-    selectedMenus.forEach((element: ModelMetaData) => {
-      deleteList.push(element.id);
-    });
+    const deleteList = selectedMenus.map((element) => element.id);
     deleteManyModules(deleteList);
     setDialogVisible(false);
+    setSelectedMenus([]);
   };
 
-  const onDeleteClose = () => {
-    setDialogVisible(false);
-    setSelectedMenus([]);
-  }
-
-  const generateCodeHandler = async () => {
-    await generateCode({ id: generateCodeForModule })
-    setGenerateCodeVisible(false)
-  }
-
-  const onGenerateCodeClose = () => {
+  const handleGenerateCode = async () => {
+    if (!generateCodeForModule) return;
+    await generateCode({ id: generateCodeForModule });
     setGenerateCodeVisible(false);
-    setSelectedMenus([]);
-
-  }
-  const isFetchBaseQueryErrorWithErrorResponse = (error: any): error is FetchBaseQueryError & { data: ErrorResponseData } => {
-    return error && typeof error === 'object' && 'data' in error && 'message' in error.data;
-  }
-
-  // const handleError = (errorToast: any) => {
-  //   let errorMessage: any = ['An error occurred'];
-
-  //   if (isFetchBaseQueryErrorWithErrorResponse(errorToast)) {
-  //     errorMessage = errorToast.data.message;
-  //   } else {
-  //     errorMessage = ['Something went wrong'];
-  //   }
-
-  //   toast?.current?.show({
-  //     severity: 'error',
-  //     summary: 'Error',
-  //     detail: errorMessage,
-  //     life: 3000,
-  //     //@ts-ignore
-  //     content: (props) => (
-  //       <div className="flex flex-column align-items-left" style={{ flex: "1" }}>
-  //         {Array.isArray(errorMessage) ? (
-  //           errorMessage.map((message, index) => (
-  //             <div className="flex align-items-center gap-2" key={index}>
-  //               <span className="font-bold text-900">{message.trim()}</span>
-  //             </div>
-  //           ))
-  //         ) : (
-  //           <div className="flex align-items-center gap-2">
-  //             <span className="font-bold text-900">{errorMessage?.trim()}</span>
-  //           </div>
-  //         )}
-  //       </div>
-  //     ),
-  //   });
-  // };
-
+    setGenerateCodeForModule(null);
+  };
 
   useEffect(() => {
     if (isGenerateCodeError) {
-      const errorMessage = generateCodeError && typeof generateCodeError === 'object' && 'data' in generateCodeError && 'message' in (generateCodeError as any).data
-        ? (generateCodeError as any).data.message
-        : 'Something went wrong';
-      const detail = Array.isArray(errorMessage) ? errorMessage.join(', ') : String(errorMessage);
-      dispatch(showToast({ severity: 'error', summary: 'Error', detail }));
+      const errorMessage =
+        generateCodeError && typeof generateCodeError === "object" && "data" in generateCodeError && "message" in (generateCodeError as any).data
+          ? (generateCodeError as any).data.message
+          : "Something went wrong";
+      const detail = Array.isArray(errorMessage) ? errorMessage.join(", ") : String(errorMessage);
+      dispatch(showToast({ severity: "error", summary: "Error", detail }));
     }
-  }, [isGenerateCodeError])
-
+  }, [dispatch, isGenerateCodeError, generateCodeError]);
 
   useEffect(() => {
     if (isGenerateCodeSuceess) {
-      dispatch(showToast({ severity: 'success', summary: 'Success', detail: 'Code Generated Successfully' }));
+      dispatch(showToast({ severity: "success", summary: "Success", detail: "Code Generated Successfully" }));
     }
-  }, [isGenerateCodeSuceess])
+  }, [dispatch, isGenerateCodeSuceess]);
 
   const handleRefreshPermission = () => {
-    refreshPermission("")
-  }
+    refreshPermission("");
+  };
+
+  const detailsBodyTemplate = (record: ModelMetaData) => (
+    <Link
+      href={`${record.id}`}
+      rel="noopener noreferrer"
+      className="text-sm font-bold p-0"
+      style={{ color: "#12415D" }}
+    >
+      {record.isSystem ? (
+        <SolidIcon name="si-eye" style={{ fontSize: "1rem" }} aria-hidden />
+      ) : (
+        <SolidIcon name="si-pencil" style={{ fontSize: "1rem" }} aria-hidden />
+      )}
+    </Link>
+  );
+
+  const generateCodeBodyTemplate = (record: ModelMetaData) => {
+    if (record.isSystem) return null;
+    return (
+      <button
+        type="button"
+        className="text-primary border-0 bg-transparent cursor-pointer"
+        onClick={() => {
+          setGenerateCodeForModule(record.id);
+          setGenerateCodeVisible(true);
+        }}
+      >
+        <SolidIcon name="si-cog" style={{ fontSize: "1rem" }} aria-hidden />
+      </button>
+    );
+  };
 
   return (
-    <div className="">
-      <div className="flex gap-3 mb-4">
+    <div className="solid-module-list w-full">
+      <div className="flex gap-3 mb-4 align-items-center flex-wrap">
         <CreateButton />
-        <Button className='small-button' onClick={handleRefreshPermission}>Refresh Permissions</Button>
-        {selectedMenus.length > 0 && <Button
-          type="button"
-          label="Delete"
-          size="small"
-          onClick={() => setDialogVisible(true)}
-          className="small-button"
-          severity="danger"
-        />}
-        {/* <Button
-        type="button"
-        icon="pi pi-filter-slash"
-        label="Clear"
-        size="small"
-        outlined
-      //   onClick={clearFilter}
-        className="small-button"
-      /> */}
+        <SolidButton className="small-button" onClick={handleRefreshPermission} label="Refresh Permissions" />
+        {selectedMenus.length > 0 && (
+          <SolidButton
+            type="button"
+            label="Delete"
+            size="small"
+            severity="danger"
+            className="small-button"
+            onClick={() => setDialogVisible(true)}
+          />
+        )}
       </div>
-      <style>{`
-      .p-datatable .p-datatable-loading-overlay {
-      background-color: rgba(0, 0, 0, 0.0);
-      }
-      `}</style>
-      <DataTable
+
+      <div className="flex flex-column md:flex-row align-items-start gap-3 mb-3">
+        <SolidInput
+          value={pendingFilters.displayName.value ?? ""}
+          onChange={(event) => handleFilterInputChange("displayName", event.currentTarget.value)}
+          placeholder="Search module by name"
+          className="w-full md:w-20rem"
+        />
+        <div className="flex align-items-center gap-2">
+          <SolidButton size="small" onClick={applyFilters} label="Apply" />
+          <SolidButton size="small" variant="ghost" onClick={clearFilters} label="Clear" />
+        </div>
+      </div>
+
+      {(loading || isLoading) && (
+        <div className="flex justify-content-center my-3">
+          <SolidSpinner />
+        </div>
+      )}
+
+      <SolidDataTable
         value={moduleMetadata}
-        lazy
         size="small"
         paginator
         rows={rows}
         rowsPerPageOptions={[10, 25, 50]}
         dataKey="id"
-        filters={filters}
         emptyMessage="No Modules found"
-        onFilter={onFilter}
-        filterDisplay="row"
         totalRecords={totalRecords}
         first={first}
         onPage={onPageChange}
-        onSort={(e: DataTableStateEvent) => onSort(e)}
+        onSort={onSort}
         sortField={sortField}
-        sortOrder={sortOrder === 1 || sortOrder === -1 ? sortOrder : 0}
-        loading={loading || isLoading}
-        loadingIcon="pi pi-spinner"
+        sortOrder={sortOrder}
         selection={selectedMenus}
-        onSelectionChange={onSelectionChange}
-        selectionMode="multiple"
-        removableSort
+        onSelectionChange={({ value }) => setSelectedMenus(value)}
       >
         <Column selectionMode="multiple" headerStyle={{ width: "3em" }} />
-        <Column field="id" header="Id" className="text-sm" sortable headerClassName="table-header-fs"></Column>
+        <Column field="id" header="Id" className="text-sm" sortable headerClassName="table-header-fs" />
         <Column
           field="displayName"
           header="Display Name"
           className="text-sm"
           sortable
-          filter
-          filterPlaceholder="Search model by name"
           style={{ minWidth: "12rem" }}
           headerClassName="table-header-fs"
-        ></Column>
-        <Column
-          header="Edit"
-          body={detailsBodyTemplate}></Column>
-        <Column
-          header="Code"
-          body={generateCodeBodyTemplate}></Column>
+        />
+        <Column header="Edit" body={detailsBodyTemplate} />
+        <Column header="Code" body={generateCodeBodyTemplate} />
+      </SolidDataTable>
 
-      </DataTable>
-      <Dialog
+      <SolidDialog
         visible={isDialogVisible}
         header="Confirm Delete"
         modal
         className="solid-confirm-dialog"
-        footer={() => (
-          <div className="flex justify-content-center">
-            <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteBulk} />
-            <Button label="No" icon="pi pi-times" className='small-button' onClick={onDeleteClose} />
-          </div>
-        )}
         onHide={() => setDialogVisible(false)}
       >
         <p>Are you sure you want to delete the selected Modules?</p>
-      </Dialog>
-      <Dialog
+        <div className="flex justify-content-center gap-3 mt-3">
+          <SolidButton label="Yes" className="small-button" severity="danger" autoFocus onClick={deleteBulk} />
+          <SolidButton label="No" className="small-button" variant="ghost" onClick={() => setDialogVisible(false)} />
+        </div>
+      </SolidDialog>
+
+      <SolidDialog
         visible={isGenerateCodeVisible}
         header="Generate Code"
-        headerClassName="text-center"
         modal
         className="solid-confirm-dialog"
-        footer={() => (
-          <div className="flex justify-content-center">
-            <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={generateCodeHandler} />
-            <Button label="No" icon="pi pi-times" className='small-button' onClick={onGenerateCodeClose} />
-          </div>
-        )}
-        onHide={() => setGenerateCodeVisible(false)}
+        onHide={() => {
+          setGenerateCodeVisible(false);
+          setGenerateCodeForModule(null);
+        }}
       >
         <p className="text-center">Proceed with module code generation? Existing files will be overwritten.</p>
-      </Dialog>
+        <div className="flex justify-content-center gap-3 mt-3">
+          <SolidButton label="Yes" className="small-button" severity="danger" autoFocus onClick={handleGenerateCode} />
+          <SolidButton label="No" className="small-button" variant="ghost" onClick={() => setGenerateCodeVisible(false)} />
+        </div>
+      </SolidDialog>
     </div>
   );
 };

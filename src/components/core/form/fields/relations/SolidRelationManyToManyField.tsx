@@ -231,7 +231,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                         <>
                             <div>
                                 <SolidButton
-                                    icon="pi pi-plus"
+                                    icon="si si-plus"
                                     rounded
                                     variant="outline"
                                     aria-label="Filter"
@@ -369,7 +369,7 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
                 {fieldContext.field.attrs.inlineCreate && (
                     <>
                         <SolidButton
-                            icon="pi pi-plus"
+                            icon="si si-plus"
                             rounded
                             variant="outline"
                             aria-label="Filter"

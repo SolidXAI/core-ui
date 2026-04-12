@@ -3,6 +3,7 @@ import styles from './solidFields.module.css';
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { SolidButton } from "../../../shad-cn-ui/SolidButton";
+import { SolidIcon } from "../../../shad-cn-ui";
 import { SolidPasswordInput } from "../../../shad-cn-ui/SolidPasswordInput";
 import {
     SolidDialog,
@@ -172,10 +173,11 @@ export const DefaultPasswordFormViewWidget = ({ formik, fieldContext }: SolidFor
                 <p className={styles.fieldViewValue}>
                     {isText ? formik.values[fieldLayoutInfo.attrs.name] : "••••••••"}
                 </p>
-                <i
-                    className={`pi ${isText ? 'pi-eye' : 'pi-eye-slash'}`}
+                <SolidIcon
+                    name={isText ? "si-eye" : "si-eye-slash"}
                     onClick={() => setIsText(!isText)}
-                    style={{ cursor: 'pointer' }}
+                    style={{ cursor: "pointer" }}
+                    aria-hidden
                 />
             </div>
         </div>
@@ -330,7 +332,7 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
             <SolidButton
                 type="button"
                 label="Change Password"
-                icon="pi pi-lock"
+                icon="si si-lock"
                 onClick={() => setVisible(true)}
                 className="mt-1"
                 disabled={formDisabled || fieldDisabled || readOnlyPermission || fieldReadonly}
@@ -380,7 +382,7 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
                     </div>
 
                     <div className="mt-5">
-                        <SolidButton label="Update Password" icon="pi pi-check" type="submit" className="w-full" />
+                        <SolidButton label="Update Password" icon="si si-check" type="submit" className="w-full" />
                     </div>
                 </form>
                 </SolidDialogBody>

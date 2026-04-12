@@ -1,6 +1,5 @@
 import { DropzonePlaceholder } from "../../../components/common/DropzonePlaceholder";
 import { FileReaderExt } from "../../../components/common/FileReaderExt";
-import { SolidFormHeader } from "../../../components/common/SolidFormHeader";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { getSingularAndPlural } from "../../../helpers/helpers";
 import { useGetFieldDefaultMetaDataQuery } from "../../../redux/api/fieldApi";
@@ -9,11 +8,6 @@ import { useCreatemoduleMutation, useDeletemoduleMutation, useUpdatemoduleMutati
 import { useFormik } from "formik";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
-import { Divider } from "primereact/divider";
-import { InputText } from "primereact/inputtext";
-import { InputTextarea } from "primereact/inputtextarea";
-import { Panel } from "primereact/panel";
-import { ProgressBar } from "primereact/progressbar";
 import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { showToast } from "../../../redux/features/toastSlice";
@@ -21,30 +15,25 @@ import { useDropzone } from "react-dropzone";
 import * as Yup from "yup";
 import { env } from "../../../adapters/env";
 import styles from "../form/fields/solidFields.module.css";
-import { SolidMessage } from "../../shad-cn-ui/SolidMessage";
-import { SolidAutocomplete } from "../../shad-cn-ui/SolidAutocomplete";
+import {
+  SolidAutocomplete,
+  SolidButton,
+  SolidInput,
+  SolidMessage,
+  SolidPanel,
+  SolidPopover,
+  SolidPopoverContent,
+  SolidPopoverTrigger,
+  SolidProgressBar,
+  SolidTextarea,
+  SolidIcon,
+} from "../../shad-cn-ui";
 import { useSolidAutocompleteField } from "../../../hooks/useSolidAutocompleteField";
-import { SolidButton } from "../../shad-cn-ui/SolidButton";
-import { SolidPopover, SolidPopoverContent, SolidPopoverTrigger } from "../../shad-cn-ui/SolidPopover";
 import { Settings, Trash2 } from "lucide-react";
 import { SolidFormFooter } from "../form/SolidFormFooter";
-import { SolidFormViewProps } from "../form/SolidFormView";
 
 
 
-
-const footer = (
-  <>
-    <Divider />
-    <p className="mt-2">Suggestions</p>
-    <ul className="pl-2 ml-2 mt-0 line-height-3">
-      <li>At least one lowercase</li>
-      <li>At least one uppercase</li>
-      <li>At least one numeric</li>
-      <li>Minimum 8 characters</li>
-    </ul>
-  </>
-);
 
 const CreateModule = ({ params, data }: any) => {
   const dispatch = useDispatch();
@@ -394,14 +383,14 @@ const CreateModule = ({ params, data }: any) => {
           {/* <SolidFormHeader /> */}
           <div className="solid-form-content">
             {/* <p className="form-wrapper-heading text-base">Basic Info</p> */}
-            <Panel header={"Basic Info"} className="solid-column-panel">
+            <SolidPanel header={"Basic Info"} className="solid-column-panel">
               <div className="formgrid grid mt-3">
                 <div className="field col-12 pb-3 lg:pb-0 lg:col-6">
                   <div className={styles.fieldWrapper}>
                     <label htmlFor="displayName" className={`${styles.fieldLabel} form-field-label`}>
                       Display Name <span className="text-red-500">*</span>
                     </label>
-                    <InputText
+                    <SolidInput
                       disabled={!!data}
                       type="text"
                       id="displayName"
@@ -426,7 +415,7 @@ const CreateModule = ({ params, data }: any) => {
                     <label htmlFor="name" className={`${styles.fieldLabel} form-field-label`}>
                       Name <span className="text-red-500">*</span>
                     </label>
-                    <InputText
+                    <SolidInput
                       disabled
                       type="text"
                       id="name"
@@ -447,7 +436,7 @@ const CreateModule = ({ params, data }: any) => {
                     <label htmlFor="menuSequenceNumber" className={`${styles.fieldLabel} form-field-label`}>
                       Menu Sequence Number
                     </label>
-                    <InputText
+                    <SolidInput
                       id="menuSequenceNumber"
                       type="number"
                       onChange={formik.handleChange}
@@ -465,7 +454,7 @@ const CreateModule = ({ params, data }: any) => {
                     <label htmlFor="description" className={`${styles.fieldLabel} form-field-label`}>
                       Description <span className="text-red-500">*</span>
                     </label>
-                    <InputTextarea
+                    <SolidTextarea
                       id="description"
                       name="description"
                       onChange={formik.handleChange}
@@ -480,10 +469,10 @@ const CreateModule = ({ params, data }: any) => {
                   </div>
                 </div>
               </div>
-            </Panel>
+            </SolidPanel>
             {/* <Divider /> */}
             {/* <p className="form-wrapper-heading text-base" style={{ fontSize: 16 }}>Configurations</p> */}
-            <Panel header={"Configurations"} className="solid-column-panel mt-4">
+            <SolidPanel header={"Configurations"} className="solid-column-panel mt-4">
               <div className="formgrid grid mt-3">
                 <div className="field col-12 pb-3 lg:pb-0 lg:col-6">
                   <div className={styles.fieldWrapper}>
@@ -532,7 +521,7 @@ const CreateModule = ({ params, data }: any) => {
                                 className="solid-file-icon-btn is-danger"
                                 onClick={handleCancelUpload}
                               >
-                                <i className="pi pi-times" />
+                                <SolidIcon name="si-times" aria-hidden />
                               </button>
                             </div>
                             {uploadCompleted ? (
@@ -565,13 +554,13 @@ const CreateModule = ({ params, data }: any) => {
                             )}
                           </div>
                         </div>
-                        <ProgressBar value={uploadProgress} showValue={false} style={{ height: 4 }} className="mt-2" />
+                        <SolidProgressBar value={uploadProgress} showValue={false} style={{ height: 4 }} className="mt-2" />
                       </div>
                     )}
                   </div>
                 </div>
               </div>
-            </Panel>
+            </SolidPanel>
           </div>
         </form>
         {/* <div style={{ width: '22.5%' }}></div> */}

@@ -1,4 +1,3 @@
-import { Message } from "primereact/message";
 import { env } from "../../adapters/env";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ChatIcon } from "../layout/SolidAiStudioLayout";

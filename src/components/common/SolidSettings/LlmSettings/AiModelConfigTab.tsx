@@ -1,4 +1,4 @@
-import { Dropdown } from "primereact/dropdown";
+import { SolidSelect } from "../../../shad-cn-ui";
 import { OpenAiProviderComponent } from "./OpenAiProviderComponent";
 import { AnthropicProviderComponent } from "./AnthropicProviderComponent";
 
@@ -51,7 +51,7 @@ export const AiModelConfigTab = ({ config, onChange }: Props) => {
     <div className="ai-model-config-tab">
       <div className="flex flex-column gap-2">
         <label className="form-field-label">Provider</label>
-        <Dropdown
+        <SolidSelect
           className="w-full"
           value={provider}
           options={PROVIDER_OPTIONS}

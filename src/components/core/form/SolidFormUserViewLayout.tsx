@@ -1,12 +1,11 @@
 
 import { useFormik } from "formik";
-import { Button } from "primereact/button";
 import { useDispatch } from "react-redux";
 import React from "react";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showToast } from "../../../redux/features/toastSlice";
-import { SolidCodeEditor } from "../../shad-cn-ui";
+import { SolidButton, SolidCodeEditor } from "../../shad-cn-ui";
 
 export const SolidFormUserViewLayout = ({ solidFormViewMetaData, setLayoutDialogVisible }: any) => {
     const dispatch = useDispatch();
@@ -55,12 +54,12 @@ export const SolidFormUserViewLayout = ({ solidFormViewMetaData, setLayoutDialog
                     }}
                 />
                 <div className="pt-3 flex gap-2">
-                    <Button type="submit" label="Apply" size="small" />
-                    <Button
+                    <SolidButton type="submit" label="Apply" size="sm" />
+                    <SolidButton
                         type="button"
                         outlined
                         label="Cancel"
-                        size="small"
+                        size="sm"
                         onClick={() => setLayoutDialogVisible(false)}
                     />
                 </div>

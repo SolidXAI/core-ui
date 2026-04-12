@@ -8,6 +8,7 @@ import { SolidOneToManyFilterElement } from "./SolidOneToManyFilterElement";
 import { SolidButton } from "../../shad-cn-ui/SolidButton";
 import { SolidInput } from "../../shad-cn-ui/SolidInput";
 import { SolidNumberInput } from "../../shad-cn-ui/SolidNumberInput";
+import { SolidIcon } from "../../shad-cn-ui";
 
 export enum InputTypes {
     Date = 'Date',
@@ -264,10 +265,10 @@ export const SolidVarInputsFilterElement = ({ values, onChange, inputType = Inpu
                     {numberOfInputs === null &&
                         <>
                             <SolidButton variant="ghost" size="sm" onClick={() => addInput()} className='solid-filter-action-btn solid-filter-action-icon-btn'>
-                                <i className="pi pi-plus" />
+                                <SolidIcon name="si-plus" aria-hidden />
                             </SolidButton>
                             <SolidButton variant="ghost" size="sm" onClick={() => deleteInput(index)} className='solid-filter-action-btn solid-filter-action-icon-btn is-danger'>
-                                <i className="pi pi-trash" />
+                                <SolidIcon name="si-trash" aria-hidden />
                             </SolidButton>
                         </>
                     }

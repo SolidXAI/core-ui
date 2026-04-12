@@ -1,12 +1,10 @@
 
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
-import { OverlayPanel } from "primereact/overlaypanel";
-import { useRef, useState } from "react";
+import { useState } from "react";
+import { SolidButton, SolidDialog, SolidPopover, SolidPopoverContent, SolidPopoverTrigger } from "../shad-cn-ui";
 
 const FilterMenu = () => {
-    const op = useRef<any>(null);
     const [visible, setVisible] = useState(false);
+    const [menuOpen, setMenuOpen] = useState(false);
 
     const filters = [
         { label: 'On Time Off', onClick: () => handleFilterClick('On Time Off') },
@@ -56,16 +54,19 @@ const FilterMenu = () => {
 
     return (
         <div>
-            <Button
-                icon="pi pi-cog"
-                className="transparent-background"
-                onClick={(e: any) => op?.current?.toggle(e)}
-                aria-haspopup
-                aria-controls="popup_menu"
-            />
-            {/* <Button type="button" icon="pi pi-image" label="Image" onClick={(e: any) => op?.current?.toggle(e)} /> */}
-            <OverlayPanel ref={op} className="filterDropdown">
-                <div className="grid m-0">
+            <SolidPopover open={menuOpen} onOpenChange={setMenuOpen} autoCloseGroup="filter-menu">
+                <SolidPopoverTrigger asChild>
+                    <SolidButton
+                        icon="pi pi-cog"
+                        className="transparent-background"
+                        variant="ghost"
+                        size="sm"
+                        aria-haspopup
+                        aria-controls="popup_menu"
+                    />
+                </SolidPopoverTrigger>
+                <SolidPopoverContent className="filterDropdown" side="bottom" align="start">
+                    <div className="grid m-0">
                     {/* Column 1: Filters */}
                     <div className="col-12 md:col-4 lg:col-4">
                         <h3><span className=" pi pi-filter"></span> Filters</h3>
@@ -101,11 +102,12 @@ const FilterMenu = () => {
                             ))}
                         </ul>
                     </div>
-                </div>
-            </OverlayPanel>
-            <Dialog header="Add Custom Filter" visible={visible} style={{ width: '50vw' }} onHide={() => { if (!visible) return; setVisible(false); }}>
+                    </div>
+                </SolidPopoverContent>
+            </SolidPopover>
+            <SolidDialog header="Add Custom Filter" visible={visible} className="solid-dialog-lg" onHide={() => { if (!visible) return; setVisible(false); }}>
                 {/* <FilterComponent></FilterComponent> */}
-            </Dialog>
+            </SolidDialog>
 
             {/* <Dialog
                 visible={visible}

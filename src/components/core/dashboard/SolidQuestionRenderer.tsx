@@ -1,9 +1,8 @@
 
+import type { ReactNode } from 'react';
 import { useGetDashboardQuestionDataByIdQuery } from '../../../redux/api/dashboardQuestionApi';
 import { SqlExpression } from '../../../types/solid-core';
-import { Message } from 'primereact/message';
-import { MeterGroup } from 'primereact/metergroup';
-import { ProgressSpinner } from 'primereact/progressspinner';
+import { SolidMessage, SolidSpinner } from '../../shad-cn-ui';
 import qs from 'qs';
 import { ChartJsRenderer } from './chart-renderers/ChartJsRenderer';
 import PrimeReactDatatableRenderer from './chart-renderers/PrimeReactDatatableRenderer';
@@ -17,7 +16,7 @@ type SolidQuestionRendererProps = {
 
 type DataItem = {
     value: number;
-    label?: string | HTMLElement;
+    label?: string | ReactNode;
     color?: string;
 }
 
@@ -25,7 +24,7 @@ export const SolidQuestionRenderer = ({ question, filters = [], isPreview = fals
     if (!question) {
         return (
             <div className={`${styles.SolidChartCardWrapper} p-4`}>
-                <Message text="Preview Unavailable" />
+                <SolidMessage text="Preview Unavailable" />
             </div>
         );
     }
@@ -33,9 +32,7 @@ export const SolidQuestionRenderer = ({ question, filters = [], isPreview = fals
     const textAlign = question?.textAlign ?? 'start'
     if (!question) {
         return (
-            <>
-                <Message text="Preview Unavailable" />
-            </>
+            <SolidMessage text="Preview Unavailable" />
         )
     }
     // console.log(`Rendering BarChartRenderer using question id: ${question.id}`);
@@ -61,7 +58,7 @@ export const SolidQuestionRenderer = ({ question, filters = [], isPreview = fals
     // const visualizedAs = question.data.visualisedAs;
     return (
         <>
-            {questionDataIsLoading && <ProgressSpinner />}
+            {questionDataIsLoading && <SolidSpinner />}
             {!questionDataIsLoading &&
                 <div className={`${styles.SolidChartCardWrapper} h-full`}>
                     <div className='flex flex-col p-4 pb-3' style={{ borderBottom: "1px solid #e4e3e3" }}>
@@ -70,7 +67,29 @@ export const SolidQuestionRenderer = ({ question, filters = [], isPreview = fals
                     </div>
                     <div className='mt-3 flex-1 min-h-0 p-4 pt-2'>
                         {['bar', 'line', 'pie'].includes(question.visualisedAs) && <ChartJsRenderer options={options} visualizationData={questionData.data.visualizationData} visualizedAs={question.visualisedAs} />}
-                        {question.visualisedAs === 'prime-meter-group' && <MeterGroup values={questionData.data.visualizationData.dataset} max={questionData?.data?.visualizationData?.dataset?.reduce((total: number, item: DataItem) => total + item.value, 0)} />}
+                        {question.visualisedAs === 'prime-meter-group' && (() => {
+                            const dataset: DataItem[] = questionData.data.visualizationData.dataset;
+                            const total = dataset.reduce((sum, it) => sum + it.value, 0) || 1;
+                            return (
+                                <div className="solid-meter-group">
+                                    {dataset.map((item: DataItem, idx: number) => {
+                                        const percentage = Math.round((item.value / total) * 100);
+                                        return (
+                                            <div key={`${item.label}-${idx}`} className="solid-meter-group-row">
+                                                <span className="solid-meter-group-label">{item.label}</span>
+                                                <div className="solid-meter-group-bar">
+                                                    <div
+                                                        className="solid-meter-group-bar-fill"
+                                                        style={{ width: `${percentage}%`, backgroundColor: item.color || 'var(--solid-surface-accent)' }}
+                                                    />
+                                                </div>
+                                                <span className="solid-meter-group-value">{percentage}%</span>
+                                            </div>
+                                        );
+                                    })}
+                                </div>
+                            );
+                        })()}
                         {question.visualisedAs === 'prime-datatable' && <PrimeReactDatatableRenderer options={options} visualizationData={questionData.data.visualizationData} />}
                     </div>
                 </div>

@@ -5,6 +5,7 @@ import { handleLogout } from "../../adapters/auth/handleLogout";
 import { useLazyGetSolidSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { useSession } from "../../hooks/useSession";
 import { SolidButton } from "../shad-cn-ui/SolidButton";
+import { SolidIcon, parseSolidIconMeta } from "../shad-cn-ui/SolidIcon";
 
 type InlineToast = {
   id: number;
@@ -201,7 +202,7 @@ const UserProfileMenu = () => {
                 }}
               >
                 {solidSettingsData?.data?.contactSupportIcon ? (
-                  <i className={solidSettingsData?.data?.contactSupportIcon} aria-hidden="true" />
+                  (() => { const m = parseSolidIconMeta(solidSettingsData?.data?.contactSupportIcon); return m ? <SolidIcon name={m.name} spin={m.spin} aria-hidden="true" /> : <i className={solidSettingsData?.data?.contactSupportIcon} aria-hidden="true" />; })()
                 ) : (
                   <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 18 18" fill="none" aria-hidden="true">
                     <path d="M3 4.5C3 3.67157 3.67157 3 4.5 3H13.5C14.3284 3 15 3.67157 15 4.5V13.5C15 14.3284 14.3284 15 13.5 15H4.5C3.67157 15 3 14.3284 3 13.5V4.5Z" stroke="currentColor" strokeWidth="1.25" />

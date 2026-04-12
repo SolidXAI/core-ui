@@ -1,12 +1,11 @@
-import { InputText } from "primereact/inputtext";
-import { Password } from "primereact/password";
+import { SolidInput, SolidPasswordInput } from "../../../shad-cn-ui";
 
 export const OpenAiProviderComponent = ({ profile, onUpdate }: any) => {
   return (
     <div className="flex flex-column gap-4 mt-3">
       <div className="flex flex-column gap-2">
         <label className="form-field-label">Base URL</label>
-        <InputText
+        <SolidInput
           placeholder="https://api.provider.com"
           value={profile?.baseUrl || ""}
           onChange={(e) => onUpdate("baseUrl", e.target.value)}
@@ -15,18 +14,16 @@ export const OpenAiProviderComponent = ({ profile, onUpdate }: any) => {
       </div>
       <div className="flex flex-column gap-2">
         <label className="form-field-label">API Key</label>
-        <Password
+        <SolidPasswordInput
           className="w-full"
           value={profile?.apiKey || ""}
           onChange={(e) => onUpdate("apiKey", e.target.value)}
-          toggleMask
-          feedback={false}
-          inputClassName="w-full"
+          toggle
         />
       </div>
       <div className="flex flex-column gap-2">
         <label className="form-field-label">Model Name</label>
-        <InputText
+        <SolidInput
           placeholder="e.g. gpt-4o-mini"
           value={profile?.modelName || ""}
           onChange={(e) => onUpdate("modelName", e.target.value)}

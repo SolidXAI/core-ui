@@ -2,9 +2,6 @@ import { useInitateLoginMutation } from "../../redux/api/authApi";
 import { Form, Formik } from "formik";
 import { useRouter } from "../../hooks/useRouter";
 import { useSearchParams } from "../../hooks/useSearchParams";
-import { Button } from "primereact/button";
-import { InputOtp } from "primereact/inputotp";
-import { Message } from "primereact/message";
 import { useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
 import * as Yup from "yup";
@@ -13,7 +10,7 @@ import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
-import { SolidButton } from "../shad-cn-ui";
+import { SolidButton, SolidIcon, SolidMessage, SolidOtpInput } from "../shad-cn-ui";
 import { loadSession } from "../../adapters/auth/storage";
 import { hasAnyRole } from "../../helpers/rolesHelper";
 
@@ -182,22 +179,22 @@ const SolidInitialLoginOtp = () => {
                                             className="solid-auth-otp-resend"
                                             onClick={handleResendOtp}
                                             disabled={!resendEnabled}
+                                            leftIcon={<SolidIcon name="si-refresh" aria-hidden />}
                                         >
-                                            <i className="pi pi-refresh" />
                                             Resend code
                                         </SolidButton>
                                     </div>
-                                    <InputOtp
+                                    <SolidOtpInput
                                         id="otp"
+                                        className="solid-auth-otp-input"
                                         value={formik.values.otp}
-                                        onChange={(e) => formik.setFieldValue("otp", e.value)}
+                                        onChange={(nextValue) => formik.setFieldValue("otp", nextValue)}
                                         length={6}
                                         integerOnly
-                                        className="solid-auth-otp-input"
                                         invalid={!!formik.errors.otp}
                                     />
                                     {isFormFieldValid(formik, "otp") && (
-                                        <Message className="text-red-500 text-sm" severity="error" text={formik.errors.otp?.toString()} />
+                                        <SolidMessage className="text-red-500 text-sm" severity="error" text={formik.errors.otp?.toString()} />
                                     )}
                                     <p className="solid-auth-otp-time">
                                         {resendEnabled
@@ -208,8 +205,20 @@ const SolidInitialLoginOtp = () => {
                                     </p>
                                 </div>
                                 <div className="mt-4">
-                                    <Button type="submit" className="w-full font-light auth-submit-button" label="Verify" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
-                                    <Button type="button" label="Back" className="w-full auth-back-button text-center mt-1" link onClick={() => (window.location.href = '/auth/login')} />
+                                    <SolidButton
+                                        type="submit"
+                                        className="w-full font-light auth-submit-button"
+                                        label="Verify"
+                                        disabled={formik.isSubmitting}
+                                        loading={formik.isSubmitting}
+                                    />
+                                    <SolidButton
+                                        type="button"
+                                        label="Back"
+                                        className="w-full auth-back-button text-center mt-1"
+                                        text
+                                        onClick={() => (window.location.href = '/auth/login')}
+                                    />
                                 </div>
                             </Form>
                         )}

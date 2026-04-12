@@ -1,4 +1,5 @@
 import React, { useState } from "react";
+import { SolidIcon } from "./SolidIcon";
 
 type SolidPanelProps = {
   header?: React.ReactNode;
@@ -22,7 +23,10 @@ export function SolidPanel({ header, toggleable, defaultCollapsed, children, cla
         <div className="solid-panel-title">{header}</div>
         {toggleable && (
           <button type="button" className="solid-panel-toggle" onClick={handleToggle} aria-expanded={!collapsed}>
-            <i className={collapsed ? "pi pi-chevron-down" : "pi pi-chevron-up"} aria-hidden />
+            <SolidIcon
+              name={collapsed ? "si-chevron-down" : "si-chevron-up"}
+              aria-hidden
+            />
           </button>
         )}
       </div>

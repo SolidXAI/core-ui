@@ -3,6 +3,7 @@ import { useMemo, useState } from "react";
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
 import MarkdownViewer from "../../../../../components/common/MarkdownViewer";
 import { SolidButton } from "../../../../shad-cn-ui/SolidButton";
+import { SolidIcon } from "../../../../shad-cn-ui";
 import { SolidTabGroup } from "../../../../../components/shad-cn-ui/SolidTabs";
 import ReactCodeMirror, { EditorView, oneDark } from "@uiw/react-codemirror";
 import { javascript } from "@codemirror/lang-javascript";
@@ -79,7 +80,7 @@ export const SolidAiInteractionMetadataFieldFormWidget = ({ formik, fieldContext
                                 <span className="font-medium">{headerTitle}</span>
                                 {isDoc && (
                                     <SolidButton variant="ghost" size="sm" onClick={openDoc} aria-label="Open documentation">
-                                        <i className="pi pi-external-link" aria-hidden />
+                                        <SolidIcon name="si-external-link" aria-hidden />
                                     </SolidButton>
                                 )}
                             </summary>

@@ -3,6 +3,7 @@ import { GroupableField } from "./SolidGlobalSearchElement";
 import { SolidAutocomplete } from "../../shad-cn-ui/SolidAutocomplete";
 import { SolidSelect } from "../../shad-cn-ui/SolidSelect";
 import { SolidButton } from "../../shad-cn-ui/SolidButton";
+import { SolidIcon } from "../../shad-cn-ui/SolidIcon";
 
 const groupedDateOptions = [
   {
@@ -234,10 +235,7 @@ const GroupingComponent = ({
   const groupedDateItemTemplate = (option: any) => {
     return (
       <div className="flex align-items-center gap-2">
-        <i className={`pi ${option.label === "Year" ? "pi-calendar" :
-          option.label === "Month" ? "pi-calendar-minus" :
-            "pi-calendar-plus"
-          }`} />
+        <SolidIcon name={option.label === "Year" ? "si-calendar" : option.label === "Month" ? "si-calendar-minus" : "si-calendar-plus"} />
         <div>
           {option.label}
         </div>
@@ -319,11 +317,11 @@ const GroupingComponent = ({
                 )}
 
                 <button type="button" className="solid-grouping-chip-remove" onClick={() => removeGroup(rule.id)}>
-                  <i className="pi pi-times" />
+                  <SolidIcon name="si-times" />
                 </button>
               </div>
               {index < groupingRules.length - 1 && (
-                <i className="pi pi-angle-double-right text-400 text-xs" />
+                <SolidIcon name="si-angle-double-right" className="text-400 text-xs" />
               )}
             </React.Fragment>
           );
@@ -380,7 +378,7 @@ const GroupingComponent = ({
 
               {!rule.locked && (
                 <button type="button" className="solid-grouping-chip-remove" onClick={() => removeAggregation(rule.id)}>
-                  <i className="pi pi-times" />
+                  <SolidIcon name="si-times" />
                 </button>
               )}
             </div>
@@ -391,11 +389,11 @@ const GroupingComponent = ({
       {/* FOOTER */}
       <div className="solid-grouping-footer">
         <SolidButton size="sm" variant="primary" onClick={() => applyGrouping(groupingRules, aggregationRules)}>
-          <i className="pi pi-check" />
+          <SolidIcon name="si-check" />
           Apply
         </SolidButton>
         <SolidButton size="sm" variant="outline" onClick={closeDialog}>
-          <i className="pi pi-times" />
+          <SolidIcon name="si-times" />
           Cancel
         </SolidButton>
       </div>

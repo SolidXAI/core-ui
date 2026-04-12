@@ -2,7 +2,6 @@
 
 import { useSession } from "../../hooks/useSession";
 import styles from './solidModuleHome.module.css'
-import { Button } from 'primereact/button';
 import { DocsSvg } from '../Svg/DocsSvg';
 import { SettingsSvg } from '../Svg/SettingsSvg';
 import { DevDocs } from '../Svg/DevDocs';
@@ -12,6 +11,7 @@ import { useState } from 'react';
 import { SolidAccountSettings } from '../core/common/SolidAccountSettings/SolidAccountSettings';
 import { useDispatch, useSelector } from "react-redux";
 import { showNavbar, toggleNavbar } from "../../redux/features/navbarSlice";
+import { SolidButton, SolidIcon } from "../shad-cn-ui";
 
 type SolidModuleHomeProps = {
     moduleName?: string;
@@ -38,7 +38,7 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
             <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
                 <div className='flex align-items-center gap-2'>
                     <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
-                        <i className="pi pi-th-large"></i>
+                        <SolidIcon name="si-th-large" aria-hidden />
                     </div>
                     <p className="m-0 view-title solid-text-wrapper">
                         {moduleName}
@@ -93,14 +93,22 @@ export const SolidModuleHome = ({ moduleName = "Dashboard" }: SolidModuleHomePro
                                 <div>
                                     {card.url ? (
                                         <Link href={card.url} target="_blank" rel="noopener noreferrer">
-                                            <Button outlined label='Explore' size='small' icon="pi pi-arrow-right" iconPos='right' className="font-bold" style={{ background: 'var(--solid-module-home-add-button-bg)' }} />
+                                            <SolidButton
+                                                outlined
+                                                label='Explore'
+                                                size='small'
+                                                icon="si si-arrow-right"
+                                                iconPos='right'
+                                                className="font-bold"
+                                                style={{ background: 'var(--solid-module-home-add-button-bg)' }}
+                                            />
                                         </Link>
                                     ) : (
-                                        <Button
+                                        <SolidButton
                                             outlined
                                             label='Open'
                                             size='small'
-                                            icon="pi pi-cog"
+                                            icon="si si-cog"
                                             iconPos='right'
                                             className="font-bold"
                                             style={{ background: 'var(--solid-module-home-add-button-bg)' }}

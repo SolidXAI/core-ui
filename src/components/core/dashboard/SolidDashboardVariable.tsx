@@ -1,14 +1,14 @@
 
 import { SqlExpression } from "../../../types/solid-core";
-import { AutoComplete, AutoCompleteChangeEvent, AutoCompleteCompleteEvent } from "primereact/autocomplete";
-import { Calendar } from "primereact/calendar";
-import { Nullable } from "primereact/ts-helpers";
 import React, { Dispatch, SetStateAction, useEffect, useState } from "react";
 import styles from './SolidDashboard.module.css';
 import { useGetDashboardVariableSelectionDynamicValuesQuery } from "../../../redux/api/dashboardApi";
-import { ProgressSpinner } from "primereact/progressspinner";
 import { DashboardVariableRecord } from "./SolidDashboard";
-import { Button } from "primereact/button";
+import { SolidAutocomplete, SolidButton, SolidDatePicker, SolidIcon, SolidSpinner } from "../../shad-cn-ui";
+
+type Nullable<T> = T | null;
+type AutoCompleteChangeEvent = { value: any };
+type AutoCompleteCompleteEvent = { query: string };
 
 
 export interface DashboardVariableFilterProps {
@@ -17,17 +17,19 @@ export interface DashboardVariableFilterProps {
   dashboardVariable: DashboardVariableRecord;
 }
 
+type DateRange = [Date | null, Date | null] | null;
+
 export const DateVariableFilterComponent: React.FC<DashboardVariableFilterProps> = ({ setFilters, clearSignal, dashboardVariable }) => {
   // Initialize the default dates state
   // If the dashboardVariable has a defaultOperator as Between and a defaultValue as two dates, we can set those as the initial values, otherwise null
   const defaultDatesString = dashboardVariable.defaultOperator === '$between' && dashboardVariable.defaultValue
   const defaultDatesArray = JSON.parse(defaultDatesString || '[]');
   // Map the defaultDatesArray to Date objects
-  const defaultDates: Nullable<(Date | null)[]> = defaultDatesArray.length === 2 ? [
+  const defaultDates: DateRange = defaultDatesArray.length === 2 ? [
     new Date(defaultDatesArray[0]),
     new Date(defaultDatesArray[1])
   ] : null;
-  const [dates, setDates] = useState<Nullable<(Date | null)[]>>(defaultDates);
+  const [dates, setDates] = useState<DateRange>(defaultDates);
 
   useEffect(() => {
     setDates(null);  // reset UI
@@ -35,32 +37,37 @@ export const DateVariableFilterComponent: React.FC<DashboardVariableFilterProps>
   
   return (
     <div className={`flex align-items-center ${styles.SolidDashboardDateRangeFilterWrapper}`}>
-      <Calendar value={dates} onChange={(e) => {
-        console.log(`Calendar changed values are: `);
-        console.log(e.value);
-        const newDates = e.value as Date[] | null;
-        setDates(newDates);
+      <SolidDatePicker
+        selectsRange
+        startDate={dates ? dates[0] : null}
+        endDate={dates ? dates[1] : null}
+        onChange={(next: [Date | null, Date | null] | null) => {
+          const newDates = next;
+          setDates(newDates);
 
-        if (newDates && newDates.length === 2 && newDates[0] && newDates[1]) {
-          const filter: SqlExpression = {
-            variableName: dashboardVariable.variableName,
-            // @ts-ignore
-            operator: '$between',
-            value: [
+          if (newDates && newDates[0] && newDates[1]) {
+            const filter: SqlExpression = {
+              variableName: dashboardVariable.variableName,
+              // @ts-ignore
+              operator: '$between',
+              value: [
               newDates[0].toISOString().split('T')[0],
               newDates[1].toISOString().split('T')[0]
             ]
-          };
-          setFilters(prev => {
-            // Remove any existing dashboardDate filter and replace with the new one
-            // const filtered = prev.filter(f => f.variableName !== 'dashboardDate');
-            return [filter];
-          });
-        }
+            };
+            setFilters(prev => {
+              // Remove any existing dashboardDate filter and replace with the new one
+              // const filtered = prev.filter(f => f.variableName !== 'dashboardDate');
+              return [filter];
+            });
+          }
 
-      }} selectionMode="range" readOnlyInput hideOnRangeSelection inputStyle={{ height: 36.38 }} className={styles.SolidDashboardDateRangeFilter} />
+        }}
+        className={styles.SolidDashboardDateRangeFilter}
+        inputClassName="h-3rem w-full"
+      />
       <div className="px-2">
-        <i className="pi pi-calendar opacity-50"></i>
+        <SolidIcon name="si-calendar" className="opacity-50" aria-hidden />
       </div>
     </div>
   )
@@ -120,16 +127,14 @@ export const SelectionDynamicVariableFilterComponent: React.FC<DashboardVariable
 
   return (
     <>
-      {isLoading && <ProgressSpinner></ProgressSpinner>}
+      {isLoading && <SolidSpinner />}
       {isError && <div>Error loading values</div>}
       {!isLoading && !isError &&
-        <AutoComplete
+        <SolidAutocomplete
           value={selectionDynamicValues}
           suggestions={filteredItems}
           completeMethod={searchDynamic}
           onChange={(e: AutoCompleteChangeEvent) => {
-            console.log('AutoComplete changed values are:');
-            console.log(e);
             setSelectionDynamicValues(e.value)
           }}
           multiple
@@ -195,7 +200,7 @@ export const SelectionStaticVariableFilterComponent: React.FC<DashboardVariableF
   }, [clearSignal]);
 
   return (
-    <AutoComplete
+    <SolidAutocomplete
       value={selectionStaticValues}
       suggestions={filteredStaticItems}
       completeMethod={searchStatic}
@@ -240,12 +245,11 @@ const SolidDashboardVariable: React.FC<SolidDashboardVariableProps> = ({ dashboa
     <div className="flex align-items-center gap-3">
       {dashboardVariableComponents}
       {filters.length > 0 && (
-        <Button
+        <SolidButton
           onClick={clearAllFilters}
-          size="small"
+          size="sm"
           outlined
-          // severity="info"
-          icon="pi pi-filter-slash"
+          icon="si si-filter-slash"
         />
       )}
     </div>
@@ -253,4 +257,3 @@ const SolidDashboardVariable: React.FC<SolidDashboardVariableProps> = ({ dashboa
 }
 
 export default SolidDashboardVariable;
-

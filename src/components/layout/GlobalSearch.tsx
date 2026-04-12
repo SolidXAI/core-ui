@@ -1,7 +1,5 @@
 import { usePathname } from "../../hooks/usePathname";
-import { IconField } from 'primereact/iconfield';
-import { InputIcon } from 'primereact/inputicon';
-import { InputText } from 'primereact/inputtext';
+import { SolidInput } from "../shad-cn-ui";
 
 export const GlobalSearch = () => {
     const path = usePathname();
@@ -21,16 +19,12 @@ export const GlobalSearch = () => {
         return `Search ${dynamicSegment.replace(/-/g, ' ').replace(/\b\w/g, char => char.toUpperCase())}`;
     };
     return (
-        <div className='absolute left-50' style={{ transform: 'translateX(-50%)' }}>
-            <IconField iconPosition="left">
-                <InputIcon className="pi pi-search"></InputIcon>
-                <InputText
-                    v-model="value1"
-                    placeholder={getPlaceholder()}
-                    // placeholder={placeholderMap[placeholder] || 'Search'}
-                    className='border-cyan-200 border-1 max-h-2rem w-25rem'
-                />
-            </IconField>
+        <div className='absolute left-50 solid-global-search' style={{ transform: 'translateX(-50%)' }}>
+            <span className="pi pi-search" />
+            <SolidInput
+                placeholder={getPlaceholder()}
+                className='border-cyan-200 border-1 max-h-2rem w-25rem'
+            />
         </div>
     )
 }

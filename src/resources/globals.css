@@ -194,12 +194,18 @@ a {
 }
 
 .react-datepicker {
-  width: 100%;
+  width: auto;
+  min-width: 240px;
 }
 
 .react-datepicker__month-container {
   float: left;
-  width: 100%;
+  width: auto;
+}
+
+.react-datepicker__time-container {
+  min-width: 160px;
+  border-left: 1px solid rgba(15, 23, 42, 0.1);
 }
 
 /* Avatar */
@@ -451,6 +457,20 @@ a {
   margin: 0;
 }
 
+.solid-settings-heading {
+  font-size: 1rem;
+  font-weight: 600;
+  color: var(--solid-form-title, #0f172a);
+  margin: 1.25rem 0 0.35rem;
+}
+
+.solid-settings-subheading {
+  font-size: 0.95rem;
+  font-weight: 600;
+  color: var(--solid-form-title, #0f172a);
+  margin: 0 0 0.35rem;
+}
+
 .solid-field-tooltip-icon {
   margin-left: 8px;
   color: var(--text-color);
@@ -497,10 +517,45 @@ a {
 }
 
 .form-wrapper-heading {
-  font-size: 1rem !important;
-  font-weight: 600;
-  color: var(--solid-form-title) !important;
+  font-size: 0.95rem !important;
+  font-weight: 700;
+  color: var(--solid-form-title, #0f172a) !important;
+  letter-spacing: 0.05em;
+  margin: 0;
+  display: flex;
+  align-items: center;
+  gap: 0.75rem;
+  width: 100%;
+  /* padding: 0.6rem 0.9rem; */
+  padding-top: 20px;
+  /* border-radius: 8px; */
+  /* background: color-mix(in srgb, var(--primary-color, #6366f1) 12%, #fff); */
+  /* border-bottom: 1px solid color-mix(in srgb, var(--primary-color, #6366f1) 28%, transparent); */
 }
+
+/* .form-wrapper-heading::before {
+  content: "";
+  width: 14px;
+  height: 14px;
+  border-radius: 50%;
+  background: radial-gradient(circle at 30% 30%, #fff 5%, var(--primary-color, #6366f1));
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--primary-color, #6366f1) 20%, transparent);
+  flex: 0 0 auto;
+} */
+
+/* .form-wrapper-heading::after {
+  content: "";
+  flex: 1;
+  height: 2px;
+  border-radius: 999px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in srgb, var(--primary-color, #6366f1) 30%, transparent),
+    color-mix(in srgb, var(--primary-color, #6366f1) 5%, transparent)
+  );
+  max-width: 160px;
+  opacity: 0.75;
+} */
 
 .boolean-switch .p-button {
   max-height: 2rem;
@@ -1429,6 +1484,7 @@ li.header-li-px {
 .fieldSubTitle {
   font-size: 0.8em;
   margin-top: 5px;
+  color: grey;
 }
 
 .tab-error-heading .p-tabview-title {
@@ -2606,11 +2662,11 @@ li.header-li-px {
 }
 
 .solid-field-metadata-form-header {
-  padding: 10px 14px 10px 24px;
+  padding: 10px;
   display: flex;
   align-items: center;
   justify-content: space-between;
-  background: var(--solid-light-grey);
+  /* background: var(--primary-color); */
 }
 
 .solid-global-search-element {

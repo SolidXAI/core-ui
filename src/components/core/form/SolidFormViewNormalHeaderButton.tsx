@@ -1,6 +1,7 @@
-import { Button } from 'primereact/button';
 import { hasAnyRole } from '../../../helpers/rolesHelper';
 import { useSession } from "../../../hooks/useSession";
+import { SolidButton } from '../../shad-cn-ui';
+import { SolidIcon, parseSolidIconMeta } from "../../shad-cn-ui/SolidIcon";
 
 interface SolidFormViewNormalHeaderButtonProps {
     button: any;
@@ -51,7 +52,7 @@ export function SolidFormViewNormalHeaderButton({
                 onClick={handleClick}
             >
                 {button?.attrs?.icon && (
-                    <i className={`${button.attrs.icon} solid-row-action-button-icon`} />
+                    (() => { const m = parseSolidIconMeta(button.attrs.icon); return m ? <SolidIcon name={m.name} spin={m.spin} className="solid-row-action-button-icon" /> : <i className={`${button.attrs.icon} solid-row-action-button-icon`} />; })()
                 )}
                 <span className="solid-row-action-button-label">{button.attrs.label}</span>
             </button>
@@ -60,11 +61,11 @@ export function SolidFormViewNormalHeaderButton({
 
     return (
         <div>
-            <Button
+            <SolidButton
                 type="button"
-                className={`w-full text-left gap-2 p-button-sm solid-icon-button ${button?.attrs?.className ? button?.attrs?.className : ''}`}
+                className={`w-full text-left gap-2 solid-icon-button ${button?.attrs?.className ? button?.attrs?.className : ''}`}
                 label={button.attrs.label}
-                size="small"
+                size="sm"
                 iconPos="left"
                 icon={button?.attrs?.icon ? button?.attrs?.icon : ""}
                 onClick={handleClick}

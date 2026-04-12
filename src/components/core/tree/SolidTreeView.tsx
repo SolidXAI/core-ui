@@ -37,7 +37,7 @@ import { useRouter } from "../../../hooks/useRouter";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 import { usePathname } from "../../../hooks/usePathname";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
-import { SolidButton, SolidDialog, SolidDialogBody, SolidDialogDescription, SolidDialogFooter, SolidDialogHeader, SolidDialogSeparator, SolidDialogTitle, SolidDropdownMenu, SolidDropdownMenuContent, SolidDropdownMenuItem, SolidDropdownMenuSeparator, SolidDropdownMenuTrigger, SolidSelect, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../shad-cn-ui";
+import { SolidButton, SolidDialog, SolidDialogBody, SolidDialogDescription, SolidDialogFooter, SolidDialogHeader, SolidDialogSeparator, SolidDialogTitle, SolidDropdownMenu, SolidDropdownMenuContent, SolidDropdownMenuItem, SolidDropdownMenuSeparator, SolidDropdownMenuTrigger, SolidIcon, SolidSelect, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../shad-cn-ui";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
 import { Column as SolidTreeColumn, SolidTreeNode as TreeNode, SolidTreeSelectionKeys, SolidTreeTable } from "./SolidTreeTable";
 
@@ -1608,7 +1608,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           <div className="flex align-items-center solid-header-buttons-wrapper">
             {params.embeded !== true && (
               <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
-                <i className="pi pi-th-large"></i>
+                <SolidIcon name="si-th-large" />
               </div>
             )}
 

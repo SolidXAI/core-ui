@@ -35,6 +35,7 @@ import {
   SolidDialogHeader,
   SolidDialogSeparator,
   SolidDialogTitle,
+  SolidIcon,
 } from "../../shad-cn-ui";
 import { FilterMatchMode } from "../filter/filterMatchMode";
 
@@ -806,7 +807,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
               <div className="flex gap-3 align-items-center w-full solid-list-toolbar-left">
                 {params.embeded !== true &&
                   <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
-                    <i className="pi pi-th-large"></i>
+                    <SolidIcon name="si-th-large" aria-hidden />
                   </div>
                 }
 
@@ -828,9 +829,9 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                       size="sm"
                       className="solid-icon-button"
                       onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
-                    >
-                      <i className="pi pi-search" />
-                    </SolidButton>
+                      aria-label="Toggle search"
+                      leftIcon={<SolidIcon name="si-search" aria-hidden />}
+                    />
                   </div>
                 }
 
@@ -854,9 +855,9 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
                   onClick={() => {
                     window.location.reload()
                   }}
-                >
-                  <i className="pi pi-refresh" />
-                </SolidButton>
+                  aria-label="Refresh board"
+                  leftIcon={<SolidIcon name="si-refresh" aria-hidden />}
+                />
                 <SolidKanbanViewConfigure
                   solidKanbanViewMetaData={solidKanbanViewMetaData}
                   modelName={params.modelName}

@@ -6,7 +6,6 @@ import { useLazyGetModelsQuery } from "../../../redux/api/modelApi";
 import { useLazyGetmodulesQuery } from "../../../redux/api/moduleApi";
 import { useFormik } from "formik";
 import { snakeCase } from "lodash";
-import { classNames } from "primereact/utils";
 import qs from "qs";
 import React, { useEffect, useRef, useState } from "react";
 import { useDispatch } from "react-redux";
@@ -15,6 +14,21 @@ import * as Yup from "yup";
 import { SolidAutocomplete, SolidCheckbox, SolidInput, SolidPanel, SolidTextarea } from "../../shad-cn-ui";
 import { useSolidAutocompleteField } from "../../../hooks/useSolidAutocompleteField";
 import styles from "../form/fields/solidFields.module.css";
+
+const cx = (...parts: Array<string | false | null | undefined | Record<string, boolean>>) => {
+  const classes: string[] = [];
+  parts.forEach((part) => {
+    if (!part) return;
+    if (typeof part === "string") {
+      classes.push(part);
+      return;
+    }
+    Object.entries(part).forEach(([key, value]) => {
+      if (value) classes.push(key);
+    });
+  });
+  return classes.join(" ");
+};
 
 const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allModelsNames, deleteModelFunction, nextTab, formikModelMetadataRef, params, formErrors, setIsDirty }: any, ref) => {
 
@@ -403,7 +417,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     Module
                   </label>
                   <div
-                    className={classNames(
+                    className={cx(
                       "solid-standard-autocomplete w-full",
                       fieldHasError("module", "moduleId") && styles.fieldInvalidControl
                     )}
@@ -427,7 +441,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                     Data Source
                   </label>
                   <div
-                    className={classNames(
+                    className={cx(
                       "solid-standard-autocomplete w-full",
                       fieldHasError("dataSource") && styles.fieldInvalidControl
                     )}
@@ -495,7 +509,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                       Parent Model
                     </label>
                     <div
-                      className={classNames(
+                      className={cx(
                         "solid-standard-autocomplete w-full",
                         fieldHasError("parentModel", "parentModelId") && styles.fieldInvalidControl
                       )}
@@ -684,7 +698,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                       name="pluralName"
                       onChange={formik.handleChange}
                       value={formik.values.pluralName}
-                      className={classNames("p-inputtext-sm w-full small-input", {
+                      className={cx("p-inputtext-sm w-full small-input", {
                         "p-invalid": isFormFieldValid(formik, "pluralName"),
                       })}
                     />
@@ -716,7 +730,7 @@ const ModelMetaData = React.forwardRef(({ modelMetaData, setModelMetaData, allMo
                       }
                       }
                       placeholder="Select a Data Source"
-                      className={classNames("p-inputtext-sm w-full", {
+                      className={cx("p-inputtext-sm w-full", {
                         "p-invalid": isFormFieldValid(formik, "dataSource"),
                       })}
                     />

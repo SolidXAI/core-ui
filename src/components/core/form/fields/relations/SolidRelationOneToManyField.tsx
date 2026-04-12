@@ -500,7 +500,7 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
 
     return (
         <div className="many-to-many-add" >
-            {/* <Button icon="pi pi-plus"
+            {/* <Button icon="si si-plus"
                 rounded
                 outlined
                 aria-label="Filter"

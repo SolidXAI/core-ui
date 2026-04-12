@@ -3,13 +3,11 @@ import { useChangePasswordMutation } from '../../redux/api/authApi';
 import { useFormik } from 'formik';
 import { signOut } from "../../adapters/auth/index";
 import { useSession } from "../../hooks/useSession";
-import { Button } from 'primereact/button';
-import { Message } from 'primereact/message';
-import { Password } from 'primereact/password';
 import { useDispatch } from 'react-redux';
 import * as Yup from 'yup';
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
+import { SolidButton, SolidMessage, SolidPasswordInput } from "../shad-cn-ui";
 
 const SolidChangeForcePassword = () => {
     const dispatch = useDispatch();
@@ -114,60 +112,63 @@ const SolidChangeForcePassword = () => {
             <form onSubmit={formik.handleSubmit} className='d-flex flex-column gap-3 auth-form'>
                 <div className="flex flex-column gap-2 mt-2" style={{}}>
                     <label htmlFor="currentPassword" className="solid-auth-input-label">Current Password</label>
-                    <Password
+                    <SolidPasswordInput
                         id="currentPassword"
                         name="currentPassword"
                         value={formik.values.currentPassword}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        toggleMask
-                        invalid={!!formik.errors.currentPassword}
-                        inputClassName="w-full"
-                        feedback={false}
+                        toggle
+                        aria-invalid={!!formik.errors.currentPassword}
+                        className="w-full"
                     />
-                    {isFormFieldValid(formik, "currentPassword") && <Message
-                        className="text-red-500 text-sm"
-                        severity="error"
-                        text={formik?.errors?.currentPassword?.toString()}
-                    />}
+                    {isFormFieldValid(formik, "currentPassword") && (
+                        <SolidMessage
+                            className="text-red-500 text-sm"
+                            severity="error"
+                            text={formik?.errors?.currentPassword?.toString()}
+                        />
+                    )}
                 </div>
                 <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4" style={{}}>
                     <label htmlFor="password" className="solid-auth-input-label">New Password</label>
-                    <Password
+                    <SolidPasswordInput
                         id="newPassword"
                         name="newPassword"
                         value={formik.values.newPassword}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        toggleMask
-                        invalid={!!formik.errors.newPassword}
-                        inputClassName="w-full"
-                        feedback={false}
+                        toggle
+                        aria-invalid={!!formik.errors.newPassword}
+                        className="w-full"
                     />
-                    {isFormFieldValid(formik, "newPassword") && <Message
-                        className="text-red-500 text-sm"
-                        severity="error"
-                        text={formik?.errors?.newPassword?.toString()}
-                    />}
+                    {isFormFieldValid(formik, "newPassword") && (
+                        <SolidMessage
+                            className="text-red-500 text-sm"
+                            severity="error"
+                            text={formik?.errors?.newPassword?.toString()}
+                        />
+                    )}
                 </div>
                 <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4" style={{}}>
                     <label htmlFor="password" className="solid-auth-input-label">Confirm Password</label>
-                    <Password
+                    <SolidPasswordInput
                         id="confirmPassword"
                         name="confirmPassword"
                         value={formik.values.confirmPassword}
                         onChange={formik.handleChange}
                         onBlur={formik.handleBlur}
-                        toggleMask
-                        invalid={!!formik.errors.confirmPassword}
-                        inputClassName="w-full"
-                        feedback={false}
+                        toggle
+                        aria-invalid={!!formik.errors.confirmPassword}
+                        className="w-full"
                     />
-                    {isFormFieldValid(formik, "confirmPassword") && <Message
-                        className="text-red-500 text-sm"
-                        severity="error"
-                        text={formik?.errors?.confirmPassword?.toString()}
-                    />}
+                    {isFormFieldValid(formik, "confirmPassword") && (
+                        <SolidMessage
+                            className="text-red-500 text-sm"
+                            severity="error"
+                            text={formik?.errors?.confirmPassword?.toString()}
+                        />
+                    )}
                 </div>
                 {/* <div className='mt-4'>
                     <div className='grid'>
@@ -201,7 +202,13 @@ const SolidChangeForcePassword = () => {
                     </div>
                 )}
                 <div className="mt-4">
-                    <Button className="w-full font-light auth-submit-button" label="Change Password" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
+                    <SolidButton
+                        type="submit"
+                        className="w-full font-light auth-submit-button"
+                        label="Change Password"
+                        disabled={formik.isSubmitting}
+                        loading={formik.isSubmitting}
+                    />
                 </div>
             </form>
         </>

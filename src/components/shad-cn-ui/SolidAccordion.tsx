@@ -1,5 +1,6 @@
 import * as React from "react";
 import * as Accordion from "@radix-ui/react-accordion";
+import { SolidIcon } from "./SolidIcon";
 
 function cx(...parts: Array<string | false | undefined>) {
   return parts.filter(Boolean).join(" ");
@@ -22,7 +23,7 @@ export const SolidAccordionTrigger = React.forwardRef<
     <Accordion.Header className="solid-accordion-header">
       <Accordion.Trigger ref={ref} className={cx("solid-accordion-trigger", className)} {...props}>
         <span className="solid-accordion-trigger-label">{children}</span>
-        <i className="pi pi-chevron-down solid-accordion-trigger-icon" />
+        <SolidIcon name="si-chevron-down" className="solid-accordion-trigger-icon" aria-hidden />
       </Accordion.Trigger>
     </Accordion.Header>
   );
