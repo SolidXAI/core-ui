@@ -4,6 +4,7 @@ import { SolidAutocomplete } from "../../shad-cn-ui/SolidAutocomplete";
 import { SolidSelect } from "../../shad-cn-ui/SolidSelect";
 import { SolidButton } from "../../shad-cn-ui/SolidButton";
 import { SolidIcon } from "../../shad-cn-ui/SolidIcon";
+import { Plus } from "lucide-react";
 
 const groupedDateOptions = [
   {
@@ -26,9 +27,6 @@ const groupedDateOptions = [
     ]
   }
 ];
-
-
-
 const aggregateOperators = [
   { label: "Count", value: "count" },
   { label: "Sum", value: "sum" },
@@ -111,7 +109,6 @@ export interface GroupingRule {
   dateGrouping?: DateGroupingFormat | null;
 }
 
-
 const GroupingComponent = ({
   viewData,
   fields,
@@ -168,17 +165,6 @@ const GroupingComponent = ({
     );
   }, [fields]);
 
-  // -------------------------------
-  // GROUPING HANDLERS
-  // -------------------------------
-
-  const addGroup = () => {
-    setGroupingRules((prev: any) => [
-      ...prev,
-      { id: Date.now(), fieldName: null, dateGrouping: null }
-    ]);
-  };
-
   const removeGroup = (id: any) => {
     setGroupingRules((prev: any) => prev.filter((r: any) => r.id !== id));
   };
@@ -187,17 +173,6 @@ const GroupingComponent = ({
     setGroupingRules((prev: any) =>
       prev.map((r: any) => r.id === id ? { ...r, [key]: value } : r)
     );
-  };
-
-  // -------------------------------
-  // AGGREGATION HANDLERS
-  // -------------------------------
-
-  const addAggregation = () => {
-    setAggregationRules((prev: any) => [
-      ...prev,
-      { id: Date.now(), operator: "sum", fieldName: null }
-    ]);
   };
 
   const removeAggregation = (id: any) => {
@@ -212,45 +187,6 @@ const GroupingComponent = ({
     );
   };
 
-  // -------------------------------
-  // READONLY GROUP ORDER DISPLAY
-  // -------------------------------
-
-  const groupingSummary = groupingRules
-    .filter((g: GroupingRule) => g.fieldName)
-    .map((g: GroupingRule) => {
-      const fieldMeta = fields.find((f: GroupableField) => f.fieldName === g.fieldName);
-      if (!fieldMeta) return null;
-
-      if (["date", "datetime"].includes(fieldMeta.type) && g.dateGrouping) {
-        return `${fieldMeta.displayName} (${g.dateGrouping})`;
-      }
-
-      return fieldMeta.displayName;
-    })
-    .filter(Boolean)
-    .join(" > ");
-
-
-  const groupedDateItemTemplate = (option: any) => {
-    return (
-      <div className="flex align-items-center gap-2">
-        <SolidIcon name={option.label === "Year" ? "si-calendar" : option.label === "Month" ? "si-calendar-minus" : "si-calendar-plus"} />
-        <div>
-          {option.label}
-        </div>
-      </div>
-    );
-  };
-
-  const groupedDateValueTemplate = (option: any) => {
-    return (
-      <div className="pl-3">
-        {option.label}
-      </div>
-    );
-  };
-
   const groupedDateFlatOptions = groupedDateOptions.flatMap((group) =>
     group.items.map((item) => ({
       label: `${group.label}: ${item.label}`,
@@ -258,143 +194,178 @@ const GroupingComponent = ({
     }))
   );
 
+  const visibleGroupingRules = groupingRules.filter((rule) => rule.fieldName);
+  const visibleAggregationRules = aggregationRules.filter((rule) => rule.fieldName);
+
   return (
     <div className="solid-grouping-builder">
+      <section className="solid-grouping-section-card">
+        <div className="solid-grouping-section-head">
+          <div>
+            <p className="m-0 solid-filter-section-title">Grouping Rules</p>
+            <p className="m-0 solid-grouping-section-copy">
+              Add fields in the order you want the tree to grow. The first rule becomes the top level.
+            </p>
+          </div>
+        </div>
 
-      {/* ========================================================= */}
-      {/* A. APPLY GROUPS */}
-      {/* ========================================================= */}
-      <p className="mb-2 font-bold solid-filter-section-title">Apply Groups</p>
+        <div className="solid-grouping-search-row">
+          <SolidAutocomplete
+            value={groupSearchValue}
+            suggestions={filteredGroupingFields}
+            completeMethod={searchGroupingFields}
+            field="displayName"
+            placeholder="Search field to group by"
+            className="w-full solid-filter-compact-control"
+            dropdown
+            onChange={(e) => setGroupSearchValue(e.value)}
+            onSelect={(e) => {
+              if (typeof e.value === "object" && e.value.fieldName) {
+                const isDate = ["date", "datetime"].includes(e.value.type);
+                setGroupingRules((prev: any) => [
+                  ...prev,
+                  { id: Date.now(), fieldName: e.value.fieldName, dateGrouping: isDate ? "YYYY-MM-DD" : null }
+                ]);
+              }
+              setGroupSearchValue(null);
+            }}
+          />
+        </div>
 
-      <div className="mb-3 solid-grouping-search-row">
-        <SolidAutocomplete
-          value={groupSearchValue}
-          suggestions={filteredGroupingFields}
-          completeMethod={searchGroupingFields}
-          field="displayName"
-          placeholder="Search Field to Group By"
-          className="w-full solid-filter-compact-control"
-          dropdown
-          onChange={(e) => setGroupSearchValue(e.value)}
-          onSelect={(e) => {
-            if (typeof e.value === "object" && e.value.fieldName) {
-              const isDate = ["date", "datetime"].includes(e.value.type);
-              setGroupingRules((prev: any) => [
-                ...prev,
-                { id: Date.now(), fieldName: e.value.fieldName, dateGrouping: isDate ? "YYYY-MM-DD" : null }
-              ]);
-            }
-            setGroupSearchValue(null);
-          }}
-        />
-      </div>
+        <div className="solid-grouping-list">
+          {visibleGroupingRules.length === 0 && (
+            <div className="solid-grouping-empty-panel">
+              <Plus size={14} />
+              <span>No grouping rules applied yet.</span>
+            </div>
+          )}
+          {visibleGroupingRules.map((rule, index) => {
+            const fieldMeta = fields.find((f) => f.fieldName === rule.fieldName);
+            if (!fieldMeta) return null;
 
-      <div className="solid-grouping-chip-list">
-        {groupingRules.length == 1 && groupingRules[0].fieldName === null && (
-          <span className="solid-grouping-empty-state">No grouping rules applied.</span>
-        )}
-        {groupingRules.map((rule, index) => {
-          const fieldMeta = fields.find((f) => f.fieldName === rule.fieldName);
-          if (!fieldMeta) return null;
+            const isDate = ["date", "datetime"].includes(fieldMeta.type);
 
-          const isDate = ["date", "datetime"].includes(fieldMeta.type);
-
-          return (
-            <React.Fragment key={rule.id}>
-              <div className="solid-grouping-chip">
-                <span>{fieldMeta.displayName}</span>
-
-                {isDate && (
-                  <SolidSelect
-                    value={rule.dateGrouping || "YYYY-MM-DD"}
-                    options={groupedDateFlatOptions}
-                    optionLabel="label"
-                    optionValue="value"
-                    placeholder="Format"
-                    className="solid-grouping-chip-select"
-                    onChange={(e) => updateGroup(rule.id, "dateGrouping", e.value)}
-                  />
-                )}
-
-                <button type="button" className="solid-grouping-chip-remove" onClick={() => removeGroup(rule.id)}>
+            return (
+              <div key={rule.id} className="solid-grouping-rule-row">
+                <div className="solid-grouping-order-badge">{index + 1}</div>
+                <div className="solid-grouping-rule-main">
+                  <div className="solid-grouping-rule-title-row">
+                    <div className="solid-grouping-rule-title">{fieldMeta.displayName}</div>
+                    <div className="solid-grouping-rule-caption">
+                      {index === 0 ? "Top-level grouping" : `Then group within level ${index}`}
+                    </div>
+                  </div>
+                  {isDate ? (
+                    <div className="solid-grouping-rule-controls">
+                      <span className="solid-grouping-inline-label">Group by</span>
+                      <SolidSelect
+                        value={rule.dateGrouping || "YYYY-MM-DD"}
+                        options={groupedDateFlatOptions}
+                        optionLabel="label"
+                        optionValue="value"
+                        placeholder="Format"
+                        className="solid-grouping-row-select"
+                        onChange={(e) => updateGroup(rule.id, "dateGrouping", e.value)}
+                      />
+                    </div>
+                  ) : (
+                    <div className="solid-grouping-rule-summary">Groups by exact value of this field.</div>
+                  )}
+                </div>
+                <button type="button" className="solid-grouping-row-remove" onClick={() => removeGroup(rule.id)}>
                   <SolidIcon name="si-times" />
                 </button>
               </div>
-              {index < groupingRules.length - 1 && (
-                <SolidIcon name="si-angle-double-right" className="text-400 text-xs" />
-              )}
-            </React.Fragment>
-          );
-        })}
-      </div>
+            );
+          })}
+        </div>
+      </section>
 
-      {/* ========================================================= */}
-      {/* B. APPLY AGGREGATIONS */}
-      {/* ========================================================= */}
-      <p className="mt-4 mb-2 font-bold solid-filter-section-title">Apply Aggregations</p>
+      <section className="solid-grouping-section-card">
+        <div className="solid-grouping-section-head">
+          <div>
+            <p className="m-0 solid-filter-section-title">Aggregations</p>
+            <p className="m-0 solid-grouping-section-copy">
+              Add rollups to show counts or numeric summaries for each group.
+            </p>
+          </div>
+        </div>
 
-      <div className="mb-3 solid-grouping-search-row">
-        <SolidAutocomplete
-          value={aggSearchValue}
-          suggestions={filteredAggregationFields}
-          completeMethod={searchAggregationFields}
-          field="displayName"
-          placeholder="Search Field to Aggregate"
-          className="w-full solid-filter-compact-control"
-          dropdown
-          onChange={(e) => setAggSearchValue(e.value)}
-          onSelect={(e) => {
-            if (typeof e.value === "object" && e.value.fieldName) {
-              setAggregationRules((prev: any) => [
-                ...prev,
-                { id: Date.now(), operator: "count", fieldName: e.value.fieldName }
-              ]);
-            }
-            setAggSearchValue(null);
-          }}
-        />
-      </div>
+        <div className="solid-grouping-search-row">
+          <SolidAutocomplete
+            value={aggSearchValue}
+            suggestions={filteredAggregationFields}
+            completeMethod={searchAggregationFields}
+            field="displayName"
+            placeholder="Search field to aggregate"
+            className="w-full solid-filter-compact-control"
+            dropdown
+            onChange={(e) => setAggSearchValue(e.value)}
+            onSelect={(e) => {
+              if (typeof e.value === "object" && e.value.fieldName) {
+                setAggregationRules((prev: any) => [
+                  ...prev,
+                  { id: Date.now(), operator: "count", fieldName: e.value.fieldName }
+                ]);
+              }
+              setAggSearchValue(null);
+            }}
+          />
+        </div>
 
-      <div className="solid-grouping-chip-list">
-        {aggregationRules.length === 0 && (
-          <span className="solid-grouping-empty-state">No aggregations applied.</span>
-        )}
-        {aggregationRules.map((rule) => {
-          const fieldMeta = fields.find((f) => f.fieldName === rule.fieldName);
-          if (!fieldMeta) return null;
-
-          return (
-            <div key={rule.id} className="solid-grouping-chip">
-              <span>{fieldMeta.displayName}</span>
-
-              <SolidSelect
-                value={rule.operator}
-                options={aggregateOperators}
-                disabled={rule.locked}
-                placeholder="Op"
-                className="solid-grouping-chip-select"
-                onChange={(e) => updateAggregation(rule.id, "operator", e.value)}
-              />
-
-              {!rule.locked && (
-                <button type="button" className="solid-grouping-chip-remove" onClick={() => removeAggregation(rule.id)}>
-                  <SolidIcon name="si-times" />
-                </button>
-              )}
+        <div className="solid-grouping-list solid-grouping-list-compact">
+          {visibleAggregationRules.length === 0 && (
+            <div className="solid-grouping-empty-panel">
+              <Plus size={14} />
+              <span>No aggregations applied yet.</span>
             </div>
-          );
-        })}
-      </div>
+          )}
+          {visibleAggregationRules.map((rule) => {
+            const fieldMeta = fields.find((f) => f.fieldName === rule.fieldName);
+            if (!fieldMeta) return null;
+
+            return (
+              <div key={rule.id} className="solid-aggregation-row">
+                <div className="solid-aggregation-row-main">
+                  <div className="solid-aggregation-row-title">{fieldMeta.displayName}</div>
+                  <div className="solid-aggregation-row-caption">
+                    {rule.locked ? "Default aggregation" : "Applied to each group"}
+                  </div>
+                </div>
+
+                <div className="solid-aggregation-row-controls">
+                  <span className="solid-grouping-inline-label">Operation</span>
+                  <SolidSelect
+                    value={rule.operator}
+                    options={aggregateOperators}
+                    disabled={rule.locked}
+                    placeholder="Op"
+                    className="solid-grouping-row-select solid-aggregation-row-select"
+                    onChange={(e) => updateAggregation(rule.id, "operator", e.value)}
+                  />
+                </div>
+                {!rule.locked ? (
+                  <button type="button" className="solid-grouping-row-remove solid-aggregation-row-remove" onClick={() => removeAggregation(rule.id)}>
+                    <SolidIcon name="si-times" />
+                  </button>
+                ) : (
+                  <span className="solid-aggregation-row-remove-spacer" aria-hidden="true" />
+                )}
+              </div>
+            );
+          })}
+        </div>
+      </section>
 
       {/* FOOTER */}
       <div className="solid-grouping-footer">
-        <SolidButton size="sm" variant="primary" onClick={() => applyGrouping(groupingRules, aggregationRules)}>
-          <SolidIcon name="si-check" />
-          Apply
-        </SolidButton>
         <SolidButton size="sm" variant="outline" onClick={closeDialog}>
           <SolidIcon name="si-times" />
           Cancel
+        </SolidButton>
+        <SolidButton size="sm" variant="primary" onClick={() => applyGrouping(groupingRules, aggregationRules)}>
+          <SolidIcon name="si-check" />
+          Apply
         </SolidButton>
       </div>
     </div>

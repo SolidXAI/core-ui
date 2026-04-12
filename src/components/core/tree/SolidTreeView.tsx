@@ -6,7 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
-import { ChevronLeft, ChevronRight, EllipsisVertical, Info, Pencil, RefreshCw, Search, Trash2 } from "lucide-react";
+import { ChevronLeft, ChevronRight, EllipsisVertical, Pencil, Plus, RefreshCw, Search, Trash2 } from "lucide-react";
 import { showToast } from "../../../redux/features/toastSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
@@ -27,9 +27,7 @@ import CompactImage from '../../../resources/images/layout/images/compact.png';
 import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
-import { getSingularAndPlural } from "../../../helpers/helpers";
 import { getFilterObjectFromLocalStorage, setFilterObjectToLocalStorage } from "../list/SolidListView";
-import { HomePageModuleSvg } from "../../Svg/HomePageModuleSvg";
 import { SolidBeforeTreeNodeLoad } from "../../../types";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { SolidTreeLoad, SolidTreeUiEventResponse } from "../../../types/solid-core";
@@ -37,7 +35,7 @@ import { useRouter } from "../../../hooks/useRouter";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 import { usePathname } from "../../../hooks/usePathname";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
-import { SolidButton, SolidDialog, SolidDialogBody, SolidDialogDescription, SolidDialogFooter, SolidDialogHeader, SolidDialogSeparator, SolidDialogTitle, SolidDropdownMenu, SolidDropdownMenuContent, SolidDropdownMenuItem, SolidDropdownMenuSeparator, SolidDropdownMenuTrigger, SolidIcon, SolidSelect, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../shad-cn-ui";
+import { SolidButton, SolidDialog, SolidDialogBody, SolidDialogDescription, SolidDialogFooter, SolidDialogHeader, SolidDialogSeparator, SolidDialogTitle, SolidDropdownMenu, SolidDropdownMenuContent, SolidDropdownMenuItem, SolidDropdownMenuSeparator, SolidDropdownMenuTrigger, SolidIcon } from "../../shad-cn-ui";
 import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
 import { Column as SolidTreeColumn, SolidTreeNode as TreeNode, SolidTreeSelectionKeys, SolidTreeTable } from "./SolidTreeTable";
 
@@ -112,6 +110,10 @@ type PaginationEntry = {
 };
 
 const DEFAULT_PAGE_SIZE = 25;
+const DEFAULT_PAGE_SIZE_OPTIONS = [10, 25, 50, 100];
+const resolveDefaultPageSize = (options: number[]) => (
+  options.includes(DEFAULT_PAGE_SIZE) ? DEFAULT_PAGE_SIZE : options[0]
+);
 
 // ─── Component ────────────────────────────────────────────────────────────────
 
@@ -399,7 +401,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     const layoutPageSizeOptions = solidTreeViewMetaData?.data?.solidView?.layout?.attrs?.pageSizeOptions;
     const currentOptions = (Array.isArray(layoutPageSizeOptions) && layoutPageSizeOptions.length > 0)
       ? layoutPageSizeOptions
-      : [15, 25, 50];
+      : DEFAULT_PAGE_SIZE_OPTIONS;
 
     setPageSizeOptions(currentOptions);
 
@@ -413,14 +415,14 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       if (savedLimit && currentOptions.includes(savedLimit)) {
         setGlobalLimit(savedLimit);
       } else {
-        setGlobalLimit(currentOptions[0]);
+        setGlobalLimit(resolveDefaultPageSize(currentOptions));
       }
     }
     else {
       if (!solidTreeViewLayout || !solidFieldsMetadata) {
         setToPopulate([]);
         setToPopulateMedia([]);
-        setGlobalLimit(currentOptions[0]);
+        setGlobalLimit(resolveDefaultPageSize(currentOptions));
         return;
       }
 
@@ -441,7 +443,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
       setToPopulate(nextPopulate);
       setToPopulateMedia(nextPopulateMedia);
-      setGlobalLimit(currentOptions[0]);
+      setGlobalLimit(resolveDefaultPageSize(currentOptions));
     }
   }, [solidTreeViewLayout, solidTreeViewMetaData]);
 
@@ -1260,15 +1262,29 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     return derivedAggregates.map((agg) => {
       const [field, operator] = agg.split(":");
       const responseKey = `${field}_${operator}`;
-      const header = formatHeader(responseKey);
+      const fieldMeta = getFieldMetadata(field);
+      const fieldLabel = fieldMeta?.displayName ?? formatHeader(field);
+      const operatorLabel = operator.toUpperCase();
+      const fullHeader = `${fieldLabel} ${operatorLabel}`;
 
       return (
         <SolidTreeColumn
           key={`agg-col-${agg}`}
           field={responseKey}
-          header={header}
+          header={(
+            <div className="solid-tree-aggregate-header" title={fullHeader}>
+              <span className="solid-tree-aggregate-header-field">{fieldLabel}</span>
+              <span className="solid-tree-aggregate-header-op">{operatorLabel}</span>
+            </div>
+          )}
           sortable
-          style={{ minWidth: "8rem" }}
+          frozen
+          alignFrozen="right"
+          align="right"
+          alignHeader="right"
+          style={{ width: "7rem", minWidth: "7rem", maxWidth: "7rem" }}
+          headerClassName="solid-tree-aggregate-header-cell"
+          bodyClassName="solid-tree-aggregate-body-cell"
           body={(node: any) => {
             const rowData = node?.data ?? node;
             const nodeMeta = rowData?.__treeMeta;
@@ -1276,7 +1292,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
             if (nodeMeta?.nodeType !== "group") return <span>&nbsp;</span>;
 
             const value = nodeMeta?.aggregates?.[responseKey];
-            return <span>{value ?? 0}</span>;
+            return <span className="solid-tree-aggregate-value">{value ?? 0}</span>;
           }}
         />
       );
@@ -1292,23 +1308,9 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     if (nodeMeta?.nodeType !== "group") return <span>&nbsp;</span>;
 
     const label = nodeMeta.groupLabel ?? "";
-    const truncateAfter = 30;
-    const isTruncated = truncateAfter && label.length > truncateAfter;
     return (
       <div className="solid-tree-group-label">
-        <span className="font-semibold solid-text-ellipsis" style={{ maxWidth: `${truncateAfter}ch` }}>
-          {label}
-        </span>
-        {isTruncated ? (
-          <SolidTooltip>
-            <SolidTooltipTrigger asChild>
-              <button type="button" className="solid-tree-inline-tooltip" data-no-row-click="true" aria-label="Show full group label">
-                <Info size={13} />
-              </button>
-            </SolidTooltipTrigger>
-            <SolidTooltipContent>{label}</SolidTooltipContent>
-          </SolidTooltip>
-        ) : null}
+        <span className="font-semibold solid-tree-group-label-text">{label}</span>
       </div>
     );
   };
@@ -1318,48 +1320,53 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   const RootPaginationBar = () => {
     if (activeGroupingRules.length === 0) return null;
 
-    const { offset, total } = getPagination("root");
+    const { offset, limit, total } = getPagination("root");
     const rootHasPrev = hasPrev("root");
     const rootHasNext = hasNext("root");
     const start = total === 0 ? 0 : offset + 1;
-    const end = total === 0 ? 0 : Math.min(offset + globalLimit, total);
+    const end = total === 0 ? 0 : Math.min(offset + limit, total);
 
     return (
-      <div className="solid-tree-root-paginator">
-        <div className="solid-tree-root-paginator-meta">
-          <span className="solid-paginator-label">Items per page</span>
-          <SolidSelect
-            value={globalLimit}
-            options={pageSizeOptions.map((option) => ({ label: String(option), value: option }))}
-            onChange={(e) => {
-              setGlobalLimit(e.value);
+      <div className="w-full solid-table-paginator solid-table-paginator-align-end flex items-center justify-end gap-3 text-sm rounded-md border border-border/60 px-3 py-1.5 bg-background">
+        <div className="solid-paginator-meta flex items-center gap-2 ml-auto">
+          <span className="solid-paginator-label">Rows</span>
+          <select
+            value={limit}
+            onChange={(event) => {
+              setGlobalLimit(Number(event.target.value));
             }}
-            className="solid-tree-page-size-select"
-          />
+            className="solid-paginator-select"
+          >
+            {pageSizeOptions.map((option) => (
+              <option key={option} value={option}>{option}</option>
+            ))}
+          </select>
+          <span className="solid-paginator-report">{start} - {end} of {total}</span>
         </div>
-        <div className="solid-tree-root-paginator-actions">
-          <span className="solid-paginator-report">{start}–{end} of {total}</span>
-          <SolidButton
+        <div className="solid-paginator-actions flex items-center gap-2">
+          <button
             type="button"
-            variant="outline"
-            size="sm"
-            leftIcon={<ChevronLeft size={14} />}
+            className="solid-paginator-btn"
+            onClick={() => { void handleRootPageChange("prev"); }}
             disabled={!rootHasPrev || treeLoading}
-            onClick={() => handleRootPageChange("prev")}
-            className="solid-tree-paginator-btn"
-          />
-          <SolidButton
+          >
+            Previous
+          </button>
+          <button
             type="button"
-            variant="outline"
-            size="sm"
-            leftIcon={<ChevronRight size={14} />}
+            className="solid-paginator-btn"
+            onClick={() => { void handleRootPageChange("next"); }}
             disabled={!rootHasNext || treeLoading}
-            onClick={() => handleRootPageChange("next")}
-            className="solid-tree-paginator-btn"
-          />
+          >
+            Next
+          </button>
         </div>
       </div>
     );
+  };
+
+  const openGroupingBuilder = () => {
+    solidGlobalSearchElementRef.current?.openGroupingDialog?.();
   };
 
   // ─── Imperative handle ────────────────────────────────────────────────────
@@ -1371,7 +1378,15 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       solidGlobalSearchElementRef.current?.clearFilter?.();
     },
     applyFilter: (filter) => { handleApplyCustomFilter(filter); },
-    setPagination: () => { /* pagination wired via paginationMap */ },
+    setPagination: (nextFirst: number, nextRows: number) => {
+      const currentLimit = getPagination("root").limit;
+      if (nextRows !== currentLimit) {
+        setGlobalLimit(nextRows);
+        void loadRootGroups(0);
+        return;
+      }
+      void loadRootGroups(nextFirst);
+    },
     setSort: (nextSortField: string, nextSortOrder: 1 | -1 | 0) => {
       setSortField(nextSortField);
       setSortOrder(nextSortOrder);
@@ -1601,148 +1616,170 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   // ─── Render ───────────────────────────────────────────────────────────────
 
   return (
-    <div className="page-parent-wrapper">
-      {/* ── Header ── */}
-      <div className="page-header flex-column lg:flex-row">
-        <div className="flex justify-content-between w-full">
-          <div className="flex align-items-center solid-header-buttons-wrapper">
-            {params.embeded !== true && (
-              <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
-                <SolidIcon name="si-th-large" />
+    <div className="page-parent-wrapper solid-list-page-wrapper solid-tree-page-wrapper flex h-full min-h-0 overflow-hidden">
+      <div className="solid-list-content h-full flex flex-column flex-grow-1">
+        <div className="solid-list-surface solid-tree-surface flex flex-column flex-1 min-h-0">
+          {/* ── Header ── */}
+          <div className="page-header solid-list-toolbar solid-tree-toolbar flex-column lg:flex-row">
+            <div className="flex justify-content-between w-full solid-list-toolbar-row">
+              <div className="flex gap-3 align-items-center w-full solid-list-toolbar-left">
+                <div className="flex align-items-center gap-2">
+                  {params.embeded !== true && (
+                    <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                      <SolidIcon name="si-th-large" />
+                    </div>
+                  )}
+                  <p className="m-0 view-title solid-text-wrapper">{treeViewTitle}</p>
+                </div>
+
+                {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
+                  <div className="hidden lg:flex">
+                    <SolidGlobalSearchElement
+                      viewType="tree"
+                      showSaveFilterPopup={showSaveFilterPopup}
+                      setShowSaveFilterPopup={setShowSaveFilterPopup}
+                      ref={solidGlobalSearchElementRef}
+                      viewData={solidTreeViewMetaData}
+                      handleApplyCustomFilter={handleApplyCustomFilter}
+                    />
+                  </div>
+                )}
               </div>
-            )}
 
-            <p className="m-0 view-title solid-text-wrapper">{treeViewTitle}</p>
+              <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
+                {headerRequestStatusLabel ? <SolidHeaderRequestStatus label={headerRequestStatusLabel} /> : null}
 
-            {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
-              <div className="hidden lg:flex">
-                <SolidGlobalSearchElement
-                  viewType="tree"
-                  showSaveFilterPopup={showSaveFilterPopup}
-                  setShowSaveFilterPopup={setShowSaveFilterPopup}
-                  ref={solidGlobalSearchElementRef}
-                  viewData={solidTreeViewMetaData}
-                  handleApplyCustomFilter={handleApplyCustomFilter}
-                />
-              </div>
-            )}
-          </div>
+                {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
+                  <div className="flex lg:hidden">
+                    <SolidButton
+                      type="button"
+                      size="sm"
+                      variant="outline"
+                      leftIcon={<Search size={14} />}
+                      className="solid-icon-button"
+                      onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
+                    />
+                  </div>
+                )}
 
-          <div className="flex align-items-center solid-header-buttons-wrapper">
-            {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
-              <div className="flex lg:hidden">
+                {actionsAllowed.includes(`${permissionExpression(params.modelName, "create")}`) &&
+                  solidTreeViewMetaData?.data?.solidView?.layout?.attrs.create !== false && (
+                    <SolidCreateButton
+                      createButtonUrl={createButtonUrl}
+                      createActionQueryParams={createActionQueryParams}
+                      responsiveIconOnly={true}
+                    />
+                  )}
+
+                {actionsAllowed.includes(`${permissionExpression(params.modelName, "delete")}`) &&
+                  solidTreeViewMetaData?.data?.solidView?.layout?.attrs.delete !== false &&
+                  selectedRecords.length > 0 && (
+                    <SolidButton
+                      type="button"
+                      label="Delete"
+                      size="sm"
+                      onClick={() => setDeleteRecordsDialogVisible(true)}
+                      className="small-button"
+                      severity="danger"
+                    />
+                  )}
+
                 <SolidButton
                   type="button"
                   size="sm"
                   variant="outline"
-                  leftIcon={<Search size={14} />}
+                  leftIcon={<RefreshCw size={14} />}
                   className="solid-icon-button"
-                  onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
+                  onClick={() => { void loadRootGroups(getPagination("root").offset); }}
                 />
+                {showArchived && (
+                  <SolidButton
+                    type="button"
+                    label="Recover"
+                    size="sm"
+                    variant="outline"
+                    leftIcon={<RefreshCw size={14} />}
+                    className="hidden lg:flex solid-icon-button "
+                    onClick={() => setRecoverDialogVisible(true)}
+                  />
+                )}
+
+                {params.embeded === false &&
+                  solidTreeViewLayout?.attrs?.configureView !== false && (
+                    <SolidListViewConfigure
+                      listViewMetaData={solidTreeViewMetaData}
+                      solidListViewLayout={solidTreeViewLayout}
+                      setShowArchived={setShowArchived}
+                      showArchived={showArchived}
+                      viewData={solidTreeViewMetaData}
+                      sizeOptions={sizeOptions}
+                      setSize={setSize}
+                      size={size}
+                      viewModes={viewModes}
+                      params={params}
+                      actionsAllowed={actionsAllowed}
+                      selectedRecords={selectedRecords}
+                      setDialogVisible={setDeleteRecordsDialogVisible}
+                      setShowSaveFilterPopup={setShowSaveFilterPopup}
+                      filters={filters}
+                      handleFetchUpdatedRecords={handleFetchUpdatedRecords}
+                      setRecoverDialogVisible={setRecoverDialogVisible}
+                    />
+                  )}
               </div>
-            )}
+            </div>
 
-            {actionsAllowed.includes(`${permissionExpression(params.modelName, "create")}`) &&
-              solidTreeViewMetaData?.data?.solidView?.layout?.attrs.create !== false && (
-                <SolidCreateButton
-                  createButtonUrl={createButtonUrl}
-                  createActionQueryParams={createActionQueryParams}
-                  responsiveIconOnly={true}
-                />
-              )}
-
-            {actionsAllowed.includes(`${permissionExpression(params.modelName, "delete")}`) &&
-              solidTreeViewMetaData?.data?.solidView?.layout?.attrs.delete !== false &&
-              selectedRecords.length > 0 && (
-                <SolidButton
-                  type="button"
-                  label="Delete"
-                  size="sm"
-                  onClick={() => setDeleteRecordsDialogVisible(true)}
-                  className="small-button"
-                  severity="danger"
-                />
-              )}
-
-            {headerRequestStatusLabel ? <SolidHeaderRequestStatus label={headerRequestStatusLabel} /> : null}
-
-            <SolidButton
-              type="button"
-              size="sm"
-              variant="outline"
-              leftIcon={<RefreshCw size={14} />}
-              className="solid-icon-button"
-              onClick={() => { void loadRootGroups(getPagination("root").offset); }}
-            />
-            {showArchived && (
-              <SolidButton
-                type="button"
-                label="Recover"
-                size="sm"
-                variant="outline"
-                leftIcon={<RefreshCw size={14} />}
-                className="hidden lg:flex solid-icon-button "
-                onClick={() => setRecoverDialogVisible(true)}
-              />
-            )}
-
-            {params.embeded === false &&
-              solidTreeViewLayout?.attrs?.configureView !== false && (
-                <SolidListViewConfigure
-                  listViewMetaData={solidTreeViewMetaData}
-                  solidListViewLayout={solidTreeViewLayout}
-                  setShowArchived={setShowArchived}
-                  showArchived={showArchived}
-                  viewData={solidTreeViewMetaData}
-                  sizeOptions={sizeOptions}
-                  setSize={setSize}
-                  size={size}
-                  viewModes={viewModes}
-                  params={params}
-                  actionsAllowed={actionsAllowed}
-                  selectedRecords={selectedRecords}
-                  setDialogVisible={setDeleteRecordsDialogVisible}
-                  setShowSaveFilterPopup={setShowSaveFilterPopup}
-                  filters={filters}
-                  handleFetchUpdatedRecords={handleFetchUpdatedRecords}
-                  setRecoverDialogVisible={setRecoverDialogVisible}
-                />
+            {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
+              showGlobalSearchElement && (
+                <div className="flex lg:hidden">
+                  <SolidGlobalSearchElement
+                    viewType="tree"
+                    showSaveFilterPopup={showSaveFilterPopup}
+                    setShowSaveFilterPopup={setShowSaveFilterPopup}
+                    ref={solidGlobalSearchElementRef}
+                    viewData={solidTreeViewMetaData}
+                    handleApplyCustomFilter={handleApplyCustomFilter}
+                  />
+                </div>
               )}
           </div>
-        </div>
 
-        {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
-          showGlobalSearchElement && (
-            <div className="flex lg:hidden">
-              <SolidGlobalSearchElement
-                viewType="tree"
-                showSaveFilterPopup={showSaveFilterPopup}
-                setShowSaveFilterPopup={setShowSaveFilterPopup}
-                ref={solidGlobalSearchElementRef}
-                viewData={solidTreeViewMetaData}
-                handleApplyCustomFilter={handleApplyCustomFilter}
-              />
-            </div>
-          )}
-      </div>
+          {/* ── Tree table ── */}
+          <div className="solid-datatable-wrapper solid-list-table-area solid-tree-table-area flex-1 min-h-0 overflow-hidden">
+            {activeGroupingRules.length === 0 ? (
+              <div className="solid-empty-listview-placeholder-container solid-tree-empty-state">
+                <div className="solid-empty-listview-placeholder-panel">
+                  <div className="solid-empty-listview-header">
+                    <div className="solid-empty-listview-header-title">{treeViewTitle || "Tree View"}</div>
+                    <div className="solid-empty-listview-header-subtitle">
+                      Build a grouping structure to explore your data in hierarchical levels.
+                    </div>
+                  </div>
 
-      {/* ── Tree table ── */}
-      <div className="solid-datatable-wrapper solid-treetable-wrapper flex-1 min-h-0 overflow-auto">
-        {activeGroupingRules.length === 0 ? (
-          <div className="flex flex-column align-items-center justify-content-center h-full p-6 text-center">
-            <div className="mb-4" style={{ opacity: 0.1 }}>
-              <HomePageModuleSvg />
-            </div>
-            <h3 className="m-0 mb-2" style={{ color: "var(--solid-dark-title)", fontWeight: 700, fontSize: '1.5rem' }}>
-              Tree View
-            </h3>
-            <p className="m-0 text-sl" style={{ maxWidth: '35rem', lineHeight: '1.5', color: 'var(--text-color)' }}>
-              To visualize your data in a hierarchical structure, please apply a <strong>Grouping Rule</strong> from the Global Search bar above.
-            </p>
-          </div>
+                  <div className="solid-empty-listview-body">
+                    <div className="solid-empty-listview-title">
+                      No grouping rules applied
+                    </div>
+                    <div className="solid-empty-listview-actions">
+                      <SolidButton
+                        type="button"
+                        variant="primary"
+                        size="small"
+                        leftIcon={<Plus size={14} />}
+                        onClick={openGroupingBuilder}
+                      >
+                        Create Groups
+                      </SolidButton>
+                    </div>
 
-        ) : (
-          <SolidTreeTable
+                    <div className="solid-empty-listview-description">
+                      Start by adding grouping rules and optional aggregations for this tree view.
+                    </div>
+                  </div>
+                </div>
+              </div>
+            ) : (
+              <SolidTreeTable
             value={treeNodes}
             loading={treeLoading}
             expandedKeys={expandedKeys}
@@ -1819,10 +1856,13 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
               field="__group"
               header="Group"
               sortable
+              frozen
+              alignFrozen="left"
               expander={(node: any) => node?.data?.__treeMeta?.nodeType === "group"}
               body={groupColumnBody}
-
-              style={{ minWidth: "18rem", display: "flex", alignItems: "center" }}
+              headerClassName="solid-tree-group-header-cell"
+              bodyClassName="solid-tree-group-body-cell"
+              style={{ width: "max-content", minWidth: "24rem" }}
             />
 
             {renderColumnsDynamically()}
@@ -1831,7 +1871,11 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
             <SolidTreeColumn
               key="tree-last-frozen-column"
               header=""
-              style={{ width: "20rem" }}
+              frozen
+              alignFrozen="right"
+              style={{ width: "9rem", minWidth: "9rem", maxWidth: "9rem" }}
+              className="solid-tree-actions-cell"
+              headerClassName="solid-tree-actions-cell"
               body={(node: any) => {
                 const rowData = node?.data as TreeRowData;
                 const nodeMeta = rowData?.__treeMeta;
@@ -1847,35 +1891,14 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 const childrenLoaded = isExpanded && node.children && node.children.length > 0;
                 if (!childrenLoaded) return <span>&nbsp;</span>;
 
-                const pagEntry = getPagination(nodeKey);
                 const canPrev = hasPrev(nodeKey);
                 const canNext = hasNext(nodeKey);
-
-                // "in Jharkhand" — this node's own group label
-                const inLabel = nodeMeta.groupLabel ?? "";
-
-                // "of cities" — what the children represent
-                // nextRuleIndex = nodeMeta.ruleIndex + 1
-                const nextRuleIndex = nodeMeta.ruleIndex + 1;
-                const isLeafLevel = nextRuleIndex >= activeGroupingRules.length;
-                const ofLabel = isLeafLevel
-                  ? solidTreeViewMetaData?.data?.solidView?.model?.displayName                                          // leaf → model name
-                  : (() => {
-                    const nextRule = activeGroupingRules[nextRuleIndex];
-                    const fieldName = String(nextRule?.fieldName ?? "");
-                    const fieldMeta = getFieldMetadata(fieldName);
-                    // Use displayName if available, fallback to fieldName
-                    return fieldMeta?.displayName ?? fieldMeta?.name ?? fieldName;
-                  })();
 
                 return (
                   <div
                     className="solid-tree-node-paginator"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    <span className="solid-tree-node-paginator-copy">
-                      {pagEntry.offset + 1}–{Math.min(pagEntry.offset + pagEntry.limit, pagEntry.total)} of {pagEntry.total} {getSingularAndPlural(ofLabel).toPlural ?? ofLabel} in {inLabel}
-                    </span>
                     <SolidButton
                       type="button"
                       variant="outline"
@@ -1898,12 +1921,14 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                 );
               }}
             />
-          </SolidTreeTable>
-        )}
-      </div>
+              </SolidTreeTable>
+            )}
+          </div>
 
-      {/* ── Root-level pagination bar ── */}
-      <RootPaginationBar />
+          {/* ── Root-level pagination bar ── */}
+          <RootPaginationBar />
+        </div>
+      </div>
 
       <SolidDialog
         open={deleteEntity}

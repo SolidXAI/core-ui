@@ -33,6 +33,8 @@ export type SolidTreeColumnProps = {
   align?: "left" | "center" | "right";
   alignHeader?: "left" | "center" | "right";
   expander?: boolean | ((node: SolidTreeNode) => boolean);
+  frozen?: boolean;
+  alignFrozen?: "left" | "right";
   [key: string]: any;
 };
 
@@ -173,6 +175,24 @@ function normalizeTextAlign(value?: "left" | "center" | "right") {
   return value;
 }
 
+function parseWidthValue(value: unknown): number | null {
+  if (typeof value === "number") return value;
+  if (typeof value !== "string") return null;
+
+  const trimmed = value.trim();
+  if (trimmed.endsWith("px")) {
+    const parsed = Number.parseFloat(trimmed.replace("px", ""));
+    return Number.isFinite(parsed) ? parsed : null;
+  }
+  if (trimmed.endsWith("rem")) {
+    const parsed = Number.parseFloat(trimmed.replace("rem", ""));
+    return Number.isFinite(parsed) ? parsed * 16 : null;
+  }
+
+  const parsed = Number.parseFloat(trimmed);
+  return Number.isFinite(parsed) ? parsed : null;
+}
+
 export function SolidTreeTable({
   value = [],
   children,
@@ -194,6 +214,39 @@ export function SolidTreeTable({
 }: SolidTreeTableProps) {
   const columns = useMemo(() => normalizeColumns(children), [children]);
   const visibleRows = useMemo(() => flattenVisibleNodes(value, expandedKeys), [value, expandedKeys]);
+  const selectionWidth = selectionMode === "checkbox" ? 48 : 0;
+
+  const frozenColumnMeta = useMemo(() => {
+    const getColumnWidth = (props: SolidTreeColumnProps) =>
+      parseWidthValue(props.style?.width)
+      ?? parseWidthValue(props.style?.minWidth)
+      ?? parseWidthValue(props.headerStyle?.width)
+      ?? parseWidthValue(props.headerStyle?.minWidth)
+      ?? 160;
+
+    const leftOffsets = new Map<number, number>();
+    const rightOffsets = new Map<number, number>();
+
+    let leftOffset = selectionWidth;
+    columns.forEach((column, index) => {
+      const props = column.props;
+      if (props.frozen && (props.alignFrozen ?? "left") === "left") {
+        leftOffsets.set(index, leftOffset);
+        leftOffset += getColumnWidth(props);
+      }
+    });
+
+    let rightOffset = 0;
+    for (let index = columns.length - 1; index >= 0; index -= 1) {
+      const props = columns[index].props;
+      if (props.frozen && props.alignFrozen === "right") {
+        rightOffsets.set(index, rightOffset);
+        rightOffset += getColumnWidth(props);
+      }
+    }
+
+    return { leftOffsets, rightOffsets };
+  }, [columns, selectionWidth]);
 
   const selectionColSpan = selectionMode === "checkbox" ? 1 : 0;
 
@@ -206,6 +259,42 @@ export function SolidTreeTable({
     visibleRows.length > 0 &&
     selectedLeafRows.length === visibleRows.length;
 
+  const getStickyStyles = (
+    kind: "selection" | "column",
+    index: number | null,
+    position: "header" | "body"
+  ): React.CSSProperties => {
+    if (kind === "selection") {
+      return {
+        position: "sticky",
+        left: 0,
+        zIndex: position === "header" ? 7 : 5,
+      };
+    }
+
+    if (index === null) return {};
+
+    const leftOffset = frozenColumnMeta.leftOffsets.get(index);
+    if (leftOffset !== undefined) {
+      return {
+        position: "sticky",
+        left: leftOffset,
+        zIndex: position === "header" ? 6 : 4,
+      };
+    }
+
+    const rightOffset = frozenColumnMeta.rightOffsets.get(index);
+    if (rightOffset !== undefined) {
+      return {
+        position: "sticky",
+        right: rightOffset,
+        zIndex: position === "header" ? 6 : 4,
+      };
+    }
+
+    return {};
+  };
+
   return (
     <div className="solid-tree-table-root">
       <div className="solid-data-table-viewport min-h-0 rounded-md border border-border/60 bg-background">
@@ -214,7 +303,10 @@ export function SolidTreeTable({
             <thead className="solid-data-table-head sticky top-0 z-2">
               <tr>
                 {selectionMode === "checkbox" ? (
-                  <th className="solid-data-table-th solid-data-table-selection-col">
+                  <th
+                    className="solid-data-table-th solid-data-table-selection-col solid-tree-sticky-cell solid-tree-sticky-cell-left"
+                    style={getStickyStyles("selection", null, "header")}
+                  >
                     <input
                       type="checkbox"
                       checked={Boolean(allVisibleSelected)}
@@ -242,11 +334,17 @@ export function SolidTreeTable({
                   return (
                     <th
                       key={`tree-header-${index}`}
-                      className={cx("solid-data-table-th text-left text-foreground whitespace-nowrap", props.headerClassName)}
+                      className={cx(
+                        "solid-data-table-th text-left text-foreground whitespace-nowrap",
+                        props.frozen && (props.alignFrozen ?? "left") === "left" && "solid-tree-sticky-cell solid-tree-sticky-cell-left",
+                        props.frozen && props.alignFrozen === "right" && "solid-tree-sticky-cell solid-tree-sticky-cell-right",
+                        props.headerClassName
+                      )}
                       style={{
                         ...props.style,
                         ...props.headerStyle,
                         textAlign: normalizeTextAlign(props.alignHeader ?? props.align),
+                        ...getStickyStyles("column", index, "header"),
                       }}
                     >
                       <button
@@ -295,7 +393,10 @@ export function SolidTreeTable({
                       }}
                     >
                       {selectionMode === "checkbox" ? (
-                        <td className="solid-data-table-td solid-data-table-selection-col">
+                        <td
+                          className="solid-data-table-td solid-data-table-selection-col solid-tree-sticky-cell solid-tree-sticky-cell-left"
+                          style={getStickyStyles("selection", null, "body")}
+                        >
                           <input
                             type="checkbox"
                             checked={isSelected}
@@ -340,10 +441,17 @@ export function SolidTreeTable({
                         return (
                           <td
                             key={`tree-cell-${key}-${columnIndex}`}
-                            className={cx("solid-data-table-td align-top text-foreground", props.className, props.bodyClassName)}
+                            className={cx(
+                              "solid-data-table-td align-top text-foreground",
+                              props.frozen && (props.alignFrozen ?? "left") === "left" && "solid-tree-sticky-cell solid-tree-sticky-cell-left",
+                              props.frozen && props.alignFrozen === "right" && "solid-tree-sticky-cell solid-tree-sticky-cell-right",
+                              props.className,
+                              props.bodyClassName
+                            )}
                             style={{
                               ...props.style,
                               textAlign: normalizeTextAlign(props.align),
+                              ...getStickyStyles("column", columnIndex, "body"),
                             }}
                           >
                             {isExpanderColumn ? (

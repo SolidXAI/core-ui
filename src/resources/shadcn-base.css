@@ -3166,6 +3166,63 @@ body {
   background: color-mix(in srgb, var(--accent) 65%, transparent);
 }
 
+.solid-tree-toolbar .solid-global-search-element {
+  height: 36px;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 10px;
+  background: var(--background);
+  padding: 0 0 0 6px;
+}
+
+.solid-tree-toolbar .solid-global-search-element:focus-within {
+  border-color: color-mix(in srgb, var(--ring) 60%, var(--border) 40%);
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 18%, transparent);
+}
+
+.solid-tree-toolbar .solid-global-search-element-wrapper {
+  width: min(460px, 42vw);
+}
+
+.solid-tree-toolbar .solid-global-search-element input {
+  height: 34px;
+  max-width: none !important;
+  width: 100%;
+  border: 0;
+  background: transparent;
+  font-size: 13px;
+  color: var(--foreground);
+  padding-left: 8px;
+  padding-right: 40px;
+}
+
+.solid-tree-toolbar .solid-global-search-element input::placeholder {
+  color: color-mix(in srgb, var(--muted-foreground) 78%, transparent);
+}
+
+.solid-tree-toolbar .custom-filter-button {
+  border: 0;
+  background: transparent;
+  height: 34px;
+  width: 34px;
+  border-radius: 8px;
+  right: 1px;
+}
+
+.solid-tree-toolbar .custom-filter-button:hover {
+  background: color-mix(in srgb, var(--accent) 65%, transparent);
+}
+
+.solid-tree-toolbar .solid-btn.solid-icon-button {
+  width: 32px;
+  min-width: 32px;
+  height: 32px;
+  padding: 0;
+}
+
+.solid-tree-toolbar .solid-btn.solid-icon-button .solid-btn-label {
+  justify-content: center;
+}
+
 .solid-list-toolbar .p-button,
 .solid-list-toolbar .solid-btn {
   height: 32px;
@@ -3285,7 +3342,23 @@ body {
   min-height: 0;
 }
 
+.solid-tree-page-wrapper .solid-datatable-wrapper {
+  height: 100% !important;
+  min-height: 0;
+}
+
+.solid-tree-page-wrapper .solid-list-content,
+.solid-tree-surface,
+.solid-tree-table-area {
+  min-width: 0;
+}
+
 .solid-list-table-area>.solid-data-table-root {
+  flex: 1 1 auto;
+  min-height: 0;
+}
+
+.solid-tree-table-area>.solid-tree-table-root {
   flex: 1 1 auto;
   min-height: 0;
 }
@@ -3476,14 +3549,33 @@ body {
 
 .solid-treetable-wrapper {
   position: relative;
-  height: calc(100vh - 110px);
+  height: 100%;
   min-height: 0;
   overflow: hidden;
 }
 
 .solid-tree-table-root {
+  display: flex;
+  flex: 1 1 auto;
+  flex-direction: column;
   height: 100%;
   min-height: 0;
+  min-width: 0;
+  overflow: hidden;
+}
+
+.solid-tree-table-root .solid-data-table-viewport {
+  flex: 1 1 auto;
+  min-height: 0;
+  min-width: 0;
+  height: auto;
+  overflow: auto;
+  overscroll-behavior: contain;
+}
+
+.solid-tree-table-root .solid-data-table-viewport > .relative {
+  min-height: 100%;
+  min-width: max-content;
 }
 
 .solid-tree-table-row {
@@ -3540,6 +3632,103 @@ body {
   display: inline-flex;
   align-items: center;
   gap: 0.35rem;
+  flex: 1 1 auto;
+}
+
+.solid-tree-sticky-cell {
+  background: var(--background);
+}
+
+.solid-data-table-head .solid-tree-sticky-cell {
+  background: color-mix(in srgb, var(--card) 88%, var(--background) 12%);
+}
+
+.solid-tree-sticky-cell-left {
+  box-shadow: 8px 0 12px -12px rgba(15, 23, 42, 0.18);
+}
+
+.solid-tree-sticky-cell-right {
+  box-shadow: -8px 0 12px -12px rgba(15, 23, 42, 0.18);
+}
+
+.solid-data-table-head .solid-tree-group-header-cell {
+  min-height: 42px;
+  z-index: 10 !important;
+  background: color-mix(in srgb, var(--card) 92%, var(--background) 8%);
+}
+
+.solid-tree-group-header-cell .solid-table-header-button {
+  width: 100%;
+  min-height: 24px;
+}
+
+.solid-tree-group-body-cell {
+  min-width: 24rem;
+}
+
+.solid-tree-aggregate-header-cell,
+.solid-tree-aggregate-body-cell {
+  width: 7rem;
+  min-width: 7rem;
+  max-width: 7rem;
+}
+
+.solid-tree-aggregate-header-cell .solid-table-header-button {
+  width: 100%;
+  min-width: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: flex-end;
+  gap: 4px;
+}
+
+.solid-tree-aggregate-header {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: flex-end;
+  gap: 2px;
+  min-width: 0;
+  flex: 1 1 auto;
+  width: auto;
+  max-width: calc(100% - 18px);
+}
+
+.solid-tree-aggregate-header-field {
+  display: inline-block;
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-size: 10px;
+  line-height: 1.1;
+  color: color-mix(in srgb, var(--foreground) 82%, transparent);
+}
+
+.solid-tree-aggregate-header-op {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  min-width: 0;
+  padding: 1px 6px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 88%, transparent);
+  color: color-mix(in srgb, var(--foreground) 80%, transparent);
+  font-size: 9px;
+  font-weight: 700;
+  line-height: 1.1;
+  letter-spacing: 0.04em;
+}
+
+.solid-tree-aggregate-body-cell {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.solid-tree-aggregate-value {
+  display: inline-block;
+  width: 100%;
+  text-align: right;
+  font-variant-numeric: tabular-nums;
 }
 
 .solid-tree-table-loading-overlay {
@@ -3570,19 +3759,17 @@ body {
 .solid-tree-group-label {
   display: inline-flex;
   align-items: center;
-  gap: 0.4rem;
   min-width: 0;
+  width: max-content;
+  max-width: none;
 }
 
-.solid-tree-inline-tooltip {
-  all: unset;
-  display: inline-flex;
-  align-items: center;
-  justify-content: center;
-  width: 1rem;
-  height: 1rem;
-  color: color-mix(in srgb, var(--foreground) 58%, transparent);
-  cursor: pointer;
+.solid-tree-group-label-text {
+  display: inline-block;
+  min-width: 0;
+  max-width: none;
+  overflow: visible;
+  white-space: nowrap;
 }
 
 .solid-tree-root-paginator {
@@ -3630,13 +3817,7 @@ body {
 
 .solid-tree-node-paginator {
   justify-content: flex-end;
-}
-
-.solid-tree-node-paginator-copy {
-  font-size: 0.72rem;
-  line-height: 1.2;
-  color: color-mix(in srgb, var(--foreground) 72%, transparent);
-  white-space: nowrap;
+  gap: 6px;
 }
 
 .solid-tree-row-action-icon {
@@ -3687,6 +3868,11 @@ body {
 
 .solid-tree-confirm-dialog .solid-radix-dialog-description {
   color: color-mix(in srgb, var(--foreground) 78%, transparent);
+}
+
+.solid-tree-empty-state {
+  flex: 1 1 auto;
+  min-height: 0;
 }
 
 .solid-data-table-viewport {

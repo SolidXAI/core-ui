@@ -759,6 +759,14 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     useImperativeHandle(ref, () => ({
         clearFilter: () => {
             setFilterRules(initialState);
+        },
+        openGroupingDialog: () => {
+            setShowOverlay(false);
+            setShowGroupFilterElement(true);
+        },
+        openCustomFilterDialog: () => {
+            setShowOverlay(false);
+            setShowGlobalSearchElement(true);
         }
     }));
 
@@ -1891,7 +1899,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             {inputValue ? (
                                 <>
                                     <div className="custom-filter-search-options solid-search-overlay-section px-3 py-1 flex flex-column">
-                                        <h6 className="my-1 solid-search-overlay-heading solid-search-overlay-section-title">Search by fields</h6>
+                                        <h6 className="my-1 solid-search-overlay-heading solid-search-overlay-section-title solid-search-overlay-heading-with-icon">
+                                            <Search size={13} />
+                                            <span>Search by fields</span>
+                                        </h6>
                                         {searchableFields.length > 0 ? (
                                             searchableFields.map((value: any, index: number) => {
                                                 return (
@@ -1967,7 +1978,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             ) :
                                 <>
                                     <div className="p-3 solid-search-overlay-empty">
-                                        <div className="solid-search-overlay-empty-title">Start typing to search</div>
+                                        <div className="solid-search-overlay-empty-title solid-search-overlay-heading-with-icon">
+                                            <Search size={13} />
+                                            <span>Start typing to search</span>
+                                        </div>
                                         <div className="solid-search-overlay-empty-subtitle">
                                             Start typing in search input to see all fields on which you can search {searchableEntityLabel} by.
                                         </div>
@@ -2040,17 +2054,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                 </button>
                             )}
                         </div>
-                        {viewType === "tree" && (
-                            <div
-                                className="px-3 py-2 flex flex-column solid-search-overlay-footer cursor-pointer solid-search-overlay-footer-grouping"
-                                onClick={() => setShowGroupFilterElement(true)}
-                            >
-                                <div className="solid-search-overlay-footer-title solid-search-overlay-section-title">Or click here to open grouping filter</div>
-                                <div className="solid-search-overlay-footer-subtitle">
-                                    Group tree results and configure aggregations without leaving this view.
-                                </div>
-                            </div>
-                        )}
                     </div>
                 )
                 }
