@@ -1093,6 +1093,16 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         setRefreshKey((prev) => prev + 1)
     }
 
+    const openCustomFilterDialog = () => {
+        setShowOverlay(false);
+        setShowGlobalSearchElement(true);
+    };
+
+    const openGroupingDialog = () => {
+        setShowOverlay(false);
+        setShowGroupFilterElement(true);
+    };
+
     useEffect(() => {
         if (refreshKey > 0 && hasSearched) {
 
@@ -1990,29 +2000,43 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                             }
                         </div>
 
-                        <div className="px-3 py-2 flex flex-column solid-search-overlay-footer cursor-pointer" onClick={() => {
-                            if (viewType === "tree") {
-                                setShowGroupFilterElement(true)
-                            } else {
-                                setShowGlobalSearchElement(true)
-                            }
-                        }}>
-                            <div className="solid-search-overlay-footer-title solid-search-overlay-section-title">Or click here to custom filter</div>
-                            <div className="solid-search-overlay-footer-subtitle">
-                                Use custom filters to apply filters on any field using any operator for a more flexible approach to filtering data.
-                            </div>
-                            {/* <div className="solid-search-overlay-footer-actions">
-                                <SolidButton variant="ghost" size="sm" onClick={() => } className="solid-search-overlay-option solid-search-overlay-footer-btn">
+                        <div className="solid-search-overlay-footer">
+                            <button
+                                type="button"
+                                className="px-3 py-2 flex flex-column solid-search-overlay-footer-action"
+                                onClick={openCustomFilterDialog}
+                            >
+                                <div className="solid-search-overlay-footer-action-main">
                                     <Filter size={14} />
-                                    Custom Filter
-                                </SolidButton>
-                                {viewType === "tree" &&
-                                    <SolidButton variant="ghost" size="sm" onClick={() => } className="solid-search-overlay-option solid-search-overlay-footer-btn">
+                                    <div>
+                                        <div className="solid-search-overlay-footer-title solid-search-overlay-section-title">
+                                            Click here to apply custom filters
+                                        </div>
+                                        <div className="solid-search-overlay-footer-subtitle">
+                                            Use custom filters to apply conditions on any field using any operator.
+                                        </div>
+                                    </div>
+                                </div>
+                            </button>
+                            {viewType === "tree" && (
+                                <button
+                                    type="button"
+                                    className="px-3 py-2 flex flex-column solid-search-overlay-footer-action solid-search-overlay-footer-action-secondary"
+                                    onClick={openGroupingDialog}
+                                >
+                                    <div className="solid-search-overlay-footer-action-main">
                                         <Plus size={14} />
-                                        Grouping
-                                    </SolidButton>
-                                }
-                            </div> */}
+                                        <div>
+                                            <div className="solid-search-overlay-footer-title solid-search-overlay-section-title">
+                                                Click here to do custom grouping
+                                            </div>
+                                            <div className="solid-search-overlay-footer-subtitle">
+                                                Configure grouping rules and aggregations for the tree view.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </button>
+                            )}
                         </div>
                     </div>
                 )

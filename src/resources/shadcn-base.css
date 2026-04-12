@@ -3351,6 +3351,221 @@ body {
   cursor: not-allowed;
 }
 
+.solid-treetable-wrapper {
+  position: relative;
+  height: calc(100vh - 110px);
+  min-height: 0;
+  overflow: hidden;
+}
+
+.solid-tree-table-root {
+  height: 100%;
+  min-height: 0;
+}
+
+.solid-tree-table-row {
+  cursor: pointer;
+}
+
+.solid-tree-table-row.is-selected {
+  background: color-mix(in srgb, var(--accent) 70%, transparent);
+}
+
+.solid-tree-cell {
+  display: flex;
+  align-items: center;
+  min-width: 0;
+}
+
+.solid-tree-cell-indent {
+  flex: 0 0 auto;
+}
+
+.solid-tree-expander {
+  all: unset;
+  width: 1.75rem;
+  height: 1.75rem;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: 8px;
+  color: color-mix(in srgb, var(--foreground) 84%, transparent);
+  transition: background-color 120ms ease, color 120ms ease, transform 120ms ease;
+  cursor: pointer;
+}
+
+.solid-tree-expander:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 86%, transparent);
+}
+
+.solid-tree-expander:disabled {
+  opacity: 0.24;
+  cursor: default;
+  pointer-events: none;
+}
+
+.solid-tree-expander-icon {
+  transition: transform 120ms ease;
+}
+
+.solid-tree-expander-icon.is-expanded {
+  transform: rotate(90deg);
+}
+
+.solid-tree-cell-content {
+  min-width: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 0.35rem;
+}
+
+.solid-tree-table-loading-overlay {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+  padding-top: 1rem;
+  background: linear-gradient(to bottom, color-mix(in srgb, var(--background) 84%, transparent), transparent 35%);
+  pointer-events: none;
+}
+
+.solid-tree-table-loading-pill {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.5rem;
+  padding: 0.45rem 0.7rem;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  background: color-mix(in srgb, var(--card) 94%, transparent);
+  color: color-mix(in srgb, var(--foreground) 86%, transparent);
+  box-shadow: 0 10px 24px rgba(15, 23, 42, 0.08);
+  font-size: 0.78rem;
+  font-weight: 600;
+}
+
+.solid-tree-group-label {
+  display: inline-flex;
+  align-items: center;
+  gap: 0.4rem;
+  min-width: 0;
+}
+
+.solid-tree-inline-tooltip {
+  all: unset;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 1rem;
+  height: 1rem;
+  color: color-mix(in srgb, var(--foreground) 58%, transparent);
+  cursor: pointer;
+}
+
+.solid-tree-root-paginator {
+  width: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 1rem;
+  padding: 0.625rem 0.85rem;
+  border-top: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+  background: color-mix(in srgb, var(--card) 94%, transparent);
+}
+
+.solid-tree-root-paginator-meta,
+.solid-tree-root-paginator-actions,
+.solid-tree-node-paginator {
+  display: flex;
+  align-items: center;
+  gap: 0.55rem;
+}
+
+.solid-tree-page-size-select {
+  min-width: 4.25rem;
+}
+
+.solid-tree-page-size-select .solid-select {
+  height: 28px;
+  min-width: 4.25rem;
+  font-size: 0.75rem;
+  border-radius: 8px;
+  padding-top: 0;
+  padding-bottom: 0;
+}
+
+.solid-tree-paginator-btn {
+  min-width: 2rem;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+}
+
+.solid-tree-paginator-btn .solid-btn-label {
+  display: none;
+}
+
+.solid-tree-node-paginator {
+  justify-content: flex-end;
+}
+
+.solid-tree-node-paginator-copy {
+  font-size: 0.72rem;
+  line-height: 1.2;
+  color: color-mix(in srgb, var(--foreground) 72%, transparent);
+  white-space: nowrap;
+}
+
+.solid-tree-row-action-icon {
+  min-width: 2rem;
+  width: 2rem;
+  height: 2rem;
+  padding: 0;
+}
+
+.solid-tree-row-action-icon .solid-btn-label {
+  display: none;
+}
+
+.solid-tree-row-action-icon.is-danger {
+  color: var(--destructive);
+}
+
+.solid-tree-row-menu-trigger {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: 2rem;
+  height: 2rem;
+  border-radius: 9px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: color-mix(in srgb, var(--foreground) 76%, transparent);
+  transition: background-color 120ms ease, border-color 120ms ease, color 120ms ease;
+}
+
+.solid-tree-row-menu-trigger:hover {
+  background: color-mix(in srgb, var(--accent) 92%, transparent);
+  border-color: color-mix(in srgb, var(--border) 74%, transparent);
+  color: var(--foreground);
+}
+
+.solid-tree-row-menu .solid-dropdown-menu-item {
+  gap: 0.55rem;
+}
+
+.solid-tree-row-menu .solid-dropdown-menu-item.is-danger {
+  color: var(--destructive);
+}
+
+.solid-tree-confirm-dialog {
+  width: min(28rem, calc(100vw - 2rem));
+}
+
+.solid-tree-confirm-dialog .solid-radix-dialog-description {
+  color: color-mix(in srgb, var(--foreground) 78%, transparent);
+}
+
 .solid-data-table-viewport {
   scrollbar-width: thin;
   scrollbar-color: color-mix(in srgb, var(--foreground) 26%, transparent) color-mix(in srgb, var(--background) 86%, transparent);

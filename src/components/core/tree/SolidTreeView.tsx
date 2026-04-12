@@ -6,6 +6,7 @@ import React, {
   useRef,
   useState,
 } from "react";
+import { ChevronLeft, ChevronRight, EllipsisVertical, Info, Pencil, RefreshCw, Search, Trash2 } from "lucide-react";
 import { showToast } from "../../../redux/features/toastSlice";
 import { useDispatch, useSelector } from "react-redux";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
@@ -13,16 +14,10 @@ import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import qs from "qs";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { SolidGlobalSearchElement } from "../common/SolidGlobalSearchElement";
-import { Button } from "primereact/button";
 import { permissionExpression } from "../../../helpers/permissions";
 import { SolidCreateButton } from "../common/SolidCreateButton";
-import { Dialog } from "primereact/dialog";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { AggregationRule, GroupingRule } from "../common/GroupingComponent";
-import { TreeTable } from "primereact/treetable";
-import { Dropdown } from "primereact/dropdown";
-import type { TreeNode } from "primereact/treenode";
-import { Column } from "primereact/column";
 import { SolidListViewColumn } from "../list/SolidListViewColumn";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { useSession } from "../../../hooks/useSession";
@@ -31,7 +26,6 @@ import { SolidListViewConfigure } from "../list/SolidListViewConfigure";
 import CompactImage from '../../../resources/images/layout/images/compact.png';
 import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
-import { Divider } from "primereact/divider";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { getSingularAndPlural } from "../../../helpers/helpers";
 import { getFilterObjectFromLocalStorage, setFilterObjectToLocalStorage } from "../list/SolidListView";
@@ -39,13 +33,13 @@ import { HomePageModuleSvg } from "../../Svg/HomePageModuleSvg";
 import { SolidBeforeTreeNodeLoad } from "../../../types";
 import { getExtensionFunction } from "../../../helpers/registry";
 import { SolidTreeLoad, SolidTreeUiEventResponse } from "../../../types/solid-core";
-import { Tooltip } from "primereact/tooltip";
 import { useRouter } from "../../../hooks/useRouter";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
 import { usePathname } from "../../../hooks/usePathname";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
-import { OverlayPanel } from "primereact/overlaypanel";
-import { SolidListViewRowActionMenuItem } from "../list/SolidListViewRowActionMenuItem";
+import { SolidButton, SolidDialog, SolidDialogBody, SolidDialogDescription, SolidDialogFooter, SolidDialogHeader, SolidDialogSeparator, SolidDialogTitle, SolidDropdownMenu, SolidDropdownMenuContent, SolidDropdownMenuItem, SolidDropdownMenuSeparator, SolidDropdownMenuTrigger, SolidSelect, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from "../../shad-cn-ui";
+import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
+import { Column as SolidTreeColumn, SolidTreeNode as TreeNode, SolidTreeSelectionKeys, SolidTreeTable } from "./SolidTreeTable";
 
 // ─── Types ────────────────────────────────────────────────────────────────────
 
@@ -149,7 +143,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   const [aggregationRules, setAggregationRules] = useState<AggregationRule[]>([]);
 
   const [treeNodes, setTreeNodes] = useState<TreeNode[]>([]);
-  const [selectedNodeKeys, setSelectedNodeKeys] = useState<Record<string, any>>({});
+  const [selectedNodeKeys, setSelectedNodeKeys] = useState<SolidTreeSelectionKeys>({});
   const [expandedKeys, setExpandedKeys] = useState<any>({});
   const [treeLoading, setTreeLoading] = useState<boolean>(false);
 
@@ -180,6 +174,8 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
   const [size, setSize] = useState<string | any>(sizeOptions[1].value);
   const [viewModes, setViewModes] = useState<any>([]);
+
+  const headerRequestStatusLabel = treeLoading ? "Loading..." : null;
 
 
   // ── Pagination state ──────────────────────────────────────────────────────
@@ -262,7 +258,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     {
       modelName: params.modelName,
       moduleName: params.moduleName,
-      viewType: "list",
+      viewType: "tree",
       menuItemId,
       menuItemName,
       actionId,
@@ -889,6 +885,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       const rootNodes = buildGroupNodes(response?.groupMeta || [], 0, [], "root");
       setTreeNodes(rootNodes);
       setExpandedKeys({});
+      setSelectedNodeKeys({});
       // Collapse expanded keys since data changed
       const total = response?.meta.totalRecords ?? 0;
       setPagination("root", { offset, total: total });
@@ -967,6 +964,27 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
       setTreeNodes((prev) => updateNodeChildren(prev, nodeKey, children));
       setPagination(nodeKey, { offset, total });
+      setSelectedNodeKeys((prevKeys) => {
+        const next = { ...prevKeys };
+        Object.keys(next).forEach((key) => {
+          if (key !== nodeKey && key.startsWith(`${nodeKey}-`)) {
+            delete next[key];
+          }
+        });
+
+        if (prevKeys?.[nodeKey]?.checked) {
+          children.forEach((child) => {
+            next[String(child.key)] = {
+              ...next[String(child.key)],
+              checked: true,
+              partialChecked: false,
+              nodeType: child.data?.__treeMeta?.nodeType,
+            };
+          });
+        }
+
+        return next;
+      });
 
       // Collapse all immediate children's expanded state so stale
       // sub-trees don't appear open with no data after pagination.
@@ -1082,6 +1100,29 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     await loadNodeChildren(node, nextOffset);
   };
 
+  useEffect(() => {
+    const checkedRecords: any[] = [];
+
+    const walk = (nodes: TreeNode[]) => {
+      nodes.forEach((node) => {
+        const key = String(node.key);
+        const nodeMeta = (node.data as TreeRowData)?.__treeMeta;
+
+        if (selectedNodeKeys?.[key]?.checked && nodeMeta?.nodeType === "record") {
+          checkedRecords.push(node.data);
+        }
+
+        if (node.children?.length) {
+          walk(node.children);
+        }
+      });
+    };
+
+    walk(treeNodes);
+    setSelectedRecords(checkedRecords);
+    setSelectedRecoverRecords(checkedRecords);
+  }, [treeNodes, selectedNodeKeys]);
+
   // ─── Filter handler ───────────────────────────────────────────────────────
 
   const handleApplyCustomFilter = (nextFilterPredicates: any, persistFilter = false) => {
@@ -1183,11 +1224,11 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       };
 
       return (
-        <Column
+        <SolidTreeColumn
           key={`tree-col-${fieldMetadata.name}`}
           field={originalProps.field ?? fieldMetadata.name}
           header={originalProps.header}
-          // sortable
+          sortable={originalProps.sortable}
           style={mergedColumnStyle}
           className={originalProps.className}
           headerClassName={originalProps.headerClassName}
@@ -1222,7 +1263,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       const header = formatHeader(responseKey);
 
       return (
-        <Column
+        <SolidTreeColumn
           key={`agg-col-${agg}`}
           field={responseKey}
           header={header}
@@ -1252,23 +1293,22 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
     const label = nodeMeta.groupLabel ?? "";
     const truncateAfter = 30;
+    const isTruncated = truncateAfter && label.length > truncateAfter;
     return (
-      <div className="flex align-items-center">
-        <div
-          className="solid-table-row"
-          style={{ maxWidth: `${truncateAfter}ch` }}
-        // title={truncateAfter ? displayValue : undefined}
-        >
-          <span className="font-semibold">{label}</span>
-        </div>
-        {truncateAfter && label.length > truncateAfter &&
-          <>
-            <Tooltip target=".solid-field-tooltip-icon" />
-            <i className="pi pi-info-circle solid-field-tooltip-icon"
-              data-pr-tooltip={label}
-            />
-          </>
-        }
+      <div className="solid-tree-group-label">
+        <span className="font-semibold solid-text-ellipsis" style={{ maxWidth: `${truncateAfter}ch` }}>
+          {label}
+        </span>
+        {isTruncated ? (
+          <SolidTooltip>
+            <SolidTooltipTrigger asChild>
+              <button type="button" className="solid-tree-inline-tooltip" data-no-row-click="true" aria-label="Show full group label">
+                <Info size={13} />
+              </button>
+            </SolidTooltipTrigger>
+            <SolidTooltipContent>{label}</SolidTooltipContent>
+          </SolidTooltip>
+        ) : null}
       </div>
     );
   };
@@ -1279,50 +1319,43 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     if (activeGroupingRules.length === 0) return null;
 
     const { offset, total } = getPagination("root");
-    const currentPage = Math.floor(offset / globalLimit) + 1;
     const rootHasPrev = hasPrev("root");
     const rootHasNext = hasNext("root");
-
-    // if (!rootHasPrev && !rootHasNext) return null;
+    const start = total === 0 ? 0 : offset + 1;
+    const end = total === 0 ? 0 : Math.min(offset + globalLimit, total);
 
     return (
-      <div style={{ width: "100%", display: "flex", alignItems: "center", justifyContent: "space-between", borderTop: "1px solid var(--surface-border)" }}>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 0.75rem" }}>
-          <span className="text-sm text-color-secondary">Items per page</span>
-          <Dropdown
+      <div className="solid-tree-root-paginator">
+        <div className="solid-tree-root-paginator-meta">
+          <span className="solid-paginator-label">Items per page</span>
+          <SolidSelect
             value={globalLimit}
-            options={pageSizeOptions}
+            options={pageSizeOptions.map((option) => ({ label: String(option), value: option }))}
             onChange={(e) => {
               setGlobalLimit(e.value);
             }}
-            className="solid-page-size-dropdown"
-            style={{ height: '2rem', display: 'flex', alignItems: 'center' }}
+            className="solid-tree-page-size-select"
           />
         </div>
-        <div style={{ display: "flex", alignItems: "center", gap: "0.5rem", padding: "0.5rem 0.75rem" }}>
-          <span className="text-sm text-color-secondary">{offset + 1}–{Math.min(offset + globalLimit, total)} of {total}</span>
-          <Button
+        <div className="solid-tree-root-paginator-actions">
+          <span className="solid-paginator-report">{start}–{end} of {total}</span>
+          <SolidButton
             type="button"
-            icon="pi pi-angle-left"
-            size="small"
-            outlined
-            severity="secondary"
+            variant="outline"
+            size="sm"
+            leftIcon={<ChevronLeft size={14} />}
             disabled={!rootHasPrev || treeLoading}
             onClick={() => handleRootPageChange("prev")}
-            style={{ padding: 0, border: "none", width: "2rem" }}
-            className="small-button"
+            className="solid-tree-paginator-btn"
           />
-          <Button
+          <SolidButton
             type="button"
-            icon="pi pi-angle-right"
-            iconPos="right"
-            size="small"
-            outlined
-            severity="secondary"
+            variant="outline"
+            size="sm"
+            leftIcon={<ChevronRight size={14} />}
             disabled={!rootHasNext || treeLoading}
             onClick={() => handleRootPageChange("next")}
-            style={{ padding: 0, border: "none", width: "2rem" }}
-            className="small-button"
+            className="solid-tree-paginator-btn"
           />
         </div>
       </div>
@@ -1361,67 +1394,45 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
   const handleCustomButtonClick = useHandleListCustomButtonClick();
 
-
-
   const [selectedSolidViewData, setSelectedSolidViewData] = useState<any>();
-  const selectedDataRef = useRef<any>();
-  const op = useRef<any>(null);
   const [deleteEntity, setDeleteEntity] = useState(false);
+  const openRowForEdit = (rowData: any, viewMode: "edit" | "view") => {
+    try {
+      sessionStorage.setItem("fromView", "tree");
+      sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
+    } catch (e) { }
 
-  const hasEditInContextMenu = actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
-    solidTreeViewLayout?.attrs?.edit !== false &&
-    solidTreeViewLayout?.attrs?.showDefaultEditButton !== false &&
-    solidTreeViewLayout?.attrs?.showRowEditInContextMenu !== false &&
-    !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.publishedAt);
-
-  const hasDeleteInContextMenu = actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) &&
-    solidTreeViewLayout?.attrs?.delete !== false &&
-    solidTreeViewLayout?.attrs?.showRowDeleteInContextMenu !== false &&
-    !(isDraftPublishWorkflowEnabled && selectedDataRef.current?.publishedAt);
-
-  const hasCustomContextMenuButtons =
-    solidTreeViewLayout?.attrs?.rowButtons?.some(
-      (rb: any) => rb?.attrs?.actionInContextMenu === true
-    );
-
-  const hasAnyContextMenuActions =
-    hasEditInContextMenu || hasDeleteInContextMenu || hasCustomContextMenuButtons;
-
-
-  const detailsBodyTemplate = (solidViewData: any) => {
-    return (
-      <div>
-        <Button
-          type="button"
-          text
-          size="small"
-          className=""
-          onClick={(e) =>
-          // @ts-ignore
-          {
-            e.stopPropagation();
-            selectedDataRef.current = solidViewData;
-            setSelectedSolidViewData(solidViewData);
-            op.current?.toggle(e)
-          }
-          }
-        >
-          <svg
-            xmlns="http://www.w3.org/2000/svg"
-            width="3"
-            height="10"
-            viewBox="0 0 4 16"
-            fill="none"
-          >
-            <path
-              d="M4 14C4 14.55 3.80417 15.0208 3.4125 15.4125C3.02083 15.8042 2.55 16 2 16C1.45 16 0.979167 15.8042 0.5875 15.4125C0.195833 15.0208 0 14.55 0 14C0 13.45 0.195833 12.9792 0.5875 12.5875C0.979167 12.1958 1.45 12 2 12C2.55 12 3.02083 12.1958 3.4125 12.5875C3.80417 12.9792 4 13.45 4 14ZM4 8C4 8.55 3.80417 9.02083 3.4125 9.4125C3.02083 9.80417 2.55 10 2 10C1.45 10 0.979167 9.80417 0.5875 9.4125C0.195833 9.02083 0 8.55 0 8C0 7.45 0.195833 6.97917 0.5875 6.5875C0.979167 6.19583 1.45 6 2 6C2.55 6 3.02083 6.19583 3.4125 6.5875C3.80417 6.97917 4 7.45 4 8ZM4 2C4 2.55 3.80417 3.02083 3.4125 3.4125C3.02083 3.80417 2.55 4 2 4C1.45 4 0.979167 3.80417 0.5875 3.4125C0.195833 3.02083 0 2.55 0 2C0 1.45 0.195833 0.979166 0.5875 0.5875C0.979167 0.195833 1.45 0 2 0C2.55 0 3.02083 0.195833 3.4125 0.5875C3.80417 0.979166 4 1.45 4 2Z"
-              fill="#666666"
-            />
-          </svg>
-        </Button>
-      </div>
+    router.push(
+      `${editBaseUrl}/${rowData?.id}?viewMode=${viewMode}&${new URLSearchParams(editActionQueryParams).toString()}`
     );
   };
+
+  const canEditRow = (rowData: any, inContextMenu = false) =>
+    actionsAllowed.includes(permissionExpression(params.modelName, "update")) &&
+    solidTreeViewLayout?.attrs?.edit !== false &&
+    (!inContextMenu || solidTreeViewLayout?.attrs?.showDefaultEditButton !== false) &&
+    (!inContextMenu || solidTreeViewLayout?.attrs?.showRowEditInContextMenu !== false) &&
+    !(isDraftPublishWorkflowEnabled && rowData?.publishedAt);
+
+  const canDeleteRow = (rowData: any, inContextMenu = false) =>
+    actionsAllowed.includes(permissionExpression(params.modelName, "delete")) &&
+    solidTreeViewLayout?.attrs?.delete !== false &&
+    (!inContextMenu
+      ? params.embeded ||
+      (solidTreeViewLayout?.attrs?.showRowDeleteInContextMenu !== undefined &&
+        solidTreeViewLayout?.attrs?.showRowDeleteInContextMenu !== true)
+      : solidTreeViewLayout?.attrs?.showRowDeleteInContextMenu !== false) &&
+    !(isDraftPublishWorkflowEnabled && rowData?.publishedAt);
+
+  const getContextMenuButtons = (rowData: any) =>
+    (solidTreeViewLayout?.attrs?.rowButtons || []).filter((rb: any) => {
+      const roles = rb?.attrs?.roles || [];
+      return (
+        rb?.attrs?.actionInContextMenu === true &&
+        rb?.attrs?.visible !== false &&
+        (roles.length === 0 || hasAnyRole(user?.roles, roles))
+      );
+    });
 
 
   const handleDeleteEntity = async () => {
@@ -1444,8 +1455,14 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
   };
 
   const renderRowActions = (rowData: any) => {
+    const customContextMenuButtons = getContextMenuButtons(rowData);
+    const hasAnyContextMenuActions =
+      canEditRow(rowData, true) ||
+      canDeleteRow(rowData, true) ||
+      customContextMenuButtons.length > 0;
+
     return (
-      <div className="flex align-items-center justify-content-end gap-1">
+      <div className="flex align-items-center justify-content-end gap-1" onClick={(event) => event.stopPropagation()}>
 
         {/* ---------------- CUSTOM ROW BUTTONS ---------------- */}
         {solidTreeViewLayout?.attrs?.rowButtons &&
@@ -1462,7 +1479,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
               return !isInContextMenu && isAllowed && isVisible;
             })
             .map((button: any, index: number) => (
-              <Button
+              <SolidButton
                 key={index}
                 type="button"
                 icon={button?.attrs?.icon ?? "pi pi-pencil"}
@@ -1472,7 +1489,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
                     ? button.attrs.label
                     : ""
                 }
-                size="small"
+                size="sm"
                 iconPos="left"
                 onClick={() => {
                   const event = {
@@ -1491,30 +1508,12 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
         ) &&
           solidTreeViewLayout?.attrs?.edit !== false &&
           solidTreeViewLayout?.attrs?.showRowEditInContextMenu === false && (
-            <Button
-              text
-              severity="secondary"
-              size="small"
-              icon="pi pi-pencil"
-              onClick={() => {
-                // if (params.embeded == true) {
-                //   params.handleEditClickForEmbeddedView(rowData?.id);
-                // } else {
-                try {
-                  sessionStorage.setItem("fromView", "list");
-                  sessionStorage.setItem(
-                    "fromViewUrl",
-                    window.location.pathname + window.location.search
-                  );
-                } catch (e) { }
-
-                router.push(
-                  `${editBaseUrl}/${rowData?.id}?viewMode=edit&${new URLSearchParams(
-                    editActionQueryParams
-                  ).toString()}`
-                );
-                // }
-              }}
+            <SolidButton
+              variant="ghost"
+              size="sm"
+              leftIcon={<Pencil size={14} />}
+              className="solid-tree-row-action-icon"
+              onClick={() => openRowForEdit(rowData, "edit")}
             />
           )}
 
@@ -1528,26 +1527,73 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
               undefined &&
               solidTreeViewLayout?.attrs?.showRowDeleteInContextMenu !==
               true)) && (
-            <Button
-              text
-              size="small"
-              severity="danger"
-              icon="pi pi-trash"
+            <SolidButton
+              variant="ghost"
+              size="sm"
+              leftIcon={<Trash2 size={14} />}
+              className="solid-tree-row-action-icon is-danger"
               onClick={() => {
-                // if (
-                //   params?.embededFieldRelationType === "many-to-many"
-                // ) {
-                //   params?.handleDeleteClick(rowData.id);
-                // } else {
                 setSelectedSolidViewData(rowData);
                 setDeleteEntity(true);
-                // }
               }}
             />
           )}
 
         {/* ---------------- CONTEXT MENU ---------------- */}
-        {hasAnyContextMenuActions && detailsBodyTemplate(rowData)}
+        {hasAnyContextMenuActions && (
+          <SolidDropdownMenu>
+            <SolidDropdownMenuTrigger asChild>
+              <button
+                type="button"
+                className="solid-tree-row-menu-trigger"
+                aria-label="Open row actions"
+                data-no-row-click="true"
+              >
+                <EllipsisVertical size={16} />
+              </button>
+            </SolidDropdownMenuTrigger>
+            <SolidDropdownMenuContent className="solid-tree-row-menu">
+              {canEditRow(rowData, true) ? (
+                <SolidDropdownMenuItem onSelect={() => openRowForEdit(rowData, "edit")}>
+                  <Pencil size={14} />
+                  <span>Edit</span>
+                </SolidDropdownMenuItem>
+              ) : null}
+              {canDeleteRow(rowData, true) && !params.embeded ? (
+                <SolidDropdownMenuItem
+                  className="is-danger"
+                  onSelect={() => {
+                    setSelectedSolidViewData(rowData);
+                    setDeleteEntity(true);
+                  }}
+                >
+                  <Trash2 size={14} />
+                  <span>Delete</span>
+                </SolidDropdownMenuItem>
+              ) : null}
+              {customContextMenuButtons.length > 0 &&
+                (canEditRow(rowData, true) || (canDeleteRow(rowData, true) && !params.embeded)) ? (
+                <SolidDropdownMenuSeparator />
+              ) : null}
+              {customContextMenuButtons.map((button: any, index: number) => (
+                <SolidDropdownMenuItem
+                  key={`${rowData?.id || "row"}-${button?.attrs?.label || index}`}
+                  onSelect={() => {
+                    const event = {
+                      params,
+                      rowData,
+                      solidListViewMetaData: solidTreeViewMetaData?.data,
+                    };
+                    handleCustomButtonClick(button.attrs, event);
+                  }}
+                >
+                  {button?.attrs?.icon ? <i className={button.attrs.icon} aria-hidden="true" /> : <Pencil size={14} />}
+                  <span>{button?.attrs?.label}</span>
+                </SolidDropdownMenuItem>
+              ))}
+            </SolidDropdownMenuContent>
+          </SolidDropdownMenu>
+        )}
       </div>
     );
   };
@@ -1585,12 +1631,11 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           <div className="flex align-items-center solid-header-buttons-wrapper">
             {solidTreeViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && (
               <div className="flex lg:hidden">
-                <Button
+                <SolidButton
                   type="button"
-                  size="small"
-                  icon="pi pi-search"
-                  severity="secondary"
-                  outlined
+                  size="sm"
+                  variant="outline"
+                  leftIcon={<Search size={14} />}
                   className="solid-icon-button"
                   onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
                 />
@@ -1609,35 +1654,36 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
             {actionsAllowed.includes(`${permissionExpression(params.modelName, "delete")}`) &&
               solidTreeViewMetaData?.data?.solidView?.layout?.attrs.delete !== false &&
               selectedRecords.length > 0 && (
-                <Button
+                <SolidButton
                   type="button"
                   label="Delete"
-                  size="small"
+                  size="sm"
                   onClick={() => setDeleteRecordsDialogVisible(true)}
                   className="small-button"
                   severity="danger"
                 />
               )}
 
-            <Button
+            {headerRequestStatusLabel ? <SolidHeaderRequestStatus label={headerRequestStatusLabel} /> : null}
+
+            <SolidButton
               type="button"
-              size="small"
-              icon="pi pi-refresh"
-              severity="secondary"
+              size="sm"
+              variant="outline"
+              leftIcon={<RefreshCw size={14} />}
               className="solid-icon-button"
-              outlined
               onClick={() => { void loadRootGroups(getPagination("root").offset); }}
             />
             {showArchived && (
-              <Button
+              <SolidButton
                 type="button"
-                icon="pi pi-refresh"
                 label="Recover"
-                size="small"
-                severity="secondary"
+                size="sm"
+                variant="outline"
+                leftIcon={<RefreshCw size={14} />}
                 className="hidden lg:flex solid-icon-button "
                 onClick={() => setRecoverDialogVisible(true)}
-              ></Button>
+              />
             )}
 
             {params.embeded === false &&
@@ -1680,10 +1726,6 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           )}
       </div>
 
-      <style>{`
-       
-      `}</style>
-
       {/* ── Tree table ── */}
       <div className="solid-datatable-wrapper solid-treetable-wrapper flex-1 min-h-0 overflow-auto">
         {activeGroupingRules.length === 0 ? (
@@ -1700,32 +1742,24 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
           </div>
 
         ) : (
-          <TreeTable
+          <SolidTreeTable
             value={treeNodes}
-            lazy
             loading={treeLoading}
             expandedKeys={expandedKeys}
             onToggle={(event: any) => setExpandedKeys(event.value)}
             onExpand={handleNodeExpand}
-            scrollable
             tableStyle={{ minWidth: "max-content" }}
             tableClassName="solid-data-table"
-            resizableColumns
-            columnResizeMode="expand"
             selectionMode="checkbox"
             selectionKeys={selectedNodeKeys}
             sortField={sortField}
             sortOrder={sortOrder as any}
             removableSort
             onSort={(e) => {
-              setSortField(e.sortField);
-              setSortOrder(e.sortOrder as any);
+              setSortField(e.sortField || "");
+              setSortOrder((e.sortOrder as any) || 0);
             }}
             onRowClick={(e) => {
-              const target = e.originalEvent.target as HTMLElement;
-              if (target.closest(".p-checkbox")) return;
-              if (target.closest(".p-c")) return;
-
               if (e.node.leaf !== true) return;
               const rowData = e.node.data;
 
@@ -1748,7 +1782,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
                 // also store the full current URL so Back can restore exact state (including action params)
                 try {
-                  sessionStorage.setItem("fromView", "list");
+                  sessionStorage.setItem("fromView", "tree");
                   sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
                 } catch (e) {
                   // ignore storage errors
@@ -1759,11 +1793,11 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
             }
             }
             onSelectionChange={(e) => {
-              e.originalEvent.stopPropagation();
-              const incoming = e.value as Record<string, any>;
+              e.originalEvent.stopPropagation?.();
+              const incoming = e.value as SolidTreeSelectionKeys;
 
-              setSelectedNodeKeys((prev: any) => {
-                const next: Record<string, any> = {};
+              setSelectedNodeKeys((prev: SolidTreeSelectionKeys) => {
+                const next: SolidTreeSelectionKeys = {};
 
                 Object.keys(incoming).forEach((key) => {
                   // Find the node to get its type
@@ -1780,7 +1814,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
             }}
 
           >
-            <Column
+            <SolidTreeColumn
               key="tree-group-column"
               field="__group"
               header="Group"
@@ -1794,7 +1828,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
             {renderColumnsDynamically()}
             {renderAggregateColumns()}
 
-            <Column
+            <SolidTreeColumn
               key="tree-last-frozen-column"
               header=""
               style={{ width: "20rem" }}
@@ -1836,191 +1870,111 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
 
                 return (
                   <div
-                    style={{ display: "flex", alignItems: "center", gap: "0.2rem", justifyContent: "flex-end" }}
+                    className="solid-tree-node-paginator"
                     onClick={(e) => e.stopPropagation()}
                   >
-                    {/* <span style={{ fontSize: "0.9rem", color: "var(--text-color-secondary)", whiteSpace: "nowrap" }}>
-                        {pagEntry.offset + 1}–{Math.min(pagEntry.offset + pagEntry.limit, pagEntry.total)} of {pagEntry.total} {getSingularAndPlural(ofLabel).toPlural ?? ofLabel} in {inLabel}
-                      </span> */}
-                    <Button
+                    <span className="solid-tree-node-paginator-copy">
+                      {pagEntry.offset + 1}–{Math.min(pagEntry.offset + pagEntry.limit, pagEntry.total)} of {pagEntry.total} {getSingularAndPlural(ofLabel).toPlural ?? ofLabel} in {inLabel}
+                    </span>
+                    <SolidButton
                       type="button"
-                      icon="pi pi-angle-left"
-                      size="small"
-                      rounded
-                      outlined
+                      variant="outline"
+                      size="sm"
+                      leftIcon={<ChevronLeft size={14} />}
                       disabled={!canPrev || treeLoading}
-                      style={{ padding: 0, border: "none", width: "2rem" }}
-                      className="small-button"
+                      className="solid-tree-paginator-btn"
                       onClick={() => handleNodePageChange(nodeKey, "prev")}
                     />
-                    <Button
+                    <SolidButton
                       type="button"
-                      icon="pi pi-angle-right"
-                      size="small"
-                      rounded
-                      outlined
+                      variant="outline"
+                      size="sm"
+                      leftIcon={<ChevronRight size={14} />}
                       disabled={!canNext || treeLoading}
-                      style={{ padding: 0, border: "none", width: "2rem" }}
-                      className="small-button"
+                      className="solid-tree-paginator-btn"
                       onClick={() => handleNodePageChange(nodeKey, "next")}
                     />
                   </div>
                 );
               }}
             />
-          </TreeTable>
+          </SolidTreeTable>
         )}
       </div>
 
       {/* ── Root-level pagination bar ── */}
       <RootPaginationBar />
 
-
-
-
-      <Dialog
-        header={`Delete ${solidTreeViewMetaData?.data?.solidView?.model?.displayName
-          ? solidTreeViewMetaData?.data?.solidView?.model?.displayName
-          : params?.modelName
-          }`}
-        headerClassName="py-2"
-        contentClassName="px-0 pb-0"
-        visible={deleteEntity}
-        style={{ width: "20vw" }}
-        onHide={() => {
-          if (!deleteEntity) return;
-          setDeleteEntity(false);
+      <SolidDialog
+        open={deleteEntity}
+        onOpenChange={(open) => {
+          if (!open) setDeleteEntity(false);
         }}
-        className="solid-confirm-dialog"
+        contentClassName="solid-confirm-dialog solid-tree-confirm-dialog"
+        showHeader={false}
       >
-        <Divider className="m-0" />
-        <div className="p-4">
-          <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
-            {`Are you sure you want to delete this ${solidTreeViewMetaData?.data?.solidView?.model?.displayName
-              ? solidTreeViewMetaData?.data?.solidView?.model?.displayName
-              : params?.modelName
-              }?`}
-          </p>
-          {/* <p className="" style={{ color: 'var{--solid-grey-500}' }}>{selectedSolidViewData?.singularName}</p> */}
-          <div className="flex align-items-center gap-2 mt-3">
-            <Button label="Delete" severity="danger" size="small" onClick={handleDeleteEntity} />
-            <Button label="Cancel" size="small" onClick={() => setDeleteEntity(false)} outlined className='bg-primary-reverse' />
-          </div>
-        </div>
-      </Dialog>
+        <SolidDialogHeader>
+          <SolidDialogTitle>
+            Delete {solidTreeViewMetaData?.data?.solidView?.model?.displayName || params?.modelName}
+          </SolidDialogTitle>
+        </SolidDialogHeader>
+        <SolidDialogSeparator />
+        <SolidDialogBody>
+          <SolidDialogDescription className="m-0">
+            {`Are you sure you want to delete this ${solidTreeViewMetaData?.data?.solidView?.model?.displayName || params?.modelName}?`}
+          </SolidDialogDescription>
+        </SolidDialogBody>
+        <SolidDialogFooter>
+          <SolidButton label="Cancel" size="sm" variant="outline" onClick={() => setDeleteEntity(false)} />
+          <SolidButton label="Delete" size="sm" severity="danger" onClick={handleDeleteEntity} />
+        </SolidDialogFooter>
+      </SolidDialog>
 
-      {/* ── Delete dialog ── */}
-      <Dialog
-        visible={isDeleteRecordsDialogVisible}
-        header="Confirm Delete"
-        onHide={() => setDeleteRecordsDialogVisible(false)}
-        headerClassName="py-2"
-        contentClassName="px-0 pb-0"
-        // style={{ width: '20vw' }}
-        breakpoints={{ '1199px': '30rem', '550px': '85vw' }}
+      <SolidDialog
+        open={isDeleteRecordsDialogVisible}
+        onOpenChange={(open) => {
+          if (!open) setDeleteRecordsDialogVisible(false);
+        }}
+        contentClassName="solid-confirm-dialog solid-tree-confirm-dialog"
+        showHeader={false}
       >
-        <Divider className="m-0" />
-        <div className="p-4">
-          <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>Are you sure you want to delete the selected records?</p>
-          <div className="flex align-items-center gap-2 mt-3">
-            <Button label="Delete" severity="danger" size="small" autoFocus onClick={deleteBulk} />
-            <Button label="Cancel" size="small" onClick={onDeleteClose} outlined className='bg-primary-reverse' />
-          </div>
-        </div>
-      </Dialog>
-      <Dialog
-        visible={isRecoverDialogVisible}
-        header="Confirm Recover"
-        modal
-        className="solid-confirm-dialog"
-        footer={() => (
-          <div className="flex justify-content-center">
-            <Button
-              label="Yes"
-              icon="pi pi-check"
-              severity="danger"
-              autoFocus
-              onClick={recoverAll}
-            />
-            <Button
-              label="No"
-              icon="pi pi-times"
-              onClick={() => setRecoverDialogVisible(false)}
-            />
-          </div>
-        )}
-        onHide={() => setRecoverDialogVisible(false)}
-      >
-        <p>Are you sure you want to recover all records?</p>
-      </Dialog>
+        <SolidDialogHeader>
+          <SolidDialogTitle>Confirm Delete</SolidDialogTitle>
+        </SolidDialogHeader>
+        <SolidDialogSeparator />
+        <SolidDialogBody>
+          <SolidDialogDescription className="m-0">
+            Are you sure you want to delete the selected records?
+          </SolidDialogDescription>
+        </SolidDialogBody>
+        <SolidDialogFooter>
+          <SolidButton label="Cancel" size="sm" variant="outline" onClick={onDeleteClose} />
+          <SolidButton label="Delete" size="sm" severity="danger" onClick={deleteBulk} />
+        </SolidDialogFooter>
+      </SolidDialog>
 
-      <OverlayPanel
-        ref={op}
-        className="solid-custom-overlay"
-        style={{ top: 10, minWidth: 120 }}
+      <SolidDialog
+        open={isRecoverDialogVisible}
+        onOpenChange={(open) => {
+          if (!open) setRecoverDialogVisible(false);
+        }}
+        contentClassName="solid-confirm-dialog solid-tree-confirm-dialog"
+        showHeader={false}
       >
-        <div className="flex flex-column gap-1 p-1">
-          {hasEditInContextMenu && (
-            <Button
-              type="button"
-              className="w-full text-left gap-1"
-              label="Edit"
-              size="small"
-              iconPos="left"
-              icon={"pi pi-pencil"}
-              onClick={() => {
-                // if (params.embeded == true) {
-                //   params.handleEditClickForEmbeddedView(
-                //     selectedDataRef.current?.id
-                //   );
-                // } else {
-                try {
-                  sessionStorage.setItem("fromView", "list");
-                  sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-                } catch (e) { }
-                router.push(
-                  `${editBaseUrl}/${selectedDataRef.current?.id}?viewMode=edit&${new URLSearchParams(editActionQueryParams).toString()}`
-                );
-                // }
-              }}
-            />
-          )}
-
-          {hasDeleteInContextMenu && !params.embeded && (
-            <Button
-              text
-              type="button"
-              className="w-full text-left gap-1"
-              label="Delete"
-              size="small"
-              iconPos="left"
-              severity="danger"
-              icon={"pi pi-trash"}
-              onClick={() => setDeleteEntity(true)}
-            />
-          )}
-          {hasCustomContextMenuButtons && solidTreeViewLayout?.attrs?.rowButtons
-            ?.filter(
-              (rb: any) =>
-                rb?.attrs?.actionInContextMenu === true &&
-                rb?.attrs?.visible !== false
-            )
-            .map((button: any, index: number) => (
-              <SolidListViewRowActionMenuItem
-                key={`${index}-${selectedDataRef?.current?.id || ''}`}
-                button={button}
-                params={params}
-                rowData={selectedDataRef.current}
-                solidListViewMetaData={
-                  solidTreeViewMetaData
-                }
-                handleCustomButtonClick={
-                  handleCustomButtonClick
-                }
-              />
-            ))}
-        </div>
-      </OverlayPanel>
+        <SolidDialogHeader>
+          <SolidDialogTitle>Confirm Recover</SolidDialogTitle>
+        </SolidDialogHeader>
+        <SolidDialogSeparator />
+        <SolidDialogBody>
+          <SolidDialogDescription className="m-0">
+            Are you sure you want to recover all records?
+          </SolidDialogDescription>
+        </SolidDialogBody>
+        <SolidDialogFooter>
+          <SolidButton label="No" size="sm" variant="outline" onClick={() => setRecoverDialogVisible(false)} />
+          <SolidButton label="Yes" size="sm" severity="danger" onClick={recoverAll} />
+        </SolidDialogFooter>
+      </SolidDialog>
 
     </div>
   );
