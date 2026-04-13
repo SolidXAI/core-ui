@@ -1,5 +1,5 @@
 import { env } from "../../adapters/env";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
+import SolidLogo from '../../resources/images/SolidXLogo-dark.svg'
 import { ChatIcon } from "../layout/SolidAiStudioLayout";
 
 export const SolidAdmin = () => {
@@ -16,139 +16,84 @@ export const SolidAdmin = () => {
   return (
     <>
       <style>{`
-        @import url('https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,500;1,400&family=DM+Sans:wght@300;400;500&display=swap');
-
         .solid-welcome {
           min-height: 100vh;
-          background: #FFF;
+          background: var(--background);
           display: flex;
           align-items: center;
           justify-content: center;
-          font-family: 'DM Sans', sans-serif;
           padding: 2rem;
         }
 
         .welcome-card {
           text-align: center;
-          max-width: 560px;
+          max-width: 480px;
           width: 100%;
+          background-color: var(--card);
+          border: 1px solid var(--border);
+          border-radius: 12px;
+          box-shadow: 0 4px 12px rgba(0, 0, 0, 0.05);
+          overflow: hidden;
+          display: flex;
+          flex-direction: column;
         }
 
-
-        .logo-wrap {
-          display: inline-flex;
+        .welcome-card-header {
+          padding: 32px 32px 16px;
+          display: flex;
+          flex-direction: column;
           align-items: center;
-          justify-content: center;
-          width: 56px;
-          height: 56px;
-          background: #1A1A1A;
-          border-radius: 14px;
-          margin-bottom: 2rem;
+          gap: 12px;
         }
 
-        .logo-letter {
-          font-family: 'Lora', serif;
-          font-weight: 500;
-          font-size: 1.5rem;
-          color: #FAFAF8;
-          letter-spacing: -0.02em;
-        }
-
-        .welcome-eyebrow {
-          font-size: 0.72rem;
-          font-weight: 500;
-          letter-spacing: 0.12em;
-          text-transform: uppercase;
-          color: #A0A096;
-          margin-bottom: 0.85rem;
+        .welcome-card-content {
+          padding: 0 32px 16px;
         }
 
         .welcome-title {
-          font-family: 'Lora', serif;
-          font-size: 2.4rem;
-          font-weight: 400;
-          color: #1A1A1A;
+          font-size: 24px;
+          font-weight: 700;
+          color: var(--foreground);
           line-height: 1.2;
-          margin-bottom: 1.25rem;
+          margin: 0;
           letter-spacing: -0.02em;
         }
 
-        .welcome-title em {
-          font-style: italic;
-          color: #555550;
-        }
-
-        .divider {
-          width: 36px;
-          height: 1.5px;
-          background: #D4D4CC;
-          margin: 0 auto 1.25rem;
-        }
-
         .welcome-desc {
-          font-size: 0.975rem;
-          font-weight: 300;
-          color: #6E6E66;
-          line-height: 1.75;
-          margin-bottom: 2.25rem;
+          font-size: 14px;
+          color: var(--muted-foreground);
+          line-height: 1.6;
+          margin-bottom: 12px;
         }
 
         .features-row {
           display: flex;
           justify-content: center;
-          gap: 1rem;
+          gap: 0px;
           flex-wrap: wrap;
-        }
-
-        .feature-pill {
-          font-size: 0.78rem;
-          font-weight: 400;
-          color: #7A7A72;
-          background: #F0F0EC;
-          border: 1px solid #E4E4DF;
-          border-radius: 100px;
-          padding: 0.35rem 0.9rem;
-          letter-spacing: 0.01em;
-          transition: background 0.2s, color 0.2s;
-          cursor: default;
-        }
-
-        .feature-pill:hover {
-          background: #E8E8E3;
-          color: #3A3A35;
-        }
-
-        .hint {
-          margin-top: 2.5rem;
-          font-size: 0.78rem;
-          color: #B0B0A8;
-          font-weight: 300;
-        }
-
-        .hint span {
-          display: inline-block;
-          background: #EDEDE9;
-          border: 1px solid #E0E0DB;
-          border-radius: 5px;
-          padding: 0.1rem 0.45rem;
-          font-size: 0.72rem;
-          color: #8A8A82;
-          font-family: monospace;
-          vertical-align: middle;
+          margin-bottom: 12px;
         }
 
         .chat-hint {
           display: flex;
           flex-direction: column;
           align-items: center;
-          gap: 0.9rem;
-          margin-top: 1.3rem;
+          gap: 12px;
+          margin-top: 12px;
+          padding-top: 12px;
+          border-top: 1px solid var(--border);
         }
 
         .chat-hint p {
           margin: 0;
-          font-size: 0.85rem;
-          color: #6E6E66;
+          font-size: 13px;
+          color: var(--muted-foreground);
+        }
+
+        .hint {
+          font-size: 12px;
+          color: var(--muted-foreground);
+          opacity: 0.8;
         }
 
         .chat-button {
@@ -156,12 +101,12 @@ export const SolidAdmin = () => {
           background: #111827;
           color: #fff;
           border-radius: 999px;
-          padding: 0.6rem 1.35rem;
-          font-size: 0.9rem;
+          padding: 0.5rem 1.25rem;
+          font-size: 14px;
           font-weight: 500;
           display: inline-flex;
           align-items: center;
-          gap: 0.55rem;
+          gap: 8px;
           cursor: pointer;
           transition: transform 0.15s ease, box-shadow 0.15s ease;
         }
@@ -169,7 +114,6 @@ export const SolidAdmin = () => {
         .chat-button:disabled {
           opacity: 0.4;
           cursor: not-allowed;
-          box-shadow: none;
         }
 
         .chat-button:not(:disabled):hover {
@@ -178,75 +122,56 @@ export const SolidAdmin = () => {
         }
       `}</style>
 
-      {/* <div className="flex flex-column align-items-center justify-content-center min-h-screen bg-white">
-        {!hasRedirect && (
-          <div className="mb-3">
-            <Message
-              severity="warn"
-              text="Default redirect URL is not configured. Please ask your system administrator to set VITE_LOGIN_REDIRECT_URL."
-            />
-          </div>
-        )}
-        {hasRedirect && (
-          <>
+      <div className="solid-welcome">
+
+        <div className="solid-studio-card welcome-card">
+
+          <div className="welcome-card-header">
             <img
               alt="solid logo"
               src={SolidLogo}
-              className="mb-5 w-6rem flex-shrink-0"
+              className="mb-2 w-4rem flex-shrink-0"
+              style={{ opacity: 0.9 }}
             />
-            <h1 className="mt-0 mb-3">Welcome to SolidX</h1>
-            <p className="text-600 line-height-3 mt-0 mb-5 text-xl w-5 text-center">
-              SolidX is the admin console for managing modules, models, views, and permissions. Use the
-              left navigation to explore modules, configure settings, and build your app.
-            </p>
-          </>
-        )}
-      </div> */}
-      <div className="solid-welcome">
 
-        <div className="welcome-card">
+            <div className="solid-studio-home-badge">Admin Console</div>
 
-          <img
-            alt="solid logo"
-            src={SolidLogo}
-            className="mb-5 w-6rem flex-shrink-0"
-          />
-
-          <p className="welcome-eyebrow">Admin Console</p>
-
-          <h1 className="welcome-title">
-            Welcome to <em>SolidX</em>
-          </h1>
-
-          <div className="divider" />
-
-          <p className="welcome-desc">
-            Manage your modules, models, views, and permissions
-            from one place. Use the navigation on the left to
-            explore and configure your application.
-          </p>
-
-          <div className="features-row">
-            {["Modules", "Models", "Views", "Permissions", "Settings"].map((label) => (
-              <span key={label} className="feature-pill">{label}</span>
-            ))}
+            <h1 className="welcome-title">
+              Welcome to SolidX
+            </h1>
           </div>
 
-          <div className="chat-hint">
-            <p className="hint">
-              Get started by selecting a section from the <span>left nav</span>
+          <div className="welcome-card-content">
+            <p className="welcome-desc">
+              Manage modules, models, views, and permissions
+              from one place. Use the navigation on the left to
+              explore and configure your application.
             </p>
-            <p>Need help scaffolding something specific? Ask the SolidX AI Agent.</p>
-            <button
-              type="button"
-              className="chat-button"
-              onClick={handleChatLaunch}
-              disabled={!canOpenChat}
-              aria-label="Open SolidX AI chat"
-            >
-              <ChatIcon />
-              <span>Open AI Chat</span>
-            </button>
+
+            <div className="features-row">
+              {["Modules", "Models", "Views", "Permissions", "Settings"].map((label) => (
+                <span key={label} className="solid-studio-home-badge" style={{ textTransform: 'none', letterSpacing: 'normal' }}>
+                  {label}
+                </span>
+              ))}
+            </div>
+
+            <div className="chat-hint">
+              <p>Need help scaffolding? Ask the SolidX AI Agent.</p>
+              <button
+                type="button"
+                className="chat-button"
+                onClick={handleChatLaunch}
+                disabled={!canOpenChat}
+                aria-label="Open SolidX AI chat"
+              >
+                <ChatIcon />
+                <span>Open AI Chat</span>
+              </button>
+              <p className="hint">
+                Or select a section from the left sidebar
+              </p>
+            </div>
           </div>
 
         </div>

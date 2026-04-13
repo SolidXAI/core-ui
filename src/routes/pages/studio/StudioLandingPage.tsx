@@ -239,7 +239,7 @@ function LayoutCard({
           {entry.description && (
             <span className="solid-studio-home-card-desc">{entry.description}</span>
           )}
-          <span className="solid-studio-home-card-desc" style={{ opacity: 0.6, fontSize: 11 }}>
+          <span className="solid-studio-home-card-desc" style={{ opacity: 0.6, fontSize: 12 }}>
             {entry.to}
           </span>
         </div>
@@ -259,8 +259,8 @@ export function StudioLandingPage() {
   const [listView, setListView] = useState(false);
 
   return (
-    <div className="solid-studio-home solid-studio-home--top">
-      <div className="solid-studio-home-inner solid-studio-home-inner--fluid">
+    <div className={`solid-studio-home ${layouts.length > 0 ? "solid-studio-home--top" : ""}`}>
+      <div className={`solid-studio-home-inner ${layouts.length > 0 ? "solid-studio-home-inner--fluid" : ""}`}>
 
         {/* Toolbar: title left, view toggle right */}
         <div className="solid-studio-home-toolbar">
