@@ -60,6 +60,8 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
   }, [showWorkflowInfo]);
 
   const [activeTabValue, setActiveTabValue] = useState<string>(() => mapTabIndexToValue(activeTab, tabOrder));
+  const userKeyFieldName = solidFormViewMetaData?.data?.solidView?.model?.userKeyField?.name;
+  const modelUserKeyValue = solidFormViewData?.data?.[userKeyFieldName];
 
   useEffect(() => {
     const nextValue = mapTabIndexToValue(activeTab, tabOrder);
@@ -102,6 +104,7 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
             setRefreshChatterMessage={setRefreshChatterMessage}
             actionsAllowed={actionsAllowed}
             title={showWorkflowInfo ? undefined : 'Audit Trail'}
+            modelUserKey={modelUserKeyValue}
           />
         </div>
       )

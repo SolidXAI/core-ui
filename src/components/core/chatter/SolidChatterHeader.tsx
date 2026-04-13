@@ -32,10 +32,11 @@ interface Props {
     onFilterChange?: (filters: FilterState) => void;
     onComposerCancel?: () => void;
     title?: string;
+    modelUserKey?: string;
 }
 
 export const SolidChatterHeader = (props: Props) => {
-    const { activeTab, visibleBox, handleTabClick, modelSingularName, refetch, id, onFilterChange, onComposerCancel, title } = props;
+    const { activeTab, visibleBox, handleTabClick, modelSingularName, refetch, id, onFilterChange, onComposerCancel, title, modelUserKey } = props;
     const [showFilterDialog, setShowFilterDialog] = useState(false);
     const [filters, setFilters] = useState<FilterState>({
         name: '',
@@ -170,11 +171,11 @@ export const SolidChatterHeader = (props: Props) => {
             {visibleBox &&
                 <div className='mt-2'>
                     {visibleBox === "email-message" &&
-                        <SolidMessageComposer id={id} refetch={refetch} modelSingularName={modelSingularName} type={"email"} onCancel={onComposerCancel} />
+                        <SolidMessageComposer id={id} refetch={refetch} modelSingularName={modelSingularName} type={"email"} onCancel={onComposerCancel} modelUserKey={modelUserKey} />
                     }
 
                     {visibleBox === "log" &&
-                        <SolidMessageComposer id={id} refetch={refetch} modelSingularName={modelSingularName} onCancel={onComposerCancel} />
+                        <SolidMessageComposer id={id} refetch={refetch} modelSingularName={modelSingularName} onCancel={onComposerCancel} modelUserKey={modelUserKey} />
                     }
                 </div>
             }

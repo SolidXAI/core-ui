@@ -16,7 +16,7 @@ interface FilterState {
     endDate: Date | null;
 }
 
-export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, setRefreshChatterMessage, actionsAllowed = [], title }: { modelSingularName: any, id: any, refreshChatterMessage: boolean, setRefreshChatterMessage: (value: boolean) => void, actionsAllowed?: string[], title?: string }) => {
+export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, setRefreshChatterMessage, actionsAllowed = [], title, modelUserKey }: { modelSingularName: any, id: any, refreshChatterMessage: boolean, setRefreshChatterMessage: (value: boolean) => void, actionsAllowed?: string[], title?: string, modelUserKey?: string }) => {
     const [activeTab, setActiveTab] = useState<'email-message' | 'log' | null>('email-message');
     const [visibleBox, setVisibleBox] = useState<'email-message' | 'log' | null>(null);
     const [messages, setMessages] = useState<any[]>([]);
@@ -241,6 +241,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                 onFilterChange={handleFilterChange}
                 onComposerCancel={() => setVisibleBox(null)}
                 title={title}
+                modelUserKey={modelUserKey}
             />
             <div className='solid-chatter-body' style={{
                 height:
