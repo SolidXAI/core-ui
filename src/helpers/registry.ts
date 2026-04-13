@@ -46,7 +46,7 @@ import { SolidAiInteractionMessageFieldFormWidget } from "../components/core/for
 import { SolidS3FileViewerWidget } from "../components/core/form/fields/widgets/SolidS3FileViewerWidget";
 import DeleteModuleRowAction from "../components/core/extension/solid-core/moduleMetadata/list/DeleteModuleRowAction";
 import hanldeModelSequenceFormViewChange from "../components/core/extension/solid-core/modelSequence/modelSequenceFormViewChangeHandler";
-import { DefaultDateTimeListWidget } from "../components/core/list/columns/SolidDateColumn";
+import { DefaultDateListWidget, DefaultDateTimeListWidget } from "../components/core/list/columns/SolidDateColumn";
 import dashboardFormViewChangeHandler from "../components/core/extension/solid-core/dashboard/dashboardFormViewChangeHandler";
 import dashboardQuestionFieldChangeHandler from "../components/core/extension/solid-core/dashboard/dashboardQuestionFieldChangeHandler";
 import dashboardQuestionOnFormLoadHandler from "../components/core/extension/solid-core/dashboard/dashboardQuestionOnFormLoadHandler";
@@ -152,6 +152,9 @@ registerExtensionComponent("DefaultRelationOneToManyListWidget", DefaultRelation
 
 // - relation.datetime
 registerExtensionComponent('DefaultDateTimeListWidget', DefaultDateTimeListWidget, ExtensionComponentTypes.list_field_widget);
+// - date
+registerExtensionComponent('DefaultDateListWidget', DefaultDateListWidget, ExtensionComponentTypes.list_field_widget);
+// - datetime
 
 // ...
 

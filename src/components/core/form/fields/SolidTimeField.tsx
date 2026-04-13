@@ -4,6 +4,7 @@ import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 import { buildSyntheticChangeEvent } from "./fieldEventUtils";
 import { useRef } from "react";
 import * as Yup from 'yup';
+import dayjs from 'dayjs';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
@@ -221,8 +222,10 @@ export const DefaultTimeFormViewWidget = ({
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
 
     const rawValue = formik.values[fieldName];
-    const format = fieldLayoutInfo.attrs?.format
+    const format = fieldLayoutInfo.attrs?.format;
 
+    const parsedTime = rawValue ? parseTimeStringToDate(rawValue) : null;
+    const displayValue = parsedTime ? (format ? dayjs(parsedTime).format(format) : formatTime(parsedTime)) : "-";
 
     return (
         <div className={styles.fieldViewWrapper}>
