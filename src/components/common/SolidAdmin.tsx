@@ -52,11 +52,11 @@ export const SolidAdmin = () => {
 
         .welcome-title {
           font-size: 24px;
-          font-weight: 700;
+          font-weight: 500;
           color: var(--foreground);
           line-height: 1.2;
           margin: 0;
-          letter-spacing: -0.02em;
+          letter-spacing: 0em;
         }
 
         .welcome-desc {
