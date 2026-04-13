@@ -65,12 +65,11 @@
 - [ ] move control pane to the bottom
 
 # Chatter
-
-- [x] jenendar
+ 
 - [x] reduced padding on the rhs, the button panel to be more sleek, remove the log note text replace with icon remove bottom border and reduce overall height.
 
 # Form View 
-
+ 
 - [x] wrapper like we have in list view 
 - [x] workflow field stepper to be improved
 - [x] rich text field alternative
@@ -92,9 +91,9 @@
 - [x] cleanup spinner, remove shimer 
 - [x] cleanup toast 
 - [x] backend studio landing page
-- [ ] core user interfaces 
-    - [ ] module form view 
-    - [ ] model form view > field popups
+- [x] core user interfaces 
+    - [x] module form view 
+    - [x] model form view > field popups
     - [x] user form view 
     - [x] generate module 
     - [x] delete module
@@ -105,6 +104,6 @@
 
 
 # Cleanup run
-- [ ] remove all references of prime react from eveywhere 
+- [x] remove all references of prime react from eveywhere (only refrence in dashboard for prime-datatable)
 - [ ] check if there is scope to review the code and come up with primitives that might be useful 
 - [ ] check for component duplication and refactor 
