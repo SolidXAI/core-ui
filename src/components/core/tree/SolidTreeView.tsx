@@ -187,14 +187,17 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
    */
   const [paginationMap, setPaginationMap] = useState<Record<string, PaginationEntry>>({});
 
-  const getPagination = (key: string): PaginationEntry =>
-    paginationMap[key] ?? { offset: 0, limit: globalLimit, total: 0 };
+  const getPagination = (key: string, map = paginationMap): PaginationEntry =>
+    map[key] ?? { offset: 0, limit: globalLimit, total: 0 };
 
   const setPagination = (key: string, entry: Partial<PaginationEntry>) =>
-    setPaginationMap((prev) => ({
-      ...prev,
-      [key]: { ...getPagination(key), ...entry },
-    }));
+    setPaginationMap((prev) => {
+      const current = getPagination(key, prev);
+      return {
+        ...prev,
+        [key]: { ...current, ...entry },
+      };
+    });
 
   // ── Pagination helpers ────────────────────────────────────────────────────
 
@@ -890,7 +893,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       setSelectedNodeKeys({});
       // Collapse expanded keys since data changed
       const total = response?.meta.totalRecords ?? 0;
-      setPagination("root", { offset, total: total });
+      setPagination("root", { offset, total: total, limit });
 
       if (latestFilterPredicatesRef.current && latestFilterPredicatesRef.current.persistFilter) {
         let queryData: any = {
@@ -935,7 +938,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
     if (!meta || meta.nodeType !== "group") return;
 
     const nodeKey = String(node.key);
-    const limit = getPagination(nodeKey).limit || DEFAULT_PAGE_SIZE;
+    const limit = getPagination(nodeKey).limit || globalLimit || DEFAULT_PAGE_SIZE;
     const nextRuleIndex = meta.ruleIndex + 1;
 
     setTreeLoading(true);
@@ -965,7 +968,7 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
       }
 
       setTreeNodes((prev) => updateNodeChildren(prev, nodeKey, children));
-      setPagination(nodeKey, { offset, total });
+      setPagination(node.key as string, { offset, total: total, limit });
       setSelectedNodeKeys((prevKeys) => {
         const next = { ...prevKeys };
         Object.keys(next).forEach((key) => {
@@ -1780,147 +1783,147 @@ export const SolidTreeView = forwardRef<SolidTreeViewHandle, SolidTreeViewParams
               </div>
             ) : (
               <SolidTreeTable
-            value={treeNodes}
-            loading={treeLoading}
-            expandedKeys={expandedKeys}
-            onToggle={(event: any) => setExpandedKeys(event.value)}
-            onExpand={handleNodeExpand}
-            tableStyle={{ minWidth: "max-content" }}
-            tableClassName="solid-data-table"
-            selectionMode="checkbox"
-            selectionKeys={selectedNodeKeys}
-            sortField={sortField}
-            sortOrder={sortOrder as any}
-            removableSort
-            onSort={(e) => {
-              setSortField(e.sortField || "");
-              setSortOrder((e.sortOrder as any) || 0);
-            }}
-            onRowClick={(e) => {
-              if (e.node.leaf !== true) return;
-              const rowData = e.node.data;
+                value={treeNodes}
+                loading={treeLoading}
+                expandedKeys={expandedKeys}
+                onToggle={(event: any) => setExpandedKeys(event.value)}
+                onExpand={handleNodeExpand}
+                tableStyle={{ minWidth: "max-content" }}
+                tableClassName="solid-data-table"
+                selectionMode="checkbox"
+                selectionKeys={selectedNodeKeys}
+                sortField={sortField}
+                sortOrder={sortOrder as any}
+                removableSort
+                onSort={(e) => {
+                  setSortField(e.sortField || "");
+                  setSortOrder((e.sortOrder as any) || 0);
+                }}
+                onRowClick={(e) => {
+                  if (e.node.leaf !== true) return;
+                  const rowData = e.node.data;
 
-              if (solidTreeViewLayout?.attrs?.disableRowClick === true) return;
+                  if (solidTreeViewLayout?.attrs?.disableRowClick === true) return;
 
-              const hasFindPermission = actionsAllowed.includes(
-                permissionExpression(params.modelName, 'findOne')
-              );
-              const hasUpdatePermission =
-                actionsAllowed.includes(permissionExpression(params.modelName, 'update')) &&
-                solidTreeViewLayout?.attrs?.edit !== false;
+                  const hasFindPermission = actionsAllowed.includes(
+                    permissionExpression(params.modelName, 'findOne')
+                  );
+                  const hasUpdatePermission =
+                    actionsAllowed.includes(permissionExpression(params.modelName, 'update')) &&
+                    solidTreeViewLayout?.attrs?.edit !== false;
 
-              if (!(hasFindPermission || hasUpdatePermission)) return;
+                  if (!(hasFindPermission || hasUpdatePermission)) return;
 
-              // if (params.embeded === true) {
-              // params.handleEditClickForEmbeddedView(rowData?.id);
-              // } else {
-              if (typeof window !== "undefined") {
-                // store a simple marker for the caller
+                  // if (params.embeded === true) {
+                  // params.handleEditClickForEmbeddedView(rowData?.id);
+                  // } else {
+                  if (typeof window !== "undefined") {
+                    // store a simple marker for the caller
 
-                // also store the full current URL so Back can restore exact state (including action params)
-                try {
-                  sessionStorage.setItem("fromView", "tree");
-                  sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
-                } catch (e) {
-                  // ignore storage errors
+                    // also store the full current URL so Back can restore exact state (including action params)
+                    try {
+                      sessionStorage.setItem("fromView", "tree");
+                      sessionStorage.setItem("fromViewUrl", window.location.pathname + window.location.search);
+                    } catch (e) {
+                      // ignore storage errors
+                    }
+                  }
+                  router.push(`${editBaseUrl}/${rowData?.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`);
+                  // }
                 }
-              }
-              router.push(`${editBaseUrl}/${rowData?.id}?viewMode=view&${new URLSearchParams(editActionQueryParams).toString()}`);
-              // }
-            }
-            }
-            onSelectionChange={(e) => {
-              e.originalEvent.stopPropagation?.();
-              const incoming = e.value as SolidTreeSelectionKeys;
-
-              setSelectedNodeKeys((prev: SolidTreeSelectionKeys) => {
-                const next: SolidTreeSelectionKeys = {};
-
-                Object.keys(incoming).forEach((key) => {
-                  // Find the node to get its type
-                  const node = findNodeByKey(treeNodes, key);
-                  next[key] = {
-                    ...incoming[key],                              // checked, partialChecked from PrimeReact
-                    nodeType: node?.data?.__treeMeta?.nodeType     // add type from tree
-                      ?? prev[key]?.nodeType,                      // fallback to prev if node not found
-                  };
-                });
-
-                return next;
-              });
-            }}
-
-          >
-            <SolidTreeColumn
-              key="tree-group-column"
-              field="__group"
-              header="Group"
-              sortable
-              frozen
-              alignFrozen="left"
-              expander={(node: any) => node?.data?.__treeMeta?.nodeType === "group"}
-              body={groupColumnBody}
-              headerClassName="solid-tree-group-header-cell"
-              bodyClassName="solid-tree-group-body-cell"
-              style={{ width: "max-content", minWidth: "20rem" }}
-            />
-
-            {renderColumnsDynamically()}
-            {renderAggregateColumns()}
-
-            <SolidTreeColumn
-              key="tree-last-frozen-column"
-              header=""
-              frozen
-              alignFrozen="right"
-              style={{ width: "9rem", minWidth: "9rem", maxWidth: "9rem" }}
-              className="solid-tree-actions-cell"
-              headerClassName="solid-tree-actions-cell"
-              body={(node: any) => {
-                const rowData = node?.data as TreeRowData;
-                const nodeMeta = rowData?.__treeMeta;
-
-                // ---------------- NORMAL ROW ----------------
-                if (nodeMeta?.nodeType !== "group") {
-                  return renderRowActions(rowData);
                 }
+                onSelectionChange={(e) => {
+                  e.originalEvent.stopPropagation?.();
+                  const incoming = e.value as SolidTreeSelectionKeys;
 
-                // ---------------- GROUP ROW ----------------
-                const nodeKey = String(node.key);
-                const isExpanded = expandedKeys[nodeKey];
-                const childrenLoaded = isExpanded && node.children && node.children.length > 0;
-                if (!childrenLoaded) return <span>&nbsp;</span>;
+                  setSelectedNodeKeys((prev: SolidTreeSelectionKeys) => {
+                    const next: SolidTreeSelectionKeys = {};
 
-                const canPrev = hasPrev(nodeKey);
-                const canNext = hasNext(nodeKey);
+                    Object.keys(incoming).forEach((key) => {
+                      // Find the node to get its type
+                      const node = findNodeByKey(treeNodes, key);
+                      next[key] = {
+                        ...incoming[key],                              // checked, partialChecked from PrimeReact
+                        nodeType: node?.data?.__treeMeta?.nodeType     // add type from tree
+                          ?? prev[key]?.nodeType,                      // fallback to prev if node not found
+                      };
+                    });
 
-                return (
-                  <div
-                    className="solid-tree-node-paginator"
-                    onClick={(e) => e.stopPropagation()}
-                  >
-                    <SolidButton
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      leftIcon={<ChevronLeft size={14} />}
-                      disabled={!canPrev || treeLoading}
-                      className="solid-tree-paginator-btn"
-                      onClick={() => handleNodePageChange(nodeKey, "prev")}
-                    />
-                    <SolidButton
-                      type="button"
-                      variant="outline"
-                      size="sm"
-                      leftIcon={<ChevronRight size={14} />}
-                      disabled={!canNext || treeLoading}
-                      className="solid-tree-paginator-btn"
-                      onClick={() => handleNodePageChange(nodeKey, "next")}
-                    />
-                  </div>
-                );
-              }}
-            />
+                    return next;
+                  });
+                }}
+
+              >
+                <SolidTreeColumn
+                  key="tree-group-column"
+                  field="__group"
+                  header="Group"
+                  sortable
+                  frozen
+                  alignFrozen="left"
+                  expander={(node: any) => node?.data?.__treeMeta?.nodeType === "group"}
+                  body={groupColumnBody}
+                  headerClassName="solid-tree-group-header-cell"
+                  bodyClassName="solid-tree-group-body-cell"
+                  style={{ width: "max-content", minWidth: "20rem" }}
+                />
+
+                {renderColumnsDynamically()}
+                {renderAggregateColumns()}
+
+                <SolidTreeColumn
+                  key="tree-last-frozen-column"
+                  header=""
+                  frozen
+                  alignFrozen="right"
+                  style={{ width: "9rem", minWidth: "9rem", maxWidth: "9rem" }}
+                  className="solid-tree-actions-cell"
+                  headerClassName="solid-tree-actions-cell"
+                  body={(node: any) => {
+                    const rowData = node?.data as TreeRowData;
+                    const nodeMeta = rowData?.__treeMeta;
+
+                    // ---------------- NORMAL ROW ----------------
+                    if (nodeMeta?.nodeType !== "group") {
+                      return renderRowActions(rowData);
+                    }
+
+                    // ---------------- GROUP ROW ----------------
+                    const nodeKey = String(node.key);
+                    const isExpanded = expandedKeys[nodeKey];
+                    const childrenLoaded = isExpanded && node.children && node.children.length > 0;
+                    if (!childrenLoaded) return <span>&nbsp;</span>;
+
+                    const canPrev = hasPrev(nodeKey);
+                    const canNext = hasNext(nodeKey);
+
+                    return (
+                      <div
+                        className="solid-tree-node-paginator"
+                        onClick={(e) => e.stopPropagation()}
+                      >
+                        <SolidButton
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          leftIcon={<ChevronLeft size={14} />}
+                          disabled={!canPrev || treeLoading}
+                          className="solid-tree-paginator-btn"
+                          onClick={() => handleNodePageChange(nodeKey, "prev")}
+                        />
+                        <SolidButton
+                          type="button"
+                          variant="outline"
+                          size="sm"
+                          leftIcon={<ChevronRight size={14} />}
+                          disabled={!canNext || treeLoading}
+                          className="solid-tree-paginator-btn"
+                          onClick={() => handleNodePageChange(nodeKey, "next")}
+                        />
+                      </div>
+                    );
+                  }}
+                />
               </SolidTreeTable>
             )}
           </div>
