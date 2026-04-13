@@ -1,6 +1,7 @@
 import type { RouteObject } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 import { AuthGuard } from "./guards/AuthGuard";
+import { GuestGuard } from "./guards/GuestGuard";
 import { AdminLayoutWrapper } from "../layouts/AdminLayoutWrapper";
 import { AuthLayoutWrapper } from "../layouts/AuthLayoutWrapper";
 import { ErrorPage } from "./pages/ErrorPage";
@@ -76,7 +77,7 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
   return [
     { path: "/error", element: pick("error", <ErrorPage />) },
     { path: "/not-found", element: pick("notFound", <NotFoundPage />) },
-    { element: pick("authLayout", <AuthLayoutWrapper />), children: authChildren },
+    { element: <GuestGuard />, children: [{ element: pick("authLayout", <AuthLayoutWrapper />), children: authChildren }] },
     {
       element: pick("authGuard", <AuthGuard />),
       children: [
