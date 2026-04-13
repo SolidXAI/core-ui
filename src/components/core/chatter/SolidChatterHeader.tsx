@@ -22,10 +22,11 @@ interface Props {
     refetch: any,
     id: any,
     onFilterChange?: (filters: FilterState) => void;
+    modelUserKey?: string;
 }
 
 export const SolidChatterHeader = (props: Props) => {
-    const { activeTab, visibleBox, handleTabClick, modelSingularName, refetch, id, onFilterChange } = props;
+    const { activeTab, visibleBox, handleTabClick, modelSingularName, refetch, id, onFilterChange, modelUserKey } = props;
     const [showFilterDialog, setShowFilterDialog] = useState(false);
     const [filters, setFilters] = useState<FilterState>({
         name: '',
@@ -139,11 +140,11 @@ export const SolidChatterHeader = (props: Props) => {
             {visibleBox &&
                 <div className='mt-4'>
                     {visibleBox === "email-message" &&
-                        <SolidMessageComposer id={id} refetch={refetch} modelSingularName={modelSingularName} type={"email"} />
+                        <SolidMessageComposer id={id} refetch={refetch} modelSingularName={modelSingularName} type={"email"} modelUserKey={modelUserKey} />
                     }
 
                     {visibleBox === "log" &&
-                        <SolidMessageComposer id={id} refetch={refetch} modelSingularName={modelSingularName} />
+                        <SolidMessageComposer id={id} refetch={refetch} modelSingularName={modelSingularName} modelUserKey={modelUserKey} />
                     }
                 </div>
             }

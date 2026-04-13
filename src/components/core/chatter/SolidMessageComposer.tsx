@@ -6,7 +6,7 @@ import { useEffect, useState, useRef } from 'react'
 import { ERROR_MESSAGES } from '../../../constants/error-messages'
 import { useSession } from '../../../hooks/useSession'
 
-export const SolidMessageComposer = ({ type, modelSingularName, refetch, id }: { type?: string, modelSingularName?: any, refetch?: any, id?: any }) => {
+export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, modelUserKey }: { type?: string, modelSingularName?: any, refetch?: any, id?: any, modelUserKey?: string }) => {
     const [message, setMessage] = useState('');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
@@ -42,7 +42,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id }: {
             formData.append('coModelEntityId', id);
             formData.append('coModelName', modelSingularName);
             formData.append('userId', user?.id || 1);
-
+            if (modelUserKey) formData.append('modelUserKey', modelUserKey);
             selectedFiles.forEach((file, index) => {
                 formData.append(`messageAttachments`, file);
             });

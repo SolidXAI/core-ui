@@ -40,8 +40,8 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
   actionsAllowed,
   mcpUrl
 }) => {
-
-
+  const userKeyFieldName = solidFormViewMetaData?.data?.solidView?.model?.userKeyField?.name;
+  const modelUserKeyValue = solidFormViewData?.data?.[userKeyFieldName];
 
 
 
@@ -72,6 +72,7 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
           refreshChatterMessage={refreshChatterMessage}
           setRefreshChatterMessage={setRefreshChatterMessage}
           actionsAllowed={actionsAllowed}
+          modelUserKey={modelUserKeyValue}
         />
       </TabPanel>
       {

@@ -14,7 +14,7 @@ interface FilterState {
     endDate: Date | null;
 }
 
-export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, setRefreshChatterMessage, actionsAllowed=[] }: { modelSingularName: any, id: any, refreshChatterMessage: boolean, setRefreshChatterMessage: (value: boolean) => void , actionsAllowed?:string[]}) => {    
+export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, setRefreshChatterMessage, actionsAllowed=[], modelUserKey }: { modelSingularName: any, id: any, refreshChatterMessage: boolean, setRefreshChatterMessage: (value: boolean) => void , actionsAllowed?:string[], modelUserKey?: string}) => {
     const [activeTab, setActiveTab] = useState<'email-message' | 'log' | null>('email-message');
     const [visibleBox, setVisibleBox] = useState<'email-message' | 'log' | null>(null);
     const [messages, setMessages] = useState<any[]>([]);
@@ -168,6 +168,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                 handleTabClick={handleTabClick}
                 visibleBox={visibleBox}
                 onFilterChange={handleFilterChange}
+                modelUserKey={modelUserKey}
             />
             <div className='p-3' style={{
                 overflowY: 'scroll',
