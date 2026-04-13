@@ -1,8 +1,14 @@
 
 import { useRef, useState } from "react";
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
+import { SolidButton } from "../../../../shad-cn-ui/SolidButton";
+import {
+  SolidDialog,
+  SolidDialogBody,
+  SolidDialogClose,
+  SolidDialogHeader,
+  SolidDialogTitle,
+} from "../../../../shad-cn-ui/SolidDialog";
 import { useResolveS3UrlMutation } from "../../../../../redux/api/fieldApi";
 import Viewer from "viewerjs";
 import "viewerjs/dist/viewer.css";
@@ -140,8 +146,8 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
             {value ? (
                 <div className="flex gap-3 items-center">
                     {(isImage || isPDF) && (
-                        <Button
-                            icon="pi pi-eye"
+                        <SolidButton
+                            icon="si si-eye"
                             type="button"
                             style={{ minWidth: 66 }}
                             loading={isLoading}
@@ -154,10 +160,10 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
                         />
                     )}
                     {downloadAllowed && (
-                        <Button
+                        <SolidButton
                             size="small"
                             type="button"
-                            icon="pi pi-download"
+                            icon="si si-download"
                             tooltip={`Download ${value?.split("/").pop()}`}
                             loading={isLoading}
                             onClick={handleDownload}
@@ -199,31 +205,34 @@ export const SolidS3FileViewerWidget = ({ formik, fieldContext }: SolidFormField
 
             )}
 
-            <Dialog
-                header={value}
-                visible={open}
-                modal
+            <SolidDialog
+                open={open}
+                onOpenChange={setOpen}
+                className="solid-confirm-dialog"
                 style={{ width: "80vw", maxHeight: "90vh" }}
-                onHide={() => setOpen(false)}
-                headerClassName='p-1 form-wrapper-title'
-                contentClassName='p-0'
-                contentStyle={{ borderRadius: 6 }}
             >
-                {previewUrl && isPDF && (
-                    <div
-                        style={{
-                            width: "100%",
-                            height: "75vh",
-                            overflow: "hidden",
-                        }}
-                    >
-                        <iframe
-                            src={previewUrl}
-                            style={{ width: "100%", height: "100%", border: "none" }}
-                        />
-                    </div>
-                )}
-            </Dialog>
+                <SolidDialogHeader className="p-1 form-wrapper-title">
+                    <SolidDialogTitle>{value}</SolidDialogTitle>
+                    <SolidDialogClose aria-label="Close preview" />
+                </SolidDialogHeader>
+                <SolidDialogBody className="p-0">
+                    {previewUrl && isPDF && (
+                        <div
+                            style={{
+                                width: "100%",
+                                height: "75vh",
+                                overflow: "hidden",
+                                borderRadius: 6,
+                            }}
+                        >
+                            <iframe
+                                src={previewUrl}
+                                style={{ width: "100%", height: "100%", border: "none" }}
+                            />
+                        </div>
+                    )}
+                </SolidDialogBody>
+            </SolidDialog>
         </div>
     );
 };

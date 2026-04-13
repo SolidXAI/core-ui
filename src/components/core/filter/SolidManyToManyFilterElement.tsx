@@ -1,15 +1,16 @@
 
 
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
-import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { useEffect, useState } from "react";
 import qs from "qs";
+import { SolidAutocomplete } from "../../shad-cn-ui/SolidAutocomplete";
 
 export const SolidManyToManyFilterElement = ({
     value = [],
     updateInputs,
     index,
-    fieldMetadata
+    fieldMetadata,
+    multiple = false
 }: any) => {
 
     const entityApi = createSolidEntityApi(fieldMetadata.relationCoModelSingularName);
@@ -18,7 +19,7 @@ export const SolidManyToManyFilterElement = ({
 
     const [suggestions, setSuggestions] = useState<any[]>([]);
 
-    const search = async (event: AutoCompleteCompleteEvent) => {
+    const search = async (event: any) => {
         const queryData = {
             offset: 0,
             limit: 20,
@@ -44,11 +45,11 @@ export const SolidManyToManyFilterElement = ({
 
 
     return (
-        <AutoComplete
-            // multiple
+        <SolidAutocomplete
             dropdown
             field="label"
             value={value}
+            multiple={multiple}
             suggestions={suggestions}
             completeMethod={search}
             onChange={(e) => {
@@ -58,7 +59,7 @@ export const SolidManyToManyFilterElement = ({
             }}
             placeholder={`Select ${fieldMetadata.displayName}`}
             className="w-full"
-            inputClassName="w-full p-inputtext-sm"
+            inputClassName="w-full p-inputtext-sm solid-filter-compact-control"
         />
     );
 };

@@ -1,5 +1,5 @@
 
-import { Dropdown } from 'primereact/dropdown';
+import { SolidSelect } from "../../../shad-cn-ui/SolidSelect";
 import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
 
@@ -20,9 +20,9 @@ const SolidSelectionStaticField = ({ fieldMetadata, onChange, index, rule }: Sol
     const numberOfInputs = getNumberOfInputs(rule.matchMode);
 
     return (
-        <div className='flex flex-column md:flex-row align-items-start gap-2 md:gap-0'>
-            <div className="col-12 md:col-6 px-0 md:pr-2 md:pl-0">
-                <Dropdown
+        <div className='flex flex-column md:flex-row align-items-start gap-6 md:gap-1'>
+            <div className="col-12 md:col-6 px-0 md:pr-0 md:pl-0 p-0">
+                <SolidSelect
                     value={rule.matchMode}
                     onChange={(e: any) => {
                         onChange(rule.id, 'matchMode', e.value)
@@ -35,7 +35,7 @@ const SolidSelectionStaticField = ({ fieldMetadata, onChange, index, rule }: Sol
                 />
             </div>
 
-            <div className='flex flex-column gap-2 col-12 md:col-6 px-0 md:pl-2 md:pr-0'>
+            <div className='flex flex-column gap-2 col-12 md:col-6 px-0 md:pl-0 md:pr-0 p-0'>
                 <SolidVarInputsFilterElement
                     values={rule.value}
                     onChange={(e: any) => {

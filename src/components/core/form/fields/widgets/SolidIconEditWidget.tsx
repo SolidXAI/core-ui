@@ -1,10 +1,10 @@
 
 import { solidIcons } from "../../../../../helpers/solidIcons";
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
-import { Dropdown } from "primereact/dropdown";
-import { InputText } from "primereact/inputtext";
+import { SolidButton } from "../../../../shad-cn-ui/SolidButton";
+import { SolidDialog } from "../../../../shad-cn-ui/SolidDialog";
+import { SolidSelect } from "../../../../shad-cn-ui/SolidSelect";
+import { SolidInput } from "../../../../shad-cn-ui/SolidInput";
 import { useEffect, useState } from "react";
 
 export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
@@ -85,18 +85,18 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                             </p>
                         </div>
                     ) : (
-                        <Button
+                        <SolidButton
                             type="button"
                             size="small"
                             label="Select Icon"
                             onClick={() => setOpenIconDialog(true)}
-                            outlined
+                            variant="outline"
                         />
                     )}
                 </div>
                 {selectedIcon && (
                     <div>
-                        <Button
+                        <SolidButton
                             type="button"
                             label="Remove"
                             className="p-button-text p-button-danger ml-2"
@@ -108,7 +108,7 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                     </div>
                 )}
             </div>
-            <Dialog contentClassName="p-0" className="solid-icon-dialog" contentStyle={{ borderRadius: 6 }} showHeader={false} header={false} closable={false} visible={openIconDialog} style={{ width: '70vw', height: '70vh' }} breakpoints={{ '1024px': '75vw','991px': '90vw','767px':'94w', '250px': '96vw'}} onHide={() => setOpenIconDialog(false)}>
+            <SolidDialog contentClassName="p-0" className="solid-icon-dialog" contentStyle={{ borderRadius: 6 }} showHeader={false} header={false} visible={openIconDialog} style={{ width: '70vw', height: '70vh' }} breakpoints={{ '1024px': '75vw','991px': '90vw','767px':'94w', '250px': '96vw'}} onHide={() => setOpenIconDialog(false)}>
                 <div>
                     <div className="grid m-0 flex-column md:flex-row ">
                         <div className="col-12 lg:col-3 p-0">
@@ -129,7 +129,7 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                                     <p className="font-medium">Category</p>
                                     <div style={{ marginBottom: "1rem", display: "flex", gap: "1rem", flexWrap: "wrap" }} className="solid-icon-category-wrapper">
                                         {tabs.map((tab) => (
-                                            <Button
+                                            <SolidButton
                                                 type='button'
                                                 key={tab}
                                                 size="small"
@@ -137,7 +137,7 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                                                     setSelectedCategory(tab);
                                                     setSearchIcon("");
                                                 }}
-                                                outlined={selectedCategory === tab ? false : true}
+                                                variant={selectedCategory === tab ? "primary" : "outline"}
                                                 style={{
                                                     padding: "8px 16px",
                                                     fontSize: 12
@@ -146,13 +146,13 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                                                 severity="secondary"
                                             >
                                                 {tab}
-                                            </Button>
+                                            </SolidButton>
                                         ))}
                                     </div>
                                 </div>
                                 <div className="flex gap-3">
-                                    <Button type="button" size="small" label="Select" onClick={() => setOpenIconDialog(false)} />
-                                    <Button type="button" size="small" outlined label="Cancel" onClick={() => setOpenIconDialog(false)} />
+                                    <SolidButton type="button" size="small" label="Select" onClick={() => setOpenIconDialog(false)} />
+                                    <SolidButton type="button" size="small" variant="outline" label="Cancel" onClick={() => setOpenIconDialog(false)} />
                                 </div>
                             </div>
                         </div>
@@ -186,7 +186,7 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                             <div className="px-3 lg:px-4 pt-3 lg:pt-4">
                                 <div>
                                     <p className="font-medium">Select Icon</p>
-                                    <InputText
+                                    <SolidInput
                                         type="text"
                                         placeholder={`Search icons in "${selectedCategory}"`}
                                         value={searchIcon}
@@ -259,7 +259,7 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                         </div>
                     </div>
                 </div>
-            </Dialog>
+            </SolidDialog>
         </div>
     );
 };

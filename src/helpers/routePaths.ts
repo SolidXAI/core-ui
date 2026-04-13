@@ -4,7 +4,7 @@ export const normalizeSolidListTreeKanbanActionPath = (currentPath: string, acti
     return actionUrl;
   }
 
-  const basePath = currentPath.replace(/\/(list|tree|kanban)(\/)?$/, "");
+  const basePath = currentPath.replace(/\/(list|tree|kanban|card)(\/)?$/, "");
   const normalizedBase = basePath.length > 0 ? basePath : "/";
   const actionTrimmed = actionUrl.replace(/^\/+/, "");
 

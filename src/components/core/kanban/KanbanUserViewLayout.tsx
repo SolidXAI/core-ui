@@ -1,12 +1,9 @@
 import { useFormik } from "formik";
-import { Button } from "primereact/button";
 import { useDispatch } from "react-redux";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
-import { javascript } from "@codemirror/lang-javascript";
-import { oneDark } from "@codemirror/theme-one-dark";
-import CodeMirror, { EditorView } from "@uiw/react-codemirror";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showToast } from "../../../redux/features/toastSlice";
+import { SolidButton, SolidCodeEditor } from "../../shad-cn-ui";
 
 export const KanbanUserViewLayout = ({ solidKanbanViewMetaData, setLayoutDialogVisible }: any) => {
     const dispatch = useDispatch();
@@ -45,25 +42,27 @@ export const KanbanUserViewLayout = ({ solidKanbanViewMetaData, setLayoutDialogV
     return (
         <>
             <form onSubmit={formik.handleSubmit}>
-                <CodeMirror
+                <SolidCodeEditor
                     value={formik.values.layoutString}
                     height="500px"
-                    theme={oneDark}
-                    style={{ fontSize: '10px' }}
-                    extensions={[javascript(), EditorView.lineWrapping]}
+                    fontSize="10px"
+                    language="json"
                     onChange={(value) => {
-                        formik.setFieldValue("layoutString", value);
+                        formik.setFieldValue("layoutString", value ?? "");
                     }}
                 />
                 <div className="pt-3 flex gap-2">
-                    <Button type="submit" label="Apply" size="small" />
-                    <Button
+                    <SolidButton type="submit" size="sm">
+                        Apply
+                    </SolidButton>
+                    <SolidButton
                         type="button"
-                        outlined
-                        label="Cancel"
-                        size="small"
+                        variant="outline"
+                        size="sm"
                         onClick={() => setLayoutDialogVisible(false)}
-                    />
+                    >
+                        Cancel
+                    </SolidButton>
                 </div>
             </form>
         </>

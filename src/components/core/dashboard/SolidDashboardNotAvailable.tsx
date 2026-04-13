@@ -1,4 +1,4 @@
-
+import { SolidIcon } from "../../shad-cn-ui";
 
 const SolidDashboardNotAvailable = () => {
   return (
@@ -13,7 +13,7 @@ const SolidDashboardNotAvailable = () => {
             color: 'var(--blue-500)'
           }}
         >
-          <i className="pi pi-chart-bar" style={{ fontSize: '2.5rem' }}></i>
+          <SolidIcon name="si-chart-bar" style={{ fontSize: '2.5rem' }} aria-hidden />
         </div>
         
         <div className="flex flex-column gap-2">

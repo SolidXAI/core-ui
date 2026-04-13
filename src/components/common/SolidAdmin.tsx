@@ -1,10 +1,17 @@
-import { Message } from "primereact/message";
 import { env } from "../../adapters/env";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
+import { ChatIcon } from "../layout/SolidAiStudioLayout";
 
 export const SolidAdmin = () => {
   const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL");
   const hasRedirect = Boolean(redirectUrl);
+  const aiChatUrl = env("VITE_SOLIDX_AI_URL");
+  const canOpenChat = Boolean(aiChatUrl);
+
+  const handleChatLaunch = () => {
+    if (!aiChatUrl) return;
+    window.open(aiChatUrl, "_blank");
+  };
 
   return (
     <>
@@ -129,6 +136,46 @@ export const SolidAdmin = () => {
           font-family: monospace;
           vertical-align: middle;
         }
+
+        .chat-hint {
+          display: flex;
+          flex-direction: column;
+          align-items: center;
+          gap: 0.9rem;
+          margin-top: 1.3rem;
+        }
+
+        .chat-hint p {
+          margin: 0;
+          font-size: 0.85rem;
+          color: #6E6E66;
+        }
+
+        .chat-button {
+          border: none;
+          background: #111827;
+          color: #fff;
+          border-radius: 999px;
+          padding: 0.6rem 1.35rem;
+          font-size: 0.9rem;
+          font-weight: 500;
+          display: inline-flex;
+          align-items: center;
+          gap: 0.55rem;
+          cursor: pointer;
+          transition: transform 0.15s ease, box-shadow 0.15s ease;
+        }
+
+        .chat-button:disabled {
+          opacity: 0.4;
+          cursor: not-allowed;
+          box-shadow: none;
+        }
+
+        .chat-button:not(:disabled):hover {
+          transform: translateY(-1px);
+          box-shadow: 0 8px 15px rgba(17, 24, 39, 0.2);
+        }
       `}</style>
 
       {/* <div className="flex flex-column align-items-center justify-content-center min-h-screen bg-white">
@@ -185,9 +232,22 @@ export const SolidAdmin = () => {
             ))}
           </div>
 
-          <p className="hint">
-            Get started by selecting a section from the <span>left nav</span>
-          </p>
+          <div className="chat-hint">
+            <p className="hint">
+              Get started by selecting a section from the <span>left nav</span>
+            </p>
+            <p>Need help scaffolding something specific? Ask the SolidX AI Agent.</p>
+            <button
+              type="button"
+              className="chat-button"
+              onClick={handleChatLaunch}
+              disabled={!canOpenChat}
+              aria-label="Open SolidX AI chat"
+            >
+              <ChatIcon />
+              <span>Open AI Chat</span>
+            </button>
+          </div>
 
         </div>
 

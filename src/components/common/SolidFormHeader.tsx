@@ -13,13 +13,18 @@ interface Props {
 }
 
 export const SolidFormHeader = (props: Props) => {
-    const { solidFormViewMetaData, id } = props;
+    const { solidFormViewMetaData } = props;
+    const hasWorkflowStepper = solidFormViewMetaData?.data?.solidFormViewWorkflowData?.length > 0;
+
+    if (!hasWorkflowStepper) {
+        return null;
+    }
+
     return (
         <div className='flex flex-column gap-2 align-items-start xl:flex-row xl:align-items-center justify-content-between solid-dynamic-breadcrumb-stepper'>
-            <SolidBreadcrumb {...props} />
-            {solidFormViewMetaData?.data?.solidFormViewWorkflowData.length > 0 &&
-                <SolidFormStepper {...props} />
-            }
+            {/* <SolidBreadcrumb {...props} /> */}
+            <div></div>
+            <SolidFormStepper {...props} />
         </div>
     )
 }

@@ -312,7 +312,7 @@
   color: #9B5AED;
 }
 
-@layer primereact {
+@layer solid-theme {
   .p-error {
     color: #fca5a5;
   }
@@ -1019,17 +1019,6 @@
     appearance: none;
     border-radius: 6px;
     outline-color: transparent;
-  }
-
-  .solid-auth-theme-wrapper .p-inputtext {
-    color: #ffffff !important;
-    background: #1f1f1f !important;
-    border: 1px solid #1f1f1f !important;
-    border-radius: 8px !important;
-  }
-
-  .solid-auth-theme-wrapper .p-inputtext::placeholder {
-    color: #474747 !important;
   }
 
   .p-inputtext:enabled:hover {
@@ -5980,7 +5969,7 @@
   }
 }
 
-@layer primereact {
+@layer solid-theme {
   .p-carousel .p-carousel-indicators .p-carousel-indicator.p-highlight button {
     background-color: #9B5AED;
   }
@@ -6133,7 +6122,13 @@
   }
 
   .form-field-label {
-    color: #fff !important;
+    font-size: 12px;
+    color: var(--muted-foreground);
+    font-weight: 500;
+    display: flex;
+    align-items: center;
+    gap: 3px;
+    margin: 0;
   }
 
   .solid-standard-autocomplete .p-autocomplete-dropdown.p-button {
@@ -6181,14 +6176,14 @@
 
   .solid-kanban-card,
   .solid-media-card {
-    border: 1px solid var(--primary-light-color);
-    background: #171717;
+    border: none;
+    background: transparent;
   }
 
   .solid-kanban-card:hover,
   .solid-media-card:hover {
-    border: 1px solid var(--purple-900);
-    background: var(--surface-hover);
+    border: none;
+    background: transparent;
   }
 
   .solid-mimetype-chip {

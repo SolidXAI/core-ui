@@ -1,6 +1,7 @@
 import type { RouteObject } from "react-router-dom";
 import { Navigate } from "react-router-dom";
 import { AuthGuard } from "./guards/AuthGuard";
+import { AdminGuard } from "./guards/AdminGuard";
 import { AdminLayoutWrapper } from "../layouts/AdminLayoutWrapper";
 import { AuthLayoutWrapper } from "../layouts/AuthLayoutWrapper";
 import { ErrorPage } from "./pages/ErrorPage";
@@ -9,6 +10,7 @@ import { AdminPage } from "./pages/admin/AdminPage";
 import { ModuleHomePage } from "./pages/admin/core/ModuleHomePage";
 import { ListPage } from "./pages/admin/core/ListPage";
 import { KanbanPage } from "./pages/admin/core/KanbanPage";
+import { CardPage } from "./pages/admin/core/CardPage";
 import { FormPage } from "./pages/admin/core/FormPage";
 import { SettingsPage } from "./pages/admin/core/SettingsPage";
 import { LoginPage } from "./pages/auth/LoginPage";
@@ -25,6 +27,9 @@ import { SsoPage } from "./pages/auth/SsoPage";
 import type { SolidRoutesOptions, SolidRouteKey } from "./types";
 import { TreePage } from "./pages/admin/core/TreePage";
 import { DashboardPage } from "./pages/admin/core/DashboardPage";
+import { StudioHomePage } from "./pages/studio/StudioHomePage";
+import { StudioLandingPage } from "./pages/studio/StudioLandingPage";
+import { _solidRegisterExtraRoutes } from "./SolidLayoutRegistry";
 
 export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] {
   const {
@@ -33,6 +38,10 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     extraRoutes = [],
     elementOverrides = {},
   } = options;
+
+  // Auto-register layout routes so StudioLandingPage can discover them
+  // without any changes in the consuming project.
+  _solidRegisterExtraRoutes(extraRoutes);
 
   const pick = (key: SolidRouteKey, fallback: JSX.Element) =>
     (elementOverrides[key] as JSX.Element) || fallback;
@@ -68,6 +77,7 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
     { path: "/admin/core/:moduleName/:modelName/list", element: pick("list", <ListPage />) },
     { path: "/admin/core/:moduleName/:modelName/tree", element: pick("tree", <TreePage />) },
     { path: "/admin/core/:moduleName/:modelName/kanban", element: pick("kanban", <KanbanPage />) },
+    { path: "/admin/core/:moduleName/:modelName/card", element: pick("card", <CardPage />) },
     { path: "/admin/core/:moduleName/:modelName/form/:id", element: pick("form", <FormPage />) },
     { path: "/admin/core/:moduleName/settings/:settings", element: pick("settings", <SettingsPage />) },
     ...extraAdminRoutes,
@@ -83,6 +93,13 @@ export function getSolidRoutes(options: SolidRoutesOptions = {}): RouteObject[] 
         {
           element: pick("adminLayout", <AdminLayoutWrapper />),
           children: adminChildren,
+        },
+        {
+          element: pick("adminGuard", <AdminGuard />),
+          children: [
+            { path: "/studio", element: pick("studioHome", <StudioHomePage />) },
+            { path: "/landing", element: pick("landing", <StudioLandingPage />) },
+          ],
         },
       ],
     },

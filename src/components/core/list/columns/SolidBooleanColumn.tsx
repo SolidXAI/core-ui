@@ -1,4 +1,4 @@
-import { Column } from "primereact/column";
+import { Column } from "../SolidDataTable";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { SolidListFieldWidgetProps } from "../../../../types/solid-core";
 import { getExtensionComponent } from "../../../../helpers/registry";
@@ -48,7 +48,7 @@ export const DefaultBooleanListWidget = ({ rowData, solidListViewMetaData, field
     const fieldKey = column.attrs.label ?? fieldMetadata.name;
     const trueLabel = column.attrs.trueLabel ?? 'Yes';
     const falseLabel = column.attrs.falseLabel ?? 'No';
-    console.log(`rendering boolean column ${fieldKey} with value ${rowData[fieldKey]}, trueLabel=${trueLabel}, falseLabel=${falseLabel}`);
+    // console.log(`rendering boolean column ${fieldKey} with value ${rowData[fieldKey]}, trueLabel=${trueLabel}, falseLabel=${falseLabel}`);
     const value = rowData[fieldKey];
     if (value === true) {
         return trueLabel;

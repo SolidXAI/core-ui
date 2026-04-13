@@ -1,8 +1,10 @@
 import { hasAnyRole } from "../../../helpers/rolesHelper";
-import { Button } from "primereact/button";
 import { useSession } from "../../../hooks/useSession";
+import { SquarePen } from "lucide-react";
+import { SolidDropdownMenuItem } from "../../shad-cn-ui";
+import { SolidIcon, parseSolidIconMeta } from "../../shad-cn-ui/SolidIcon";
 
-export const SolidListViewHeaderContextMenuButton = ({ button, params, solidListViewMetaData, handleCustomButtonClick }: any) => {
+export const SolidListViewHeaderContextMenuButton = ({ button, params, solidListViewMetaData, handleCustomButtonClick, onActionComplete }: any) => {
 
     const { data: session, status } = useSession();
     const user = session?.user;
@@ -12,21 +14,21 @@ export const SolidListViewHeaderContextMenuButton = ({ button, params, solidList
     if (!hasRole) return null;
 
     return (
-        <Button
-            text
-            type="button"
-            className="w-full text-left gap-2"
-            label={button.attrs.label}
-            size="small"
-            iconPos="left"
-            icon={button?.attrs?.className ? button?.attrs?.className : "pi pi-pencil"}
-            onClick={() => {
+        <SolidDropdownMenuItem
+            className="solid-header-dropdown-item"
+            onSelect={() => {
                 const event = {
                     params,
                     solidListViewMetaData: solidListViewMetaData.data,
                 };
                 handleCustomButtonClick(button.attrs, event);
+                onActionComplete?.();
             }}
-        />
+        >
+            {button?.attrs?.icon
+                ? (() => { const m = parseSolidIconMeta(button.attrs.icon); return m ? <SolidIcon name={m.name} spin={m.spin} className="solid-header-action-button-icon" /> : <i className={`${button.attrs.icon} solid-header-action-button-icon`} />; })()
+                : <SquarePen size={14} className="solid-header-action-button-icon" />}
+            <span className="solid-header-action-button-label">{button.attrs.label}</span>
+        </SolidDropdownMenuItem>
     );
 };

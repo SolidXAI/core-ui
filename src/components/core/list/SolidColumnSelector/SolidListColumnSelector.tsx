@@ -1,6 +1,4 @@
 import { useFormik } from 'formik';
-import { Button } from 'primereact/button';
-import { Checkbox } from 'primereact/checkbox';
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { createSolidEntityApi } from '../../../../redux/api/solidEntityApi';
@@ -18,9 +16,7 @@ interface FilterColumns {
     key: string;
 }
 
-export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: any) => {
-    console.log("listViewMetaData column selector", listViewMetaData);
-
+export const SolidListColumnSelector = ({ listViewMetaData, onClose }: any) => {
     const dispatch = useDispatch();
     const [isDragging, setIsDragging] = useState(false);
     const entityApi = createSolidEntityApi('userViewMetadata');
@@ -157,14 +153,14 @@ export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: a
 
     return (
         <>
-            <form onSubmit={formik.handleSubmit} className="flex flex-column gap-1 px-2">
+            <form onSubmit={formik.handleSubmit} className="flex flex-column gap-1 px-0">
                 <DragDropContext onDragEnd={onDragEnd} onDragStart={() => setIsDragging(true)}>
                     <Droppable droppableId="columns">
                         {(provided): React.ReactElement => (
                             <div
                                 {...provided.droppableProps}
                                 ref={provided.innerRef}
-                                className={`flex flex-column cogwheel-column-filter px-1 ${isDragging ? styles.SolidColumnDragContextActive : ''}`}
+                                className={`flex flex-column cogwheel-column-filter px-0 ${isDragging ? styles.SolidColumnDragContextActive : ''}`}
                                 style={{ maxHeight: 400, overflowY: 'auto' }}
                             >
                                 {fields.map((column, index) => (
@@ -174,16 +170,18 @@ export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: a
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
                                                 {...provided.dragHandleProps}
-                                                className={`flex align-items-center justify-content-between gap-3 px-3 py-2 ${snapshot.isDragging ? styles.SolidColumnDraggedActiveElement : ''}`}
+                                                className={`flex align-items-center justify-content-between gap-3 px-2 py-2 ${snapshot.isDragging ? styles.SolidColumnDraggedActiveElement : ''}`}
                                                 style={{
                                                     ...provided.draggableProps.style,
                                                 }}
                                             >
-                                                <div className='flex align-items-center gap-1'>
-                                                    <Checkbox
-                                                        inputId={column.key}
+                                                <label htmlFor={column.key} className='solid-column-selector-item-main'>
+                                                    <input
+                                                        id={column.key}
+                                                        type="checkbox"
                                                         name="selectedColumns"
-                                                        value={column}
+                                                        className="solid-column-selector-checkbox"
+                                                        checked={formik.values.selectedColumns.some(item => item.key === column.key)}
                                                         onChange={() => {
                                                             const isChecked = formik.values.selectedColumns.some(item => item.key === column.key);
                                                             formik.setFieldValue(
@@ -193,13 +191,11 @@ export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: a
                                                                     : [...formik.values.selectedColumns, column]
                                                             );
                                                         }}
-                                                        checked={formik.values.selectedColumns.some(item => item.key === column.key)}
-                                                        className="text-base flex align-items-center"
                                                     />
-                                                    <label htmlFor={column.key} className="ml-2 text-base">
+                                                    <span className="solid-column-selector-label">
                                                         {column.name}
-                                                    </label>
-                                                </div>
+                                                    </span>
+                                                </label>
                                                 <DragActive active={snapshot.isDragging} />
                                             </div>
                                         )}
@@ -210,12 +206,11 @@ export const SolidListColumnSelector = ({ listViewMetaData, customizeLayout }: a
                         )}
                     </Droppable>
                 </DragDropContext>
-                <div className="p-3 flex gap-2">
-                    <Button type='submit' label="Apply" size="small" />
-                    <Button type='button' outlined label="Cancel" size="small"
-                        // @ts-ignore
-                        onClick={(e) => customizeLayout.current.hide(e)}
-                    />
+                <div className="solid-column-selector-actions">
+                    <button type='submit' className="solid-compact-action-button solid-compact-action-button-primary">Apply</button>
+                    <button type='button' className="solid-compact-action-button" onClick={() => onClose?.()}>
+                        Cancel
+                    </button>
                 </div>
             </form>
         </>

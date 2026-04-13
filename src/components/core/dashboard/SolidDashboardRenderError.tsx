@@ -1,4 +1,4 @@
-
+import { SolidIcon } from "../../shad-cn-ui";
 
 export const SolidDashboardRenderError = () => {
   return (
@@ -13,8 +13,7 @@ export const SolidDashboardRenderError = () => {
             color: 'var(--red-500)'
           }}
         >
-          <i className="pi pi-exclamation-triangle"
-             style={{ fontSize: '2.5rem' }} />
+          <SolidIcon name="si-exclamation-triangle" style={{ fontSize: '2.5rem' }} aria-hidden />
         </div>
         <div className="flex flex-column gap-2">
           <h3 className="m-0" style={{ color: 'var(--text-color)', fontSize: '1.25rem', fontWeight: 600 }}>Error in Loading Dashboard</h3>

@@ -2,27 +2,22 @@ import { Form, Formik } from "formik";
 import { signIn } from "../../adapters/auth/index";
 import Link from "../common/Link";
 import { useRouter } from "../../hooks/useRouter";
-import { Button } from "primereact/button";
-import { Divider } from "primereact/divider";
-import { InputText } from "primereact/inputtext";
-import { Message } from "primereact/message";
-import { Password } from "primereact/password";
-import { TabPanel, TabView } from 'primereact/tabview';
 import { useEffect, useState } from "react";
-import { useDispatch } from 'react-redux';
 import * as Yup from "yup";
 import { SocialMediaLogin } from "../common/SocialMediaLogin";
 import { useInitateLoginMutation } from "../../redux/api/authApi";
-import Image from "../common/Image";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { formatTimeLeft } from "../../helpers/resendOtpHelper";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
-import { RadioButton } from "primereact/radiobutton";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
+import { AuthTabs } from "./AuthTabs";
+import { loadSession } from "../../adapters/auth/storage";
+import { hasAnyRole } from "../../helpers/rolesHelper";
+import { useDispatch } from "react-redux";
+import { SolidButton, SolidDivider, SolidInput, SolidMessage, SolidPasswordInput, SolidRadioGroup } from "../shad-cn-ui";
 
-interface AuthTabsProps {
+interface AuthModesProps {
     passwordBasedAuth: boolean;
     passwordLessAuth: boolean;
 }
@@ -94,7 +89,10 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                             });
                         } else {
                             dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
-                            const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin";
+                            const session = loadSession();
+                            const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
+                            const isDev = env("VITE_SOLIDX_ENV") === "dev";
+                            const redirectUrl = isAdmin && isDev ? "/studio" : (env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin");
                             router.push(redirectUrl);
                         }
                     } catch (error: any) {
@@ -108,58 +106,58 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                     <Form>
                         <div className="flex flex-column gap-2 mt-3">
                             <label htmlFor="email" className="solid-auth-input-label">{signInValidatorLabel ? signInValidatorLabel : "Username or Email"}</label>
-                            <InputText
+                            <SolidInput
                                 id="identifier"
                                 name="identifier"
                                 placeholder={signInValidatorPlaceholder ? signInValidatorPlaceholder : "Email or Username"}
                                 onChange={formik.handleChange}
                                 value={formik.values.identifier}
-                                invalid={!!formik.errors.identifier}
                                 onBlur={formik.handleBlur}
+                                aria-invalid={!!isFormFieldValid(formik, "identifier")}
+                                className="w-full"
                             />
-                            {isFormFieldValid(formik, "identifier") && <Message
-                                className="text-red-500 text-sm"
-                                severity="error"
-                                text={formik?.errors?.identifier?.toString()}
-                            />}
+                            {isFormFieldValid(formik, "identifier") && (
+                                <SolidMessage
+                                    className="text-red-500 text-sm"
+                                    severity="error"
+                                    text={formik?.errors?.identifier?.toString()}
+                                />
+                            )}
                         </div>
                         <div className="flex flex-column gap-1 mt-4" style={{}}>
-                            <label htmlFor="password" className="solid-auth-input-label">Password</label>
-                            <Password
+                            <div className="flex align-items-center justify-content-between">
+                                <label htmlFor="password" className="solid-auth-input-label">Password</label>
+                                <Link href={"/auth/initiate-forgot-password"} className="solid-auth-inline-link">Forgot your password?</Link>
+                            </div>
+                            <SolidPasswordInput
                                 id="password"
                                 name="password"
                                 value={formik.values.password}
                                 onChange={formik.handleChange}
-                                toggleMask
-                                invalid={!!formik.errors.password}
-                                inputClassName="w-full"
-                                feedback={false}
+                                toggle
+                                className="w-full"
+                                aria-invalid={!!isFormFieldValid(formik, "password")}
                             />
-                            {isFormFieldValid(formik, "password") && <Message
-                                className="text-red-500 text-sm"
-                                severity="error"
-                                text={formik?.errors?.password?.toString()}
-                            />}
+                            {isFormFieldValid(formik, "password") && (
+                                <SolidMessage
+                                    className="text-red-500 text-sm"
+                                    severity="error"
+                                    text={formik?.errors?.password?.toString()}
+                                />
+                            )}
                         </div>
                         {/* <div className="flex align-items-center mt-4">
                                     <Checkbox inputId="remember" onChange={(e: any) => setChecked(e.checked)} checked={checked} />
                                     <label htmlFor="remember" className="ml-2">Remember me</label>
                                 </div> */}
-                        <div className="mt-4 flex align-items-center justify-content-between">
-                            {/* <div className="flex align-items-center gap-2">
-                                <Checkbox
-                                    inputId="rememberMe"
-                                    name="rememberMe"
-                                    checked={formik.values.rememberMe}
-                                    onChange={formik.handleChange}
-                                />
-                                <label htmlFor="rememberMe" className="solid-auth-input-label">Remember me</label>
-                            </div> */}
-                            <div></div>
-                            <Link href={"/auth/initiate-forgot-password"} className="solid-auth-input-label font-bold">Forgot Password?</Link>
-                        </div>
                         <div className="mt-4">
-                            <Button className="w-full font-light auth-submit-button" label="Sign In" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
+                            <SolidButton
+                                type="submit"
+                                className="w-full font-light auth-submit-button"
+                                label="Sign In"
+                                disabled={formik.isSubmitting}
+                                loading={formik.isSubmitting}
+                            />
                         </div>
                     </Form>
                 )}
@@ -291,57 +289,49 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                         {validationType === "selectable" && (
                             <div className="flex flex-column gap-3 mt-3">
                                 <label className="solid-auth-input-label">Select Authentication Method</label>
-                                <div className="flex gap-4">
-                                    <div className="flex align-items-center">
-                                        <RadioButton
-                                            inputId="auth-email"
-                                            name="authMethod"
-                                            value="email"
-                                            checked={selectedAuthMethod === "email"}
-                                            onChange={(e) => {
-                                                setSelectedAuthMethod("email");
-                                                formik.setFieldValue("identifier", "");
-                                            }}
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor="auth-email" className="solid-auth-input-label cursor-pointer">Email / Username</label>
-                                    </div>
-                                    <div className="flex align-items-center">
-                                        <RadioButton
-                                            inputId="auth-mobile"
-                                            name="authMethod"
-                                            value="mobile"
-                                            checked={selectedAuthMethod === "mobile"}
-                                            onChange={(e) => {
-                                                setSelectedAuthMethod("mobile");
-                                                formik.setFieldValue("identifier", "");
-                                            }}
-                                            className="mr-2"
-                                        />
-                                        <label htmlFor="auth-mobile" className="solid-auth-input-label cursor-pointer">Mobile / Username</label>
-                                    </div>
-                                </div>
+                                <SolidRadioGroup
+                                    name="authMethod"
+                                    value={selectedAuthMethod}
+                                    options={[
+                                        { label: "Email / Username", value: "email" },
+                                        { label: "Mobile / Username", value: "mobile" },
+                                    ]}
+                                    onChange={(value) => {
+                                        setSelectedAuthMethod(value);
+                                        formik.setFieldValue("identifier", "");
+                                    }}
+                                    className="solid-auth-radio-options flex gap-4 flex-wrap"
+                                />
                             </div>
                         )}
                         <div className="flex flex-column gap-2 mt-3">
                             <label htmlFor="identifier" className="solid-auth-input-label">{fieldConfig.label}</label>
-                            <InputText
+                            <SolidInput
                                 id="identifier"
                                 name="identifier"
                                 placeholder={fieldConfig.placeholder}
                                 onChange={formik.handleChange}
                                 value={formik.values.identifier}
-                                invalid={!!formik.errors.identifier}
                                 onBlur={formik.handleBlur}
+                                aria-invalid={!!isFormFieldValid(formik, "identifier")}
+                                className="w-full"
                             />
-                            {isFormFieldValid(formik, "identifier") && <Message
-                                className="text-red-500 text-sm"
-                                severity="error"
-                                text={formik?.errors?.identifier?.toString()}
-                            />}
+                            {isFormFieldValid(formik, "identifier") && (
+                                <SolidMessage
+                                    className="text-red-500 text-sm"
+                                    severity="error"
+                                    text={formik?.errors?.identifier?.toString()}
+                                />
+                            )}
                         </div>
                         <div className="mt-4">
-                            <Button className="w-full font-light auth-submit-button" label="Sign In" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
+                            <SolidButton
+                                type="submit"
+                                className="w-full font-light auth-submit-button"
+                                label="Sign In"
+                                disabled={formik.isSubmitting}
+                                loading={formik.isSubmitting}
+                            />
                         </div>
                     </Form>
                 )}
@@ -349,20 +339,17 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
         )
     }
 
-    const AuthTabs: React.FC<AuthTabsProps> = ({ passwordBasedAuth, passwordLessAuth }) => {
+    const RenderAuthModes: React.FC<AuthModesProps> = ({ passwordBasedAuth, passwordLessAuth }) => {
         if (passwordBasedAuth && passwordLessAuth) {
             return (
-                <TabView className="solid-auth-tabview"
+                <AuthTabs
                     activeIndex={activeIndex}
-                    onTabChange={(e) => setActiveIndex(e.index)}
-                >
-                    <TabPanel header="With Password">
-                        <PasswordLogin />
-                    </TabPanel>
-                    <TabPanel header="Without Password">
-                        <PasswordLessLogin />
-                    </TabPanel>
-                </TabView>
+                    onChange={setActiveIndex}
+                    tabs={[
+                        { key: "with-password", label: "With Password", content: <PasswordLogin /> },
+                        { key: "without-password", label: "Without Password", content: <PasswordLessLogin /> },
+                    ]}
+                />
             );
         } else if (passwordBasedAuth) {
             return <PasswordLogin />;
@@ -376,32 +363,20 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
     return (
         <div className="">
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
-                {solidSettingsData?.data?.authPagesLayout === 'center' &&
-                    <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
-                            <Image
-                                alt="solid logo"
-                                src={solidSettingsData?.data?.appLogo || SolidLogo}
-                                className="relative"
-                                fill
-                            />
-                        </div>
-                    </div>
-                }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>Sign In To Your Account</h2>
-                {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
+                <h2 className="solid-auth-title">Login to your account</h2>
+                <p className="solid-auth-helper">Enter your credentials below to login to your account</p>
 
-                <AuthTabs passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} />
-                {solidSettingsData?.data?.iamGoogleOAuthEnabled &&
+                <RenderAuthModes passwordBasedAuth={solidSettingsData?.data?.passwordBasedAuth} passwordLessAuth={solidSettingsData?.data?.passwordLessAuth} />
+                {solidSettingsData?.data?.iamGoogleOAuthEnabled && (
                     <>
-                        <Divider align="center">
-                            <div className="inline-flex align-items-center">
-                                OR
-                            </div>
-                        </Divider>
+                        <div className="solid-auth-divider flex align-items-center gap-2 my-4">
+                            <SolidDivider className="flex-1" />
+                            <span className="text-sm text-500">Or continue with</span>
+                            <SolidDivider className="flex-1" />
+                        </div>
                         <SocialMediaLogin />
                     </>
-                }
+                )}
             </div>
             {solidSettingsData?.data?.allowPublicRegistration && <div className="mt-3 md:mt-5">
                 <div className="text-sm text-center text-400 secondary-dark-color">

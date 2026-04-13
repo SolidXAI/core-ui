@@ -1,6 +1,7 @@
-import { Button } from 'primereact/button';
 import { hasAnyRole } from '../../../helpers/rolesHelper';
 import { useSession } from "../../../hooks/useSession";
+import { SolidButton } from '../../shad-cn-ui';
+import { SolidIcon, parseSolidIconMeta } from "../../shad-cn-ui/SolidIcon";
 
 interface SolidFormViewNormalHeaderButtonProps {
     button: any;
@@ -8,17 +9,20 @@ interface SolidFormViewNormalHeaderButtonProps {
     formik: any;
     solidFormViewMetaData: any;
     handleCustomButtonClick: (attrs: any, event: any) => void;
-    formData: any
+    formData: any;
+    onActionComplete?: () => void;
+    variant?: "default" | "menu";
 }
 
 export function SolidFormViewNormalHeaderButton({
-
     button,
     params,
     formik,
     solidFormViewMetaData,
     handleCustomButtonClick,
-    formData
+    formData,
+    onActionComplete,
+    variant = "default"
 }: SolidFormViewNormalHeaderButtonProps) {
 
     const { data: session, status } = useSession();
@@ -28,25 +32,43 @@ export function SolidFormViewNormalHeaderButton({
 
     if (!hasRole) return null;
     if (button?.attrs?.visible == false) return null
+    const handleClick = () => {
+        const event = {
+            action: button.attrs.action,
+            params,
+            formik,
+            solidFormViewMetaData: solidFormViewMetaData.data,
+            formData
+        };
+        handleCustomButtonClick(button.attrs, event);
+        onActionComplete?.();
+    };
+
+    if (variant === "menu") {
+        return (
+            <button
+                type="button"
+                className={`solid-row-action-button ${button?.attrs?.className ? button?.attrs?.className : ''}`}
+                onClick={handleClick}
+            >
+                {button?.attrs?.icon && (
+                    (() => { const m = parseSolidIconMeta(button.attrs.icon); return m ? <SolidIcon name={m.name} spin={m.spin} className="solid-row-action-button-icon" /> : <i className={`${button.attrs.icon} solid-row-action-button-icon`} />; })()
+                )}
+                <span className="solid-row-action-button-label">{button.attrs.label}</span>
+            </button>
+        );
+    }
+
     return (
         <div>
-            <Button
+            <SolidButton
                 type="button"
-                className={`w-full text-left gap-2 p-button-sm solid-icon-button ${button?.attrs?.className ? button?.attrs?.className : ''}`}
+                className={`w-full text-left gap-2 solid-icon-button ${button?.attrs?.className ? button?.attrs?.className : ''}`}
                 label={button.attrs.label}
-                size="small"
+                size="sm"
                 iconPos="left"
                 icon={button?.attrs?.icon ? button?.attrs?.icon : ""}
-                onClick={() => {
-                    const event = {
-                        action: button.attrs.action,
-                        params,
-                        formik,
-                        solidFormViewMetaData: solidFormViewMetaData.data,
-                        formData
-                    };
-                    handleCustomButtonClick(button.attrs, event);
-                }}
+                onClick={handleClick}
             />
         </div>
     );

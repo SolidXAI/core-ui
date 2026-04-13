@@ -4,9 +4,22 @@ import { LayoutState, ChildContainerProps, LayoutConfig, LayoutContextProps } fr
 export const LayoutContext = createContext({} as LayoutContextProps);
 
 export const LayoutProvider = ({ children }: ChildContainerProps) => {
+    const THEME_STORAGE_KEY = "solidx.theme.mode";
+    const getInitialThemeMode = (): "light" | "dark" => {
+        if (typeof window === "undefined") return "light";
+
+        const stored = window.localStorage.getItem(THEME_STORAGE_KEY);
+        if (stored === "dark" || stored === "light") {
+            return stored;
+        }
+
+        return window.matchMedia("(prefers-color-scheme: dark)").matches ? "dark" : "light";
+    };
+
+    const [themeMode, setThemeMode] = useState<"light" | "dark">(getInitialThemeMode);
     const [layoutConfig, setLayoutConfig] = useState<LayoutConfig>({
         inputStyle: 'outlined',
-        colorScheme: 'light',
+        colorScheme: themeMode,
         theme: 'solid-light-purple',
         scale: 14,
         authLayout: 'Center'
@@ -33,15 +46,31 @@ export const LayoutProvider = ({ children }: ChildContainerProps) => {
         setLayoutState((prevLayoutState:any) => ({ ...prevLayoutState, profileSidebarVisible: !prevLayoutState.profileSidebarVisible }));
     };
 
- 
+    const toggleThemeMode = () => {
+        setThemeMode((prev) => (prev === "light" ? "dark" : "light"));
+    };
 
     const isDesktop = () => {
         return window.innerWidth > 991;
     };
 
+    React.useEffect(() => {
+        if (typeof window === "undefined") return;
+        window.localStorage.setItem(THEME_STORAGE_KEY, themeMode);
+        document.documentElement.classList.toggle("dark", themeMode === "dark");
+        document.documentElement.setAttribute("data-theme", themeMode);
+        setLayoutConfig((prevLayoutConfig: LayoutConfig) => ({
+            ...prevLayoutConfig,
+            colorScheme: themeMode
+        }));
+    }, [themeMode]);
+
     const value: LayoutContextProps = {
         layoutConfig,
         setLayoutConfig,
+        themeMode,
+        setThemeMode,
+        toggleThemeMode,
         layoutState,
         setLayoutState,
         onMenuToggle,

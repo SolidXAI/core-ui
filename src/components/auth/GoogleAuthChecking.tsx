@@ -2,11 +2,13 @@ import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { signInWithOAuthAccessCode } from "../../adapters/auth/index";
 import { useRouter } from "../../hooks/useRouter";
 import { useSearchParams } from "../../hooks/useSearchParams";
-import { ProgressSpinner } from 'primereact/progressspinner';
 import { useEffect, useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
+import { loadSession } from "../../adapters/auth/storage";
+import { hasAnyRole } from "../../helpers/rolesHelper";
+import { SolidSpinner } from "../shad-cn-ui";
 
 export const GoogleAuthChecking = () => {
     const searchParams = useSearchParams();
@@ -33,7 +35,10 @@ export const GoogleAuthChecking = () => {
                     setError(ERROR_MESSAGES.AUTHENICATION__FAILED)
                 } else {
                     dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
-                    const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin";
+                    const session = loadSession();
+                    const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
+                    const isDev = env("VITE_SOLIDX_ENV") === "dev";
+                    const redirectUrl = isAdmin && isDev ? "/studio" : (env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin");
                     router.push(redirectUrl);
                 }
             } catch (err: any) {
@@ -52,8 +57,6 @@ export const GoogleAuthChecking = () => {
         );
     }
     return (
-        <div>
-            <ProgressSpinner />
-        </div>
+        <SolidSpinner className="flex items-center justify-center min-h-screen" />
     )
 }

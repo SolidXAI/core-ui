@@ -1,19 +1,15 @@
 
-import { InputTextarea } from "primereact/inputtextarea";
-import { Message } from "primereact/message";
 import * as Yup from 'yup';
+import styles from './solidFields.module.css';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
-// import { Editor } from "primereact/editor";
 import { useEffect, useRef, useState } from "react";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
-import Editor from '@monaco-editor/react';
-import { Calendar } from "primereact/calendar";
-import { Dropdown } from "primereact/dropdown";
-import { InputText } from "primereact/inputtext";
-import { Button } from "primereact/button";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import { SolidButton, SolidDatePicker, SolidSelect, SolidInput, SolidCodeEditor, SolidIcon } from "../../../shad-cn-ui";
+import { parseSolidIconMeta } from "../../../shad-cn-ui/SolidIcon";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 
 
 export class SolidLongTextField implements ISolidField {
@@ -55,10 +51,10 @@ export class SolidLongTextField implements ISolidField {
         }
         // 2. length (min/max)
         if (fieldMetadata.min && fieldMetadata.min > 0) {
-            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel,fieldMetadata.min));
+            schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel, fieldMetadata.min));
         }
         if (fieldMetadata.max && fieldMetadata.max > 0) {
-            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel,fieldMetadata.max));
+            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel, fieldMetadata.max));
         }
         // 3. regular expression
         if (fieldMetadata.regexPattern) {
@@ -137,31 +133,26 @@ export const DefaultLongTextFormEditWidget = ({ formik, fieldContext }: SolidFor
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
     return (
-        <div className="relative">
-            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
-                {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                        <SolidFieldTooltip fieldContext={fieldContext} />
-                        {/* &nbsp;   {fieldDescription && <span>({fieldDescription}) </span>} */}
-                    </label>
-                }
-                <InputTextarea
-                    readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                    disabled={formDisabled || fieldDisabled}
-                    id={fieldLayoutInfo.attrs.name}
-                    aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                    // onChange={formik.handleChange}
-                    onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-                    value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                    rows={5}
-                    cols={30}
-                />
-            </div>
+        <div className={styles.fieldWrapper}>
+            {showFieldLabel != false &&
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={styles.fieldLabel}>
+                    {fieldLabel}
+                    {fieldMetadata.required && <span className="text-red-500">*</span>}
+                    <SolidFieldTooltip fieldContext={fieldContext} />
+                </label>
+            }
+            <textarea
+                readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                disabled={formDisabled || fieldDisabled}
+                id={fieldLayoutInfo.attrs.name}
+                aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
+                onChange={(e: React.ChangeEvent<HTMLTextAreaElement>) => fieldContext.onChange(e, 'onFieldChange')}
+                value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                rows={5}
+                className={styles.fieldTextarea}
+            />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <div className="absolute mt-1">
-                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                </div>
+                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
             )}
         </div>
     );
@@ -174,11 +165,8 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
 
     const readOnly = fieldLayoutInfo.attrs?.readonly || fieldContext.readOnly;
     const disabled = fieldLayoutInfo.attrs?.disabled;
-
-    // Default to SQL
-    const language = fieldLayoutInfo.attrs.editorLanguage || 'ts';
-
     const value = formik.values[fieldLayoutInfo.attrs.name] || '';
+    const codeLanguage = fieldLayoutInfo.attrs.editorLanguage || 'ts';
 
     const isFormFieldValid = (formik: any, fieldName: string) =>
         formik.touched[fieldName] && formik.errors[fieldName];
@@ -202,7 +190,7 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
     // };
     const fieldJsonSchema = fieldLayoutInfo.attrs?.jsonSchema;
     if (!fieldJsonSchema) {
-        return <Message severity="error" text="Field Layout Attributes are missing jsonSchema, cannot render with widget jsonEditor without specifying the schema" />
+        return <SolidMessage severity="error" text="Field Layout Attributes are missing jsonSchema, cannot render with widget jsonEditor without specifying the schema" />
     }
     const [data, setData] = useState(JSON.parse(value || '[]'));
 
@@ -212,22 +200,19 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
         if (!meta) return null;
 
         if (meta.type === "string" || meta.type === "shortText") {
-            return (
-                <InputText value={value} readOnly disabled />
-            );
+            return <SolidInput value={value} readOnly disabled />;
         }
         if (meta.type === "longText") {
             return (
-                <InputTextarea value={value} rows={10} cols={100} readOnly />
+                <textarea value={value} rows={10} cols={100} readOnly className={styles.fieldTextarea} />
             );
         }
         if (meta.type === "date" || meta.type === "datetime") {
             return (
-                <Calendar
-                    value={value ? new Date(value) : null}
-                    showTime={meta.type === "datetime"}
-                    dateFormat="yy-mm-dd"
-                    readOnlyInput
+                <SolidDatePicker
+                    selected={value ? new Date(value) : null}
+                    onChange={() => { }}
+                    showTimeSelect={meta.type === "datetime"}
                     disabled
                 />
             );
@@ -235,12 +220,11 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
 
         if (meta.type === "selectionStatic") {
             return (
-                <Dropdown
+                <SolidSelect
                     value={value}
                     // @ts-ignore
                     options={meta.allowedValues.map((v) => ({ label: v, value: v }))}
                     placeholder="Select."
-                    readOnly
                     disabled
                 />
             );
@@ -252,7 +236,7 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
     return (
         <div className="mt-4">
             {fieldLayoutInfo?.attrs?.showLabel !== false && (
-                <label className="form-field-label mb-10">
+                <label className={`${styles.fieldLabel} form-field-label mb-10`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -297,9 +281,6 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
     const readOnly = fieldLayoutInfo.attrs?.readonly || fieldContext.readOnly;
     const disabled = fieldLayoutInfo.attrs?.disabled;
 
-    // Default to SQL
-    const language = fieldLayoutInfo.attrs.editorLanguage || 'ts';
-
     const value = formik.values[fieldLayoutInfo.attrs.name] || '';
 
     const isFormFieldValid = (formik: any, fieldName: string) =>
@@ -324,7 +305,7 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
     // };
     const fieldJsonSchema = fieldLayoutInfo.attrs?.jsonSchema;
     if (!fieldJsonSchema) {
-        return <Message severity="error" text="Field Layout Attributes are missing jsonSchema, cannot render with widget jsonEditor without specifying the schema" />
+        return <SolidMessage severity="error" text="Field Layout Attributes are missing jsonSchema, cannot render with widget jsonEditor without specifying the schema" />
     }
     const [data, setData] = useState(JSON.parse(value || '[]'));
 
@@ -363,7 +344,7 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
 
         if (meta.type === "string" || meta.type === "shortText") {
             return (
-                <InputText
+                <SolidInput
                     value={value}
                     onChange={(e) => handleChange(index, key, e.target.value)}
                     disabled={!!disabled}
@@ -374,38 +355,36 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
 
         if (meta.type === "longText") {
             return (
-                <InputTextarea
+                <textarea
                     onChange={(e) => handleChange(index, key, e.target.value)}
                     value={value}
                     rows={10}
                     cols={100}
+                    className={styles.fieldTextarea}
                 />
             );
         }
 
         if (meta.type === "date" || meta.type === "datetime") {
             return (
-                <Calendar
-                    value={value ? new Date(value) : null}
-                    onChange={(e) => handleChange(index, key, e.value)}
-                    showTime={meta.type === "datetime"}
-                    dateFormat="yy-mm-dd"
+                <SolidDatePicker
+                    selected={value ? new Date(value) : null}
+                    onChange={(date: Date | null) => handleChange(index, key, date)}
+                    showTimeSelect={meta.type === "datetime"}
                     disabled={!!disabled}
-                    readOnlyInput={!!readOnly}
                 />
             );
         }
 
         if (meta.type === "selectionStatic") {
             return (
-                <Dropdown
+                <SolidSelect
                     value={value}
                     // @ts-ignore
                     options={meta.allowedValues.map((v) => ({ label: v, value: v }))}
                     onChange={(e) => handleChange(index, key, e.value)}
                     placeholder="Select."
                     disabled={!!disabled}
-                    readOnly={!!readOnly}
                 />
             );
         }
@@ -416,7 +395,7 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
     return (
         <div className="mt-4">
             {fieldLayoutInfo?.attrs?.showLabel !== false && (
-                <label className="form-field-label mb-10">
+                <label className={`${styles.fieldLabel} form-field-label mb-10`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -426,12 +405,13 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
             <div className="p-4 border-round surface-card shadow-1">
                 <div className="flex justify-content-between align-items-center mb-3">
                     {!disabled && !readOnly ? (
-                        <Button
+                        <SolidButton
                             type="button"
-                            label="Add"
-                            icon="pi pi-plus"
+                            leftIcon={<SolidIcon name="si-plus" aria-hidden />}
                             onClick={handleAdd}
-                        />
+                        >
+                            Add
+                        </SolidButton>
                     ) : null}
                 </div>
 
@@ -455,9 +435,9 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
                                     ))}
                                 </div>
                                 {!disabled && !readOnly ? (
-                                    <Button
+                                    <SolidButton
                                         type="button"
-                                        icon="pi pi-minus"
+                                        leftIcon={<SolidIcon name="si-minus" aria-hidden />}
                                         className="ml-2 h-2rem w-2rem rounded-circle"
                                         onClick={() => handleRemove(idx)}
                                     />
@@ -485,9 +465,7 @@ export const CodeEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFiel
 
     const readOnly = fieldLayoutInfo.attrs?.readonly || fieldContext.readOnly;
     const disabled = fieldLayoutInfo.attrs?.disabled;
-
-    // Default to SQL
-    const language = fieldLayoutInfo.attrs.editorLanguage || 'ts';
+    const codeLanguage = fieldLayoutInfo.attrs.editorLanguage || 'ts';
 
     const value = formik.values[fieldLayoutInfo.attrs.name] || '';
 
@@ -497,7 +475,7 @@ export const CodeEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFiel
     return (
         <div className="mt-4">
             {fieldLayoutInfo?.attrs?.showLabel !== false && (
-                <label className="form-field-label mb-10">
+                <label className={`${styles.fieldLabel} form-field-label mb-10`}>
                     {fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
@@ -505,24 +483,19 @@ export const CodeEditorFormEditWidget = ({ formik, fieldContext }: SolidFormFiel
             )}
 
             <div className="border border-gray-300 rounded overflow-hidden">
-                <Editor
-                    height="200px"
-                    defaultLanguage={language}
+                <SolidCodeEditor
                     value={value}
                     onChange={(val) => formik.setFieldValue(fieldLayoutInfo.attrs.name, val)}
-                    options={{
-                        readOnly,
-                        minimap: { enabled: false },
-                        lineNumbers: 'on',
-                        fontSize: 14,
-                        scrollBeyondLastLine: false,
-                    }}
+                    height={fieldLayoutInfo.attrs?.height ?? "200px"}
+                    fontSize={fieldLayoutInfo.attrs?.fontSize ?? "14px"}
+                    readOnly={readOnly || disabled}
+                    language={codeLanguage}
                 />
             </div>
 
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <div className="mt-1">
-                    <Message text={formik.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    <SolidMessage text={formik.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 </div>
             )}
         </div>
@@ -554,16 +527,15 @@ export const DynamicSelectionStaticEditWidget = ({
 
         if (meta?.type === "selectionStatic") {
             return (
-                <Dropdown
+                <SolidSelect
                     value={val}
-                    options={meta.allowedValues.map((v:any) => ({
+                    options={meta.allowedValues.map((v: any) => ({
                         label: v,
                         value: v,
                     }))}
                     onChange={(e) => handleChange(key, e.value)}
                     placeholder={meta.placeHolder || "Select."}
                     disabled={!!disabled}
-                    readOnly={!!readOnly}
                     className="w-full"
                 />
             );
@@ -585,34 +557,33 @@ export const DynamicSelectionStaticEditWidget = ({
     };
 
     return (
-      <div className="flex gap-3 align-items-center">
-        {Object.keys(fieldJsonSchema).map((key) => {
-          const meta: any = fieldJsonSchema[key];
-           if (!shouldShowField(key)) return null;
-          return (
-            <div key={key} className={"flex flex-column gap-2 " + (meta.className || '')}>
-              {/*load prime header icon and headerText */}
-              {(meta.headerText || meta.headerIcon) && (
-                <div className="flex align-items-center gap-2">
-                  {meta.headerIcon && <i className={meta.headerIcon}></i>}
-                  <span className="font-semibold form-field-label font-medium">
-                    {meta.headerText ?? key}
-                  </span>
-                </div>
-              )}
-              {/* Notes below input */}
-                {meta.noteText && (
-                    <small className="text-secondary mt-2">{meta.noteText}</small>
-                )}
-              {/*load note here */}
-              <label className="form-field-label font-medium">{key.charAt(0).toUpperCase() + key.slice(1)} {meta.required && <span className="text-red-500">*</span>}</label>
-              <div className="w-full mt-1 flex flex-row gap-2">
-              {renderInput(key)}
-              </div>
-            </div>
-          );
-        })}
-      </div>
+        <div className="flex gap-3 align-items-center">
+            {Object.keys(fieldJsonSchema).map((key) => {
+                const meta: any = fieldJsonSchema[key];
+                if (!shouldShowField(key)) return null;
+                return (
+                    <div key={key} className={"flex flex-column gap-2 " + (meta.className || '')}>
+                        {/*load prime header icon and headerText */}
+                        {(meta.headerText || meta.headerIcon) && (
+                            <div className="flex align-items-center gap-2">
+                                {meta.headerIcon && (() => { const m = parseSolidIconMeta(meta.headerIcon); return m ? <SolidIcon name={m.name} spin={m.spin} /> : <i className={meta.headerIcon}></i>; })()}
+                                <span className="font-semibold form-field-label font-medium">
+                                    {meta.headerText ?? key}
+                                </span>
+                            </div>
+                        )}
+                        {/* Notes below input */}
+                        {meta.noteText && (
+                            <small className="text-secondary mt-2">{meta.noteText}</small>
+                        )}
+                        {/*load note here */}
+                        <label className="form-field-label font-medium">{key.charAt(0).toUpperCase() + key.slice(1)} {meta.required && <span className="text-red-500">*</span>}</label>
+                        <div className="w-full mt-1 flex flex-row gap-2">
+                            {renderInput(key)}
+                        </div>
+                    </div>
+                );
+            })}
+        </div>
     );
 };
-

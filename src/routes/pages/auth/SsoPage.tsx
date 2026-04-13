@@ -1,9 +1,8 @@
 import { useEffect, useState } from "react";
-import { Card } from "primereact/card";
-import { ProgressSpinner } from "primereact/progressspinner";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { signIn } from "../../../adapters/auth/signIn";
+import { SolidSpinner, SolidIcon } from "../../../components/shad-cn-ui";
 
 export function SsoPage() {
   const router = useRouter();
@@ -39,8 +38,8 @@ export function SsoPage() {
 
   return (
     <div className="card flex justify-content-center align-items-center" style={{ height: "80vh" }}>
-      <Card
-        className="custom-card md:w-25rem"
+      <div
+        className="custom-card md:w-25rem solid-sso-card"
         style={{
           boxShadow:
             "rgba(0, 0, 0, 0.16) 0px 10px 36px 0px, rgba(0, 0, 0, 0.06) 0px 0px 0px 1px",
@@ -55,25 +54,18 @@ export function SsoPage() {
           }}
         >
           {isLoading ? (
-            <>
-              <ProgressSpinner style={{ width: "50px", height: "50px" }} />
-              <style>{`
-                .p-progress-spinner circle {
-                  stroke: blue !important;
-                }
-              `}</style>
-            </>
+            <SolidSpinner />
           ) : success ? (
-            <i className="pi pi-check" style={{ color: "green", fontSize: "30px", fontWeight: "700" }}></i>
+            <SolidIcon name="si-check" style={{ color: "green", fontSize: "30px", fontWeight: "700" }} aria-hidden />
           ) : (
-            <i className="pi pi-times" style={{ color: "red", fontSize: "30px", fontWeight: "700" }}></i>
+            <SolidIcon name="si-times" style={{ color: "red", fontSize: "30px", fontWeight: "700" }} aria-hidden />
           )}
         </div>
         <p className="m-20" style={{ textAlign: "center" }}>
           {isLoading && `Please wait while we authenticate your profile.`}
           {error && `${error} Your not authenticated`}
         </p>
-      </Card>
+      </div>
     </div>
   );
 }

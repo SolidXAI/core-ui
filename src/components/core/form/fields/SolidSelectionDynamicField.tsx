@@ -1,7 +1,7 @@
 
 import { useLazyGetSelectionDynamicValuesQuery } from "../../../../redux/api/fieldApi";
-import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
-import { Message } from "primereact/message";
+import { SolidAutocomplete } from "../../../shad-cn-ui/SolidAutocomplete";
+import { buildSyntheticChangeEvent } from "./fieldEventUtils";
 import qs from "qs";
 import { useState } from "react";
 import * as Yup from 'yup';
@@ -11,6 +11,9 @@ import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { formikValuestoQueryString } from "../../../../helpers/helpers";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import styles from "./solidFields.module.css";
+
+type AutoCompleteCompleteEvent = { query: string };
 
 
 export class SolidSelectionDynamicField implements ISolidField {
@@ -243,45 +246,39 @@ export const DefaultSelectionDynamicFormEditWidget = ({ formik, fieldContext }: 
 
 
     return (
-        <div className="relative">
-            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
-                {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                        {isRequired && <span className="text-red-500"> *</span>}
-                        <SolidFieldTooltip fieldContext={fieldContext} />
-                        {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                    </label>
-                }
-                <AutoComplete
-                    multiple={isMultiSelect}
-                    readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                    disabled={formDisabled || fieldDisabled}
-                    {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
-                    id={fieldLayoutInfo.attrs.name}
-                    field="label"
-                    // value={formik.values[fieldLayoutInfo.attrs.name] || null}
-                    value={formik.values[fieldLayoutInfo.attrs.name] || (isMultiSelect ? [] : null)}
-                    dropdown
-                    suggestions={selectionDynamicItems}
-                    completeMethod={selectionDynamicSearch}
-                    // onChange={(e) => updateInputs(index, e.value)} />
-                    // onChange={formik.handleChange}
-                    onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-                    className="solid-standard-autocomplete"
-                    emptyMessage="No records found"
-                />
-            </div>
+        <div className={`${styles.fieldWrapper} ${isFormFieldValid(formik, fieldLayoutInfo.attrs.name) ? styles.fieldInvalid : ""}`}>
+            {showFieldLabel != false &&
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                    {fieldLabel}
+                    {isRequired && <span className="text-red-500"> *</span>}
+                    <SolidFieldTooltip fieldContext={fieldContext} />
+                </label>
+            }
+            <SolidAutocomplete
+                multiple={isMultiSelect}
+                field="label"
+                className={`solid-standard-autocomplete ${isFormFieldValid(formik, fieldLayoutInfo.attrs.name) ? styles.fieldInvalidControl : ""}`}
+                value={formik.values[fieldLayoutInfo.attrs.name] || (isMultiSelect ? [] : null)}
+                dropdown
+                suggestions={selectionDynamicItems}
+                completeMethod={(e) => selectionDynamicSearch(e)}
+                emptyMessage="No records found"
+                onChange={({ value }) => {
+                    if (formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled) return;
+                    const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
+                    fieldContext.onChange(syntheticEvent, "onFieldChange");
+                }}
+                onSelect={({ value }) => {
+                    const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
+                    fieldContext.onChange(syntheticEvent, "onFieldChange");
+                }}
+            />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <div className="absolute mt-1">
-                    <Message severity="error"
-                        text={
-                            // formik?.errors[fieldLayoutInfo.attrs.name]?.toString()
-                            typeof formik.errors[fieldLayoutInfo?.attrs?.name] === 'object'
-                                ? formik.errors[fieldLayoutInfo?.attrs?.name]?.value?.toString()
-                                : formik.errors[fieldLayoutInfo?.attrs?.name]?.toString()
-                        }
-                    />
-                </div>
+                <p className={styles.fieldError}>
+                    {typeof formik.errors[fieldLayoutInfo?.attrs?.name] === 'object'
+                        ? formik.errors[fieldLayoutInfo?.attrs?.name]?.value?.toString()
+                        : formik.errors[fieldLayoutInfo?.attrs?.name]?.toString()}
+                </p>
             )}
         </div>
     );
@@ -297,44 +294,42 @@ export const DefaultSelectionDynamicFormViewWidget = ({ formik, fieldContext }: 
     const value = formik.values[fieldLayoutInfo.attrs.name];
     const isMultiSelect = fieldMetadata?.isMultiSelect;
 
+    const toLabel = (val: any) => {
+        if (!val) return '';
+        if (typeof val === 'string' || typeof val === 'number') return String(val);
+        if (typeof val === 'object') return val.label ?? val.value ?? '';
+        return '';
+    };
+
     let values: string[] = [];
     if (isMultiSelect) {
         if (typeof value === 'string') {
             try {
                 const parsed = JSON.parse(value);
                 if (Array.isArray(parsed)) {
-                    values = parsed;
+                    values = parsed.map(toLabel);
                 }
             } catch {
-                // Fallback if not a JSON string (or invalid JSON)
-                values = value.split(',').map(v => v.trim());
+                values = value.split(',').map(v => v.trim()).map(toLabel);
             }
         } else if (Array.isArray(value)) {
-            values = value.map(v => (typeof v === 'object' && v.label ? v.label : String(v)));
+            values = value.map(toLabel);
         }
     }
 
     return (
-        // <div className="mt-2 flex-column gap-2">
-        //     <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
-        //     <p className="m-0 solid-custom-selection-dynamic-pill">{value && value.label && value.label}</p>
-        // </div>
-        <div className="mt-2 flex-column gap-2">
+        <div className={styles.fieldViewWrapper}>
             {showFieldLabel !== false && (
-                <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
             )}
-            <p className="m-0">
-                {isMultiSelect ? (
-                    values.length > 0 ? (
-                        <span>{values.join(', ')}</span> // ✅ Join with commas
-                    ) : (
-                        <span className="text-gray-500">No selection</span>
-                    )
-                ) : (
-                    value && value?.label ? value.label : <span className="text-gray-500">No selection</span>
-                )}
+            <p className={styles.fieldViewValue}>
+                {isMultiSelect
+                    ? (values.length > 0 ? values.join(', ') : 'No selection')
+                    : (() => {
+                        const single = toLabel(value);
+                        return single ? single : 'No selection';
+                    })()}
             </p>
         </div>
     );
 }
-

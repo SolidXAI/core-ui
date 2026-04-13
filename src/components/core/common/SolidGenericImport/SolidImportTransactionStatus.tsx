@@ -1,9 +1,19 @@
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
 import { getSession } from "../../../../adapters/auth/index";
-import { Button } from 'primereact/button';
-import { Dialog } from 'primereact/dialog';
+import { AlertTriangle, CheckCircle2, CircleX, Download, Eye } from 'lucide-react';
 import { useState } from 'react';
 import { env } from "../../../../adapters/env";
+import {
+  SolidButton,
+  SolidDialog,
+  SolidDialogBody,
+  SolidDialogClose,
+  SolidDialogDescription,
+  SolidDialogFooter,
+  SolidDialogHeader,
+  SolidDialogSeparator,
+  SolidDialogTitle,
+} from '../../../shad-cn-ui';
 
 export const SolidImportTransactionStatus = ({ importStatusResult, transactionId, setOpenImportDialog, handleFetchUpdatedRecords }: any) => {
 
@@ -66,40 +76,57 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
 
   const getStatusTag = () => {
     if (status === "import_succeeded") {
-      return <Button type='button' size='small' icon="pi pi-check-circle" severity="success" label={`${importedCount} row${importedCount > 1 ? 's' : ''} imported successfully`} />;
+      return (
+        <div className="solid-import-status-pill is-success">
+          <CheckCircle2 size={16} />
+          <span>{importedCount} row{importedCount > 1 ? 's' : ''} imported successfully</span>
+        </div>
+      );
     }
     if (status === "import_failed" && importedCount === 0) {
-      return <Button type='button' size='small' icon="pi pi-times-circle" severity="danger" label="Import Failed" />;
+      return (
+        <div className="solid-import-status-pill is-danger">
+          <CircleX size={16} />
+          <span>Import Failed</span>
+        </div>
+      );
     }
     if (status === "import_failed" && importedCount > 0) {
-      return <Button type='button' size='small' icon="pi pi-exclamation-triangle" severity="warning" label="Completed with Some Errors" />;
+      return (
+        <div className="solid-import-status-pill is-warning">
+          <AlertTriangle size={16} />
+          <span>Completed with Some Errors</span>
+        </div>
+      );
     }
     return <div>Import Status</div>;
   };
 
   return (
     <div>
-      <div style={{ borderRadius: 6, border: '1px solid var(--primary-light-color)' }}>
-        <div className='p-3' style={{ borderBottom: '1px solid var(--primary-light-color)', pointerEvents: 'none' }}>
+      <div className="solid-import-summary-card">
+        <div className='solid-import-summary-card-header'>
           {getStatusTag()}
         </div>
-        <div className='font-bold' style={{ color: 'var(--solid-primary-black)' }}>
-          <div className='p-3 flex justify-content-between'>
+        <div className='solid-import-summary-metrics'>
+          <div className='solid-import-summary-metric'>
             <span>No. of Successful Rows</span> <span>{importedCount ?? 0}</span>
           </div>
-          <div className='px-3'>
-            <div style={{ borderTop: '1px dashed var(--primary-light-color)' }}></div>
+          <div className='solid-import-summary-divider-wrap'>
+            <div className='solid-import-summary-divider'></div>
           </div>
-          <div className='p-3 flex justify-content-between'>
+          <div className='solid-import-summary-metric'>
             <span>No. of Failed Rows</span> <span>{failedCount ?? 0}</span>
           </div>
         </div>
       </div>
-      <div className='mt-3 flex align-items-center gap-3'>
+      <div className='solid-import-actions'>
+        <p className="solid-import-actions-copy">Review the result and open the updated records when you are ready.</p>
         {importedCount > 0 &&
-          <Button
-            label='View Imported Records'
+          <SolidButton
+            type='button'
             size='small'
+            leftIcon={<Eye size={14} />}
             onClick={() => {
               if (status === "import_failed" && importedCount > 0) {
                 setShowPartialDialog(true);
@@ -108,50 +135,58 @@ export const SolidImportTransactionStatus = ({ importStatusResult, transactionId
               }
             }
             }
-          />
+          >
+            View Imported Records
+          </SolidButton>
         }
         {status === "import_failed" && transactionId &&
-          <Button
-            label="Download Failed Records"
+          <SolidButton
+            type='button'
             size='small'
-            icon="pi pi-download"
-            outlined
-            severity='secondary'
+            leftIcon={<Download size={14} />}
+            variant='outline'
             onClick={() => handleDownloadFailedRecords(transactionId)}
-          />
+          >
+            Download Failed Records
+          </SolidButton>
         }
       </div>
-      <Dialog
-        header="View Imported Records"
-        visible={showPartialDialog}
-        onHide={() => setShowPartialDialog(false)}
-        style={{
-          width: '50vh'
-        }}
-        footer={
-          <div className="flex justify-content-start gap-2">
-            <Button
-              label="Yes"
-              size='small'
-              icon="pi pi-download"
-              onClick={handlePartialDialogConfirm}
-            />
-            <Button
-              label="No"
-              size='small'
-              icon="pi pi-times"
-              severity="secondary"
-              outlined
-              onClick={() => {
-                handleSuccessSyncImport();
-              }}
-            />
-          </div>
-        }
-        modal
+      <SolidDialog
+        open={showPartialDialog}
+        onOpenChange={setShowPartialDialog}
+        style={{ width: 'min(460px, calc(100vw - 2rem))' }}
+        className="solid-import-confirm-dialog"
       >
-        <p>Do you want to download failed records before viewing the successful imports?</p>
-      </Dialog>
+        <SolidDialogHeader className="solid-filter-dialog-head">
+          <div>
+            <SolidDialogTitle className="solid-filter-dialog-title m-0">View Imported Records</SolidDialogTitle>
+            <SolidDialogDescription className="solid-filter-dialog-subtitle m-0">
+              Failed rows can be downloaded before you return to the imported results.
+            </SolidDialogDescription>
+          </div>
+          <SolidDialogClose className="solid-filter-dialog-close" />
+        </SolidDialogHeader>
+        <SolidDialogSeparator className="solid-filter-dialog-sep" />
+        <SolidDialogBody className="solid-import-confirm-dialog-body">
+          <p>Do you want to download failed records before viewing the successful imports?</p>
+        </SolidDialogBody>
+        <SolidDialogFooter className="solid-import-confirm-dialog-footer">
+          <SolidButton type="button" size='small' leftIcon={<Download size={14} />} onClick={handlePartialDialogConfirm}>
+            Yes
+          </SolidButton>
+          <SolidButton
+            type="button"
+            size='small'
+            variant="outline"
+            leftIcon={<CircleX size={14} />}
+            onClick={() => {
+              handleSuccessSyncImport();
+            }}
+          >
+            No
+          </SolidButton>
+        </SolidDialogFooter>
+      </SolidDialog>
     </div>
   )
 }

@@ -1,14 +1,9 @@
 import React, { useState, useEffect } from "react";
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
-import { Dropdown } from "primereact/dropdown";
-import { Calendar } from "primereact/calendar";
-import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
+import { SolidAutocomplete, SolidButton, SolidDatePicker, SolidDialog, SolidDivider, SolidSelect } from "../../shad-cn-ui";
 import { SqlExpression } from "../../../types/solid-core";
 import { DashboardVariableRecord } from "./SolidDashboard";
 import { useLazyGetDashboardVariableSelectionDynamicValuesQuery } from "../../../redux/api/dashboardApi";
-import { Divider } from "primereact/divider";
-import { Fieldset } from "primereact/fieldset";
+type AutoCompleteCompleteEvent = { query: string };
 
 interface DashboardFilterProps {
     dashboardVariables: DashboardVariableRecord[];
@@ -85,17 +80,16 @@ const FilterValueInput = ({ rule, onChange }: any) => {
         let dateVal = val ? new Date(val) : null;
         if (isNaN(dateVal?.getTime() || 0)) dateVal = null;
         return (
-            <Calendar
-                value={dateVal}
-                onChange={(e) => {
-                    const dateStr = e.value ? (e.value as Date).toISOString().split('T')[0] : '';
+        <SolidDatePicker
+          selected={dateVal || undefined}
+          onChange={(nextDate: Date | null) => {
+            const dateStr = nextDate ? nextDate.toISOString().split('T')[0] : '';
                     updateValue(index, dateStr);
                 }}
-                dateFormat="mm/dd/yy"
-                placeholder="mm/dd/yyyy"
-                mask="99/99/9999"
+                dateFormat="MM/dd/yyyy"
+                placeholderText="mm/dd/yyyy"
                 className="w-full"
-                inputClassName="w-full p-inputtext-sm"
+                inputClassName="w-full text-sm"
             />
         );
     };
@@ -114,7 +108,7 @@ const FilterValueInput = ({ rule, onChange }: any) => {
         };
 
         return (
-            <AutoComplete
+            <SolidAutocomplete
                 value={val}
                 suggestions={filteredItems}
                 completeMethod={search}
@@ -122,7 +116,7 @@ const FilterValueInput = ({ rule, onChange }: any) => {
                 field="label"
                 dropdown
                 className="w-full"
-                inputClassName="w-full p-inputtext-sm"
+                inputClassName="w-full text-sm"
             />
         );
     };
@@ -145,7 +139,7 @@ const FilterValueInput = ({ rule, onChange }: any) => {
         };
 
         return (
-            <AutoComplete
+            <SolidAutocomplete
                 value={val}
                 suggestions={filteredItems}
                 completeMethod={search}
@@ -153,7 +147,7 @@ const FilterValueInput = ({ rule, onChange }: any) => {
                 field="label"
                 dropdown
                 className="w-full"
-                inputClassName="w-full p-inputtext-sm"
+                inputClassName="w-full text-sm"
             />
         );
     };
@@ -171,8 +165,8 @@ const FilterValueInput = ({ rule, onChange }: any) => {
                     </div>
                     {numberOfInputs === null && (
                         <div className="flex align-items-center">
-                            <Button type="button" text severity='secondary' icon="pi pi-plus" size='small' onClick={addInput} className='p-0 mr-2 target-btn' style={{ width: 30, minWidth: 30 }} />
-                            <Button type="button" text severity='secondary' icon="pi pi-trash" size='small' onClick={() => deleteInput(index)} className='p-0 target-btn' style={{ width: 30, minWidth: 30 }} disabled={values.length <= 1} />
+                            <SolidButton type="button" text severity='secondary' icon="si si-plus" size='sm' onClick={addInput} className='p-0 mr-2 target-btn' style={{ width: 30, minWidth: 30 }} />
+                            <SolidButton type="button" text severity='secondary' icon="si si-trash" size='sm' onClick={() => deleteInput(index)} className='p-0 target-btn' style={{ width: 30, minWidth: 30 }} disabled={values.length <= 1} />
                         </div>
                     )}
                 </div>
@@ -301,14 +295,14 @@ export const DashboardFilter: React.FC<DashboardFilterProps> = ({
     return (
 
 
-        <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={visible} style={{ width: '50vw' }} breakpoints={{ '1024px': '75vw', '991px': '90vw', '767px': '94w', '250px': '96vw' }} onHide={onHide}>
+        <SolidDialog showHeader={false} visible={visible} className="solid-global-search-filter solid-dialog-lg" onHide={onHide}>
             <div className="flex align-items-center justify-content-between px-3">
                 <h5 className="solid-custom-title m-0">Add Dashboard Filter</h5>
-                <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={onHide} />
+                <SolidButton icon="si si-times" rounded text aria-label="Cancel" type="reset" size="sm" onClick={onHide} />
             </div>
-            <Divider className="m-0" />
+            <SolidDivider className="m-0" />
             <div className="p-2 lg:p-2">
-                <Fieldset className='primary-filter-fieldset'>
+                <div className='primary-filter-fieldset'>
                     <div className="flex flex-column gap-3 py-3">
 
                         {rules.map((rule) => (
@@ -319,14 +313,12 @@ export const DashboardFilter: React.FC<DashboardFilterProps> = ({
                                     </div>
                                 </div>
                                 <div className="col-12 md:col-4 pr-2">
-                                    <Dropdown
+                                    <SolidSelect
                                         value={rule.matchMode}
                                         onChange={(e: any) => handleChange(rule.id, 'matchMode', e.value)}
                                         options={rule.variable.variableType === 'date' ? dateFilterMatchModeOptions : selectionFilterMatchModeOptions}
-                                        optionLabel='label'
-                                        optionValue='value'
                                         placeholder="Select Operator"
-                                        className="p-inputtext-sm w-full"
+                                        className="w-full"
                                     />
                                 </div>
                                 <div className="col-12 md:col-4">
@@ -338,19 +330,19 @@ export const DashboardFilter: React.FC<DashboardFilterProps> = ({
                             <div className="text-color-secondary italic">No variables available for this dashboard.</div>
                         )}
                     </div>
-                </Fieldset>
+                </div>
                 {/* <div className="flex justify-content-between align-items-center mt-4">
-                    <Button label="Clear Filters" icon="pi pi-filter-slash" severity="danger" text onClick={handleClear} />
+                    <Button label="Clear Filters" icon="si si-filter-slash" severity="danger" text onClick={handleClear} />
                     <div className="flex gap-2">
                     </div>
                 </div> */}
                 <div className='flex gap-3 mt-3'>
-                    <Button label="Apply" size="small" onClick={handleApply} autoFocus />
-                    <Button type='button' label='Cancel' outlined size='small' onClick={onHide} />
+                    <SolidButton label="Apply" size="sm" onClick={handleApply} autoFocus />
+                    <SolidButton type='button' label='Cancel' outlined size='sm' onClick={onHide} />
                 </div>
 
             </div>
-        </Dialog>
+        </SolidDialog>
 
     );
 };

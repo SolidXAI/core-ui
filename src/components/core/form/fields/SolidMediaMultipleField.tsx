@@ -2,21 +2,31 @@
 import { DropzonePlaceholder } from "../../../../components/common/DropzonePlaceholder";
 import { DropzoneUpload } from "../../../../components/common/DropzoneUpload";
 import { useDeleteMediaMutation } from "../../../../redux/api/mediaApi";
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
-import { Message } from "primereact/message";
+import { SolidButton } from "../../../shad-cn-ui/SolidButton";
+import {
+  SolidDialog,
+  SolidDialogBody,
+  SolidDialogClose,
+  SolidDialogFooter,
+  SolidDialogHeader,
+  SolidDialogSeparator,
+  SolidDialogTitle,
+} from "../../../shad-cn-ui/SolidDialog";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
+import { SolidProgressBar } from "../../../shad-cn-ui/SolidProgressBar";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { FileReaderExt } from "../../../../components/common/FileReaderExt";
-import { ProgressBar } from "primereact/progressbar";
 import getAcceptedFileTypes from "../../../../helpers/getAcceptedFileTypes";
 import { downloadMediaFile } from "../../../../helpers/downloadMediaFile";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps, SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import styles from "./solidFields.module.css";
+import { SolidIcon } from "../../../shad-cn-ui";
 export class SolidMediaMultipleField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
@@ -158,6 +168,12 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const readOnlyPermission = fieldContext.readOnly ? fieldContext.readOnly : fieldLayoutInfo.attrs.readonly;
+    const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
+    const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
+    const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
+    const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+    const isFieldDisabled = formDisabled || fieldDisabled;
+    const isFieldReadonly = formReadonly || fieldReadonly || readOnlyPermission;
 
     const [isDeleteImageDialogVisible, setDeleteImageDialogVisible] = useState(false);
     const [imageToBeDeletedData, setImageToBeDeletedData] = useState<any>();
@@ -318,9 +334,9 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
 
     return (
         <div style={readOnlyPermission === true ? { filter: 'opacity(50%)', pointerEvents: 'none' } : {}}>
-            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4 relative">
+            <div className={`${styles.fieldWrapper} relative`}>
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
@@ -339,13 +355,13 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                     </div>
                     {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                         <div className="absolute mt-1">
-                            <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                            <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                         </div>
                     )}
                 </div>
                 {
                     fileSizeError &&
-                    <Message severity="error" text={fileSizeError?.toString()} />
+                    <SolidMessage severity="error" text={fileSizeError?.toString()} />
                 }
             </div>
             {fileDetails.length > 0 &&
@@ -353,39 +369,29 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                     <div className="flex align-items-center md:gap-2">
                         <FileReaderExt fileDetails={fileDetails[0]} />
                         <div className="w-full flex flex-column gap-1">
-                            <div className="flex align-items-center justify-content-between">
-                                <p className="font-normal w-9 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails[0])}>{fileDetails[0].name}</p>
-                                <div className="flex align-items-center md:gap-2">
-                                    <div>
-                                        <Button
+                                <div className="flex align-items-center justify-content-between">
+                                    <p className="font-normal w-9 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails[0])}>{fileDetails[0].name}</p>
+                                    <div className="flex align-items-center gap-2">
+                                        <button
                                             type="button"
-                                            text
-                                            icon={"pi pi-download"}
-                                            size="small"
-                                            style={{
-                                                height: 16,
-                                                width: 16
-                                            }}
+                                            className="solid-file-icon-btn"
+                                            disabled={isFieldDisabled || isFieldReadonly}
+                                            aria-label="Download file"
                                             onClick={() => downloadMediaFile(fileDetails[0]?.fileUrl, fileDetails[0]?.name)}
-                                        />
-                                    </div>
-                                    <div>
-                                        <Button
+                                        >
+                                            <SolidIcon name="si-download" aria-hidden />
+                                        </button>
+                                        <button
                                             type="button"
-                                            text
-                                            icon={"pi pi-times"}
-                                            size="small"
-                                            severity="secondary"
-                                            // className="p-2"
-                                            style={{
-                                                height: 16,
-                                                width: 16
-                                            }}
+                                            className="solid-file-icon-btn is-danger"
+                                            disabled={isFieldDisabled || isFieldReadonly}
+                                            aria-label="Remove file"
                                             onClick={() => confirmDeleteFile(`${fileDetails[0].name}-${fileDetails[0].size}`, fileDetails[0].id)}
-                                        />
+                                        >
+                                            <SolidIcon name="si-times" aria-hidden />
+                                        </button>
                                     </div>
                                 </div>
-                            </div>
                             <div className="flex align-items-center gap-2 text-sm">
                                 {formatFileSize(fileDetails[0].size)}
                             </div>
@@ -400,15 +406,14 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                         {fileDetails.length - 1} items
                     </p>
                     <div>
-                        <Button type="button" size="small" text label="View" onClick={() => setShowAllFiles(true)} />
+                        <SolidButton type="button" size="small" text label="View" onClick={() => setShowAllFiles(true)} />
                     </div>
                 </div>
             }
 
-            <Dialog
+            <SolidDialog
                 visible={isShowAllFiles}
                 header="Items Uploaded"
-                modal
                 onHide={() => setShowAllFiles(false)}
                 style={{ minWidth: 450 }}
             >
@@ -422,35 +427,25 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                                     <div className="w-full flex flex-column gap-1">
                                         <div className="flex align-items-center justify-content-between">
                                             <p className="font-normal w-11 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(file)}>{file.name}</p>
-                                            <div className="flex align-items-center md:gap-2">
-                                                <div>
-                                                    <Button
-                                                        type="button"
-                                                        text
-                                                        icon={"pi pi-download"}
-                                                        size="small"
-                                                        style={{
-                                                            height: 16,
-                                                            width: 16
-                                                        }}
-                                                        onClick={() => downloadMediaFile(file?.fileUrl, file?.name)}
-                                                    />
-                                                </div>
-                                                <div>
-                                                    <Button
-                                                        type="button"
-                                                        text
-                                                        icon={"pi pi-times"}
-                                                        size="small"
-                                                        severity="secondary"
-                                                        // className="p-2"
-                                                        style={{
-                                                            height: 16,
-                                                            width: 16
-                                                        }}
-                                                        onClick={() => confirmDeleteFile(fileId, file?.id)}
-                                                    />
-                                                </div>
+                                            <div className="flex align-items-center gap-2">
+                                                <button
+                                                    type="button"
+                                                    className="solid-file-icon-btn"
+                                                    disabled={isFieldDisabled || isFieldReadonly}
+                                                    aria-label="Download file"
+                                                    onClick={() => downloadMediaFile(file?.fileUrl, file?.name)}
+                                                >
+                                                    <SolidIcon name="si-download" aria-hidden />
+                                                </button>
+                                                <button
+                                                    type="button"
+                                                    className="solid-file-icon-btn is-danger"
+                                                    disabled={isFieldDisabled || isFieldReadonly}
+                                                    aria-label="Remove file"
+                                                    onClick={() => confirmDeleteFile(fileId, file?.id)}
+                                                >
+                                                    <SolidIcon name="si-times" aria-hidden />
+                                                </button>
                                             </div>
                                         </div>
                                         <div className="flex align-items-center gap-2 text-sm">
@@ -462,22 +457,29 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                         );
                     })
                 }
-            </Dialog>
-            <Dialog
-                visible={isDeleteImageDialogVisible}
-                header="Confirm Delete"
-                modal
-                className="solid-confirm-dialog"
-                footer={() => (
-                    <div className="flex justify-content-center">
-                        <Button type="button" label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteFile} />
-                        <Button type="button" label="No" icon="pi pi-times" className='small-button' onClick={() => setDeleteImageDialogVisible(false)} />
-                    </div>
-                )}
-                onHide={() => setDeleteImageDialogVisible(false)}
+            </SolidDialog>
+            <SolidDialog
+                open={isDeleteImageDialogVisible}
+                onOpenChange={setDeleteImageDialogVisible}
+                className="solid-shadcn-confirm-dialog"
             >
-                <p>Are you sure you want to delete image?</p>
-            </Dialog>
+                <SolidDialogHeader className="solid-shadcn-dialog-head">
+                    <SolidDialogTitle>Confirm Delete</SolidDialogTitle>
+                    <SolidDialogClose />
+                </SolidDialogHeader>
+                <SolidDialogSeparator className="solid-shadcn-dialog-sep" />
+                <SolidDialogBody className="solid-shadcn-dialog-body">
+                    <p className="solid-shadcn-dialog-text">Are you sure you want to delete this file?</p>
+                </SolidDialogBody>
+                <SolidDialogFooter className="solid-shadcn-dialog-actions">
+                    <SolidButton variant="destructive" size="sm" autoFocus onClick={deleteFile}>
+                        Delete
+                    </SolidButton>
+                    <SolidButton variant="outline" size="sm" onClick={() => setDeleteImageDialogVisible(false)}>
+                        Cancel
+                    </SolidButton>
+                </SolidDialogFooter>
+            </SolidDialog>
         </div>
     );
 }
@@ -565,11 +567,12 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
     }
 
     return (
-        <div>
+        <div className={styles.fieldViewWrapper}>
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label mt-4 font-medium">{fieldLabel}
+                <p className={`${styles.fieldViewLabel} form-field-label`}>
+                    {fieldLabel}
                     <SolidFieldTooltip fieldContext={fieldContext} />
-                </label>
+                </p>
             }
             {fileDetails.length > 0 &&
                 <div className="solid-file-view-wrapper">
@@ -580,10 +583,10 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                                 <p className="font-normal w-11 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails[0])}>{fileDetails[0].name}</p>
                                 <div className="flex align-items-center md:gap-2">
                                     <div>
-                                        <Button
+                                        <SolidButton
                                             type="button"
                                             text
-                                            icon={"pi pi-download"}
+                                            icon="si si-download"
                                             size="small"
                                             style={{
                                                 height: 16,
@@ -608,15 +611,14 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                         {fileDetails.length - 1} items
                     </p>
                     <div>
-                        <Button type="button" size="small" text label="View" onClick={() => setShowAllFiles(true)} />
+                        <SolidButton type="button" size="small" text label="View" onClick={() => setShowAllFiles(true)} />
                     </div>
                 </div>
             }
 
-            <Dialog
+            <SolidDialog
                 visible={isShowAllFiles}
                 header="Items Uploaded"
-                modal
                 onHide={() => setShowAllFiles(false)}
                 style={{ minWidth: 450 }}
             >
@@ -632,10 +634,10 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                                             <p className="font-normal w-11 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(file)}>{file.name}</p>
                                             <div className="flex align-items-center md:gap-2">
                                                 <div>
-                                                    <Button
+                                                    <SolidButton
                                                         type="button"
                                                         text
-                                                        icon={"pi pi-download"}
+                                                        icon="si si-download"
                                                         size="small"
                                                         style={{
                                                             height: 16,
@@ -655,7 +657,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                         );
                     })
                 }
-            </Dialog>
+            </SolidDialog>
 
         </div>
     );

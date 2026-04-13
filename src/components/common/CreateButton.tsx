@@ -2,7 +2,7 @@
 
 import { usePathname } from "../../hooks/usePathname";
 import { useRouter } from "../../hooks/useRouter";
-import { Button } from 'primereact/button';
+import { SolidButton } from "../shad-cn-ui";
 
 export const CreateButton = () => {
     const router = useRouter();
@@ -12,7 +12,13 @@ export const CreateButton = () => {
 
     return (
         <div>
-            <Button type="button" label="Add" size='small' onClick={() => router.push(createPAth)} className='small-button' />
+            <SolidButton
+                type="button"
+                label="Add"
+                size='small'
+                onClick={() => router.push(createPAth)}
+                className='small-button'
+            />
         </div>
     )
 }

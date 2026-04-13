@@ -1,0 +1,268 @@
+import { permissionExpression } from "../../../helpers/permissions";
+import { usePathname } from "../../../hooks/usePathname";
+import { useRouter } from "../../../hooks/useRouter";
+import { useSearchParams } from "../../../hooks/useSearchParams";
+import { useEffect, useState } from "react";
+import { SolidExport } from "../../../components/common/SolidExport";
+import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImport";
+import {
+  SolidDialog,
+  SolidDialogBody,
+  SolidDialogClose,
+  SolidDialogDescription,
+  SolidDialogHeader,
+  SolidDialogSeparator,
+  SolidDialogTitle,
+  SolidDropdownMenu,
+  SolidDropdownMenuContent,
+  SolidDropdownMenuItem,
+  SolidDropdownMenuLabel,
+  SolidDropdownMenuRadioGroup,
+  SolidDropdownMenuRadioItem,
+  SolidDropdownMenuSeparator,
+  SolidDropdownMenuSub,
+  SolidDropdownMenuSubContent,
+  SolidDropdownMenuSubTrigger,
+  SolidDropdownMenuTrigger,
+  SolidIcon,
+} from "../../shad-cn-ui";
+
+const normalizeViewModes = (viewModes: any[] = []) => {
+  return viewModes
+    .map((option: any) => {
+      if (!option) return null;
+
+      if (typeof option === "string") {
+        return {
+          type: option,
+          label: option.charAt(0).toUpperCase() + option.slice(1),
+        };
+      }
+
+      const type = option.type || option.value;
+      if (!type) return null;
+
+      return {
+        ...option,
+        type,
+        label: option.label || (type.charAt(0).toUpperCase() + type.slice(1)),
+      };
+    })
+    .filter(Boolean);
+};
+
+export const SolidCardViewConfigure = ({
+  solidCardViewMetaData,
+  modelName,
+  actionsAllowed,
+  viewModes,
+  setLayoutDialogVisible,
+  setShowSaveFilterPopup,
+  filters,
+  handleRefreshView,
+}: any) => {
+  const pathname = usePathname();
+  const router = useRouter();
+  const searchParams = useSearchParams();
+  const [view, setView] = useState<string>("");
+  const [isCogMenuOpen, setIsCogMenuOpen] = useState(false);
+  const [openImportDialog, setOpenImportDialog] = useState(false);
+  const [exportView, setExportView] = useState(false);
+
+  const visibleViewModes = normalizeViewModes(Array.isArray(viewModes) ? viewModes : []);
+  const showSwitchType = visibleViewModes.length > 1;
+
+  useEffect(() => {
+    if (typeof pathname === "string") {
+      const pathSegments = pathname.split("/").filter(Boolean);
+      if (pathSegments.length > 0) {
+        setView(pathSegments[pathSegments.length - 1]);
+      }
+    }
+  }, [pathname]);
+
+  const handleViewChange = (newViewType: string) => {
+    if (view === newViewType) return;
+
+    const nextView = visibleViewModes.find((option: any) => option.type === newViewType);
+    const pathSegments = pathname.split("/").filter(Boolean);
+    pathSegments[pathSegments.length - 1] = newViewType;
+    const nextSearchParams = new URLSearchParams(searchParams.toString());
+    const currentQuery = {
+      menuItemId: searchParams.get("menuItemId"),
+      menuItemName: searchParams.get("menuItemName"),
+      actionId: searchParams.get("actionId"),
+      actionName: searchParams.get("actionName"),
+    };
+
+    const queryFields = {
+      menuItemId: nextView?.menuItemId ?? currentQuery.menuItemId,
+      menuItemName: nextView?.menuItemName ?? currentQuery.menuItemName,
+      actionId: nextView?.actionId ?? currentQuery.actionId,
+      actionName: nextView?.actionName ?? currentQuery.actionName,
+    };
+
+    Object.entries(queryFields).forEach(([key, value]) => {
+      if (value) {
+        nextSearchParams.set(key, value);
+      } else {
+        nextSearchParams.delete(key);
+      }
+    });
+
+    const newPath = "/" + pathSegments.join("/");
+    const nextQueryString = nextSearchParams.toString();
+    router.push(nextQueryString ? `${newPath}?${nextQueryString}` : newPath);
+  };
+
+  const clearLocalstorageCache = () => {
+    const currentPageUrl = window.location.pathname;
+    localStorage.removeItem(currentPageUrl);
+    window.location.reload();
+  };
+
+  const canImport =
+    Boolean(modelName) &&
+    actionsAllowed.includes(`${permissionExpression(modelName, "create")}`) &&
+    actionsAllowed.includes(`${permissionExpression("importTransaction", "create")}`);
+
+  const canExport =
+    Boolean(modelName) &&
+    actionsAllowed.includes(`${permissionExpression(modelName, "findMany")}`) &&
+    actionsAllowed.includes(`${permissionExpression("exportTransaction", "create")}`);
+
+  const canCustomizeLayout = actionsAllowed.includes(`${permissionExpression("userViewMetadata", "create")}`);
+  const canSaveCustomFilter = actionsAllowed.includes(`${permissionExpression("savedFilters", "create")}`);
+
+  return (
+    <div className="position-relative">
+      <SolidDropdownMenu open={isCogMenuOpen} onOpenChange={setIsCogMenuOpen}>
+        <SolidDropdownMenuTrigger asChild>
+          <button
+            type="button"
+            className="solid-icon-button solid-header-cog-trigger"
+            aria-label="Open card options"
+          >
+            <SolidIcon name="si-cog" aria-hidden />
+          </button>
+        </SolidDropdownMenuTrigger>
+        <SolidDropdownMenuContent className="listview-cogwheel-panel">
+          {canImport && (
+            <SolidDropdownMenuItem
+              className="solid-header-dropdown-item"
+              onSelect={() => {
+                setOpenImportDialog(true);
+                setIsCogMenuOpen(false);
+              }}
+            >
+              <SolidIcon name="si-download" className="solid-header-action-button-icon" aria-hidden />
+              <span className="solid-header-action-button-label">Import</span>
+            </SolidDropdownMenuItem>
+          )}
+
+          {canExport && (
+            <SolidDropdownMenuItem
+              className="solid-header-dropdown-item"
+              onSelect={() => {
+                setExportView(true);
+                setIsCogMenuOpen(false);
+              }}
+            >
+              <SolidIcon name="si-upload" className="solid-header-action-button-icon" aria-hidden />
+              <span className="solid-header-action-button-label">Export</span>
+            </SolidDropdownMenuItem>
+          )}
+
+          {(canCustomizeLayout || canSaveCustomFilter) && <SolidDropdownMenuSeparator />}
+
+          {canCustomizeLayout && (
+            <SolidDropdownMenuSub>
+              <SolidDropdownMenuSubTrigger className="solid-header-dropdown-item">
+                <SolidIcon name="si-sliders-h" className="solid-header-action-button-icon" aria-hidden />
+                <span className="solid-header-action-button-label">Customize Layout</span>
+              </SolidDropdownMenuSubTrigger>
+              <SolidDropdownMenuSubContent className="customize-layout-panel">
+                {showSwitchType && (
+                  <>
+                    <SolidDropdownMenuLabel>Switch Type</SolidDropdownMenuLabel>
+                    <SolidDropdownMenuRadioGroup value={view} onValueChange={handleViewChange}>
+                      {visibleViewModes.map((option: any) => (
+                        <SolidDropdownMenuRadioItem key={option.type} value={option.type}>
+                          {option.label}
+                        </SolidDropdownMenuRadioItem>
+                      ))}
+                    </SolidDropdownMenuRadioGroup>
+                    <SolidDropdownMenuSeparator />
+                  </>
+                )}
+                <SolidDropdownMenuItem
+                  onSelect={() => {
+                    setLayoutDialogVisible(true);
+                    setIsCogMenuOpen(false);
+                  }}
+                >
+                  <SolidIcon name="si-code" className="solid-header-action-button-icon" aria-hidden />
+                  <span className="solid-header-action-button-label">Layout Editor</span>
+                </SolidDropdownMenuItem>
+              </SolidDropdownMenuSubContent>
+            </SolidDropdownMenuSub>
+          )}
+
+          {canSaveCustomFilter && (
+            <SolidDropdownMenuItem
+              className="solid-header-dropdown-item"
+              onSelect={() => {
+                setShowSaveFilterPopup(true);
+                setIsCogMenuOpen(false);
+              }}
+            >
+              <SolidIcon name="si-save" className="solid-header-action-button-icon" aria-hidden />
+              <span className="solid-header-action-button-label">Save Custom Filter</span>
+            </SolidDropdownMenuItem>
+          )}
+
+          <SolidDropdownMenuItem
+            className="solid-header-dropdown-item"
+            onSelect={() => {
+              clearLocalstorageCache();
+              setIsCogMenuOpen(false);
+            }}
+          >
+            <SolidIcon name="si-trash" className="solid-header-action-button-icon" aria-hidden />
+            <span className="solid-header-action-button-label">Clear cache</span>
+          </SolidDropdownMenuItem>
+        </SolidDropdownMenuContent>
+      </SolidDropdownMenu>
+
+      <SolidDialog
+        open={exportView}
+        onOpenChange={setExportView}
+        className="solid-kanban-export-dialog"
+        style={{ width: "min(960px, calc(100vw - 32px))" }}
+      >
+        <SolidDialogHeader className="solid-export-dialog-header">
+          <div>
+            <SolidDialogTitle>Export</SolidDialogTitle>
+            <SolidDialogDescription className="solid-filter-dialog-subtitle m-0">
+              Choose the file format, refine the field set, and save reusable export templates.
+            </SolidDialogDescription>
+          </div>
+          <SolidDialogClose />
+        </SolidDialogHeader>
+        <SolidDialogSeparator />
+        <SolidDialogBody className="solid-kanban-export-dialog-body">
+          <SolidExport listViewMetaData={solidCardViewMetaData} filters={filters} />
+        </SolidDialogBody>
+      </SolidDialog>
+
+      {openImportDialog && (
+        <SolidGenericImport
+          openImportDialog={openImportDialog}
+          setOpenImportDialog={setOpenImportDialog}
+          listViewMetaData={solidCardViewMetaData}
+          handleFetchUpdatedRecords={handleRefreshView}
+        />
+      )}
+    </div>
+  );
+};

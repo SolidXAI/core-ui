@@ -1,0 +1,11 @@
+{
+  "permissions": {
+    "allow": [
+      "Read(//opt/gitco/solid-starter/mswipe-nbf-app/**)",
+      "Bash(grep -rn \"SolidTabGroup\\\\|tab.*param\\\\|query.*tab\" /opt/gitco/solid-starter/mswipe-nbf-app/solid-ui/src --include=*.tsx)"
+    ],
+    "additionalDirectories": [
+      "/opt/gitco/solid-starter/mswipe-nbf-app/solid-ui/src"
+    ]
+  }
+}

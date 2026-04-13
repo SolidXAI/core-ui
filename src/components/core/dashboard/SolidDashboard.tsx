@@ -1,24 +1,19 @@
-
 import { DashboardResponse, useGetDashboardQuery } from '../../../redux/api/dashboardApi';
 import { SqlExpression } from '../../../types/solid-core';
-import { Button } from 'primereact/button';
-import { Tooltip } from "primereact/tooltip";
+import { SolidButton, SolidIcon, SolidTooltip, SolidTooltipContent, SolidTooltipTrigger } from '../../shad-cn-ui';
 import qs from 'qs';
-import { Dispatch, SetStateAction, useEffect, useRef, useState } from 'react';
-import { SolidXAIIcon } from '../solid-ai/SolidXAIIcon';
+import { Dispatch, SetStateAction, useEffect, useState } from 'react';
 import styles from './SolidDashboard.module.css';
 import SolidDashboardBody, { GridItem } from './SolidDashboardBody';
 import { DashboardFilter } from './DashboardFilter';
-import { SolidAiMainWrapper } from '../solid-ai/SolidAiMainWrapper';
+// import { SolidAiMainWrapper } from '../solid-ai/SolidAiMainWrapper'; // moved to SolidX Studio panel
 import { SolidDashboardFilterRequired } from './SolidDashboardFilterRequired';
 import { SolidDashboardLoading } from './SolidDashboardLoading';
 import { SolidDashboardRenderError } from './SolidDashboardRenderError';
 import { useDispatch, useSelector } from "react-redux";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import SolidDashboardNotAvailable from './SolidDashboardNotAvailable';
-import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from '../../../redux/api/solidSettingsApi';
-import showToast from '../../../helpers/showToast';
-import { Toast } from "primereact/toast";
+import { showToast } from '../../../redux/features/toastSlice';
 import { ERROR_MESSAGES } from '../../../constants/error-messages';
 import { useUpsertUserDashboardLayoutMutation } from '../../../redux/api/dashboardLayoutApi';
 
@@ -133,19 +128,14 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
   // TODO [HP]: replace dashboardVariableFilterRules with filters everywhere...
   // const [dashboardVariableFilterRules, setDashboardVariableFilterRules] = useState<ISolidDashboardVariableFilterRule[]>([]);
   const dispatch = useDispatch();
-  const toast = useRef<Toast>(null);
 
   const visibleNavbar = useSelector((state: any) => state.navbarState?.visibleNavbar);
   const [filters, setFilters] = useState<SqlExpression[]>([]);
-  const [isOpenSolidXAiPanel, setIsOpenSolidXAiPanel] = useState(false);
-  const [chatterWidth, setChatterWidth] = useState(380);
-  const [isResizing, setIsResizing] = useState(false);
   const [questions, setQuestions] = useState<any[]>([]);
   const [dashboardVariables, setDashboardVariables] = useState<DashboardVariableRecord[]>([]);
   const [isDashboardFilterVisible, setIsDashboardFilterVisible] = useState(false);
 
-
-  const [upsertDashboardLayout, { isLoading: isDashboardLayoutLoading, error: dashboardLayoutError, isSuccess: isDashboardLayoutSuccess, data: dashboardLayoutData }] = useUpsertUserDashboardLayoutMutation();
+  const [upsertDashboardLayout] = useUpsertUserDashboardLayoutMutation();
 
   const [dashboardLayout, setDashboardLayout] = useState<GridItem[]>([]);
 
@@ -156,13 +146,12 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
         layout: JSON.stringify(dashboardLayout),
       }).unwrap();
       if (response.statusCode === 200) {
-        showToast(toast, "success", ERROR_MESSAGES.LAYOUT, ERROR_MESSAGES.DASHBOARD_LAYOUT_UPDATE_SUCCESSFULLY);
+        dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LAYOUT, detail: ERROR_MESSAGES.DASHBOARD_LAYOUT_UPDATE_SUCCESSFULLY }));
       }
     } catch (error) {
-      showToast(toast, "error", ERROR_MESSAGES.LAYOUT, ERROR_MESSAGES.DASHBOARD_LAYOUT_UPDATE_FAILED);
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.LAYOUT, detail: ERROR_MESSAGES.DASHBOARD_LAYOUT_UPDATE_FAILED }));
     }
   }
-
 
   useEffect(() => {
     // Invoke the dashboard api to fetch the dashboard data
@@ -172,57 +161,6 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
       handleDashboardData(data, setDashboardVariables, setQuestions);
     }
   }, [isLoading, data]);
-
-  useEffect(() => {
-    const storedOpen = localStorage.getItem('d_solidxai_open');
-    const storedWidth = localStorage.getItem('d_solidxai_width');
-
-    if (storedOpen !== null) {
-      setIsOpenSolidXAiPanel(storedOpen === 'true');
-    }
-
-    if (storedWidth !== null) {
-      const width = parseInt(storedWidth, 10);
-      if (!isNaN(width)) {
-        setChatterWidth(width);
-      }
-    }
-  }, []);
-
-
-  useEffect(() => {
-    if (isResizing) {
-      const handleMouseMove = (e: MouseEvent) => {
-        const newWidth = window.innerWidth - e.clientX;
-        const clampedWidth = Math.max(280, Math.min(newWidth, 700));
-        setChatterWidth(clampedWidth);
-        localStorage.setItem('d_solidxai_width', clampedWidth.toString());
-      };
-
-      const handleMouseUp = () => {
-        setIsResizing(false);
-      };
-
-      window.addEventListener('mousemove', handleMouseMove);
-      window.addEventListener('mouseup', handleMouseUp);
-
-      return () => {
-        window.removeEventListener('mousemove', handleMouseMove);
-        window.removeEventListener('mouseup', handleMouseUp);
-      };
-    }
-  }, [isResizing]);
-
-
-  const handleOpen = () => {
-    setIsOpenSolidXAiPanel(true);
-    localStorage.setItem('d_solidxai_open', 'true');
-  };
-
-  const handleClose = () => {
-    setIsOpenSolidXAiPanel(false);
-    localStorage.setItem('d_solidxai_open', 'false');
-  };
 
   const toggleBothSidebars = () => {
     if (visibleNavbar) {
@@ -234,41 +172,8 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
 
 
 
-  const [mcpUrl, setMcpUrl] = useState<string | null>(null);
-  const [getMcpUrl] = useLazyGetMcpUrlQuery();
-
-  const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
-  useEffect(() => {
-    trigger("") // Fetch settings on mount
-  }, [])
-
-  useEffect(() => {
-    if (solidSettingsData?.data?.mcpEnabled && solidSettingsData?.data?.mcpServerUrl) {
-      enableSolidXAiPanel();
-    }
-  }, [solidSettingsData]);
-
-  const enableSolidXAiPanel = async () => {
-    try {
-      const queryData = {
-        showHeader: "true",
-        inListView: "true"
-      };
-      const queryString = qs.stringify({ ...queryData }, { encodeValuesOnly: true });
-      const response = await getMcpUrl(queryString).unwrap();
-      console.log("response", response);
-      if (response && response?.data?.mcpUrl) {
-        setMcpUrl(response?.data?.mcpUrl);
-      }
-    } catch (error) {
-
-    }
-  }
-
-
   return (
     <div className={`h-screen surface-0 flex`}>
-      <Toast ref={toast} />
 
       <div className={`h-full flex-grow-1 ${styles.SolidDashboardPageContentWrapper}`}>
         {isLoading && <SolidDashboardLoading />}
@@ -281,58 +186,56 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
             <div className="page-header" style={{ borderBottom: '1px solid var(--primary-light-color)' }}>
               <div className='flex align-items-center gap-2'>
                 <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
-                  <i className="pi pi-th-large"></i>
+                  <SolidIcon name="si-th-large" aria-hidden />
                 </div>
                 <p className={`view-title solid-text-wrapper flex align-items-center gap-1 ${styles.SolidDashboardTitle}`}>
                   {data?.records[0]?.displayName ? data?.records[0]?.displayName : data?.records[0]?.name}
-                  {data?.records[0]?.description &&
-                    <>
-                      <Tooltip className='solid-field-tooltip' target=".solid-field-tooltip-icon" />
-                      <i className="pi pi-info-circle solid-field-tooltip-icon"
-                        data-pr-tooltip={data?.records[0]?.description}
-                        data-pr-position={'right'}
-                      />
-                    </>
-                  }
+                  {data?.records[0]?.description && (
+                    <SolidTooltip>
+                      <SolidTooltipTrigger asChild>
+                        <SolidIcon name="si-info-circle" className="solid-field-tooltip-icon" aria-hidden />
+                      </SolidTooltipTrigger>
+                      <SolidTooltipContent side="right">{data?.records[0]?.description}</SolidTooltipContent>
+                    </SolidTooltip>
+                  )}
                 </p>
               </div>
               {dashboardVariables && dashboardVariables.length > 0 && (
                 <>
                   <div className='flex gap-2'>
-                    <a onClick={() => setIsDashboardFilterVisible(true)}>
-                      <>
-                        <Button
-                          type="button"
-                          icon={filters.length > 0 ? "pi pi-filter-fill" : "pi pi-filter"}
-                          className={`p-button-sm lg:hidden solid-icon-button `}
-                          size='small'
-                        />
+                    <SolidButton
+                      type="button"
+                      icon={filters.length > 0 ? "si si-filter-fill" : "si si-filter"}
+                      className="lg:hidden solid-icon-button"
+                      size='sm'
+                      variant='secondary'
+                      onClick={() => setIsDashboardFilterVisible(true)}
+                    />
 
-                        <Button
-                          type="button"
-                          icon={filters.length > 0 ? "pi pi-filter-fill" : "pi pi-filter"}
-                          label={"Filter"}
-                          className={`hidden lg:inline-flex`}
-                          size='small'
-
-                        />
-                      </>
-                    </a>
+                    <SolidButton
+                      type="button"
+                      icon={filters.length > 0 ? "si si-filter-fill" : "si si-filter"}
+                      label={"Filter"}
+                      className="hidden lg:inline-flex"
+                      size='sm'
+                      variant='secondary'
+                      onClick={() => setIsDashboardFilterVisible(true)}
+                    />
                     {filters.length > 0 && (
-                      <Button
+                      <SolidButton
                         type="button"
-                        size="small"
-                        icon="pi pi-filter-slash"
+                        size="sm"
+                        icon="si si-filter-slash"
                         severity="secondary"
                         className="solid-icon-button "
                         outlined
                         onClick={() => { setFilters([]); setIsDashboardFilterVisible(false); }}
                       />
                     )}
-                    <Button
+                    <SolidButton
                       type="button"
-                      size="small"
-                      icon="pi pi-save"
+                      size="sm"
+                      icon="si si-save"
                       severity="secondary"
                       className="solid-icon-button "
                       outlined
@@ -353,56 +256,7 @@ const SolidDashboard = (params: SolidDashboardViewProps) => {
           </>
         )}
       </div>
-      {
-        mcpUrl && (
-          <div className={`chatter-section ${isOpenSolidXAiPanel === false ? 'collapsed' : 'open'}`} style={{ width: chatterWidth }}>
-            {isOpenSolidXAiPanel && (
-              <div
-                style={{
-                  width: 5,
-                  cursor: 'col-resize',
-                  position: 'absolute',
-                  left: 0,
-                  top: 0,
-                  bottom: 0,
-                  height: '100%',
-                  zIndex: 9,
-                }}
-                onMouseDown={() => setIsResizing(true)}
-              />
-            )}
-            {isOpenSolidXAiPanel &&
-              <Button
-                icon="pi pi-angle-double-right"
-                size="small"
-                text
-                className="chatter-collapse-btn"
-                style={{ width: 30, height: 30, aspectRatio: '1/1' }}
-                onClick={handleClose}
-              />
-            }
-
-            {isOpenSolidXAiPanel === false ?
-              <div className="flex flex-column gap-2 justify-content-center p-2">
-                <div className="chatter-collapsed-content" onClick={handleOpen}>
-                  <div className="flex gap-2"> <SolidXAIIcon /> SolidX AI </div>
-                </div>
-                <Button
-                  icon="pi pi-chevron-left"
-                  size="small"
-                  className="px-0"
-                  style={{ width: 30 }}
-                  onClick={handleOpen}
-                />
-              </div>
-              :
-              <SolidAiMainWrapper mcpUrl={mcpUrl} />
-            }
-          </div>
-        )
-      }
-
-    </div >
+    </div>
   );
 }
 

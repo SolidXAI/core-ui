@@ -1,4 +1,12 @@
 import { Session } from "../adapters/auth";
+import type {
+    ExtensionComponentType,
+    ExtensionFunctionType,
+} from "./extension-registry";
+export type {
+    ExtensionComponentType,
+    ExtensionFunctionType,
+} from "./extension-registry";
 
 // Base type of all Solid entities
 export type CommonEntity = {
@@ -74,6 +82,7 @@ export type LayoutAttribute = {
     visible?: boolean;
     editWidget?: string;
     viewWidget?: string;
+    cardWidget?: string;
     showLabel?: boolean;
     inlineListLayout?: any;
     inlineCreateLayout?: any;
@@ -93,7 +102,7 @@ export type LayoutAttribute = {
 };
 
 // Generic representation of any node in our layout 
-export type LayoutNodeType = "form" | "sheet" | "notebook" | "page" | "row" | "column" | "field" | "div" | "p" | "span" | "h1" | "h2" | "h3" | "list" | "custom";
+export type LayoutNodeType = "form" | "sheet" | "notebook" | "page" | "row" | "column" | "field" | "div" | "p" | "span" | "h1" | "h2" | "h3" | "list" | "custom" | "kanban" | "card" | "image";
 export type LayoutNode = {
     body?: string;
     type: LayoutNodeType;
@@ -108,31 +117,7 @@ export type ListLayoutType = {
 };
 
 // Event type
-export type SolidUiEvents =
-    // Implemented
-    "onFieldChange" |
-    // Implemented
-    "onFieldBlur" |
-    // Implemented
-    "onFormDataLoad" |
-    // Implemented
-    "onFormLayoutLoad" |
-    // Implemented
-    "onFormLoad" |
-    // Implemented
-    "onListLoad" |
-    // Implemented
-    "onBeforeTreeDataLoad" |
-    // Implemented
-    "onTreeLoad" |
-    // Implemented
-    "onBeforeListDataLoad" |
-    // Not Implemented
-    "afterLogin" |
-    // Not Implemented
-    "beforeLogout" |
-    // Implemented
-    "onApplicationMount";
+export type SolidUiEvents = ExtensionFunctionType;
 export type SolidUiEvent = {
     type: SolidUiEvents;
     modifiedField?: string;
@@ -308,6 +293,23 @@ export type SolidListFieldWidgetProps = {
 export type SolidMediaListFieldWidgetProps = SolidListFieldWidgetProps & {
     setLightboxUrls?: any,
     setOpenLightbox?: any
+}
+
+export type SolidKanbanCardWidgetProps = {
+    rowData: any;
+    solidKanbanViewMetaData: any;
+    solidView: SolidView;
+    solidFieldsMetadata: FieldsMetadata;
+    card: any;
+    layoutAttrs: Record<string, any>;
+    groupedView: boolean;
+    groupByFieldName?: string;
+    group?: any;
+    editButtonUrl?: string;
+    setLightboxUrls?: any;
+    setOpenLightbox?: any;
+    openRecord: () => void;
+    openEdit: () => void;
 }
 
 export type SolidMediaFormFieldWidgetProps = SolidFormFieldWidgetProps & {

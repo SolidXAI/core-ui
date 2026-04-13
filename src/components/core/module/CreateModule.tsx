@@ -1,9 +1,5 @@
-import { BackButton } from "../../../components/common/BackButton";
-import { CancelButton } from "../../../components/common/CancelButton";
 import { DropzonePlaceholder } from "../../../components/common/DropzonePlaceholder";
 import { FileReaderExt } from "../../../components/common/FileReaderExt";
-import { SingleSelectAutoCompleteField } from "../../../components/common/SingleSelectAutoCompleteField";
-import { SolidFormHeader } from "../../../components/common/SolidFormHeader";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { getSingularAndPlural } from "../../../helpers/helpers";
 import { useGetFieldDefaultMetaDataQuery } from "../../../redux/api/fieldApi";
@@ -12,36 +8,34 @@ import { useCreatemoduleMutation, useDeletemoduleMutation, useUpdatemoduleMutati
 import { useFormik } from "formik";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
-import { Button } from "primereact/button";
-import { Divider } from "primereact/divider";
-import { InputText } from "primereact/inputtext";
-import { InputTextarea } from "primereact/inputtextarea";
-import { Message } from "primereact/message";
-import { OverlayPanel } from "primereact/overlaypanel";
-import { Panel } from "primereact/panel";
-import { ProgressBar } from "primereact/progressbar";
-import { classNames } from "primereact/utils";
-import React, { useEffect, useRef, useState } from "react";
+import React, { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import { showToast } from "../../../redux/features/toastSlice";
 import { useDropzone } from "react-dropzone";
 import * as Yup from "yup";
 import { env } from "../../../adapters/env";
+import styles from "../form/fields/solidFields.module.css";
+import {
+  SolidAutocomplete,
+  SolidButton,
+  SolidInput,
+  SolidMessage,
+  SolidPanel,
+  SolidPopover,
+  SolidPopoverContent,
+  SolidPopoverTrigger,
+  SolidProgressBar,
+  SolidTextarea,
+  SolidIcon,
+} from "../../shad-cn-ui";
+import { useSolidAutocompleteField } from "../../../hooks/useSolidAutocompleteField";
+import { Settings, Trash2 } from "lucide-react";
+import { SolidFormFooter } from "../form/SolidFormFooter";
 
-const footer = (
-  <>
-    <Divider />
-    <p className="mt-2">Suggestions</p>
-    <ul className="pl-2 ml-2 mt-0 line-height-3">
-      <li>At least one lowercase</li>
-      <li>At least one uppercase</li>
-      <li>At least one numeric</li>
-      <li>Minimum 8 characters</li>
-    </ul>
-  </>
-);
 
-const CreateModule = ({ data }: any) => {
+
+
+const CreateModule = ({ params, data }: any) => {
   const dispatch = useDispatch();
   const router = useRouter();
   const pathname = usePathname()
@@ -284,6 +278,15 @@ const CreateModule = ({ data }: any) => {
     }
   };
 
+  const defaultDataSourceField = useSolidAutocompleteField({
+    formik,
+    fieldName: "defaultDataSource",
+    labelKey: "label",
+    valueKey: "value",
+    searchData: serachDDefaultDataSource,
+    existingData: formik.values.defaultDataSource,
+  });
+
 
   // Error Handler 
 
@@ -307,291 +310,262 @@ const CreateModule = ({ data }: any) => {
     });
   }, [isError, isModuleUpdateError, isModuleDeleteError, isMediaDeleteError])
 
-  const op = useRef(null);
+  const [formActionsMenuOpen, setFormActionsMenuOpen] = useState(false);
 
-  const formActionDropdown = () => {
-    return (
-      <div>
-        <Button
-          outlined
-          severity="secondary"
+  const isCreateMode = pathname.includes('new');
+  const headerTitle = isCreateMode ? "Create Module" : "Edit Module";
+  const canShowActionsMenu = !isCreateMode && data?.isSystem !== true;
+
+  const handleCancel = () => {
+    router.back();
+  };
+
+  const formActionDropdown = () => (
+    <SolidPopover open={formActionsMenuOpen} onOpenChange={setFormActionsMenuOpen}>
+      <SolidPopoverTrigger asChild>
+        <SolidButton
+          variant="ghost"
+          size="sm"
+          className="solid-icon-button"
+          aria-label="Module actions"
+        >
+          <Settings size={16} />
+        </SolidButton>
+      </SolidPopoverTrigger>
+      <SolidPopoverContent
+        side="bottom"
+        align="end"
+        className="solid-form-actions-popover"
+        onClick={(event) => event.stopPropagation()}
+      >
+        <button
           type="button"
-          icon={'pi pi-cog'}
-          size="small"
-          className="surface-card p-0"
-          style={{
-            height: 33.06,
-            width: 33.06
+          className="solid-row-action-button solid-row-action-button-danger"
+          onClick={() => {
+            setFormActionsMenuOpen(false);
+            deteleAction();
           }}
-          onClick={(e) =>
-            // @ts-ignore 
-            op.current.toggle(e)
-          }
-        />
-        <OverlayPanel ref={op} className="solid-custom-overlay">
-          <div className="flex flex-column gap-1 p-1">
-            {/* <Button
-              text
-              type="button"
-              className="w-8rem text-left gap-2 text-color"
-              label="Duplicate"
-              size="small"
-              iconPos="left"
-              icon={<svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                <path d="M6 11.9997C5.63333 11.9997 5.31944 11.8691 5.05833 11.608C4.79722 11.3469 4.66667 11.033 4.66667 10.6663V2.66634C4.66667 2.29967 4.79722 1.98579 5.05833 1.72467C5.31944 1.46356 5.63333 1.33301 6 1.33301H12C12.3667 1.33301 12.6806 1.46356 12.9417 1.72467C13.2028 1.98579 13.3333 2.29967 13.3333 2.66634V10.6663C13.3333 11.033 13.2028 11.3469 12.9417 11.608C12.6806 11.8691 12.3667 11.9997 12 11.9997H6ZM6 10.6663H12V2.66634H6V10.6663ZM3.33333 14.6663C2.96667 14.6663 2.65278 14.5358 2.39167 14.2747C2.13056 14.0136 2 13.6997 2 13.333V3.99967H3.33333V13.333H10.6667V14.6663H3.33333Z" fill="black" fill-opacity="0.88" />
-              </svg>}
-            /> */}
-            <Button
-              text
-              type="button"
-              className="w-8rem text-left gap-2"
-              label="Delete"
-              size="small"
-              iconPos="left"
-              severity="danger"
-              icon={'pi pi-trash'}
-              onClick={deteleAction}
-            />
-          </div>
-        </OverlayPanel>
-      </div>
-    )
-  }
+        >
+          <Trash2 size={14} className="solid-row-action-button-icon" />
+          <span className="solid-row-action-button-label">Delete</span>
+        </button>
+      </SolidPopoverContent>
+    </SolidPopover>
+  );
 
   return (
     <div className="solid-form-wrapper">
-      <form style={{ width: '100%', borderRight: '1px solid var(--primary-light-color' }} onSubmit={formik.handleSubmit}>
-        <div className="solid-form-header">
-          {pathname.includes('new') ?
-            <>
-              <div className="flex align-items-center gap-3">
-                <BackButton />
-                <div className="form-wrapper-title">Create Module</div>
-              </div>
-              <div className="gap-3 flex">
-                {formik.dirty &&
-                  <Button label="Save" size="small" onClick={() => showError()} type="submit" />
-                }
-                <CancelButton />
-              </div>
-            </>
-            :
-            <>
-              <div className="flex align-items-center gap-3">
-                <BackButton />
-                <div className="form-wrapper-title"> Edit Module</div>
-              </div>
-              <div className="gap-3 flex">
-                {data?.isSystem !== true &&
-                  <>
-                    {formik.dirty &&
-                      <Button label="Save" size="small" onClick={() => showError()} type="submit" />
-                    }
-                    <CancelButton />
-                    {formActionDropdown()}
-                  </>
-                }
-              </div>
-            </>
-          }
-        </div>
-        <SolidFormHeader />
-        {/* <div className="solid-form-stepper">
-          <SolidFormStepper />
-        </div> */}
-        <div className="px-4 py-3 md:p-4 solid-form-content">
-          {/* <p className="form-wrapper-heading text-base">Basic Info</p> */}
-          <Panel header={"Basic Info"} className="solid-column-panel">
-            <div className="formgrid grid mt-3">
-              <div className="field col-12 pb-3 lg:pb-0 lg:col-6 flex flex-column gap-2">
-                <label htmlFor="displayName" className="form-field-label">
-                  Display Name <span style={{ color: 'red' }}>*</span>
-                </label>
-                <InputText
-                  disabled={data ? true : false}
-                  type="text"
-                  id="displayName"
-                  name="displayName"
-                  // onChange={formik.handleChange}
-                  onChange={(e) => {
-                    formik.handleChange(e);
-                    const { toKebabCase, toSnakeCase, toPluralCamelCase } = getSingularAndPlural(e.target.value);
-                    if (pathname.includes('new')) {
-                      formik.setFieldValue("name", toKebabCase);
-                    }
-
-                  }}
-                  value={formik.values.displayName}
-                  className={classNames("", {
-                    "p-invalid": isFormFieldValid(formik, "displayName"),
-                  })}
-                />
-                {isFormFieldValid(formik, "displayName") && (
-                  <Message
-                    severity="error"
-                    text={formik?.errors?.displayName?.toString()}
-                  />
-                )}
-              </div>
-              <div className="field col-12  lg:col-6 flex flex-column gap-2">
-                <label htmlFor="name" className="form-field-label">
-                  Name <span style={{ color: 'red' }}>*</span>
-                </label>
-                <InputText
-                  disabled
-                  type="text"
-                  id="name"
-                  name="name"
-                  onChange={formik.handleChange}
-                  value={formik.values.name}
-                  className={classNames("", {
-                    "p-invalid": isFormFieldValid(formik, "name"),
-                  })}
-                />
-                {isFormFieldValid(formik, "name") && (
-                  <Message severity="error" text={formik?.errors?.name?.toString()} />
-                )}
-              </div>
+      <div className="solid-form-section" style={{ borderRight: params.embeded !== true ? '1px solid var(--primary-light-color)' : '' }} >
+        <form style={{ width: '100%', background: "#fff" }} onSubmit={formik.handleSubmit}>
+          <div className="solid-form-header flex align-items-center justify-content-between gap-3 flex-wrap">
+            <div className="flex flex-column gap-1">
+              {/* <span className="text-sm text-color-secondary uppercase tracking-wider">Module</span> */}
+              {/* <div className="form-wrapper-title m-0">{headerTitle}</div> */}
             </div>
-            <div className="formgrid grid mt-4">
-              <div className="field col-12 pb-3 ld:pb-0 lg:col-6 flex flex-column gap-2">
-                <label htmlFor="description" className="form-field-label">
-                  Menu Sequence Number
-                </label>
-                <InputText
-                  id="menuSequenceNumber"
-                  type="number"
-                  onChange={formik.handleChange}
-                  min={0}
-                  value={formik.values.menuSequenceNumber}
-                  className={classNames("", {
-                    "p-invalid": isFormFieldValid(formik, "menuSequenceNumber"),
-                  })}
-                />
-                {isFormFieldValid(formik, "menuSequenceNumber") && (
-                  <Message
-                    severity="error"
-                    text={formik?.errors?.menuSequenceNumber?.toString()}
-                  />
-                )}
-              </div>
-              <div className="field col-12 lg:col-6 flex flex-column gap-2">
-                <label htmlFor="description" className="form-field-label">
-                  Description <span style={{ color: 'red' }}>*</span>
-                </label>
-                <InputTextarea
-                  id="description"
-                  name="description"
-                  onChange={formik.handleChange}
-                  value={formik.values.description}
-                  className={classNames("", {
-                    "p-invalid": isFormFieldValid(formik, "description"),
-                  })}
-                  rows={5}
-                  cols={30}
-                />
-                {isFormFieldValid(formik, "description") && (
-                  <Message
-                    severity="error"
-                    text={formik?.errors?.description?.toString()}
-                  />
-                )}
-              </div>
+            <div className="flex align-items-center gap-2">
+              <SolidButton
+                variant="outline"
+                size="sm"
+                type="button"
+                onClick={handleCancel}
+                className="bg-primary-reverse"
+              >
+                Cancel
+              </SolidButton>
+              {formik.dirty && (
+                <SolidButton size="sm" type="submit" onClick={() => showError()}>
+                  Save
+                </SolidButton>
+              )}
+              {canShowActionsMenu && formActionDropdown()}
             </div>
-          </Panel>
-          {/* <Divider /> */}
-          {/* <p className="form-wrapper-heading text-base" style={{ fontSize: 16 }}>Configurations</p> */}
-          <Panel header={"Configurations"} className="solid-column-panel mt-4">
-            <div className="formgrid grid mt-3">
-              <div className="field col-12 pb-3 lg:pb-0 lg:col-6 flex flex-column gap-2">
-                <label htmlFor="defaultDataSource" className="form-field-label">
-                  Default Data Source
-                </label>
-                <SingleSelectAutoCompleteField
-                  disabled={data ? true : false}
-                  key="defaultDataSource"
-                  formik={formik}
-                  isFormFieldValid={isFormFieldValid}
-                  // relationField={false}
-                  fieldName="defaultDataSource"
-                  fieldNameId={null}
-                  labelKey="label"
-                  valueKey="value"
-                  searchData={serachDDefaultDataSource}
-                  existingData={formik.values.defaultDataSource}
-                />
-                {isFormFieldValid(formik, "defaultDataSource") && (
-                  <Message
-                    severity="error"
-                    text={formik?.errors?.defaultDataSource?.toString()}
-                  />
-                )}
-              </div>
-              <div className="field col-12 lg:col-6 flex flex-column gap-2">
-                <label htmlFor="menuIconUrl" className="form-label form-field-label">
-                  Menu Icon <small className="text-red-500 helper-text">(only svg, png and jpeg are allowed)</small>
-                </label>
-                <div {...getRootPropsmenuIcon()} className="solid-dropzone-wrapper">
-                  <input {...getInputPropsmenuIcon()} />
-                  <DropzonePlaceholder />
+          </div>
+          {/* <SolidFormHeader /> */}
+          <div className="solid-form-content">
+            {/* <p className="form-wrapper-heading text-base">Basic Info</p> */}
+            <SolidPanel header={"Basic Info"} className="solid-column-panel">
+              <div className="formgrid grid mt-3">
+                <div className="field col-12 pb-3 lg:pb-0 lg:col-6">
+                  <div className={styles.fieldWrapper}>
+                    <label htmlFor="displayName" className={`${styles.fieldLabel} form-field-label`}>
+                      Display Name <span className="text-red-500">*</span>
+                    </label>
+                    <SolidInput
+                      disabled={!!data}
+                      type="text"
+                      id="displayName"
+                      name="displayName"
+                      onChange={(e) => {
+                        formik.handleChange(e);
+                        const { toKebabCase } = getSingularAndPlural(e.target.value);
+                        if (pathname.includes('new')) {
+                          formik.setFieldValue("name", toKebabCase);
+                        }
+                      }}
+                      value={formik.values.displayName}
+                      className={styles.fieldInput}
+                    />
+                    {isFormFieldValid(formik, "displayName") && (
+                      <p className={styles.fieldError}>{formik?.errors?.displayName?.toString()}</p>
+                    )}
+                  </div>
                 </div>
-                {isFormFieldValid(formik, "menuIconUrl") && (
-                  <Message severity="error" text={formik?.errors?.menuIconUrl?.toString()} />
-                )}
+                <div className="field col-12 lg:col-6">
+                  <div className={styles.fieldWrapper}>
+                    <label htmlFor="name" className={`${styles.fieldLabel} form-field-label`}>
+                      Name <span className="text-red-500">*</span>
+                    </label>
+                    <SolidInput
+                      disabled
+                      type="text"
+                      id="name"
+                      name="name"
+                      onChange={formik.handleChange}
+                      value={formik.values.name}
+                      className={styles.fieldInput}
+                    />
+                    {isFormFieldValid(formik, "name") && (
+                      <p className={styles.fieldError}>{formik?.errors?.name?.toString()}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+              <div className="formgrid grid mt-4">
+                <div className="field col-12 pb-3 ld:pb-0 lg:col-6">
+                  <div className={styles.fieldWrapper}>
+                    <label htmlFor="menuSequenceNumber" className={`${styles.fieldLabel} form-field-label`}>
+                      Menu Sequence Number
+                    </label>
+                    <SolidInput
+                      id="menuSequenceNumber"
+                      type="number"
+                      onChange={formik.handleChange}
+                      min={0}
+                      value={formik.values.menuSequenceNumber}
+                      className={styles.fieldInput}
+                    />
+                    {isFormFieldValid(formik, "menuSequenceNumber") && (
+                      <p className={styles.fieldError}>{formik?.errors?.menuSequenceNumber?.toString()}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="field col-12 lg:col-6">
+                  <div className={styles.fieldWrapper}>
+                    <label htmlFor="description" className={`${styles.fieldLabel} form-field-label`}>
+                      Description <span className="text-red-500">*</span>
+                    </label>
+                    <SolidTextarea
+                      id="description"
+                      name="description"
+                      onChange={formik.handleChange}
+                      value={formik.values.description}
+                      className={styles.fieldTextarea}
+                      rows={5}
+                      cols={30}
+                    />
+                    {isFormFieldValid(formik, "description") && (
+                      <p className={styles.fieldError}>{formik?.errors?.description?.toString()}</p>
+                    )}
+                  </div>
+                </div>
+              </div>
+            </SolidPanel>
+            {/* <Divider /> */}
+            {/* <p className="form-wrapper-heading text-base" style={{ fontSize: 16 }}>Configurations</p> */}
+            <SolidPanel header={"Configurations"} className="solid-column-panel mt-4">
+              <div className="formgrid grid mt-3">
+                <div className="field col-12 pb-3 lg:pb-0 lg:col-6">
+                  <div className={styles.fieldWrapper}>
+                    <label htmlFor="defaultDataSource" className={`${styles.fieldLabel} form-field-label`}>
+                      Default Data Source
+                    </label>
+                    <div className="solid-standard-autocomplete w-full">
+                      <SolidAutocomplete
+                        disabled={!!data}
+                        value={defaultDataSourceField.selectedItem}
+                        suggestions={defaultDataSourceField.filteredItems}
+                        completeMethod={defaultDataSourceField.searchItems}
+                        onChange={defaultDataSourceField.handleChange}
+                        dropdown
+                        field="label"
+                        className="w-full"
+                      />
+                    </div>
+                    {isFormFieldValid(formik, "defaultDataSource") && (
+                      <p className={styles.fieldError}>{formik?.errors?.defaultDataSource?.toString()}</p>
+                    )}
+                  </div>
+                </div>
+                <div className="field col-12 lg:col-6">
+                  <div className={`${styles.fieldWrapper} relative`}>
+                    <label htmlFor="menuIconUrl" className={`${styles.fieldLabel} form-field-label`}>
+                      Menu Icon <small className="text-red-500 helper-text">(only svg, png and jpeg are allowed)</small>
+                    </label>
+                    <div {...getRootPropsmenuIcon()} className="solid-dropzone-wrapper">
+                      <input {...getInputPropsmenuIcon()} />
+                      <DropzonePlaceholder />
+                    </div>
+                    {isFormFieldValid(formik, "menuIconUrl") && (
+                      <SolidMessage severity="error" text={formik?.errors?.menuIconUrl?.toString()} className="mt-2" />
+                    )}
 
-                {fileDetails && (
-                  <div className="solid-file-upload-wrapper">
-                    <div className="flex align-items-center gap-2">
-                      <FileReaderExt fileDetails={fileDetails} />
-                      <div className="w-full flex flex-column gap-1">
-                        <div className="flex align-items-center justify-content-between">
-                          <div className="font-bold solid-module-mobile-text-wrapper">{fileDetails.name}</div>
-                          <div className="cancel-upload-button" onClick={handleCancelUpload}>
-                            <svg xmlns="http://www.w3.org/2000/svg" width="6" height="6" viewBox="0 0 6 6" fill="none">
-                              <path d="M0.6 6L0 5.4L2.4 3L0 0.6L0.6 0L3 2.4L5.4 0L6 0.6L3.6 3L6 5.4L5.4 6L3 3.6L0.6 6Z" fill="#4B4D52" />
-                            </svg>
+                    {fileDetails && (
+                      <div className="solid-file-upload-wrapper mt-4">
+                        <div className="flex align-items-center gap-2">
+                          <FileReaderExt fileDetails={fileDetails} />
+                          <div className="w-full flex flex-column gap-1">
+                            <div className="flex align-items-center justify-content-between">
+                              <div className="font-bold solid-module-mobile-text-wrapper">{fileDetails.name}</div>
+                              <button
+                                type="button"
+                                className="solid-file-icon-btn is-danger"
+                                onClick={handleCancelUpload}
+                              >
+                                <SolidIcon name="si-times" aria-hidden />
+                              </button>
+                            </div>
+                            {uploadCompleted ? (
+                              <div className="flex align-items-center gap-2 text-sm">
+                                {totalSize} of {totalSize}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="4" height="4" viewBox="0 0 4 4" fill="none">
+                                  <circle cx="2" cy="2" r="2" fill="#C1C1C1" />
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
+                                  <mask id="mask0_2480_8635" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">
+                                    <rect width="20" height="20" fill="#D9D9D9" />
+                                  </mask>
+                                  <g mask="url(#mask0_2480_8635)">
+                                    <path d="M9.16 12.76L13.39 8.53L12.55 7.69L9.16 11.08L7.45 9.37L6.61 10.21L9.16 12.76ZM10 16C9.17 16 8.39 15.8424 7.66 15.5272C6.93 15.2124 6.295 14.785 5.755 14.245C5.215 13.705 4.7876 13.07 4.4728 12.34C4.1576 11.61 4 10.83 4 10C4 9.17 4.1576 8.39 4.4728 7.66C4.7876 6.93 5.215 5.215 5.755 5.755C6.295 5.215 6.93 4.7874 7.66 4.4722C8.39 4.1574 9.17 4 10 4C10.83 4 11.61 4.1574 12.34 4.4722C13.07 4.7874 13.705 5.215 14.245 5.755C14.785 6.295 15.2124 6.93 15.5272 7.66C15.8424 8.39 16 9.17 16 10C16 10.83 15.8424 11.61 15.5272 12.34C15.2124 13.07 14.785 13.705 14.245 14.245C13.705 14.785 13.07 15.2124 12.34 15.5272C11.61 15.8424 10.83 16 10 16Z" fill="#722ED1" />
+                                  </g>
+                                </svg>
+                                Completed
+                              </div>
+                            ) : (
+                              <div className="flex align-items-center gap-2 text-sm">
+                                {uploadedSize} of {totalSize}
+                                <svg xmlns="http://www.w3.org/2000/svg" width="4" height="4" viewBox="0 0 4 4" fill="none">
+                                  <circle cx="2" cy="2" r="2" fill="#C1C1C1" />
+                                </svg>
+                                <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
+                                  <path d="M7.375 10.5V5.40625L5.75 7.03125L4.875 6.125L8 3L11.125 6.125L10.25 7.03125L8.625 5.40625V10.5H7.375ZM4.25 13C3.90625 13 3.61198 12.8776 3.36719 12.6328C3.1224 12.388 3 12.0938 3 11.75V9.875H4.25V11.75H11.75V9.875H13V11.75C13 12.0938 12.8776 12.388 12.6328 12.6328C12.388 12.8776 12.0938 13 11.75 13H4.25Z" fill="black" />
+                                </svg>
+                                Uploading ${uploadProgress}% Completed
+                              </div>
+                            )}
                           </div>
                         </div>
-                        {
-                          uploadCompleted ?
-                            <div className="flex align-items-center gap-2 text-sm">
-                              {totalSize} of {totalSize}
-                              <svg xmlns="http://www.w3.org/2000/svg" width="4" height="4" viewBox="0 0 4 4" fill="none">
-                                <circle cx="2" cy="2" r="2" fill="#C1C1C1" />
-                              </svg>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 20 20" fill="none">
-                                <mask id="mask0_2480_8635" style={{ maskType: 'alpha' }} maskUnits="userSpaceOnUse" x="0" y="0" width="20" height="20">
-                                  <rect width="20" height="20" fill="#D9D9D9" />
-                                </mask>
-                                <g mask="url(#mask0_2480_8635)">
-                                  <path d="M9.16 12.76L13.39 8.53L12.55 7.69L9.16 11.08L7.45 9.37L6.61 10.21L9.16 12.76ZM10 16C9.17 16 8.39 15.8424 7.66 15.5272C6.93 15.2124 6.295 14.785 5.755 14.245C5.215 13.705 4.7876 13.07 4.4728 12.34C4.1576 11.61 4 10.83 4 10C4 9.17 4.1576 8.39 4.4728 7.66C4.7876 6.93 5.215 6.295 5.755 5.755C6.295 5.215 6.93 4.7874 7.66 4.4722C8.39 4.1574 9.17 4 10 4C10.83 4 11.61 4.1574 12.34 4.4722C13.07 4.7874 13.705 5.215 14.245 5.755C14.785 6.295 15.2124 6.93 15.5272 7.66C15.8424 8.39 16 9.17 16 10C16 10.83 15.8424 11.61 15.5272 12.34C15.2124 13.07 14.785 13.705 14.245 14.245C13.705 14.785 13.07 15.2124 12.34 15.5272C11.61 15.8424 10.83 16 10 16Z" fill="#722ED1" />
-                                </g>
-                              </svg>
-                              Completed
-                            </div>
-                            :
-                            <div className="flex align-items-center gap-2 text-sm">
-                              {uploadedSize} of {totalSize}
-                              <svg xmlns="http://www.w3.org/2000/svg" width="4" height="4" viewBox="0 0 4 4" fill="none">
-                                <circle cx="2" cy="2" r="2" fill="#C1C1C1" />
-                              </svg>
-                              <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 16 16" fill="none">
-                                <path d="M7.375 10.5V5.40625L5.75 7.03125L4.875 6.125L8 3L11.125 6.125L10.25 7.03125L8.625 5.40625V10.5H7.375ZM4.25 13C3.90625 13 3.61198 12.8776 3.36719 12.6328C3.1224 12.388 3 12.0938 3 11.75V9.875H4.25V11.75H11.75V9.875H13V11.75C13 12.0938 12.8776 12.388 12.6328 12.6328C12.388 12.8776 12.0938 13 11.75 13H4.25Z" fill="black" />
-                              </svg>
-                              Uploading ${uploadProgress}% Completed
-                            </div>
-                        }
+                        <SolidProgressBar value={uploadProgress} showValue={false} style={{ height: 4 }} className="mt-2" />
                       </div>
-                    </div>
-                    <ProgressBar value={uploadProgress} showValue={false} style={{ height: 4 }} className="mt-2" />
+                    )}
                   </div>
-                )}
+                </div>
               </div>
-            </div>
-          </Panel>
-        </div>
-      </form>
-      {/* <div style={{ width: '22.5%' }}></div> */}
+            </SolidPanel>
+          </div>
+        </form>
+        {/* <div style={{ width: '22.5%' }}></div> */}
+        <SolidFormFooter params={params}></SolidFormFooter>
+      </div>
     </div>
   );
 };

@@ -1,200 +1,190 @@
-
+import { useEffect, useMemo, useState } from "react";
+import { useDispatch } from "react-redux";
+import { AlertTriangle, FileCode2, Sparkles } from "lucide-react";
+import { SolidCircularLoader } from "../../../../../../components/core/common/SolidLoaders/SolidCircularLoader";
+import { ERROR_MESSAGES } from "../../../../../../constants/error-messages";
+import { env } from "../../../../../../adapters/env";
 import { useGenerateCodeForModelMutation } from "../../../../../../redux/api/modelApi";
 import { useSeederMutation } from "../../../../../../redux/api/solidServiceApi";
 import { closePopup } from "../../../../../../redux/features/popupSlice";
-import { SolidListRowdataDynamicFunctionProps } from "../../../../../../types/solid-core";
-import { Button } from "primereact/button";
-import { useEffect, useState } from "react";
-import { useDispatch } from "react-redux";
 import { showToast } from "../../../../../../redux/features/toastSlice";
-import { SolidCircularLoader } from '../../../../../../components/core/common/SolidLoaders/SolidCircularLoader';
-import { ERROR_MESSAGES } from "../../../../../../constants/error-messages";
-import { env } from "../../../../../../adapters/env";
-
+import { SolidListRowdataDynamicFunctionProps } from "../../../../../../types/solid-core";
+import { SolidButton } from "../../../../../shad-cn-ui";
 
 const GenerateModelCodeRowAction = (event: SolidListRowdataDynamicFunctionProps) => {
-    const dispatch = useDispatch();
-    const [generateCode, {
-        isLoading: isGenerateCodeUpdating,
-        isSuccess: isGenerateCodeSuceess,
-        isError: isGenerateCodeError,
-        error: generateCodeError,
-        data: generateCodeData
-    }] = useGenerateCodeForModelMutation();
+  const dispatch = useDispatch();
+  const [statusMessage, setStatusMessage] = useState("Preparing model generation...");
+  const [isPinging, setIsPinging] = useState(false);
+  const [isGenerating, setIsGenerating] = useState(false);
 
-    // const mqMessageApi = createSolidEntityApi("mqMessage");
-    // const {
-    //     useGetSolidEntitiesQuery: useGetMqMessageQuery,
-    //     useLazyGetSolidEntitiesQuery: useLazyGetMqMessageQuery,
-    // } = mqMessageApi;
-    // const [getMqMessageStatus, {
-    //     data: solidListViewMetaData,
-    //     error: solidListViewMetaDataError,
-    //     isLoading: solidListViewMetaDataIsLoading,
-    //     isError: solidListViewMetaDataIsError
-    // }] = useLazyGetMqMessageQuery();
-    // const fetchMqMessageStatus = async (retries = 30, delay = 500, generateCodeData: any): Promise<boolean> => {
-    //     for (let i = 0; i < retries; i++) {
-    //         try {
-    //             const query = {
-    //                 filters: {
-    //                     messageId: {
-    //                         $eq: generateCodeData?.data?.messageId
-    //                     }
-    //                 }
-    //             };
-    //             const queryString = qs.stringify(query, {
-    //                 encodeValuesOnly: true,
-    //             });
-    //             const res = await getMqMessageStatus(queryString)
-    //             if (res.isSuccess === true) {
-    //                 if (res.data.records.length > 0) {
-    //                     const messageStage = res.data.records[0].stage;
-    //                     console.log("messageStatus", messageStage);
-    //                     if (messageStage === "succeeded") {
-    //                         return true
-    //                     }
-    //                     if (messageStage === "failed") {
-    //                         return false
-    //                     }
-    //                 }
-    //             }
-    //         } catch (e) {
-    //             // ignore and retry
-    //         }
-    //         await new Promise((resolve) => setTimeout(resolve, delay));
-    //     }
-    //     return false;
-    // };
+  const [generateCode, { isLoading: isGenerateCodeUpdating, isSuccess: isGenerateCodeSuceess }] =
+    useGenerateCodeForModelMutation();
 
-    const generateCodeHandler = async () => {
-        const response: any = await generateCode({ id: event?.rowData?.id });
-        console.log("response generate code handler", response);
-        setIsGenerating(true);
+  const [triggerSeeder, { data, isSuccess: isSeederSuccess, isError: isSeederError }] = useSeederMutation();
+
+  const isSolidCoreModel = event?.rowData?.module?.name === "solid-core";
+  const generatedFiles = useMemo(
+    () => [
+      "Entity file",
+      "Repository file",
+      "Controller file",
+      "Service file",
+      "Create and update DTO files",
+    ],
+    []
+  );
+
+  const pingBackendWithRetry = async (retries = 30, delay = 500): Promise<boolean> => {
+    for (let i = 0; i < retries; i += 1) {
+      try {
+        const res = await fetch(`${env("NEXT_PUBLIC_BACKEND_API_URL")}/api/ping`);
+        if (res.ok) return true;
+      } catch (error) {
+        // ignore and retry
+      }
+      await new Promise((resolve) => setTimeout(resolve, delay));
+    }
+    return false;
+  };
+
+  const generateCodeHandler = async () => {
+    try {
+      setIsGenerating(true);
+      setStatusMessage("Submitting model generation request...");
+      await generateCode({ id: event?.rowData?.id }).unwrap();
+      setStatusMessage("Waiting for backend to come back online...");
+    } catch (error) {
+      setIsGenerating(false);
+      dispatch(closePopup());
+      dispatch(showToast({ severity: "error", summary: "Something went wrong", detail: ERROR_MESSAGES.API_ERROR }));
+    }
+  };
+
+  useEffect(() => {
+    if (!isGenerateCodeSuceess) return undefined;
+
+    const timer = window.setTimeout(async () => {
+      setIsPinging(true);
+      setStatusMessage("Checking backend availability before refreshing metadata...");
+      const isAlive = await pingBackendWithRetry();
+      setIsPinging(false);
+
+      if (isAlive) {
+        setStatusMessage("Refreshing seeded metadata...");
+        await triggerSeeder("ModuleMetadataSeederService");
+        return;
+      }
+
+      setIsGenerating(false);
+      dispatch(closePopup());
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: ERROR_MESSAGES.BACKEND_UNAVAILABLE,
+          detail: ERROR_MESSAGES.SEEDER_NOT_TRIGGERED,
+        })
+      );
+    }, 5000);
+
+    return () => window.clearTimeout(timer);
+  }, [dispatch, isGenerateCodeSuceess, triggerSeeder]);
+
+  useEffect(() => {
+    if (isSeederSuccess) {
+      dispatch(
+        showToast({
+          severity: "success",
+          summary: ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY,
+          detail: ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY,
+        })
+      );
+      setIsGenerating(false);
+      dispatch(closePopup());
+      window.location.reload();
     }
 
-    // TODO: START REFACTORING - reusable code alert
-    const [triggerSeeder, {
-        data,
-        isLoading,
-        isSuccess: isSeederSuccess,
-        isError: isSeederError
-    }] = useSeederMutation();
+    if (isSeederError) {
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEEDER_ERROR, detail: ERROR_MESSAGES.SEEDER_NOT_RUN }));
+      setIsGenerating(false);
+    }
+  }, [data, dispatch, isSeederError, isSeederSuccess]);
 
-    // Utitlity to track if solid-api is up
-    const [isPinging, setIsPinging] = useState(false);
-    const [isGenerating, setIsGenerating] = useState(false);
-    const pingBackendWithRetry = async (retries = 30, delay = 500): Promise<boolean> => {
-        for (let i = 0; i < retries; i++) {
-            try {
-                const res = await fetch(`${env("NEXT_PUBLIC_BACKEND_API_URL")}/api/ping`);
-                console.log("ping response", res);
-
-                if (res.ok)
-                    return true;
-            } catch (e) {
-                // ignore and retry
-            }
-            await new Promise((resolve) => setTimeout(resolve, delay));
-        }
-        return false;
-    };
-
-    useEffect(() => {
-        const runSeederIfQueueStatusIsSuccess = async () => {
-            if (isGenerateCodeSuceess) {
-                // console.log("isGenerateCodeSuceess", isGenerateCodeSuceess);
-                // setIsPinging(true);
-                // const hasMqMessageCompleted = await fetchMqMessageStatus(30, 500, generateCodeData);
-                const isAlive = await pingBackendWithRetry();
-                setIsPinging(false);
-
-                // const hasMqMessageCompleted = true;
-                // const isAlive = true;
-                // if (hasMqMessageCompleted && isAlive) {
-                if (isAlive) {
-                    await triggerSeeder("ModuleMetadataSeederService");
-                } else {
-                    dispatch(closePopup());
-                    console.log("Backend is not alive, cannot run seeder");
-                    dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.BACKEND_UNAVAILABLE, detail: ERROR_MESSAGES.SEEDER_NOT_TRIGGERED }));
-                }
-            }
-        };
-        setTimeout(() => {
-            runSeederIfQueueStatusIsSuccess();
-        }, 5000);
-    }, [isGenerateCodeSuceess]);
-
-    useEffect(() => {
-        if (isSeederSuccess) {
-            console.log(ERROR_MESSAGES.IS_SEEDER_SUCCESS, data);
-            dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY, detail: ERROR_MESSAGES.CODE_GENERTAE_SUCCESSFULLY }));
-            setIsGenerating(false);
-            dispatch(closePopup());
-            window.location.reload();
-        }
-        if (isSeederError) {
-            console.log(ERROR_MESSAGES.IS_SEEDER_ERROR, isSeederError);
-            dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEEDER_ERROR, detail: ERROR_MESSAGES.SEEDER_NOT_RUN }));
-            setIsGenerating(false);
-        }
-    }, [isSeederSuccess])
-    // TODO: END REFACTORING - reusable code alert
-
+  if (isGenerating) {
     return (
-        <>
-            {isGenerating ?
-                <>
-                    <div className="flex flex-column align-items-center justify-content-center" style={{ padding: '2rem', height: 200 }}>
-                        <SolidCircularLoader />
-                        <p className="mt-4 font-medium">Waiting for backend...</p>
-                    </div>
-                </>
-                :
-                <>
-                    {event?.rowData?.module?.name != "solid-core" ?
-                        <div className="">
-                            <div className="p-dialog-header secondary-border-bottom py-3" style={{ background: 'var(--solid-light-grey)' }}>
-                                <span className="p-dialog-title">
-                                    Generate Model
-                                </span>
-                            </div>
-                            <div className="px-4 pb-4 pt-3">
-                                <p className="">Proceed with model code generation? Existing files will be overwritten.</p>
-                                <p>Below is the list of files that will be created </p>
-                                <ul>
-                                    <li>Model Entity File</li>
-                                    <li>Model Repository</li>
-                                    <li>Model Controller File</li>
-                                    <li>Model Service File</li>
-                                    <li>Model Create and Update Dto files</li>
-                                </ul>
-                                <div className="flex gap-3 justify-content-start">
-                                    <Button size="small" label="Ok" autoFocus onClick={generateCodeHandler} />
-                                    <Button size="small" label="Cancel" outlined onClick={() => dispatch(closePopup())} />
-                                </div>
-                            </div>
-                        </div > :
-                        <div className="">
-                            <div className="p-dialog-header secondary-border-bottom py-3" style={{ background: 'var(--solid-light-grey)' }}>
-                                <span className="p-dialog-title">
-                                    Generate Model
-                                </span>
-                            </div>
-                            <div className="px-4 pb-4 pt-3">
-                                <p className="text-center">You cannot generate code for Solid Core models</p>
-                                <div className="flex gap-3 justify-content-center">
-                                    <Button size="small" label="Cancel" outlined onClick={() => dispatch(closePopup())} />
-                                </div>
-                            </div>
-                        </div>
-                    }
-                </>
-            }
+      <div className="solid-generate-code-popup">
+        <div className="solid-filter-dialog-head solid-generate-code-popup__head">
+          <div>
+            <h3 className="solid-filter-dialog-title">Generate Model</h3>
+            <p className="solid-filter-dialog-subtitle m-0">Applying the code generation pipeline and reseeding metadata.</p>
+          </div>
+        </div>
+        <div className="solid-filter-dialog-sep" />
+        <div className="solid-filter-dialog-body solid-generate-code-popup__body solid-generate-code-popup__body--loading">
+          <SolidCircularLoader />
+          <p className="solid-generate-code-popup__loading-title">
+            {isPinging ? "Waiting for backend..." : "Generating model code..."}
+          </p>
+          <p className="solid-generate-code-popup__loading-copy">{statusMessage}</p>
+        </div>
+      </div>
+    );
+  }
 
-        </>
-    )
-}
+  return (
+    <div className="solid-generate-code-popup">
+      <div className="solid-filter-dialog-head solid-generate-code-popup__head">
+        <div>
+          <h3 className="solid-filter-dialog-title">Generate Model</h3>
+          <p className="solid-filter-dialog-subtitle m-0">
+            Generate or refresh the model code artifacts from the current metadata definition.
+          </p>
+        </div>
+      </div>
+      <div className="solid-filter-dialog-sep" />
+      <div className="solid-filter-dialog-body solid-generate-code-popup__body">
+        {isSolidCoreModel ? (
+          <div className="solid-generate-code-popup__notice is-warning">
+            <AlertTriangle size={16} />
+            <span>You cannot generate code for Solid Core models.</span>
+          </div>
+        ) : (
+          <>
+            <p className="solid-generate-code-popup__intro">
+              Proceed with model code generation. Existing generated files may be overwritten.
+            </p>
+            <div className="solid-generate-code-popup__panel">
+              <div className="solid-generate-code-popup__panel-title">
+                <FileCode2 size={15} />
+                <span>Artifacts created</span>
+              </div>
+              <ul className="solid-generate-code-popup__list">
+                {generatedFiles.map((item) => (
+                  <li key={item}>{item}</li>
+                ))}
+              </ul>
+            </div>
+          </>
+        )}
+
+        <div className="solid-generate-code-popup__actions">
+          {!isSolidCoreModel ? (
+            <SolidButton
+              size="small"
+              autoFocus
+              leftIcon={<Sparkles size={14} />}
+              loading={isGenerateCodeUpdating}
+              onClick={generateCodeHandler}
+            >
+              Generate
+            </SolidButton>
+          ) : null}
+          <SolidButton size="small" variant="outline" onClick={() => dispatch(closePopup())}>
+            {isSolidCoreModel ? "Close" : "Cancel"}
+          </SolidButton>
+        </div>
+      </div>
+    </div>
+  );
+};
 
 export default GenerateModelCodeRowAction;
