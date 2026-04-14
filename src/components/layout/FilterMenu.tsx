@@ -105,9 +105,9 @@ const FilterMenu = () => {
                     </div>
                 </SolidPopoverContent>
             </SolidPopover>
-            <SolidDialog header="Add Custom Filter" visible={visible} className="solid-dialog-lg" onHide={() => { if (!visible) return; setVisible(false); }}>
-                {/* <FilterComponent></FilterComponent> */}
-            </SolidDialog>
+            {/* <SolidDialog header="Add Custom Filter" visible={visible} className="solid-dialog-lg" onHide={() => { if (!visible) return; setVisible(false); }}>
+                <FilterComponent></FilterComponent>
+            </SolidDialog> */}
 
             {/* <Dialog
                 visible={visible}

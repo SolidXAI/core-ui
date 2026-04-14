@@ -2,7 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { useSolidLayoutRegistry } from "../../SolidLayoutRegistry";
 import type { SolidLayoutEntry } from "../../SolidLayoutRegistry";
-import { ChatIcon } from "@/components/layout/SolidAiStudioLayout";
+import { ChatIcon } from "../../../components/layout/SolidAiStudioLayout";
 import { env } from "../../../adapters/env";
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
