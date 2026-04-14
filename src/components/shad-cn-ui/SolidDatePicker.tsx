@@ -56,7 +56,7 @@ export function SolidDatePicker({
   ...props
 }: SolidDatePickerProps) {
   const resolvedShowTime = timeOnly ? true : showTimeSelect;
-  const resolvedFormat = dateFormat ?? "yyyy-MM-dd";
+  const resolvedFormat = (Array.isArray(dateFormat) ? dateFormat[0] : dateFormat) ?? "yyyy-MM-dd";
   const displayValue = formatDateValue(selected as Date | null | undefined, resolvedFormat);
 
   return (
