@@ -128,10 +128,12 @@ export default function MqMessageKanbanCardWidget({
   return (
     <div className="mq-message-kanban-card" style={cardStyle}>
       <div className="mq-message-kanban-card__accent" />
+      <span className="mq-message-kanban-card__record-id mq-message-kanban-card__badge mq-message-kanban-card__badge--record-id">
+        #{renderText(rowData?.id)}
+      </span>
 
       <div className="mq-message-kanban-card__eyebrow">
         <span className="mq-message-kanban-card__chip">{chipLabel}</span>
-        <span className="mq-message-kanban-card__record-id">#{renderText(rowData?.id)}</span>
       </div>
 
       <div className="mq-message-kanban-card__title" title={renderText(rowData?.messageId)}>

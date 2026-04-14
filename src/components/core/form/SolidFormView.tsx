@@ -456,7 +456,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [openLightbox, setOpenLightbox] = useState(false);
     const [lightboxUrls, setLightboxUrls] = useState([]);
     const [isShowChatter, setShowChatter] = useState(false);
-    const [chatterLocaleWidth, setChatterLocaleWidth] = useState(380); // default width
+    const [chatterLocaleWidth, setChatterLocaleWidth] = useState(320);
     const [isResizingChatterLocale, setIsResizingChatterLocale] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -508,14 +508,16 @@ const SolidFormView = (params: SolidFormViewProps) => {
     useEffect(() => {
         const stored = localStorage.getItem('chatter_locale_width');
         if (stored) {
-            setChatterLocaleWidth(parseInt(stored, 10));
+            const parsed = parseInt(stored, 10);
+            const clampedWidth = Math.max(280, Math.min(parsed, 360));
+            setChatterLocaleWidth(clampedWidth);
         }
     }, []);
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
             if (!isResizingChatterLocale) return;
             const newWidth = window.innerWidth - e.clientX;
-            const clampedWidth = Math.max(280, Math.min(newWidth, 700));
+            const clampedWidth = Math.max(280, Math.min(newWidth, 360));
             setChatterLocaleWidth(clampedWidth);
             localStorage.setItem('chatter_locale_width', clampedWidth.toString());
         };
@@ -1225,7 +1227,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         return (
             <div className="solid-form-wrapper">
-                <div className="solid-form-section" style={{ borderRight: params.embeded !== true ? '1px solid var(--primary-light-color)' : '' }}>
+                <div className="solid-form-section">
                     <div className="page-header solid-list-toolbar flex-column lg:flex-row">
                         <div className="flex justify-content-between w-full solid-form-toolbar-row">
                             <div className="flex gap-3 align-items-center solid-form-toolbar-left">
@@ -1659,7 +1661,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
         return (
             <div className="solid-form-wrapper">
-                <div className="solid-form-section" style={{ borderRight: params.embeded !== true ? '1px solid var(--primary-light-color)' : '' }} >
+                <div className="solid-form-section">
                     <form style={{ width: '100%' }} onSubmit={formik.handleSubmit}>
                         <SolidFormActionHeader
                             formik={formik}
@@ -1721,7 +1723,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 size="sm"
                                 text
                                 className="chatter-collapse-btn"
-                                style={{ width: 30, height: 30, aspectRatio: '1/1' }}
+                                style={{ width: 26, height: 26, aspectRatio: '1/1' }}
                                 onClick={() => setShowChatter(false)}
                             />
                         }

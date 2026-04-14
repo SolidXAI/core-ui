@@ -108,18 +108,17 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
   ];
 
   return (
-    <div style={{marginLeft:"10px",backgroundColor:"#fff"}}>
-
-    <SolidTabGroup
-      className="solid-locale-tabs h-full"
-      listClassName="solid-locale-tabs-list"
-      panelClassName="solid-locale-tabs-panel"
-      tabs={tabs}
-      value={activeTabValue}
-      onValueChange={setActiveTabValue}
-      tabPosition='center'
+    <div className="solid-locale-panel">
+      <SolidTabGroup
+        className="solid-locale-tabs h-full"
+        listClassName="solid-locale-tabs-list"
+        panelClassName="solid-locale-tabs-panel"
+        tabs={tabs}
+        value={activeTabValue}
+        onValueChange={setActiveTabValue}
+        tabPosition='center'
       />
-      </div>
+    </div>
   );
 };
 

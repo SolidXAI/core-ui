@@ -34,6 +34,13 @@ export const KanbanBoard = ({ groupByFieldName, kanbanViewData, maxSwimLanesCoun
     // State to manage the folded status of each column
     const [foldedStates, setFoldedStates] = useState<Record<string, boolean>>({});
     const cardNode = findKanbanCardNode(solidKanbanViewMetaData?.solidView?.layout?.children || []);
+    const layoutAttrs = solidKanbanViewMetaData?.solidView?.layout?.attrs || {};
+    const isKanbanDragEnabled =
+        layoutAttrs.draggable !== false &&
+        layoutAttrs.dragAndDrop !== false &&
+        layoutAttrs.enableDrag !== false &&
+        layoutAttrs.disableDrag !== true &&
+        layoutAttrs.disableDragging !== true;
     const cardWidget = cardNode?.attrs?.cardWidget || cardNode?.cardWidget;
     const DynamicCardWidget = cardWidget ? getExtensionComponent(cardWidget) : null;
     const kanbanCardConfigurationIssue = !cardWidget
@@ -135,6 +142,7 @@ export const KanbanBoard = ({ groupByFieldName, kanbanViewData, maxSwimLanesCoun
                                 key={data.groupName}
                                 groupByField={data.groupName}
                                 group={group}
+                                isKanbanDragEnabled={isKanbanDragEnabled}
                                 solidKanbanViewMetaData={solidKanbanViewMetaData}
                                 groupData={data.groupData.records}
                                 toggleFold={toggleFold}

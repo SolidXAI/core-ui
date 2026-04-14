@@ -30,7 +30,7 @@
     height: 34px !important;
     border-radius: 8px !important;
     border: 1px solid var(--border) !important;
-    background: var(--background) !important;
+    background: var(--solid-form-control-bg, color-mix(in srgb, var(--card) 98%, var(--background) 2%)) !important;
     color: var(--foreground) !important;
     padding: 0 11px !important;
     font-size: 13px !important;
@@ -48,14 +48,14 @@
 .fieldInput:disabled {
     opacity: 0.75 !important;
     cursor: not-allowed !important;
-    background: color-mix(in srgb, var(--muted) 35%, transparent) !important;
+    background: var(--solid-form-control-bg-disabled, color-mix(in srgb, var(--muted) 18%, var(--card) 82%)) !important;
 }
 
 .fieldTextarea {
     width: 100% !important;
     border-radius: 8px !important;
     border: 1px solid var(--border) !important;
-    background: var(--background) !important;
+    background: var(--solid-form-control-bg, color-mix(in srgb, var(--card) 98%, var(--background) 2%)) !important;
     color: var(--foreground) !important;
     padding: 8px 11px !important;
     font-size: 13px !important;
@@ -75,7 +75,7 @@
 .fieldTextarea:disabled {
     opacity: 0.75 !important;
     cursor: not-allowed !important;
-    background: color-mix(in srgb, var(--muted) 35%, transparent) !important;
+    background: var(--solid-form-control-bg-disabled, color-mix(in srgb, var(--muted) 18%, var(--card) 82%)) !important;
 }
 
 /* InputNumber wrapper — className lands on the outer span */
@@ -92,7 +92,7 @@
     height: 34px !important;
     border-radius: 8px !important;
     border: 1px solid var(--border) !important;
-    background: var(--background) !important;
+    background: var(--solid-form-control-bg, color-mix(in srgb, var(--card) 98%, var(--background) 2%)) !important;
     color: var(--foreground) !important;
     padding: 0 11px !important;
     font-size: 13px !important;
@@ -109,7 +109,7 @@
 .fieldNumberWrapper :global(.p-inputnumber-input):disabled {
     opacity: 0.75 !important;
     cursor: not-allowed !important;
-    background: color-mix(in srgb, var(--muted) 35%, transparent) !important;
+    background: var(--solid-form-control-bg-disabled, color-mix(in srgb, var(--muted) 18%, var(--card) 82%)) !important;
 }
 
 .fieldError {

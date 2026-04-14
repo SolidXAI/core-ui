@@ -241,9 +241,7 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                 onFilterChange={handleFilterChange}
                 onComposerCancel={() => setVisibleBox(null)}
             />
-            <div className=' solid-chatter-body' style={{
-                paddingRight: '10px',
-                overflowY: 'scroll',
+            <div className='solid-chatter-body' style={{
                 height:
                     visibleBox === 'email-message'
                         ? 'calc(100vh - 196px)'

@@ -96,10 +96,12 @@ export default function MediaCardWidget({
           </div>
         )}
 
-        <div className="solid-media-card-widget__topline">
-          <span className="solid-media-card-widget__chip">{mimeLabel}</span>
-          <span className="solid-media-card-widget__size">{formatFileSize(rowData?.fileSize)}</span>
-        </div>
+        <span className="solid-media-card-widget__chip solid-media-card-widget__badge solid-media-card-widget__badge--type">
+          {mimeLabel}
+        </span>
+        <span className="solid-media-card-widget__size solid-media-card-widget__badge solid-media-card-widget__badge--size">
+          {formatFileSize(rowData?.fileSize)}
+        </span>
       </div>
 
       <div className="solid-media-card-widget__body">

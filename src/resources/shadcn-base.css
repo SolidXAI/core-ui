@@ -3251,12 +3251,100 @@ body {
   padding: 0 !important;
 }
 
+html.dark .solid-list-page-wrapper,
+[data-theme="dark"] .solid-list-page-wrapper {
+  background:
+    radial-gradient(circle at top right, color-mix(in srgb, var(--primary) 10%, transparent), transparent 26%),
+    linear-gradient(180deg, color-mix(in srgb, var(--background) 98%, #020617 2%), color-mix(in srgb, var(--background) 94%, #020617 6%)) !important;
+}
+
+html.dark .solid-list-surface,
+[data-theme="dark"] .solid-list-surface {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, #0b1220 4%), color-mix(in srgb, var(--card) 90%, #020617 10%));
+  border-color: color-mix(in srgb, var(--border) 72%, #334155 28%);
+  box-shadow:
+    0 18px 40px rgba(2, 6, 23, 0.42),
+    inset 0 1px 0 rgba(148, 163, 184, 0.04);
+}
+
+html.dark .solid-list-toolbar,
+[data-theme="dark"] .solid-list-toolbar {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--card) 94%, #172554 6%), color-mix(in srgb, var(--card) 88%, #0b1220 12%));
+  border-bottom-color: color-mix(in srgb, var(--border) 72%, #334155 28%);
+  box-shadow:
+    inset 0 -1px 0 rgba(15, 23, 42, 0.55),
+    0 10px 20px rgba(2, 6, 23, 0.18);
+}
+
+html.dark .solid-list-toolbar .view-title,
+[data-theme="dark"] .solid-list-toolbar .view-title {
+  color: color-mix(in srgb, var(--foreground) 94%, white 6%);
+  letter-spacing: -0.01em;
+}
+
+html.dark .solid-list-toolbar .solid-global-search-element,
+html.dark .solid-kanban-toolbar .solid-global-search-element,
+[data-theme="dark"] .solid-list-toolbar .solid-global-search-element,
+[data-theme="dark"] .solid-kanban-toolbar .solid-global-search-element {
+  border-color: color-mix(in srgb, var(--border) 72%, #334155 28%);
+  background: color-mix(in srgb, var(--background) 76%, var(--card) 24%);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+html.dark .solid-list-toolbar .solid-global-search-element input::placeholder,
+html.dark .solid-kanban-toolbar .solid-global-search-element input::placeholder,
+[data-theme="dark"] .solid-list-toolbar .solid-global-search-element input::placeholder,
+[data-theme="dark"] .solid-kanban-toolbar .solid-global-search-element input::placeholder {
+  color: color-mix(in srgb, var(--muted-foreground) 64%, transparent);
+}
+
+html.dark .solid-list-toolbar .p-button.p-button-secondary,
+html.dark .solid-list-toolbar .p-button.p-button-outlined,
+html.dark .solid-list-toolbar .solid-btn--secondary,
+html.dark .solid-list-toolbar .solid-btn--outline,
+html.dark .solid-list-toolbar .solid-icon-button,
+html.dark .solid-icon-button,
+html.dark .solid-list-toolbar .solid-header-cog-trigger,
+html.dark .solid-header-cog-trigger,
+[data-theme="dark"] .solid-list-toolbar .p-button.p-button-secondary,
+[data-theme="dark"] .solid-list-toolbar .p-button.p-button-outlined,
+[data-theme="dark"] .solid-list-toolbar .solid-btn--secondary,
+[data-theme="dark"] .solid-list-toolbar .solid-btn--outline,
+[data-theme="dark"] .solid-list-toolbar .solid-icon-button,
+[data-theme="dark"] .solid-icon-button,
+[data-theme="dark"] .solid-list-toolbar .solid-header-cog-trigger,
+[data-theme="dark"] .solid-header-cog-trigger {
+  background: color-mix(in srgb, var(--background) 72%, var(--card) 28%);
+  border-color: color-mix(in srgb, var(--border) 70%, #334155 30%);
+  color: color-mix(in srgb, var(--foreground) 88%, transparent);
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+html.dark .solid-list-toolbar .solid-icon-button:hover,
+html.dark .solid-icon-button:hover,
+html.dark .solid-list-toolbar .solid-header-cog-trigger:hover,
+html.dark .solid-header-cog-trigger:hover,
+[data-theme="dark"] .solid-list-toolbar .solid-icon-button:hover,
+[data-theme="dark"] .solid-icon-button:hover,
+[data-theme="dark"] .solid-list-toolbar .solid-header-cog-trigger:hover,
+[data-theme="dark"] .solid-header-cog-trigger:hover {
+  background: color-mix(in srgb, var(--accent) 48%, #172554 22%);
+  border-color: color-mix(in srgb, var(--primary) 26%, var(--border) 74%);
+  color: var(--foreground);
+}
+
 /* === Solid Notebook (Tabs 11 underline style) === */
 .solid-notebook-tablist {
   display: flex;
   border-bottom: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
   padding: 0 2px;
   gap: 0;
+}
+
+.chatter-section .solid-locale-tabs-list {
+  padding-left: 2.7rem;
 }
 
 .solid-notebook-tab-trigger {
@@ -3549,6 +3637,162 @@ body {
 .solid-paginator-btn:disabled {
   opacity: 0.46;
   cursor: not-allowed;
+}
+
+html.dark .solid-list-table-area,
+[data-theme="dark"] .solid-list-table-area {
+  padding: 0 10px 10px;
+}
+
+html.dark .solid-data-table-viewport,
+[data-theme="dark"] .solid-data-table-viewport {
+  border-radius: 0 0 12px 12px;
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--card) 90%, #0b1220 10%), color-mix(in srgb, var(--card) 84%, #020617 16%));
+}
+
+html.dark .solid-data-table-head,
+[data-theme="dark"] .solid-data-table-head {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, #172554 4%), color-mix(in srgb, var(--card) 88%, #0b1220 12%));
+  backdrop-filter: blur(10px);
+  box-shadow:
+    inset 0 -1px 0 color-mix(in srgb, var(--border) 70%, #334155 30%),
+    0 8px 18px rgba(2, 6, 23, 0.2);
+}
+
+html.dark .solid-data-table-th,
+[data-theme="dark"] .solid-data-table-th {
+  color: color-mix(in srgb, var(--foreground) 85%, white 15%);
+  border-bottom-color: color-mix(in srgb, var(--border) 72%, #334155 28%);
+}
+
+html.dark .solid-table-header-button,
+[data-theme="dark"] .solid-table-header-button {
+  color: color-mix(in srgb, var(--foreground) 84%, transparent);
+}
+
+html.dark .solid-table-header-button.is-sortable:hover,
+[data-theme="dark"] .solid-table-header-button.is-sortable:hover {
+  color: color-mix(in srgb, var(--foreground) 96%, white 4%);
+}
+
+html.dark .solid-data-table-td,
+[data-theme="dark"] .solid-data-table-td {
+  color: color-mix(in srgb, var(--foreground) 90%, #dbeafe 10%);
+}
+
+html.dark .solid-data-table-row,
+[data-theme="dark"] .solid-data-table-row {
+  border-top-color: color-mix(in srgb, var(--border) 62%, #334155 38%);
+}
+
+html.dark .solid-data-table-row:nth-child(even),
+[data-theme="dark"] .solid-data-table-row:nth-child(even) {
+  background: color-mix(in srgb, var(--accent) 12%, transparent);
+}
+
+html.dark .solid-data-table-row:hover,
+[data-theme="dark"] .solid-data-table-row:hover {
+  background: color-mix(in srgb, var(--accent) 34%, #1e293b 18%);
+}
+
+html.dark .solid-data-table-row:has(input[type="checkbox"]:checked),
+[data-theme="dark"] .solid-data-table-row:has(input[type="checkbox"]:checked) {
+  background: color-mix(in srgb, var(--primary) 10%, var(--accent) 24%);
+  box-shadow: inset 2px 0 0 color-mix(in srgb, var(--primary) 86%, white 14%);
+}
+
+html.dark .solid-datatable-wrapper td a:not(.solid-inline-row-button):not(.solid-row-menu-trigger),
+[data-theme="dark"] .solid-datatable-wrapper td a:not(.solid-inline-row-button):not(.solid-row-menu-trigger) {
+  color: color-mix(in srgb, var(--primary) 68%, var(--foreground) 32%);
+  text-decoration: none;
+  transition: color 120ms ease, opacity 120ms ease;
+}
+
+html.dark .solid-datatable-wrapper td a:not(.solid-inline-row-button):not(.solid-row-menu-trigger):hover,
+[data-theme="dark"] .solid-datatable-wrapper td a:not(.solid-inline-row-button):not(.solid-row-menu-trigger):hover {
+  color: color-mix(in srgb, var(--primary) 82%, white 18%);
+}
+
+html.dark .solid-data-table-root input[type="checkbox"],
+[data-theme="dark"] .solid-data-table-root input[type="checkbox"] {
+  appearance: none;
+  border: 1px solid color-mix(in srgb, var(--border) 66%, #475569 34%);
+  border-radius: 4px;
+  background: color-mix(in srgb, var(--background) 70%, var(--card) 30%);
+  display: inline-grid;
+  place-items: center;
+  margin: 0;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  transition: background 120ms ease, border-color 120ms ease, box-shadow 120ms ease, transform 120ms ease;
+}
+
+html.dark .solid-data-table-root input[type="checkbox"]::before,
+[data-theme="dark"] .solid-data-table-root input[type="checkbox"]::before {
+  content: "";
+  width: 8px;
+  height: 8px;
+  transform: scale(0);
+  transition: transform 120ms ease;
+  clip-path: polygon(14% 44%, 0 59%, 41% 100%, 100% 20%, 84% 6%, 38% 62%);
+  background: var(--primary-foreground);
+}
+
+html.dark .solid-data-table-root input[type="checkbox"]:hover,
+[data-theme="dark"] .solid-data-table-root input[type="checkbox"]:hover {
+  border-color: color-mix(in srgb, var(--primary) 34%, var(--border) 66%);
+}
+
+html.dark .solid-data-table-root input[type="checkbox"]:focus-visible,
+[data-theme="dark"] .solid-data-table-root input[type="checkbox"]:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 34%, transparent);
+}
+
+html.dark .solid-data-table-root input[type="checkbox"]:checked,
+[data-theme="dark"] .solid-data-table-root input[type="checkbox"]:checked {
+  background: color-mix(in srgb, var(--primary) 88%, #93c5fd 12%);
+  border-color: color-mix(in srgb, var(--primary) 72%, white 28%);
+  box-shadow:
+    0 0 0 3px color-mix(in srgb, var(--ring) 26%, transparent),
+    inset 0 1px 0 rgba(255, 255, 255, 0.12);
+}
+
+html.dark .solid-data-table-root input[type="checkbox"]:checked::before,
+[data-theme="dark"] .solid-data-table-root input[type="checkbox"]:checked::before {
+  transform: scale(1);
+}
+
+html.dark .solid-table-paginator,
+[data-theme="dark"] .solid-table-paginator {
+  background:
+    linear-gradient(180deg, color-mix(in srgb, var(--card) 90%, #0b1220 10%), color-mix(in srgb, var(--card) 84%, #020617 16%));
+  border-color: color-mix(in srgb, var(--border) 72%, #334155 28%) !important;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
+}
+
+html.dark .solid-paginator-label,
+html.dark .solid-paginator-report,
+[data-theme="dark"] .solid-paginator-label,
+[data-theme="dark"] .solid-paginator-report {
+  color: color-mix(in srgb, var(--foreground) 72%, transparent);
+}
+
+html.dark .solid-paginator-select,
+html.dark .solid-paginator-btn,
+[data-theme="dark"] .solid-paginator-select,
+[data-theme="dark"] .solid-paginator-btn {
+  background: color-mix(in srgb, var(--background) 74%, var(--card) 26%);
+  border-color: color-mix(in srgb, var(--border) 70%, #334155 30%);
+  color: color-mix(in srgb, var(--foreground) 88%, transparent);
+}
+
+html.dark .solid-paginator-btn:hover:not(:disabled),
+[data-theme="dark"] .solid-paginator-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, var(--accent) 46%, #172554 20%);
+  border-color: color-mix(in srgb, var(--primary) 26%, var(--border) 74%);
+  color: var(--foreground);
 }
 
 .solid-treetable-wrapper {

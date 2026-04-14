@@ -19,8 +19,11 @@ type SolidMenuItem = {
 
 const defaultMenuKey = env("NEXT_PUBLIC_DEFAULT_MENU_KEY");
 const SIDEBAR_STORAGE_KEY = "solidx.sidebar.collapsed";
+const SELECTED_WORKSPACE_STORAGE_KEY = "solidx.sidebar.selected-workspace";
 const SIDEBAR_TOGGLE_EVENT = "solidx:sidebar-toggle";
 const DESKTOP_SIDEBAR_WIDTH = "272px";
+const DEFAULT_WORKSPACE_TITLE = "Solid Core";
+const DEFAULT_WORKSPACE_KEY = "solid-core";
 
 function filterMenuItems(items: SolidMenuItem[], query: string): SolidMenuItem[] {
     const normalizedQuery = query.trim().toLowerCase();
@@ -35,6 +38,15 @@ function filterMenuItems(items: SolidMenuItem[], query: string): SolidMenuItem[]
         }
     });
     return next;
+}
+
+function resolveDefaultWorkspace(items: SolidMenuItem[]) {
+    return (
+        items.find((item) => item.key === DEFAULT_WORKSPACE_KEY) ||
+        items.find((item) => item.title.trim().toLowerCase() === DEFAULT_WORKSPACE_TITLE.toLowerCase()) ||
+        items.find((item) => item.key === defaultMenuKey) ||
+        items[0]
+    );
 }
 
 const SidebarMenuTree = ({
@@ -138,7 +150,10 @@ const AppSidebar = () => {
 
     const [searchTerm, setSearchTerm] = useState("");
     const [workspaceOpen, setWorkspaceOpen] = useState(false);
-    const [selectedWorkspaceKey, setSelectedWorkspaceKey] = useState("");
+    const [selectedWorkspaceKey, setSelectedWorkspaceKey] = useState<string>(() => {
+        if (typeof window === "undefined") return "";
+        return window.localStorage.getItem(SELECTED_WORKSPACE_STORAGE_KEY) || "";
+    });
     const [isDesktop, setIsDesktop] = useState<boolean>(typeof window === "undefined" ? true : window.innerWidth > 1199);
     const [isCollapsed, setIsCollapsed] = useState<boolean>(() => {
         if (typeof window === "undefined") return false;
@@ -176,15 +191,29 @@ const AppSidebar = () => {
     }, [isCollapsed]);
 
     useEffect(() => {
+        if (typeof window === "undefined") return;
+        if (!selectedWorkspaceKey) {
+            window.localStorage.removeItem(SELECTED_WORKSPACE_STORAGE_KEY);
+            return;
+        }
+        window.localStorage.setItem(SELECTED_WORKSPACE_STORAGE_KEY, selectedWorkspaceKey);
+    }, [selectedWorkspaceKey]);
+
+    useEffect(() => {
         const width = isDesktop ? (isCollapsed ? "0px" : DESKTOP_SIDEBAR_WIDTH) : "0px";
         document.documentElement.style.setProperty("--solid-sidebar-width", width);
     }, [isDesktop, isCollapsed]);
 
     useEffect(() => {
         if (!menu?.data?.length) return;
-        const defaultWorkspace = menu.data.find((m: any) => m.key === defaultMenuKey) || menu.data[0];
-        setSelectedWorkspaceKey((prev) => prev || defaultWorkspace?.key || "");
-    }, [menu]);
+        const defaultWorkspace = resolveDefaultWorkspace(menu.data);
+        const hasSelectedWorkspace = menu.data.some((workspace: SolidMenuItem) => workspace.key === selectedWorkspaceKey);
+        const nextWorkspaceKey = hasSelectedWorkspace ? selectedWorkspaceKey : defaultWorkspace?.key || "";
+
+        if (nextWorkspaceKey !== selectedWorkspaceKey) {
+            setSelectedWorkspaceKey(nextWorkspaceKey);
+        }
+    }, [menu, selectedWorkspaceKey]);
 
     useEffect(() => {
         if (!isDesktop) {
