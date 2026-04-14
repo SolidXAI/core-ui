@@ -1,0 +1,3 @@
+# no such endpoints exist, need to called user get with populate api key filter
+useGetSelfApiKeysQuery() → GET /iam/api-keys (self mode)
+useGetUserApiKeysQuery(userId) → GET /users/:id/api-keys (admin mode)

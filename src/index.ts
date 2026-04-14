@@ -515,6 +515,16 @@ export type {
 } from './types';
 
 export { GeneralSettings } from './components/common/GeneralSettings';
+export { ApiKeysTab } from './components/core/users/ApiKeysTab';
+export {
+    apiKeyApi,
+    useGetUserApiKeysQuery,
+    useCreateApiKeyMutation,
+    useUpdateApiKeyMutation,
+    type ApiKeyRecord,
+    type CreateApiKeyBody,
+    type CreateApiKeyResponse,
+} from './redux/api/apiKeyApi';
 export { SolidErrorPage } from './components/common/SolidErrorPage';
 export { SolidNotFoundPage } from './components/common/SolidNotFoundPage';
 
