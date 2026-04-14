@@ -7,6 +7,10 @@
   background: transparent;
 }
 
+.solid-locale-panel--single {
+  margin-left: 0;
+}
+
 .solid-locale-tabs {
   display: flex;
   flex-direction: column;

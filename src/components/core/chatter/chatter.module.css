@@ -3,6 +3,10 @@
     border-bottom: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
 }
 
+.chatterTitleWithLabel {
+    padding-left: 2.4rem;
+}
+
 .chatterMessageComposer .chatterMessageInput {
     background-color: var(--background);
     border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);

@@ -456,7 +456,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [openLightbox, setOpenLightbox] = useState(false);
     const [lightboxUrls, setLightboxUrls] = useState([]);
     const [isShowChatter, setShowChatter] = useState(false);
-    const [chatterLocaleWidth, setChatterLocaleWidth] = useState(320);
+    const [chatterLocaleWidth, setChatterLocaleWidth] = useState(360);
     const [isResizingChatterLocale, setIsResizingChatterLocale] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -509,7 +509,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const stored = localStorage.getItem('chatter_locale_width');
         if (stored) {
             const parsed = parseInt(stored, 10);
-            const clampedWidth = Math.max(280, Math.min(parsed, 360));
+            const clampedWidth = Math.max(320, Math.min(parsed, 420));
             setChatterLocaleWidth(clampedWidth);
         }
     }, []);
@@ -517,7 +517,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
         const handleMouseMove = (e: MouseEvent) => {
             if (!isResizingChatterLocale) return;
             const newWidth = window.innerWidth - e.clientX;
-            const clampedWidth = Math.max(280, Math.min(newWidth, 360));
+            const clampedWidth = Math.max(320, Math.min(newWidth, 420));
             setChatterLocaleWidth(clampedWidth);
             localStorage.setItem('chatter_locale_width', clampedWidth.toString());
         };

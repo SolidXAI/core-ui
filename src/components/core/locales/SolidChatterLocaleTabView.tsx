@@ -101,11 +101,29 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
             refreshChatterMessage={refreshChatterMessage}
             setRefreshChatterMessage={setRefreshChatterMessage}
             actionsAllowed={actionsAllowed}
+            title={showWorkflowInfo ? undefined : 'Audit Trail'}
           />
         </div>
       )
     }
   ];
+
+  if (!showWorkflowInfo) {
+    return (
+      <div className="solid-locale-panel solid-locale-panel--single">
+        <div className="solid-locale-tab-content">
+          <SolidChatter
+            modelSingularName={solidFormViewMetaData?.data?.solidView?.model?.singularName}
+            id={id}
+            refreshChatterMessage={refreshChatterMessage}
+            setRefreshChatterMessage={setRefreshChatterMessage}
+            actionsAllowed={actionsAllowed}
+            title="Audit Trail"
+          />
+        </div>
+      </div>
+    );
+  }
 
   return (
     <div className="solid-locale-panel">
@@ -116,7 +134,7 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
         tabs={tabs}
         value={activeTabValue}
         onValueChange={setActiveTabValue}
-        tabPosition='center'
+        tabPosition='left'
       />
     </div>
   );
