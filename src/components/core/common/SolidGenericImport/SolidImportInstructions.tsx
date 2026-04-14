@@ -73,15 +73,15 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
                 ) : (
                     <div className={`solid-import-panel-grid ${customInstructions.length === 0 ? 'is-single-column' : ''}`}>
                         <div className={`solid-import-panel solid-import-panel-main ${customInstructions.length > 0 ? 'has-side-panel' : 'is-full-width'}`}>
-                                <h5 className='solid-primary-black-text solid-import-section-title'>Standard Instructions</h5>
+                                <h5 className='solid-import-section-title'>Standard Instructions</h5>
                                 <ol className='solid-import-instruction-list'>
                                     <li>
-                                        <p className='font-medium solid-primary-black-text solid-import-instruction-title'>Download a starter template</p>
-                                        <div className='flex gap-3 flex-wrap'>
-                                            <SolidButton type="button" variant="outline" size="small" leftIcon={<Download size={14} />} onClick={() => handleTemplateDownload('csv')}>
+                                        <p className='solid-import-instruction-title'>Download a starter template</p>
+                                        <div className='solid-import-template-actions'>
+                                            <SolidButton type="button" variant="outline" size="sm" leftIcon={<Download size={14} />} onClick={() => handleTemplateDownload('csv')}>
                                                 CSV Template
                                             </SolidButton>
-                                            <SolidButton type="button" variant="outline" size="small" leftIcon={<FileSpreadsheet size={14} />} onClick={() => handleTemplateDownload('excel')}>
+                                            <SolidButton type="button" variant="outline" size="sm" leftIcon={<FileSpreadsheet size={14} />} onClick={() => handleTemplateDownload('excel')}>
                                                 Excel Template
                                             </SolidButton>
                                         </div>
@@ -98,18 +98,17 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
 
                                                     const rendered = (
                                                         <li key={key} className='solid-import-instruction-item'>
-                                                            <p className='font-medium solid-primary-black-text mb-1 solid-import-instruction-title'>
+                                                            <p className='solid-import-instruction-title'>
                                                                 {titleCaseKey}
                                                             </p>
-                                                            <div className='flex flex-wrap solid-import-instruction-copy'>
+                                                            <div className='solid-import-instruction-copy solid-import-inline-token-list'>
                                                                 {values.map((item: any, i) => (
-                                                                    <span key={i} className='mr-2'>
+                                                                    <span key={i} className='solid-import-inline-token'>
                                                                         {typeof item === 'string'
                                                                             ? item
                                                                             : item?.fieldName
                                                                                 ? `${item.fieldName} (Regex: ${item.regexPattern})`
                                                                                 : JSON.stringify(item)}
-                                                                        {i < values.length - 1 ? ', ' : ''}
                                                                     </span>
                                                                 ))}
                                                             </div>
@@ -138,7 +137,7 @@ export const SolidImportInstructions = ({ setImportStep, listViewMetaData }: any
             </div>
             <div className='solid-import-actions'>
                 <p className="solid-import-actions-copy">Review the template guidance before uploading your file.</p>
-                <SolidButton type="button" size='small' onClick={() => setImportStep(2)} rightIcon={<MoveRight size={14} />}>
+                <SolidButton type="button" size='sm' onClick={() => setImportStep(2)} rightIcon={<MoveRight size={14} />}>
                     Continue
                 </SolidButton>
             </div>

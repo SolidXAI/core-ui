@@ -57,7 +57,7 @@ export const SolidFormUserViewLayout = ({ solidFormViewMetaData, setLayoutDialog
                     <SolidButton type="submit" label="Apply" size="sm" />
                     <SolidButton
                         type="button"
-                        outlined
+                        variant="outline"
                         label="Cancel"
                         size="sm"
                         onClick={() => setLayoutDialogVisible(false)}

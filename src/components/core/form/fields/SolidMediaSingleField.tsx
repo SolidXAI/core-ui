@@ -365,34 +365,41 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                     <SolidMessage severity="error" text={fileSizeError?.toString()} />
                 }
                 {fileDetails && (
-                    <div className="solid-file-upload-wrapper mt-4">
-                        <div className="flex align-items-center md:gap-2">
+                    <div className={`${styles.mediaAttachmentCard} mt-4`}>
+                        <div className={`${styles.mediaAttachmentRow} flex align-items-center md:gap-2`}>
                             <FileReaderExt fileDetails={fileDetails} />
-                                    <div className="w-full flex flex-column gap-1">
-                                        <div className="flex align-items-start justify-content-between">
-                                            <p className="font-normal w-9 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails)}>{fileDetails.name}</p>
-                                            <div className="flex align-items-center gap-2">
-                                                <button
-                                                    type="button"
-                                                    className="solid-file-icon-btn"
-                                                    disabled={isFieldDisabled || isFieldReadonly}
-                                                    aria-label="Download file"
-                                                    onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
-                                                >
-                                                    <SolidIcon name="si-download" aria-hidden />
-                                                </button>
-                                                <button
-                                                    type="button"
-                                                    className="solid-file-icon-btn is-danger"
-                                                    disabled={isFieldDisabled || isFieldReadonly}
-                                                    aria-label="Remove file"
-                                                    onClick={() => setDeleteImageDialogVisible(true)}
-                                                >
-                                                    <SolidIcon name="si-times" aria-hidden />
-                                                </button>
-                                            </div>
-                                        </div>
-                                <div className="flex align-items-center gap-2 text-sm">
+                            <div className={`${styles.mediaAttachmentMeta} w-full`}>
+                                <div className="flex align-items-start justify-content-between gap-3">
+                                    <button
+                                        type="button"
+                                        className={styles.mediaAttachmentName}
+                                        onClick={() => handleFileView(fileDetails)}
+                                        title={fileDetails.name}
+                                    >
+                                        {fileDetails.name}
+                                    </button>
+                                    <div className={`${styles.mediaAttachmentActions} flex align-items-center gap-2`}>
+                                        <button
+                                            type="button"
+                                            className="solid-file-icon-btn"
+                                            disabled={isFieldDisabled || isFieldReadonly}
+                                            aria-label="Download file"
+                                            onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
+                                        >
+                                            <SolidIcon name="si-download" aria-hidden />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="solid-file-icon-btn is-danger"
+                                            disabled={isFieldDisabled || isFieldReadonly}
+                                            aria-label="Remove file"
+                                            onClick={() => setDeleteImageDialogVisible(true)}
+                                        >
+                                            <SolidIcon name="si-times" aria-hidden />
+                                        </button>
+                                    </div>
+                                </div>
+                                <div className={styles.mediaAttachmentSize}>
                                     {fileDetails && formatFileSize(fileDetails.fileSize)}
                                 </div>
                             </div>
@@ -532,13 +539,20 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
             }
 
             {fileDetails && (
-                <div className="solid-file-view-wrapper mt-4">
-                    <div className="flex align-items-center md:gap-2">
+                <div className={`${styles.mediaAttachmentCard} ${styles.mediaAttachmentCardView} mt-4`}>
+                    <div className={`${styles.mediaAttachmentRow} flex align-items-center md:gap-2`}>
                         <FileReaderExt fileDetails={fileDetails} />
-                        <div className="w-full flex flex-column gap-1">
-                            <div className="flex align-items-start justify-content-between">
-                                <p className="font-normal w-9 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails)}>{fileDetails.name}</p>
-                                <div className="flex align-items-center md:gap-2">
+                        <div className={`${styles.mediaAttachmentMeta} w-full`}>
+                            <div className="flex align-items-start justify-content-between gap-3">
+                                <button
+                                    type="button"
+                                    className={styles.mediaAttachmentName}
+                                    onClick={() => handleFileView(fileDetails)}
+                                    title={fileDetails.name}
+                                >
+                                    {fileDetails.name}
+                                </button>
+                                <div className={`${styles.mediaAttachmentActions} flex align-items-center md:gap-2`}>
                                     <button
                                         type="button"
                                         className="solid-file-icon-btn"
@@ -549,7 +563,7 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
                                     </button>
                                 </div>
                             </div>
-                            <div className="flex align-items-center gap-2 text-sm">
+                            <div className={styles.mediaAttachmentSize}>
                                 {fileDetails && formatFileSize(fileDetails.fileSize)}
                             </div>
                         </div>

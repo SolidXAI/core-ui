@@ -1768,18 +1768,21 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 }
 
                 <SolidDialog
-                    visible={isDeleteDialogVisible}
-                    header="Confirm Delete"
+                    open={isDeleteDialogVisible}
+                    onOpenChange={setDeleteDialogVisible}
                     className="solid-confirm-dialog"
-                    onHide={() => setDeleteDialogVisible(false)}
-                    footer={
-                        <div className="flex justify-content-center gap-2">
-                            <SolidButton label="Yes" icon="si si-check" className='small-button' severity="danger" autoFocus onClick={() => handleDeleteEntity()} />
-                            <SolidButton label="No" icon="si si-times" className='small-button' variant="outline" onClick={onDeleteClose} />
-                        </div>
-                    }
                 >
-                    <p>Are you sure you want to delete?</p>
+                    <SolidDialogHeader className="solid-field-confirm-header">
+                        <SolidDialogTitle>Confirm Delete</SolidDialogTitle>
+                        <SolidDialogClose />
+                    </SolidDialogHeader>
+                    <SolidDialogBody className="solid-field-confirm-dialog-body">
+                        <p className="solid-field-confirm-message">Are you sure you want to delete?</p>
+                    </SolidDialogBody>
+                    <div className="solid-radix-dialog-footer solid-field-confirm-actions">
+                        <SolidButton label="Yes" icon="si si-check" variant="destructive" autoFocus onClick={() => handleDeleteEntity()} />
+                        <SolidButton label="No" icon="si si-times" variant="outline" onClick={onDeleteClose} />
+                    </div>
                 </SolidDialog>
                 <SolidDialog
                     open={isLayoutDialogVisible}

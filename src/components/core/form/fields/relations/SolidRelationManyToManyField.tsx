@@ -5,7 +5,7 @@ import { getExtensionComponent } from "../../../../../helpers/registry";
 import { SolidAutocomplete } from "../../../../shad-cn-ui/SolidAutocomplete";
 import { SolidButton } from "../../../../shad-cn-ui/SolidButton";
 import { SolidCheckbox } from "../../../../shad-cn-ui/SolidCheckbox";
-import { SolidDialog } from "../../../../shad-cn-ui/SolidDialog";
+import { SolidDialog, SolidDialogBody, SolidDialogClose, SolidDialogHeader, SolidDialogTitle } from "../../../../shad-cn-ui/SolidDialog";
 import { SolidMessage } from "../../../../shad-cn-ui/SolidMessage";
 import { SolidPanel } from "../../../../shad-cn-ui/SolidPanel";
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
@@ -236,7 +236,7 @@ export const DefaultRelationManyToManyAutoCompleteFormEditWidget = ({ formik, fi
                                     variant="outline"
                                     aria-label="Filter"
                                     type="button"
-                                    size="small"
+                                    size="sm"
                                     onClick={() => setVisibleCreateDialog(true)}
                                     className="custom-add-button"
                                     disabled={isUnsaved}
@@ -374,7 +374,7 @@ export const DefaultRelationManyToManyCheckBoxFormEditWidget = ({ formik, fieldC
                             variant="outline"
                             aria-label="Filter"
                             type="button"
-                            size="small"
+                            size="sm"
                             onClick={() => setVisibleCreateDialog(true)}
                             className="custom-add-button"
                             disabled={isUnsaved}
@@ -628,81 +628,79 @@ export const DefaultRelationManyToManyListFormEditWidget = ({ formik, fieldConte
                 />
             )}
 
-                <SolidDialog
-                    header={`Link existing ${fieldLabel}`}
-                    showHeader={true}
-                    visible={visibleLinkDialog}
-                    style={{ width: '30vw', minWidth: 320 }}
-                    onHide={() => setVisibleLinkDialog(false)}
-                footer={
-                    <div className="flex gap-2 justify-content-end">
-                        <SolidButton
-                            label="Link"
-                            size="small"
-                            disabled={!selectedLinkItem || isLinking}
-                            loading={isLinking}
-                            onClick={handleLinkConfirm}
-                        />
-                        <SolidButton
-                            label="Cancel"
-                            size="small"
-                            variant="outline"
-                            className="bg-primary-reverse"
-                            onClick={() => setVisibleLinkDialog(false)}
+            <SolidDialog
+                open={visibleLinkDialog}
+                onOpenChange={setVisibleLinkDialog}
+                style={{ width: '30vw', minWidth: 320 }}
+            >
+                <SolidDialogHeader>
+                    <SolidDialogTitle>{`Link existing ${fieldLabel}`}</SolidDialogTitle>
+                    <SolidDialogClose />
+                </SolidDialogHeader>
+                <SolidDialogBody>
+                    <div className="flex flex-column gap-2 pt-2">
+                        <label className="form-field-label">
+                            Search {fieldLabel}
+                        </label>
+                        <SolidAutocomplete
+                            field="label"
+                            value={selectedLinkItem}
+                            suggestions={suggestions}
+                            completeMethod={handleLinkSearch}
+                            onChange={({ value }: { value: any }) => setSelectedLinkItem(value)}
+                            onSelect={({ value }: { value: any }) => setSelectedLinkItem(value)}
+                            placeholder={`Type to search...`}
+                            className="w-full"
+                            dropdown
                         />
                     </div>
-                }
-            >
-                <div className="flex flex-column gap-2 pt-2">
-                    <label className="form-field-label">
-                        Search {fieldLabel}
-                    </label>
-                    <SolidAutocomplete
-                        field="label"
-                        value={selectedLinkItem}
-                        suggestions={suggestions}
-                        completeMethod={handleLinkSearch}
-                        onChange={({ value }: { value: any }) => setSelectedLinkItem(value)}
-                        onSelect={({ value }: { value: any }) => setSelectedLinkItem(value)}
-                        placeholder={`Type to search...`}
-                        className="w-full"
-                        dropdown
+                </SolidDialogBody>
+                <div className="solid-radix-dialog-footer flex gap-2 justify-content-end">
+                    <SolidButton
+                        label="Link"
+                        size="sm"
+                        disabled={!selectedLinkItem || isLinking}
+                        loading={isLinking}
+                        onClick={handleLinkConfirm}
+                    />
+                    <SolidButton
+                        label="Cancel"
+                        size="sm"
+                        variant="outline"
+                        className="bg-primary-reverse"
+                        onClick={() => setVisibleLinkDialog(false)}
                     />
                 </div>
             </SolidDialog>
 
 
             <SolidDialog
-                header="Save Required"
-                headerClassName="py-2"
-                contentClassName="px-0 pb-0"
-                className="solid-confirm-dialog"
-                contentStyle={{ borderRadius: 6 }}
-                visible={showSaveParentEntityConfirmationPopup}
-                style={{ width: '20vw' }}
-                onHide={() => {
-                    if (!showSaveParentEntityConfirmationPopup) return;
-                    setShowSaveParentEntityConfirmationPopup(false);
-                }}
+                open={showSaveParentEntityConfirmationPopup}
+                onOpenChange={setShowSaveParentEntityConfirmationPopup}
+                className="solid-confirm-dialog solid-field-confirm-dialog"
+                style={{ width: "min(420px, calc(100vw - 2rem))" }}
             >
-                <div className="p-4">
-                    <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
-                        Before Creating {fieldLabel} you need to save{' '}
+                <SolidDialogHeader className="solid-field-confirm-header">
+                    <SolidDialogTitle>Save Required</SolidDialogTitle>
+                    <SolidDialogClose />
+                </SolidDialogHeader>
+                <SolidDialogBody className="solid-field-confirm-dialog-body">
+                    <p className="solid-field-confirm-message">
+                        Before creating {fieldLabel}, you need to save{" "}
                         {solidFormViewMetaData?.data?.solidView?.model?.displayName
-                            ? solidFormViewMetaData?.data?.solidView?.model?.displayName
+                            ? solidFormViewMetaData.data.solidView.model.displayName
                             : capitalize(fieldContext.modelName)}
-                        . Please click save if you wish to proceed?
+                        . Please save first if you want to continue.
                     </p>
-                    <div className="flex align-items-center justify-content-start gap-2 mt-3">
-                        <SolidButton label="Save" size="small" onClick={saveParentEntity} />
-                        <SolidButton
-                            label="Cancel"
-                            size="small"
-                            onClick={() => setShowSaveParentEntityConfirmationPopup(false)}
-                            variant="outline"
-                            className="bg-primary-reverse"
-                        />
-                    </div>
+                </SolidDialogBody>
+                <div className="solid-radix-dialog-footer solid-field-confirm-actions">
+                    <SolidButton label="Save" size="sm" onClick={saveParentEntity} autoFocus />
+                    <SolidButton
+                        label="Cancel"
+                        size="sm"
+                        onClick={() => setShowSaveParentEntityConfirmationPopup(false)}
+                        variant="outline"
+                    />
                 </div>
             </SolidDialog>
         </div>

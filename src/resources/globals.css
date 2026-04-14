@@ -1953,19 +1953,50 @@ li.header-li-px {
 }
 
 .solid-dropzone {
-  border-radius: 0.5rem;
-  border: 1px dashed var(--solid-primary-border);
+  border-radius: 0.875rem;
+  border: 1px dashed color-mix(in srgb, var(--border, var(--solid-primary-border)) 78%, transparent);
   background: var(--solid-dropzone-bg);
   display: flex;
   align-items: center;
   justify-content: center;
   flex-direction: column;
-  padding: 20px;
+  gap: 0.45rem;
+  min-height: 108px;
+  padding: 22px 18px;
+  box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.02);
+  transition: border-color 0.15s ease, background-color 0.15s ease, box-shadow 0.15s ease;
 }
 
-.solid-dropzone p {
-  color: var(--solid-grey-500) !important;
-  font-size: 10px !important;
+.solid-dropzone:hover {
+  border-color: color-mix(in srgb, var(--primary-color, var(--primary)) 34%, var(--border, var(--solid-primary-border)));
+  background: color-mix(in srgb, var(--solid-dropzone-bg) 78%, var(--card, var(--surface-card)) 22%);
+}
+
+.solid-dropzone-icon {
+  color: color-mix(in srgb, var(--muted-foreground, var(--text-color-secondary)) 82%, transparent);
+}
+
+.solid-dropzone-title {
+  margin: 0;
+  text-align: center;
+  color: var(--foreground, var(--text-color));
+  font-size: 14px;
+  font-weight: 600;
+  line-height: 1.35;
+  letter-spacing: -0.01em;
+}
+
+.solid-dropzone-title-accent {
+  color: var(--primary-color, var(--primary));
+}
+
+.solid-dropzone-meta {
+  margin: 0 0 0.2rem;
+  text-align: center;
+  color: var(--muted-foreground, var(--text-color-secondary)) !important;
+  font-size: 11px !important;
+  line-height: 1.45;
+  letter-spacing: 0.01em;
 }
 
 .solid-file-upload-wrapper {

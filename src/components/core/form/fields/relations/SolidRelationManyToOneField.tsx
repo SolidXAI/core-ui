@@ -516,22 +516,19 @@ export const RenderSolidFormEmbededView = ({ formik, fieldContext, customCreateH
                     variant="outline"
                     aria-label="Filter"
                     type="button"
-                    size="small"
+                    size="sm"
                     onClick={() => setvisibleCreateRelationEntity(true)}
                     className="custom-add-button"
                 />
             </div>
             <SolidDialog
-                visible={visibleCreateRelationEntity}
-                showHeader={false}
+                open={visibleCreateRelationEntity}
+                onOpenChange={setvisibleCreateRelationEntity}
                 style={{
                     width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw",
                     height: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.height ?? "auto"
                 }}
-                onHide={() => {
-                    if (!visibleCreateRelationEntity) return;
-                    setvisibleCreateRelationEntity(false);
-                }}
+                showHeader={false}
                 className="solid-dialog"
                 breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
 
