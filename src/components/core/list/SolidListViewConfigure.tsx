@@ -271,7 +271,7 @@ export const SolidListViewConfigure = (
                                             </>
                                         )}
                                         <SolidDropdownMenuLabel>Row Spacing</SolidDropdownMenuLabel>
-                                        <SolidDropdownMenuRadioGroup value={size} onValueChange={(value) => setSize(value)}>
+                                        <SolidDropdownMenuRadioGroup value={size} onValueChange={(value: string) => setSize(value)}>
                                             {sizeOptions.map((option: any) => (
                                                 <SolidDropdownMenuRadioItem key={option.value} value={option.value}>
                                                     {option.label}

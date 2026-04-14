@@ -104,6 +104,12 @@ export { permissionExpression } from './helpers/permissions';
 export { revalidateTag } from './helpers/revalidate';
 export { hasAnyRole } from './helpers/rolesHelper';
 export { registerExtensionComponent, registerExtensionFunction } from './helpers/registry';
+export {
+    ExtensionComponentTypes,
+    ExtensionFunctionTypes,
+    type ExtensionComponentType,
+    type ExtensionFunctionType,
+} from "./types/extension-registry";
 export { env } from './adapters/env';
 export { logger } from './helpers/logger';
 
@@ -399,7 +405,70 @@ export { default as SolidInitialLoginOtp } from './components/auth/SolidInitialL
 export { default as SolidInitiateRegisterOtp } from './components/auth/SolidInitiateRegisterOtp';
 export { GoogleAuthChecking } from './components/auth/GoogleAuthChecking';
 export { ForgotPasswordThankYou } from './components/auth/ForgotPasswordThankYou';
-export { SolidButton, SolidTab, SolidTabGroup, SolidToast } from './components/shad-cn-ui';
+export { 
+  SolidButton, 
+  SolidAccordion,
+  SolidAccordionItem, 
+  SolidAccordionContent, 
+  SolidAccordionTrigger,
+  SolidDropdownMenu,
+  SolidDropdownMenuCheckboxItem,
+  SolidDropdownMenuContent,
+  SolidDropdownMenuItem,
+  SolidDropdownMenuLabel,
+  SolidDropdownMenuRadioGroup,
+  SolidDropdownMenuRadioItem,
+  SolidDropdownMenuSeparator,
+  SolidDropdownMenuSub,
+  SolidDropdownMenuSubContent,
+  SolidDropdownMenuSubTrigger,
+  SolidDropdownMenuTrigger,
+  SolidInput,
+  SolidNumberInput,
+  SolidAutocomplete,
+  SolidPopover, 
+  SolidPopoverContent, 
+  SolidPopoverTrigger,
+  SolidSelect,
+  SolidTab, 
+  SolidTabGroup,
+  SolidDialog,
+  SolidDialogBody,
+  SolidDialogClose,
+  SolidDialogDescription,
+  SolidDialogFooter,
+  SolidDialogHeader,
+  SolidDialogSeparator,
+  SolidDialogTitle,
+  SolidTextarea,
+  SolidPasswordInput,
+  SolidCheckbox,
+  SolidSwitch,
+  SolidSegmentedControl,
+  SolidRadioGroup,
+  SolidDatePicker,
+  SolidPanel,
+  SolidConfirmDialog,
+  SolidProgressBar,
+  SolidSpinner,
+  SolidToast,
+  SolidSlider,
+  SolidTag,
+  SolidMessage,
+  SolidDivider,
+  SolidOtpInput,
+  SolidTooltip, 
+  SolidTooltipContent, 
+  SolidTooltipTrigger,
+  SolidCodeEditor as SolidShadCodeEditor,
+  SolidRichTextEditor,
+  SolidLightbox,
+  SolidIcon,
+  type SolidIconName,
+  type SolidIconMeta,
+  parseSolidIconMeta,
+  normalizeSolidIconName
+} from './components/shad-cn-ui';
 
 // redux
 export { default as authenticationReducer } from './redux/features/authSlice';
@@ -408,7 +477,7 @@ export { default as navbarReducer } from './redux/features/navbarSlice';
 export { default as popupReducer } from './redux/features/popupSlice';
 export { closePopup, openPopup } from './redux/features/popupSlice';
 export { default as toastReducer } from './redux/features/toastSlice';
-export { showToast as showGlobalToast, clearToast } from './redux/features/toastSlice';
+export { showToast, clearToast } from './redux/features/toastSlice';
 export type { ToastMessage, ToastSeverity } from './redux/features/toastSlice';
 export { default as themeReducer } from './redux/features/themeSlice';
 export { default as userReducer } from './redux/features/userSlice';

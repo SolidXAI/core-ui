@@ -12,6 +12,7 @@ type SolidSelectProps = {
   className?: string;
   disabled?: boolean;
   onChange?: (event: { value: any }) => void;
+  id?: string;
 };
 
 function cx(...parts: Array<string | false | undefined>) {
@@ -27,6 +28,7 @@ export function SolidSelect({
   className,
   disabled,
   onChange,
+  id,
 }: SolidSelectProps) {
   const normalized = options.map((option, index) => ({
     key: String(index),
@@ -40,6 +42,7 @@ export function SolidSelect({
   return (
     <div className={cx("solid-select-wrap", className)}>
       <select
+        id={id}
         className="solid-select"
         value={selectedKey}
         disabled={disabled}
