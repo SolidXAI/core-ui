@@ -62,6 +62,7 @@ import { SolidChatterMessageCoModelEntityIdFormViewWidget } from "../components/
 import { SolidChatterMessageCoModelEntityIdListViewWidget } from "../components/core/list/widgets/SolidChatterMessageCoModelEntityIdListViewWidget";
 import { SolidMqMessageStageListViewWidget } from "../components/core/list/widgets/SolidMqMessageStageListViewWidget";
 import { SolidLovTypeChangeFormEditWidget } from "@/components/core/form/fields/widgets/SolidLovTypeChangeFormEditWidget";
+import { SolidSummarizeListHeaderActionMqMessages } from "../components/core/list/widgets/SolidSummarizeListHeaderActionMqMessages";
 
 
 type ExtensionComponentMetadata = {
@@ -164,6 +165,7 @@ registerExtensionComponent('DefaultDateListWidget', DefaultDateListWidget, Exten
 
 registerExtensionComponent("SolidChatterMessageCoModelEntityIdListViewWidget", SolidChatterMessageCoModelEntityIdListViewWidget, ExtensionComponentTypes.list_field_widget);
 registerExtensionComponent("SolidMqMessageStageListViewWidget", SolidMqMessageStageListViewWidget, ExtensionComponentTypes.list_field_widget);
+registerExtensionComponent("SolidSummarizeListHeaderActionMqMessages", SolidSummarizeListHeaderActionMqMessages, ExtensionComponentTypes.list_header_action);
 
 // ...
 
