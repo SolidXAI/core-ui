@@ -7,6 +7,7 @@ import { useDispatch, useSelector } from "react-redux";
 import UserProfileMenu from "./user-profile-menu";
 import SolidLink from "../common/Link";
 import { usePathname } from "../../hooks/usePathname";
+import { useSearchParams } from "../../hooks/useSearchParams";
 import { env } from "../../adapters/env";
 
 type SolidMenuItem = {
@@ -21,6 +22,50 @@ const defaultMenuKey = env("NEXT_PUBLIC_DEFAULT_MENU_KEY");
 const SIDEBAR_STORAGE_KEY = "solidx.sidebar.collapsed";
 const SIDEBAR_TOGGLE_EVENT = "solidx:sidebar-toggle";
 const DESKTOP_SIDEBAR_WIDTH = "272px";
+
+function normalizePath(path: string): string {
+    if (!path || path === "/") return "/";
+    return path.endsWith("/") ? path.slice(0, -1) : path;
+}
+
+function getPathAndParams(targetPath: string): { pathname: string; searchParams: URLSearchParams } {
+    const parsed = new URL(targetPath, "http://localhost");
+    return {
+        pathname: normalizePath(parsed.pathname),
+        searchParams: new URLSearchParams(parsed.search),
+    };
+}
+
+function doesSearchParamsMatchSubset(requiredParams: URLSearchParams, currentParams: URLSearchParams): boolean {
+    const currentValueCounts = new Map<string, number>();
+    currentParams.forEach((value, key) => {
+        const token = `${key}=${value}`;
+        currentValueCounts.set(token, (currentValueCounts.get(token) || 0) + 1);
+    });
+
+    let isSubset = true;
+    requiredParams.forEach((value, key) => {
+        if (!isSubset) return;
+        const token = `${key}=${value}`;
+        const count = currentValueCounts.get(token) || 0;
+        if (count <= 0) {
+            isSubset = false;
+            return;
+        }
+        currentValueCounts.set(token, count - 1);
+    });
+
+    return isSubset;
+}
+
+function isMenuPathActive(itemPath: string | undefined, currentPathname: string, currentSearchParams: URLSearchParams): boolean {
+    if (!itemPath) return false;
+
+    const { pathname: itemPathname, searchParams: itemSearchParams } = getPathAndParams(itemPath);
+    if (itemPathname !== normalizePath(currentPathname)) return false;
+
+    return doesSearchParamsMatchSubset(itemSearchParams, currentSearchParams);
+}
 
 function filterMenuItems(items: SolidMenuItem[], query: string): SolidMenuItem[] {
     const normalizedQuery = query.trim().toLowerCase();
@@ -40,10 +85,12 @@ function filterMenuItems(items: SolidMenuItem[], query: string): SolidMenuItem[]
 const SidebarMenuTree = ({
     items,
     pathname,
+    searchParams,
     forceExpand,
 }: {
     items: SolidMenuItem[];
     pathname: string;
+    searchParams: URLSearchParams;
     forceExpand?: boolean;
 }) => {
     const [expandedKeys, setExpandedKeys] = useState<Record<string, boolean>>({});
@@ -81,7 +128,7 @@ const SidebarMenuTree = ({
         const nodeId = buildNodeId(node, parentId, index);
         const hasChildren = !!(node.children && node.children.length > 0);
         const isExpanded = expandedKeys[nodeId] === true;
-        const isActive = !!node.path && pathname === node.path;
+        const isActive = isMenuPathActive(node.path, pathname, searchParams);
         const paddingLeft = 12 + depth * 14;
 
         return (
@@ -133,6 +180,7 @@ const SidebarMenuTree = ({
 const AppSidebar = () => {
     const dispatch = useDispatch();
     const pathname = usePathname();
+    const searchParams = useSearchParams();
     const visibleNavbar = useSelector((state: any) => state.navbarState.visibleNavbar);
     const { data: menu } = useGetSolidMenuBasedOnRoleQuery("");
 
@@ -292,7 +340,7 @@ const AppSidebar = () => {
                         </div>
 
                         <div className="solid-sidebar-tree-wrap">
-                            <SidebarMenuTree items={filteredMenu} pathname={pathname} forceExpand={!!searchTerm.trim()} />
+                            <SidebarMenuTree items={filteredMenu} pathname={pathname} searchParams={searchParams} forceExpand={!!searchTerm.trim()} />
                         </div>
                     </>
                 ) : (
@@ -301,7 +349,7 @@ const AppSidebar = () => {
                             <SolidLink
                                 key={item.key || item.title}
                                 href={item.path || "#"}
-                                className={`solid-collapsed-item ${pathname === item.path ? "is-active" : ""}`}
+                                className={`solid-collapsed-item ${isMenuPathActive(item.path, pathname, searchParams) ? "is-active" : ""}`}
                                 title={item.title}
                             >
                                 {item.title.slice(0, 1).toUpperCase()}

@@ -2913,15 +2913,15 @@ body {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--solid-focus-ring) 60%, transparent);
 }
 
-.solid-auth-theme-wrapper .solid-auth-otp-input .solid-otp-input-field:nth-child(3),
+/* .solid-auth-theme-wrapper .solid-auth-otp-input .solid-otp-input-field:nth-child(3),
 .solid-auth-theme-wrapper .solid-auth-otp-input.p-inputotp .p-inputotp-input:nth-child(3) {
   margin-right: 10px;
 }
 
 .solid-auth-theme-wrapper .solid-auth-otp-input .solid-otp-input-field:nth-child(4),
 .solid-auth-theme-wrapper .solid-auth-otp-input.p-inputotp .p-inputotp-input:nth-child(4) {
-  margin-left: 10px;
-}
+  margin-right: 10px;
+} */
 
 .solid-auth-theme-wrapper .solid-auth-otp-input.is-invalid .solid-otp-input-field,
 .solid-auth-theme-wrapper .solid-auth-otp-input.p-inputotp.p-invalid .p-inputotp-input {
