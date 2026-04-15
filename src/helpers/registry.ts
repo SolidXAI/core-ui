@@ -61,7 +61,7 @@ import {
 import { SolidChatterMessageCoModelEntityIdFormViewWidget } from "../components/core/form/fields/widgets/SolidChatterMessageCoModelEntityIdFormViewWidget";
 import { SolidChatterMessageCoModelEntityIdListViewWidget } from "../components/core/list/widgets/SolidChatterMessageCoModelEntityIdListViewWidget";
 import { SolidMqMessageStageListViewWidget } from "../components/core/list/widgets/SolidMqMessageStageListViewWidget";
-import { SolidLovTypeChangeFormEditWidget } from "@/components/core/form/fields/widgets/SolidLovTypeChangeFormEditWidget";
+import { SolidLovTypeChangeFormEditWidget } from "../components/core/form/fields/widgets/SolidLovTypeChangeFormEditWidget";
 import { SolidSummarizeListHeaderActionMqMessages } from "../components/core/list/widgets/SolidSummarizeListHeaderActionMqMessages";
 
 
