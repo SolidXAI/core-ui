@@ -2228,7 +2228,11 @@ body {
 .solid-auth-brand.is-center {
   align-self: center;
 }
-
+.solid-auth-brand-logo img{
+  width:100%;
+  max-width: 125px;
+  align-items: center;
+}
 .solid-auth-brand-icon {
   width: 24px;
   height: 24px;

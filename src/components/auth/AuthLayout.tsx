@@ -101,14 +101,16 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
 
     const renderBrand = (align: "center" | "start" = "start") => (
         <a href="#" className={`solid-auth-brand ${align === "center" ? "is-center" : ""}`} aria-label={appName}>
-            <span className="solid-auth-brand-icon">
                 {authLogoSrc ? (
+                    <span className="solid-auth-brand-logo">
                     <img src={authLogoSrc} alt={appName} />
+                    </span>
                 ) : (
+                    <span className="solid-auth-brand-icon">
                     <span className="solid-auth-brand-fallback">{appName.slice(0, 1).toUpperCase()}</span>
+                    <span className="solid-auth-brand-text">{appName}</span>
+                    </span>
                 )}
-            </span>
-            <span className="solid-auth-brand-text">{appName}</span>
         </a>
     );
 
