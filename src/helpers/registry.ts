@@ -58,6 +58,12 @@ import {
     type ExtensionComponentType,
     type ExtensionFunctionType,
 } from "../types/extension-registry";
+import { SolidChatterMessageCoModelEntityIdFormViewWidget } from "../components/core/form/fields/widgets/SolidChatterMessageCoModelEntityIdFormViewWidget";
+import { SolidChatterMessageCoModelEntityIdListViewWidget } from "../components/core/list/widgets/SolidChatterMessageCoModelEntityIdListViewWidget";
+import { SolidMqMessageStageListViewWidget } from "../components/core/list/widgets/SolidMqMessageStageListViewWidget";
+import { SolidLovTypeChangeFormEditWidget } from "@/components/core/form/fields/widgets/SolidLovTypeChangeFormEditWidget";
+import { SolidSummarizeListHeaderActionMqMessages } from "../components/core/list/widgets/SolidSummarizeListHeaderActionMqMessages";
+
 
 type ExtensionComponentMetadata = {
     component: React.ComponentType<any>;
@@ -155,6 +161,11 @@ registerExtensionComponent('DefaultDateTimeListWidget', DefaultDateTimeListWidge
 // - date
 registerExtensionComponent('DefaultDateListWidget', DefaultDateListWidget, ExtensionComponentTypes.list_field_widget);
 // - datetime
+
+
+registerExtensionComponent("SolidChatterMessageCoModelEntityIdListViewWidget", SolidChatterMessageCoModelEntityIdListViewWidget, ExtensionComponentTypes.list_field_widget);
+registerExtensionComponent("SolidMqMessageStageListViewWidget", SolidMqMessageStageListViewWidget, ExtensionComponentTypes.list_field_widget);
+registerExtensionComponent("SolidSummarizeListHeaderActionMqMessages", SolidSummarizeListHeaderActionMqMessages, ExtensionComponentTypes.list_header_action);
 
 // ...
 
@@ -332,6 +343,9 @@ registerExtensionComponent("CustomHtml", CustomHtml, ExtensionComponentTypes.for
 // Common
 registerExtensionComponent("ChartFormPreviewWidget", ChartFormPreviewWidget, ExtensionComponentTypes.form_widget, ["chart"]);
 
+registerExtensionComponent("SolidChatterMessageCoModelEntityIdFormViewWidget", SolidChatterMessageCoModelEntityIdFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
+registerExtensionComponent("SolidLovTypeChangeFormEditWidget", SolidLovTypeChangeFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
+
 // Formview Default View widgets
 registerExtensionComponent("MaskedShortTextListViewWidget", MaskedShortTextListViewWidget, ExtensionComponentTypes.list_field_widget, ["maskedShortTextList"]);
 registerExtensionComponent("PublishedStatusListViewWidget", PublishedStatusListViewWidget, ExtensionComponentTypes.list_field_widget, ["publishedStatus"])
@@ -350,9 +364,11 @@ registerExtensionComponent("RolePermissionsManyToManyFieldWidget", RolePermissio
 registerExtensionComponent("SolidIconEditWidget", SolidIconEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 registerExtensionComponent("SolidIconViewWidget", SolidIconViewWidget, ExtensionComponentTypes.form_field_view_widget);
 
+
 // Kanban
 registerExtensionComponent("MqMessageKanbanCardWidget", MqMessageKanbanCardWidget, ExtensionComponentTypes.kanban_card_widget);
 registerExtensionComponent("MediaCardWidget", MediaCardWidget, ExtensionComponentTypes.card_widget);
+
 
 // # Extension functions 
 // Email Template

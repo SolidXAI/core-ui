@@ -2750,6 +2750,17 @@ li.header-li-px {
   border-radius: 8px;
   height: 30px;
   width: 30px;
+  background: var(--primary);
+  color: var(--foreground);
+}
+
+.custom-filter-button svg {
+  color: var(--foreground);
+}
+
+.custom-filter-button:hover {
+  background: color-mix(in srgb, var(--muted) 88%, transparent);
+  color: var(--foreground);
 }
 
 .solid-global-search-element ul,

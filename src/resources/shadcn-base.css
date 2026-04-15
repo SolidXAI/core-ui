@@ -1396,8 +1396,9 @@ body {
 .solid-autocomplete-trigger {
   position: absolute;
   right: 2px;
-  top: 2px;
-  height: calc(100% - 4px);
+  top: 50%;
+  transform: translateY(-50%);
+  height: 24px;
   width: 24px;
   min-width: 24px;
   border: 0;
@@ -1405,6 +1406,9 @@ body {
   background: transparent;
   color: color-mix(in srgb, var(--foreground) 65%, transparent);
   cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .solid-autocomplete-trigger:hover {
@@ -2275,7 +2279,11 @@ body {
 .solid-auth-brand.is-center {
   align-self: center;
 }
-
+.solid-auth-brand-logo img{
+  width:100%;
+  max-width: 125px;
+  align-items: center;
+}
 .solid-auth-brand-icon {
   width: 24px;
   height: 24px;
@@ -2956,15 +2964,15 @@ body {
   box-shadow: 0 0 0 2px color-mix(in srgb, var(--solid-focus-ring) 60%, transparent);
 }
 
-.solid-auth-theme-wrapper .solid-auth-otp-input .solid-otp-input-field:nth-child(3),
+/* .solid-auth-theme-wrapper .solid-auth-otp-input .solid-otp-input-field:nth-child(3),
 .solid-auth-theme-wrapper .solid-auth-otp-input.p-inputotp .p-inputotp-input:nth-child(3) {
   margin-right: 10px;
 }
 
 .solid-auth-theme-wrapper .solid-auth-otp-input .solid-otp-input-field:nth-child(4),
 .solid-auth-theme-wrapper .solid-auth-otp-input.p-inputotp .p-inputotp-input:nth-child(4) {
-  margin-left: 10px;
-}
+  margin-right: 10px;
+} */
 
 .solid-auth-theme-wrapper .solid-auth-otp-input.is-invalid .solid-otp-input-field,
 .solid-auth-theme-wrapper .solid-auth-otp-input.p-inputotp.p-invalid .p-inputotp-input {

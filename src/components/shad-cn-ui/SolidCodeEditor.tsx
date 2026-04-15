@@ -20,19 +20,29 @@ export function SolidCodeEditor({
   language = "javascript",
 }: SolidCodeEditorProps) {
   return (
-    <Editor
+    <div
       className={className}
-      height={height}
-      language={language}
-      value={value}
-      onChange={(val) => onChange?.(val ?? "")}
-      options={{
-        readOnly,
-        minimap: { enabled: false },
-        lineNumbers: "on",
-        fontSize: typeof fontSize === "number" ? fontSize : parseInt(String(fontSize), 10) || 14,
-        scrollBeyondLastLine: false,
+      style={{
+        border: "1px solid var(--surface-border, #d0d7de)",
+        borderRadius: "0.5rem",
+        overflow: "hidden",
+        background: "var(--surface-card, #fff)",
       }}
-    />
+    >
+      <Editor
+        height={height}
+        language={language}
+        value={value}
+        onChange={(val) => onChange?.(val ?? "")}
+        options={{
+          readOnly,
+          minimap: { enabled: false },
+          lineNumbers: "on",
+          fontSize: typeof fontSize === "number" ? fontSize : parseInt(String(fontSize), 10) || 14,
+          scrollBeyondLastLine: false,
+          overviewRulerBorder: false,
+        }}
+      />
+    </div>
   );
 }
