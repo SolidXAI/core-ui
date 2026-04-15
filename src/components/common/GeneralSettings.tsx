@@ -11,7 +11,7 @@ import { useDropzone } from 'react-dropzone';
 import { SettingDropzoneActivePlaceholder } from './SolidSettings/SettingDropzoneActivePlaceholder';
 import { SolidUploadedImage } from './SolidSettings/SolidUploadedImage';
 import { SettingsImageRemoveButton } from './SolidSettings/SettingsImageRemoveButton';
-import { AiModelConfigTab, ModelConfig } from './SolidSettings/LlmSettings/AiModelConfigTab';
+import { AiModelConfigTab, ModelBehavior, ModelEntry, ProviderConfig, SolidAiConfig } from './SolidSettings/LlmSettings/AiModelConfigTab';
 import { useDispatch, useSelector } from 'react-redux';
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { useBulkUpdateSolidSettingsMutation, useLazyGetSolidSettingsQuery } from '../../redux/api/solidSettingsApi';
@@ -66,10 +66,23 @@ export const GeneralSettings = () => {
         authScreenRightBackgroundImage: solidSettingsData?.data?.authScreenRightBackgroundImage ?? null,
         authScreenLeftBackgroundImage: solidSettingsData?.data?.authScreenLeftBackgroundImage ?? null,
         authScreenCenterBackgroundImage: solidSettingsData?.data?.authScreenCenterBackgroundImage ?? null,
-        solidXGenAiCodeBuilderConfig: solidSettingsData?.data?.solidXGenAiCodeBuilderConfig ?? {
-            fastModel: { provider: "", availableProviders: [] },
-            defaultProvider: { provider: "", availableProviders: [] },
-        }
+        solidXGenAiCodeBuilderConfig: (() => {
+            const defaultAiConfig: SolidAiConfig = {
+                models: {
+                    default: { providerKey: "", behavior: { streaming: false, custom: "" } },
+                    fast: { providerKey: "", behavior: { streaming: false, custom: "" } },
+                },
+                providers: {},
+            };
+            const raw = solidSettingsData?.data?.solidXGenAiCodeBuilderConfig;
+            if (!raw) return defaultAiConfig;
+            try {
+                const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
+                return (parsed && typeof parsed === "object" ? parsed : defaultAiConfig) as SolidAiConfig;
+            } catch {
+                return defaultAiConfig;
+            }
+        })(),
         // llmProvider: solidSettingsData?.data?.llmProvider ?? null,
         // llModelName: solidSettingsData?.data?.llModelName ?? null,
         // llmProviderApiKey: solidSettingsData?.data?.llmProviderApiKey ?? null,
@@ -339,11 +352,8 @@ export const GeneralSettings = () => {
 
 
 
-    const handleModelConfigChange = (modelType: "fastModel" | "defaultProvider", config: ModelConfig) => {
-        formik.setFieldValue("solidXGenAiCodeBuilderConfig", {
-            ...formik.values.solidXGenAiCodeBuilderConfig,
-            [modelType]: config,
-        });
+    const handleAiConfigChange = (newConfig: SolidAiConfig) => {
+        formik.setFieldValue("solidXGenAiCodeBuilderConfig", newConfig);
     };
 
 
@@ -995,10 +1005,8 @@ export const GeneralSettings = () => {
                             }
                             {pathname.includes("ai-settings") &&
                                 <AiSettingsSection
-                                    fastModelConfig={formik.values.solidXGenAiCodeBuilderConfig.fastModel ?? { provider: "", availableProviders: [] }}
-                                    intelligentModelConfig={formik.values.solidXGenAiCodeBuilderConfig.defaultProvider ?? { provider: "", availableProviders: [] }}
-                                    onFastModelChange={(config) => handleModelConfigChange("fastModel", config)}
-                                    onIntelligentModelChange={(config) => handleModelConfigChange("defaultProvider", config)}
+                                    aiConfig={formik.values.solidXGenAiCodeBuilderConfig as SolidAiConfig}
+                                    onAiConfigChange={handleAiConfigChange}
                                 />
                             }
                         </div>
@@ -1010,46 +1018,68 @@ export const GeneralSettings = () => {
 }
 
 const AI_TABS = [
-    { key: "fastModel" as const, label: "Fast Model", title: "Fast Model" },
-    { key: "defaultProvider" as const, label: "Intelligent Model", title: "Intelligent Model (Reasoning & tool use)" },
+    { key: "fast" as const, label: "Fast Model", title: "Fast Model" },
+    { key: "default" as const, label: "Intelligent Model", title: "Intelligent Model (Reasoning & tool use)" },
 ];
 
 interface AiSettingsSectionProps {
-    fastModelConfig: ModelConfig;
-    intelligentModelConfig: ModelConfig;
-    onFastModelChange: (config: ModelConfig) => void;
-    onIntelligentModelChange: (config: ModelConfig) => void;
+    aiConfig: SolidAiConfig;
+    onAiConfigChange: (config: SolidAiConfig) => void;
 }
 
-const AiSettingsSection = ({ fastModelConfig, intelligentModelConfig, onFastModelChange, onIntelligentModelChange }: AiSettingsSectionProps) => {
-    const [activeTab, setActiveTab] = useState<"fastModel" | "defaultProvider">("fastModel");
+const DEFAULT_BEHAVIOR: ModelBehavior = { streaming: false, custom: "" };
 
-            const tabItems = AI_TABS.map((tab) => {
-                const config = tab.key === "fastModel" ? fastModelConfig : intelligentModelConfig;
-                const onChange = tab.key === "fastModel" ? onFastModelChange : onIntelligentModelChange;
-                return {
-                    value: tab.key,
-                    label: tab.label,
-                    content: (
-                        <div className="space-y-4">
-                            <p className="solid-settings-subheading">
-                                {tab.title}
-                            </p>
-                            <AiModelConfigTab config={config} onChange={onChange} />
-                        </div>
-                    ),
-                };
-            });
+const AiSettingsSection = ({ aiConfig, onAiConfigChange }: AiSettingsSectionProps) => {
+    const [activeTab, setActiveTab] = useState<"fast" | "default">("fast");
+
+    const tabItems = AI_TABS.map((tab) => {
+        const modelEntry: ModelEntry = aiConfig.models?.[tab.key] ?? { providerKey: "", behavior: DEFAULT_BEHAVIOR };
+        const providerKey = modelEntry.providerKey ?? "";
+        const providerConfig: ProviderConfig = aiConfig.providers?.[providerKey] ?? { provider: providerKey, apiKey: "", model: "" };
+        const behavior: ModelBehavior = modelEntry.behavior ?? DEFAULT_BEHAVIOR;
+
+        return {
+            value: tab.key,
+            label: tab.label,
+            content: (
+                <AiModelConfigTab
+                    providerKey={providerKey}
+                    providerConfig={providerConfig}
+                    behavior={behavior}
+                    allProviders={aiConfig.providers ?? {}}
+                    onProviderKeyChange={(newKey, newConfig) => {
+                        onAiConfigChange({
+                            ...aiConfig,
+                            models: { ...aiConfig.models, [tab.key]: { ...modelEntry, providerKey: newKey } },
+                            providers: { ...aiConfig.providers, [newKey]: newConfig },
+                        });
+                    }}
+                    onProviderConfigChange={(pk, config) => {
+                        onAiConfigChange({
+                            ...aiConfig,
+                            providers: { ...aiConfig.providers, [pk]: config },
+                        });
+                    }}
+                    onBehaviorChange={(newBehavior) => {
+                        onAiConfigChange({
+                            ...aiConfig,
+                            models: { ...aiConfig.models, [tab.key]: { ...modelEntry, behavior: newBehavior } },
+                        });
+                    }}
+                />
+            ),
+        };
+    });
 
     return (
-        <div className="space-y-4">
-            <p className="solid-settings-heading">
+        <div>
+            <p className="solid-settings-heading" style={{ marginBottom: "1rem" }}>
                 AI Model Configuration
             </p>
             <SolidTabGroup
                 tabs={tabItems}
                 value={activeTab}
-                onValueChange={(value) => setActiveTab(value as "fastModel" | "defaultProvider")}
+                onValueChange={(value) => setActiveTab(value as "fast" | "default")}
                 tabPosition="left"
             />
         </div>
