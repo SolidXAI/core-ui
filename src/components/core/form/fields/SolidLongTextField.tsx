@@ -7,7 +7,7 @@ import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
-import { SolidButton, SolidDatePicker, SolidSelect, SolidInput, SolidCodeEditor, SolidIcon } from "../../../shad-cn-ui";
+import { SolidButton, SolidDatePicker, SolidSelect, SolidInput, SolidCodeEditor, SolidIcon, SolidTextarea } from "../../../shad-cn-ui";
 import { parseSolidIconMeta } from "../../../shad-cn-ui/SolidIcon";
 import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 
@@ -141,7 +141,7 @@ export const DefaultLongTextFormEditWidget = ({ formik, fieldContext }: SolidFor
                     <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
             }
-            <textarea
+            <SolidTextarea
                 readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                 disabled={formDisabled || fieldDisabled}
                 id={fieldLayoutInfo.attrs.name}
@@ -204,7 +204,7 @@ export const DynamicJsonEditorFormViewWidget = ({ formik, fieldContext }: SolidF
         }
         if (meta.type === "longText") {
             return (
-                <textarea value={value} rows={10} cols={100} readOnly className={styles.fieldTextarea} />
+                <SolidTextarea value={value} rows={10} cols={100} readOnly className={styles.fieldTextarea} />
             );
         }
         if (meta.type === "date" || meta.type === "datetime") {
@@ -355,7 +355,7 @@ export const DynamicJsonEditorFormEditWidget = ({ formik, fieldContext }: SolidF
 
         if (meta.type === "longText") {
             return (
-                <textarea
+                <SolidTextarea
                     onChange={(e) => handleChange(index, key, e.target.value)}
                     value={value}
                     rows={10}

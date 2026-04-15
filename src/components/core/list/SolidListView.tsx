@@ -1650,6 +1650,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
                       <Column
                         frozen
                         alignFrozen="right"
+                        frozenBackground="transparent"
                         body={(rowData) =>
                           rowData?.deletedAt ? (
                             <a
