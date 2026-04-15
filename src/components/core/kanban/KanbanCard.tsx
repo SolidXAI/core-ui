@@ -21,6 +21,7 @@ interface KanbanCardProps {
   data: Data;
   solidKanbanViewMetaData: any;
   index: number;
+  isDragDisabled?: boolean;
   setLightboxUrls?: any;
   setOpenLightbox?: any;
   editButtonUrl?: string;
@@ -30,7 +31,7 @@ interface KanbanCardProps {
   DynamicCardWidget?: any;
 }
 
-const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, setLightboxUrls, setOpenLightbox, editButtonUrl, groupByFieldName, group, cardNode, DynamicCardWidget }) => {
+const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, index, isDragDisabled = false, setLightboxUrls, setOpenLightbox, editButtonUrl, groupByFieldName, group, cardNode, DynamicCardWidget }) => {
   const router = useRouter()
   const openRecord = () => {
     if (typeof window !== "undefined") {
@@ -71,13 +72,13 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
   }
 
   return (
-    <Draggable draggableId={String(data.id)} index={index}>
+    <Draggable draggableId={String(data.id)} index={index} isDragDisabled={isDragDisabled}>
       {(provided: DraggableProvided, snapshot) => (
         <div
           className=""
           ref={provided.innerRef}
           {...provided.draggableProps}
-          {...provided.dragHandleProps}
+          {...(!isDragDisabled ? provided.dragHandleProps : {})}
           style={{ marginTop: "1rem", ...provided.draggableProps.style }}
           className="kanban-card-container"
         >
@@ -87,7 +88,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
             style={{
               opacity: snapshot.isDragging ? 0.9 : 1,
               transform: snapshot.isDragging ? "rotate(-2deg)" : "",
-              cursor: 'pointer'
+              cursor: isDragDisabled ? "pointer" : "grab"
             }}
             elevation={snapshot.isDragging ? 3 : 1}
             className="solid-kanban-card"

@@ -20,18 +20,33 @@
 }
 
 :global(.solid-import-dialog-body) {
-    padding: 12px 14px 14px;
+    padding: 14px 16px 16px;
 }
 
 :global(.solid-import-shell) {
     display: flex;
     flex-direction: column;
-    gap: 10px;
+    gap: 12px;
+}
+
+:global(.solid-import-dialog-heading) {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+:global(.solid-import-dialog-title) {
+    font-size: 18px;
+    line-height: 1.15;
+    font-weight: 700;
+    letter-spacing: -0.02em;
 }
 
 :global(.solid-import-dialog-subtitle) {
-    max-width: 520px;
-    color: color-mix(in srgb, var(--foreground) 68%, transparent);
+    max-width: 560px;
+    font-size: 12.5px;
+    line-height: 1.55;
+    color: color-mix(in srgb, var(--foreground) 74%, transparent);
 }
 
 :global(.solid-import-stepper) {
@@ -49,7 +64,7 @@
     min-height: 46px;
     border: 1px solid color-mix(in srgb, var(--border) 92%, transparent);
     border-radius: 11px;
-    background: color-mix(in srgb, var(--card) 92%, white 8%);
+    background: color-mix(in srgb, var(--card) 94%, white 6%);
     color: var(--foreground);
     display: flex;
     align-items: center;
@@ -74,7 +89,8 @@
 
 :global(.solid-import-stepper-item.is-active) {
     border-color: color-mix(in srgb, var(--primary) 50%, var(--border));
-    background: color-mix(in srgb, var(--primary) 10%, var(--card));
+    background: color-mix(in srgb, var(--primary) 12%, var(--card));
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.04);
 }
 
 :global(.solid-import-stepper-item.is-complete) {
@@ -122,19 +138,32 @@
 :global(.solid-import-panel-grid) {
     display: grid;
     grid-template-columns: minmax(0, 1.45fr) minmax(240px, 0.85fr);
-    gap: 12px;
-    padding: 12px;
+    gap: 14px;
+    padding: 14px;
 }
 
 :global(.solid-import-panel-grid.is-single-column) {
     grid-template-columns: 1fr;
 }
 
+:global(.solid-import-panel-grid.is-single-column .solid-import-panel) {
+    border: 0;
+    border-radius: 0;
+    background: transparent;
+    box-shadow: none;
+    padding: 0;
+}
+
+:global(.solid-import-panel-grid.is-single-column .solid-import-panel-main) {
+    max-width: 100%;
+}
+
 :global(.solid-import-panel) {
     border: 1px solid color-mix(in srgb, var(--border) 90%, transparent);
-    border-radius: 12px;
-    background: color-mix(in srgb, var(--card) 92%, white 8%);
-    padding: 14px;
+    border-radius: 14px;
+    background: linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, white 4%), color-mix(in srgb, var(--card) 99%, black 1%));
+    padding: 16px;
+    box-shadow: inset 0 1px 0 rgba(255, 255, 255, 0.03);
 }
 
 :global(.solid-import-panel.is-full-width) {
@@ -142,21 +171,22 @@
 }
 
 :global(.solid-import-panel-side) {
-    background: color-mix(in srgb, var(--accent) 34%, transparent);
+    background: linear-gradient(180deg, color-mix(in srgb, var(--accent) 26%, var(--card)), color-mix(in srgb, var(--card) 96%, black 4%));
 }
 
 :global(.solid-import-section-title) {
-    margin: 0 0 10px;
-    font-size: 13px;
+    margin: 0 0 12px;
+    font-size: 14px;
     line-height: 1.25;
     font-weight: 700;
+    letter-spacing: -0.01em;
     color: var(--foreground);
 }
 
 :global(.solid-import-section-copy) {
-    font-size: 12px;
-    line-height: 1.5;
-    color: color-mix(in srgb, var(--foreground) 72%, transparent);
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--foreground) 76%, transparent);
 }
 
 :global(.solid-import-instruction-list) {
@@ -164,7 +194,14 @@
     padding-left: 22px;
     display: flex;
     flex-direction: column;
-    gap: 14px;
+    gap: 16px;
+}
+
+:global(.solid-import-panel-grid.is-single-column .solid-import-instruction-list) {
+    padding-left: 0;
+    gap: 0;
+    list-style: none;
+    counter-reset: solid-import-instruction;
 }
 
 :global(.solid-import-instruction-list li::marker) {
@@ -177,21 +214,98 @@
     line-height: 1.45;
 }
 
+:global(.solid-import-instruction-list > li) {
+    padding-bottom: 14px;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 72%, transparent);
+}
+
+:global(.solid-import-instruction-list > li:last-child) {
+    padding-bottom: 0;
+    border-bottom: 0;
+}
+
+:global(.solid-import-panel-grid.is-single-column .solid-import-instruction-list > li) {
+    display: grid;
+    grid-template-columns: minmax(150px, 190px) minmax(0, 1fr);
+    gap: 16px;
+    align-items: start;
+    padding: 12px 0;
+    counter-increment: solid-import-instruction;
+}
+
 :global(.solid-import-instruction-title) {
     margin: 0 0 6px;
     font-size: 13px;
-    line-height: 1.35;
-    font-weight: 600;
+    line-height: 1.4;
+    font-weight: 650;
+    letter-spacing: -0.01em;
+    color: color-mix(in srgb, var(--foreground) 96%, transparent);
+}
+
+:global(.solid-import-panel-grid.is-single-column .solid-import-instruction-title) {
+    margin: 0;
+    padding-top: 3px;
+}
+
+:global(.solid-import-panel-grid.is-single-column .solid-import-instruction-title::before) {
+    content: counter(solid-import-instruction) ". ";
+    color: color-mix(in srgb, var(--foreground) 66%, transparent);
+    font-variant-numeric: tabular-nums;
 }
 
 :global(.solid-import-instruction-copy) {
+    font-size: 12px;
+    line-height: 1.65;
+    color: color-mix(in srgb, var(--foreground) 72%, transparent);
+}
+
+:global(.solid-import-template-actions) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 10px;
+}
+
+:global(.solid-import-panel-grid.is-single-column .solid-import-template-actions) {
+    justify-content: flex-start;
+}
+
+:global(.solid-import-inline-token-list) {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+}
+
+:global(.solid-import-inline-token) {
+    display: inline-flex;
+    align-items: center;
+    min-height: 26px;
+    padding: 0 10px;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--border) 85%, transparent);
+    background: color-mix(in srgb, var(--accent) 28%, transparent);
+    color: color-mix(in srgb, var(--foreground) 86%, transparent);
     font-size: 11.5px;
-    line-height: 1.6;
-    color: color-mix(in srgb, var(--foreground) 66%, transparent);
+    line-height: 1.3;
+    font-weight: 500;
+}
+
+:global(.solid-import-panel-grid.is-single-column .solid-import-inline-token-list) {
+    gap: 9px;
 }
 
 :global(.solid-import-custom-instruction) {
-    margin: 0 0 10px;
+    margin: 0;
+    padding: 10px 12px;
+    border-radius: 10px;
+    border: 1px solid color-mix(in srgb, var(--border) 78%, transparent);
+    background: color-mix(in srgb, var(--card) 88%, var(--accent) 12%);
+    font-size: 12px;
+    line-height: 1.65;
+    color: color-mix(in srgb, var(--foreground) 78%, transparent);
+}
+
+:global(.solid-import-custom-instruction + .solid-import-custom-instruction) {
+    margin-top: 10px;
 }
 
 :global(.solid-import-dropzone-shell) {
@@ -326,9 +440,9 @@
 
 :global(.solid-import-actions-copy) {
     margin: 0;
-    font-size: 11px;
-    line-height: 1.45;
-    color: color-mix(in srgb, var(--foreground) 56%, transparent);
+    font-size: 11.5px;
+    line-height: 1.5;
+    color: color-mix(in srgb, var(--foreground) 62%, transparent);
 }
 
 :global(.solid-import-loading-state),
@@ -345,16 +459,16 @@
 
 :global(.solid-import-empty-state h4) {
     margin: 0;
-    font-size: 15px;
+    font-size: 16px;
     line-height: 1.3;
     color: var(--foreground);
 }
 
 :global(.solid-import-empty-state p) {
     margin: 0;
-    font-size: 12px;
-    line-height: 1.5;
-    color: color-mix(in srgb, var(--foreground) 66%, transparent);
+    font-size: 12.5px;
+    line-height: 1.6;
+    color: color-mix(in srgb, var(--foreground) 70%, transparent);
 }
 
 :global(.solid-import-mapping-shell) {
@@ -583,5 +697,14 @@
 
     :global(.solid-import-mapping-intro) {
         flex-direction: column;
+    }
+
+    :global(.solid-import-panel-grid.is-single-column .solid-import-instruction-list > li) {
+        grid-template-columns: 1fr;
+        gap: 8px;
+    }
+
+    :global(.solid-import-panel-grid.is-single-column .solid-import-instruction-title) {
+        padding-top: 0;
     }
 }

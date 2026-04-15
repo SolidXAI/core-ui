@@ -31,10 +31,11 @@ interface Props {
     id: any,
     onFilterChange?: (filters: FilterState) => void;
     onComposerCancel?: () => void;
+    title?: string;
 }
 
 export const SolidChatterHeader = (props: Props) => {
-    const { activeTab, visibleBox, handleTabClick, modelSingularName, refetch, id, onFilterChange, onComposerCancel } = props;
+    const { activeTab, visibleBox, handleTabClick, modelSingularName, refetch, id, onFilterChange, onComposerCancel, title } = props;
     const [showFilterDialog, setShowFilterDialog] = useState(false);
     const [filters, setFilters] = useState<FilterState>({
         name: '',
@@ -110,10 +111,10 @@ export const SolidChatterHeader = (props: Props) => {
     };
 
     return (
-        <div className={`${styles.chatterTitle} solid-list-toolbar`}>
+        <div className={`${styles.chatterTitle} ${title ? styles.chatterTitleWithLabel : ''} solid-list-toolbar`}>
             <div className='flex justify-content-between align-items-center solid-list-toolbar-row'>
                 <p className="m-0 view-title solid-text-wrapper form-wrapper-title">
-                    {/* Activity */}
+                    {title || ''}
                 </p>
                 <div className='flex align-items-center solid-header-buttons-wrapper'>
                     {/* <Button

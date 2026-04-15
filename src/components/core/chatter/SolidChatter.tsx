@@ -16,7 +16,7 @@ interface FilterState {
     endDate: Date | null;
 }
 
-export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, setRefreshChatterMessage, actionsAllowed=[] }: { modelSingularName: any, id: any, refreshChatterMessage: boolean, setRefreshChatterMessage: (value: boolean) => void , actionsAllowed?:string[]}) => {    
+export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, setRefreshChatterMessage, actionsAllowed = [], title }: { modelSingularName: any, id: any, refreshChatterMessage: boolean, setRefreshChatterMessage: (value: boolean) => void, actionsAllowed?: string[], title?: string }) => {
     const [activeTab, setActiveTab] = useState<'email-message' | 'log' | null>('email-message');
     const [visibleBox, setVisibleBox] = useState<'email-message' | 'log' | null>(null);
     const [messages, setMessages] = useState<any[]>([]);
@@ -240,10 +240,9 @@ export const SolidChatter = ({ modelSingularName, id, refreshChatterMessage, set
                 visibleBox={visibleBox}
                 onFilterChange={handleFilterChange}
                 onComposerCancel={() => setVisibleBox(null)}
+                title={title}
             />
-            <div className=' solid-chatter-body' style={{
-                paddingRight: '10px',
-                overflowY: 'scroll',
+            <div className='solid-chatter-body' style={{
                 height:
                     visibleBox === 'email-message'
                         ? 'calc(100vh - 196px)'

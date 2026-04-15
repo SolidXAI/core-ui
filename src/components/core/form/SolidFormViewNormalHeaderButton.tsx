@@ -64,6 +64,7 @@ export function SolidFormViewNormalHeaderButton({
             <SolidButton
                 type="button"
                 className={`w-full text-left gap-2 solid-icon-button ${button?.attrs?.className ? button?.attrs?.className : ''}`}
+                {...button.attrs}
                 label={button.attrs.label}
                 size="sm"
                 iconPos="left"

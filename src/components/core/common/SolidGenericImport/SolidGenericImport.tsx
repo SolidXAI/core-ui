@@ -88,8 +88,8 @@ export const SolidGenericImport = ({
             style={{ width: "min(840px, calc(100vw - 1.5rem))" }}
         >
             <SolidDialogHeader className="solid-filter-dialog-head solid-import-dialog-head">
-                <div>
-                    <SolidDialogTitle className="solid-filter-dialog-title m-0">Import Data</SolidDialogTitle>
+                <div className="solid-import-dialog-heading">
+                    <SolidDialogTitle className="solid-filter-dialog-title solid-import-dialog-title m-0">Import Data</SolidDialogTitle>
                     <SolidDialogDescription className="solid-filter-dialog-subtitle solid-import-dialog-subtitle">
                         Upload a CSV or Excel file, map its columns, and import records in four short steps.
                     </SolidDialogDescription>

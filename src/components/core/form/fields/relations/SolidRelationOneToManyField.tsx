@@ -11,7 +11,7 @@ import { getExtensionComponent } from "../../../../../helpers/registry";
 import { SolidFormFieldWidgetProps, SolidFormWidgetProps } from "../../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../../components/common/SolidFieldTooltip";
 import { SolidButton } from "../../../../shad-cn-ui/SolidButton";
-import { SolidDialog } from "../../../../shad-cn-ui/SolidDialog";
+import { SolidDialog, SolidDialogBody, SolidDialogClose, SolidDialogHeader, SolidDialogTitle } from "../../../../shad-cn-ui/SolidDialog";
 import { SolidMessage } from "../../../../shad-cn-ui/SolidMessage";
 import { ERROR_MESSAGES } from "../../../../../constants/error-messages";
 import styles from "../solidFields.module.css";
@@ -336,16 +336,33 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
                 <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
             }
 
-            <SolidDialog header="Save Required" headerClassName="py-2" contentClassName="px-0 pb-0" className="solid-confirm-dialog" contentStyle={{ borderRadius: 6 }} visible={showSaveParentEntityConfirmationPopup} style={{ width: '20vw' }} onHide={() => { if (!showSaveParentEntityConfirmationPopup) return; setShowSaveParentEntityConfirmationPopup(false); }}>
-                <div className="p-4">
-                    <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
-                        Before Creating {fieldLabel} you need to save {solidFormViewMetaData?.data?.solidView?.model?.displayName ? solidFormViewMetaData?.data?.solidView?.model?.displayName : capitalize(fieldContext.modelName)}.
-                        Please click save if you wish to proceed ?
+            <SolidDialog
+                open={showSaveParentEntityConfirmationPopup}
+                onOpenChange={setShowSaveParentEntityConfirmationPopup}
+                className="solid-confirm-dialog solid-field-confirm-dialog"
+                style={{ width: "min(420px, calc(100vw - 2rem))" }}
+            >
+                <SolidDialogHeader className="solid-field-confirm-header">
+                    <SolidDialogTitle>Save Required</SolidDialogTitle>
+                    <SolidDialogClose />
+                </SolidDialogHeader>
+                <SolidDialogBody className="solid-field-confirm-dialog-body">
+                    <p className="solid-field-confirm-message">
+                        Before creating {fieldLabel}, you need to save{" "}
+                        {solidFormViewMetaData?.data?.solidView?.model?.displayName
+                            ? solidFormViewMetaData.data.solidView.model.displayName
+                            : capitalize(fieldContext.modelName)}
+                        . Please save first if you want to continue.
                     </p>
-                    <div className="flex align-items-center justify-content-start gap-2 mt-3">
-                        <SolidButton label="Save" size="small" onClick={saveParentEntity} />
-                        <SolidButton label="Cancel" size="small" onClick={() => setShowSaveParentEntityConfirmationPopup(false)} variant="outline" className='bg-primary-reverse' />
-                    </div>
+                </SolidDialogBody>
+                <div className="solid-radix-dialog-footer solid-field-confirm-actions">
+                    <SolidButton label="Save" size="sm" onClick={saveParentEntity} autoFocus />
+                    <SolidButton
+                        label="Cancel"
+                        size="sm"
+                        onClick={() => setShowSaveParentEntityConfirmationPopup(false)}
+                        variant="outline"
+                    />
                 </div>
             </SolidDialog>
 
@@ -508,17 +525,14 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
                 onClick={() => setvisibleCreateRelationEntity(true)}
             /> */}
             <SolidDialog
-                visible={visibleCreateRelationEntity}
-                showHeader={false}
+                open={visibleCreateRelationEntity}
+                onOpenChange={setvisibleCreateRelationEntity}
                 className="solid-dialog"
                 style={{
                     width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw",
                     height: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.height ?? "auto"
                 }}
-                onHide={() => {
-                    if (!visibleCreateRelationEntity) return;
-                    setvisibleCreateRelationEntity(false);
-                }}
+                showHeader={false}
                 breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
 
             >

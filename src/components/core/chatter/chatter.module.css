@@ -1,15 +1,19 @@
 .chatterTitle {
-    padding-top: 10px;
-    border-bottom: 0px solid #D8E2EA;
+    padding: 0.2rem 0 0.55rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+}
+
+.chatterTitleWithLabel {
+    padding-left: 2.4rem;
 }
 
 .chatterMessageComposer .chatterMessageInput {
-    background-color: #FEFCFF;
-    border: 1px solid #D8E2EA;
+    background-color: var(--background);
+    border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
 }
 
 .chatterMessageComposer .chatterMessageInput::placeholder {
-    color: rgba(51, 51, 51, 0.20);
+    color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
 }
 
 .chatterEmails {
@@ -28,8 +32,8 @@
     position: absolute;
     right: 0px !important;
     top: 1;
-    background-color: #fff;
-    border: 1px solid #D8E2EA;
+    background-color: var(--card);
+    border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
     padding: 8px;
     border-radius: 8px !important;
     min-width: 200;
@@ -43,7 +47,7 @@
 }
 
 .chatterDatetimeDivider {
-    border-top: 1px dashed #00000026;
+    border-top: 1px dashed color-mix(in srgb, var(--border) 70%, transparent);
     position: relative;
     margin: 30px 0 15px 0;
 }
@@ -53,21 +57,21 @@
     left: 50%;
     transform: translate(-50%, -50%);
     border-radius: 6.25rem;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    background: #FAFAFA;
+    border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+    background: color-mix(in srgb, var(--card) 96%, var(--background) 4%);
     padding: 0.25rem 0.5rem;
     text-wrap: nowrap;
     font-size: 0.625rem;
     font-weight: 600;
-    color: var(--secondary-dark-color);
+    color: var(--muted-foreground);
 }
 
 .solidMessageWrapper {
-    border: 1px solid #D8E2EA;
-    padding: 5px;
-    border-radius: 0.4rem;
+    border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+    padding: 0.7rem 0.8rem;
+    border-radius: 0.7rem;
     width: 100%;
-    background: #fff;
+    background: color-mix(in srgb, var(--card) 96%, var(--background) 4%);
     font-size: 12px;
     line-height: 1.45;
     color: var(--solid-text-secondary, #475569);
@@ -96,13 +100,13 @@
 
 .solidChatterMessageBox {
     margin-top: 0px;
-    padding-left: 0.75rem;
+    padding-left: 0.3rem;
 }
 
 .solidChatterMessageCard {
-    border-radius: 0.5rem;
+    border-radius: 0.75rem;
     background: transparent;
-    padding: 0.2rem 0;
+    padding: 0.25rem 0;
 }
 
 .solidChatterMessageLayout {
@@ -121,7 +125,7 @@
     align-items: center;
     justify-content: center;
     text-transform: uppercase;
-    border: 1px solid #fff;
+    border: 1px solid color-mix(in srgb, var(--card) 82%, transparent);
     box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
 }
 
@@ -167,10 +171,10 @@
 }
 
 .solidChatterAttachment {
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    border-radius: 0.4rem;
-    padding: 0.25rem 0.45rem;
-    background: rgba(145, 158, 171, 0.06);
+    border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
+    border-radius: 0.55rem;
+    padding: 0.3rem 0.5rem;
+    background: color-mix(in srgb, var(--muted) 16%, var(--card) 84%);
     display: flex;
     align-items: center;
     gap: 0.25rem;
@@ -193,8 +197,8 @@
     gap: 0.5rem;
     padding: 0.45rem 0.75rem;
     border-radius: 0.5rem;
-    border: 1px solid rgba(15, 23, 42, 0.08);
-    background: rgba(15, 23, 42, 0.02);
+    border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
+    background: color-mix(in srgb, var(--card) 95%, var(--background) 5%);
     min-width: 220px;
 }
 
@@ -202,8 +206,8 @@
     width: 28px;
     height: 28px;
     border-radius: 0.45rem;
-    background: rgba(114, 46, 209, 0.12);
-    color: #722ED1;
+    background: color-mix(in srgb, var(--primary) 14%, var(--card) 86%);
+    color: var(--primary);
     display: flex;
     align-items: center;
     justify-content: center;
@@ -232,11 +236,11 @@
     display: inline-flex;
     align-items: center;
     gap: 0.2rem;
-    font-size: 0.65rem;
-    padding: 0 0.3rem;
-    border-radius: 0.3rem;
-    border: 1px solid rgba(0, 0, 0, 0.08);
-    background: rgba(15, 23, 42, 0.03);
+    font-size: 0.62rem;
+    padding: 0.1rem 0.35rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
+    background: color-mix(in srgb, var(--muted) 16%, var(--card) 84%);
 }
 
 .solidChatterBadge.audit {
@@ -249,6 +253,12 @@
     color: #2563eb;
     border-color: rgba(37, 99, 235, 0.2);
     background: rgba(37, 99, 235, 0.08);
+}
+
+:global(.solid-chatter-body) {
+    padding: 0.35rem 0.85rem 1rem 0.2rem;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
 }
 :global(.solidMessageWrapper .solidMessageText) {
     margin: 0;

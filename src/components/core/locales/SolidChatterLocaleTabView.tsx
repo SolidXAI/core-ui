@@ -101,25 +101,42 @@ const SolidChatterLocaleTabView: React.FC<Props> = ({
             refreshChatterMessage={refreshChatterMessage}
             setRefreshChatterMessage={setRefreshChatterMessage}
             actionsAllowed={actionsAllowed}
+            title={showWorkflowInfo ? undefined : 'Audit Trail'}
           />
         </div>
       )
     }
   ];
 
-  return (
-    <div style={{marginLeft:"10px",backgroundColor:"#fff"}}>
-
-    <SolidTabGroup
-      className="solid-locale-tabs h-full"
-      listClassName="solid-locale-tabs-list"
-      panelClassName="solid-locale-tabs-panel"
-      tabs={tabs}
-      value={activeTabValue}
-      onValueChange={setActiveTabValue}
-      tabPosition='center'
-      />
+  if (!showWorkflowInfo) {
+    return (
+      <div className="solid-locale-panel solid-locale-panel--single">
+        <div className="solid-locale-tab-content">
+          <SolidChatter
+            modelSingularName={solidFormViewMetaData?.data?.solidView?.model?.singularName}
+            id={id}
+            refreshChatterMessage={refreshChatterMessage}
+            setRefreshChatterMessage={setRefreshChatterMessage}
+            actionsAllowed={actionsAllowed}
+            title="Audit Trail"
+          />
+        </div>
       </div>
+    );
+  }
+
+  return (
+    <div className="solid-locale-panel">
+      <SolidTabGroup
+        className="solid-locale-tabs h-full"
+        listClassName="solid-locale-tabs-list"
+        panelClassName="solid-locale-tabs-panel"
+        tabs={tabs}
+        value={activeTabValue}
+        onValueChange={setActiveTabValue}
+        tabPosition='left'
+      />
+    </div>
   );
 };
 

@@ -8,6 +8,7 @@ import { SolidPasswordInput } from "../../../shad-cn-ui/SolidPasswordInput";
 import {
     SolidDialog,
     SolidDialogBody,
+    SolidDialogClose,
     SolidDialogFooter,
     SolidDialogHeader,
     SolidDialogTitle,
@@ -339,52 +340,55 @@ export const DefaultPasswordFormEditWidget = ({ formik, fieldContext }: SolidFor
             />
 
             <SolidDialog
-                header={`Change ${fieldLabel}`}
-                visible={visible}
-                onHide={() => setVisible(false)}
+                open={visible}
+                onOpenChange={setVisible}
                 style={{ width: '30vw' }}
                 className="solid-confirm-dialog"
             >
+                <SolidDialogHeader>
+                    <SolidDialogTitle>{`Change ${fieldLabel}`}</SolidDialogTitle>
+                    <SolidDialogClose />
+                </SolidDialogHeader>
                 <SolidDialogBody>
-                <form onSubmit={modalFormik.handleSubmit} className="p-fluid">
-                    <div className={styles.fieldWrapper}>
-                        <label htmlFor={fieldName} className={`${styles.fieldLabel} form-field-label`}>New {fieldLabel}</label>
-                        <SolidPasswordInput
-                            id={fieldName}
-                            name={fieldName}
-                            value={modalFormik.values[fieldName]}
-                            onChange={modalFormik.handleChange}
-                            onBlur={modalFormik.handleBlur}
-                            toggle
-                            autoComplete="new-password"
-                            className="w-full"
-                        />
-                        {isFormFieldValid(modalFormik, fieldName) && (
-                            <p className={styles.fieldError}>{modalFormik.errors[fieldName]?.toString()}</p>
-                        )}
-                    </div>
+                    <form onSubmit={modalFormik.handleSubmit} className="p-fluid">
+                        <div className={styles.fieldWrapper}>
+                            <label htmlFor={fieldName} className={`${styles.fieldLabel} form-field-label`}>New {fieldLabel}</label>
+                            <SolidPasswordInput
+                                id={fieldName}
+                                name={fieldName}
+                                value={modalFormik.values[fieldName]}
+                                onChange={modalFormik.handleChange}
+                                onBlur={modalFormik.handleBlur}
+                                toggle
+                                autoComplete="new-password"
+                                className="w-full"
+                            />
+                            {isFormFieldValid(modalFormik, fieldName) && (
+                                <p className={styles.fieldError}>{modalFormik.errors[fieldName]?.toString()}</p>
+                            )}
+                        </div>
 
-                    <div className={styles.fieldWrapper}>
-                        <label htmlFor={confirmFieldName} className={`${styles.fieldLabel} form-field-label`}>Confirm {fieldLabel}</label>
-                        <SolidPasswordInput
-                            id={confirmFieldName}
-                            name={confirmFieldName}
-                            value={modalFormik.values[confirmFieldName]}
-                            onChange={modalFormik.handleChange}
-                            onBlur={modalFormik.handleBlur}
-                            toggle
-                            autoComplete="new-password"
-                            className="w-full"
-                        />
-                        {isFormFieldValid(modalFormik, confirmFieldName) && (
-                            <p className={styles.fieldError}>{modalFormik.errors[confirmFieldName]?.toString()}</p>
-                        )}
-                    </div>
+                        <div className={styles.fieldWrapper}>
+                            <label htmlFor={confirmFieldName} className={`${styles.fieldLabel} form-field-label`}>Confirm {fieldLabel}</label>
+                            <SolidPasswordInput
+                                id={confirmFieldName}
+                                name={confirmFieldName}
+                                value={modalFormik.values[confirmFieldName]}
+                                onChange={modalFormik.handleChange}
+                                onBlur={modalFormik.handleBlur}
+                                toggle
+                                autoComplete="new-password"
+                                className="w-full"
+                            />
+                            {isFormFieldValid(modalFormik, confirmFieldName) && (
+                                <p className={styles.fieldError}>{modalFormik.errors[confirmFieldName]?.toString()}</p>
+                            )}
+                        </div>
 
-                    <div className="mt-5">
-                        <SolidButton label="Update Password" icon="si si-check" type="submit" className="w-full" />
-                    </div>
-                </form>
+                        <SolidDialogFooter className="mt-5">
+                            <SolidButton label="Update Password" icon="si si-check" type="submit" className="w-full" />
+                        </SolidDialogFooter>
+                    </form>
                 </SolidDialogBody>
             </SolidDialog>
         </div>

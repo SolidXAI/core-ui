@@ -76,13 +76,13 @@
 
     .chatter-section.open {
         position: absolute;
-        right: 0;
+        right: 12px;
         top: 0;
-        width: 380px !important;
+        width: 320px !important;
         height: 100%;
         z-index: 99;
-        background-color: #fff;
-        border-left: 1px solid var(--primary-light-color);
+        background-color: transparent;
+        border-left: none;
         max-width: calc(100% - 100px);
     }
 
@@ -185,7 +185,7 @@
     /* ===================== Chatter Section ===================== */
 
     .chatter-section.open {
-        width: 330px;
+        width: 320px;
     }
 
     .solid-common-dialog {
@@ -381,7 +381,7 @@
     }
 
     .chatter-section.collapsed {
-        width: 40px !important;
+        width: 32px !important;
     }
 
 

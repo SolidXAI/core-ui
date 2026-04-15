@@ -63,13 +63,13 @@ export function SolidDialog({
         <Dialog.Content
           className={cx("solid-radix-dialog-content", className, contentClassName)}
           style={style ?? contentStyle}
-          onEscapeKeyDown={(event) => {
+          onEscapeKeyDown={(event: any) => {
             if (!dismissible) event.preventDefault();
           }}
-          onPointerDownOutside={(event) => {
+          onPointerDownOutside={(event: any) => {
             if (!dismissible) event.preventDefault();
           }}
-          onInteractOutside={(event) => {
+          onInteractOutside={(event: any) => {
             if (!dismissible) event.preventDefault();
           }}
         >
@@ -118,10 +118,12 @@ export function SolidDialogSeparator({ className }: { className?: string }) {
 export function SolidDialogClose({
   className,
   children,
+  onClick,
   "aria-label": ariaLabel = "Close dialog",
 }: {
   className?: string;
   children?: React.ReactNode;
+  onClick?: (event: React.MouseEvent<HTMLButtonElement>) => void;
   "aria-label"?: string;
 }) {
   return (
@@ -130,6 +132,7 @@ export function SolidDialogClose({
         type="button"
         className={cx("solid-radix-dialog-close", className)}
         aria-label={ariaLabel}
+        onClick={onClick}
       >
         {children ?? <X size={16} />}
       </button>

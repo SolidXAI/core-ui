@@ -29,6 +29,7 @@ interface KanbanColumnProps {
   groupByField: string;
   group: Group;
   groupData: GroupData[];
+  isKanbanDragEnabled?: boolean;
   cardNode?: any;
   DynamicCardWidget?: any;
   toggleFold: (groupByField: string) => void;
@@ -38,7 +39,7 @@ interface KanbanColumnProps {
 }
 
 // @ts-ignore
-const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData, cardNode, DynamicCardWidget, toggleFold, handleLoadMore, setLightboxUrls, setOpenLightbox, editButtonUrl }: KanbanColumnProps) => {
+const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData, isKanbanDragEnabled = true, cardNode, DynamicCardWidget, toggleFold, handleLoadMore, setLightboxUrls, setOpenLightbox, editButtonUrl }: KanbanColumnProps) => {
   return (
     <div className={group.folded ? "kanban-column kanban-column-folded" : "kanban-column"}>
       <div className="kaban-heading-area">
@@ -83,7 +84,7 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
         }
       </div>
       {!group.folded && (
-        <Droppable droppableId={groupByField}>
+        <Droppable droppableId={groupByField} isDropDisabled={!isKanbanDragEnabled}>
           {(provided: DroppableProvided) => (
             <div
               ref={provided.innerRef}
@@ -92,7 +93,7 @@ const KanbanColumn = ({ groupByField, solidKanbanViewMetaData, group, groupData,
             >
               {groupData.map((data, index) => (
                 // @ts-ignore
-                <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl} groupByFieldName={groupByField} group={group} cardNode={cardNode} DynamicCardWidget={DynamicCardWidget} />
+                <KanbanCard key={data.id} data={data} solidKanbanViewMetaData={solidKanbanViewMetaData} index={index} isDragDisabled={!isKanbanDragEnabled} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editButtonUrl} groupByFieldName={groupByField} group={group} cardNode={cardNode} DynamicCardWidget={DynamicCardWidget} />
               ))}
               {provided.placeholder}
               {group.count > 0 && (group.count > (group.limit * group.currentPage)) &&

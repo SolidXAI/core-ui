@@ -406,17 +406,23 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                         {fileDetails.length - 1} items
                     </p>
                     <div>
-                        <SolidButton type="button" size="small" text label="View" onClick={() => setShowAllFiles(true)} />
+                        <SolidButton type="button" size="sm" variant="ghost" onClick={() => setShowAllFiles(true)}>
+                            View
+                        </SolidButton>
                     </div>
                 </div>
             }
 
             <SolidDialog
-                visible={isShowAllFiles}
-                header="Items Uploaded"
-                onHide={() => setShowAllFiles(false)}
+                open={isShowAllFiles}
+                onOpenChange={setShowAllFiles}
                 style={{ minWidth: 450 }}
             >
+                <SolidDialogHeader>
+                    <SolidDialogTitle>Items Uploaded</SolidDialogTitle>
+                    <SolidDialogClose />
+                </SolidDialogHeader>
+                <SolidDialogBody>
                 {fileDetails.length > 1 &&
                     fileDetails.map((file, index) => {
                         const fileId = `${file.name}-${file.size}`;
@@ -457,6 +463,7 @@ export const DefaultMediaMultipleFormEditWidget = ({ formik, fieldContext, setLi
                         );
                     })
                 }
+                </SolidDialogBody>
             </SolidDialog>
             <SolidDialog
                 open={isDeleteImageDialogVisible}
@@ -582,17 +589,17 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                             <div className="flex align-items-center justify-content-between">
                                 <p className="font-normal w-11 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails[0])}>{fileDetails[0].name}</p>
                                 <div className="flex align-items-center md:gap-2">
-                                    <div>
-                                        <SolidButton
-                                            type="button"
-                                            text
-                                            icon="si si-download"
-                                            size="small"
-                                            style={{
-                                                height: 16,
-                                                width: 16
-                                            }}
-                                            onClick={() => downloadMediaFile(fileDetails[0]?.fileUrl, fileDetails[0]?.name)}
+                    <div>
+                        <SolidButton
+                            type="button"
+                            variant="ghost"
+                            icon="si si-download"
+                            size="sm"
+                            style={{
+                                height: 16,
+                                width: 16
+                            }}
+                            onClick={() => downloadMediaFile(fileDetails[0]?.fileUrl, fileDetails[0]?.name)}
                                         />
                                     </div>
                                 </div>
@@ -611,17 +618,23 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                         {fileDetails.length - 1} items
                     </p>
                     <div>
-                        <SolidButton type="button" size="small" text label="View" onClick={() => setShowAllFiles(true)} />
+                        <SolidButton type="button" size="sm" variant="ghost" onClick={() => setShowAllFiles(true)}>
+                            View
+                        </SolidButton>
                     </div>
                 </div>
             }
 
             <SolidDialog
-                visible={isShowAllFiles}
-                header="Items Uploaded"
-                onHide={() => setShowAllFiles(false)}
+                open={isShowAllFiles}
+                onOpenChange={setShowAllFiles}
                 style={{ minWidth: 450 }}
             >
+                <SolidDialogHeader>
+                    <SolidDialogTitle>Items Uploaded</SolidDialogTitle>
+                    <SolidDialogClose />
+                </SolidDialogHeader>
+                <SolidDialogBody>
                 {fileDetails.length > 1 &&
                     fileDetails.map((file, index) => {
                         const fileId = `${file.name}-${file.size}`;
@@ -636,9 +649,9 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                                                 <div>
                                                     <SolidButton
                                                         type="button"
-                                                        text
+                                                        variant="ghost"
                                                         icon="si si-download"
-                                                        size="small"
+                                                        size="sm"
                                                         style={{
                                                             height: 16,
                                                             width: 16
@@ -657,6 +670,7 @@ export const DefaultMediaMultipleFormViewWidget = ({ formik, fieldContext, setLi
                         );
                     })
                 }
+                </SolidDialogBody>
             </SolidDialog>
 
         </div>
