@@ -101,6 +101,9 @@
     - [x] delete model
 - [ ] command palette (cmd-p) for global navigation
 - [ ] command palette (cmd-shift-p) for view specific commands 
+- [ ] ADD NEW SOLID PRIMITIVE FOR VAR INPUTS 
+
+
 
 
 # Cleanup run

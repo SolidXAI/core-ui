@@ -21,6 +21,7 @@ export type SolidColumnProps = {
   headerClassName?: string;
   frozen?: boolean;
   alignFrozen?: "left" | "right";
+  frozenBackground?: string;
   [key: string]: any;
 };
 
@@ -79,6 +80,27 @@ function nextSortOrder(active: boolean, order: 1 | -1 | 0, removableSort = true)
   if (!active || order === 0) return 1;
   if (order === 1) return -1;
   return removableSort ? 0 : 1;
+}
+
+function getFrozenCellStyle(
+  props: SolidColumnProps,
+  baseStyle?: React.CSSProperties
+): React.CSSProperties {
+  if (!props.frozen) return baseStyle ?? {};
+
+  const stickyStyle: React.CSSProperties = {
+    position: "sticky",
+    zIndex: 3,
+    background: props.frozenBackground ?? "var(--background)",
+  };
+
+  if (props.alignFrozen === "right") {
+    stickyStyle.right = 0;
+  } else {
+    stickyStyle.left = 0;
+  }
+
+  return { ...baseStyle, ...stickyStyle };
 }
 
 export function SolidDataTable({
@@ -180,10 +202,13 @@ export function SolidDataTable({
                     key={`header-${index}`}
                     className={cx(
                       "solid-data-table-th text-left text-foreground whitespace-nowrap",
+                      props.frozen ? "solid-tree-sticky-cell" : undefined,
+                      props.frozen && props.alignFrozen === "right" ? "solid-tree-sticky-cell-right" : undefined,
+                      props.frozen && props.alignFrozen !== "right" ? "solid-tree-sticky-cell-left" : undefined,
                       isSelectionColumn ? "solid-data-table-selection-col" : undefined,
                       props.headerClassName
                     )}
-                    style={{ ...props.style, ...props.headerStyle }}
+                    style={getFrozenCellStyle(props, { ...props.style, ...props.headerStyle })}
                   >
                     {isSelectionColumn ? (
                       <input
@@ -258,10 +283,13 @@ export function SolidDataTable({
                           key={`cell-${key}-${index}`}
                           className={cx(
                             "solid-data-table-td align-top text-foreground",
+                            props.frozen ? "solid-tree-sticky-cell" : undefined,
+                            props.frozen && props.alignFrozen === "right" ? "solid-tree-sticky-cell-right" : undefined,
+                            props.frozen && props.alignFrozen !== "right" ? "solid-tree-sticky-cell-left" : undefined,
                             isSelectionColumn ? "solid-data-table-selection-col" : undefined,
                             props.className
                           )}
-                          style={props.style}
+                          style={getFrozenCellStyle(props, props.style)}
                         >
                           {content}
                         </td>

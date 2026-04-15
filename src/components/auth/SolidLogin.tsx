@@ -230,7 +230,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                 //       })
                 //   }
                 validationSchema={
-                    Yup.object({ identifier: Yup.string().required("required") })
+                    Yup.object({ identifier: Yup.string().required("Rxequired") })
                 }
                 enableReinitialize={false}
                 onSubmit={async (values, { setSubmitting, setErrors }) => {
@@ -320,7 +320,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 <SolidMessage
                                     className="text-red-500 text-sm"
                                     severity="error"
-                                    text={formik?.errors?.identifier?.toString()}
+                                    text={ signInValidatorLabel ? `${signInValidatorLabel} is ${formik?.errors?.identifier?.toString()}` : formik?.errors?.identifier?.toString()}
                                 />
                             )}
                         </div>
