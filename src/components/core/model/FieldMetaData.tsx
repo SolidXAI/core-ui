@@ -10,7 +10,11 @@ import {
   SolidButton,
   SolidDialog,
   SolidDialogBody,
+  SolidDialogClose,
   SolidDialogFooter,
+  SolidDialogHeader,
+  SolidDialogSeparator,
+  SolidDialogTitle,
 } from "../../shad-cn-ui";
 
 
@@ -194,19 +198,22 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
                 setIsRequiredPopUp(false);
               }
             }}
-            className="solid-dialog solid-confirm-dialog"
-            style={{ width: "20vw" }}
-            header={
-              <div className="flex align-items-center gap-2">
-                <AlertTriangle size={18} className="text-yellow-500" />
-                <span>Warning</span>
-              </div>
-            }
+            className="solid-dialog solid-confirm-dialog solid-field-confirm-dialog"
+            style={{ width: "min(420px, calc(100vw - 2rem))" }}
           >
-            <SolidDialogBody>
-              <p className="mb-0">If there is data against this model this operation might not work and manual intervention will be required.</p>
+            <SolidDialogHeader className="solid-field-confirm-header">
+              <SolidDialogTitle>
+                <span className="flex align-items-center gap-2">
+                  <AlertTriangle size={18} className="text-yellow-500" />
+                  <span>Warning</span>
+                </span>
+              </SolidDialogTitle>
+              <SolidDialogClose />
+            </SolidDialogHeader>
+            <SolidDialogBody className="solid-field-confirm-dialog-body">
+              <p className="solid-field-confirm-message">If there is data against this model this operation might not work and manual intervention will be required.</p>
             </SolidDialogBody>
-            <SolidDialogFooter className="justify-content-start">
+            <SolidDialogFooter className="solid-field-confirm-actions">
               <SolidButton size="sm" onClick={() => setIsRequiredPopUp(false)}>
                 Ok
               </SolidButton>
@@ -220,19 +227,35 @@ const FieldMetaData = ({ setIsDirty, modelMetaData, fieldMetaData, setFieldMetaD
                 setRowToDelete(null);
               }
             }}
-            className="solid-dialog solid-confirm-dialog"
-            style={{ width: "20vw" }}
-            header={
-              <div className="flex align-items-center justify-content-center gap-2">
-                <AlertTriangle size={18} className="text-yellow-500" />
-                <span>Warning</span>
-              </div>
-            }
+            className="solid-shadcn-confirm-dialog solid-field-delete-flow-dialog"
+            style={{ width: "min(560px, calc(100vw - 2rem))" }}
           >
-            <SolidDialogBody>
-              <p className="mb-0 text-center">Are you sure you want to delete this field?</p>
+            <SolidDialogHeader className="solid-shadcn-dialog-head solid-field-delete-flow-head">
+              <SolidDialogTitle>
+                <span className="flex align-items-center gap-2 justify-content-center">
+                  <AlertTriangle size={18} className="text-yellow-500" />
+                  <span>Remove Field</span>
+                </span>
+              </SolidDialogTitle>
+              <SolidDialogClose />
+            </SolidDialogHeader>
+            <SolidDialogSeparator className="solid-shadcn-dialog-sep" />
+            <SolidDialogBody className="solid-shadcn-dialog-body solid-field-delete-flow-body">
+              <p className="solid-shadcn-dialog-text solid-field-delete-flow-intro">
+                Removing a field is a 2 step process.
+              </p>
+              <ol className="solid-field-delete-flow-list">
+                <li>
+                  Delete the field and save the model form.
+                  <span>This marks the field for removal.</span>
+                </li>
+                <li>
+                  Generate code for this model.
+                  <span>This removes the field from generated code, metadata tables, and JSON.</span>
+                </li>
+              </ol>
             </SolidDialogBody>
-            <SolidDialogFooter className="flex justify-content-center gap-2">
+            <SolidDialogFooter className="solid-shadcn-dialog-actions solid-field-delete-flow-actions">
               <SolidButton
                 size="sm"
                 onClick={() => {

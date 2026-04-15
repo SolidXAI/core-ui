@@ -11,18 +11,20 @@
 .fieldWrapper {
     display: flex;
     flex-direction: column;
-    gap: 5px;
-    margin-top: 12px;
+    gap: 4px;
+    margin-top: 10px;
 }
 
 .fieldLabel {
-    font-size: 12px;
-    color: var(--muted-foreground);
+    font-size: 11px;
+    color: color-mix(in srgb, var(--muted-foreground) 84%, var(--background) 16%);
     font-weight: 500;
     display: flex;
     align-items: center;
-    gap: 3px;
+    gap: 4px;
     margin: 0;
+    line-height: 1.35;
+    letter-spacing: 0.01em;
 }
 
 .fieldInput {
@@ -178,15 +180,17 @@
 .fieldViewWrapper {
     display: flex;
     flex-direction: column;
-    gap: 3px;
-    margin-top: 12px;
+    gap: 2px;
+    margin-top: 10px;
 }
 
 .fieldViewLabel {
     margin: 0;
-    font-size: 12px;
-    color: var(--muted-foreground);
+    font-size: 11px;
+    color: color-mix(in srgb, var(--muted-foreground) 84%, var(--background) 16%);
     font-weight: 500;
+    line-height: 1.35;
+    letter-spacing: 0.01em;
 }
 
 .fieldViewValue {

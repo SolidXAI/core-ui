@@ -45,7 +45,7 @@ import { SolidFormFooter } from "./SolidFormFooter";
 import { normalizeSolidFormActionPath } from "../../../helpers/routePaths";
 import { showToast } from "../../../redux/features/toastSlice";
 import { useDispatch } from "react-redux";
-import { SolidButton, SolidConfirmDialog, SolidPanel } from "../../shad-cn-ui";
+import { SolidButton, SolidConfirmDialog } from "../../shad-cn-ui";
 import {
     SolidDialog,
     SolidDialogBody,
@@ -206,12 +206,13 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
 };
 
 const SolidGroup = ({ children, attrs }: any) => {
-
-    const className = attrs.className;
+    const className = ["solid-form-layout-group", attrs.label ? "solid-form-layout-group--labeled" : "", attrs.className]
+        .filter(Boolean)
+        .join(" ");
 
     return (
         <div className={className}>
-            {attrs.label && <p>{attrs.label}</p>}
+            {attrs.label && <p className="solid-form-layout-label">{attrs.label}</p>}
             <div className="grid">{children}</div>
         </div>
         // <div className={className}>
@@ -230,8 +231,9 @@ const SolidGroup = ({ children, attrs }: any) => {
 };
 
 const SolidRow = ({ children, attrs }: any) => {
-
-    const className = attrs.className;
+    const className = ["row", "solid-form-layout-row", attrs.label ? "solid-form-layout-row--labeled" : "", attrs.className]
+        .filter(Boolean)
+        .join(" ");
 
     return (
         // <div className={`row ${className}`}>
@@ -244,8 +246,8 @@ const SolidRow = ({ children, attrs }: any) => {
         //     </div>
 
         // </div>
-        <div className={`row ${className}`}>
-            {attrs.label && <p >{attrs.label}</p>}
+        <div className={className}>
+            {attrs.label && <p className="solid-form-layout-label">{attrs.label}</p>}
             <div className="grid">{children}</div>
         </div>
         // <div>{children}</div>
@@ -253,43 +255,15 @@ const SolidRow = ({ children, attrs }: any) => {
 };
 
 const SolidColumn = ({ children, attrs }: any) => {
-    const className = attrs.className;
+    const className = ["solid-form-layout-column", attrs.label ? "solid-form-layout-column--labeled" : "", attrs.className]
+        .filter(Boolean)
+        .join(" ");
 
     return (
-        // first fieldset ui
-
-        // <div className={`${className}`}>
-        //     <div className="s_group">
-        //         <fieldset>
-        //             {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
-        //             <div className="grid">{children}</div>
-        //         </fieldset>
-        //     </div>
-        // </div>
-
-        //second fieldset ui
-        // <div className={`${className}`}>
-        //     {attrs.label && <p>{attrs.label}</p>}
-        //     <div className="grid">{children}</div>
-        // </div>
-
-        //figma fieldset ui
-        attrs.label ?
-            <div className={`${className}`}>
-                <SolidPanel header={attrs.label} className="solid-column-panel">
-                    <div className="grid">{children}</div>
-                </SolidPanel>
-                {/* <div className="p-fieldset">
-                    <div className="solid-fieldset-header">
-                        <div>{attrs.label}</div>
-                    </div>
-                    <div className="grid solid-fieldset-content">{children}</div>
-                </div> */}
-            </div>
-            :
-            <div className={`${className}`}>
-                <div className="grid">{children}</div>
-            </div>
+        <div className={className}>
+            {attrs.label && <p className="solid-form-layout-label">{attrs.label}</p>}
+            <div className="grid">{children}</div>
+        </div>
     );
 };
 
