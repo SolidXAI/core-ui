@@ -1,5 +1,5 @@
 import React from "react";
-import { SolidInput, SolidPasswordInput, SolidSelect, SolidSwitch, SolidTextarea } from "../../../shad-cn-ui";
+import { SolidInput, SolidSelect, SolidSwitch, SolidTextarea } from "../../../shad-cn-ui";
 
 export interface ModelBehavior {
   streaming: boolean;
@@ -73,19 +73,6 @@ export const AiModelConfigTab = ({
     onProviderConfigChange(providerKey, { ...providerConfig, [key]: value });
   };
 
-  const parsedCustom = (() => {
-    try { return JSON.parse(behavior.custom); } catch { return behavior.custom; }
-  })();
-
-  const preview = JSON.stringify(
-    {
-      providerConfig,
-      behavior: { ...behavior, custom: parsedCustom },
-    },
-    null,
-    2
-  );
-
   const cardStyle: React.CSSProperties = {
     border: "1px solid var(--solid-border-color, #e2e8f0)",
     borderRadius: "0.5rem",
@@ -121,11 +108,11 @@ export const AiModelConfigTab = ({
           )}
           <div className="flex flex-column gap-2">
             <label className="form-field-label">API Key</label>
-            <SolidPasswordInput
+            <SolidInput
+              type="password"
               className="w-full"
               value={providerConfig?.apiKey || ""}
               onChange={(e) => handleConfigUpdate("apiKey", e.target.value)}
-              toggle
             />
           </div>
           <div className="flex flex-column gap-2">
@@ -163,10 +150,6 @@ export const AiModelConfigTab = ({
         </div>
       </div>
 
-      <div style={cardStyle}>
-        <p className="solid-settings-subheading" style={{ marginBottom: "0.75rem" }}>Preview</p>
-        <pre style={{ margin: 0, fontSize: "0.8rem", overflowX: "auto", whiteSpace: "pre-wrap", wordBreak: "break-all" }}>{preview}</pre>
-      </div>
     </div>
   );
 };
