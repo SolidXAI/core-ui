@@ -559,5 +559,6 @@ export { InitiateGoogleOauthPage as AuthInitiateGoogleOauthPage } from './routes
 export { SsoPage as AuthSsoPage } from './routes/pages/auth/SsoPage';
 export { ErrorPage } from './routes/pages/ErrorPage';
 export { NotFoundPage } from './routes/pages/NotFoundPage';
+export { handleAuthSuccess } from './adapters/auth/helper';
 
 export * from "./styles";

@@ -1,8 +1,6 @@
-import { jwtDecode } from "jwt-decode";
 import { env } from "../env";
-import { saveSession } from "./storage";
-import { eventBus, AppEvents } from "../../helpers/eventBus";
 import { solidPost } from "../..//http/solidHttp";
+import { handleAuthSuccess } from "./helper"; 
 
 type SignInResponse = {
   ok: boolean;
@@ -49,27 +47,9 @@ export async function signInWithOtp(options: SignInWithOtpOptions): Promise<Sign
     const accessToken = response?.data?.data?.accessToken;
     const refreshToken = response?.data?.data?.refreshToken;
     const user = response?.data?.data?.user || {};
+    
+    return handleAuthSuccess(accessToken,refreshToken,user,response?.status)
 
-    if (!accessToken || !refreshToken) {
-      return { ok: false, error: "Missing tokens in response", status: response.status || 500, url: null };
-    }
-
-    const decoded = jwtDecode<{ exp?: number }>(accessToken);
-    const accessTokenExpires = decoded.exp ? decoded.exp * 1000 : undefined;
-
-    const session = {
-      user: {
-        ...user,
-        accessToken,
-        refreshToken,
-        accessTokenExpires,
-      },
-      error: null,
-    };
-    saveSession(session);
-    eventBus.emit(AppEvents.SessionUpdated, session);
-
-    return { ok: true, error: null, status: response.status || 200, url: null };
   } catch (error: any) {
     const message = error?.response?.data?.message || error?.response?.data?.data?.message || error?.message || "Login failed";
     return { ok: false, error: message, status: error?.response?.status || 500, url: null };

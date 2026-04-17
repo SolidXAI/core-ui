@@ -67,6 +67,7 @@ import {
     type ExtensionFunctionType,
 } from "../types/extension-registry";
 
+
 type ExtensionComponentMetadata = {
     component: React.ComponentType<any>;
     type: ExtensionComponentType;

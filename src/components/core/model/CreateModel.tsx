@@ -457,11 +457,11 @@ const CreateModel = ({ data, params }: any) => {
 
       </div>
       {/* <div style={{ width: '22.5%' }}></div> */}
-      <SolidDialog header="Delete Field" headerClassName="py-2" className="solid-confirm-dialog" contentClassName="px-0 pb-0" visible={deleteEntity} style={{ width: '20vw' }} onHide={() => { if (!deleteEntity) return; setDeleteEntity(false); }}>
+      <SolidDialog header="Delete Model" headerClassName="py-2" className="solid-confirm-dialog" contentClassName="px-0 pb-0" visible={deleteEntity} style={{ width: '20vw' }} onHide={() => { if (!deleteEntity) return; setDeleteEntity(false); }}>
         <SolidDivider className="m-0" />
         <div className="p-4">
           <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
-            Are you sure you want to delete this Field ?
+            Are you sure you want to delete this Model?
           </p>
           <p className="" style={{ color: 'var{--solid-grey-500}' }}>{modelMetaData?.singularName}</p>
           <div className="flex align-items-center gap-2 mt-3">

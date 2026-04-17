@@ -1024,6 +1024,53 @@ body {
   width: min(296px, calc(100vw - 32px));
 }
 
+.solid-field-delete-flow-dialog {
+  width: min(560px, calc(100vw - 32px));
+}
+
+.solid-field-delete-flow-head {
+  text-align: left;
+}
+
+.solid-field-delete-flow-body {
+  text-align: left;
+}
+
+.solid-field-delete-flow-intro {
+  margin-bottom: 12px;
+  font-size: 13px;
+  line-height: 1.55;
+  color: var(--foreground);
+}
+
+.solid-field-delete-flow-list {
+  margin: 0;
+  padding-left: 18px;
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+  color: var(--foreground);
+}
+
+.solid-field-delete-flow-list li {
+  font-size: 13px;
+  line-height: 1.55;
+  font-weight: 500;
+}
+
+.solid-field-delete-flow-list li span {
+  display: block;
+  margin-top: 2px;
+  font-size: 12px;
+  line-height: 1.55;
+  font-weight: 400;
+  color: var(--muted-foreground);
+}
+
+.solid-field-delete-flow-actions {
+  justify-content: flex-end;
+}
+
 .solid-delete-confirm-dialog .solid-shadcn-dialog-head {
   padding: 9px 12px;
 }
@@ -5965,6 +6012,33 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-panel-content {
   padding: 12px;
+}
+
+.solid-form-layout-group,
+.solid-form-layout-row,
+.solid-form-layout-column {
+  min-width: 0;
+}
+
+.solid-form-layout-label {
+  margin: 0 0 0.9rem;
+  display: flex;
+  align-items: center;
+  gap: 0.8rem;
+  font-size: 14px;
+  line-height: 1.3;
+  font-weight: 650;
+  color: var(--solid-form-title, color-mix(in srgb, var(--foreground) 88%, var(--muted-foreground) 12%));
+  letter-spacing: -0.015em;
+}
+
+.solid-form-layout-label::after {
+  content: "";
+  flex: 1;
+  min-width: 1.5rem;
+  height: 1px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--border) 82%, transparent);
 }
 
 .solid-message {
