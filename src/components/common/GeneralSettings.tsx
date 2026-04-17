@@ -69,8 +69,8 @@ export const GeneralSettings = () => {
         solidXGenAiCodeBuilderConfig: (() => {
             const defaultAiConfig: SolidAiConfig = {
                 models: {
-                    default: { providerKey: "", behavior: { streaming: false, custom: "" } },
-                    fast: { providerKey: "", behavior: { streaming: false, custom: "" } },
+                    default: { providerKey: "", behavior: { streaming: false, custom: {} } },
+                    fast: { providerKey: "", behavior: { streaming: false, custom: {} } },
                 },
                 providers: {},
             };
@@ -78,7 +78,19 @@ export const GeneralSettings = () => {
             if (!raw) return defaultAiConfig;
             try {
                 const parsed = typeof raw === "string" ? JSON.parse(raw) : raw;
-                return (parsed && typeof parsed === "object" ? parsed : defaultAiConfig) as SolidAiConfig;
+                if (!parsed || typeof parsed !== "object") return defaultAiConfig;
+                const normalizeCustom = (entry: any) => {
+                    if (!entry?.behavior) return entry;
+                    const custom = entry.behavior.custom;
+                    if (typeof custom === "string") {
+                        try { entry.behavior.custom = JSON.parse(custom); } catch { entry.behavior.custom = {}; }
+                    }
+                    return entry;
+                };
+                if (parsed.models) {
+                    Object.keys(parsed.models).forEach(k => normalizeCustom(parsed.models[k]));
+                }
+                return parsed as SolidAiConfig;
             } catch {
                 return defaultAiConfig;
             }
@@ -1027,7 +1039,7 @@ interface AiSettingsSectionProps {
     onAiConfigChange: (config: SolidAiConfig) => void;
 }
 
-const DEFAULT_BEHAVIOR: ModelBehavior = { streaming: false, custom: "" };
+const DEFAULT_BEHAVIOR: ModelBehavior = { streaming: false, custom: {} };
 
 const AiSettingsSection = ({ aiConfig, onAiConfigChange }: AiSettingsSectionProps) => {
     const [activeTab, setActiveTab] = useState<"fast" | "default">("fast");

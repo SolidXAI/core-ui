@@ -1,9 +1,9 @@
 import React from "react";
-import { SolidInput, SolidSelect, SolidSwitch, SolidTextarea } from "../../../shad-cn-ui";
+import { SolidInput, SolidSelect, SolidSwitch } from "../../../shad-cn-ui";
 
 export interface ModelBehavior {
   streaming: boolean;
-  custom: string;
+  custom: Record<string, any>;
 }
 
 export interface ProviderConfig {
@@ -138,14 +138,47 @@ export const AiModelConfigTab = ({
             <label className="form-field-label" style={{ marginBottom: 0 }}>Streaming</label>
           </div>
           <div className="flex flex-column gap-2">
-            <label className="form-field-label">Custom Params (JSON)</label>
-            <SolidTextarea
-              value={behavior.custom}
-              onChange={(e) => onBehaviorChange({ ...behavior, custom: e.target.value })}
-              placeholder='{ "temperature": 0.7, "maxTokens": 1000 }'
-              rows={4}
-              className="w-full"
-            />
+            <label className="form-field-label">Custom Params</label>
+            {Object.entries(behavior.custom || {}).map(([key, val], idx) => (
+              <div key={idx} className="flex gap-2 align-items-center">
+                <SolidInput
+                  placeholder="key"
+                  value={key}
+                  onChange={(e) => {
+                    const newCustom = { ...behavior.custom };
+                    delete newCustom[key];
+                    const entries = Object.entries(behavior.custom);
+                    entries[idx] = [e.target.value, val];
+                    onBehaviorChange({ ...behavior, custom: Object.fromEntries(entries) });
+                  }}
+                  className="w-full"
+                />
+                <SolidInput
+                  placeholder="value"
+                  value={String(val)}
+                  onChange={(e) => {
+                    const raw = e.target.value;
+                    const parsed = raw === "true" ? true : raw === "false" ? false : isNaN(Number(raw)) || raw === "" ? raw : Number(raw);
+                    onBehaviorChange({ ...behavior, custom: { ...behavior.custom, [key]: parsed } });
+                  }}
+                  className="w-full"
+                />
+                <button
+                  type="button"
+                  onClick={() => {
+                    const newCustom = { ...behavior.custom };
+                    delete newCustom[key];
+                    onBehaviorChange({ ...behavior, custom: newCustom });
+                  }}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "var(--solid-danger, #ef4444)", fontSize: "1.1rem" }}
+                >✕</button>
+              </div>
+            ))}
+            <button
+              type="button"
+              onClick={() => onBehaviorChange({ ...behavior, custom: { ...behavior.custom, "": "" } })}
+              style={{ background: "none", border: "1px dashed var(--solid-border-color, #e2e8f0)", borderRadius: "0.375rem", padding: "0.4rem 0.75rem", cursor: "pointer", fontSize: "0.85rem", color: "var(--solid-primary, #6366f1)" }}
+            >+ Add Param</button>
           </div>
         </div>
       </div>
