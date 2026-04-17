@@ -2,10 +2,12 @@ import React, { useEffect, useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 import { useNavigate, useLocation } from "react-router-dom";
 import { exitStudioMode, setStudioView, type StudioView } from "../../redux/features/solidStudioSlice";
+import { showToast } from "../../redux/features/toastSlice";
 import { useSession } from "../../hooks/useSession";
-import { signOut } from "../../adapters/auth/index";
+import { getSession, signOut } from "../../adapters/auth/index";
 import { createPortal } from "react-dom";
 import { env } from "../../adapters/env";
+import { ERROR_MESSAGES } from "../../constants/error-messages";
 
 // ── Icons ──────────────────────────────────────────────────────────────────────
 
@@ -68,9 +70,10 @@ export function SolidStudio() {
   const { pathname, search } = useLocation();
   const isPreviewMode = new URLSearchParams(search).get("preview") === "true" || (typeof sessionStorage !== "undefined" && sessionStorage.getItem("solid-preview") === "true");
   const isPreviewable = pathname !== "/studio" && pathname !== "/landing";
-  const { status } = useSession();
+  const { data, status } = useSession();
   const isAuthenticated = status === "authenticated";
   const [isMenuOpen, setIsMenuOpen] = useState(false);
+  const [isChatRedirecting, setIsChatRedirecting] = useState(false);
   const menuRef = useRef<HTMLDivElement>(null);
 
   // Close the 3-dot menu when clicking outside
@@ -105,6 +108,68 @@ export function SolidStudio() {
     navigate(view === "backend" ? "/admin" : "/landing");
   };
 
+  const handleAiChatClick = async () => {
+    if (isChatRedirecting) return;
+
+    const aiUrl = env("VITE_SOLIDX_AI_URL");
+    if (!aiUrl) return;
+
+    setIsChatRedirecting(true);
+    try {
+      const session = await getSession();
+      const accessToken = session?.user?.accessToken || data?.user?.accessToken;
+      if (!accessToken) return;
+
+      const apiBaseUrl = env("API_URL", "http://localhost:8080").replace(/\/+$/, "");
+      const response = await fetch(`${apiBaseUrl}/api/iam/sso/code`, {
+        method: "POST",
+        headers: {
+          accept: "*/*",
+          Authorization: `Bearer ${accessToken}`,
+        },
+        body: "",
+      });
+
+      if (!response.ok) {
+        let detail = `Failed to fetch ssoCode (${response.status})`;
+        try {
+          const errorPayload = await response.json();
+          detail =
+            errorPayload?.message ||
+            errorPayload?.error?.message ||
+            errorPayload?.data?.message ||
+            detail;
+        } catch {
+          // no-op: keep default message
+        }
+        throw new Error(detail);
+      }
+
+      const payload = await response.json();
+      const ssoCode = payload?.ssoCode ?? payload?.data?.ssoCode;
+      if (!ssoCode) {
+        throw new Error("ssoCode missing in response");
+      }
+
+      const redirectUrl = new URL(aiUrl, window.location.origin);
+      redirectUrl.searchParams.set("ssoCode", String(ssoCode));
+      window.open(redirectUrl.toString(), "_blank");
+    } catch (error) {
+      const detail = error instanceof Error ? error.message : ERROR_MESSAGES.SOMETHING_WRONG;
+      dispatch(
+        showToast({
+          severity: "error",
+          summary: ERROR_MESSAGES.ERROR,
+          detail,
+          life: 4000,
+        })
+      );
+      console.error("Failed to open AI chat with ssoCode:", error);
+    } finally {
+      setIsChatRedirecting(false);
+    }
+  };
+
   const studioUI = (
     <div className="solid-studio-island" style={{ zIndex: "var(--z-studio)" }}>
       <div className="solid-studio-island-inner">
@@ -127,10 +192,9 @@ export function SolidStudio() {
         <button
           type="button"
           className="solid-studio-island-btn"
-          onClick={() => {
-            const aiUrl = env("VITE_SOLIDX_AI_URL");
-            if (aiUrl) window.open(aiUrl, "_blank");
-          }}
+          onClick={handleAiChatClick}
+          disabled={isChatRedirecting}
+          aria-busy={isChatRedirecting}
           aria-label="AI chat"
         >
           <ChatIcon />
