@@ -22,7 +22,7 @@ import {
   SolidSwitch,
   SolidTabGroup,
 } from "../../shad-cn-ui";
-import { ApiKeysTab } from "./ApiKeysTab";
+import { ApiKeysTab, GenerateApiKeyModal, RevealApiKeyModal } from "./ApiKeysTab";
 
 interface ErrorResponseData {
   message: string;
@@ -39,8 +39,10 @@ const CreateUser = ({ data, params }: any) => {
   const router = useRouter();
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
   const [activeTab, setActiveTab] = useState("userDetails");
+  const [newUserIdForApiKey, setNewUserIdForApiKey] = useState<number | null>(null);
+  const [revealKey, setRevealKey] = useState<{ apiKey: string; keyName: string } | null>(null);
 
-  const [registerPrivate, { isLoading, error: userCreateError, isSuccess }] = useRegisterPrivateMutation();
+  const [registerPrivate, { isLoading, error: userCreateError }] = useRegisterPrivateMutation();
   const [
     updateUser,
     {
@@ -119,16 +121,29 @@ const CreateUser = ({ data, params }: any) => {
         return;
       }
 
-      registerPrivate({
-        fullName: values.fullName,
-        username: values.username,
-        email: values.email,
-        mobile: values.mobile,
-        password: values.password,
-        roles: selectedRoles,
-        failedLoginAttempts: values.failedLoginAttempts,
-        isAllowedToGenerateApiKeys: values.isAllowedToGenerateApiKeys,
-      });
+      try {
+        const response = await registerPrivate({
+          fullName: values.fullName,
+          username: values.username,
+          email: values.email,
+          mobile: values.mobile,
+          password: values.password,
+          roles: selectedRoles,
+          failedLoginAttempts: values.failedLoginAttempts,
+          isAllowedToGenerateApiKeys: values.isAllowedToGenerateApiKeys,
+        }).unwrap();
+
+        if (values.isAllowedToGenerateApiKeys) {
+          const userId = (response as any)?.data?.id ?? (response as any)?.id;
+          if (userId) {
+            setNewUserIdForApiKey(userId);
+            return;
+          }
+        }
+        router.back();
+      } catch {
+        // error shown via userCreateError effect
+      }
     },
   });
 
@@ -164,10 +179,10 @@ const CreateUser = ({ data, params }: any) => {
   }, [dispatch, userCreateError, userUpdateError]);
 
   useEffect(() => {
-    if (isSuccess || isDeleteUserSuccess || isUpdateUserSuccess) {
+    if (isDeleteUserSuccess || isUpdateUserSuccess) {
       router.back();
     }
-  }, [isDeleteUserSuccess, isSuccess, isUpdateUserSuccess, router]);
+  }, [isDeleteUserSuccess, isUpdateUserSuccess, router]);
 
   const isEditMode = params.id !== "new";
   const isSaving = isLoading || isUserUpdating;
@@ -255,6 +270,33 @@ const CreateUser = ({ data, params }: any) => {
           </div>
         </form>
       </div>
+
+      {newUserIdForApiKey !== null && (
+        <GenerateApiKeyModal
+          open={true}
+          userId={newUserIdForApiKey}
+          onClose={() => {
+            setNewUserIdForApiKey(null);
+            router.back();
+          }}
+          onCreated={(apiKey, keyName) => {
+            setNewUserIdForApiKey(null);
+            setRevealKey({ apiKey, keyName });
+          }}
+        />
+      )}
+
+      {revealKey && (
+        <RevealApiKeyModal
+          open={true}
+          apiKey={revealKey.apiKey}
+          keyName={revealKey.keyName}
+          onClose={() => {
+            setRevealKey(null);
+            router.back();
+          }}
+        />
+      )}
     </div>
   );
 };

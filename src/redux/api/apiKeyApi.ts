@@ -50,6 +50,14 @@ export const apiKeyApi = createApi({
       }),
       invalidatesTags: ["ApiKey"],
     }),
+    generateApiKeyForUser: builder.mutation<CreateApiKeyResponse, { userId: number; body: CreateApiKeyBody }>({
+      query: ({ userId, body }) => ({
+        url: `/api-keys/users/${userId}`,
+        method: "POST",
+        body,
+      }),
+      invalidatesTags: ["ApiKey"],
+    }),
   }),
 });
 
@@ -57,4 +65,5 @@ export const {
   useGetUserApiKeysQuery,
   useCreateApiKeyMutation,
   useUpdateApiKeyMutation,
+  useGenerateApiKeyForUserMutation,
 } = apiKeyApi;
