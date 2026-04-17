@@ -1,9 +1,9 @@
-import { SolidListFieldWidgetProps } from "../../../../types/solid-core";
+import { SolidListFieldWidgetProps } from "../../../../../../types/solid-core";
 import { useState } from "react";
-import { solidGet } from "../../../../http/solidHttp";
-import { SolidButton } from "../../../shad-cn-ui";
+import { solidGet } from "../../../../../../http/solidHttp";
+import { SolidButton } from "../../../../../shad-cn-ui";
 import { useDispatch } from "react-redux";
-import { closePopup } from "../../../../redux/features/popupSlice";
+import { closePopup } from "../../../../../../redux/features/popupSlice";
 import { X } from "lucide-react";
 
 // Chart.js imports
@@ -103,7 +103,7 @@ const PivotChart = ({ data }: { data: PivotData }) => {
 // =========================
 // Widget
 // =========================
-export const SolidSummarizeListHeaderActionMqMessages = ({
+export const SolidMqMessagesSummarizeListHeaderAction = ({
     solidListViewMetaData
 }: SolidListFieldWidgetProps) => {
     const dispatch = useDispatch();

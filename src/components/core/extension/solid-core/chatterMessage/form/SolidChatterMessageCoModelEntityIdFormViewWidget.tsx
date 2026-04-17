@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
-import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
+import { SolidFormFieldWidgetProps } from "../../../../../../types/solid-core";
 import { ExternalLink } from "lucide-react";
-import { solidGet } from "../../../../../http/solidHttp";
+import { solidGet } from "../../../../../../http/solidHttp";
 import { snakeCase } from "lodash";
 
 export const SolidChatterMessageCoModelEntityIdFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {

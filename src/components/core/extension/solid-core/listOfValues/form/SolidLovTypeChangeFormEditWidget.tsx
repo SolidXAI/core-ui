@@ -1,9 +1,9 @@
 import { useState } from "react";
-import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
-import { solidGet } from "../../../../../http/solidHttp";
-import { SolidAutocomplete } from "../../../../../components/shad-cn-ui/SolidAutocomplete";
-import { SolidInput } from "../../../../../components/shad-cn-ui/SolidInput";
-import { SolidIcon } from "../../../../../components/shad-cn-ui/SolidIcon";
+import { SolidFormFieldWidgetProps } from "../../../../../../types/solid-core";
+import { solidGet } from "../../../../../../http/solidHttp";
+import { SolidAutocomplete } from "../../../../../../components/shad-cn-ui/SolidAutocomplete";
+import { SolidInput } from "../../../../../../components/shad-cn-ui/SolidInput";
+import { SolidIcon } from "../../../../../../components/shad-cn-ui/SolidIcon";
 
 export const SolidLovTypeChangeFormEditWidget = ({
     formik,
