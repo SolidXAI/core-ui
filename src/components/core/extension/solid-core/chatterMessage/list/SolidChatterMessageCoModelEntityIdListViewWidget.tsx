@@ -1,9 +1,9 @@
 
 
 import { ExternalLink } from "lucide-react";
-import { SolidListFieldWidgetProps } from "../../../../types/solid-core";
+import { SolidListFieldWidgetProps } from "../../../../../../types/solid-core";
 import { useEffect, useState } from "react";
-import { solidGet } from "../../../../http/solidHttp";
+import { solidGet } from "../../../../../../http/solidHttp";
 import { snakeCase } from "lodash";
 
 

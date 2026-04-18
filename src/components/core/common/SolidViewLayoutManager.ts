@@ -12,6 +12,12 @@ export class SolidViewLayoutManager {
     /** Internal mutable layout copy */
     private layout: LayoutNode;
 
+    private clone<T>(value: T): T {
+        return typeof structuredClone === "function"
+            ? structuredClone(value)
+            : JSON.parse(JSON.stringify(value));
+    }
+
     /**
      * Creates a new layout manager instance.
      * A deep copy of the provided layout is created to avoid side effects.
@@ -20,7 +26,7 @@ export class SolidViewLayoutManager {
      */
     constructor(layout: LayoutNode) {
         // Create a deep copy to prevent modifying the original object
-        this.layout = structuredClone ? structuredClone(layout) : JSON.parse(JSON.stringify(layout));
+        this.layout = this.clone(layout);
     }
 
     /**
@@ -91,6 +97,20 @@ export class SolidViewLayoutManager {
         return parent.children.some((child) => this.removeNodeRecursive(child, name));
     }
 
+    private insertNodeBeforeRecursive(parent: LayoutNode, targetName: string, newNode: LayoutNode): boolean {
+        if (!parent.children || parent.children.length === 0) return false;
+
+        const targetIndex = parent.children.findIndex((child) => child.attrs.name === targetName);
+        if (targetIndex !== -1) {
+            parent.children.splice(targetIndex, 0, this.clone(newNode));
+            return true;
+        }
+
+        return parent.children.some((child) =>
+            this.insertNodeBeforeRecursive(child, targetName, newNode)
+        );
+    }
+
 
     /**
       * Returns the managed layout instance.
@@ -117,6 +137,27 @@ export class SolidViewLayoutManager {
             return true;
         }
         return false;
+    }
+
+    /**
+     * Checks whether a node exists by name.
+     *
+     * @param name - Node name
+     * @returns true if found
+     */
+    hasNode(name: string): boolean {
+        return !!this.findNode(this.layout, name);
+    }
+
+    /**
+     * Inserts a node before the first matching target node.
+     *
+     * @param targetName - Target node name
+     * @param newNode - Node to insert
+     * @returns true if insertion was successful
+     */
+    insertNodeBefore(targetName: string, newNode: LayoutNode): boolean {
+        return this.insertNodeBeforeRecursive(this.layout, targetName, newNode);
     }
 
     /**

@@ -75,6 +75,7 @@ export type SolidView = CommonEntity & {
 export type LayoutAttribute = {
     name: string;
     label?: string;
+    html?: string;
     className?: string;
     inlineCreate?: string;
     renderMode?: string;

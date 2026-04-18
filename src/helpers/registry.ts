@@ -52,17 +52,20 @@ import dashboardQuestionFieldChangeHandler from "../components/core/extension/so
 import dashboardQuestionOnFormLoadHandler from "../components/core/extension/solid-core/dashboard/dashboardQuestionOnFormLoadHandler";
 import MqMessageKanbanCardWidget from "../components/core/extension/solid-core/mqMessage/kanban/MqMessageKanbanCardWidget";
 import MediaCardWidget from "../components/core/extension/solid-core/media/card/MediaCardWidget";
+import { SolidChatterMessageCoModelEntityIdListViewWidget } from "../components/core/extension/solid-core/chatterMessage/list/SolidChatterMessageCoModelEntityIdListViewWidget";
+import { SolidMqMessageStageListViewWidget } from "../components/core/extension/solid-core/mqMessage/list/SolidMqMessageStageListViewWidget";
+import { SolidMqMessagesSummarizeListHeaderAction } from "../components/core/extension/solid-core/mqMessage/list/SolidMqMessagesSummarizeListHeaderAction";
+import { SolidChatterMessageCoModelEntityIdFormViewWidget } from "../components/core/extension/solid-core/chatterMessage/form/SolidChatterMessageCoModelEntityIdFormViewWidget";
+import { SolidLovTypeChangeFormEditWidget } from "../components/core/extension/solid-core/listOfValues/form/SolidLovTypeChangeFormEditWidget";
+import mqMessageOnFormLoadHandler from "../components/core/extension/solid-core/mqMessage/form/mqMessageOnFormLoadHandler";
+import { SolidMqMessageStageFormViewWIdget } from "../components/core/extension/solid-core/mqMessage/form/SolidMqMessageStageFormViewWIdget";
+
 import {
     ExtensionComponentTypes,
     ExtensionFunctionTypes,
     type ExtensionComponentType,
     type ExtensionFunctionType,
 } from "../types/extension-registry";
-import { SolidChatterMessageCoModelEntityIdFormViewWidget } from "../components/core/form/fields/widgets/SolidChatterMessageCoModelEntityIdFormViewWidget";
-import { SolidChatterMessageCoModelEntityIdListViewWidget } from "../components/core/list/widgets/SolidChatterMessageCoModelEntityIdListViewWidget";
-import { SolidMqMessageStageListViewWidget } from "../components/core/list/widgets/SolidMqMessageStageListViewWidget";
-import { SolidLovTypeChangeFormEditWidget } from "../components/core/form/fields/widgets/SolidLovTypeChangeFormEditWidget";
-import { SolidSummarizeListHeaderActionMqMessages } from "../components/core/list/widgets/SolidSummarizeListHeaderActionMqMessages";
 
 
 type ExtensionComponentMetadata = {
@@ -165,7 +168,7 @@ registerExtensionComponent('DefaultDateListWidget', DefaultDateListWidget, Exten
 
 registerExtensionComponent("SolidChatterMessageCoModelEntityIdListViewWidget", SolidChatterMessageCoModelEntityIdListViewWidget, ExtensionComponentTypes.list_field_widget);
 registerExtensionComponent("SolidMqMessageStageListViewWidget", SolidMqMessageStageListViewWidget, ExtensionComponentTypes.list_field_widget);
-registerExtensionComponent("SolidSummarizeListHeaderActionMqMessages", SolidSummarizeListHeaderActionMqMessages, ExtensionComponentTypes.list_header_action);
+registerExtensionComponent("SolidMqMessagesSummarizeListHeaderAction", SolidMqMessagesSummarizeListHeaderAction, ExtensionComponentTypes.list_header_action);
 
 // ...
 
@@ -363,7 +366,7 @@ registerExtensionComponent("RolePermissionsManyToManyFieldWidget", RolePermissio
 // Solid Google Material Symbols Icon
 registerExtensionComponent("SolidIconEditWidget", SolidIconEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 registerExtensionComponent("SolidIconViewWidget", SolidIconViewWidget, ExtensionComponentTypes.form_field_view_widget);
-
+registerExtensionComponent("SolidMqMessageStageFormViewWIdget", SolidMqMessageStageFormViewWIdget, ExtensionComponentTypes.form_field_view_widget);
 
 // Kanban
 registerExtensionComponent("MqMessageKanbanCardWidget", MqMessageKanbanCardWidget, ExtensionComponentTypes.kanban_card_widget);
@@ -385,3 +388,4 @@ registerExtensionFunction("dashboardQuestionOnFormLoadHandler", dashboardQuestio
 // on change of module, apply a where clause on the model & field fields.. 
 // on change of model, apply a where clause on the field field...
 registerExtensionFunction("modelSequenceFormViewChangeHandler", hanldeModelSequenceFormViewChange, ExtensionFunctionTypes.onFieldChange);
+registerExtensionFunction("mqMessageOnFormLoadHandler", mqMessageOnFormLoadHandler, ExtensionFunctionTypes.onFormLoad);
