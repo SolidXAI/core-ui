@@ -16,7 +16,7 @@ import {
   SolidSelect,
 } from "../../../shad-cn-ui";
 import { showToast } from "../../../../redux/features/toastSlice";
-import { useCreateApiKeyMutation, useGenerateApiKeyForUserMutation } from "../../../../redux/api/apiKeyApi";
+import { useGenerateApiKeyForUserMutation } from "../../../../redux/api/apiKeyApi";
 
 const EXPIRY_OPTIONS = [
   { label: "30 days", value: "30d" },
@@ -53,15 +53,12 @@ interface GenerateApiKeyModalProps {
   open: boolean;
   onClose: () => void;
   onCreated: (rawApiKey: string, keyName: string) => void;
-  /** When provided, generates the key for another user via the admin endpoint. */
   userId?: number;
 }
 
 export function GenerateApiKeyModal({ open, onClose, onCreated, userId }: GenerateApiKeyModalProps) {
   const dispatch = useDispatch();
-  const [createApiKey, { isLoading: isCreatingOwn }] = useCreateApiKeyMutation();
-  const [generateApiKeyForUser, { isLoading: isCreatingForUser }] = useGenerateApiKeyForUserMutation();
-  const isLoading = isCreatingOwn || isCreatingForUser;
+  const [generateApiKeyForUser, { isLoading }] = useGenerateApiKeyForUserMutation();
   const [customDate, setCustomDate] = useState<Date | null>(null);
 
   const formik = useFormik({
@@ -87,9 +84,7 @@ export function GenerateApiKeyModal({ open, onClose, onCreated, userId }: Genera
 
       try {
         const body = { name: values.name.trim(), ...(expiresAt ? { expiresAt } : {}) };
-        const response = userId !== undefined
-          ? await generateApiKeyForUser({ userId, body }).unwrap()
-          : await createApiKey(body).unwrap();
+        const response = await generateApiKeyForUser({ userId: userId!, body }).unwrap();
 
         onCreated(response.data.apiKey, values.name.trim());
         handleClose();

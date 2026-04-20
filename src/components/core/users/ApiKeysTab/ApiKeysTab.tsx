@@ -1,6 +1,7 @@
 import { useState } from "react";
 import { useDispatch } from "react-redux";
 import { KeyRound, Plus } from "lucide-react";
+import "./ApiKeysTab.css";
 import { SolidButton, SolidSpinner, SolidSwitch, SolidTag } from "../../../shad-cn-ui";
 import { showToast } from "../../../../redux/features/toastSlice";
 import {
@@ -58,7 +59,15 @@ function ApiKeysTable({
 
   return (
     <div style={{ overflowX: "auto" }}>
-      <table style={{ width: "100%", borderCollapse: "collapse" }}>
+      <table style={{ width: "100%", borderCollapse: "collapse", tableLayout: "fixed" }}>
+        <colgroup>
+          <col style={{ width: "18%" }} />
+          <col style={{ width: "22%" }} />
+          <col style={{ width: "14%" }} />
+          <col style={{ width: "16%" }} />
+          <col style={{ width: "18%" }} />
+          <col style={{ width: "12%" }} />
+        </colgroup>
         <thead>
           <tr>
             <th className="solid-api-keys-th">Name</th>
@@ -66,7 +75,7 @@ function ApiKeysTable({
             <th className="solid-api-keys-th">Status</th>
             <th className="solid-api-keys-th">Expires</th>
             <th className="solid-api-keys-th">Last Used</th>
-            <th className="solid-api-keys-th">Active</th>
+            <th className="solid-api-keys-th" style={{ textAlign: "right" }}>Active</th>
           </tr>
         </thead>
         <tbody>
@@ -128,7 +137,7 @@ function ApiKeysTable({
                   {formatDate(key.lastUsedAt)}
                 </td>
 
-                <td className="solid-api-keys-td">
+                <td className="solid-api-keys-td" style={{ textAlign: "right" }}>
                   {isTogglingId === key.id ? (
                     <SolidSpinner />
                   ) : (
@@ -226,6 +235,7 @@ export function ApiKeysTab({ userId, canCreate = false }: ApiKeysTabProps) {
 
       <GenerateApiKeyModal
         open={showGenerate}
+        userId={Number(userId)}
         onClose={() => setShowGenerate(false)}
         onCreated={(apiKey, keyName) => {
           setShowGenerate(false);
