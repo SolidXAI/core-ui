@@ -7,12 +7,8 @@ export function GuestGuard() {
   const navigate = useNavigate();
 
   useEffect(() => {
-    if (status === "authenticated") {
-      if (window.history.length > 1) {
-        navigate(-1);
-      } else {
-        navigate("/admin", { replace: true });
-      }
+    if (status === "authenticated" && location.pathname.startsWith("/auth")) {
+      navigate("/admin", { replace: true });
     }
   }, [status, navigate]);
 
