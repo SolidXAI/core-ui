@@ -542,6 +542,7 @@ export type { SolidStore, SolidRootState, SolidDispatch, CreateSolidStoreOptions
 export { StoreProvider } from './redux/store/StoreProvider';
 export { solidAxios, solidGet, solidPost, solidPut, solidPatch, solidDelete } from './http/solidHttp';
 export { AuthGuard } from './routes/guards/AuthGuard';
+export { GuestGuard } from './routes/guards/GuestGuard';
 export { AdminLayoutWrapper } from './layouts/AdminLayoutWrapper';
 export { AuthLayoutWrapper } from './layouts/AuthLayoutWrapper';
 export { AppEventListener } from './routes/AppEventListener';

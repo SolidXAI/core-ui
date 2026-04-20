@@ -12,9 +12,10 @@ interface SolidMessageComposerProps {
     refetch?: any;
     id?: any;
     onCancel?: () => void;
+    modelUserKey?: string;
 }
 
-export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onCancel }: SolidMessageComposerProps) => {
+export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onCancel, modelUserKey }: SolidMessageComposerProps) => {
     const [message, setMessage] = useState('');
     const [selectedFiles, setSelectedFiles] = useState<File[]>([]);
 
@@ -51,6 +52,7 @@ export const SolidMessageComposer = ({ type, modelSingularName, refetch, id, onC
             formData.append('coModelName', modelSingularName);
             formData.append('userId', user?.id || 1);
 
+            if (modelUserKey) formData.append('modelUserKey', modelUserKey);
             selectedFiles.forEach((file, index) => {
                 formData.append(`messageAttachments`, file);
             });
