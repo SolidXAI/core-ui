@@ -15,6 +15,7 @@ type SolidTabGroupProps = {
   listClassName?: string;
   panelClassName?: string;
   tabPosition?: "left" | "center" | "right";
+  extra?: React.ReactNode;
 };
 
 function cx(...parts: Array<string | false | undefined>) {
@@ -33,13 +34,16 @@ export function SolidTabGroup({
   listClassName,
   panelClassName,
   tabPosition = "left",
+  extra,
 }: SolidTabGroupProps) {
   return (
     <div className={cx("solid-notebook", "solid-tabs", `solid-tabs--${tabPosition}`, className)}>
       <div
         className={cx("solid-notebook-tablist", "solid-tabs-list", listClassName)}
         role="tablist"
+        style={extra ? { display: "flex", alignItems: "center", justifyContent: "space-between" } : undefined}
       >
+        <div style={extra ? { display: "flex" } : undefined}>
         {tabs.map((tab) => {
           const isActive = tab.value === value;
           return (
@@ -63,6 +67,8 @@ export function SolidTabGroup({
             </button>
           );
         })}
+        </div>
+        {extra && <div>{extra}</div>}
       </div>
 
       {tabs.map((tab) => {
