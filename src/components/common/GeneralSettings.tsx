@@ -13,7 +13,7 @@ import { useDropzone } from 'react-dropzone';
 import { SettingDropzoneActivePlaceholder } from './SolidSettings/SettingDropzoneActivePlaceholder';
 import { SolidUploadedImage } from './SolidSettings/SolidUploadedImage';
 import { SettingsImageRemoveButton } from './SolidSettings/SettingsImageRemoveButton';
-import { AiModelConfigTab, ModelBehavior, ModelEntry, ProviderConfig, SolidAiConfig } from './SolidSettings/LlmSettings/AiModelConfigTab';
+import { ModelConfigTab, ProvidersTab, ModelBehavior, ModelEntry, SolidAiConfig, ensureBuiltInProviders } from './SolidSettings/LlmSettings/AiModelConfigTab';
 import { useDispatch, useSelector } from 'react-redux';
 import { ERROR_MESSAGES } from '../../constants/error-messages';
 import { useBulkUpdateSolidSettingsMutation, useLazyGetSolidSettingsQuery } from '../../redux/api/solidSettingsApi';
@@ -72,8 +72,8 @@ export const GeneralSettings = () => {
         solidXGenAiCodeBuilderConfig: (() => {
             const defaultAiConfig: SolidAiConfig = {
                 models: {
-                    default: { providerKey: "", behavior: { streaming: false, custom: "" } },
-                    fast: { providerKey: "", behavior: { streaming: false, custom: "" } },
+                    default: { providerId: "", model: "", behavior: { streaming: false, custom: "" } },
+                    fast: { providerId: "", model: "", behavior: { streaming: false, custom: "" } },
                 },
                 providers: {},
             };
@@ -1026,59 +1026,62 @@ export const GeneralSettings = () => {
     )
 }
 
-const AI_TABS = [
-    { key: "fast" as const, label: "Fast Model", title: "Fast Model" },
-    { key: "default" as const, label: "Intelligent Model", title: "Intelligent Model (Reasoning & tool use)" },
-];
-
 interface AiSettingsSectionProps {
     aiConfig: SolidAiConfig;
     onAiConfigChange: (config: SolidAiConfig) => void;
 }
 
 const DEFAULT_BEHAVIOR: ModelBehavior = { streaming: false, custom: "" };
+const DEFAULT_MODEL_ENTRY: ModelEntry = { providerId: "", model: "", behavior: DEFAULT_BEHAVIOR };
 
 const AiSettingsSection = ({ aiConfig, onAiConfigChange }: AiSettingsSectionProps) => {
-    const [activeTab, setActiveTab] = useState<"fast" | "default">("fast");
+    const [activeTab, setActiveTab] = useState<"providers" | "default" | "fast">("providers");
+    const [showAddProvider, setShowAddProvider] = useState(false);
 
-    const tabItems = AI_TABS.map((tab) => {
-        const modelEntry: ModelEntry = aiConfig.models?.[tab.key] ?? { providerKey: "", behavior: DEFAULT_BEHAVIOR };
-        const providerKey = modelEntry.providerKey ?? "";
-        const providerConfig: ProviderConfig = aiConfig.providers?.[providerKey] ?? { provider: providerKey, apiKey: "", model: "" };
-        const behavior: ModelBehavior = modelEntry.behavior ?? DEFAULT_BEHAVIOR;
+    const providers = ensureBuiltInProviders(aiConfig.providers ?? {});
 
-        return {
-            value: tab.key,
-            label: tab.label,
+    const tabItems = [
+        {
+            value: "providers" as const,
+            label: "Providers",
             content: (
-                <AiModelConfigTab
-                    providerKey={providerKey}
-                    providerConfig={providerConfig}
-                    behavior={behavior}
-                    allProviders={aiConfig.providers ?? {}}
-                    onProviderKeyChange={(newKey, newConfig) => {
-                        onAiConfigChange({
-                            ...aiConfig,
-                            models: { ...aiConfig.models, [tab.key]: { ...modelEntry, providerKey: newKey } },
-                            providers: { ...aiConfig.providers, [newKey]: newConfig },
-                        });
+                <ProvidersTab
+                    providers={providers}
+                    onProvidersChange={(newProviders) => {
+                        onAiConfigChange({ ...aiConfig, providers: newProviders });
                     }}
-                    onProviderConfigChange={(pk, config) => {
-                        onAiConfigChange({
-                            ...aiConfig,
-                            providers: { ...aiConfig.providers, [pk]: config },
-                        });
-                    }}
-                    onBehaviorChange={(newBehavior) => {
-                        onAiConfigChange({
-                            ...aiConfig,
-                            models: { ...aiConfig.models, [tab.key]: { ...modelEntry, behavior: newBehavior } },
-                        });
+                    showAddModal={showAddProvider}
+                    onAddModalClose={() => setShowAddProvider(false)}
+                />
+            ),
+        },
+        {
+            value: "default" as const,
+            label: "Intelligent Model",
+            content: (
+                <ModelConfigTab
+                    modelEntry={aiConfig.models?.default ?? DEFAULT_MODEL_ENTRY}
+                    providers={providers}
+                    onModelEntryChange={(entry) => {
+                        onAiConfigChange({ ...aiConfig, models: { ...aiConfig.models, default: entry } });
                     }}
                 />
             ),
-        };
-    });
+        },
+        {
+            value: "fast" as const,
+            label: "Fast Model",
+            content: (
+                <ModelConfigTab
+                    modelEntry={aiConfig.models?.fast ?? DEFAULT_MODEL_ENTRY}
+                    providers={providers}
+                    onModelEntryChange={(entry) => {
+                        onAiConfigChange({ ...aiConfig, models: { ...aiConfig.models, fast: entry } });
+                    }}
+                />
+            ),
+        },
+    ];
 
     return (
         <div>
@@ -1088,8 +1091,15 @@ const AiSettingsSection = ({ aiConfig, onAiConfigChange }: AiSettingsSectionProp
             <SolidTabGroup
                 tabs={tabItems}
                 value={activeTab}
-                onValueChange={(value) => setActiveTab(value as "fast" | "default")}
+                onValueChange={(value) => setActiveTab(value as "providers" | "default" | "fast")}
                 tabPosition="left"
+                extra={
+                    activeTab === "providers" ? (
+                        <SolidButton size="sm" onClick={() => setShowAddProvider(true)}>
+                            Add
+                        </SolidButton>
+                    ) : undefined
+                }
             />
         </div>
     );
