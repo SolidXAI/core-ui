@@ -110,6 +110,17 @@ export {
     type ExtensionComponentType,
     type ExtensionFunctionType,
 } from "./types/extension-registry";
+export {
+    createSolidUiModuleRuntime,
+    getSolidUiModules,
+    registerSolidUiModuleExtensions,
+    type SolidUiExtensionComponent,
+    type SolidUiExtensionFunction,
+    type SolidUiModule,
+    type SolidUiModuleImports,
+    type SolidUiModuleRoutes,
+    type SolidUiModuleRuntime,
+} from './modules/solidUiModule';
 export { env } from './adapters/env';
 export { logger } from './helpers/logger';
 
