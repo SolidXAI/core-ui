@@ -1,14 +1,17 @@
 
-import { Calendar } from "primereact/calendar";
-import { Message } from "primereact/message";
+import { SolidDatePicker } from "../../../shad-cn-ui/SolidDatePicker";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
+import { buildSyntheticChangeEvent } from "./fieldEventUtils";
 import { useRef } from "react";
 import * as Yup from 'yup';
+import dayjs from 'dayjs';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { DateFieldViewComponent } from '../../../../components/core/common/DateFieldViewComponent';
+import styles from "./solidFields.module.css";
 
 
 // Converts multiple time formats into a JavaScript Date object
@@ -173,37 +176,32 @@ export const DefaultTimeFormEditWidget = ({ formik, fieldContext }: SolidFormFie
 
     return (
         <div className="relative">
-            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
+            <div className={styles.fieldWrapper}>
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
-                <Calendar
+                <SolidDatePicker
+                    selected={fieldValue instanceof Date ? fieldValue : typeof fieldValue === "string" ? parseTimeStringToDate(fieldValue) ?? undefined : undefined}
+                    onChange={(date: Date | null) => {
+                        const nextValue = (date as Date | null) ?? null;
+                        const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, nextValue, "time", nextValue ? true : undefined);
+                        fieldContext.onChange(syntheticEvent, "onFieldChange");
+                    }}
                     disabled={formDisabled || fieldDisabled || readOnlyPermission}
-                    ref={calendarRef} // Attach ref to Calendar
-                    id={fieldLayoutInfo.attrs.name}
-                    aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                    // onChange={formik.handleChange}
-                    onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-
-                    //@ts-ignore
-                    // value={formik.values[fieldLayoutInfo.attrs.name] ? formik.values[fieldLayoutInfo.attrs.name] : Date()}
-                    value={fieldValue instanceof Date ? fieldValue : typeof fieldValue === "string" ? parseTimeStringToDate(fieldValue) : null}
-                    // dateFormat="mm/dd/yy"
-                    // placeholder="mm/dd/yyyy hh:mm"
-                    hideOnDateTimeSelect
+                    readOnly={readOnlyPermission}
                     timeOnly
-                    showTime className=""
-                    hourFormat="24"
-
+                    showTimeSelect
+                    dateFormat="HH:mm"
+                    className=""
                 />
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <div className="absolute mt-1">
-                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 </div>
             )}
         </div>
@@ -224,21 +222,20 @@ export const DefaultTimeFormViewWidget = ({
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
 
     const rawValue = formik.values[fieldName];
-    const format = fieldLayoutInfo.attrs?.format
+    const format = fieldLayoutInfo.attrs?.format;
 
+    const parsedTime = rawValue ? parseTimeStringToDate(rawValue) : null;
+    const displayValue = parsedTime ? (format ? dayjs(parsedTime).format(format) : formatTime(parsedTime)) : "-";
 
     return (
-        <div className="mt-2 flex flex-column gap-2">
+        <div className={styles.fieldViewWrapper}>
             {showFieldLabel !== false && (
-                <p className="m-0 form-field-label font-medium">
+                <p className={`${styles.fieldViewLabel} form-field-label`}>
                     {fieldLabel}
                 </p>
             )}
-
-            <p className="m-0">
-                {/* {displayValue ?? "-"} */}
+            <p className={styles.fieldViewValue}>
                 <DateFieldViewComponent value={rawValue} format={format} fallback="-"></DateFieldViewComponent>
-
             </p>
         </div>
     );

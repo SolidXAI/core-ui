@@ -1,15 +1,19 @@
 .chatterTitle {
-    padding: 15px;
-    border-bottom: 1px solid #D8E2EA;
+    padding: 0.2rem 0 0.55rem;
+    border-bottom: 1px solid color-mix(in srgb, var(--border) 82%, transparent);
+}
+
+.chatterTitleWithLabel {
+    padding-left: 2.4rem;
 }
 
 .chatterMessageComposer .chatterMessageInput {
-    background-color: #FEFCFF;
-    border: 1px solid #D8E2EA;
+    background-color: var(--background);
+    border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
 }
 
 .chatterMessageComposer .chatterMessageInput::placeholder {
-    color: rgba(51, 51, 51, 0.20);
+    color: color-mix(in srgb, var(--muted-foreground) 52%, transparent);
 }
 
 .chatterEmails {
@@ -28,8 +32,8 @@
     position: absolute;
     right: 0px !important;
     top: 1;
-    background-color: #fff;
-    border: 1px solid #D8E2EA;
+    background-color: var(--card);
+    border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
     padding: 8px;
     border-radius: 8px !important;
     min-width: 200;
@@ -43,7 +47,7 @@
 }
 
 .chatterDatetimeDivider {
-    border-top: 1px dashed #00000026;
+    border-top: 1px dashed color-mix(in srgb, var(--border) 70%, transparent);
     position: relative;
     margin: 30px 0 15px 0;
 }
@@ -53,22 +57,218 @@
     left: 50%;
     transform: translate(-50%, -50%);
     border-radius: 6.25rem;
-    border: 1px solid rgba(0, 0, 0, 0.15);
-    background: #FAFAFA;
+    border: 1px solid color-mix(in srgb, var(--border) 80%, transparent);
+    background: color-mix(in srgb, var(--card) 96%, var(--background) 4%);
     padding: 0.25rem 0.5rem;
     text-wrap: nowrap;
     font-size: 0.625rem;
     font-weight: 600;
-    color: var(--secondary-dark-color);
+    color: var(--muted-foreground);
 }
 
 .solidMessageWrapper {
-    border: 1px solid #D8E2EA;
-    padding: 10px;
-    border-radius: 0.25rem;
+    border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+    padding: 0.7rem 0.8rem;
+    border-radius: 0.7rem;
     width: 100%;
+    background: color-mix(in srgb, var(--card) 96%, var(--background) 4%);
+    font-size: 12px;
+    line-height: 1.45;
+    color: var(--solid-text-secondary, #475569);
+    font-weight: 400;
+    word-break: break-word;
+    overflow-wrap: anywhere;
 }
 
-.solidChatterMessageBox{
-    margin-top: 15px;
+:global(.solidMessageWrapper p) {
+    margin: 0;
+    font-size: inherit;
+    line-height: inherit;
+    color: inherit;
+}
+
+:global(.solid-purple-button) {
+    --solid-btn-bg: #722ED1;
+    --solid-btn-border: #722ED1;
+    --solid-btn-fg: #fff;
+}
+
+:global(.solid-purple-button:hover) {
+    --solid-btn-bg: #5b1bb7;
+    --solid-btn-border: #5b1bb7;
+}
+
+.solidChatterMessageBox {
+    margin-top: 0px;
+    padding-left: 0.3rem;
+}
+
+.solidChatterMessageCard {
+    border-radius: 0.75rem;
+    background: transparent;
+    padding: 0.25rem 0;
+}
+
+.solidChatterMessageLayout {
+    display: flex;
+    gap: 0.65rem;
+    align-items: flex-start;
+}
+
+.solidChatterAvatar {
+    width: 25px;
+    height: 25px;
+    border-radius: 50%;
+    font-size: 0.55rem;
+    font-weight: 500;
+    display: inline-flex;
+    align-items: center;
+    justify-content: center;
+    text-transform: uppercase;
+    border: 1px solid color-mix(in srgb, var(--card) 82%, transparent);
+    box-shadow: 0 2px 8px rgba(15, 23, 42, 0.12);
+}
+
+.solidChatterMessageContent {
+    flex: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 0.4rem;
+}
+
+.solidChatterMessageHeader {
+    display: flex;
+    align-items: baseline;
+    justify-content: space-between;
+    gap: 0.35rem;
+    flex-wrap: wrap;
+}
+
+.solidChatterUser {
+    margin: 0;
+    font-size: 0.85rem;
+    font-weight: 600;
+    color: var(--foreground);
+}
+
+.solidChatterMeta {
+    margin: 0;
+    font-size: 0.70rem;
+    color: var(--muted-foreground);
+}
+
+.solidChatterTime {
+    font-size: 0.70rem;
+    color: var(--muted-foreground);
+    white-space: nowrap;
+}
+
+.solidChatterAttachments {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.35rem;
+}
+
+.solidChatterAttachment {
+    border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
+    border-radius: 0.55rem;
+    padding: 0.3rem 0.5rem;
+    background: color-mix(in srgb, var(--muted) 16%, var(--card) 84%);
+    display: flex;
+    align-items: center;
+    gap: 0.25rem;
+}
+
+.solidChatterAttachment img {
+    border-radius: 0.45rem;
+}
+
+.chatterSelectedFiles {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 0.5rem;
+    margin-top: 0.75rem;
+}
+
+.chatterSelectedFileCard {
+    display: flex;
+    align-items: center;
+    gap: 0.5rem;
+    padding: 0.45rem 0.75rem;
+    border-radius: 0.5rem;
+    border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
+    background: color-mix(in srgb, var(--card) 95%, var(--background) 5%);
+    min-width: 220px;
+}
+
+.chatterSelectedFileIcon {
+    width: 28px;
+    height: 28px;
+    border-radius: 0.45rem;
+    background: color-mix(in srgb, var(--primary) 14%, var(--card) 86%);
+    color: var(--primary);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+}
+
+.chatterSelectedFileMeta {
+    flex: 1;
+    min-width: 0;
+}
+
+.chatterSelectedFileName {
+    margin: 0;
+    font-size: 0.8rem;
+    font-weight: 500;
+    color: var(--foreground);
+    word-break: break-word;
+}
+
+.chatterSelectedFileSize {
+    font-size: 0.7rem;
+    color: var(--muted-foreground);
+}
+
+.solidChatterBadge {
+    display: inline-flex;
+    align-items: center;
+    gap: 0.2rem;
+    font-size: 0.62rem;
+    padding: 0.1rem 0.35rem;
+    border-radius: 999px;
+    border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
+    background: color-mix(in srgb, var(--muted) 16%, var(--card) 84%);
+}
+
+.solidChatterBadge.audit {
+    color: #9333ea;
+    border-color: rgba(147, 51, 234, 0.2);
+    background: rgba(147, 51, 234, 0.08);
+}
+
+.solidChatterBadge.custom {
+    color: #2563eb;
+    border-color: rgba(37, 99, 235, 0.2);
+    background: rgba(37, 99, 235, 0.08);
+}
+
+:global(.solid-chatter-body) {
+    padding: 0.35rem 0.85rem 1rem 0.2rem;
+    overflow-y: auto;
+    scrollbar-gutter: stable;
+}
+:global(.solidMessageWrapper .solidMessageText) {
+    margin: 0;
+    font-size: inherit;
+    color: inherit;
+    line-height: inherit;
+}
+.solidMessageText {
+    margin: 0;
+    font-size: inherit;
+    color: inherit;
+    line-height: inherit;
 }

@@ -1,18 +1,10 @@
 import { useSession } from "../../../hooks/useSession";
 import { permissionExpression } from "../../../helpers/permissions";
-import Image from "../../common/Image";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
-import { Accordion, AccordionTab } from "primereact/accordion";
-import { Button } from "primereact/button";
-import { Checkbox } from "primereact/checkbox";
-import { Divider } from "primereact/divider";
-import { OverlayPanel } from "primereact/overlaypanel";
-import { RadioButton } from "primereact/radiobutton";
 import { useEffect, useRef, useState } from "react";
 import { SolidListColumnSelector } from "./SolidColumnSelector/SolidListColumnSelector";
 import { SolidExport } from "../../../components/common/SolidExport";
-import { Dialog } from "primereact/dialog";
 import { useHandleListCustomButtonClick } from "../../../components/common/useHandleListCustomButtonClick";
 import { SolidListViewHeaderContextMenuButton } from "./SolidListViewHeaderContextMenuButton";
 import "../../common/solid-export.css";
@@ -20,6 +12,28 @@ import { SolidGenericImport } from "../common/SolidGenericImport/SolidGenericImp
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import { SolidListViewHeaderButton } from "./SolidListViewHeaderButton";
 import { capitalize } from "lodash";
+import { Cog, Download, RefreshCw, Save, SlidersHorizontal, Table, Trash2, Upload } from "lucide-react";
+import {
+    SolidDialog,
+    SolidDialogBody,
+    SolidDialogClose,
+    SolidDialogDescription,
+    SolidDialogHeader,
+    SolidDialogSeparator,
+    SolidDialogTitle,
+    SolidDropdownMenu,
+    SolidDropdownMenuCheckboxItem,
+    SolidDropdownMenuContent,
+    SolidDropdownMenuItem,
+    SolidDropdownMenuLabel,
+    SolidDropdownMenuRadioGroup,
+    SolidDropdownMenuRadioItem,
+    SolidDropdownMenuSeparator,
+    SolidDropdownMenuSub,
+    SolidDropdownMenuSubContent,
+    SolidDropdownMenuSubTrigger,
+    SolidDropdownMenuTrigger,
+} from "../../shad-cn-ui";
 
 export type ViewMode = {
     actionId: string;
@@ -53,15 +67,12 @@ export const SolidListViewConfigure = (
     // const [visible, setVisible] = useState<boolean>(false);
     const handleCustomButtonClick = useHandleListCustomButtonClick();
     const [openImportDialog, setOpenImportDialog] = useState<boolean>(false);
-    const op = useRef(null);
-    const exportRef = useRef(null);
-    const customizeLayout = useRef<OverlayPanel | null>(null);
     const pathname = usePathname();
     const router = useRouter();
     const [view, setView] = useState<string>("");
     const [exportView, setExportView] = useState<boolean>(false);
-    const [isOverlayOpen, setIsOverlayOpen] = useState(false);
-
+    const [isCogMenuOpen, setIsCogMenuOpen] = useState(false);
+    const [showColumnSelectorDialog, setShowColumnSelectorDialog] = useState(false);
 
     const handleViewChange = (newView: ViewMode) => {
         if (view === newView.type) return; // Prevent unnecessary updates
@@ -79,26 +90,6 @@ export const SolidListViewConfigure = (
             }
         }
     }, [])
-
-    useEffect(() => {
-        const handleClickOutside = (event: MouseEvent) => {
-            if (
-                customizeLayout.current &&
-                !customizeLayout.current.getElement()?.contains(event.target as Node)
-            ) {
-                setIsOverlayOpen(false);
-            }
-        };
-
-        if (isOverlayOpen) {
-            document.addEventListener("click", handleClickOutside);
-        } else {
-            document.removeEventListener("click", handleClickOutside);
-        }
-
-        return () => document.removeEventListener("click", handleClickOutside);
-    }, [isOverlayOpen])
-
 
     //Build a map of actionKey → boolean at the top level
     const headerActions = solidListViewLayout?.attrs ?? {};
@@ -149,195 +140,226 @@ export const SolidListViewConfigure = (
         window.location.reload();
     };
 
+    const visibleViewModes = Array.isArray(viewModes) ? viewModes : [];
+    const showSwitchType = visibleViewModes.length > 1;
+    const handleViewTypeChange = (nextType: string) => {
+        const nextView = visibleViewModes.find((option: ViewMode) => option.type === nextType);
+        if (nextView) {
+            handleViewChange(nextView);
+        }
+    };
+
     return (
         <div className="position-relative">
-            <Button
-                type="button"
-                size="small"
-                icon="pi pi-cog"
-                severity="secondary"
-                className="solid-icon-button"
-                outlined
-                // @ts-ignore
-                onClick={(e) => op.current.toggle(e)}
-            />
-            <Dialog header="Export" visible={exportView} headerClassName="solid-export-dialog-header" className="ExportDialog p-0 m-0" onHide={() => { if (!exportView) return; setExportView(false); }}>
-                <SolidExport listViewMetaData={listViewMetaData} filters={filters} />
-            </Dialog>
-            <OverlayPanel ref={exportRef} className="listview-export-panel">
-
-            </OverlayPanel>
-            <OverlayPanel ref={op} className="listview-cogwheel-panel">
-                {(
-                    (actionsAllowed.includes(`${permissionExpression(params.modelName, 'deleteMany')}`) &&
-                        viewData?.data?.solidView?.layout?.attrs?.delete !== false &&
-                        selectedRecords.length > 0) ||
-                    isHeaderActionEnabled('import') && actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && actionsAllowed.includes(`${permissionExpression('importTransaction', 'create')}`) ||
-                    isHeaderActionEnabled('export') && actionsAllowed.includes(`${permissionExpression(params.modelName, 'findMany')}`) && actionsAllowed.includes(`${permissionExpression('exportTransaction', 'create')}`) ||
-                    isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`) ||
-                    isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`) ||
-                    (solidListViewLayout?.attrs?.headerButtons
-                        ?.some((rb: any) => rb.attrs.actionInContextMenu === true)) ||
-                    viewData?.data?.solidView?.model?.enableSoftDelete
-                ) && (
+            <SolidDropdownMenu open={isCogMenuOpen} onOpenChange={setIsCogMenuOpen}>
+                <SolidDropdownMenuTrigger asChild>
+                    <button
+                        type="button"
+                        className="solid-icon-button solid-header-cog-trigger"
+                        aria-label="Open list options"
+                    >
+                        <Cog size={16} />
+                    </button>
+                </SolidDropdownMenuTrigger>
+                <SolidDropdownMenuContent className="listview-cogwheel-panel">
+                    {(
+                        (actionsAllowed.includes(`${permissionExpression(params.modelName, 'deleteMany')}`) &&
+                            viewData?.data?.solidView?.layout?.attrs?.delete !== false &&
+                            selectedRecords.length > 0) ||
+                        isHeaderActionEnabled('import') && actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && actionsAllowed.includes(`${permissionExpression('importTransaction', 'create')}`) ||
+                        isHeaderActionEnabled('export') && actionsAllowed.includes(`${permissionExpression(params.modelName, 'findMany')}`) && actionsAllowed.includes(`${permissionExpression('exportTransaction', 'create')}`) ||
+                        isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`) ||
+                        isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`) ||
+                        (solidListViewLayout?.attrs?.headerButtons
+                            ?.some((rb: any) => rb.attrs.actionInContextMenu === true)) ||
+                        viewData?.data?.solidView?.model?.enableSoftDelete
+                    ) && (
                         <>
-                            <div className="p-2">
-                                <div className="flex flex-column">
-                                    {actionsAllowed.includes(`${permissionExpression(params.modelName, 'deleteMany')}`) && viewData?.data?.solidView?.layout?.attrs?.delete !== false && selectedRecords.length > 0 &&
-                                        <Button
-                                            text
-                                            type="button"
-                                            className="text-left gap-2 text-base"
-                                            label="Delete"
-                                            size="small"
-                                            iconPos="left"
-                                            severity="danger"
-                                            icon={'pi pi-trash'}
-                                            onClick={() => setDialogVisible(true)}
-                                        />}
-                                    {isHeaderActionEnabled("import") && actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && actionsAllowed.includes(`${permissionExpression('importTransaction', 'create')}`) && (
-                                        <Button text icon='pi pi-download' label="Import" size="small" severity="secondary" className="text-left gap-2 text-base"
-                                            onClick={() => setOpenImportDialog(true)}
-                                        />
-                                    )}
-                                    {isHeaderActionEnabled("export") && actionsAllowed.includes(`${permissionExpression(params.modelName, 'findMany')}`) && actionsAllowed.includes(`${permissionExpression('exportTransaction', 'create')}`) && (
-                                        <Button text icon='pi pi-upload' label="Export" size="small" severity="secondary" className="text-left gap-2 text-base"
-                                            // @ts-ignore
-                                            onClick={() => { setExportView((exportView) => !exportView); }} />
-                                    )}
-                                    {solidListViewLayout?.attrs?.headerButtons
-                                        ?.filter((rb: any) => rb.attrs.actionInContextMenu === true)
-                                        ?.map((button: any, index: number) => (
-                                            <SolidListViewHeaderContextMenuButton
-                                                key={index}
-                                                button={button}
-                                                params={params}
-                                                solidListViewMetaData={listViewMetaData}
-                                                handleCustomButtonClick={handleCustomButtonClick}
-                                            />
-                                        ))}
-                                    {viewData?.data?.solidView?.model?.enableSoftDelete && (
-                                        <div className="flex align-items-center px-3 gap-2 mt-2 mb-1">
-                                            <Checkbox
-                                                inputId="showArchived"
-                                                checked={showArchived}
-                                                onChange={() => setShowArchived(!showArchived)}
-                                            />
-                                            <label htmlFor="showArchived" className="ml-2 text-base solid-secondary-text-color">
-                                                Show Archived Records
-                                            </label>
-                                        </div>
-                                    )}
-                                    {showArchived && (
-                                        <Button text icon='pi pi-refresh' label="Recover" size="small" severity="secondary" className="flex lg:hidden text-left gap-2 text-base "
-                                            onClick={() => setRecoverDialogVisible(true)} />
-                                    )}
+                            {actionsAllowed.includes(`${permissionExpression(params.modelName, 'deleteMany')}`) && viewData?.data?.solidView?.layout?.attrs?.delete !== false && selectedRecords.length > 0 && (
+                                <SolidDropdownMenuItem
+                                    className="solid-header-dropdown-item solid-header-dropdown-item-danger"
+                                    onSelect={() => {
+                                        setDialogVisible(true);
+                                        setIsCogMenuOpen(false);
+                                    }}
+                                >
+                                    <Trash2 size={14} className="solid-header-action-button-icon" />
+                                    <span className="solid-header-action-button-label">Delete</span>
+                                </SolidDropdownMenuItem>
+                            )}
+                            {isHeaderActionEnabled("import") && actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && actionsAllowed.includes(`${permissionExpression('importTransaction', 'create')}`) && (
+                                <SolidDropdownMenuItem
+                                    className="solid-header-dropdown-item"
+                                    onSelect={() => {
+                                        setOpenImportDialog(true);
+                                        setIsCogMenuOpen(false);
+                                    }}
+                                >
+                                    <Download size={14} className="solid-header-action-button-icon" />
+                                    <span className="solid-header-action-button-label">Import</span>
+                                </SolidDropdownMenuItem>
+                            )}
+                            {isHeaderActionEnabled("export") && actionsAllowed.includes(`${permissionExpression(params.modelName, 'findMany')}`) && actionsAllowed.includes(`${permissionExpression('exportTransaction', 'create')}`) && (
+                                <SolidDropdownMenuItem
+                                    className="solid-header-dropdown-item"
+                                    onSelect={() => {
+                                        setExportView((current) => !current);
+                                        setIsCogMenuOpen(false);
+                                    }}
+                                >
+                                    <Upload size={14} className="solid-header-action-button-icon" />
+                                    <span className="solid-header-action-button-label">Export</span>
+                                </SolidDropdownMenuItem>
+                            )}
+                            {solidListViewLayout?.attrs?.headerButtons
+                                ?.filter((rb: any) => rb.attrs.actionInContextMenu === true)
+                                ?.map((button: any, index: number) => (
+                                    <SolidListViewHeaderContextMenuButton
+                                        key={index}
+                                        button={button}
+                                        params={params}
+                                        solidListViewMetaData={listViewMetaData}
+                                        handleCustomButtonClick={handleCustomButtonClick}
+                                        onActionComplete={() => setIsCogMenuOpen(false)}
+                                    />
+                                ))}
+                            {viewData?.data?.solidView?.model?.enableSoftDelete && (
+                                <SolidDropdownMenuCheckboxItem
+                                    checked={showArchived}
+                                    onCheckedChange={() => setShowArchived(!showArchived)}
+                                >
+                                    Show Archived Records
+                                </SolidDropdownMenuCheckboxItem>
+                            )}
+                            {showArchived && (
+                                <SolidDropdownMenuItem
+                                    className="solid-header-dropdown-item lg:hidden"
+                                    onSelect={() => {
+                                        setRecoverDialogVisible(true);
+                                        setIsCogMenuOpen(false);
+                                    }}
+                                >
+                                    <RefreshCw size={14} className="solid-header-action-button-icon" />
+                                    <span className="solid-header-action-button-label">Recover</span>
+                                </SolidDropdownMenuItem>
+                            )}
 
-                                    <div className="flex flex-column lg:hidden">
-                                        {solidListViewLayout?.attrs?.headerButtons
-                                            ?.filter((rb: any) => rb.attrs.actionInContextMenu != true)
-                                            ?.map((button: any, index: number) => (
-                                                <SolidListViewHeaderButton
-                                                    key={index}
-                                                    button={button}
-                                                    params={params}
-                                                    solidListViewMetaData={listViewMetaData}
-                                                    handleCustomButtonClick={handleCustomButtonClick}
-                                                    selectedRecords={selectedRecords}
-                                                    filters={filters}
-                                                />
+                            {(
+                                isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`) ||
+                                isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`) ||
+                                true
+                            ) && <SolidDropdownMenuSeparator />}
+
+                            {isHeaderActionEnabled('customizeLayout') && actionsAllowed.includes(`${permissionExpression('userViewMetadata', 'create')}`) && (
+                                <SolidDropdownMenuSub>
+                                    <SolidDropdownMenuSubTrigger className="solid-header-dropdown-item">
+                                        <SlidersHorizontal size={14} className="solid-header-action-button-icon" />
+                                        <span className="solid-header-action-button-label">Customize Layout</span>
+                                    </SolidDropdownMenuSubTrigger>
+                                    <SolidDropdownMenuSubContent className="customize-layout-panel">
+                                        {showSwitchType && (
+                                            <>
+                                                <SolidDropdownMenuLabel>Switch Type</SolidDropdownMenuLabel>
+                                                <SolidDropdownMenuRadioGroup value={view} onValueChange={handleViewTypeChange}>
+                                                    {visibleViewModes.map((option: ViewMode) => (
+                                                        <SolidDropdownMenuRadioItem key={option.type} value={option.type}>
+                                                            {capitalize(option.type)}
+                                                        </SolidDropdownMenuRadioItem>
+                                                    ))}
+                                                </SolidDropdownMenuRadioGroup>
+                                                <SolidDropdownMenuSeparator />
+                                            </>
+                                        )}
+                                        <SolidDropdownMenuLabel>Row Spacing</SolidDropdownMenuLabel>
+                                        <SolidDropdownMenuRadioGroup value={size} onValueChange={(value: string) => setSize(value)}>
+                                            {sizeOptions.map((option: any) => (
+                                                <SolidDropdownMenuRadioItem key={option.value} value={option.value}>
+                                                    {option.label}
+                                                </SolidDropdownMenuRadioItem>
                                             ))}
-                                    </div>
-
-                                </div>
-                            </div>
-                            <Divider className="m-0" />
+                                        </SolidDropdownMenuRadioGroup>
+                                        <SolidDropdownMenuSeparator />
+                                        <SolidDropdownMenuItem
+                                            onSelect={() => {
+                                                setShowColumnSelectorDialog(true);
+                                                setIsCogMenuOpen(false);
+                                            }}
+                                        >
+                                            <Table size={14} className="solid-header-action-button-icon" />
+                                            <span className="solid-header-action-button-label">Column Selector</span>
+                                        </SolidDropdownMenuItem>
+                                    </SolidDropdownMenuSubContent>
+                                </SolidDropdownMenuSub>
+                            )}
+                            {isHeaderActionEnabled('savedFilters') && actionsAllowed.includes(`${permissionExpression('savedFilters', 'create')}`) && (
+                                <SolidDropdownMenuItem
+                                    className="solid-header-dropdown-item"
+                                    onSelect={() => {
+                                        setShowSaveFilterPopup(true);
+                                        setIsCogMenuOpen(false);
+                                    }}
+                                >
+                                    <Save size={14} className="solid-header-action-button-icon" />
+                                    <span className="solid-header-action-button-label">Save Custom Filter</span>
+                                </SolidDropdownMenuItem>
+                            )}
+                            <SolidDropdownMenuItem
+                                className="solid-header-dropdown-item"
+                                onSelect={() => {
+                                    clearLocalstorageCache();
+                                    setIsCogMenuOpen(false);
+                                }}
+                            >
+                                <Trash2 size={14} className="solid-header-action-button-icon" />
+                                <span className="solid-header-action-button-label">Clear cache</span>
+                            </SolidDropdownMenuItem>
                         </>
                     )}
-                <div className="p-2 relative flex flex-column gap-1">
-                    {isHeaderActionEnabled('customizeLayout') && permissionExpression('userViewMetadata', 'create') && (<Button
-                        icon='pi pi-sliders-h'
-                        label="Customize Layout"
-                        severity={isOverlayOpen ? undefined : "secondary"}
-                        size="small"
-                        text={isOverlayOpen ? false : true}
-                        className="text-left gap-2 w-full text-base"
-                        // @ts-ignore
-                        onClick={(e) => {
-                            customizeLayout.current?.toggle(e);
-                            setIsOverlayOpen((prev) => !prev); // ✅ Ensure state updates when toggled
-                        }}
-                    >
-                        <i className="pi pi-chevron-right text-sm"></i>
-                    </Button>
-                    )}
-                    {isHeaderActionEnabled('savedFilters') && permissionExpression('savedFilters', 'create') && (
-                        <Button text icon='pi pi-save' label="Save Custom Filter" size="small" severity="secondary" className="text-left gap-2 text-base" onClick={() => setShowSaveFilterPopup(true)} />
-                    )}
-                    <Button text icon='pi pi-trash' label="Clear cache" size="small" severity="secondary" className="text-left gap-2 text-base "
-                        onClick={() => clearLocalstorageCache()} />
-
-                    <OverlayPanel ref={customizeLayout} className="customize-layout-panel" style={{ minWidth: 250 }}
-                        onShow={() => setIsOverlayOpen(true)}
-                        onHide={() => {
-                            setTimeout(() => setIsOverlayOpen(false), 50); // ✅ Ensure state updates
-                        }}
-                    >
-                        <div className="solid-layout-accordion">
-                            <Accordion multiple expandIcon="pi pi-chevron-down" collapseIcon="pi pi-chevron-up" activeIndex={[2]}>
-                                {viewModes && viewModes.length > 0 &&
-                                    <AccordionTab header="Switch Type">
-                                        <div className="flex flex-column gap-1 p-1">
-                                            {viewModes.map((option: ViewMode) => (
-                                                <div key={option.type} className={`flex align-items-center ${option.type === view ? 'solid-active-view' : 'solid-view'}`}>
-                                                    <RadioButton
-                                                        inputId={option.type}
-                                                        name="views"
-                                                        value={option.type}
-                                                        // onChange={(e) => router}
-                                                        onChange={() => handleViewChange(option)}
-                                                        checked={option.type === view}
-                                                    />
-                                                    <label htmlFor={option.type} className="ml-2 flex align-items-center justify-content-between w-full">
-                                                        {capitalize(option.type)}
-                                                    </label>
-                                                </div>
-                                            ))}
-                                        </div>
-                                    </AccordionTab>
-                                }
-                                <AccordionTab header="Row Spacing">
-                                    <div className="flex flex-column gap-1 p-1flex flex-column gap-1 p-1">
-                                        {sizeOptions.map((option: any) => (
-                                            <div key={option.value} className={`flex align-items-center ${option.value === size ? 'solid-active-view' : 'solid-view'}`}>
-                                                <RadioButton
-                                                    inputId={option.value}
-                                                    name="sizes"
-                                                    value={option.value}
-                                                    onChange={(e) => setSize(e.value)}
-                                                    checked={option.value === size}
-                                                />
-                                                <label htmlFor={option.value} className="ml-2 flex align-items-center justify-content-between w-full">
-                                                    {option.label}
-                                                    <Image
-                                                        src={option.image}
-                                                        alt={option.value}
-                                                        fill
-                                                        className='relative row-spacing-img'
-                                                    />
-                                                </label>
-                                            </div>
-                                        ))}
-                                    </div>
-                                </AccordionTab>
-                                <AccordionTab header="Column Selector" headerClassName="pb-0">
-                                    <SolidListColumnSelector listViewMetaData={listViewMetaData} customizeLayout={customizeLayout} />
-                                </AccordionTab>
-                            </Accordion>
-                        </div>
-                    </OverlayPanel>
-                </div>
-            </OverlayPanel>
+                </SolidDropdownMenuContent>
+            </SolidDropdownMenu>
+            <SolidDialog
+                open={exportView}
+                onOpenChange={setExportView}
+                className="solid-kanban-export-dialog solid-list-export-dialog"
+                style={{ width: "min(980px, calc(100vw - 32px))" }}
+            >
+                <SolidDialogHeader className="solid-export-dialog-header">
+                    <div>
+                        <SolidDialogTitle>Export</SolidDialogTitle>
+                        <SolidDialogDescription className="solid-filter-dialog-subtitle m-0">
+                            Choose the file format, refine the field set, and save reusable export templates.
+                        </SolidDialogDescription>
+                    </div>
+                    <SolidDialogClose />
+                </SolidDialogHeader>
+                <SolidDialogSeparator />
+                <SolidDialogBody className="solid-kanban-export-dialog-body">
+                    <SolidExport listViewMetaData={listViewMetaData} filters={filters} />
+                </SolidDialogBody>
+            </SolidDialog>
+            <SolidDialog
+                open={showColumnSelectorDialog}
+                onOpenChange={setShowColumnSelectorDialog}
+                className="solid-column-selector-dialog"
+                style={{ width: "min(388px, calc(100vw - 2rem))" }}
+            >
+                <SolidDialogHeader className="solid-filter-dialog-head">
+                    <div>
+                        <SolidDialogTitle className="solid-filter-dialog-title m-0">Column Selector</SolidDialogTitle>
+                        <SolidDialogDescription className="solid-filter-dialog-subtitle m-0">
+                            Choose visible columns and reorder them for this list view.
+                        </SolidDialogDescription>
+                    </div>
+                    <SolidDialogClose className="solid-filter-dialog-close" />
+                </SolidDialogHeader>
+                <SolidDialogSeparator className="solid-filter-dialog-sep" />
+                <SolidDialogBody className="solid-filter-dialog-body">
+                    <SolidListColumnSelector
+                        listViewMetaData={listViewMetaData}
+                        onClose={() => setShowColumnSelectorDialog(false)}
+                    />
+                </SolidDialogBody>
+            </SolidDialog>
             {openImportDialog &&
                 <SolidGenericImport
                     openImportDialog={openImportDialog}

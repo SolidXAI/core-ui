@@ -1,12 +1,18 @@
-
-import { Dialog } from 'primereact/dialog';
-import React, { useState } from 'react'
+import React, { useEffect, useState } from 'react'
 import { SolidImportStepper } from './SolidImportStepper';
 import { SolidImportInstructions } from './SolidImportInstructions';
-// import { SolidImportWrapper } from './SolidImportWrapper';
 import { SolidImportDropzone } from './SolidImportDropzone';
 import { SolidImportTransaction } from './SolidImportTransaction';
 import { SolidImportTransactionStatus } from './SolidImportTransactionStatus';
+import {
+    SolidDialog,
+    SolidDialogBody,
+    SolidDialogClose,
+    SolidDialogDescription,
+    SolidDialogHeader,
+    SolidDialogSeparator,
+    SolidDialogTitle,
+} from "../../../shad-cn-ui";
 
 export const SolidGenericImport = ({
     openImportDialog,
@@ -15,50 +21,92 @@ export const SolidGenericImport = ({
     handleFetchUpdatedRecords
 }: any) => {
     const [importStep, setImportStep] = useState<number>(1)
+    const [maxStepReached, setMaxStepReached] = useState<number>(1);
     const [transactionId, setTransactionId] = useState(null);
     const [importStatusResult, setImportStatusResult] = useState<any>(null)
     const modelMetadataId = listViewMetaData?.data?.solidView?.model?.id;
+
+    useEffect(() => {
+        if (openImportDialog) {
+            setImportStep(1);
+            setMaxStepReached(1);
+            setTransactionId(null);
+            setImportStatusResult(null);
+        }
+    }, [openImportDialog]);
+
+    const handleStepChange = (nextStep: number) => {
+        setImportStep(nextStep);
+        setMaxStepReached((current) => Math.max(current, nextStep));
+    };
+
+    const renderStepContent = () => {
+        if (importStep === 1) {
+            return (
+                <SolidImportInstructions
+                    setImportStep={handleStepChange}
+                    listViewMetaData={listViewMetaData}
+                />
+            );
+        }
+
+        if (importStep === 2) {
+            return (
+                <SolidImportDropzone
+                    setImportStep={handleStepChange}
+                    setTransactionId={setTransactionId}
+                    modelMetadataId={modelMetadataId}
+                />
+            );
+        }
+
+        if (importStep === 3) {
+            return (
+                <SolidImportTransaction
+                    transactionId={transactionId}
+                    setImportStatusResult={setImportStatusResult}
+                    setImportStep={handleStepChange}
+                />
+            );
+        }
+
+        return (
+            <SolidImportTransactionStatus
+                importStatusResult={importStatusResult}
+                transactionId={transactionId}
+                setOpenImportDialog={setOpenImportDialog}
+                handleFetchUpdatedRecords={handleFetchUpdatedRecords}
+            />
+        );
+    };
+
     return (
-        <Dialog
-            header={<h5 className='m-0'>Import Data</h5>}
-            visible={openImportDialog}
-            style={{ width: '60vw' }}
-            onHide={() => { if (!openImportDialog) return; setOpenImportDialog(false); }}
-            headerClassName="px-4 py-2 secondary-border-bottom solid-import-dialog-header"
-            contentClassName="p-0"
+        <SolidDialog
+            open={openImportDialog}
+            onOpenChange={setOpenImportDialog}
             className='solid-import-dialog'
+            style={{ width: "min(840px, calc(100vw - 1.5rem))" }}
         >
-            <SolidImportStepper importStep={importStep} setImportStep={setImportStep} />
-            <div className='px-3 md:px-4 py-3'>
-                {importStep === 1 &&
-                    <SolidImportInstructions setImportStep={setImportStep} listViewMetaData={listViewMetaData} />
-                }
-                {/* {importStep === 2 &&
-                    <SolidImportWrapper handleFetchUpdatedRecords={handleFetchUpdatedRecords} setImportStep={setImportStep} listViewMetaData={listViewMetaData} setOpenImportDialog={setOpenImportDialog} />
-                } */}
-                {importStep === 2 &&
-                    <SolidImportDropzone
-                        setImportStep={setImportStep}
-                        setTransactionId={setTransactionId}
-                        modelMetadataId={modelMetadataId}
+            <SolidDialogHeader className="solid-filter-dialog-head solid-import-dialog-head">
+                <div className="solid-import-dialog-heading">
+                    <SolidDialogTitle className="solid-filter-dialog-title solid-import-dialog-title m-0">Import Data</SolidDialogTitle>
+                    <SolidDialogDescription className="solid-filter-dialog-subtitle solid-import-dialog-subtitle">
+                        Upload a CSV or Excel file, map its columns, and import records in four short steps.
+                    </SolidDialogDescription>
+                </div>
+                <SolidDialogClose className="solid-filter-dialog-close" />
+            </SolidDialogHeader>
+            <SolidDialogSeparator className="solid-filter-dialog-sep" />
+            <SolidDialogBody className='solid-import-dialog-body'>
+                <div className="solid-import-shell">
+                    <SolidImportStepper
+                        importStep={importStep}
+                        maxStepReached={maxStepReached}
+                        setImportStep={handleStepChange}
                     />
-                }
-                {importStep === 3 &&
-                    <SolidImportTransaction
-                        transactionId={transactionId}
-                        setImportStatusResult={setImportStatusResult}
-                        setImportStep={setImportStep}
-                    />
-                }
-                {importStep === 4 &&
-                    <SolidImportTransactionStatus
-                        importStatusResult={importStatusResult}
-                        transactionId={transactionId}
-                        setOpenImportDialog={setOpenImportDialog}
-                        handleFetchUpdatedRecords={handleFetchUpdatedRecords}
-                    />
-                }
-            </div>
-        </Dialog>
+                    {renderStepContent()}
+                </div>
+            </SolidDialogBody>
+        </SolidDialog>
     )
 }

@@ -1,4 +1,4 @@
-
+import { SolidIcon } from "../../shad-cn-ui";
 export const SolidDashboardFilterRequired = () => {
   return (
     <div className="flex align-items-center justify-content-center" style={{ minHeight: '400px', padding: '2rem' }}>
@@ -12,7 +12,7 @@ export const SolidDashboardFilterRequired = () => {
             color: 'var(--blue-500)'
           }}
         >
-          <i className="pi pi-filter" style={{ color: "var(--primary-color)", fontSize: '2.5rem' }} />
+          <SolidIcon name="si-filter" style={{ color: "var(--primary-color)", fontSize: '2.5rem' }} aria-hidden />
         </div>
         <div>
           <div className="flex flex-column gap-2">

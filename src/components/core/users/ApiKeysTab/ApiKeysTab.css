@@ -1,0 +1,38 @@
+.solid-api-keys-tab {
+  padding: 4px 0;
+}
+
+.solid-api-keys-th {
+  padding: 8px 12px;
+  text-align: left;
+  font-size: 12px;
+  font-weight: 600;
+  color: var(--text-color-secondary, #6b7280);
+  letter-spacing: 0.02em;
+  border-bottom: 1px solid var(--surface-border, #dfe7ef);
+  white-space: nowrap;
+}
+
+.solid-api-keys-td {
+  padding: 12px 12px;
+  font-size: 13px;
+  color: var(--text-color, #4b5563);
+  border-bottom: 1px solid var(--surface-border, #dfe7ef);
+  vertical-align: middle;
+}
+
+.solid-api-keys-row--expired td {
+  opacity: 0.6;
+}
+
+.solid-api-keys-row--expired:hover td {
+  background: var(--surface-hover, #f6f9fc);
+}
+
+tbody tr:hover .solid-api-keys-td {
+  background: var(--surface-hover, #f6f9fc);
+}
+
+tbody tr:last-child .solid-api-keys-td {
+  border-bottom: none;
+}

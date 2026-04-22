@@ -10,9 +10,9 @@ import PrimeDataTableWrapper from './PrimeDataTableWrapper';
 import 'react-grid-layout/css/styles.css';
 import 'react-resizable/css/styles.css';
 import { useLazyGetUserDashboardLayoutByDashboardIdQuery } from '../../../redux/api/dashboardLayoutApi';
-import showToast from '../../../helpers/showToast';
 import { ERROR_MESSAGES } from '../../../constants/error-messages';
-import { Toast } from 'primereact/toast';
+import { useDispatch } from 'react-redux';
+import { showToast } from '../../../redux/features/toastSlice';
 
 export interface SolidDashboardBodyProps {
   dashboardOptions?: GridStackOptions;
@@ -53,7 +53,7 @@ const generateDefaultLayout = (questions: any[]): GridItem[] => {
 
 
 const SolidDashboardBody = ({ dashboardId, questions, filters = [], dashboardLayout, setDashboardLayout }: SolidDashboardBodyProps) => {
-  const toast = useRef<Toast>(null);
+  const dispatch = useDispatch();
 
   const sortedQuestions = [...questions]
     .map((q, index) => ({ ...q, defaultIndex: index + 1 }))
@@ -84,9 +84,9 @@ const SolidDashboardBody = ({ dashboardId, questions, filters = [], dashboardLay
         setTimeout(() => { isLayoutReady.current = true; }, 100);
       } catch (error: any) {
         if (error.status === 403) {
-          showToast(toast, "error", ERROR_MESSAGES.FORBIDDEN_ERROR, ERROR_MESSAGES.FORBIDDEN_ERROR);
+          dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.FORBIDDEN_ERROR, detail: ERROR_MESSAGES.FORBIDDEN_ERROR, sticky: true }));
         } else {
-          showToast(toast, "error", ERROR_MESSAGES.SOMETHING_WRONG, ERROR_MESSAGES.SOMETHING_WRONG);
+          dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SOMETHING_WRONG, detail: ERROR_MESSAGES.SOMETHING_WRONG }));
         }
       }
     };
@@ -124,7 +124,6 @@ const SolidDashboardBody = ({ dashboardId, questions, filters = [], dashboardLay
 
   return (
     <>
-      <Toast ref={toast} />
       <div
         ref={containerRef as React.RefObject<HTMLDivElement>}
         className={`p-4 ${styles.SolidDashboardContentWrapper}`}

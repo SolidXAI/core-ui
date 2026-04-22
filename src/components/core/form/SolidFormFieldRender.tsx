@@ -1,6 +1,6 @@
 
 
-import { Message } from "primereact/message";
+import { SolidMessage } from "../../shad-cn-ui";
 import { FormikObject, SolidFieldProps } from "./fields/ISolidField";
 import { SolidFormFieldRenderExtension } from "./SolidFormFieldRenderExtension";
 
@@ -42,7 +42,7 @@ export const SolidFormFieldRender = ({ formik, fieldContext }: any) => {
                         }
                         {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                             <div className="absolute mt-1">
-                                <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                                <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                             </div>
                         )}
                     </>

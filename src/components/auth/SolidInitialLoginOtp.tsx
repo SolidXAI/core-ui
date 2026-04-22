@@ -1,20 +1,18 @@
 import { useInitateLoginMutation } from "../../redux/api/authApi";
 import { Form, Formik } from "formik";
-import Image from "../common/Image";
 import { useRouter } from "../../hooks/useRouter";
 import { useSearchParams } from "../../hooks/useSearchParams";
-import { Button } from "primereact/button";
-import { InputOtp } from "primereact/inputotp";
-import { Message } from "primereact/message";
 import { useEffect, useState } from "react";
 import { useDispatch } from 'react-redux';
 import * as Yup from "yup";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { signInWithOtp } from "../../adapters/auth/index";
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
+import { SolidButton, SolidIcon, SolidMessage, SolidOtpInput } from "../shad-cn-ui";
+import { loadSession } from "../../adapters/auth/storage";
+import { hasAnyRole } from "../../helpers/rolesHelper";
 
 
 const SolidInitialLoginOtp = () => {
@@ -127,22 +125,12 @@ const SolidInitialLoginOtp = () => {
 
     return (
         <>
-            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`} style={{ minWidth: 480 }}>
-                {solidSettingsData?.data?.authPagesLayout === 'center' &&
-                    <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
-                            <Image
-                                alt="solid logo"
-                                src={solidSettingsData?.data?.appLogo || SolidLogo}
-                                className="relative"
-                                fill
-                            />
-                        </div>
-                    </div>
-                }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center mt-2 md:mt-4' : 'text-left'}`}>OTP Verification</h2>
-                <p className="solid-auth-subtitle text-sm">
-                    Please enter the OTP sent to your email to complete verification
+
+            <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
+                <h2 className="solid-auth-title">{displayText.title}</h2>
+                <p className="solid-auth-helper">
+                    {displayText.subtitle}{" "}
+                    <span className="solid-auth-helper-emphasis">{identifier}</span>
                 </p>
                 <>
                     <Formik
@@ -166,7 +154,10 @@ const SolidInitialLoginOtp = () => {
                                 } else {
                                     localStorage.removeItem(`resendOtpLogin_${identifier}`);
                                     dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.LOGIN_SUCCESS, detail: ERROR_MESSAGES.DASHBOARD_REDIRECTING }));
-                                    const redirectUrl = env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin";
+                                    const session = loadSession();
+                                    const isAdmin = hasAnyRole(session?.user?.roles, ["Admin"]);
+                                    const isDev = env("VITE_SOLIDX_ENV") === "dev";
+                                    const redirectUrl = isAdmin && isDev ? "/studio" : (env("NEXT_PUBLIC_LOGIN_REDIRECT_URL") || "/admin");
                                     router.push(redirectUrl);
                                 }
                             } catch (err: any) {
@@ -178,35 +169,56 @@ const SolidInitialLoginOtp = () => {
                     >
                         {(formik) => (
                             <Form>
-                                <div className="flex flex-column gap-2">
-                                    <label htmlFor="otp" className="solid-auth-input-label">Enter OTP</label>
-                                    <InputOtp
+                                <div className="solid-auth-otp-field">
+                                    <div className="solid-auth-otp-top">
+                                        <label htmlFor="otp" className="solid-auth-input-label">Verification code</label>
+                                        <SolidButton
+                                            type="button"
+                                            variant="outline"
+                                            size="sm"
+                                            className="solid-auth-otp-resend"
+                                            onClick={handleResendOtp}
+                                            disabled={!resendEnabled}
+                                            leftIcon={<SolidIcon name="si-refresh" aria-hidden />}
+                                        >
+                                            Resend code
+                                        </SolidButton>
+                                    </div>
+                                    <SolidOtpInput
+                                        id="otp"
+                                        className="solid-auth-otp-input"
                                         value={formik.values.otp}
-                                        onChange={(e) => formik.setFieldValue("otp", e.value)}
+                                        onChange={(nextValue) => formik.setFieldValue("otp", nextValue)}
                                         length={6}
-                                        style={{ width: '100%' }}
+                                        integerOnly
                                         invalid={!!formik.errors.otp}
                                     />
                                     {isFormFieldValid(formik, "otp") && (
-                                        <Message className="text-red-500 text-sm" severity="error" text={formik.errors.otp?.toString()} />
+                                        <SolidMessage className="text-red-500 text-sm" severity="error" text={formik.errors.otp?.toString()} />
                                     )}
-                                    <div className="flex align-items-center justify-content-between">
-                                        <Button type="button" icon='pi pi-refresh' iconPos="left" link label="Resend Code" className="px-0 text-sm font-normal"
-                                            onClick={handleResendOtp}
-                                            disabled={!resendEnabled}
-                                        />
-                                        <p className="m-0 text-sm text-color">
-                                            {resendEnabled
-                                                ? "You can resend now"
-                                                : `Time left: ${Math.floor(timeLeft / 60)
-                                                    .toString()
-                                                    .padStart(2, "0")}:${(timeLeft % 60).toString().padStart(2, "0")}`}
-                                        </p>
-                                    </div>
+                                    <p className="solid-auth-otp-time">
+                                        {resendEnabled
+                                            ? "You can resend now."
+                                            : `Time left: ${Math.floor(timeLeft / 60)
+                                                .toString()
+                                                .padStart(2, "0")}:${(timeLeft % 60).toString().padStart(2, "0")}`}
+                                    </p>
                                 </div>
                                 <div className="mt-4">
-                                    <Button type="submit" className="w-full font-light auth-submit-button" label="Verify" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
-                                    <Button type="button" label="Back" className="w-full auth-back-button text-center mt-1" link onClick={() => (window.location.href = '/auth/login')} />
+                                    <SolidButton
+                                        type="submit"
+                                        className="w-full font-light auth-submit-button"
+                                        label="Verify"
+                                        disabled={formik.isSubmitting}
+                                        loading={formik.isSubmitting}
+                                    />
+                                    <SolidButton
+                                        type="button"
+                                        label="Back"
+                                        className="w-full auth-back-button text-center mt-1"
+                                        text
+                                        onClick={() => (window.location.href = '/auth/login')}
+                                    />
                                 </div>
                             </Form>
                         )}

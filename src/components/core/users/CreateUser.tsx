@@ -1,30 +1,28 @@
-
-import { BackButton } from "../../../components/common/BackButton";
-import { CancelButton } from "../../../components/common/CancelButton";
-import { SolidBreadcrumb } from "../../../components/common/SolidBreadcrumb";
-import { SolidFormHeader } from "../../../components/common/SolidFormHeader";
-import { SolidFormStepper } from "../../../components/common/SolidFormStepper";
-import { ERROR_MESSAGES } from "../../../constants/error-messages";
-import { useRegisterPrivateMutation, useUpdateUserMutation } from "../../../redux/api/authApi";
-import { useGetrolesQuery } from "../../../redux/api/roleApi";
-import { useDeleteUserMutation } from "../../../redux/api/userApi";
 import { FetchBaseQueryError } from "@reduxjs/toolkit/dist/query";
 import { useFormik } from "formik";
-import { usePathname } from "../../../hooks/usePathname";
-import { useRouter } from "../../../hooks/useRouter";
-import { Button } from "primereact/button";
-import { Checkbox } from "primereact/checkbox";
-import { Divider } from "primereact/divider";
-import { InputText } from "primereact/inputtext";
-import { Message } from "primereact/message";
-import { Panel } from "primereact/panel";
-import { Password } from "primereact/password";
-import { classNames } from "primereact/utils";
 import { useEffect, useState } from "react";
 import { useDispatch } from "react-redux";
 import * as Yup from "yup";
+import { BackButton } from "../../../components/common/BackButton";
+import { CancelButton } from "../../../components/common/CancelButton";
+import { SolidFormHeader } from "../../../components/common/SolidFormHeader";
+import { ERROR_MESSAGES } from "../../../constants/error-messages";
+import { useRouter } from "../../../hooks/useRouter";
+import { useRegisterPrivateMutation, useUpdateUserMutation } from "../../../redux/api/authApi";
+import { useGetrolesQuery } from "../../../redux/api/roleApi";
+import { useDeleteUserMutation } from "../../../redux/api/userApi";
 import { showToast } from "../../../redux/features/toastSlice";
-
+import {
+  SolidButton,
+  SolidCheckbox,
+  SolidInput,
+  SolidMessage,
+  SolidPanel,
+  SolidPasswordInput,
+  SolidSwitch,
+  SolidTabGroup,
+} from "../../shad-cn-ui";
+import { ApiKeysTab, GenerateApiKeyModal, RevealApiKeyModal } from "./ApiKeysTab";
 
 interface ErrorResponseData {
   message: string;
@@ -32,150 +30,72 @@ interface ErrorResponseData {
   error: string;
 }
 
-const CreateUser = ({ data, params }: any) => {
+function cx(...parts: Array<string | false | undefined>) {
+  return parts.filter(Boolean).join(" ");
+}
 
+const CreateUser = ({ data, params }: any) => {
   const dispatch = useDispatch();
-  const pathname = usePathname();
   const router = useRouter();
   const [selectedRoles, setSelectedRoles] = useState<string[]>([]);
+  const [activeTab, setActiveTab] = useState("userDetails");
+  const [newUserIdForApiKey, setNewUserIdForApiKey] = useState<number | null>(null);
+  const [revealKey, setRevealKey] = useState<{ apiKey: string; keyName: string } | null>(null);
 
-  const [registerPrivate, { isLoading, error: userCreateError, isSuccess, data: user }] = useRegisterPrivateMutation();
+  const [registerPrivate, { isLoading, error: userCreateError }] = useRegisterPrivateMutation();
   const [
     updateUser,
     {
-      isLoading: isuserUpdating,
-      isSuccess: isUpdateuserSuceess,
-      isError: isuserUpdateError,
+      isLoading: isUserUpdating,
+      isSuccess: isUpdateUserSuccess,
       error: userUpdateError,
-      data: updateduser,
     },
   ] = useUpdateUserMutation();
 
-  const [deleteUser, {
-    isLoading: isUserDeleted,
-    isSuccess: isDeleteUserSuceess,
-    isError: isUserDeleteError,
-    error: UserDeleteError,
-    data: DeletedUser,
-  },] = useDeleteUserMutation();
-
+  const [deleteUser, { isLoading: isUserDeleting, isSuccess: isDeleteUserSuccess }] = useDeleteUserMutation();
   const { data: rolesData } = useGetrolesQuery("");
-  // const [
-  //   createrolebulk,
-  //   { isLoading, isSuccess, isError, error, data: roles },
-  // ] = useCreateuserrolebulkMutation();
 
   useEffect(() => {
-    if (data && data.roles) {
-      const userRoles = data.roles.map((role: any) => role.name);
-      setSelectedRoles(userRoles);
+    if (data?.roles) {
+      setSelectedRoles(data.roles.map((role: any) => role.name));
     }
   }, [data]);
 
-  const handleCheckboxChange = (roleName: string) => {
-    let updatedRoles;
-    if (selectedRoles.includes(roleName)) {
-      updatedRoles = selectedRoles.filter((name) => name !== roleName);
-    } else {
-      updatedRoles = [...selectedRoles, roleName];
-    }
-    setSelectedRoles(updatedRoles);
-    formik.setFieldTouched('roles', true); // fake "touched"
-    formik.setFieldValue('roles', updatedRoles);
-  };
-
   const initialValues = {
-    fullName: data ? data.fullName : "",
-    username: data ? data.username : "",
-    email: data ? data.email : "",
-    mobile: data ? data.mobile : "",
+    fullName: data?.fullName ?? "",
+    username: data?.username ?? "",
+    email: data?.email ?? "",
+    mobile: data?.mobile ?? "",
     password: "",
     confirmPassword: "",
-    failedLoginAttempts: data ? data.failedLoginAttempts : 0,
+    failedLoginAttempts: data?.failedLoginAttempts ?? 0,
+    isAllowedToGenerateApiKeys: data?.isAllowedToGenerateApiKeys ?? false,
   };
 
   const validationSchema = Yup.object({
-    fullName: Yup.string().required(),
-    username: Yup.string()
-      .required('Username is required'), // Must be provided
-    // .min(3, 'Username must be at least 3 characters long') // Minimum length
-    // .max(20, 'Username cannot be longer than 20 characters') // Maximum length
-    // .matches(
-    //   /^[a-zA-Z0-9_.-]*$/,
-    //   'Username can only contain letters, numbers, underscores, periods, and hyphens'
-    // ) // Allowed characters
-    // .matches(
-    //   /^[a-zA-Z]/,
-    //   'Username must start with a letter'
-    // ),
-    email: Yup
-      .string()
-      .email(ERROR_MESSAGES.FIELD_INVALID('email address'))
-      .required(ERROR_MESSAGES.FIELD_REUQIRED('Email')),
+    fullName: Yup.string().required(ERROR_MESSAGES.FIELD_REUQIRED("Full Name")),
+    username: Yup.string().required("Username is required"),
+    email: Yup.string()
+      .email(ERROR_MESSAGES.FIELD_INVALID("email address"))
+      .required(ERROR_MESSAGES.FIELD_REUQIRED("Email")),
     password: Yup.string().min(6, ERROR_MESSAGES.PASSWORD_CHARACTER(6)).nullable(),
-    confirmPassword: Yup.string()
-      .when('password', {
-        is: (val: any) => !!val, // only validate if password is filled
-        then: (schema) =>
-          schema
-            .oneOf([Yup.ref('password')], ERROR_MESSAGES.FIELD_MUST_MATCH('Password'))
-            .nullable(),
-        otherwise: (schema) => schema.notRequired().nullable(),
-      }),
-    mobile: Yup.number().required(ERROR_MESSAGES.FIELD_REUQIRED('Mobile')),
+    confirmPassword: Yup.string().when("password", {
+      is: (val: any) => !!val,
+      then: (schema) => schema.oneOf([Yup.ref("password")], ERROR_MESSAGES.FIELD_MUST_MATCH("Password")).nullable(),
+      otherwise: (schema) => schema.notRequired().nullable(),
+    }),
+    mobile: Yup.number().required(ERROR_MESSAGES.FIELD_REUQIRED("Mobile")),
     failedLoginAttempts: Yup.number()
       .typeError("Failed Login Attempts must be a number")
       .nullable()
-      .transform((value, originalValue) =>
-        originalValue === "" ? null : value
-      ),
+      .transform((value, originalValue) => (originalValue === "" ? null : value)),
   });
 
-
-  const isFormFieldValid = (formik: any, fieldName: string) => {
-    return formik.touched[fieldName] && formik.errors[fieldName];
-  };
-
-
-  const showError = async (submit?: boolean) => {
-    const errors = await formik.validateForm();
-    const errorMessages = Object.values(errors);
-
-    if (errorMessages.length > 0) {
-      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.SEND_REPORT, detail: errorMessages.join(', '), life: 3000 }));
-    }
-  };
-
-  function isFetchBaseQueryErrorWithErrorResponse(error: any): error is FetchBaseQueryError & { data: ErrorResponseData } {
-    return error && typeof error === 'object' && 'data' in error && 'message' in error.data;
+  function isFetchBaseQueryErrorWithErrorResponse(
+    error: any
+  ): error is FetchBaseQueryError & { data: ErrorResponseData } {
+    return error && typeof error === "object" && "data" in error && "message" in error.data;
   }
-
-  useEffect(() => {
-    const handleError = (errorToast: any) => {
-      let errorMessage: any = [ERROR_MESSAGES.ERROR_OCCURED];
-
-      if (isFetchBaseQueryErrorWithErrorResponse(errorToast)) {
-        errorMessage = errorToast.data.message;
-      } else {
-        errorMessage = [ERROR_MESSAGES.SOMETHING_WRONG];
-      }
-
-      const detail = Array.isArray(errorMessage) ? errorMessage.join(', ') : errorMessage;
-      dispatch(showToast({ severity: 'error', summary: ERROR_MESSAGES.ERROR, detail }));
-    };
-
-    // Check and handle errors from each API operation
-    if (userCreateError) {
-      handleError(userCreateError)
-    }
-    if (userUpdateError) {
-      handleError(userUpdateError)
-    }
-
-  }, [
-    userCreateError, userUpdateError
-  ]);
-
 
   const formik = useFormik({
     initialValues,
@@ -190,14 +110,19 @@ const CreateUser = ({ data, params }: any) => {
           mobile: values.mobile,
           roles: selectedRoles,
           failedLoginAttempts: values.failedLoginAttempts,
+          isAllowedToGenerateApiKeys: values.isAllowedToGenerateApiKeys,
         };
+
         if (values.password) {
           userData.password = values.password;
         }
-        updateUser({ id: data.id, data: userData });
 
-      } else {
-        const userData = {
+        updateUser({ id: data.id, data: userData });
+        return;
+      }
+
+      try {
+        const response = await registerPrivate({
           fullName: values.fullName,
           username: values.username,
           email: values.email,
@@ -205,265 +130,366 @@ const CreateUser = ({ data, params }: any) => {
           password: values.password,
           roles: selectedRoles,
           failedLoginAttempts: values.failedLoginAttempts,
-        };
+          isAllowedToGenerateApiKeys: values.isAllowedToGenerateApiKeys,
+        }).unwrap();
 
-        registerPrivate(userData)
+        if (values.isAllowedToGenerateApiKeys) {
+          const userId = (response as any)?.data?.id ?? (response as any)?.id;
+          if (userId) {
+            setNewUserIdForApiKey(userId);
+            return;
+          }
+        }
+        router.back();
+      } catch {
+        // error shown via userCreateError effect
       }
     },
   });
 
+  const fieldError = (fieldName: keyof typeof initialValues) =>
+    formik.touched[fieldName] && formik.errors[fieldName] ? String(formik.errors[fieldName]) : "";
+
+  const handleCheckboxChange = (roleName: string) => {
+    const updatedRoles = selectedRoles.includes(roleName)
+      ? selectedRoles.filter((name) => name !== roleName)
+      : [...selectedRoles, roleName];
+
+    setSelectedRoles(updatedRoles);
+    formik.setFieldTouched("roles", true);
+    formik.setFieldValue("roles", updatedRoles);
+  };
+
   useEffect(() => {
-    if (isSuccess == true || isDeleteUserSuceess === true || isUpdateuserSuceess === true) {
+    const handleError = (errorToast: any) => {
+      let errorMessage: any = [ERROR_MESSAGES.ERROR_OCCURED];
+
+      if (isFetchBaseQueryErrorWithErrorResponse(errorToast)) {
+        errorMessage = errorToast.data.message;
+      } else {
+        errorMessage = [ERROR_MESSAGES.SOMETHING_WRONG];
+      }
+
+      const detail = Array.isArray(errorMessage) ? errorMessage.join(", ") : errorMessage;
+      dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.ERROR, detail }));
+    };
+
+    if (userCreateError) handleError(userCreateError);
+    if (userUpdateError) handleError(userUpdateError);
+  }, [dispatch, userCreateError, userUpdateError]);
+
+  useEffect(() => {
+    if (isDeleteUserSuccess || isUpdateUserSuccess) {
       router.back();
     }
-  }, [isSuccess, isDeleteUserSuceess, isUpdateuserSuceess])
+  }, [isDeleteUserSuccess, isUpdateUserSuccess, router]);
+
+  const isEditMode = params.id !== "new";
+  const isSaving = isLoading || isUserUpdating;
+
 
   return (
     <div className="solid-form-wrapper">
-      <div className="solid-form-section" >
+      <div className="solid-form-section">
         <form onSubmit={formik.handleSubmit}>
-          <div className="solid-form-header">
-            {params.id === "new" ? (
-              <>
-                <div className="flex align-items-center gap-3">
-                  <BackButton />
-                  <div className="form-wrapper-title">Create User</div>
-                </div>
-                <div className="gap-3 flex">
-                  {formik.dirty &&
-                    <Button label="Save" size="small" type="submit" />
-                  }
-                  <CancelButton />
-                </div>
-              </>
-            ) : (
-              <>
-                <div className="flex align-items-center gap-3">
-                  <BackButton />
-                  <div className="form-wrapper-title">Update User</div>
-                </div>
-                <div>
-                  <div className="gap-3 flex">
-                    {formik.dirty &&
-                      <Button label="Save" size="small" type="submit" />
-                    }
-                    {data &&
-                      <Button outlined label="Delete" size="small" severity="danger" type="button" onClick={() => deleteUser(data.id)} />
-                    }
-                    <CancelButton />
-                  </div>
-                </div>
-              </>
-            )}
-          </div>
-          <SolidFormHeader />
-          {/* <div className="solid-form-stepper">
-          <SolidFormStepper />
-        </div> */}
-          <div className="px-4 py-3 md:p-4 solid-form-content">
-            <div className="grid">
-              <div className="col-12 lg:col-10 xl:col-8 mx-auto">
-                {/* <p className="form-wrapper-heading text-base">Basic Info</p> */}
-                <Panel header="Basic Info" className="solid-column-panel">
-                  <div className="grid formgrid mt-3">
-                    <div className="field col-12 md:col-6 flex flex-column gap-2">
-                      <label htmlFor="fullName" className="form-field-label">
-                        Full Name
-                      </label>
-                      <InputText
-                        type="text"
-                        id="fullName"
-                        name="fullName"
-                        autoComplete={"off"}
-                        onChange={formik.handleChange}
-                        value={formik.values.fullName}
-                        className={classNames("", {
-                          "p-invalid": formik.touched.fullName && formik.errors.fullName,
-                        })}
-                      />
-                      {isFormFieldValid(formik, "fullName") && (
-                        <Message
-                          severity="error"
-                          text={formik?.errors?.fullName?.toString()}
-                        />
-                      )}
-                    </div>
-                    <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3 md:mt-3">
-                      <label htmlFor="username" className="form-field-label">
-                        Username
-                      </label>
-                      <InputText
-                        type="text"
-                        id="username"
-                        name="username"
-                        autoComplete={"off"}
-                        disabled={data ? true : false}
-                        onChange={formik.handleChange}
-                        value={formik.values.username}
-                        className={classNames("", {
-                          "p-invalid": formik.touched.username && formik.errors.username,
-                        })}
-                      />
-                      {isFormFieldValid(formik, "username") && (
-                        <Message
-                          severity="error"
-                          text={formik?.errors?.username?.toString()}
-                        />
-                      )}
-                    </div>
-                    <div className="field col-12 md:col-6 flex flex-column gap-1 mt-4">
-                      <label htmlFor="email" className="form-field-label">
-                        Email
-                      </label>
-                      <InputText
-                        type="text"
-                        id="email"
-                        name="email"
-                        autoComplete={"off"}
-                        disabled={data ? true : false}
-                        onChange={formik.handleChange}
-                        value={formik.values.email}
-                        className={classNames("", {
-                          "p-invalid": formik.touched.email && formik.errors.email,
-                        })}
-                      />
-                      {isFormFieldValid(formik, "email") && (
-                        <Message
-                          severity="error"
-                          text={formik?.errors?.email?.toString()}
-                        />
-                      )}
-                    </div>
-                    <div className="field col-12 md:col-6 flex flex-column gap-1 mt-4">
-                      <label htmlFor="mobile" className="form-field-label">
-                        Mobile
-                      </label>
-                      <InputText
-                        type="text"
-                        id="mobile"
-                        name="mobile"
-                        autoComplete={"off"}
-                        onChange={formik.handleChange}
-                        value={formik.values.mobile}
-                        className={classNames("", {
-                          "p-invalid": formik.touched.mobile && formik.errors.mobile,
-                        })}
-                      />
-                      {isFormFieldValid(formik, "mobile ") && (
-                        <Message
-                          severity="error"
-                          text={formik?.errors?.mobile?.toString()}
-                        />
-                      )}
-                    </div>
-                    {params.id === "new" && <>
-                      <div className="field col-12 md:col-6 flex flex-column gap-2 py-4">
-                        <label htmlFor="Password" className="form-field-label">
-                          Password
-                        </label>
-                        <Password
-                          id="password"
-                          name="password"
-                          autoComplete="off"
-                          aria-autocomplete="none"
-                          value={formik.values.password}
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                          toggleMask
-                          invalid={isFormFieldValid(formik, "password")}
-                          inputClassName="w-full"
-                          feedback={false}
-                        />
-                        {isFormFieldValid(formik, "password") && (
-                          <Message
-                            severity="error"
-                            text={formik?.errors?.password?.toString()}
-                          />
-                        )}
-                      </div>
-                      <div className="field col-12 md:col-6 flex flex-column gap-2 pb-4 md:pb-0 md:my-4">
-                        <label htmlFor="Confirm Password" className="form-field-label">
-                          Confirm Password
-                        </label>
-                        <Password
-                          id="confirmPassword"
-                          name="confirmPassword"
-                          autoComplete="off"
-                          aria-autocomplete="none"
-                          value={formik.values.confirmPassword}
-                          onChange={formik.handleChange}
-                          onBlur={formik.handleBlur}
-                          toggleMask
-                          invalid={isFormFieldValid(formik, "confirmPassword")}
-                          inputClassName="w-full"
-                          feedback={false}
-                        />
-                        {isFormFieldValid(formik, "confirmPassword") && (
-                          <Message
-                            severity="error"
-                            text={formik?.errors?.confirmPassword?.toString()}
-                          />
-                        )}
-                      </div>
-                    </>}
-                    {params.id !== "new" && (
-                      <div className="field col-12 md:col-6 flex flex-column gap-1 mt-4">
-                        <label htmlFor="failedLoginAttempts" className="form-field-label">
-                          Failed Login Attempts
-                        </label>
-                        <InputText
-                          type="number"
-                          id="failedLoginAttempts"
-                          name="failedLoginAttempts"
-                          autoComplete="off"
-                          onChange={formik.handleChange}
-                          value={formik.values.failedLoginAttempts}
-                          className={classNames("", {
-                            "p-invalid":
-                              formik.touched.failedLoginAttempts &&
-                              formik.errors.failedLoginAttempts,
-                          })}
-                        />
-                        {formik.touched.failedLoginAttempts &&
-                          formik.errors.failedLoginAttempts && (
-                            <Message
-                              severity="error"
-                              text={formik.errors.failedLoginAttempts?.toString()}
-                            />
-                          )}
-                        <small className="text-color-secondary">
-                          Your account has been locked due to repeated unsuccessful login attempts. Please contact your system admin.
-                        </small>
-                      </div>
-                    )}
-                  </div>
-                </Panel>
-
-                {/* <Divider /> */}
-                {/* <p className="form-wrapper-heading text-base" style={{ fontSize: 16 }}>Roles</p> */}
-
-                <Panel toggleable header="Roles" className="solid-column-panel mt-5">
-                  <div className="formgrid grid mt-4">
-                    {rolesData?.data?.records && rolesData?.data?.records.map((role: any, i: number) => (
-                      <div key={role.name} className={`field col-6 flex gap-2 ${i >= 2 ? 'mt-3' : ''}`}>
-                        <Checkbox
-                          inputId={role.name}
-                          checked={selectedRoles.includes(role.name)}
-                          onChange={() => handleCheckboxChange(role.name)}
-                        />
-                        <label htmlFor={role.name}> {role.name}</label>
-                      </div>
-                    ))}
-                  </div>
-                </Panel>
+          <div className="solid-form-header flex align-items-center justify-content-between gap-3 flex-wrap">
+            <div className="solid-user-form-titleblock flex align-items-center gap-3">
+              <BackButton />
+              <div>
+                <div className="form-wrapper-title">{isEditMode ? "Update User" : "Create User"}</div>
+                <p className="solid-user-form-subtitle m-0">
+                  {isEditMode
+                    ? "Update account details, access roles, and security controls."
+                    : "Create a user account and assign the right access roles."}
+                </p>
               </div>
             </div>
+            <div className="gap-3 flex flex-wrap">
+              {formik.dirty ? (
+                <SolidButton size="small" type="submit" loading={isSaving}>
+                  Save
+                </SolidButton>
+              ) : null}
+              {data ? (
+                <SolidButton
+                  size="small"
+                  type="button"
+                  variant="destructive"
+                  loading={isUserDeleting}
+                  onClick={() => deleteUser(data.id)}
+                >
+                  Delete
+                </SolidButton>
+              ) : null}
+              <CancelButton />
+            </div>
+          </div>
+
+          <SolidFormHeader />
+
+          <div className="px-4 py-3 md:p-4 solid-form-content">
+            {isEditMode ? (
+              <SolidTabGroup
+                value={activeTab}
+                onValueChange={setActiveTab}
+                tabs={[
+                  {
+                    value: "userDetails",
+                    label: "User Details",
+                    content: <UserDetailsContent
+                      formik={formik}
+                      fieldError={fieldError}
+                      rolesData={rolesData}
+                      selectedRoles={selectedRoles}
+                      handleCheckboxChange={handleCheckboxChange}
+                      isEditMode={isEditMode}
+                    />,
+                  },
+                  {
+                    value: "apiKeys",
+                    label: "API Keys",
+                    content: <div className="pt-4">
+                      <ApiKeysTab
+                        userId={data?.id}
+                        canCreate={data?.isAllowedToGenerateApiKeys ?? false}
+                      />
+                    </div>,
+                  },
+                ]}
+              />
+            ) : (
+              <UserDetailsContent
+                formik={formik}
+                fieldError={fieldError}
+                rolesData={rolesData}
+                selectedRoles={selectedRoles}
+                handleCheckboxChange={handleCheckboxChange}
+                isEditMode={isEditMode}
+              />
+            )}
           </div>
         </form>
       </div>
+
+      {newUserIdForApiKey !== null && (
+        <GenerateApiKeyModal
+          open={true}
+          userId={newUserIdForApiKey}
+          onClose={() => {
+            setNewUserIdForApiKey(null);
+            router.back();
+          }}
+          onCreated={(apiKey, keyName) => {
+            setNewUserIdForApiKey(null);
+            setRevealKey({ apiKey, keyName });
+          }}
+        />
+      )}
+
+      {revealKey && (
+        <RevealApiKeyModal
+          open={true}
+          apiKey={revealKey.apiKey}
+          keyName={revealKey.keyName}
+          onClose={() => {
+            setRevealKey(null);
+            router.back();
+          }}
+        />
+      )}
     </div>
   );
 };
 
+/** Extracted form body so it can be used both inside and outside the tab wrapper */
+function UserDetailsContent({
+  formik,
+  fieldError,
+  rolesData,
+  selectedRoles,
+  handleCheckboxChange,
+  isEditMode,
+}: {
+  formik: any;
+  fieldError: (field: any) => string;
+  rolesData: any;
+  selectedRoles: string[];
+  handleCheckboxChange: (roleName: string) => void;
+  isEditMode: boolean;
+}) {
+  return (
+    <div className="grid">
+      <div className="col-12 lg:col-10 xl:col-8 mx-auto">
+        <SolidPanel header="Basic Info" className="solid-column-panel solid-user-form-panel">
+          <div className="grid formgrid">
+            <div className="field col-12 md:col-6 flex flex-column gap-2">
+              <label htmlFor="fullName" className="form-field-label">
+                Full Name
+              </label>
+              <SolidInput
+                type="text"
+                id="fullName"
+                name="fullName"
+                autoComplete="off"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.fullName}
+                className={cx(fieldError("fullName") && "solid-user-form-input-invalid")}
+              />
+              {fieldError("fullName") ? <SolidMessage severity="error" text={fieldError("fullName")} /> : null}
+            </div>
+
+            <div className="field col-12 md:col-6 flex flex-column gap-2">
+              <label htmlFor="username" className="form-field-label">
+                Username
+              </label>
+              <SolidInput
+                type="text"
+                id="username"
+                name="username"
+                autoComplete="off"
+                disabled={Boolean(formik.values.username) && isEditMode}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.username}
+                className={cx(fieldError("username") && "solid-user-form-input-invalid")}
+              />
+              {fieldError("username") ? <SolidMessage severity="error" text={fieldError("username")} /> : null}
+            </div>
+
+            <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+              <label htmlFor="email" className="form-field-label">
+                Email
+              </label>
+              <SolidInput
+                type="email"
+                id="email"
+                name="email"
+                autoComplete="off"
+                disabled={isEditMode}
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.email}
+                className={cx(fieldError("email") && "solid-user-form-input-invalid")}
+              />
+              {fieldError("email") ? <SolidMessage severity="error" text={fieldError("email")} /> : null}
+            </div>
+
+            <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+              <label htmlFor="mobile" className="form-field-label">
+                Mobile
+              </label>
+              <SolidInput
+                type="text"
+                id="mobile"
+                name="mobile"
+                autoComplete="off"
+                onChange={formik.handleChange}
+                onBlur={formik.handleBlur}
+                value={formik.values.mobile}
+                className={cx(fieldError("mobile") && "solid-user-form-input-invalid")}
+              />
+              {fieldError("mobile") ? <SolidMessage severity="error" text={fieldError("mobile")} /> : null}
+            </div>
+
+            {!isEditMode ? (
+              <>
+                <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+                  <label htmlFor="password" className="form-field-label">
+                    Password
+                  </label>
+                  <SolidPasswordInput
+                    id="password"
+                    name="password"
+                    autoComplete="off"
+                    value={formik.values.password}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    className={cx(fieldError("password") && "solid-user-form-input-invalid")}
+                  />
+                  {fieldError("password") ? <SolidMessage severity="error" text={fieldError("password")} /> : null}
+                </div>
+
+                <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+                  <label htmlFor="confirmPassword" className="form-field-label">
+                    Confirm Password
+                  </label>
+                  <SolidPasswordInput
+                    id="confirmPassword"
+                    name="confirmPassword"
+                    autoComplete="off"
+                    value={formik.values.confirmPassword}
+                    onChange={formik.handleChange}
+                    onBlur={formik.handleBlur}
+                    className={cx(fieldError("confirmPassword") && "solid-user-form-input-invalid")}
+                  />
+                  {fieldError("confirmPassword") ? (
+                    <SolidMessage severity="error" text={fieldError("confirmPassword")} />
+                  ) : null}
+                </div>
+              </>
+            ) : (
+              <div className="field col-12 md:col-6 flex flex-column gap-2 mt-3">
+                <label htmlFor="failedLoginAttempts" className="form-field-label">
+                  Failed Login Attempts
+                </label>
+                <SolidInput
+                  type="number"
+                  id="failedLoginAttempts"
+                  name="failedLoginAttempts"
+                  autoComplete="off"
+                  onChange={formik.handleChange}
+                  onBlur={formik.handleBlur}
+                  value={formik.values.failedLoginAttempts}
+                  className={cx(fieldError("failedLoginAttempts") && "solid-user-form-input-invalid")}
+                />
+                {fieldError("failedLoginAttempts") ? (
+                  <SolidMessage severity="error" text={fieldError("failedLoginAttempts")} />
+                ) : null}
+                <p className="solid-user-form-helper">
+                  Your account has been locked due to repeated unsuccessful login attempts. Please contact your
+                  system admin.
+                </p>
+              </div>
+            )}
+          </div>
+        </SolidPanel>
+
+        <SolidPanel toggleable header="Access" className="solid-column-panel solid-user-form-panel mt-5">
+          <div className="formgrid grid">
+            <div className="field col-12 flex align-items-center justify-content-between gap-3">
+              <div>
+                <p className="form-field-label m-0">Allow API Key Generation</p>
+                <p className="solid-user-form-helper m-0 mt-1">
+                  When enabled, this user can generate API keys for programmatic access.
+                </p>
+              </div>
+              <SolidSwitch
+                checked={formik.values.isAllowedToGenerateApiKeys}
+                onChange={(checked) => formik.setFieldValue("isAllowedToGenerateApiKeys", checked)}
+              />
+            </div>
+          </div>
+        </SolidPanel>
+
+        <SolidPanel toggleable header="Roles" className="solid-column-panel solid-user-form-panel mt-5">
+          <p className="solid-user-form-panel-copy">Select the roles that should be assigned to this user.</p>
+          <div className="formgrid grid solid-user-role-grid">
+            {rolesData?.data?.records?.map((role: any) => (
+              <div key={role.name} className="field col-12 md:col-6 solid-user-role-item">
+                <SolidCheckbox
+                  id={role.name}
+                  checked={selectedRoles.includes(role.name)}
+                  onChange={() => handleCheckboxChange(role.name)}
+                  label={role.name}
+                />
+              </div>
+            ))}
+          </div>
+        </SolidPanel>
+      </div>
+    </div>
+  );
+}
 
 export default CreateUser;

@@ -1,21 +1,31 @@
 
 import { DropzonePlaceholder } from "../../../../components/common/DropzonePlaceholder";
 import { useDeleteMediaMutation } from "../../../../redux/api/mediaApi";
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
-import { Message } from "primereact/message";
+import { SolidButton } from "../../../shad-cn-ui/SolidButton";
+import {
+  SolidDialog,
+  SolidDialogBody,
+  SolidDialogClose,
+  SolidDialogFooter,
+  SolidDialogHeader,
+  SolidDialogSeparator,
+  SolidDialogTitle,
+} from "../../../shad-cn-ui/SolidDialog";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
+import { SolidProgressBar } from "../../../shad-cn-ui/SolidProgressBar";
 import { useEffect, useState } from "react";
 import { useDropzone } from "react-dropzone";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { FileReaderExt } from "../../../../components/common/FileReaderExt";
-import { ProgressBar } from "primereact/progressbar";
 import getAcceptedFileTypes from "../../../../helpers/getAcceptedFileTypes";
 import { downloadMediaFile } from "../../../../helpers/downloadMediaFile";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidMediaFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import styles from "./solidFields.module.css";
+import { SolidIcon } from "../../../shad-cn-ui";
 
 export class SolidMediaSingleField implements ISolidField {
 
@@ -325,9 +335,9 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
 
     return (
         <div style={(isFieldDisabled === true || isFieldReadonly === true) ? { filter: 'opacity(50%)', pointerEvents: 'none' } : {}}>
-            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4 relative">
+            <div className={`${styles.fieldWrapper} relative`}>
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
@@ -346,57 +356,50 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                     </div>
                     {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                         <div className="absolute mt-1">
-                            <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                            <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                         </div>
                     )}
                 </div>
                 {
                     fileSizeError &&
-                    <Message severity="error" text={fileSizeError?.toString()} />
+                    <SolidMessage severity="error" text={fileSizeError?.toString()} />
                 }
                 {fileDetails && (
-                    <div className="solid-file-upload-wrapper mt-4">
-                        <div className="flex align-items-center md:gap-2">
+                    <div className={`${styles.mediaAttachmentCard} mt-4`}>
+                        <div className={`${styles.mediaAttachmentRow} flex align-items-center md:gap-2`}>
                             <FileReaderExt fileDetails={fileDetails} />
-                            <div className="w-full flex flex-column gap-1">
-                                <div className="flex align-items-start justify-content-between">
-                                    <p className="font-normal w-9 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails)}>{fileDetails.name}</p>
-                                    <div className="flex align-items-center md:gap-2">
-                                        <div>
-                                            <Button
-                                                type="button"
-                                                text
-                                                icon={"pi pi-download"}
-                                                size="small"
-                                                severity="secondary"
-                                                // className="p-2"
-                                                disabled={isFieldDisabled || isFieldReadonly}
-                                                style={{
-                                                    height: 16,
-                                                    width: 16
-                                                }}
-                                                onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
-                                            />
-                                        </div>
-                                        <div>
-                                            <Button
-                                                type="button"
-                                                text
-                                                icon={"pi pi-times"}
-                                                size="small"
-                                                severity="secondary"
-                                                // className="p-2"
-                                                disabled={isFieldDisabled || isFieldReadonly}
-                                                style={{
-                                                    height: 16,
-                                                    width: 16
-                                                }}
-                                                onClick={() => setDeleteImageDialogVisible(true)}
-                                            />
-                                        </div>
+                            <div className={`${styles.mediaAttachmentMeta} w-full`}>
+                                <div className="flex align-items-start justify-content-between gap-3">
+                                    <button
+                                        type="button"
+                                        className={styles.mediaAttachmentName}
+                                        onClick={() => handleFileView(fileDetails)}
+                                        title={fileDetails.name}
+                                    >
+                                        {fileDetails.name}
+                                    </button>
+                                    <div className={`${styles.mediaAttachmentActions} flex align-items-center gap-2`}>
+                                        <button
+                                            type="button"
+                                            className="solid-file-icon-btn"
+                                            disabled={isFieldDisabled || isFieldReadonly}
+                                            aria-label="Download file"
+                                            onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
+                                        >
+                                            <SolidIcon name="si-download" aria-hidden />
+                                        </button>
+                                        <button
+                                            type="button"
+                                            className="solid-file-icon-btn is-danger"
+                                            disabled={isFieldDisabled || isFieldReadonly}
+                                            aria-label="Remove file"
+                                            onClick={() => setDeleteImageDialogVisible(true)}
+                                        >
+                                            <SolidIcon name="si-times" aria-hidden />
+                                        </button>
                                     </div>
                                 </div>
-                                <div className="flex align-items-center gap-2 text-sm">
+                                <div className={styles.mediaAttachmentSize}>
                                     {fileDetails && formatFileSize(fileDetails.fileSize)}
                                 </div>
                             </div>
@@ -404,36 +407,50 @@ export const DefaultMediaSingleFormEditWidget = ({ formik, fieldContext, setLigh
                     </div>
                 )}
             </div>
-            <Dialog
-                visible={isDeleteImageDialogVisible}
-                header="Confirm Delete"
-                modal
-                className="solid-confirm-dialog"
-                footer={() => (
-                    <div className="flex justify-content-center">
-                        <Button type="button" label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={handleCancelUpload} />
-                        <Button type="button" label="No" icon="pi pi-times" className='small-button' onClick={() => setDeleteImageDialogVisible(false)} />
-                    </div>
-                )}
-                onHide={() => setDeleteImageDialogVisible(false)}
+            <SolidDialog
+                open={isDeleteImageDialogVisible}
+                onOpenChange={setDeleteImageDialogVisible}
+                className="solid-shadcn-confirm-dialog"
             >
-                <p>Are you sure you want to delete media?</p>
-            </Dialog>
-            <Dialog
-                visible={isReplaceImageDialogVisible}
-                header="Replace Image"
-                modal
-                className="solid-confirm-dialog"
-                footer={() => (
-                    <div className="flex justify-content-center">
-                        <Button type="button" label="Yes, Replace" icon="pi pi-check" className='small-button' severity="danger" onClick={handleReplaceFile} />
-                        <Button type="button" label="Cancel" icon="pi pi-times" className='small-button' onClick={() => setReplaceImageDialogVisible(false)} />
-                    </div>
-                )}
-                onHide={() => setReplaceImageDialogVisible(false)}
+                <SolidDialogHeader className="solid-shadcn-dialog-head">
+                    <SolidDialogTitle>Confirm Delete</SolidDialogTitle>
+                    <SolidDialogClose />
+                </SolidDialogHeader>
+                <SolidDialogSeparator className="solid-shadcn-dialog-sep" />
+                <SolidDialogBody className="solid-shadcn-dialog-body">
+                    <p className="solid-shadcn-dialog-text">Are you sure you want to delete media?</p>
+                </SolidDialogBody>
+                <SolidDialogFooter className="solid-shadcn-dialog-actions">
+                    <SolidButton variant="destructive" size="sm" autoFocus onClick={handleCancelUpload}>
+                        Delete
+                    </SolidButton>
+                    <SolidButton variant="outline" size="sm" onClick={() => setDeleteImageDialogVisible(false)}>
+                        Cancel
+                    </SolidButton>
+                </SolidDialogFooter>
+            </SolidDialog>
+            <SolidDialog
+                open={isReplaceImageDialogVisible}
+                onOpenChange={setReplaceImageDialogVisible}
+                className="solid-shadcn-confirm-dialog"
             >
-                <p>An media is already uploaded. Do you want to delete it and upload a new one?</p>
-            </Dialog>
+                <SolidDialogHeader className="solid-shadcn-dialog-head">
+                    <SolidDialogTitle>Replace Media</SolidDialogTitle>
+                    <SolidDialogClose />
+                </SolidDialogHeader>
+                <SolidDialogSeparator className="solid-shadcn-dialog-sep" />
+                <SolidDialogBody className="solid-shadcn-dialog-body">
+                    <p className="solid-shadcn-dialog-text">A media file is already uploaded. Do you want to delete it and upload a new one?</p>
+                </SolidDialogBody>
+                <SolidDialogFooter className="solid-shadcn-dialog-actions">
+                    <SolidButton variant="destructive" size="sm" onClick={handleReplaceFile}>
+                        Replace
+                    </SolidButton>
+                    <SolidButton variant="outline" size="sm" onClick={() => setReplaceImageDialogVisible(false)}>
+                        Cancel
+                    </SolidButton>
+                </SolidDialogFooter>
+            </SolidDialog>
         </div>
     );
 }
@@ -514,39 +531,39 @@ export const DefaultMediaSingleFormViewWidget = ({ formik, fieldContext, setLigh
     }
 
     return (
-        <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4 relative">
+        <div className={`${styles.fieldViewWrapper} relative`}>
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label font-medium">{fieldLabel}
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}
                     <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
             }
 
             {fileDetails && (
-                <div className="solid-file-view-wrapper mt-4">
-                    <div className="flex align-items-center md:gap-2">
+                <div className={`${styles.mediaAttachmentCard} ${styles.mediaAttachmentCardView} mt-4`}>
+                    <div className={`${styles.mediaAttachmentRow} flex align-items-center md:gap-2`}>
                         <FileReaderExt fileDetails={fileDetails} />
-                        <div className="w-full flex flex-column gap-1">
-                            <div className="flex align-items-start justify-content-between">
-                                <p className="font-normal w-9 text-primary m-0 solid-img-text-wrapper" style={{ cursor: 'pointer' }} onClick={() => handleFileView(fileDetails)}>{fileDetails.name}</p>
-                                <div className="flex align-items-center md:gap-2">
-                                    <div>
-                                        <Button
-                                            type="button"
-                                            text
-                                            icon={"pi pi-download"}
-                                            size="small"
-                                            severity="secondary"
-                                            // className="p-2"
-                                            style={{
-                                                height: 16,
-                                                width: 16
-                                            }}
-                                            onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
-                                        />
-                                    </div>
+                        <div className={`${styles.mediaAttachmentMeta} w-full`}>
+                            <div className="flex align-items-start justify-content-between gap-3">
+                                <button
+                                    type="button"
+                                    className={styles.mediaAttachmentName}
+                                    onClick={() => handleFileView(fileDetails)}
+                                    title={fileDetails.name}
+                                >
+                                    {fileDetails.name}
+                                </button>
+                                <div className={`${styles.mediaAttachmentActions} flex align-items-center md:gap-2`}>
+                                    <button
+                                        type="button"
+                                        className="solid-file-icon-btn"
+                                        aria-label="Download file"
+                                        onClick={() => downloadMediaFile(fileDetails?.fileUrl, fileDetails?.name)}
+                                    >
+                                        <SolidIcon name="si-download" aria-hidden />
+                                    </button>
                                 </div>
                             </div>
-                            <div className="flex align-items-center gap-2 text-sm">
+                            <div className={styles.mediaAttachmentSize}>
                                 {fileDetails && formatFileSize(fileDetails.fileSize)}
                             </div>
                         </div>

@@ -1,5 +1,5 @@
 
-import { Dropdown } from 'primereact/dropdown';
+import { SolidSelect } from "../../../shad-cn-ui/SolidSelect";
 import { getNumberOfInputs, SolidFilterFieldsParams } from '../SolidFilterFields';
 import { InputTypes, SolidVarInputsFilterElement } from '../SolidVarInputsFilterElement';
 
@@ -16,8 +16,6 @@ const SolidMediaSingleField = ({ fieldMetadata, onChange, index, rule }: SolidFi
         { label: 'Ends With', value: "$endsWith" },
         { label: 'Equals', value: "$eqi" },
         { label: 'Not Equals', value: "$nei" },
-        { label: 'In', value: "$in" },
-        { label: 'Not In', value: "$notIn" },
         { label: 'Is null', value: "$null" },
         { label: 'Is Not null', value: "$notNull" }
 
@@ -27,9 +25,9 @@ const SolidMediaSingleField = ({ fieldMetadata, onChange, index, rule }: SolidFi
     // const header = column.attrs.label ?? fieldMetadata.displayName;
 
     return (
-        <div className='flex flex-column md:flex-row align-items-start gap-2 md:gap-0'>
-            <div className="col-12 md:col-6 px-0 md:pr-2 md:pl-0">
-                <Dropdown
+        <div className='flex flex-column md:flex-row align-items-start gap-6 md:gap-1'>
+            <div className="col-12 md:col-6 px-0 md:pr-0 md:pl-0 p-0">
+                <SolidSelect
                     value={rule.matchMode}
                     onChange={(e: any) => {
                         onChange(rule.id, 'matchMode', e.value)
@@ -42,7 +40,7 @@ const SolidMediaSingleField = ({ fieldMetadata, onChange, index, rule }: SolidFi
                 />
             </div>
 
-            <div className='flex flex-column gap-2 col-12 md:col-6 px-0 md:pl-2 md:pr-0'>
+            <div className='flex flex-column gap-2 col-12 md:col-6 px-0 md:pl-0 md:pr-0 p-0'>
                 <SolidVarInputsFilterElement
                     values={rule.value}
                     onChange={(e: any) => {

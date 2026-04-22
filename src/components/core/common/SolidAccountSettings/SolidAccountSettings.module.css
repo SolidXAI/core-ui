@@ -1,59 +1,547 @@
-.SolidSettingTab {
-    border-radius: 6px;
-    padding: 10px 16px;
-    cursor: pointer;
+.backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1100;
+  background: rgba(2, 6, 23, 0.52);
+  backdrop-filter: blur(2px);
+  display: grid;
+  place-items: center;
+  padding: 16px;
 }
 
-.SolidActiveSetting {
-    background-color: var(--surface-hover);
-    color: var(--primary-color);
-    font-weight: 600;
+.modal {
+  width: min(540px, calc(100vw - 20px));
+  max-height: calc(100vh - 32px);
+  display: flex;
+  flex-direction: column;
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: 0 20px 48px rgba(2, 6, 23, 0.35);
+  overflow: hidden;
 }
 
-.SolidDeActiveSetting {
-    background-color: transparent;
-    font-weight: 400;
+.header {
+  min-height: 62px;
+  border-bottom: 1px solid var(--border);
+  padding: 12px 14px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
 }
 
-.SolidDeActiveSetting:hover {
-    background-color: var(--surface-hover);
+.title {
+  margin: 0;
+  color: var(--card-foreground);
+  font-size: 20px;
+  line-height: 1.2;
+  font-weight: 650;
+  letter-spacing: -0.01em;
 }
 
-.SolidSettingTabWrapper {
-    border-right: 1px solid var(--primary-light-color);
-    /* background-color: var(--surface-c); */
+.subtitle {
+  margin: 4px 0 0;
+  font-size: 12px;
+  color: var(--muted-foreground);
 }
 
-.SolidAccountSettingFormWrapper {
-    min-height: 60vh;
-    max-height: 80vh;
-    overflow-y: hidden;
+.closeButton {
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 22px;
+  line-height: 1;
+  cursor: pointer;
 }
 
-.SolidRemoveProfile {
-    position: absolute;
-    right: 0;
-    top: 0;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    height: 28px;
-    width: 28px;
-    border-radius: 50%;
-    background-color: #fff;
-    cursor: pointer;
-    transition: 0.3s linear;
-    color: #ef4444;
-    box-shadow: 0 3px 1px -2px rgba(0, 0, 0, 0.2), 0 2px 2px 0 rgba(0, 0, 0, 0.14), 0 1px 5px 0 rgba(0, 0, 0, 0.12);
+.closeButton:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
 }
 
-.SolidRemoveProfile:hover {
-    transform: scale(1.1);
+.tabsLine {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  border-bottom: 0;
+  padding: 0 14px;
 }
 
+.tabTrigger {
+  border: 0;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 13px;
+  font-weight: 500;
+  padding: 12px 0 10px;
+  border-bottom: 2px solid transparent;
+  cursor: pointer;
+}
 
-@media(max-width:991px) {
-    .SolidSettingTab {
-        padding: 10px 12px !important;
-    }
+.tabTrigger:hover {
+  color: var(--foreground);
+}
+
+.tabActive {
+  color: var(--foreground);
+  font-weight: 600;
+  border-bottom-color: var(--foreground);
+}
+
+.formWrapper {
+  flex: 1;
+  min-height: 0;
+  overflow: auto;
+  padding: 12px;
+  background: var(--card);
+}
+
+.toast {
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 10px;
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 10px 11px;
+  margin-bottom: 12px;
+  background: var(--card);
+}
+
+.toastTitle {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1.25;
+}
+
+.toastBody {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  line-height: 1.25;
+}
+
+.toastClose {
+  width: 22px;
+  height: 22px;
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted-foreground);
+  cursor: pointer;
+}
+
+.toastClose:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.toastError {
+  border-color: color-mix(in srgb, #ef4444 46%, var(--border));
+}
+
+.toastSuccess {
+  border-color: color-mix(in srgb, #22c55e 46%, var(--border));
+}
+
+.toastWarn {
+  border-color: color-mix(in srgb, #f59e0b 46%, var(--border));
+}
+
+.toastInfo {
+  border-color: color-mix(in srgb, var(--primary) 42%, var(--border));
+}
+
+.confirmBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 1200;
+  background: rgba(2, 6, 23, 0.45);
+  display: grid;
+  place-items: center;
+  padding: 16px;
+}
+
+.confirmModal {
+  width: min(360px, calc(100vw - 24px));
+  border-radius: 12px;
+  border: 1px solid var(--border);
+  background: var(--card);
+  color: var(--card-foreground);
+  box-shadow: 0 18px 44px rgba(2, 6, 23, 0.35);
+}
+
+.confirmHeader {
+  border-bottom: 1px solid var(--border);
+  padding: 12px 14px;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.confirmBody {
+  padding: 14px;
+  font-size: 13px;
+  color: var(--muted-foreground);
+}
+
+.confirmActions {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+  padding: 0 14px 14px;
+}
+
+@media (max-width: 900px) {
+  .tabsLine {
+    gap: 12px;
+    overflow-x: auto;
+    white-space: nowrap;
+  }
+}
+
+.accountForm {
+  min-height: 100%;
+  display: flex;
+  flex-direction: column;
+  justify-content: space-between;
+  gap: 12px;
+  border: 0;
+  border-radius: 0;
+  background: transparent;
+}
+
+.accountScroll {
+  min-height: 0;
+  padding: 12px 12px 0;
+}
+
+.sectionTitle {
+  margin: 0 0 8px;
+  font-size: 14px;
+  font-weight: 650;
+  color: var(--foreground);
+}
+
+.avatarRow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.avatarShell {
+  position: relative;
+  width: 72px;
+  height: 72px;
+  border-radius: 999px;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  background: var(--muted);
+}
+
+.avatarImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.avatarFallback {
+  width: 100%;
+  height: 100%;
+  display: grid;
+  place-items: center;
+  color: #fff;
+  font-size: 30px;
+  font-weight: 700;
+}
+
+.avatarRemove {
+  position: absolute;
+  right: -2px;
+  top: -2px;
+  width: 24px;
+  height: 24px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, #ef4444 40%, var(--border));
+  color: #ef4444;
+  background: var(--card);
+  font-size: 16px;
+  line-height: 1;
+  cursor: pointer;
+}
+
+.avatarRemove:hover {
+  background: #ef4444;
+  color: #fff;
+}
+
+.dashedDivider {
+  margin: 14px 0;
+  border-bottom: 1px dashed var(--border);
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.field {
+  display: flex;
+  flex-direction: column;
+  gap: 5px;
+}
+
+.field label {
+  font-size: 12px;
+  color: var(--muted-foreground);
+  font-weight: 500;
+}
+
+.input {
+  width: 100%;
+  height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--background);
+  color: var(--foreground);
+  padding: 0 11px;
+  font-size: 13px;
+}
+
+.input:disabled {
+  opacity: 0.78;
+  cursor: not-allowed;
+  background: color-mix(in srgb, var(--muted) 35%, transparent);
+}
+
+.input:focus-visible {
+  outline: none;
+  box-shadow: 0 0 0 3px var(--ring);
+}
+
+.roleBox {
+  min-height: 34px;
+  border-radius: 8px;
+  border: 1px solid var(--border);
+  background: var(--background);
+  padding: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 6px;
+}
+
+.roleChip {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 11px;
+  color: var(--muted-foreground);
+  background: var(--card);
+}
+
+.footerActions {
+  border-top: 1px solid var(--border);
+  padding: 10px 12px 12px;
+  display: flex;
+  justify-content: flex-start;
+}
+
+.passwordHintWrap {
+  margin: 8px;
+}
+
+.accountPrimaryBtn.solid-btn {
+  font-weight: 500;
+}
+
+.accountSecondaryBtn.solid-btn {
+  --solid-btn-bg: var(--card);
+  --solid-btn-fg: var(--foreground);
+  --solid-btn-border: var(--border);
+  font-weight: 500;
+}
+
+.accountSecondaryBtn.solid-btn:hover {
+  background: color-mix(in srgb, var(--accent) 75%, transparent);
+}
+
+.passwordWrap {
+  position: relative;
+}
+
+.passwordWrap .input {
+  padding-right: 56px;
+}
+
+.passwordToggle {
+  position: absolute;
+  right: 7px;
+  top: 50%;
+  transform: translateY(-50%);
+  border: 0;
+  border-radius: 6px;
+  background: transparent;
+  color: var(--muted-foreground);
+  font-size: 11px;
+  font-weight: 600;
+  height: 24px;
+  padding: 0 8px;
+  cursor: pointer;
+}
+
+.passwordToggle:hover {
+  background: var(--accent);
+  color: var(--accent-foreground);
+}
+
+.errorText {
+  margin: 0;
+  color: #ef4444;
+  font-size: 12px;
+  line-height: 1.2;
+}
+
+.formStack {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 12px;
+}
+
+.versionPanel {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+.versionCaption {
+  margin: 0;
+  font-size: 12px;
+  color: var(--muted-foreground);
+}
+
+.versionList {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+  margin-top: 8px;
+}
+
+.versionRow {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--muted) 20%, transparent);
+  padding: 9px 10px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+}
+
+.versionName {
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.versionHint {
+  font-size: 11px;
+  color: var(--muted-foreground);
+}
+
+.versionTags {
+  display: flex;
+  gap: 6px;
+}
+
+.versionTag {
+  border: 1px solid var(--border);
+  border-radius: 999px;
+  padding: 3px 8px;
+  font-size: 11px;
+  background: var(--card);
+}
+
+.repoLocal {
+  border-color: color-mix(in srgb, #f59e0b 48%, var(--border));
+  color: #b45309;
+}
+
+.repoNpm {
+  border-color: color-mix(in srgb, #22c55e 48%, var(--border));
+  color: #15803d;
+}
+
+.versionLoaderWrap {
+  min-height: 200px;
+  display: grid;
+  place-items: center;
+}
+
+.versionError {
+  color: var(--muted-foreground);
+  margin: 0;
+  font-size: 13px;
+}
+
+.switchRow {
+  border: 1px solid var(--border);
+  border-radius: 10px;
+  padding: 12px;
+  display: flex;
+  justify-content: space-between;
+  align-items: flex-start;
+  gap: 12px;
+}
+
+.switch {
+  position: relative;
+  display: inline-flex;
+  width: 42px;
+  height: 24px;
+}
+
+.switch input {
+  opacity: 0;
+  width: 0;
+  height: 0;
+}
+
+.switchTrack {
+  position: absolute;
+  inset: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--muted) 60%, transparent);
+  border: 1px solid var(--border);
+  transition: 120ms ease;
+}
+
+.switchTrack::after {
+  content: "";
+  position: absolute;
+  top: 2px;
+  left: 2px;
+  width: 18px;
+  height: 18px;
+  border-radius: 999px;
+  background: #fff;
+  transition: 120ms ease;
+  box-shadow: 0 1px 3px rgba(2, 6, 23, 0.2);
+}
+
+.switch input:checked + .switchTrack {
+  background: color-mix(in srgb, var(--primary) 70%, transparent);
+  border-color: color-mix(in srgb, var(--primary) 60%, var(--border));
+}
+
+.switch input:checked + .switchTrack::after {
+  left: 20px;
+}
+
+@media (max-width: 760px) {
+  .modal {
+    width: min(98vw, 540px);
+  }
 }

@@ -12,6 +12,10 @@
     flex: 1 1 calc(20% - 20px);
     max-width: calc(20% - 20px);
   }
+
+  .solid-card-view-grid {
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+  }
 }
 
 @media (max-width: 1199px) {
@@ -72,13 +76,13 @@
 
     .chatter-section.open {
         position: absolute;
-        right: 0;
+        right: 12px;
         top: 0;
-        width: 380px !important;
+        width: 320px !important;
         height: 100%;
         z-index: 99;
-        background-color: #fff;
-        border-left: 1px solid var(--primary-light-color);
+        background-color: transparent;
+        border-left: none;
         max-width: calc(100% - 100px);
     }
 
@@ -109,15 +113,8 @@
 
     /* ======================= Solid Import  ================================ */
     .solid-import-dialog {
-        width: 75rem !important;
-        max-width: 80% !important;
-    }
-
-    /* ======================= Solid Export ============================  */
-    .ExportDialog {
-        width: 75rem !important;
-        max-width: 80% !important;
-        height: auto !important;
+        width: min(840px, calc(100vw - 24px)) !important;
+        max-width: calc(100vw - 24px) !important;
     }
 
     /* ========================= Home ========================== */
@@ -154,6 +151,10 @@
         max-width: calc(33.33% - 20px);
       }
 
+    .solid-card-view-grid {
+        grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+      }
+
 }
 
 
@@ -175,33 +176,6 @@
         left: 60px !important;
     }
 
-    /* ==================== solid auth ======================== */
-
-    .solid-center-layout {
-        width: 100vw;
-
-    }
-
-    .auth-container.side {
-        width: 525px;
-        max-width: 96%;
-    }
-
-
-    .auth-container {
-        min-width: auto;
-        padding: 25px;
-        border-radius: 1rem;
-        margin: auto;
-        width: 525px;
-        max-width: 96%;
-    }
-
-
-    .solid-auth-input-label.right {
-        color: #000;
-    }
-
     /* ===================== Solid Account Setting ===================== */
 
     .solid-account-setting-main {
@@ -211,7 +185,7 @@
     /* ===================== Chatter Section ===================== */
 
     .chatter-section.open {
-        width: 330px;
+        width: 320px;
     }
 
     .solid-common-dialog {
@@ -222,13 +196,8 @@
 
     /* ======================= Solid Import  ================================ */
     .solid-import-dialog {
-        max-width: 94% !important;
-    }
-
-
-    /* ======================= Solid Export ============================  */
-    .ExportDialog {
-        max-width: 94% !important;
+        width: min(820px, calc(100vw - 20px)) !important;
+        max-width: calc(100vw - 20px) !important;
     }
 
     /* =================  cog wheel ================== */
@@ -412,7 +381,7 @@
     }
 
     .chatter-section.collapsed {
-        width: 40px !important;
+        width: 32px !important;
     }
 
 
@@ -464,33 +433,11 @@
     } */
 
     .solid-import-dialog {
-        /* width: 100% !important; */
-        max-width: 95% !important;
+        width: calc(100vw - 12px) !important;
+        max-width: calc(100vw - 12px) !important;
     }
 
 
-
-
-    /* ======================= Solid Export  ================================ */
-
-    /* .ExportDialog {
-        overflow-x: auto !important;
-    }
-
-    .ExportDialog .p-dialog-content,
-    .solid-export-dialog-header {
-        width: 44rem !important;
-    } */
-    .ExportDialog .p-dialog-content {
-        padding-left: 1rem !important;
-        padding-right: 1rem !important;
-    }
-
-    .SolidExportControls {
-        /* justify-self: flex-start !important; */
-        flex-wrap: wrap;
-        justify-content: start !important;
-    }
 
     .SolidExportProgressToaster {
         min-width: auto;
@@ -591,7 +538,7 @@
     }
 
     .solid-header-buttons-wrapper {
-        gap: 10px !important;
+        gap: 5px !important;
     }
 
     .solid-mobile-text-wrapper {
@@ -613,6 +560,10 @@
         max-width: calc(50% - 20px);
       }
 
+      .solid-card-view-grid {
+        grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+      }
+
       .solid-img-text-wrapper{
         max-width: clamp(180px, 60vw, 600px);
         white-space: nowrap;
@@ -623,16 +574,6 @@
 
 
 @media(max-width:591px) {
-
-    /* ==================== solid auth ======================== */
-
-    .solid-auth-title {
-        font-size: 1.2rem;
-    }
-
-    .p-tabview-title {
-        font-size: 0.85rem;
-    }
 
     /* =========================  Drop Zone ===========================*/
     .solid-dropzone {
@@ -651,7 +592,8 @@
     }
 
     /* ========================== BreadCrum ===================== */
-    .solid-breadcrumb.p-breadcrumb .p-menuitem a p {
+    .solid-breadcrumb-link,
+    .solid-breadcrumb-current {
         font-weight: 500 !important;
     }
 
@@ -661,6 +603,10 @@
 
     .text-base {
         font-size: 0.9rem !important;
+    }
+
+    .solid-header-request-status-label {
+        display: none;
     }
 
 
@@ -722,6 +668,16 @@
     .kanban-ungrouped-column .kanban-card-container {
         flex: 1 1 100%;
         max-width: 100%;
+      }
+
+    .solid-card-view-body {
+        padding-left: 12px;
+        padding-right: 12px;
+      }
+
+    .solid-card-view-grid {
+        grid-template-columns: 1fr;
+        gap: 12px;
       }
     
 

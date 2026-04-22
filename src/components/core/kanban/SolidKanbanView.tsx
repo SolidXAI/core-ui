@@ -3,9 +3,6 @@ import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import { useGetSolidViewLayoutQuery } from "../../../redux/api/solidViewApi";
 import { useLazyCheckIfPermissionExistsQuery } from "../../../redux/api/userApi";
 import { DropResult } from "@hello-pangea/dnd";
-import { FilterMatchMode } from "primereact/api";
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
 import qs from "qs";
 import { useEffect, useRef, useState } from "react";
 import { SolidCreateButton } from "../common/SolidCreateButton";
@@ -14,12 +11,8 @@ import KanbanBoard from "./KanbanBoard";
 import CompactImage from '../../../resources/images/layout/images/compact.png';
 import CozyImage from '../../../resources/images/layout/images/cozy.png';
 import ComfortableImage from '../../../resources/images/layout/images/comfortable.png';
-import { capitalize } from "lodash";
-import Lightbox from "yet-another-react-lightbox";
-import Counter from "yet-another-react-lightbox/plugins/counter";
-import Download from "yet-another-react-lightbox/plugins/download";
-import "yet-another-react-lightbox/styles.css";
-import "yet-another-react-lightbox/plugins/counter.css";
+import { SolidLightbox } from "../../shad-cn-ui/SolidLightbox";
+import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
 import { useRouter } from "../../../hooks/useRouter";
 import { SolidKanbanViewConfigure } from "./SolidKanbanViewConfigure";
 import { KanbanUserViewLayout } from "./KanbanUserViewLayout";
@@ -28,7 +21,23 @@ import { setFilterObjectToLocalStorage, getFilterObjectFromLocalStorage } from "
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { showNavbar, toggleNavbar } from "../../../redux/features/navbarSlice";
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
+import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
 import { showToast } from "../../../redux/features/toastSlice";
+import { usePathname } from "../../../hooks/usePathname";
+import { useSearchParams } from "../../../hooks/useSearchParams";
+import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
+import {
+  SolidButton,
+  SolidDialog,
+  SolidDialogBody,
+  SolidDialogClose,
+  SolidDialogFooter,
+  SolidDialogHeader,
+  SolidDialogSeparator,
+  SolidDialogTitle,
+  SolidIcon,
+} from "../../shad-cn-ui";
+import { FilterMatchMode } from "../filter/filterMatchMode";
 
 type SolidKanbanViewParams = {
   moduleName: string;
@@ -44,6 +53,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
   const solidGlobalSearchElementRef = useRef();
   const router = useRouter();
+  const searchParams = useSearchParams();
   // TODO: The initial filter state will be created based on the fields which are present on this kanban view. 
   const [filters, setFilters] = useState<any>();
   const [toPopulate, setToPopulate] = useState<string[]>([]);
@@ -59,12 +69,28 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [size, setSize] = useState<string | any>(sizeOptions[1].value);
   const [viewModes, setViewModes] = useState<any>([]);
   const [groupByFieldName, setGroupByFieldName] = useState<string>("");
-  const [groupedView, setGroupedView] = useState(true);
   const [triggerCheckIfPermissionExists] = useLazyCheckIfPermissionExistsQuery();
   const [openLightbox, setOpenLightbox] = useState(false);
-  const [lightboxUrls, setLightboxUrls] = useState({});
+  const [lightboxUrls, setLightboxUrls] = useState<any[]>([]);
   const [filterQueryString, setFilterQueryString] = useState<any>();
   const [isLayoutDialogVisible, setLayoutDialogVisible] = useState(false);
+  const lightboxSlides: SolidLightboxSlide[] = Array.isArray(lightboxUrls)
+    ? lightboxUrls
+      .map((item: any) => {
+        const src = item?.src || item?.downloadUrl || "";
+        if (!src) {
+          return null;
+        }
+        const mediaType = getMediaTypeFromUrl(src);
+        const slide: SolidLightboxSlide = { src };
+        if (mediaType !== "image") {
+          slide.type = mediaType;
+        }
+        return slide;
+      })
+      .filter((slide): slide is SolidLightboxSlide => !!slide)
+    : [];
+
   const pushFiltersToRouter = (filterQueryString: any) => {
     // @ts-ignore
     router.push(`?${filterQueryString}`, undefined, { shallow: true });
@@ -84,7 +110,12 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
         const permissionNames = [
           permissionExpression(params.modelName, 'create'),
           permissionExpression(params.modelName, 'delete'),
-          permissionExpression(params.modelName, 'update')
+          permissionExpression(params.modelName, 'update'),
+          permissionExpression(params.modelName, 'findMany'),
+          permissionExpression('importTransaction', 'create'),
+          permissionExpression('exportTransaction', 'create'),
+          permissionExpression('userViewMetadata', 'create'),
+          permissionExpression('savedFilters', 'create')
         ]
         const queryData = {
           permissionNames: permissionNames
@@ -108,10 +139,26 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     usePatchUpdateSolidEntityMutation
   } = entityApi;
 
+  const menuItemId = searchParams.get("menuItemId");
+  const menuItemName = searchParams.get("menuItemName");
+  const actionId = searchParams.get("actionId");
+  const actionName = searchParams.get("actionName");
+
   // Get the kanban view layout & metadata first. 
-  const kanbanViewMetaDataQs = qs.stringify({ ...params, viewType: 'kanban' }, {
-    encodeValuesOnly: true,
-  });
+  const kanbanViewMetaDataQs = qs.stringify(
+    {
+      modelName: params.modelName,
+      moduleName: params.moduleName,
+      viewType: "kanban",
+      menuItemId: menuItemId,
+      menuItemName: menuItemName,
+      actionId: actionId,
+      actionName: actionName,
+    },
+    {
+      encodeValuesOnly: true,
+    }
+  );
   const [kanbanViewMetaData, setKanbanViewMetaData] = useState<any>({});
 
   const {
@@ -127,17 +174,36 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     const initialFilters: any = {};
     const toPopulate: string[] = [];
     const toPopulateMedia: string[] = [];
-    function extractFields(node: any, result: any = []) {
-      if (node.type === "field") {
-        result.push(node);
+    function findCardNode(nodes: any[] = []): any {
+      for (const node of nodes) {
+        if (!node) continue;
+        if (node.type === "card") return node;
+        if (Array.isArray(node.children) && node.children.length > 0) {
+          const nestedCard = findCardNode(node.children);
+          if (nestedCard) return nestedCard;
+        }
       }
-      if (node.children) {
-        node.children.forEach((child: any) => extractFields(child, result));
+
+      return null;
+    }
+    function extractFields(nodes: any, result: any = []) {
+      if (!nodes) return result;
+      if (Array.isArray(nodes)) {
+        nodes.forEach((node: any) => extractFields(node, result));
+        return result;
+      }
+      if (nodes.type === "field") {
+        result.push(nodes);
+      }
+      if (nodes.children) {
+        nodes.children.forEach((child: any) => extractFields(child, result));
       }
       return result;
     }
 
-    const layoutFields = extractFields(solidView.layout);
+    const cardNode = findCardNode(solidView?.layout?.children || []);
+    const fieldSource = cardNode?.children?.length ? cardNode.children : solidView.layout;
+    const layoutFields = extractFields(fieldSource);
 
     for (let i = 0; i < layoutFields.length; i++) {
       const column = layoutFields[i];
@@ -191,15 +257,8 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
 
     if (solidKanbanViewMetaData) {
       setKanbanViewMetaData(solidKanbanViewMetaData);
-      // const viewModes = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.length > 0 && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view } });
       setViewModes(solidKanbanViewMetaData?.data?.viewModes);
-      // setViewModes(viewModes);
-      if (solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.grouped !== false) {
-        setGroupByFieldName(solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.groupBy)
-      } else {
-        setGroupByFieldName("deletedTracker");
-        setGroupedView(false);
-      }
+      setGroupByFieldName(solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.groupBy || "");
     }
   }, [solidKanbanViewMetaData]);
 
@@ -219,6 +278,7 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [queryDataLoaded, setQueryDataLoaded] = useState(false);
   const [showSaveFilterPopup, setShowSaveFilterPopup] = useState<boolean>(false);
   const [maxSwimLanesCount, setMaxSwimLanesCount] = useState<number>(0);
+  const pathname = usePathname();
   // @ts-ignore
   const editBaseUrl = normalizeSolidListTreeKanbanActionPath(pathname, editButtonUrl || "form");
   // Get the kanban view data.
@@ -229,11 +289,15 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   const [
     deleteManySolidEntities,
     {
+      isLoading: isDeleteSolidEntitiesLoading,
       isSuccess: isDeleteSolidEntitiesSucess,
     },
   ] = useDeleteMultipleSolidEntitiesMutation();
   const [
     patchKanbanView,
+    {
+      isLoading: isPatchKanbanViewLoading,
+    },
   ] = usePatchUpdateSolidEntityMutation();
 
   // After data is fetched populate the kanban view state so as to be able to render the data. 
@@ -706,8 +770,6 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
     if (solidKanbanViewMetaData) {
       const createActionUrl = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.type === "custom" ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.createAction?.customComponent : "form/new";
       const editActionUrl = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.type === "custom" ? solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.editAction?.customComponent : "form";
-      const viewModes = solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.length > 0 && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs?.allowedViews.map((view: any) => { return { label: capitalize(view), value: view } });
-      setViewModes(viewModes);
       if (createActionUrl) {
         setCreateButtonUrl(createActionUrl)
       }
@@ -718,6 +780,14 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   }, [solidKanbanViewMetaData])
 
   const kanbanViewTitle = solidKanbanViewMetaData?.data?.solidView?.displayName
+  const headerRequestStatusLabel =
+    isDeleteSolidEntitiesLoading
+      ? "Deleting..."
+      : isPatchKanbanViewLoading
+        ? "Updating..."
+        : loading || !queryDataLoaded
+          ? "Loading..."
+          : null;
 
 
   const toggleBothSidebars = () => {
@@ -729,127 +799,139 @@ export const SolidKanbanView = (params: SolidKanbanViewParams) => {
   };
 
   return (
-    <div className="page-parent-wrapper">
-      <div className="page-header flex-column lg:flex-row">
-        <div className="flex justify-content-between w-full ">
+    <div className="page-parent-wrapper solid-list-page-wrapper flex h-full min-h-0 overflow-hidden">
+      <div className="solid-list-content h-full flex flex-column flex-grow-1">
+        <div className="solid-list-surface solid-kanban-surface flex flex-column flex-1 min-h-0">
+          <div className="page-header solid-list-toolbar solid-kanban-toolbar flex-column lg:flex-row">
+            <div className="flex justify-content-between w-full solid-list-toolbar-row">
+              <div className="flex gap-3 align-items-center w-full solid-list-toolbar-left">
+                {params.embeded !== true &&
+                  <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
+                    <SolidIcon name="si-th-large" aria-hidden />
+                  </div>
+                }
 
-          <div className="flex align-items-center solid-header-buttons-wrapper">
-            {params.embeded !== true &&
-              <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>
-                <i className="pi pi-th-large"></i>
+                <p className="m-0 view-title solid-text-wrapper">{kanbanViewTitle}</p>
+                {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
+                  <div className="hidden lg:flex">
+                    <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
+                  </div>
+                }
               </div>
-            }
 
-            <p className="m-0 view-title solid-text-wrapper">{kanbanViewTitle}</p>
-            {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
-              // <SolidGlobalSearchElement viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter} ></SolidGlobalSearchElement>
-              <div className="hidden lg:flex">
+              <div className="flex align-items-center solid-header-buttons-wrapper solid-list-toolbar-actions">
+                <SolidHeaderRequestStatus label={headerRequestStatusLabel} />
+                {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
+                  <div className="flex lg:hidden">
+                    <SolidButton
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      className="solid-icon-button"
+                      onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}
+                      aria-label="Toggle search"
+                      leftIcon={<SolidIcon name="si-search" aria-hidden />}
+                    />
+                  </div>
+                }
+
+                {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.create !== false &&
+                  <SolidCreateButton createButtonUrl={createButtonUrl} createActionQueryParams={createActionQueryParams} responsiveIconOnly={true} />
+                }
+
+                {actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false && selectedRecords.length > 0 && <SolidButton
+                  type="button"
+                  variant="destructive"
+                  size="sm"
+                  onClick={() => setDialogVisible(true)}
+                >
+                  Delete
+                </SolidButton>}
+                <SolidButton
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  className="solid-icon-button"
+                  onClick={() => {
+                    window.location.reload()
+                  }}
+                  aria-label="Refresh board"
+                  leftIcon={<SolidIcon name="si-refresh" aria-hidden />}
+                />
+                <SolidKanbanViewConfigure
+                  solidKanbanViewMetaData={solidKanbanViewMetaData}
+                  modelName={params.modelName}
+                  actionsAllowed={actionsAllowed}
+                  viewModes={viewModes}
+                  setLayoutDialogVisible={setLayoutDialogVisible}
+                  setShowSaveFilterPopup={setShowSaveFilterPopup}
+                  filters={filters}
+                  handleRefreshView={() => window.location.reload()}
+                />
+              </div>
+            </div>
+            {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && showGlobalSearchElement && (
+              <div className="flex lg:hidden">
                 <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
               </div>
-            }
+            )}
           </div>
 
-          <div className="flex align-items-center solid-header-buttons-wrapper">
-            {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true &&
-              <div className="flex lg:hidden">
-                <Button
-                  type="button"
-                  size="small"
-                  icon="pi pi-search"
-                  severity="secondary"
-                  outlined
-                  className="solid-icon-button"
-                  onClick={() => setShowGlobalSearchElement(!showGlobalSearchElement)}>
-                </Button>
-              </div>
-            }
-
-            {actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.create !== false &&
-              <SolidCreateButton createButtonUrl={createButtonUrl} createActionQueryParams={createActionQueryParams} responsiveIconOnly={true} />
-            }
-
-            {actionsAllowed.includes(`${permissionExpression(params.modelName, 'delete')}`) && solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.delete !== false && selectedRecords.length > 0 && <Button
-              type="button"
-              label="Delete"
-              size="small"
-              onClick={() => setDialogVisible(true)}
-              className="small-button "
-              severity="danger"
-            />}
-            <Button
-              type="button"
-              size="small"
-              icon="pi pi-refresh"
-              severity="secondary"
-              className="solid-icon-button"
-              outlined
-              onClick={() => {
-                window.location.reload()
-              }}
-            />
-            <SolidKanbanViewConfigure
-              solidKanbanViewMetaData={solidKanbanViewMetaData}
-              actionsAllowed={actionsAllowed}
-              viewModes={viewModes}
-              setLayoutDialogVisible={setLayoutDialogVisible}
-              setShowSaveFilterPopup={setShowSaveFilterPopup}
-            />
-            {/* <SolidConfigureLayoutElement></SolidConfigureLayoutElement> */}
-          </div>
+          <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
+          {solidKanbanViewMetaData && kanbanViewData &&
+            <KanbanBoard groupByFieldName={groupByFieldName} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl}></KanbanBoard>
+          }
         </div>
-        {/* </div> */}
-        {solidKanbanViewMetaData?.data?.solidView?.layout?.attrs.enableGlobalSearch === true && showGlobalSearchElement && (
-          <div className="flex lg:hidden">
-            <SolidGlobalSearchElement viewType="kanban" showSaveFilterPopup={showSaveFilterPopup} setShowSaveFilterPopup={setShowSaveFilterPopup} ref={solidGlobalSearchElementRef} viewData={solidKanbanViewMetaData} handleApplyCustomFilter={handleApplyCustomFilter}  ></SolidGlobalSearchElement>
-          </div>
-        )}
       </div>
 
-      <style>{`.p-datatable .p-datatable-loading-overlay {background-color: rgba(0, 0, 0, 0.0);}`}</style>
-      {solidKanbanViewMetaData && kanbanViewData &&
-        <KanbanBoard groupByFieldName={groupByFieldName} groupedView={groupedView} kanbanViewData={kanbanViewData} maxSwimLanesCount={maxSwimLanesCount} solidKanbanViewMetaData={solidKanbanViewMetaData?.data} setKanbanViewData={setKanbanViewData} handleLoadMore={handleLoadMore} onDragEnd={onDragEnd} handleSwimLanePagination={handleSwimLanePagination} setLightboxUrls={setLightboxUrls} setOpenLightbox={setOpenLightbox} editButtonUrl={editBaseUrl}></KanbanBoard>
-      }
-
-      <Dialog
-        visible={isDialogVisible}
-        header="Confirm Delete"
-        modal
-        className="solid-confirm-dialog"
-        footer={() => (
-          <div className="flex justify-content-center">
-            <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteBulk} />
-            <Button label="No" icon="pi pi-times" className='small-button' onClick={onDeleteClose} />
-          </div>
-        )}
-        onHide={() => setDialogVisible(false)}
-      >
-        <p>Are you sure you want to delete the selected records?</p>
-      </Dialog>
-      {openLightbox &&
-        <Lightbox
-          open={openLightbox}
-          plugins={[Counter, Download]}
-          close={() => setOpenLightbox(false)}
-          // @ts-ignore
-          slides={lightboxUrls}
-        />
-      }
-      <Dialog
-        visible={isLayoutDialogVisible}
-        header="Change Kanban Layout"
-        modal
-        onHide={() => setLayoutDialogVisible(false)}
-        // contentStyle={{
-        //   width: 800
-        // }}
-        style={{ width: '800px' }}
-        breakpoints={{
-          '1024px': '75vw', '991px': '86vw', '767px': '92vw', '250px': '96vw'
+      <SolidDialog
+        open={isDialogVisible}
+        onOpenChange={(open) => {
+          if (!open) {
+            onDeleteClose();
+          }
         }}
-
+        className="solid-shadcn-confirm-dialog solid-delete-confirm-dialog"
       >
-        <KanbanUserViewLayout solidKanbanViewMetaData={solidKanbanViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
-      </Dialog>
+        <SolidDialogHeader className="solid-shadcn-dialog-head">
+          <SolidDialogTitle>Confirm Delete</SolidDialogTitle>
+          <SolidDialogClose />
+        </SolidDialogHeader>
+        <SolidDialogSeparator className="solid-shadcn-dialog-sep" />
+        <SolidDialogBody className="solid-shadcn-dialog-body">
+          <p className="solid-shadcn-dialog-text">Are you sure you want to delete the selected records?</p>
+        </SolidDialogBody>
+        <SolidDialogFooter className="solid-shadcn-dialog-actions">
+          <SolidButton variant="destructive" size="sm" autoFocus onClick={deleteBulk}>
+            Delete
+          </SolidButton>
+          <SolidButton variant="outline" size="sm" onClick={onDeleteClose}>
+            Cancel
+          </SolidButton>
+        </SolidDialogFooter>
+      </SolidDialog>
+      {openLightbox && (
+        <SolidLightbox
+          open={openLightbox}
+          slides={lightboxSlides}
+          onClose={() => setOpenLightbox(false)}
+        />
+      )}
+      <SolidDialog
+        open={isLayoutDialogVisible}
+        onOpenChange={setLayoutDialogVisible}
+        className="solid-kanban-layout-dialog"
+        style={{ width: "min(800px, calc(100vw - 32px))" }}
+      >
+        <SolidDialogHeader>
+          <SolidDialogTitle>Change Kanban Layout</SolidDialogTitle>
+          <SolidDialogClose />
+        </SolidDialogHeader>
+        <SolidDialogSeparator />
+        <SolidDialogBody className="solid-kanban-layout-dialog-body">
+          <KanbanUserViewLayout solidKanbanViewMetaData={solidKanbanViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
+        </SolidDialogBody>
+      </SolidDialog>
     </div>
   );
 };

@@ -1,12 +1,12 @@
 
-import { InputNumber } from "primereact/inputnumber";
-import { Message } from "primereact/message";
-import * as Yup from 'yup';
+import * as Yup from "yup";
+import styles from "./solidFields.module.css";
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import { SolidNumberInput } from "../../../shad-cn-ui";
 
 export class SolidDecimalField implements ISolidField {
 
@@ -110,12 +110,13 @@ export const DefaultDecimalFormViewWidget = ({ formik, fieldContext }: SolidForm
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+    const value = formik.values[fieldLayoutInfo.attrs.name];
     return (
-        <div className="mt-2 flex-column gap-2">
+        <div className={styles.fieldViewWrapper}>
             {showFieldLabel !== false && (
-                <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
             )}
-            <p className="m-0">{formik.values[fieldLayoutInfo.attrs.name] && typeof formik.values[fieldLayoutInfo.attrs.name] !== "object" && formik.values[fieldLayoutInfo.attrs.name]}</p>
+            <p className={styles.fieldViewValue}>{value != null && typeof value !== "object" ? value : ''}</p>
         </div>
     );
 }
@@ -124,9 +125,7 @@ export const DefaultDecimalFormEditWidget = ({ formik, fieldContext }: SolidForm
 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-    const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const readOnlyPermission = fieldContext.readOnly;
@@ -140,31 +139,29 @@ export const DefaultDecimalFormEditWidget = ({ formik, fieldContext }: SolidForm
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
     return (
-        <div className="relative">
-            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
-                {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
-                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                        <SolidFieldTooltip fieldContext={fieldContext} />
-                        {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                    </label>
-                }
-                <InputNumber
+        <div className={styles.fieldWrapper}>
+            {showFieldLabel != false &&
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                    {fieldLabel}
+                    {fieldMetadata.required && <span className="text-red-500">*</span>}
+                    <SolidFieldTooltip fieldContext={fieldContext} />
+                </label>
+            }
+            <div className={styles.fieldNumberWrapper}>
+                <SolidNumberInput
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
                     disabled={formDisabled || fieldDisabled}
                     id={fieldLayoutInfo.attrs.name}
-                    minFractionDigits={2}
                     aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
                     onChange={(e: any) => {
-                        formik.setFieldValue(fieldLayoutInfo.attrs.name, e.value)
+                        const nextVal = typeof e.value === "number" ? e.value : null;
+                        formik.setFieldValue(fieldLayoutInfo.attrs.name, nextVal);
                     }}
                     value={formik.values[fieldLayoutInfo.attrs.name] || ''}
                 />
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <div className="absolute mt-1">
-                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                </div>
+                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
             )}
         </div>
     );

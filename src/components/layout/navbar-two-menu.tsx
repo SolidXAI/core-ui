@@ -1,6 +1,4 @@
 import Link from "../common/Link";
-import { usePathname } from "../../hooks/usePathname";
-import { PanelMenu } from "primereact/panelmenu";
 import { useState, useEffect } from "react";
 import { useSearchParams } from "../../hooks/useSearchParams";
 
@@ -73,17 +71,56 @@ const NavbarTwoMenu = ({ menuItems }: any) => {
         setExpandedKeys((prev: any) => ({ ...prev, ...newExpandedKeys }));
     }, [activeId]);
 
-    return (
-        <div className="solid-panel-menu">
-            <PanelMenu
-                model={items}
-                expandedKeys={expandedKeys}
-                onExpandedKeysChange={setExpandedKeys}
-                className="w-full"
-                multiple
-            />
-        </div>
-    );
+    const toggleExpansion = (key: string) => {
+        setExpandedKeys((prev: any) => ({ ...prev, [key]: !prev[key] }));
+    };
+
+    const renderMenuItems = (menuItems: any[]): React.ReactNode => {
+        return (
+            <ul className="solid-panel-menu-list">
+                {menuItems.map((item) => {
+                    const hasChildren = item.items && item.items.length > 0;
+                    const isExpanded = !!expandedKeys[item.key];
+                    const isSelected = activeId !== null && item.id !== null && item.id === activeId;
+                    const isParentActive = hasChildren && hasActiveChild(item.items);
+
+                    return (
+                        <li key={item.key}>
+                            <div className={`flex align-items-center cursor-pointer menuHead px-3 ${isSelected || isParentActive ? "p-highlight" : ""}`}>
+                                <Link href={item?.url ? item?.url : "#"} className="w-full flex justify-content-between font-normal">
+                                    <div className="flex align-items-center" style={{ gap: 10 }}>
+                                        {item.icon && (
+                                            <span className="material-symbols-outlined" style={{ fontSize: 18 }}>
+                                                {item.icon}
+                                            </span>
+                                        )}
+                                        <span>{item.label}</span>
+                                    </div>
+                                </Link>
+                                {hasChildren && (
+                                    <button
+                                        type="button"
+                                        className="sidebar-chevrons-button"
+                                        onClick={() => toggleExpansion(item.key)}
+                                        aria-label={`Toggle ${item.label} menu`}
+                                    >
+                                        <span className={`sidebar-chevrons ${isExpanded ? "pi pi-angle-up" : "pi pi-angle-down"}`} />
+                                    </button>
+                                )}
+                            </div>
+                            {hasChildren && isExpanded && (
+                                <div className="solid-panel-menu-children pl-3">
+                                    {renderMenuItems(item.items)}
+                                </div>
+                            )}
+                        </li>
+                    );
+                })}
+            </ul>
+        );
+    };
+
+    return <div className="solid-panel-menu">{renderMenuItems(items)}</div>;
 };
 
 export default NavbarTwoMenu;

@@ -1,3 +1,5 @@
+import './styles';
+
 export { AutoCompleteField } from './components/common/AutoCompleteField';
 export { CancelButton, SolidCancelButton } from './components/common/CancelButton';
 // export * from './components/common/CodeEditor';
@@ -8,7 +10,6 @@ export { DropzoneUpload } from './components/common/DropzoneUpload';
 export { HeaderDynamicTitles } from './components/common/HeaderDynamicTitles';
 // export * from './components/common/MarkdownViewer';
 export { MultipleSelectAutoCompleteField } from './components/common/MultipleSelectAutoCompleteField';
-export { SingleSelectAutoCompleteField } from './components/common/SingleSelectAutoCompleteField';
 export { SocialMediaLogin } from './components/common/SocialMediaLogin';
 export { BackButton } from './components/common/BackButton';
 export { FileReaderExt } from './components/common/FileReaderExt';
@@ -66,6 +67,8 @@ export { SolidKanbanView } from './components/core/kanban/SolidKanbanView';
 export { SolidModuleHome } from './components/common/SolidModuleHome';
 export { SolidListView } from './components/core/list/SolidListView';
 export { SolidTreeView } from './components/core/tree/SolidTreeView';
+export { SolidTreeTable, SolidTreeColumn, Column as SolidTreeTableColumn } from './components/core/tree/SolidTreeTable';
+export type { SolidTreeNode, SolidTreeSelectionKey, SolidTreeSelectionKeys, SolidTreeColumnProps } from './components/core/tree/SolidTreeTable';
 export * from './components/core/list/listViewRegistry';
 export * from './components/core/tree/treeViewRegistry';
 export { SolidListViewColumn, getNumberOfInputs } from './components/core/list/SolidListViewColumn';
@@ -75,7 +78,7 @@ export type { SolidListViewColumnParams } from './components/core/list/SolidList
 export { SolidManyToOneFilterElement } from './components/core/list/SolidManyToOneFilterElement';
 export { SolidSelectionDynamicFilterElement } from './components/core/list/SolidSelectionDynamicFilterElement';
 export { SolidSelectionStaticFilterElement } from './components/core/list/SolidSelectionStaticFilterElement';
-export { SolidVarInputsFilterElement } from './components/core/list/SolidVarInputsFilterElement';
+export { SolidVarInputsFilterElement } from './components/core/filter/SolidVarInputsFilterElement';
 
 export { default as SolidDashboard } from './components/core/dashboard/SolidDashboard';
 
@@ -92,7 +95,6 @@ export { Layout } from './components/layout/Layout';
 
 export { FilterIcon } from './components/modelsComponents/filterIcon';
 
-export { ToastContainer, handleError, handleSuccess } from './helpers/ToastContainer';
 // export { getAuthCookieName, getAuthHeader } from './helpers/authHeader';
 export { AppTitle } from './helpers/AppTitle';
 export { addCommasToAmount, calculateDaysOfStay, getSingularAndPlural } from './helpers/helpers';
@@ -102,10 +104,14 @@ export { permissionExpression } from './helpers/permissions';
 export { revalidateTag } from './helpers/revalidate';
 export { hasAnyRole } from './helpers/rolesHelper';
 export { registerExtensionComponent, registerExtensionFunction } from './helpers/registry';
+export {
+    ExtensionComponentTypes,
+    ExtensionFunctionTypes,
+    type ExtensionComponentType,
+    type ExtensionFunctionType,
+} from "./types/extension-registry";
 export { env } from './adapters/env';
 export { logger } from './helpers/logger';
-export { default as showToast } from './helpers/showToast';
-
 
 export {
     authApi,
@@ -318,6 +324,10 @@ export { gridView, listView } from './redux/features/dataViewSlice';
 export { hideNavbar, showNavbar, toggleNavbar } from './redux/features/navbarSlice';
 export { toggleTheme } from './redux/features/themeSlice';
 export { setIsAuthenticated, setUser } from './redux/features/userSlice';
+export { enterStudioMode, exitStudioMode, setStudioView } from './redux/features/solidStudioSlice';
+export type { SolidStudioState, StudioView } from './redux/features/solidStudioSlice';
+export { default as solidStudioReducer } from './redux/features/solidStudioSlice';
+export { SolidStudio, SolidStudioPanel, SolidStudioWrapper, SolidAiStudioLayout } from './components/layout/SolidAiStudioLayout';
 
 // Admin Parent Layout
 export { AdminLayout } from './components/layout/AdminLayout';
@@ -382,6 +392,7 @@ export { default as UserProfile } from './components/layout/user-profile';
 export { default as UserSidebar } from './components/layout/UserSidebar';
 export { default as SolidPopupContainer } from './components/common/SolidPopupContainer';
 export { GlobalToast } from './components/common/GlobalToast';
+export { SolidToastProvider } from './components/common/SolidToastProvider';
 
 // Auth
 export { AuthLayout } from './components/auth/AuthLayout';
@@ -394,6 +405,70 @@ export { default as SolidInitialLoginOtp } from './components/auth/SolidInitialL
 export { default as SolidInitiateRegisterOtp } from './components/auth/SolidInitiateRegisterOtp';
 export { GoogleAuthChecking } from './components/auth/GoogleAuthChecking';
 export { ForgotPasswordThankYou } from './components/auth/ForgotPasswordThankYou';
+export { 
+  SolidButton, 
+  SolidAccordion,
+  SolidAccordionItem, 
+  SolidAccordionContent, 
+  SolidAccordionTrigger,
+  SolidDropdownMenu,
+  SolidDropdownMenuCheckboxItem,
+  SolidDropdownMenuContent,
+  SolidDropdownMenuItem,
+  SolidDropdownMenuLabel,
+  SolidDropdownMenuRadioGroup,
+  SolidDropdownMenuRadioItem,
+  SolidDropdownMenuSeparator,
+  SolidDropdownMenuSub,
+  SolidDropdownMenuSubContent,
+  SolidDropdownMenuSubTrigger,
+  SolidDropdownMenuTrigger,
+  SolidInput,
+  SolidNumberInput,
+  SolidAutocomplete,
+  SolidPopover, 
+  SolidPopoverContent, 
+  SolidPopoverTrigger,
+  SolidSelect,
+  SolidTab, 
+  SolidTabGroup,
+  SolidDialog,
+  SolidDialogBody,
+  SolidDialogClose,
+  SolidDialogDescription,
+  SolidDialogFooter,
+  SolidDialogHeader,
+  SolidDialogSeparator,
+  SolidDialogTitle,
+  SolidTextarea,
+  SolidPasswordInput,
+  SolidCheckbox,
+  SolidSwitch,
+  SolidSegmentedControl,
+  SolidRadioGroup,
+  SolidDatePicker,
+  SolidPanel,
+  SolidConfirmDialog,
+  SolidProgressBar,
+  SolidSpinner,
+  SolidToast,
+  SolidSlider,
+  SolidTag,
+  SolidMessage,
+  SolidDivider,
+  SolidOtpInput,
+  SolidTooltip, 
+  SolidTooltipContent, 
+  SolidTooltipTrigger,
+  SolidCodeEditor as SolidShadCodeEditor,
+  SolidRichTextEditor,
+  SolidLightbox,
+  SolidIcon,
+  type SolidIconName,
+  type SolidIconMeta,
+  parseSolidIconMeta,
+  normalizeSolidIconName
+} from './components/shad-cn-ui';
 
 // redux
 export { default as authenticationReducer } from './redux/features/authSlice';
@@ -402,7 +477,7 @@ export { default as navbarReducer } from './redux/features/navbarSlice';
 export { default as popupReducer } from './redux/features/popupSlice';
 export { closePopup, openPopup } from './redux/features/popupSlice';
 export { default as toastReducer } from './redux/features/toastSlice';
-export { showToast as showGlobalToast, clearToast } from './redux/features/toastSlice';
+export { showToast, clearToast } from './redux/features/toastSlice';
 export type { ToastMessage, ToastSeverity } from './redux/features/toastSlice';
 export { default as themeReducer } from './redux/features/themeSlice';
 export { default as userReducer } from './redux/features/userSlice';
@@ -440,6 +515,16 @@ export type {
 } from './types';
 
 export { GeneralSettings } from './components/common/GeneralSettings';
+export { ApiKeysTab } from './components/core/users/ApiKeysTab';
+export {
+    apiKeyApi,
+    useGetUserApiKeysQuery,
+    useCreateApiKeyMutation,
+    useUpdateApiKeyMutation,
+    type ApiKeyRecord,
+    type CreateApiKeyBody,
+    type CreateApiKeyResponse,
+} from './redux/api/apiKeyApi';
 export { SolidErrorPage } from './components/common/SolidErrorPage';
 export { SolidNotFoundPage } from './components/common/SolidNotFoundPage';
 
@@ -457,11 +542,14 @@ export type { SolidStore, SolidRootState, SolidDispatch, CreateSolidStoreOptions
 export { StoreProvider } from './redux/store/StoreProvider';
 export { solidAxios, solidGet, solidPost, solidPut, solidPatch, solidDelete } from './http/solidHttp';
 export { AuthGuard } from './routes/guards/AuthGuard';
+export { GuestGuard } from './routes/guards/GuestGuard';
 export { AdminLayoutWrapper } from './layouts/AdminLayoutWrapper';
 export { AuthLayoutWrapper } from './layouts/AuthLayoutWrapper';
 export { AppEventListener } from './routes/AppEventListener';
 export { getSolidRoutes } from './routes/solidRoutes';
 export type { SolidRoutesOptions } from './routes/types';
+export { SolidLayoutRegistryProvider, useSolidLayoutRegistry } from './routes/SolidLayoutRegistry';
+export type { SolidLayoutEntry, SolidLayoutHandle } from './routes/SolidLayoutRegistry';
 export { AdminPage } from './routes/pages/admin/AdminPage';
 export { ModuleHomePage } from './routes/pages/admin/core/ModuleHomePage';
 export { DashboardPage as AdminDashboardPage } from './routes/pages/admin/core/DashboardPage';
@@ -482,5 +570,6 @@ export { InitiateGoogleOauthPage as AuthInitiateGoogleOauthPage } from './routes
 export { SsoPage as AuthSsoPage } from './routes/pages/auth/SsoPage';
 export { ErrorPage } from './routes/pages/ErrorPage';
 export { NotFoundPage } from './routes/pages/NotFoundPage';
+export { handleAuthSuccess } from './adapters/auth/helper';
 
 export * from "./styles";

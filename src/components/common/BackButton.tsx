@@ -2,8 +2,8 @@
 
 import { usePathname } from "../../hooks/usePathname";
 import { useRouter } from "../../hooks/useRouter";
-import { Button } from 'primereact/button';
-import { useEffect, useState } from 'react';
+import { ArrowLeft } from "lucide-react";
+import { SolidButton } from "../shad-cn-ui";
 export const BackButton = () => {
     const router = useRouter();
     const pathname = usePathname();
@@ -47,7 +47,7 @@ export const BackButton = () => {
 
             const storedView = sessionStorage.getItem("fromView");
             let fromView = "list"
-            if (storedView === "list" || storedView === "kanban") {
+            if (storedView === "list" || storedView === "kanban" || storedView === "card") {
                 fromView = storedView;
             }
             const targetView = fromView || "list";
@@ -60,9 +60,9 @@ export const BackButton = () => {
     };
 
     return (
-        <Button
-            text
-            icon='pi pi-arrow-left'
+        <SolidButton
+            variant="ghost"
+            leftIcon={<ArrowLeft size={14} />}
             size="small"
             type="button"
             aria-label="Back"

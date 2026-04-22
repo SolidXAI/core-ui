@@ -1,85 +1,480 @@
-.ExportCustomProgressbar{
-    height: 3px !important;
+.solid-export-shell {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
 }
 
-.ExportCustomProgressbar .p-progressbar-label {
-  display: none !important;
+.solid-export-toolbar {
+  display: flex;
+  align-items: flex-end;
+  justify-content: space-between;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.ExportText{
-    color:  var(--solid-grey-500) !important;
-    font-size: 14px !important;
+.solid-export-toolbar-main {
+  display: flex;
+  gap: 12px;
+  flex-wrap: wrap;
+  flex: 1;
+  min-width: 0;
 }
 
-.ExportDialog {
-    width: 70% ;
-    height: 700px ;
+.solid-export-toolbar-side {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: 12px;
+  flex-wrap: wrap;
 }
 
-.SolidExportControls{
-    display: flex;
-    justify-content: flex-end;
+.solid-export-toolbar-options {
+  display: inline-flex;
+  align-items: center;
+  min-height: 36px;
+  padding: 0 10px;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent) 42%, transparent);
 }
 
-.ExportCancelButton{
-    background-color: var(--primary-color) !important;
-    border: 1px solid  var(--primary-color)  !important;
-    border-radius: 12px;
+.solid-export-toolbar-options .solid-checkbox {
+  gap: 8px;
 }
 
-.ExportDropdownText {
-    white-space: nowrap;
-    overflow: hidden;
-    text-overflow: ellipsis;
-    margin-right: 8px;
- }
+.solid-export-toolbar-options .solid-checkbox-label {
+  font-size: 12px;
+  font-weight: 600;
+  line-height: 1;
+  letter-spacing: 0;
+  color: color-mix(in srgb, var(--foreground) 82%, transparent);
+}
 
-.ExportDropdownIcon {
-    flex-shrink: 0;
-    cursor: pointer;
+.solid-export-toolbar-actions {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  justify-content: flex-end;
+}
+
+.solid-export-toolbar-actions .solid-btn--ghost:disabled {
+  opacity: 0.5;
+}
+
+.solid-export-toolbar-actions .solid-btn--primary {
+  box-shadow: 0 8px 16px color-mix(in srgb, var(--primary) 16%, transparent);
+}
+
+.solid-export-field {
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+  min-width: 0;
+}
+
+.solid-export-field--template {
+  min-width: 240px;
+}
+
+.solid-export-field-label {
+  font-size: 11px;
+  font-weight: 700;
+  letter-spacing: 0.03em;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+}
+
+.solid-export-summary {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 10px;
+  flex-wrap: wrap;
+}
+
+.solid-export-summary-card {
+  flex: 1;
+  min-width: 0;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 12px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, white 4%), var(--card));
+  padding: 11px 14px;
+}
+
+.solid-export-summary-title-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.solid-export-summary-format-icon {
+  width: 30px;
+  height: 30px;
+  border-radius: 9px;
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 30px;
+}
+
+.solid-export-summary-copy-block {
+  min-width: 0;
+}
+
+.solid-export-summary-title {
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--foreground);
+}
+
+.solid-export-summary-meta {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+  margin-top: 2px;
+}
+
+.solid-export-summary-copy {
+  font-size: 11.5px;
+  line-height: 1.35;
+  color: color-mix(in srgb, var(--foreground) 66%, transparent);
+}
+
+.solid-export-summary-dot {
+  width: 4px;
+  height: 4px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--foreground) 28%, transparent);
+  flex: 0 0 4px;
+}
+
+.solid-export-summary-chip {
+  min-height: 32px;
+  padding: 0 11px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  background: color-mix(in srgb, var(--primary) 8%, transparent);
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 11px;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--foreground) 84%, transparent);
+}
+
+.solid-export-builder {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
+  gap: 14px;
+}
+
+.solid-export-pane {
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  border-radius: 14px;
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, white 4%), var(--card));
+  overflow: hidden;
+  min-width: 0;
+}
+
+.solid-export-pane-header {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: 10px;
+  padding: 13px 14px 11px;
+  border-bottom: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.solid-export-pane-title {
+  font-size: 13.5px;
+  font-weight: 700;
+  line-height: 1.2;
+  color: var(--foreground);
+}
+
+.solid-export-pane-copy {
+  margin-top: 4px;
+  font-size: 11.5px;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--foreground) 64%, transparent);
+}
+
+.solid-export-pane-count {
+  min-height: 26px;
+  padding: 0 10px;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--card) 78%, white 22%);
+  border: 1px solid color-mix(in srgb, var(--border) 88%, transparent);
+  display: inline-flex;
+  align-items: center;
+  font-size: 11px;
+  font-weight: 700;
+  color: color-mix(in srgb, var(--foreground) 82%, transparent);
+}
+
+.solid-export-pane-count.is-selected {
+  background: color-mix(in srgb, var(--primary) 14%, transparent);
+  color: color-mix(in srgb, var(--primary) 82%, var(--foreground));
+}
+
+.solid-export-list {
+  max-height: min(52vh, 520px);
+  overflow: auto;
+}
+
+.solid-export-list-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  padding: 8px 12px;
+  border-top: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  transition: background-color 0.15s ease;
+}
+
+.solid-export-list-row:first-child {
+  border-top: 0;
+}
+
+.solid-export-list-row:hover {
+  background: color-mix(in srgb, var(--accent) 28%, transparent);
+}
+
+.solid-export-list-row-copy {
+  min-width: 0;
+  flex: 1;
+}
+
+.solid-export-list-row-title {
+  display: flex;
+  align-items: baseline;
+  gap: 6px;
+  min-width: 0;
+  font-size: 11.5px;
+  font-weight: 600;
+  line-height: 1.15;
+  color: var(--foreground);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.solid-export-list-row-key {
+  font-size: 10.5px;
+  line-height: 1.2;
+  color: color-mix(in srgb, var(--foreground) 68%, transparent);
+  flex: 0 1 auto;
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+.solid-export-list-row-action.solid-btn {
+  flex: 0 0 auto;
+  min-width: 0;
+  width: 28px;
+  height: 28px;
+  padding: 0;
+  justify-content: center;
+  border-radius: 8px;
+}
+
+.solid-export-list-row-action.solid-btn .solid-btn-label {
+  display: none;
+}
+
+.solid-export-list-row-action.solid-btn .solid-btn-icon {
+  margin: 0;
+}
+
+.solid-export-list-row-action.is-remove.solid-btn {
+  color: #b91c1c;
+  background: color-mix(in srgb, #ef4444 7%, transparent);
+}
+
+.solid-export-list-row-action.is-remove.solid-btn:hover:not(:disabled) {
+  background: color-mix(in srgb, #ef4444 12%, transparent);
+}
+
+.solid-export-empty {
+  padding: 18px 14px;
+}
+
+.solid-export-empty-title {
+  font-size: 12px;
+  font-weight: 700;
+  line-height: 1.35;
+  color: var(--foreground);
+}
+
+.solid-export-empty-copy {
+  margin-top: 4px;
+  font-size: 11.5px;
+  line-height: 1.5;
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+}
+
+.solid-export-save-field {
+  width: 100%;
+}
+
+.solid-export-save-footer {
+  display: flex;
+  justify-content: flex-end;
+  gap: 8px;
+}
+
+@media (max-width: 880px) {
+  .solid-export-toolbar-side {
+    width: 100%;
+    justify-content: space-between;
+  }
+}
+
+@media (max-width: 720px) {
+  .solid-export-builder {
+    grid-template-columns: minmax(0, 1fr);
+  }
+
+  .solid-export-toolbar-side {
+    gap: 10px;
+  }
+
+  .solid-export-toolbar-options,
+  .solid-export-toolbar-actions {
+    width: 100%;
+  }
+
+  .solid-export-toolbar-actions {
+    justify-content: flex-start;
+  }
+}
+
+.ExportCustomProgressbar.solid-progress {
+  height: 6px;
+  overflow: hidden;
+}
+
+.ExportCustomProgressbar .solid-progress-label {
+  display: none;
 }
 
 .SolidExportProgressToaster {
-    position: fixed;
-    bottom: 1rem;
-    right: 1rem;
-    padding: 1rem;
-    background-color: var(--primary-light-color);
-    color: white;
-    border-radius: 6px;
-    box-shadow: 0 2px 10px rgba(0, 0, 0, 0.2);
-    min-width: 500px;
-    z-index: 1000;
+  position: fixed;
+  right: 16px;
+  bottom: 16px;
+  width: min(420px, calc(100vw - 24px));
+  padding: 14px;
+  border-radius: 14px;
+  border: 1px solid color-mix(in srgb, var(--border) 86%, transparent);
+  background: linear-gradient(180deg, color-mix(in srgb, var(--card) 96%, white 4%), var(--card));
+  box-shadow: 0 18px 38px rgba(15, 23, 42, 0.18);
+  z-index: calc(var(--z-overlay) + 8);
 }
 
-.SolidCustomPicklist {
-  border-radius: 0.5rem;
-  border: 1px solid var(--primary-light-color) !important;
-  background: #FFF !important;
-  overflow: hidden;
-  position: relative;
+.solid-export-progress-head {
+  display: flex;
+  align-items: flex-start;
+  gap: 10px;
 }
 
-.SolidCustomPicklistSourceHeader {
-  border-right: 1px solid var(--primary-light-color);
+.solid-export-progress-icon {
+  width: 34px;
+  height: 34px;
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--primary) 10%, transparent);
+  color: var(--primary);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 34px;
 }
 
-.SolidCustomPicklistItemWrapper {
-  height: 2.5rem;
-  border-top: 1px solid var(--primary-light-color);
+.solid-export-progress-icon.is-error {
+  background: color-mix(in srgb, #ef4444 12%, transparent);
+  color: #dc2626;
 }
 
-.SolidCustomPicklistSourceItem {
-  border-right: 1px solid var(--primary-light-color);
+.solid-export-progress-icon.is-success {
+  background: color-mix(in srgb, #16a34a 12%, transparent);
+  color: #15803d;
 }
 
-
-@media(max-width:767px){
-  .SolidCustomPicklistItemWrapper {
-    min-height: 2.7rem;
-    height: auto;
-    border-top: 1px solid var(--primary-light-color);
-    display: flex;
-    align-items: center;
+.solid-export-progress-copy {
+  flex: 1;
+  min-width: 0;
 }
+
+.solid-export-progress-title {
+  margin: 0;
+  font-size: 14px;
+  line-height: 1.25;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.solid-export-progress-title.is-error {
+  color: #b91c1c;
+}
+
+.solid-export-progress-subtitle {
+  margin: 4px 0 0;
+  font-size: 12px;
+  line-height: 1.45;
+  color: color-mix(in srgb, var(--foreground) 62%, transparent);
+}
+
+.solid-export-progress-subtitle.is-error {
+  color: color-mix(in srgb, #b91c1c 86%, transparent);
+}
+
+.solid-export-progress-close {
+  width: 28px;
+  height: 28px;
+  border: 0;
+  border-radius: 999px;
+  background: color-mix(in srgb, var(--accent) 56%, transparent);
+  color: color-mix(in srgb, var(--foreground) 72%, transparent);
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  flex: 0 0 28px;
+}
+
+.solid-export-progress-actions {
+  margin-top: 12px;
+  display: flex;
+  justify-content: flex-end;
+}
+
+@media (max-width: 960px) {
+  .solid-export-builder {
+    grid-template-columns: 1fr;
+  }
+}
+
+@media (max-width: 767px) {
+  .solid-export-toolbar,
+  .solid-export-toolbar-actions {
+    align-items: stretch;
+  }
+
+  .solid-export-toolbar-actions {
+    justify-content: flex-start;
+  }
+
+  .solid-export-field--template {
+    min-width: 0;
+    width: 100%;
+  }
+
+  .solid-export-summary {
+    align-items: stretch;
+  }
 }

@@ -1,16 +1,16 @@
-import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
 import { useState } from "react";
 import qs from "qs";
 import { useLazyGetSelectionDynamicValuesQuery } from "../../../redux/api/fieldApi";
+import { SolidAutocomplete } from "../../shad-cn-ui/SolidAutocomplete";
 
 
-export const SolidSelectionDynamicFilterElement = ({ value, updateInputs, index, fieldMetadata }: any) => {
+export const SolidSelectionDynamicFilterElement = ({ value, updateInputs, index, fieldMetadata, multiple = false }: any) => {
 
 
     // selection dynamic specific code. 
     const [triggerGetSelectionDynamicValues] = useLazyGetSelectionDynamicValuesQuery();
     const [selectionDynamicItems, setSelectionDynamicItems] = useState([]);
-    const selectionDynamicSearch = async (event: AutoCompleteCompleteEvent) => {
+    const selectionDynamicSearch = async (event: any) => {
 
         // Get the list view layout & metadata first. 
         const queryData = {
@@ -36,15 +36,16 @@ export const SolidSelectionDynamicFilterElement = ({ value, updateInputs, index,
 
 
     return (
-        <AutoComplete
+        <SolidAutocomplete
             field="label"
             value={value}
+            multiple={multiple}
             dropdown
             suggestions={selectionDynamicItems}
             completeMethod={selectionDynamicSearch}
             onChange={(e) => updateInputs(index, e.value)}
             className="w-full"
-            inputClassName="w-full p-inputtext-sm"
+            inputClassName="w-full p-inputtext-sm solid-filter-compact-control"
         />
     )
 }

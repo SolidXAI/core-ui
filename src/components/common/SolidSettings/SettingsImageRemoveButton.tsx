@@ -1,9 +1,9 @@
-import { Button } from 'primereact/button'
+import { SolidButton } from '../../shad-cn-ui'
 import React from 'react'
 
 export const SettingsImageRemoveButton = ({ onClick }: any) => {
     return (
-        <Button
+        <SolidButton
             label="Remove"
             severity="danger"
             icon="pi pi-times"

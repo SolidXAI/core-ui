@@ -1,15 +1,13 @@
 
-import CodeEditor from "../../../../components/common/CodeEditor";
-import { Message } from "primereact/message";
+import { SolidMessage } from "../../../shad-cn-ui/SolidMessage";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
-import { javascript } from '@codemirror/lang-javascript';
-import { oneDark } from '@codemirror/theme-one-dark';
-import CodeMirror, { EditorView } from '@uiw/react-codemirror'; // Correct import
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import { SolidCodeEditor } from "../../../shad-cn-ui";
+import styles from "./solidFields.module.css";
 export class SolidJsonField implements ISolidField {
 
     private fieldContext: SolidFieldProps;
@@ -114,26 +112,31 @@ export const DefaultJsonFormEditWidget = ({ formik, fieldContext }: SolidFormFie
 
     return (
         <div className="relative">
-            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
+            <div className={styles.fieldWrapper}>
                 {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                    <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
                         {fieldMetadata.required && <span className="text-red-500"> *</span>}
                         <SolidFieldTooltip fieldContext={fieldContext} />
                         {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
                     </label>
                 }
-                <CodeEditor
-                    formik={formik}
-                    field={fieldLayoutInfo.attrs.name}
+                <SolidCodeEditor
+                    value={(() => {
+                        const val = formik.values[fieldLayoutInfo.attrs.name];
+                        if (val == null) return "";
+                        if (typeof val === "string") return val;
+                        return JSON.stringify(val, null, 2);
+                    })()}
+                    onChange={(next) => formik.setFieldValue(fieldLayoutInfo.attrs.name, next)}
                     height={fieldLayoutInfo.attrs?.height}
                     fontSize={fieldLayoutInfo.attrs?.fontSize}
                     readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                >
-                </CodeEditor>
+                    language="json"
+                />
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
                 <div className="absolute mt-1">
-                    <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
+                    <SolidMessage severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
                 </div>
             )}
         </div>
@@ -167,18 +170,16 @@ export const DefaultJsonFormViewWidget = ({ formik, fieldContext }: SolidFormFie
     return (
 
 
-        <div className="mt-2 flex-column gap-2">
+        <div className={styles.fieldViewWrapper}>
             {showFieldLabel != false &&
-                <p className="m-0"><span className="form-field-label font-medium">{fieldLabel}</span></p>
+                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
             }
-            <CodeMirror
-                id={fieldLabel}
+            <SolidCodeEditor
                 value={code}
                 height={fieldLayoutInfo.attrs?.height ?? '300px'}
-                style={{ fontSize: '10px' }}
-                theme={oneDark}
+                fontSize={fieldLayoutInfo.attrs?.fontSize ?? '10px'}
                 readOnly={true}
-                extensions={[javascript(), EditorView.lineWrapping]}
+                language="json"
             />
         </div>
     );

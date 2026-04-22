@@ -1,8 +1,6 @@
 
-
 import React, { useEffect, useState } from 'react';
-import { Divider } from 'primereact/divider';
-import { Dropdown } from 'primereact/dropdown';
+import { SolidDivider, SolidSelect } from "../../shad-cn-ui";
 import "./solid-locale.css";
 const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLocale, viewMode, createMode, handleLocaleChangeRedirect,
     applicableLocales, defaultEntityLocaleId, solidFormViewData, published }: { solidFormViewMetaData: any, id: string, selectedLocale: any, setSelectedLocale: any, viewMode: string, createMode: boolean, handleLocaleChangeRedirect: any, applicableLocales: any, defaultEntityLocaleId: string | null, solidFormViewData: any, published: string | null }) => {
@@ -35,9 +33,7 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
         }
     }, [applicableLocales, id, viewMode, createMode]);
 
-    const handleLocaleChange = (e: any) => {
-
-        const newLocale = e.value;
+    const handleLocaleChange = (newLocale: string) => {
         if (newLocale === selectedLocale) return;
         setSelectedLocale(newLocale);
         const targetDefaultEntityLocaleId = id === 'new' ? defaultEntityLocaleId : defaultEntityLocaleId || id;
@@ -61,60 +57,58 @@ const SolidLocale = ({ solidFormViewMetaData, id, selectedLocale, setSelectedLoc
 
 
     return (
-        <div className="flex flex-column p-0 m-0">
+        <div className="flex flex-column p-0 m-0 solid-locale-stack">
             <div className="flex justify-content-end gap-3">
             </div>
             {solidFormViewData && (viewMode === 'edit') &&
-                (<div className="w-full" style={{ backgroundColor: 'var(--surface-ground)', margin: '10px 0', padding: 0, overflow:'hidden' }}>
+                (<div className={`w-full solid-locale-status-banner ${published !== null ? 'is-published' : 'is-unpublished'}`}>
                     {solidFormViewMetaData.data.solidView?.model?.draftPublishWorkflow &&
                         published !== null ? (
-                        <li className="w-full text-left list-disc" style={{ padding: '10px 0px',margin: '0 20px', color: '#15803D' }}>
+                        <li className="w-full text-left list-disc solid-locale-status-copy">
                             Editing <span className="font-bold">published version</span>
                         </li>
                     ) : (
-                        <li className="w-full text-left list-disc" style={{ padding: '10px 0px',margin: '0 20px', color: '#EF4444' }}>
+                        <li className="w-full text-left list-disc solid-locale-status-copy">
                             Editing <span className="font-bold">unpublished version</span>
                         </li>
                     )}
                 </div>
                 )
             }
-            <div className="flex flex-column gap-2 mt-2" style={{ backgroundColor: 'var(--surface-ground)', padding: '0.5rem' }}>
-                <h3 className="text-lg font-semibold p-0 m-0">Information</h3>
-                <Divider className="my-2" />
+            <div className="flex flex-column gap-2 mt-2 solid-locale-info-card">
+                <h3 className="solid-locale-section-title p-0 m-0">Information</h3>
+                <SolidDivider className="my-2" />
                 <div className="space-y-2">
-                    <div className='flex align-items-center justify-content-between gap-2 p-2'>
-                        <p className="text-sm font-bold text-gray-500 m-0">Created At</p>
-                        <p className="text-sm m-0">{formatToDDMMYYWithTime(solidFormViewData?.data?.createdAt)}</p>
+                    <div className='flex align-items-center justify-content-between gap-2 p-2 solid-locale-info-row'>
+                        <p className="text-sm font-bold m-0 solid-locale-info-label">Created At</p>
+                        <p className="text-sm m-0 solid-locale-info-value">{formatToDDMMYYWithTime(solidFormViewData?.data?.createdAt)}</p>
                     </div>
-                    <div className='flex align-items-center justify-content-between gap-2 p-2'>
-                        <p className="text-sm font-bold text-gray-500 m-0">Updated At</p>
-                        <p className="text-sm m-0">
+                    <div className='flex align-items-center justify-content-between gap-2 p-2 solid-locale-info-row'>
+                        <p className="text-sm font-bold m-0 solid-locale-info-label">Updated At</p>
+                        <p className="text-sm m-0 solid-locale-info-value">
                             {formatToDDMMYYWithTime(solidFormViewData?.data?.updatedAt)}
                         </p>
                     </div>
-                    <div className='flex align-items-center justify-content-between gap-2 p-2'>
-                        <p className="text-sm font-bold text-gray-500 m-0">Published At</p>
-                        <p className="text-sm m-0">{formatToDDMMYYWithTime(published ?? '')}</p>
+                    <div className='flex align-items-center justify-content-between gap-2 p-2 solid-locale-info-row'>
+                        <p className="text-sm font-bold m-0 solid-locale-info-label">Published At</p>
+                        <p className="text-sm m-0 solid-locale-info-value">{formatToDDMMYYWithTime(published ?? '')}</p>
                     </div>
                 </div>
 
                 {solidFormViewMetaData?.data?.solidView?.model?.internationalisation &&
                     <>
-                        <h3 className="text-lg font-semibold mt-6 mb-2">Internationalisation</h3>
+                        <h3 className="solid-locale-section-title mt-6 mb-2">Internationalisation</h3>
                         <label className="form-field-label">Locales</label>
-                        <Dropdown
+                        <SolidSelect
                             value={selectedLocale}
-                            onChange={(e) => handleLocaleChange(e)}
+                            onChange={(e) => handleLocaleChange(e.value)}
                             options={localeOptions}
-                            optionLabel="label"
                             placeholder="Select locale"
                             className="w-full"
-                            //TODO: disable if createMode is true
                             disabled={createMode}
                         />
-                        {viewMode === 'view' || createMode && (
-                            <p className="text-sm text-gray-700 mt-0 ml-0"> By default record will be created in <b>{defautlLocale}</b></p>
+                        {(viewMode === 'view' || createMode) && (
+                            <p className="text-sm mt-0 ml-0 solid-locale-helper-copy"> By default record will be created in <b>{defautlLocale}</b></p>
                         )}
                     </>
                 }

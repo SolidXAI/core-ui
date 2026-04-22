@@ -1,5 +1,5 @@
 
-import { Column } from "primereact/column";
+import { Column } from "../SolidDataTable";
 import { SolidListViewColumnParams } from '../SolidListViewColumn';
 import { SolidListFieldWidgetProps } from '../../../../types/solid-core';
 import { getExtensionComponent } from '../../../../helpers/registry';
@@ -13,7 +13,7 @@ const SolidIdColumn = ({ solidListViewMetaData, fieldMetadata, column }: SolidLi
         <Column
             key={fieldMetadata.name}
             field={fieldMetadata.name}
-            sortable={column.sortable}
+            sortable={column.attrs.sortable}
             header={() => {
                 return (<div style={{ maxWidth: truncateAfter ? `${truncateAfter}ch` : '30ch', whiteSpace: 'nowrap', textOverflow: 'ellipsis', overflow: 'hidden' }}>{header}</div>)
             }}

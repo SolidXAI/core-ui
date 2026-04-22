@@ -1,7 +1,8 @@
 import Link from "../../common/Link";
 import { usePathname } from "../../../hooks/usePathname";
-import { Button } from 'primereact/button';
 import { normalizeSolidListTreeKanbanActionPath } from "../../../helpers/routePaths";
+import { SolidButton } from "../../shad-cn-ui";
+import { Plus } from "lucide-react";
 
 export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, solidListViewLayout, responsiveIconOnly = false }: any) => {
     const pathName = usePathname();
@@ -18,39 +19,44 @@ export const SolidCreateButton = ({ createButtonUrl, createActionQueryParams, so
 
     const createPath = resolveCreatePath();
 
-    const icon = solidListViewLayout?.attrs?.addButtonIcon || "pi pi-plus";
+    const icon = solidListViewLayout?.attrs?.addButtonIcon;
     const label = solidListViewLayout?.attrs?.addButtonTitle || "Add";
     const className = solidListViewLayout?.attrs?.addButtonClassName || "";
+    const defaultIcon = <Plus size={14} />;
 
     return (
         <div>
             <Link href={createPath}>
                 {responsiveIconOnly ? (
                     <>
-                        <Button
+                        <SolidButton
                             type="button"
                             icon={icon}
-                            className={`${className} p-button-sm lg:hidden solid-icon-button `}
-                            size='small'
+                            leftIcon={!icon ? defaultIcon : undefined}
+                            className={`${className} lg:hidden solid-icon-button `}
+                            size='sm'
                         />
 
-                        <Button
+                        <SolidButton
                             type="button"
                             icon={icon}
-                            label={label}
+                            leftIcon={!icon ? defaultIcon : undefined}
                             className={`${className} hidden lg:inline-flex`}
-                            size='small'
-
-                        />
+                            size='sm'
+                        >
+                            {label}
+                        </SolidButton>
                     </>
                 ) : (
-                    <Button
+                    <SolidButton
                         type="button"
                         icon={icon}
-                        label={label}
+                        leftIcon={!icon ? defaultIcon : undefined}
                         className={`${className}`}
-                        size='small'
-                    />
+                        size='sm'
+                    >
+                        {label}
+                    </SolidButton>
                 )}
 
             </Link>

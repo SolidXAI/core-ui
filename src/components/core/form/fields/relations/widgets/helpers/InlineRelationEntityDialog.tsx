@@ -1,4 +1,9 @@
-import { Dialog } from "primereact/dialog";
+import {
+  SolidDialog,
+  SolidDialogBody,
+  SolidDialogClose,
+  SolidDialogHeader,
+} from "../../../../../../shad-cn-ui/SolidDialog";
 import { camelCase } from "lodash";
 import SolidFormView from "../../../../../../../components/core/form/SolidFormView";
 
@@ -19,20 +24,22 @@ export const InlineRelationEntityDialog = ({ visible, setVisible, fieldContext, 
     modelName: camelCase(fieldContext.fieldMetadata.relationCoModelSingularName)
   };
 
-  return (
-    <Dialog
-      visible={visible}
-      showHeader={false}
-      style={{
-      width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw",
-      height: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.height ?? "auto"
-      }}
-      // breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
+  const dialogWidth = fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw";
+  const dialogHeight = fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.height ?? "auto";
 
-      onHide={() => setVisible(false)}
+  return (
+    <SolidDialog
+      open={visible}
+      onOpenChange={setVisible}
       className="solid-dialog"
+      style={{ width: dialogWidth, height: dialogHeight }}
     >
-      <SolidFormView {...params} />
-    </Dialog>
+      <SolidDialogHeader>
+        <SolidDialogClose aria-label="Close dialog" />
+      </SolidDialogHeader>
+      <SolidDialogBody>
+        <SolidFormView {...params} />
+      </SolidDialogBody>
+    </SolidDialog>
   );
 };

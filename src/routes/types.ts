@@ -22,11 +22,15 @@ export type SolidRouteKey =
   | "list"
   | "tree"
   | "kanban"
+  | "card"
   | "form"
   | "settings"
   | "authLayout"
   | "adminLayout"
-  | "authGuard";
+  | "authGuard"
+  | "adminGuard"
+  | "studioHome"
+  | "landing";
 
 export type SolidRoutesOptions = {
   extraAuthRoutes?: RouteObject[];

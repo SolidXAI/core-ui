@@ -1,15 +1,18 @@
 
-import { AutoComplete, AutoCompleteCompleteEvent } from "primereact/autocomplete";
-import { Message } from "primereact/message";
+import { SolidAutocomplete } from "../../../shad-cn-ui/SolidAutocomplete";
+import { SolidRadioGroup } from "../../../shad-cn-ui/SolidRadioGroup";
+import { SolidSegmentedControl } from "../../../shad-cn-ui/SolidSegmentedControl";
+import { buildSyntheticChangeEvent } from "./fieldEventUtils";
+import styles from './solidFields.module.css';
 import { useMemo, useState } from "react";
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
-import { RadioButton } from "primereact/radiobutton";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
-import { SelectButton } from "primereact/selectbutton";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+
+type AutoCompleteCompleteEvent = { query: string };
 
 export class SolidSelectionStaticField implements ISolidField {
 
@@ -84,7 +87,6 @@ export class SolidSelectionStaticField implements ISolidField {
         // Get display value for the final value
         // const displayValue = getDisplayValue(finalValue);
 
-        // return { label: displayValue ?? '', value: finalValue };
         return { label: getDisplayValue(finalValue), value: finalValue };
     }
 
@@ -184,18 +186,16 @@ export class SolidSelectionStaticField implements ISolidField {
 export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-    const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
-    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
-    const readOnlyPermission = fieldContext.readOnly;
-    const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
-    const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
+        const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+        const readOnlyPermission = fieldContext.readOnly;
+        const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
+        const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
 
-    const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
-    const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
-    const isMultiSelect = fieldMetadata?.isMultiSelect;
+        const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
+        const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
+        const isMultiSelect = fieldMetadata?.isMultiSelect;
 
     const [selectionStaticItems, setSelectionStaticItems] = useState([]);
     const selectionStaticSearch = (event: AutoCompleteCompleteEvent) => {
@@ -211,45 +211,38 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
     const isFormFieldValid = (formik: any, fieldName: string) => formik.touched[fieldName] && formik.errors[fieldName];
 
     return (
-        <div className="relative">
-            <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
-                {showFieldLabel != false &&
-                    <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label font-medium">{fieldLabel}
-                        {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                        <SolidFieldTooltip fieldContext={fieldContext} />
-                        {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                    </label>
-                }
-                <AutoComplete
-                    multiple={isMultiSelect}
-                    readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                    disabled={formDisabled || fieldDisabled}
-                    {...formik.getFieldProps(fieldLayoutInfo.attrs.name)}
-                    id={fieldLayoutInfo.attrs.name}
-                    name={fieldLayoutInfo.attrs.name}
-                    field="label"
-                    // value={formik.values[fieldLayoutInfo.attrs.name] || null}
-                    value={formik.values[fieldLayoutInfo.attrs.name] || (isMultiSelect ? [] : null)}
-                    dropdown
-                    suggestions={selectionStaticItems}
-                    completeMethod={selectionStaticSearch}
-                    // onChange={(e) => updateInputs(index, e.value)} />
-                    // onChange={formik.handleChange}
-                    onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-                    className="solid-standard-autocomplete"
-                />
-            </div>
+        <div className={`${styles.fieldWrapper} ${isFormFieldValid(formik, fieldLayoutInfo.attrs.name) ? styles.fieldInvalid : ""}`}>
+            {showFieldLabel != false &&
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                    {fieldLabel}
+                    {fieldMetadata.required && <span className="text-red-500">*</span>}
+                    <SolidFieldTooltip fieldContext={fieldContext} />
+                </label>
+            }
+            <SolidAutocomplete
+                multiple={isMultiSelect}
+                dropdown
+                field="label"
+                className={`solid-standard-autocomplete ${isFormFieldValid(formik, fieldLayoutInfo.attrs.name) ? styles.fieldInvalidControl : ""}`}
+                value={formik.values[fieldLayoutInfo.attrs.name] || (isMultiSelect ? [] : null)}
+                suggestions={selectionStaticItems}
+                completeMethod={(e) => selectionStaticSearch(e)}
+                onChange={({ value }) => {
+                    if (formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled) return;
+                    const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
+                    fieldContext.onChange(syntheticEvent, "onFieldChange");
+                }}
+                onSelect={({ value }) => {
+                    const syntheticEvent = buildSyntheticChangeEvent(fieldLayoutInfo.attrs.name, value, "text");
+                    fieldContext.onChange(syntheticEvent, "onFieldChange");
+                }}
+            />
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                <div className="absolute mt-1">
-                    <Message severity="error"
-                        text={
-                            // formik?.errors[fieldLayoutInfo.attrs.name]?.toString()
-                            typeof formik.errors[fieldLayoutInfo?.attrs?.name] === 'object'
-                                ? formik.errors[fieldLayoutInfo?.attrs?.name]?.value?.toString()
-                                : formik.errors[fieldLayoutInfo?.attrs?.name]?.toString()
-                        }
-                    />
-                </div>
+                <p className={styles.fieldError}>
+                    {typeof formik.errors[fieldLayoutInfo?.attrs?.name] === 'object'
+                        ? (formik.errors[fieldLayoutInfo?.attrs?.name] as any)?.value?.toString()
+                        : formik.errors[fieldLayoutInfo?.attrs?.name]?.toString()}
+                </p>
             )}
         </div>
     );
@@ -258,7 +251,6 @@ export const DefaultSelectionStaticAutocompleteFormEditWidget = ({ formik, field
 export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const readOnlyPermission = fieldContext.readOnly;
@@ -281,60 +273,36 @@ export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }
 
     if (isMultiSelect) {
         return (
-            <div className={className}>
-                <Message
-                    severity="error"
-                    text={`This render mode is not supported for multi select.`}
-                />
-            </div>
+            <p className={styles.fieldError}>This render mode is not supported for multi select.</p>
         );
     }
 
     return (
-        <div className={className}>
-            <div className="relative">
-                <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
-                    {showFieldLabel !== false && (
-                        <label htmlFor={fieldName} className="form-field-label font-medium">
-                            {fieldLabel}
-                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                            <SolidFieldTooltip fieldContext={fieldContext} />
-                        </label>
-                    )}
-                    <div className="flex flex-wrap gap-3">
-                        {radioOptions.map((option: any) => (
-                            <div key={option.value} className="flex items-center">
-                                <RadioButton
-                                    key={option.value}
-                                    id={`${fieldName}-${option.value}`}
-                                    name={fieldName}
-                                    value={{ label: option.label, value: option.value }}
-                                    checked={formik.values[fieldName]?.value === option.value}
-                                    // onChange={(e) => formik.setFieldValue(fieldName, e.value)} 
-                                    // onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-                                    // onChange={(e) =>
-                                    //     formik.setFieldValue(fieldName, { label: option.label, value: option.value })
-                                    // }
-                                    onChange={(e) => {
-                                        formik.setFieldValue(fieldName, { label: option.label, value: option.value });
-                                        fieldContext.onChange(e, 'onFieldChange');
-                                    }}
-                                    disabled={formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled}
-                                    className="mr-2"
-                                />
-                                <label htmlFor={`${fieldName}-${option.value}`} className="cursor-pointer">
-                                    {option.label}
-                                </label>
-                            </div>
-                        ))}
-                    </div>
-                </div>
-                {isFormFieldValid(formik, fieldName) && (
-                    <div className="absolute mt-1">
-                        <Message severity="error" text={formik?.errors[fieldName]?.toString()} />
-                    </div>
-                )}
-            </div>
+        <div className={styles.fieldWrapper}>
+            {showFieldLabel !== false && (
+                <label htmlFor={fieldName} className={styles.fieldLabel}>
+                    {fieldLabel}
+                    {fieldMetadata.required && <span className="text-red-500">*</span>}
+                    <SolidFieldTooltip fieldContext={fieldContext} />
+                </label>
+            )}
+            <SolidRadioGroup
+                name={fieldName}
+                options={radioOptions}
+                value={formik.values[fieldName]?.value ?? formik.values[fieldName]}
+                disabled={formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled}
+                onChange={(nextValue) => {
+                    const selectedOption = radioOptions.find((opt: any) => opt.value === nextValue);
+                    if (selectedOption) {
+                        formik.setFieldValue(fieldName, selectedOption);
+                        const syntheticEvent = buildSyntheticChangeEvent(fieldName, selectedOption, "radio");
+                        fieldContext.onChange(syntheticEvent, "onFieldChange");
+                    }
+                }}
+            />
+            {isFormFieldValid(formik, fieldName) && (
+                <p className={styles.fieldError}>{formik?.errors[fieldName]?.toString()}</p>
+            )}
         </div>
     );
 }
@@ -342,7 +310,6 @@ export const SolidSelectionStaticRadioFormEditWidget = ({ formik, fieldContext }
 export const SolidSelectionStaticSelectButtonFormEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const readOnlyPermission = fieldContext.readOnly;
@@ -360,12 +327,7 @@ export const SolidSelectionStaticSelectButtonFormEditWidget = ({ formik, fieldCo
 
     if (isMultiSelect) {
         return (
-            <div className={className}>
-                <Message
-                    severity="error"
-                    text={`This render mode is not supported for multi select.`}
-                />
-            </div>
+            <p className={styles.fieldError}>This render mode is not supported for multi select.</p>
         );
     }
 
@@ -375,57 +337,33 @@ export const SolidSelectionStaticSelectButtonFormEditWidget = ({ formik, fieldCo
     });
 
     const currentValue = formik.values[fieldName];
-
-    // SelectButton needs only primitive "yes" or "no" to show active correctly
     const buttonValue =
         typeof currentValue === "object" ? currentValue.value : currentValue || null;
 
-
-    console.log("selection static options", options);
-
-
-
     return (
-        <div className={className}>
-            <div className="relative">
-                <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
-                    {showFieldLabel !== false && (
-                        <label htmlFor={fieldName} className="form-field-label font-medium">
-                            {fieldLabel}
-                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                        </label>
-                    )}
-
-                    <SelectButton
-                        id={fieldName}
-                        name={fieldName}
-                        value={buttonValue}
-                        options={options}
-                        optionLabel="label"
-                        onChange={(e) => {
-                            // Always store object in Formik so validation works
-                            const selectedOption = options.find((opt: any) => opt.value === e.value);
-                            formik.setFieldValue(fieldName, selectedOption);
-                        }}
-                        disabled={
-                            formReadonly ||
-                            fieldReadonly ||
-                            readOnlyPermission ||
-                            formDisabled ||
-                            fieldDisabled
-                        }
-                    />
-                </div>
-
-                {isFormFieldValid(formik, fieldName) && (
-                    <div className="absolute mt-1">
-                        <Message
-                            severity="error"
-                            text={formik.errors[fieldName]?.toString()}
-                        />
-                    </div>
-                )}
-            </div>
+        <div className={styles.fieldWrapper}>
+            {showFieldLabel !== false && (
+                <label htmlFor={fieldName} className={styles.fieldLabel}>
+                    {fieldLabel}
+                    {fieldMetadata.required && <span className="text-red-500">*</span>}
+                </label>
+            )}
+            <SolidSegmentedControl
+                options={options}
+                value={buttonValue}
+                disabled={formReadonly || fieldReadonly || readOnlyPermission || formDisabled || fieldDisabled}
+                onChange={(nextValue) => {
+                    const selectedOption = options.find((opt: any) => opt.value === nextValue);
+                    if (selectedOption) {
+                        formik.setFieldValue(fieldName, selectedOption);
+                        const syntheticEvent = buildSyntheticChangeEvent(fieldName, selectedOption, "button");
+                        fieldContext.onChange(syntheticEvent, "onFieldChange");
+                    }
+                }}
+            />
+            {isFormFieldValid(formik, fieldName) && (
+                <p className={styles.fieldError}>{formik.errors[fieldName]?.toString()}</p>
+            )}
         </div>
     );
 };
@@ -440,23 +378,17 @@ export const DefaultSelectionStaticFormViewWidget = ({ formik, fieldContext }: S
     const isMultiSelect = fieldMetadata?.isMultiSelect;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     return (
-        // <div className="mt-2 flex-column gap-2">
-        //     <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
-        //     <p className="m-0">{value && value.label && value.label}</p>
-        // </div>
-        <div className="mt-2 flex-column gap-2">
+        <div className={styles.fieldViewWrapper}>
             {showFieldLabel !== false && (
-                <p className="m-0 form-field-label font-medium">{fieldLabel}</p>
+                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
             )}
-            <p className="m-0">
+            <p className={styles.fieldViewValue}>
                 {isMultiSelect
                     ? Array.isArray(value)
-                        ? value.map(v => v?.label).filter(Boolean).join(', ')
+                        ? value.map((v: any) => v?.label).filter(Boolean).join(', ')
                         : ''
                     : value?.label || ''}
             </p>
         </div>
     );
 }
-
-

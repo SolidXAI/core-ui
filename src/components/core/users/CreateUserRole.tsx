@@ -7,17 +7,15 @@ import { useCreateuserroleMutation } from "../../../redux/api/userApi";
 import { useFormik } from "formik";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
-import { Button } from "primereact/button";
-import { InputText } from "primereact/inputtext";
-import { Message } from "primereact/message";
-import { Toast } from "primereact/toast";
-import { classNames } from "primereact/utils";
+import { SolidButton, SolidInput, SolidMessage } from "../../shad-cn-ui";
 import qs from "qs";
-import { useEffect, useRef } from "react";
+import { useEffect } from "react";
 import * as Yup from "yup";
+import { useDispatch } from "react-redux";
+import { showToast } from "../../../redux/features/toastSlice";
 
 const CreateUserRole = ({ data }: any) => {
-  const toast = useRef<Toast>(null);
+  const dispatch = useDispatch();
 
   const [triggerGetRoles, { data: roleLazy, isFetching: isRoleLazyFetching, error: roleLazyError }] = useLazyGetrolesQuery();
   const router = useRouter();
@@ -71,25 +69,11 @@ const CreateUserRole = ({ data }: any) => {
     const errorMessages = Object.values(errors);
 
     if (errorMessages.length > 0) {
-      toast?.current?.show({
-        severity: "success",
+      dispatch(showToast({
+        severity: "error",
         summary: ERROR_MESSAGES.SEND_REPORT,
-        // sticky: true,
-        life: 3000,
-        //@ts-ignore
-        content: (props) => (
-          <div
-            className="flex flex-column align-items-left"
-            style={{ flex: "1" }}
-          >
-            {errorMessages.map((m, index) => (
-              <div className="flex align-items-center gap-2" key={index}>
-                <span className="font-bold text-900">{String(m)}</span>
-              </div>
-            ))}
-          </div>
-        ),
-      });
+        detail: errorMessages.map(String).join(", "),
+      }));
     }
   };
 
@@ -138,7 +122,7 @@ const CreateUserRole = ({ data }: any) => {
               <div className="form-wrapper-title"> Create User Role</div>
               <div className="gap-3 flex">
                 <div>
-                  <Button label="Save" size="small" onClick={() => showError()} type="submit" className='small-button' />
+                  <SolidButton label="Save" size="sm" onClick={() => showError()} type="submit" className='small-button' />
                 </div>
                 <CancelButton />
               </div>
@@ -147,7 +131,7 @@ const CreateUserRole = ({ data }: any) => {
                 <h1 className="m-0"> Edit User</h1>
                 <div className="gap-3 flex">
                   <div>
-                    <Button label="Save" onClick={() => showError()} type="submit" size="small" className='small-button' />
+                    <SolidButton label="Save" onClick={() => showError()} type="submit" size="sm" className='small-button' />
                   </div>
                   <div>
                     {/* <Button label="Delete" severity="danger" type="button" /> */}
@@ -163,18 +147,17 @@ const CreateUserRole = ({ data }: any) => {
                     <label htmlFor="username" className="form-label form-field-label">
                       User Name
                     </label>
-                    <InputText
+                    <SolidInput
                       type="text"
                       id="username"
                       name="username"
                       onChange={formik.handleChange}
                       value={formik.values.username}
-                      className={classNames("p-inputtext-sm w-full small-input", {
-                        "p-invalid": isFormFieldValid(formik, "username"),
-                      })}
+                      className="p-inputtext-sm w-full small-input"
+                      aria-invalid={!!isFormFieldValid(formik, "username")}
                     />
                     {isFormFieldValid(formik, "username") && (
-                      <Message severity="error" text={formik.errors.username?.toString()} />
+                      <SolidMessage severity="error" text={formik.errors.username?.toString()} />
                     )}
                   </div>
                 </div>
@@ -196,7 +179,7 @@ const CreateUserRole = ({ data }: any) => {
                         className="solid-standard-autocomplete"
                       ></AutoCompleteField>
                       {isFormFieldValid(formik, "roleName") && (
-                        <Message severity="error" text={formik?.errors?.roleName?.toString()} />
+                        <SolidMessage severity="error" text={formik?.errors?.roleName?.toString()} />
                       )}
                     </div>
                   </div>

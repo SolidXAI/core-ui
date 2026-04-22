@@ -1,6 +1,6 @@
-
-import { Button } from "primereact/button"
+import { Check, X } from "lucide-react";
 import { getExtensionComponent } from "../../../helpers/registry";
+import { SolidButton } from "../../shad-cn-ui";
 
 
 export const ListViewRowActionPopup = ({ context }: any) => {
@@ -28,13 +28,16 @@ export const ListViewRowActionPopup = ({ context }: any) => {
                         <h1>{context?.modelName}</h1>
                         <h1>{context?.moduleName}</h1>
                         <div className="flex justify-content-center">
-                            <Button label="Confirm" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={triggerServerAction} />
-                            <Button label="Cancel" icon="pi pi-times" className='small-button' onClick={() => context.closeCustomRowActionPopup()} />
+                            <SolidButton className='small-button' variant="destructive" autoFocus onClick={triggerServerAction} leftIcon={<Check size={14} />}>
+                                Confirm
+                            </SolidButton>
+                            <SolidButton className='small-button' variant="outline" onClick={() => context.closeCustomRowActionPopup()} leftIcon={<X size={14} />}>
+                                Cancel
+                            </SolidButton>
                         </div>
                     </>
             }
         </div>
     )
 }
-
 

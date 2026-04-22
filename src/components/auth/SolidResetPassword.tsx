@@ -1,20 +1,15 @@
 import { useConfirmForgotPasswordMutation } from "../../redux/api/authApi";
 import { useFormik } from "formik";
-import Image from "../common/Image";
 import { useRouter } from "../../hooks/useRouter";
 import { useSearchParams } from "../../hooks/useSearchParams";
-import { Button } from "primereact/button";
-import { Message } from "primereact/message";
-import { Password } from "primereact/password";
-import { classNames } from "primereact/utils";
 import { useEffect } from "react";
 import { useDispatch } from 'react-redux';
 import * as Yup from "yup";
-import SolidLogo from '../../resources/images/SolidXLogo.svg'
 import { ERROR_MESSAGES } from "../../constants/error-messages";
 import { useLazyGetAuthSettingsQuery } from "../../redux/api/solidSettingsApi";
 import { env } from "../../adapters/env";
 import { showToast } from "../../redux/features/toastSlice";
+import { SolidButton, SolidMessage, SolidPasswordInput } from "../shad-cn-ui";
 
 const SolidResetPassword = () => {
     const searchParams = useSearchParams();
@@ -91,38 +86,24 @@ const SolidResetPassword = () => {
     return (
         <>
             <div className={`auth-container ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'center' : 'side'}`}>
-                {solidSettingsData?.data?.authPagesLayout === 'center' &&
-                    <div className="flex justify-content-center">
-                        <div className={`solid-logo flex align-items-center ${solidSettingsData?.data?.appLogoPosition}`}>
-                            <Image
-                                alt="solid logo"
-                                src={solidSettingsData?.data?.appLogo || SolidLogo}
-                                className="relative"
-                                fill
-                            />
-                        </div>
-                    </div>
-                }
-                <h2 className={`solid-auth-title ${solidSettingsData?.data?.authPagesLayout === 'center' ? 'text-center' : 'text-left'}`}>Create New Password</h2>
+                <h2 className="solid-auth-title">Create new password</h2>
+                <p className="solid-auth-helper">Use a strong password for your account security</p>
                 {/* <p className="solid-auth-subtitle text-sm">By continuing, you agree to the <Link href={'#'}>Terms of Service</Link> and acknowledge you’ve read our  <Link href={'#'}>Privacy Policy.</Link> </p> */}
                 <form onSubmit={formik.handleSubmit}>
                     <div className="flex flex-column gap-2">
                         <label htmlFor="password" className="solid-auth-input-label">New Password</label>
-                        <Password
+                        <SolidPasswordInput
                             id="password"
                             name="password"
                             placeholder="***************"
                             value={formik.values.password}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
-                            toggleMask
-                            className={classNames("", {
-                                "p-invalid": isFormFieldValid(formik, "password"),
-                            })}
-                            inputClassName="w-full"
-                            feedback={false}
+                            toggle
+                            className="w-full"
+                            aria-invalid={!!isFormFieldValid(formik, "password")}
                         />
-                        {isFormFieldValid(formik, "password") && <Message
+                        {isFormFieldValid(formik, "password") && <SolidMessage
                             className="text-red-500 text-sm"
                             severity="error"
                             text={formik?.errors?.password?.toString()}
@@ -130,21 +111,18 @@ const SolidResetPassword = () => {
                     </div>
                     <div className="flex flex-column gap-1 mt-4" style={{}}>
                         <label htmlFor="password" className="solid-auth-input-label">Confirm Password</label>
-                        <Password
+                        <SolidPasswordInput
                             id="confirmPassword"
                             name="confirmPassword"
                             placeholder="***************"
                             value={formik.values.confirmPassword}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
-                            toggleMask
-                            className={classNames("", {
-                                "p-invalid": isFormFieldValid(formik, "confirmPassword"),
-                            })}
-                            inputClassName="w-full"
-                            feedback={false}
+                            toggle
+                            className="w-full"
+                            aria-invalid={!!isFormFieldValid(formik, "confirmPassword")}
                         />
-                        {isFormFieldValid(formik, "confirmPassword") && <Message
+                        {isFormFieldValid(formik, "confirmPassword") && <SolidMessage
                             className="text-red-500 text-sm"
                             severity="error"
                             text={formik?.errors?.confirmPassword?.toString()}
@@ -168,8 +146,8 @@ const SolidResetPassword = () => {
                                         <label htmlFor="remember" className="ml-2">Remember me</label>
                                     </div> */}
                     <div className="mt-4">
-                        <Button className="w-full font-light auth-submit-button" label="Reset Password" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
-                        <Button type="button" label="Back" className="w-full auth-back-button text-center mt-1" link onClick={() => (window.location.href = '/auth/login')} />
+                        <SolidButton className="w-full font-light auth-submit-button" label="Reset Password" disabled={formik.isSubmitting} loading={formik.isSubmitting} type="submit" />
+                        <SolidButton type="button" label="Back" className="w-full auth-back-button text-center mt-1" text onClick={() => (window.location.href = '/auth/login')} />
                     </div>
                 </form>
             </div>

@@ -1,7 +1,6 @@
 import React, { ReactElement, Dispatch, SetStateAction, HTMLAttributeAnchorTarget, ReactNode } from 'react';
 import { NextPage } from 'next';
 import { Demo } from './demo';
-import { Toast } from 'primereact/toast';
 
 /* Breadcrumb Types */
 export interface AppBreadcrumbProps {
@@ -39,6 +38,9 @@ export type LayoutConfig = {
 export interface LayoutContextProps {
     layoutConfig: LayoutConfig;
     setLayoutConfig: Dispatch<SetStateAction<LayoutConfig>>;
+    themeMode: "light" | "dark";
+    setThemeMode: Dispatch<SetStateAction<"light" | "dark">>;
+    toggleThemeMode: () => void;
     layoutState: LayoutState;
     setLayoutState: Dispatch<SetStateAction<LayoutState>>;
     onMenuToggle: () => void;

@@ -8,11 +8,8 @@ import { useFormik } from "formik";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
-import "primeflex/primeflex.css";
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
-import { TabPanel, TabView } from "primereact/tabview";
 import qs from "qs";
+import { getMediaTypeFromUrl } from "../../../helpers/mediaType";
 import React, { ChangeEvent, useEffect, useMemo, useRef, useState } from "react";
 import * as Yup from "yup";
 import { FormikObject, ISolidField, SolidFieldProps } from "./fields/ISolidField";
@@ -36,26 +33,28 @@ import { getExtensionComponent, getExtensionFunction } from "../../../helpers/re
 import { SolidFormWidgetProps, SolidUiEventResponse } from "../../../types/solid-core";
 import { SolidPasswordField } from "./fields/SolidPasswordField";
 import { SolidEmailField } from "./fields/SolidEmailField";
-import { Panel } from "primereact/panel";
 import { SolidFormUserViewLayout } from "./SolidFormUserViewLayout";
-import Lightbox from "yet-another-react-lightbox";
-import Counter from "yet-another-react-lightbox/plugins/counter";
-import Download from "yet-another-react-lightbox/plugins/download";
-import Video from "yet-another-react-lightbox/plugins/video";
-import "yet-another-react-lightbox/styles.css";
-import "yet-another-react-lightbox/plugins/counter.css";
+import { SolidLightbox } from "../../shad-cn-ui/SolidLightbox";
+import type { SolidLightboxSlide } from "../../shad-cn-ui/SolidLightbox";
 import { SolidFormActionHeader } from "./SolidFormActionHeader";
-import { SolidFormViewShimmerLoading } from "./SolidFormViewShimmerLoading";
 import { hasAnyRole } from "../../../helpers/rolesHelper";
 import SolidChatterLocaleTabView from "../locales/SolidChatterLocaleTabView";
-import { ConfirmDialog } from "primereact/confirmdialog";
-import { SolidXAIIcon } from "../solid-ai/SolidXAIIcon";
 import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { useLazyGetMcpUrlQuery, useLazyGetSolidSettingsQuery } from "../../../redux/api/solidSettingsApi";
 import { SolidFormFooter } from "./SolidFormFooter";
 import { normalizeSolidFormActionPath } from "../../../helpers/routePaths";
 import { showToast } from "../../../redux/features/toastSlice";
 import { useDispatch } from "react-redux";
+import { SolidButton, SolidConfirmDialog } from "../../shad-cn-ui";
+import {
+    SolidDialog,
+    SolidDialogBody,
+    SolidDialogClose,
+    SolidDialogHeader,
+    SolidDialogSeparator,
+    SolidDialogTitle
+} from "../../shad-cn-ui/SolidDialog";
+import { SolidHeaderRequestStatus } from "../../common/SolidHeaderRequestStatus";
 
 export type SolidFormViewProps = {
     moduleName: string;
@@ -207,12 +206,13 @@ const SolidField = ({ formik, field, fieldMetadata, initialEntityData, solidForm
 };
 
 const SolidGroup = ({ children, attrs }: any) => {
-
-    const className = attrs.className;
+    const className = ["solid-form-layout-group", attrs.label ? "solid-form-layout-group--labeled" : "", attrs.className]
+        .filter(Boolean)
+        .join(" ");
 
     return (
         <div className={className}>
-            {attrs.label && <p>{attrs.label}</p>}
+            {attrs.label && <p className="solid-form-layout-label">{attrs.label}</p>}
             <div className="grid">{children}</div>
         </div>
         // <div className={className}>
@@ -231,8 +231,9 @@ const SolidGroup = ({ children, attrs }: any) => {
 };
 
 const SolidRow = ({ children, attrs }: any) => {
-
-    const className = attrs.className;
+    const className = ["row", "solid-form-layout-row", attrs.label ? "solid-form-layout-row--labeled" : "", attrs.className]
+        .filter(Boolean)
+        .join(" ");
 
     return (
         // <div className={`row ${className}`}>
@@ -245,8 +246,8 @@ const SolidRow = ({ children, attrs }: any) => {
         //     </div>
 
         // </div>
-        <div className={`row ${className}`}>
-            {attrs.label && <p >{attrs.label}</p>}
+        <div className={className}>
+            {attrs.label && <p className="solid-form-layout-label">{attrs.label}</p>}
             <div className="grid">{children}</div>
         </div>
         // <div>{children}</div>
@@ -254,43 +255,15 @@ const SolidRow = ({ children, attrs }: any) => {
 };
 
 const SolidColumn = ({ children, attrs }: any) => {
-    const className = attrs.className;
+    const className = ["solid-form-layout-column", attrs.label ? "solid-form-layout-column--labeled" : "", attrs.className]
+        .filter(Boolean)
+        .join(" ");
 
     return (
-        // first fieldset ui
-
-        // <div className={`${className}`}>
-        //     <div className="s_group">
-        //         <fieldset>
-        //             {attrs.label && <p className="s_group_heading">{attrs.label}</p>}
-        //             <div className="grid">{children}</div>
-        //         </fieldset>
-        //     </div>
-        // </div>
-
-        //second fieldset ui
-        // <div className={`${className}`}>
-        //     {attrs.label && <p>{attrs.label}</p>}
-        //     <div className="grid">{children}</div>
-        // </div>
-
-        //figma fieldset ui
-        attrs.label ?
-            <div className={`${className}`}>
-                <Panel header={attrs.label} className="solid-column-panel">
-                    <div className="grid">{children}</div>
-                </Panel>
-                {/* <div className="p-fieldset">
-                    <div className="solid-fieldset-header">
-                        <div>{attrs.label}</div>
-                    </div>
-                    <div className="grid solid-fieldset-content">{children}</div>
-                </div> */}
-            </div>
-            :
-            <div className={`${className}`}>
-                <div className="grid">{children}</div>
-            </div>
+        <div className={className}>
+            {attrs.label && <p className="solid-form-layout-label">{attrs.label}</p>}
+            <div className="grid">{children}</div>
+        </div>
     );
 };
 
@@ -300,49 +273,59 @@ const SolidSheet = ({ children }: any) => (
     </div>
 );
 
+// Internal tab data carrier — SolidNotebook reads props from this
+const SolidPageTab = ({ children }: any) => <>{children}</>;
+
 const SolidNotebook = ({ children, activeTab, embeded }: any) => {
-    // const childrenArray = children;
-    // const childrenArray = React.Children.toArray(children).filter(Boolean);
-    const childrenArray = React.Children.toArray(children).filter(child => !!child);
+    const childrenArray = React.Children.toArray(children).filter(child => !!child) as any[];
 
     const router = useRouter();
     const pathname = usePathname();
     const searchParams = useSearchParams();
-
-    // Local state to manage active tab in embedded context
     const [localActiveTab, setLocalActiveTab] = useState(activeTab);
 
+    const effectiveTab = embeded ? localActiveTab : activeTab;
+
     const activeIndex = useMemo(() => {
-        return childrenArray.findIndex((child: any) => {
-            return child.key === (embeded ? localActiveTab : activeTab);
-        });
-    }, [childrenArray, activeTab, localActiveTab, embeded]);
+        const idx = childrenArray.findIndex((child: any) => child.props?.tabKey === effectiveTab);
+        return idx >= 0 ? idx : 0;
+    }, [childrenArray, effectiveTab]);
 
-    const handleTabChange = (e: any) => {
-        const selectedChild = childrenArray[e.index] as any;
-        const newTabLabel = selectedChild?.key;
-
-        if (newTabLabel) {
+    const handleTabChange = (index: number) => {
+        const selectedChild = childrenArray[index];
+        const newTabKey = selectedChild?.props?.tabKey;
+        if (newTabKey) {
             if (!embeded) {
                 const queryParams = new URLSearchParams(searchParams.toString());
-                queryParams.set('activeTab', newTabLabel);
+                queryParams.set('activeTab', newTabKey);
                 router.push(`${pathname}?${queryParams.toString()}`);
             } else {
-                // Update the active tab state locally for embedded view
-                setLocalActiveTab(newTabLabel);
+                setLocalActiveTab(newTabKey);
             }
         }
     };
 
-
     return (
-        <div className="solid-tab-view w-full">
-            <TabView activeIndex={activeIndex >= 0 ? activeIndex : 0} onTabChange={handleTabChange}>
-                {/* {children} */}
-                {childrenArray}
-            </TabView>
+        <div className="solid-notebook w-full">
+            <div className="solid-notebook-tablist" role="tablist">
+                {childrenArray.map((child: any, index: number) => (
+                    <button
+                        key={index}
+                        type="button"
+                        role="tab"
+                        aria-selected={index === activeIndex}
+                        onClick={() => handleTabChange(index)}
+                        className={`solid-notebook-tab-trigger${index === activeIndex ? ' active' : ''}${child.props?.hasError ? ' error' : ''}`}
+                    >
+                        {child.props?.label}
+                    </button>
+                ))}
+            </div>
+            <div className="solid-notebook-content" role="tabpanel">
+                {childrenArray[activeIndex]}
+            </div>
         </div>
-    )
+    );
 };
 
 const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData, solidFormViewData }: any) => {
@@ -370,20 +353,13 @@ const SolidDynamicWidget = ({ widgetName, formik, field, solidFormViewMetaData, 
 const SolidPage = ({ attrs, children, key, formik, fields }: any) => {
     const fieldsName = fields.map((f: any) => f.attrs.name);
     const errorCount = formik.submitCount > 0 ? fieldsName.filter((name: any) => !!formik.errors[name]).length : 0;
-    const label = (
-        <span style={{ color: errorCount > 0 ? 'red' : 'inherit' }}>
-            {attrs.label}{errorCount > 0 && ` (${errorCount})`}
-        </span>
-    );
-
+    const label = `${attrs.label}${errorCount > 0 ? ` (${errorCount})` : ''}`;
 
     return (
-
-        <TabPanel key={key} header={label} >
+        <SolidPageTab key={key} label={label} tabKey={key} hasError={errorCount > 0}>
             <div className="p-fluid">{children}</div>
-        </TabPanel>
-    )
-
+        </SolidPageTab>
+    );
 };
 
 // Original code...
@@ -454,7 +430,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
     const [openLightbox, setOpenLightbox] = useState(false);
     const [lightboxUrls, setLightboxUrls] = useState([]);
     const [isShowChatter, setShowChatter] = useState(false);
-    const [chatterLocaleWidth, setChatterLocaleWidth] = useState(380); // default width
+    const [chatterLocaleWidth, setChatterLocaleWidth] = useState(360);
     const [isResizingChatterLocale, setIsResizingChatterLocale] = useState(false);
     const [isSubmitting, setIsSubmitting] = useState(false);
 
@@ -506,14 +482,16 @@ const SolidFormView = (params: SolidFormViewProps) => {
     useEffect(() => {
         const stored = localStorage.getItem('chatter_locale_width');
         if (stored) {
-            setChatterLocaleWidth(parseInt(stored, 10));
+            const parsed = parseInt(stored, 10);
+            const clampedWidth = Math.max(320, Math.min(parsed, 420));
+            setChatterLocaleWidth(clampedWidth);
         }
     }, []);
     useEffect(() => {
         const handleMouseMove = (e: MouseEvent) => {
             if (!isResizingChatterLocale) return;
             const newWidth = window.innerWidth - e.clientX;
-            const clampedWidth = Math.max(280, Math.min(newWidth, 700));
+            const clampedWidth = Math.max(320, Math.min(newWidth, 420));
             setChatterLocaleWidth(clampedWidth);
             localStorage.setItem('chatter_locale_width', clampedWidth.toString());
         };
@@ -1221,7 +1199,23 @@ const SolidFormView = (params: SolidFormViewProps) => {
             onSubmit: onFormikSubmit,
         });
 
-        return <SolidFormViewShimmerLoading />;
+        return (
+            <div className="solid-form-wrapper">
+                <div className="solid-form-section">
+                    <div className="page-header solid-list-toolbar flex-column lg:flex-row">
+                        <div className="flex justify-content-between w-full solid-form-toolbar-row">
+                            <div className="flex gap-3 align-items-center solid-form-toolbar-left">
+                                <p className="m-0 view-title solid-text-wrapper">Loading form</p>
+                            </div>
+                            <div className="flex align-items-center solid-header-buttons-wrapper solid-form-toolbar-actions">
+                                <SolidHeaderRequestStatus label="Loading..." />
+                            </div>
+                        </div>
+                    </div>
+                    <div className="solid-view-loading-body-spacer flex-1 min-h-0" />
+                </div>
+            </div>
+        );
     }
     // At this point everything required to render the form is loaded, so we go ahead and start rendering things dynamically...
     else {
@@ -1358,11 +1352,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
         }
 
         // Now render the form dynamically...
-        const renderFormElementDynamically: any = (element: any, recursiveFVMD: any) => {
+        const renderFormElementDynamically: any = (element: any, recursiveFVMD: any, path = "root") => {
             let { type, attrs, body, children } = element;
 
             // const key = attrs?.name ?? generateRandomKey();
-            const key = attrs?.label;
+            const key = attrs?.key ?? attrs?.name ?? attrs?.label ?? `${type}-${path}`;
             let visible = attrs?.visible;
             if (visible === undefined || visible === null) {
                 visible = true;
@@ -1381,11 +1375,11 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 case "form":
                     if (!children)
                         children = [];
-                    return <div key={key}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</div>;
+                    return <div key={key}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</div>;
                 case "div":
                     if (!children)
                         children = [];
-                    return <div key={key} {...attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</div>
+                    return <div key={key} {...attrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</div>
                 case "span":
                     return <span key={key} {...attrs}>{body}</span>
                 case "p":
@@ -1397,24 +1391,24 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 case "ul":
                     if (!children)
                         children = [];
-                    return <ul key={key} {...attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</ul>
+                    return <ul key={key} {...attrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</ul>
                 case "li":
                     return <li key={key} {...attrs}>{body}</li>
                 case "sheet":
-                    return <SolidSheet key={key}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidSheet>;
+                    return <SolidSheet key={key}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidSheet>;
                 case "group":
                     if (visible === true) {
-                        return <SolidGroup key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidGroup>;
+                        return <SolidGroup key={key} attrs={attrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidGroup>;
                     }
                     break;
                 case "row":
                     if (visible === true) {
-                        return <SolidRow key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidRow>;
+                        return <SolidRow key={key} attrs={attrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidRow>;
                     }
                     break;
                 case "column":
                     if (visible === true) {
-                        return <SolidColumn key={key} attrs={attrs}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidColumn>;
+                        return <SolidColumn key={key} attrs={attrs}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidColumn>;
                     }
                     break;
                 case "field":
@@ -1447,13 +1441,13 @@ const SolidFormView = (params: SolidFormViewProps) => {
 
                 case "notebook":
                     if (visible === true) {
-                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded}>{children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD, formik))}</SolidNotebook>;
+                        return <SolidNotebook key={key} activeTab={searchParams.get("activeTab") || ""} embeded={params.embeded}>{children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`))}</SolidNotebook>;
                     }
                     break;
                 case "page":
                     if (visible === true) {
                         const fields = children.flatMap((child: any) => getLayoutFields(child));
-                        const pageChildren = children.map((element: any) => renderFormElementDynamically(element, recursiveFVMD));
+                        const pageChildren = children.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `${path}.${index}`));
                         return SolidPage({ children: pageChildren, attrs: attrs, key: key, formik: formik, fields });
                     }
                     break;
@@ -1495,7 +1489,7 @@ const SolidFormView = (params: SolidFormViewProps) => {
                 return;
             }
             const updatedLayout = [formViewLayout];
-            const dynamicForm = updatedLayout.map((element: any) => renderFormElementDynamically(element, recursiveFVMD));
+            const dynamicForm = updatedLayout.map((element: any, index: number) => renderFormElementDynamically(element, recursiveFVMD, `root-${index}`));
 
             return dynamicForm;
         };
@@ -1622,36 +1616,26 @@ const SolidFormView = (params: SolidFormViewProps) => {
         };
 
 
-        const isVideoOrAudio = (url: string) => {
-            // Remove query params if present
-            const cleanUrl = url.split("?")[0];
-            const ext = cleanUrl.split(".").pop()?.toLowerCase();
-
-            // Combined list of supported media extensions
-            const mediaExt = ["mp4", "webm", "ogg", "mov", "mp3", "wav", "m4a", "aac"];
-
-            return ext ? mediaExt.includes(ext) : false;
-        };
-
-        const controlsList = ["nodownload", "nofullscreen", "noremoteplayback"];
-        const slides = lightboxUrls.map((item: any) => {
-            const url = item.src || item.downloadUrl || "";
-            if (isVideoOrAudio(url)) {
-                return {
-                    type: "video" as const,
-                    sources: [{ src: url, type: "video/mp4", }],
-                };
-            }
-            return { src: url };
-        });
-
-        const hasMedia = slides.some((s) => s.type === "video");
+        const lightboxSlides: SolidLightboxSlide[] = lightboxUrls
+            .map((item: any) => {
+                const src = item?.src || item?.downloadUrl || "";
+                if (!src) {
+                    return null;
+                }
+                const mediaType = getMediaTypeFromUrl(src);
+                const slide: SolidLightboxSlide = { src };
+                if (mediaType !== "image") {
+                    slide.type = mediaType;
+                }
+                return slide;
+            })
+            .filter((slide): slide is SolidLightboxSlide => !!slide);
 
 
 
         return (
             <div className="solid-form-wrapper">
-                <div className="solid-form-section" style={{ borderRight: params.embeded !== true ? '1px solid var(--primary-light-color)' : '' }} >
+                <div className="solid-form-section">
                     <form style={{ width: '100%' }} onSubmit={formik.handleSubmit}>
                         <SolidFormActionHeader
                             formik={formik}
@@ -1675,8 +1659,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             handleDraftPublishWorkFlow={handleDraftPublishWorkFlow}
                             onStepperUpdate={() => setRefreshChatterMessage(true)}
                             isSubmitting={isSubmitting}
+                            headerRequestStatusLabel={isSubmitting ? "Saving..." : null}
                         />
-                        <div className={`px-4 py-3 md:p-4 solid-form-content ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
+                        <div className={`px-4 py-3 md:p-4 solid-form-content md:pt-1 ${createMode ? 'solid-create-mode-form-content' : ''} ${params.embeded === true ? 'h-auto' : ''}`} style={{ maxHeight: params.embeded === true ? '80vh' : '', overflowY: 'auto' }}>
                             {DynamicHeaderComponent && <DynamicHeaderComponent />}
                             {params.id === 'new' && DynamicFormComponentNew ? (
                                 <DynamicFormComponentNew params={params} />
@@ -1707,17 +1692,17 @@ const SolidFormView = (params: SolidFormViewProps) => {
                             />
                         )}
                         {isShowChatter === true &&
-                            <Button
-                                icon="pi pi-angle-double-right"
-                                size="small"
+                            <SolidButton
+                                icon="si si-angle-double-right"
+                                size="sm"
                                 text
                                 className="chatter-collapse-btn"
-                                style={{ width: 30, height: 30, aspectRatio: '1/1' }}
+                                style={{ width: 26, height: 26, aspectRatio: '1/1' }}
                                 onClick={() => setShowChatter(false)}
                             />
                         }
                         {isShowChatter === false ?
-                            <div className="flex flex-column gap-2 justify-content-center p-2">
+                            <div className="flex flex-column gap-2 justify-content-center p-1">
                                 {/*if solidview Internationalisation is enabled then show the locale tab */}
                                 {solidFormViewMetaData?.data?.solidView?.model?.draftPublishWorkflow &&
                                     <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('info')}>
@@ -1726,17 +1711,9 @@ const SolidFormView = (params: SolidFormViewProps) => {
                                 <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('chatter')}>
                                     Audit Trail
                                 </div>
-                                {
-                                    mcpUrl &&
-                                    (
-                                        <div className="chatter-collapsed-content" onClick={() => handleChatterExpandClick('solidx-ai')}>
-                                            <div className="flex gap-2"> <SolidXAIIcon /> SolidX AI </div>
-                                        </div>
-                                    )
-                                }
-                                <Button
-                                    icon="pi pi-chevron-left"
-                                    size="small"
+                                <SolidButton
+                                    icon="si si-chevron-left"
+                                    size="sm"
                                     className="px-0"
                                     style={{ width: 30 }}
                                     onClick={() => handleChatterExpandClick('chatter')}
@@ -1764,73 +1741,52 @@ const SolidFormView = (params: SolidFormViewProps) => {
                     </div>
                 }
 
-                <Dialog
-                    visible={isDeleteDialogVisible}
-                    header="Confirm Delete"
+                <SolidDialog
+                    open={isDeleteDialogVisible}
+                    onOpenChange={setDeleteDialogVisible}
                     className="solid-confirm-dialog"
-                    modal
-                    footer={() => (
-                        <div className="flex justify-content-center">
-                            <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={() => handleDeleteEntity()} />
-                            <Button label="No" icon="pi pi-times" className='small-button' onClick={onDeleteClose} />
-                        </div>
-                    )}
-                    onHide={() => setDeleteDialogVisible(false)}
                 >
-                    <p>Are you sure you want to delete?</p>
-                </Dialog>
-                <Dialog
-                    visible={isLayoutDialogVisible}
-                    header="Change Form Layout"
-                    modal
-                    onHide={() => setLayoutDialogVisible(false)}
-                    style={{ width: '50vw' }}
-                    breakpoints={{
-                        '960px': '80vw',
-                        '641px': '95vw'
-                    }}
-                    contentClassName="p-3 pt-0 lg:p-4"
+                    <SolidDialogHeader className="solid-field-confirm-header">
+                        <SolidDialogTitle>Confirm Delete</SolidDialogTitle>
+                        <SolidDialogClose />
+                    </SolidDialogHeader>
+                    <SolidDialogBody className="solid-field-confirm-dialog-body">
+                        <p className="solid-field-confirm-message">Are you sure you want to delete?</p>
+                    </SolidDialogBody>
+                    <div className="solid-radix-dialog-footer solid-field-confirm-actions">
+                        <SolidButton label="Yes" icon="si si-check" variant="destructive" autoFocus onClick={() => handleDeleteEntity()} />
+                        <SolidButton label="No" icon="si si-times" variant="outline" onClick={onDeleteClose} />
+                    </div>
+                </SolidDialog>
+                <SolidDialog
+                    open={isLayoutDialogVisible}
+                    onOpenChange={setLayoutDialogVisible}
+                    className="solid-form-layout-dialog"
                 >
-                    <SolidFormUserViewLayout solidFormViewMetaData={solidFormViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
-                </Dialog>
-                {openLightbox &&
-                    <Lightbox
+                    <SolidDialogHeader className="solid-shadcn-dialog-head">
+                        <SolidDialogTitle>Change Form Layout</SolidDialogTitle>
+                        <SolidDialogClose />
+                    </SolidDialogHeader>
+                    <SolidDialogSeparator />
+                    <SolidDialogBody className="p-3 pt-0 lg:p-4">
+                        <SolidFormUserViewLayout solidFormViewMetaData={solidFormViewMetaData} setLayoutDialogVisible={setLayoutDialogVisible} />
+                    </SolidDialogBody>
+                </SolidDialog>
+                {openLightbox && (
+                    <SolidLightbox
                         open={openLightbox}
-                        plugins={
-                            hasMedia
-                                ? [Counter, Download, Video] // add Video plugin if needed
-                                : [Counter, Download]
-                        }
-                        close={() => setOpenLightbox(false)}
-                        slides={[...slides]}
-                        {...(hasMedia && {
-                            video: {
-                                controls: true,
-                                playsInline: true,
-                                autoPlay: false,
-                                loop: false,
-                                muted: false,
-                                disablePictureInPicture: false,
-                                disableRemotePlayback: false,
-                                controlsList: controlsList.join(" "),
-                                crossOrigin: "anonymous",
-                                preload: "auto",
-                            },
-                        })}
+                        slides={lightboxSlides}
+                        onClose={() => setOpenLightbox(false)}
                     />
-                }
+                )}
 
-                <ConfirmDialog
-                    visible={confirmVisible}
-                    onHide={() => setConfirmVisible(false)}
-                    header="Confirmation"
-                    acceptLabel="Yes, confrim"
-                    rejectLabel="No, cancel"
-                    acceptClassName="p-button-danger"
-                    rejectClassName="p-button-text"
-                    position="center"
-                    accept={handleConfirmAccept}
-                    reject={handleConfirmReject}
+                <SolidConfirmDialog
+                    open={confirmVisible}
+                    title="Confirmation"
+                    confirmLabel="Yes, confirm"
+                    cancelLabel="No, cancel"
+                    onConfirm={handleConfirmAccept}
+                    onCancel={handleConfirmReject}
                     message={
                         <div className="flex flex-col items-center justify-center text-center space-y-3">
                             <p className="text-gray-800 text-base">

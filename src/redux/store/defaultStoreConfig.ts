@@ -1,34 +1,32 @@
-import {
-    authenticationReducer,
-    dataViewReducer,
-    navbarReducer,
-    popupReducer,
-    themeReducer,
-    toastReducer,
-    userReducer
-} from "../../index";
-import {
-    authApi,
-    aiInteractionApi,
-    dashboardApi,
-    dashboardQuestionApi,
-    exportTemplateApi,
-    fieldsApi,
-    importTransactionApi,
-    mediaApi,
-    mediaStorageProviderApi,
-    modulesApi,
-    modelsApi,
-    roleApi,
-    solidActionsApi,
-    solidChatterMessageApi,
-    solidMenusApi,
-    solidServiceApi,
-    solidSettingsApi,
-    solidViewsApi,
-    userApi,
-    dashboardLayoutApi
-} from "../../index";
+import authenticationReducer from "../features/authSlice";
+import dataViewReducer from "../features/dataViewSlice";
+import navbarReducer from "../features/navbarSlice";
+import popupReducer from "../features/popupSlice";
+import themeReducer from "../features/themeSlice";
+import toastReducer from "../features/toastSlice";
+import userReducer from "../features/userSlice";
+import solidStudioReducer from "../features/solidStudioSlice";
+import { authApi } from "../api/authApi";
+import { aiInteractionApi } from "../api/aiInteractionApi";
+import { dashboardApi } from "../api/dashboardApi";
+import { dashboardQuestionApi } from "../api/dashboardQuestionApi";
+import { exportTemplateApi } from "../api/exportTemplateApi";
+import { fieldsApi } from "../api/fieldApi";
+import { importTransactionApi } from "../api/importTransactionApi";
+import { mediaApi } from "../api/mediaApi";
+import { mediaStorageProviderApi } from "../api/mediaStorageProviderApi";
+import { modulesApi } from "../api/moduleApi";
+import { modelsApi } from "../api/modelApi";
+import { roleApi } from "../api/roleApi";
+import { solidActionsApi } from "../api/solidActionApi";
+import { solidChatterMessageApi } from "../api/solidChatterMessageApi";
+import { solidMenusApi } from "../api/solidMenuApi";
+import { solidServiceApi } from "../api/solidServiceApi";
+import { solidSettingsApi } from "../api/solidSettingsApi";
+import { solidViewsApi } from "../api/solidViewApi";
+import { userApi } from "../api/userApi";
+import { dashboardLayoutApi } from "../api/dashboardLayoutApi";
+import { apiKeyApi } from "../api/apiKeyApi";
 
 // 1. Export all APIs in one array
 export const solidApiSlices = [
@@ -51,7 +49,8 @@ export const solidApiSlices = [
     dashboardApi,
     dashboardQuestionApi,
     aiInteractionApi,
-    dashboardLayoutApi
+    dashboardLayoutApi,
+    apiKeyApi,
 ];
 
 // 2. Export default reducers
@@ -62,5 +61,6 @@ export const solidReducers = {
     popup: popupReducer,
     navbarState: navbarReducer,
     dataViewState: dataViewReducer,
+    solidStudio: solidStudioReducer,
     toast: toastReducer,
 };  

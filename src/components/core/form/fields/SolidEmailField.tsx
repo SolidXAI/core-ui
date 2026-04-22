@@ -1,12 +1,12 @@
 
-import { InputText } from "primereact/inputtext";
-import { Message } from "primereact/message";
+import styles from './solidFields.module.css';
 import * as Yup from 'yup';
 import { FormikObject, ISolidField, SolidFieldProps } from "./ISolidField";
 import { getExtensionComponent } from "../../../../helpers/registry";
 import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import { SolidInput } from "../../../shad-cn-ui";
 
 export class SolidEmailField implements ISolidField {
 
@@ -128,9 +128,7 @@ export const DefaultEmailFormEditWidget = ({ formik, fieldContext }: SolidFormFi
 
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
-    const className = fieldLayoutInfo.attrs?.className || 'field col-12';
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
-    const fieldDescription = fieldLayoutInfo.attrs.description ?? fieldMetadata.description;
     const solidFormViewMetaData = fieldContext.solidFormViewMetaData;
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
     const readOnlyPermission = fieldContext.readOnly;
@@ -144,33 +142,29 @@ export const DefaultEmailFormEditWidget = ({ formik, fieldContext }: SolidFormFi
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
 
     return (
-            <div className="relative">
-                <div className="flex flex-column gap-2 mt-1 sm:mt-2 md:mt-3 lg:mt-4">
-                    {showFieldLabel != false &&
-                        <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">
-                            {fieldLabel}
-                            {fieldMetadata.required && <span className="text-red-500"> *</span>}
-                            <SolidFieldTooltip fieldContext={fieldContext}/>
-                            {/* &nbsp;   {fieldDescription && <span className="form_field_help">({fieldDescription}) </span>} */}
-                        </label>
-                    }
-                    <InputText
-                        readOnly={formReadonly || fieldReadonly || readOnlyPermission}
-                        disabled={formDisabled || fieldDisabled}
-                        id={fieldLayoutInfo.attrs.name}
-                        name={fieldMetadata.name}
-                        aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
-                        // onChange={formik.handleChange}
-                        onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
-                        onBlur={(e) => fieldContext.onBlur(e, 'onFieldBlur')}
-                        value={formik.values[fieldLayoutInfo.attrs.name] || ''}
-                    />
-                </div>
-                {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
-                    <div className="absolute mt-1">
-                        <Message severity="error" text={formik?.errors[fieldLayoutInfo.attrs.name]?.toString()} />
-                    </div>
-                )}
-            </div>
+        <div className={styles.fieldWrapper}>
+            {showFieldLabel != false &&
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>
+                    {fieldLabel}
+                    {fieldMetadata.required && <span className="text-red-500">*</span>}
+                    <SolidFieldTooltip fieldContext={fieldContext} />
+                </label>
+            }
+            <SolidInput
+                type="email"
+                readOnly={formReadonly || fieldReadonly || readOnlyPermission}
+                disabled={formDisabled || fieldDisabled}
+                id={fieldLayoutInfo.attrs.name}
+                name={fieldMetadata.name}
+                aria-describedby={`${fieldLayoutInfo.attrs.name}-help`}
+                onChange={(e) => fieldContext.onChange(e, 'onFieldChange')}
+                onBlur={(e) => fieldContext.onBlur(e, 'onFieldBlur')}
+                value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                className={styles.fieldInput}
+            />
+            {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
+                <p className={styles.fieldError}>{formik?.errors[fieldLayoutInfo.attrs.name]?.toString()}</p>
+            )}
+        </div>
     );
 }

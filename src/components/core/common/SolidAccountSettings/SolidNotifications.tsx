@@ -1,127 +1,110 @@
+import { useEffect, useState } from "react";
+import { useFormik } from "formik";
+import { ERROR_MESSAGES } from "../../../../constants/error-messages";
+import { useBulkUpdateSolidUserSettingsMutation, useGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi";
+import { SolidButton } from "../../../shad-cn-ui/SolidButton";
+import styles from "./SolidAccountSettings.module.css";
 
-import { ERROR_MESSAGES } from '../../../../constants/error-messages';
-import { useBulkUpdateSolidUserSettingsMutation, useGetSolidSettingsQuery } from '../../../../redux/api/solidSettingsApi';
-import { useFormik } from 'formik';
-import { Button } from 'primereact/button';
-import { InputSwitch } from 'primereact/inputswitch';
-import React, { useEffect } from 'react'
-import { useDispatch, useSelector } from 'react-redux';
-import { showToast } from '../../../../redux/features/toastSlice';
+type ToastState = {
+  id: number;
+  severity: "success" | "error" | "info" | "warn";
+  summary: string;
+  detail: string;
+} | null;
+
 export const SolidNotifications = () => {
-    const {
-        data: solidSettingsData,
-        isLoading,
-        error,
-        refetch,
-    } = useGetSolidSettingsQuery(undefined);
+  const { data: solidSettingsData, refetch } = useGetSolidSettingsQuery(undefined);
+  const [bulkUpdateSolidSettings] = useBulkUpdateSolidUserSettingsMutation();
+  const [toast, setToast] = useState<ToastState>(null);
 
-    useEffect(() => {
-        refetch();
-    }, []);
+  useEffect(() => {
+    refetch();
+  }, [refetch]);
 
-    const dispatch = useDispatch();
-    const [bulkUpdateSolidSettings] = useBulkUpdateSolidUserSettingsMutation();
+  const notify = (severity: "success" | "error" | "info" | "warn", summary: string, detail: string) => {
+    setToast({ id: Date.now(), severity, summary, detail });
+  };
 
-    const initialValues = {
-        enableNotification: solidSettingsData?.data?.enableNotification ?? true
-    }
+  const formik = useFormik({
+    initialValues: {
+      enableNotification: solidSettingsData?.data?.enableNotification ?? true,
+    },
+    enableReinitialize: true,
+    onSubmit: async (values) => {
+      try {
+        const updatedSettingsArray: Array<{ key: string; value: string | boolean; type: string }> = [];
+        const currentSettings = solidSettingsData?.data?.user || {};
+        Object.entries(values).forEach(([key, value]) => {
+          if ((currentSettings[key] ?? "") !== (value ?? "")) {
+            updatedSettingsArray.push({ key, value, type: "user" });
+          }
+        });
 
-    const formik = useFormik({
-        initialValues: initialValues,
-        enableReinitialize: true,
-        onSubmit: async (values) => {
-            try {
-                const updatedSettingsArray: Array<{ key: string; value: string; type: string }> = [];
-                const currentSettings = solidSettingsData?.data?.user || {};
+        if (!updatedSettingsArray.length) {
+          notify("info", ERROR_MESSAGES.NO_CHANGE, ERROR_MESSAGES.NO_SETTING_UPDATE);
+          return;
+        }
 
-                const formData = new FormData();
+        const formData = new FormData();
+        formData.append("settings", JSON.stringify(updatedSettingsArray));
+        const response = await bulkUpdateSolidSettings({ data: formData }).unwrap();
 
-                // Compare changed fields
-                Object.entries(values).forEach(([key, value]) => {
-                    const currentValue = currentSettings[key];
+        if (response.statusCode === 200) {
+          notify("success", ERROR_MESSAGES.UPDATED, ERROR_MESSAGES.SETTING_UPDATED);
+        } else {
+          notify("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
+        }
+      } catch {
+        notify("error", ERROR_MESSAGES.FAILED, ERROR_MESSAGES.SOMETHING_WRONG);
+      }
+    },
+  });
 
-                    const normalizedCurrent = currentValue ?? "";
-                    const normalizedValue = value ?? "";
+  const severityClass =
+    toast?.severity === "error"
+      ? styles.toastError
+      : toast?.severity === "success"
+        ? styles.toastSuccess
+        : toast?.severity === "warn"
+          ? styles.toastWarn
+          : styles.toastInfo;
 
-                    if (normalizedCurrent !== normalizedValue) {
-                        if (value instanceof File) {
-                            formData.append(key, value);
-                            updatedSettingsArray.push({
-                                key,
-                                value: "",
-                                type: "user",
-                            });
-                        } else {
-                            updatedSettingsArray.push({
-                                key,
-                                value: value,
-                                type: "user",
-                            });
-                        }
-                    }
-                });
+  return (
+    <form onSubmit={formik.handleSubmit} className={styles.accountForm}>
+      {toast ? (
+        <div className={`${styles.toast} ${severityClass}`} role="status" aria-live="polite">
+          <div>
+            <div className={styles.toastTitle}>{toast.summary}</div>
+            <div className={styles.toastBody}>{toast.detail}</div>
+          </div>
+          <button type="button" className={styles.toastClose} onClick={() => setToast(null)} aria-label="Close notification">
+            ×
+          </button>
+        </div>
+      ) : null}
 
-                if (updatedSettingsArray.length === 0) {
-                    dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.NO_CHANGE, detail: ERROR_MESSAGES.NO_SETTING_UPDATE }));
-                    return;
-                }
+      <div className={styles.accountScroll}>
+        <div className={styles.switchRow}>
+          <div>
+            <label className={styles.sectionTitle}>Enable Notification</label>
+            <div className={styles.versionCaption}>Decide whether you want to be notified of new messages or updates.</div>
+          </div>
+          <label className={styles.switch} aria-label="Enable notification">
+            <input
+              type="checkbox"
+              checked={Boolean(formik.values.enableNotification)}
+              onChange={(event) => formik.setFieldValue("enableNotification", event.target.checked)}
+            />
+            <span className={styles.switchTrack} />
+          </label>
+        </div>
+      </div>
 
-                // Append settings array to formData
-                formData.append("settings", JSON.stringify(updatedSettingsArray));
-
-                // Call API
-                const response = await bulkUpdateSolidSettings({ data: formData }).unwrap();
-
-                if (response.statusCode === 200) {
-                    dispatch(showToast({ severity: "success", summary: ERROR_MESSAGES.UPDATED, detail: ERROR_MESSAGES.SETTING_UPDATED }));
-                }
-
-            } catch (error) {
-                dispatch(showToast({ severity: "error", summary: ERROR_MESSAGES.FAILED, detail: ERROR_MESSAGES.SOMETHING_WRONG }));
-            }
-        },
-    })
-
-
-    return (
-        <form onSubmit={formik.handleSubmit} className="h-full flex flex-column justify-content-between">
-            <div>
-                <div className="flex align-items-start justify-content-between pb-3">
-                    <div>
-                        <label className="form-field-label mb-2">Enable Notification</label>
-                        <div style={{ color: 'var(--solid-grey-500)' }}>Decide whether you want to be notified of new messages or updates.</div>
-                    </div>
-                    <div>
-                        <InputSwitch
-                            name="enableNotification"
-                            checked={formik.values.enableNotification}
-                            onChange={(e) => {
-                                formik.setFieldValue("enableNotification", e.value);
-                                // formik.submitForm();
-                            }}
-                        />
-                    </div>
-                </div>
-                {/* <div className="flex align-items-start justify-content-between pb-3 mt-3" style={{ borderBottom: '1px dashed var(--primary-light-color)' }}>
-                <div>
-                    <label className="form-field-label mb-2">Enable Notification</label>
-                    <div style={{ color: 'var(--solid-grey-500)' }}>Decide whether you want to be notified of new messages or updates.</div>
-                </div>
-                <div>
-                    <InputSwitch
-                        name="enableNotification"
-                        checked={formik.values.enableNotification}
-                        onChange={(e) => {
-                            formik.setFieldValue("enableNotification", e.value);
-                            formik.submitForm();
-                        }}
-                    />
-                </div>
-            </div> */}
-            </div>
-            <div>
-                <Button type='submit' size='small' label="Save" disabled={formik.isSubmitting} loading={formik.isSubmitting} />
-            </div>
-        </form>
-    )
-}
+      <div className={styles.footerActions}>
+        <SolidButton type="submit" size="sm" loading={formik.isSubmitting}>
+          Save
+        </SolidButton>
+      </div>
+    </form>
+  );
+};

@@ -1,13 +1,9 @@
-import React, { forwardRef, useEffect, useImperativeHandle, useRef, useState } from "react";
-import { Dialog } from "primereact/dialog";
+import React, { forwardRef, useEffect, useImperativeHandle, useMemo, useRef, useState } from "react";
 import FilterComponent, { FilterOperator, FilterRule, FilterRuleType } from "../../../components/core/common/FilterComponent";
-import { Button } from "primereact/button";
-import { Divider } from "primereact/divider";
 import { usePathname } from "../../../hooks/usePathname";
 import { useRouter } from "../../../hooks/useRouter";
 import { useSearchParams } from "../../../hooks/useSearchParams";
 import { getFilterObjectFromLocalStorage } from "../list/SolidListView";
-import { InputText } from "primereact/inputtext";
 import { createSolidEntityApi } from "../../../redux/api/solidEntityApi";
 import qs from "qs";
 import { SolidSaveCustomFilterForm } from "./SolidSaveCustomFilterForm";
@@ -15,6 +11,19 @@ import { ERROR_MESSAGES } from "../../../constants/error-messages";
 import { hydrateRelationRules } from "../../../helpers/hydrateRelationRules";
 import { useSession } from '../../../hooks/useSession'
 import GroupingComponent, { AggregationRule, GroupingRule, DateGroupingFormat } from "./GroupingComponent";
+import { Bookmark, Check, Filter, Pencil, Plus, Search, SearchX, Trash2, X } from "lucide-react";
+import { SolidButton } from "../../shad-cn-ui/SolidButton";
+import { SolidInput } from "../../shad-cn-ui/SolidInput";
+import {
+    SolidDialog,
+    SolidDialogBody,
+    SolidDialogClose,
+    SolidDialogDescription,
+    SolidDialogFooter,
+    SolidDialogHeader,
+    SolidDialogSeparator,
+    SolidDialogTitle,
+} from "../../shad-cn-ui/SolidDialog";
 
 
 const getRandomInt = (min: number, max: number) => {
@@ -400,39 +409,44 @@ export const mergeAllDiffFilters = (customFilter: any, searchFilter: any, savedF
     return filters;
 }
 
-const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, openSavedCustomFilter, setSavedFilterTobeDeleted, setIsDeleteSQDialogVisible, isFocused }: any) => {
+const SavedFilterList = ({ savedfilter, activeSavedFilter, applySavedFilter, openSavedCustomFilter, setSavedFilterTobeDeleted, setIsDeleteSQDialogVisible, isFocused, onMouseEnter }: any) => {
+    const isActive = Number(activeSavedFilter) == savedfilter.id;
+
     return (
-        <div className="flex align-items-center justify-content-between gap-2">
-            <div>
-                <Button text
-                    size="small"
-                    className={`text-base py-1 w-full ${isFocused ? 'surface-hover' : ''}`}
-                    severity={Number(activeSavedFilter) == savedfilter.id ? "secondary" : "contrast"}
+        <div className="solid-saved-filter-item" onMouseEnter={onMouseEnter}>
+            <div className="solid-saved-filter-main-wrap">
+                <SolidButton
+                    variant="ghost"
+                    size="sm"
+                    className={`solid-saved-filter-main w-full ${isActive ? "is-active" : ""} ${isFocused ? "solid-search-overlay-option-active" : ""}`}
                     onClick={() => applySavedFilter(savedfilter)}
-                    tooltip={savedfilter?.description}>{savedfilter.name}
-                </Button>
-                {/* {savedfilter?.description && <p className="text-xs pl-3">{savedfilter?.description}</p>} */}
+                    title={savedfilter?.description}
+                >
+                    {savedfilter.name}
+                </SolidButton>
             </div>
-            <div className="flex align-items-center gap-2">
+            <div className="solid-saved-filter-actions">
                 {savedfilter.isSeeded !== true &&
                     <>
-                        <Button
-                            icon="pi pi-pencil"
-                            style={{ fontSize: 10 }}
-                            severity="secondary"
-                            outlined size="small"
+                        <SolidButton
+                            variant="outline"
+                            size="sm"
+                            className="solid-saved-filter-icon-btn"
                             onClick={() => openSavedCustomFilter(savedfilter)}
-                        />
-                        <Button
-                            icon="pi pi-trash"
-                            style={{ fontSize: 10 }}
-                            severity="secondary"
-                            outlined size="small"
+                        >
+                            <Pencil size={14} />
+                        </SolidButton>
+                        <SolidButton
+                            variant="outline"
+                            size="sm"
+                            className="solid-saved-filter-icon-btn is-danger"
                             onClick={() => {
                                 setSavedFilterTobeDeleted(savedfilter.id),
                                     setIsDeleteSQDialogVisible(true);
                             }}
-                        />
+                        >
+                            <Trash2 size={14} />
+                        </SolidButton>
                     </>
                 }
 
@@ -516,6 +530,18 @@ type RelationCache = Map<string, { label: string; value: number }>;
 
 
 export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handleApplyCustomFilter, showSaveFilterPopup, setShowSaveFilterPopup, filterPredicates }: any, ref) => {
+    type OverlayOption =
+        | { id: string; kind: "field"; field: any }
+        | { id: string; kind: "predefined"; predefined: any }
+        | { id: string; kind: "saved"; saved: any };
+    type ManagedChipItem = {
+        id: string;
+        type: "saved" | "search" | "predefined" | "custom" | "grouping";
+        label: string;
+        onRemove: () => void;
+        onOpen?: () => void;
+    };
+
     const defaultState: FilterRule[] = [
         {
             id: 1,
@@ -560,6 +586,10 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
     const [initialState, setInitialState] = useState(defaultState);
     const pathname = usePathname();
+    const searchableEntityLabel =
+        viewData?.data?.solidView?.displayName ||
+        viewData?.data?.solidView?.model?.displayName ||
+        "records";
 
 
     const searchParams = useSearchParams() // Converts the query params to a string
@@ -601,6 +631,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
     //  state to maintain the text typed in the search input box
     const [inputValue, setInputValue] = useState<string | null>("");
+    const [focusedIndex, setFocusedIndex] = useState(-1);
 
     // flag to prevent un necessary re renders
     const [hasSearched, setHasSearched] = useState<boolean>(false);
@@ -617,7 +648,21 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     const [savedFilterQueryString, setSavedFilterQueryString] = useState<string>();
     const [showOverlay, setShowOverlay] = useState(false);
     const overlayRef = useRef<HTMLDivElement | null>(null);
-    const [focusedIndex, setFocusedIndex] = useState<number>(-1);
+    const [showChipManager, setShowChipManager] = useState(false);
+    const chipManagerRef = useRef<HTMLDivElement | null>(null);
+    const chipManagerTriggerRef = useRef<HTMLButtonElement | null>(null);
+
+    useEffect(() => {
+        if (focusedIndex >= 0 && showOverlay) {
+            const activeElement = document.querySelector(`.solid-search-overlay-option-active`);
+            if (activeElement) {
+                activeElement.scrollIntoView({
+                    block: 'nearest',
+                    inline: 'start'
+                });
+            }
+        }
+    }, [focusedIndex, showOverlay]);
 
     const { data: session, status } = useSession();
     const user = session?.user;
@@ -697,7 +742,7 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             const savedFilter = await triggerGetSolidEntities(queryString).unwrap();
 
             if (savedFilter) {
-                console.log("savedFilter", savedFilter);
+                // console.log("savedFilter", savedFilter);
                 setSavedFilters(savedFilter?.records)
             }
             setSavedFiltersLoaded(true);
@@ -714,6 +759,14 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     useImperativeHandle(ref, () => ({
         clearFilter: () => {
             setFilterRules(initialState);
+        },
+        openGroupingDialog: () => {
+            setShowOverlay(false);
+            setShowGroupFilterElement(true);
+        },
+        openCustomFilterDialog: () => {
+            setShowOverlay(false);
+            setShowGlobalSearchElement(true);
         }
     }));
 
@@ -872,7 +925,17 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                 };
             });
 
-            setFields(fieldsList);
+            const filterableFieldsList = fieldsList.filter((field: any) => {
+                switch (field.type) {
+                    case "mediaSingle":
+                    case "mediaMultiple":
+                        return false;
+                    default:
+                        return true;
+                }
+            });
+
+            setFields(filterableFieldsList);
 
             const searchableFieldsList = fieldsList.filter((field: any) => {
                 if (!field.isSearchable) return false;
@@ -985,7 +1048,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
     };
 
     const clearCustomFilter = () => {
-        // handleApplyCustomFilter(finalFilter)
         setFilterRules(initialState);
         setCustomFilter(null)
         // setPredefinedSearchChip(null)
@@ -1007,7 +1069,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         //     };
         // }
         setCustomFilter(finalCustomFilter);
-        // handleApplyCustomFilter(finalFilter);
         setShowGlobalSearchElement(false);
         setHasSearched(true)
         setRefreshKey((prev) => prev + 1)
@@ -1025,7 +1086,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         //     };
         // }
         setCurrentSavedFilterQuery(finalCustomFilter);
-        // handleApplyCustomFilter(finalFilter);
         setShowSavedFilterComponent(false);
         setHasSearched(true)
         setRefreshKey((prev) => prev + 1)
@@ -1040,6 +1100,16 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         setAggregationRules(aggregationRules);
         setRefreshKey((prev) => prev + 1)
     }
+
+    const openCustomFilterDialog = () => {
+        setShowOverlay(false);
+        setShowGlobalSearchElement(true);
+    };
+
+    const openGroupingDialog = () => {
+        setShowOverlay(false);
+        setShowGroupFilterElement(true);
+    };
 
     useEffect(() => {
         if (refreshKey > 0 && hasSearched) {
@@ -1218,8 +1288,25 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         };
     }, [showOverlay]);
 
+    useEffect(() => {
+        function handleChipManagerClickOutside(event: MouseEvent) {
+            const targetNode = event.target as Node;
+            if (chipManagerRef.current?.contains(targetNode)) return;
+            if (chipManagerTriggerRef.current?.contains(targetNode)) return;
+            setShowChipManager(false);
+        }
+
+        if (showChipManager) {
+            document.addEventListener("mousedown", handleChipManagerClickOutside);
+        }
+
+        return () => {
+            document.removeEventListener("mousedown", handleChipManagerClickOutside);
+        };
+    }, [showChipManager]);
+
     const CustomChip = () => {
-        console.log("customFilter", customFilter);
+        // console.log("customFilter", customFilter);
         const ruleCount =
             customFilter?.$or?.length ??
             customFilter?.$and?.length ??
@@ -1242,11 +1329,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     </div>
 
                     {/* button to clear filter */}
-                    <a onClick={clearCustomFilter}
-                        style={{ cursor: "pointer" }}
-                    >
-                        <i className="pi pi-times ml-1">
-                        </i></a>
+                    <button type="button" onClick={clearCustomFilter} style={{ cursor: "pointer" }} className="ml-1">
+                        <X size={14} />
+                    </button>
                 </div>
             </li>
         )
@@ -1318,11 +1403,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     </div>
 
                     {/* button to clear filter */}
-                    <a onClick={removeSavedFilter}
-                        style={{ cursor: "pointer" }}
-                    >
-                        <i className="pi pi-times ml-1">
-                        </i></a>
+                    <button type="button" onClick={removeSavedFilter} style={{ cursor: "pointer" }} className="ml-1">
+                        <X size={14} />
+                    </button>
                 </div>
             </li>
         )
@@ -1352,11 +1435,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     </div>
 
                     {/* button to clear filter */}
-                    <a onClick={removeGrouping}
-                        style={{ cursor: "pointer" }}
-                    >
-                        <i className="pi pi-times ml-1">
-                        </i></a>
+                    <button type="button" onClick={removeGrouping} style={{ cursor: "pointer" }} className="ml-1">
+                        <X size={14} />
+                    </button>
                 </div>
             </li>
         )
@@ -1389,80 +1470,203 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         return acc;
     }, {});
 
+    const customRuleCount =
+        customFilter?.$or?.length ??
+        customFilter?.$and?.length ??
+        Object.keys(customFilter || {}).length;
+
+    const managedChipItems = useMemo<ManagedChipItem[]>(() => {
+        const items: ManagedChipItem[] = [];
+
+        if (currentSavedFilterData?.name) {
+            items.push({
+                id: "saved-filter",
+                type: "saved",
+                label: `Saved: ${currentSavedFilterData.name}`,
+                onRemove: () => removeSavedFilter(),
+            });
+        }
+
+        if (predefinedSearchChip?.name && predefinedSearchChip?.value) {
+            items.push({
+                id: "predefined-search",
+                type: "predefined",
+                label: `Predefined: ${predefinedSearchChip.name} (${predefinedSearchChip.value})`,
+                onRemove: () => removePredefinedSearchChip(),
+            });
+        }
+
+        if (customFilter && customRuleCount > 0) {
+            items.push({
+                id: "custom-filter",
+                type: "custom",
+                label: `${customRuleCount} custom rules applied`,
+                onRemove: () => clearCustomFilter(),
+                onOpen:() => setShowGlobalSearchElement(true)
+            });
+        }
+
+        if (groupingRules.length > 0 && groupingRules.some((r) => r.fieldName !== null)) {
+            items.push({
+                id: "grouping-rules",
+                type: "grouping",
+                label: `${groupingRules.length} grouping rules applied`,
+                onRemove: () => removeGrouping(),
+                onOpen:() => setShowGroupFilterElement(true)
+
+            });
+        }
+
+        Object.entries(groupedSearchChips).forEach(([column, values]) => {
+            const fieldMeta = searchableFields.find((field) => field.fieldName === column);
+            const columnDisplayName = fieldMeta?.displayName || column;
+            items.push({
+                id: `search:${column}`,
+                type: "search",
+                label: `${columnDisplayName}: ${values.join(" or ")}`,
+                onRemove: () => handleRemoveChipGroup(column),
+            });
+        });
+
+        return items;
+    }, [
+        currentSavedFilterData,
+        predefinedSearchChip,
+        customFilter,
+        customRuleCount,
+        groupingRules,
+        groupedSearchChips,
+        searchableFields,
+    ]);
+
+    const MAX_VISIBLE_CHIPS = 3;
+    const visibleChipItems = managedChipItems.slice(0, MAX_VISIBLE_CHIPS);
+    const hiddenChipItems = managedChipItems.slice(MAX_VISIBLE_CHIPS);
+    const hiddenChipCount = hiddenChipItems.length;
+
+    const clearAllAppliedChips = () => {
+        if (managedChipItems.length === 0) return;
+
+        if (activeSavedFilter || currentSavedFilterData) {
+            removeSavedFilter();
+        }
+
+        setSearchChips([]);
+        setSearchFilter(null);
+        setPredefinedSearchChip(null);
+        setPredefinedSearchBaseFilter(null);
+        setCustomFilter(null);
+        setFilterRules(initialState);
+        setGroupingRules(defaultGroupingRules);
+        setAggregationRules(defaultAggregationRules);
+        setShowChipManager(false);
+        setHasSearched(true);
+        setRefreshKey((prev) => prev + 1);
+    };
+
+    useEffect(() => {
+        if (managedChipItems.length === 0 && showChipManager) {
+            setShowChipManager(false);
+        }
+    }, [managedChipItems.length, showChipManager]);
+
+
+    const overlayOptions = useMemo<OverlayOption[]>(() => {
+        const currentValue = inputValue?.trim() || "";
+        const fields: OverlayOption[] = currentValue
+            ? searchableFields.map((field: any) => ({
+                id: `field:${field.fieldName}`,
+                kind: "field" as const,
+                field
+            }))
+            : [];
+        const predefined: OverlayOption[] =
+            currentValue && predefinedSearches?.length
+                ? predefinedSearches.map((p: any, idx: number) => ({
+                    id: `predefined:${p.name || idx}`,
+                    kind: "predefined" as const,
+                    predefined: p,
+                }))
+                : [];
+        const saved: OverlayOption[] = (savedFilters || []).map((s: any) => ({
+            id: `saved:${s.id}`,
+            kind: "saved" as const,
+            saved: s,
+        }));
+
+        return [...fields, ...predefined, ...saved];
+    }, [inputValue, searchableFields, predefinedSearches, savedFilters]);
 
     const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
-        const hasInput = !!inputValue?.trim();
-        const searchCount = hasInput ? searchableFields.length : 0;
-        const predefinedCount = hasInput ? (predefinedSearches?.length || 0) : 0;
-        const savedFiltersCount = savedFilters?.length || 0;
-        const totalItems = searchCount + predefinedCount + savedFiltersCount;
+        const currentValue = inputValue?.trim() || "";
 
-        if (e.key === "ArrowDown") {
-            e.preventDefault();
-            if (showOverlay) {
-                setFocusedIndex(prev => (prev < totalItems - 1 ? prev + 1 : prev));
-            }
-        } else if (e.key === "ArrowUp") {
-            e.preventDefault();
-            if (showOverlay) {
-                setFocusedIndex(prev => (prev > -1 ? prev - 1 : prev));
-            }
-        } else if (e.key === "Enter") {
-            if (hasInput || focusedIndex >= 0) e.preventDefault();
-            
-            const predefinedSearchOffset = searchCount;
-            const savedFilterOffset = predefinedSearchOffset + predefinedCount;
+        const applyFieldOption = (value: any) => {
+            const trimmed = inputValue?.trim();
+            if (!trimmed) return;
+            const values = trimmed.split(",").map((v) => v.trim()).filter((v) => v !== "");
+            const chipsToAdd = values.map(v => ({
+                columnName: value.fieldName,
+                value: v,
+                columnDisplayName: value.displayName,
+                searchField: value.searchField,
+                matchMode: value.matchMode
+            }));
+            setSearchChips((prev) => [...prev, ...chipsToAdd]);
+            setInputValue("");
+            setHasSearched(true);
+            setRefreshKey((prev) => prev + 1);
+            setShowOverlay(false);
+        };
 
-            if (showOverlay && focusedIndex >= 0 && focusedIndex < predefinedSearchOffset) {
-                const value = searchableFields[focusedIndex];
-                const currentValue = inputValue?.trim() || "";
-                const values = currentValue.split(",").map((v) => v.trim()).filter((v) => v !== "");
-                const chipsToAdd = values.map((v: any) => ({
-                    columnName: value.fieldName,
-                    value: v,
-                    columnDisplayName: value.displayName,
-                    searchField: value.searchField,
-                    matchMode: value.matchMode
-                }));
-                setSearchChips((prev) => [...prev, ...chipsToAdd]);
-                setInputValue("");
-                setHasSearched(true);
-                setRefreshKey((prev) => prev + 1);
-                setShowOverlay(false);
-                setFocusedIndex(-1);
-            } else if (showOverlay && focusedIndex >= predefinedSearchOffset && focusedIndex < savedFilterOffset) {
-                const predefinedSearch = predefinedSearches[focusedIndex - predefinedSearchOffset];
-                handlePredefinedSearch(predefinedSearch);
-                setFocusedIndex(-1);
-            } else if (showOverlay && focusedIndex >= savedFilterOffset && focusedIndex < totalItems) {
-                const savedFilterIdx = focusedIndex - savedFilterOffset;
-                const savedFilter = savedFilters[savedFilterIdx];
-                if (savedFilter) applySavedFilter(savedFilter);
-                setFocusedIndex(-1);
-            } else if (hasInput) {
-                handleAddChip();
-                setShowOverlay(false);
-                setFocusedIndex(-1);
+        if ((e.key === "ArrowDown" || e.key === "ArrowUp") && overlayOptions.length > 0) {
+            e.preventDefault();
+            setShowOverlay(true);
+            const nextIndex =
+                e.key === "ArrowDown"
+                    ? (focusedIndex + 1) % overlayOptions.length
+                    : (focusedIndex <= 0 ? overlayOptions.length - 1 : focusedIndex - 1);
+            setFocusedIndex(nextIndex);
+            return;
+        }
+
+        if (e.key === "Enter") {
+            if (currentValue || focusedIndex >= 0) {
+                e.preventDefault();
+                const activeOption = overlayOptions[focusedIndex] || (currentValue ? overlayOptions[0] : null);
+
+                if (activeOption?.kind === "field") {
+                    applyFieldOption(activeOption.field);
+                } else if (activeOption?.kind === "predefined") {
+                    handlePredefinedSearch(activeOption.predefined);
+                } else if (activeOption?.kind === "saved") {
+                    applySavedFilter(activeOption.saved);
+                } else if (currentValue) {
+                    handleAddChip();
+                    setShowOverlay(false);
+                }
             }
         } else if (e.key === "Backspace" && inputValue === "") {
-
             if (searchChips.length > 0) {
                 setSearchChips((prev) => prev.slice(0, -1));
             } else if (customFilter) {
-                setCustomFilter(null)
+                setCustomFilter(null);
                 setFilterRules(initialState);
             } else if (predefinedSearchChip) {
                 setPredefinedSearchChip(null);
                 setPredefinedSearchBaseFilter(null);
             } else if (activeSavedFilter) {
-                removeSavedFilter()
-            } else if (activeSavedFilter) {
-                clearCustomFilter();
+                removeSavedFilter();
             }
             setHasSearched(true);
-            setRefreshKey((prev) => prev + 1)
+            setRefreshKey((prev) => prev + 1);
         }
     };
+
+    useEffect(() => {
+        if (!showOverlay) {
+            setFocusedIndex(-1);
+        }
+    }, [showOverlay]);
 
     const SearchChip = () => (
         <>
@@ -1485,11 +1689,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                 </React.Fragment>
                             ))}
                             {/* button to clear filter */}
-                            <i className="pi pi-times ml-1"
-                                style={{ cursor: "pointer" }}
-                                onClick={() => handleRemoveChipGroup(column)}
-                            >
-                            </i>
+                            <button type="button" className="ml-1" style={{ cursor: "pointer" }} onClick={() => handleRemoveChipGroup(column)}>
+                                <X size={14} />
+                            </button>
                         </div>
                     </li>
                 )
@@ -1531,9 +1733,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
             // Apply the predefined search filter as custom filter
             // setCustomFilter(processedFilter);
 
-            // Apply the filter
-            // handleApplyCustomFilter(finalFilter);
-
             // Clear input and close overlay
             setInputValue("");
             setShowOverlay(false);
@@ -1550,7 +1749,6 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         setPredefinedSearchChip(null);
         setPredefinedSearchBaseFilter(null)
         setCustomFilter(null);
-        // handleApplyCustomFilter(finalFilter);
         setHasSearched(true);
         setRefreshKey((prev) => prev + 1)
     };
@@ -1563,11 +1761,9 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                     <span className="custom-chip-value">{predefinedSearchChip?.value}</span>
                 </div>
                 {/* button to clear filter */}
-                <i className="pi pi-times ml-1"
-                    style={{ cursor: "pointer" }}
-                    onClick={removePredefinedSearchChip}
-                >
-                </i>
+                <button type="button" className="ml-1" style={{ cursor: "pointer" }} onClick={removePredefinedSearchChip}>
+                    <X size={14} />
+                </button>
             </div>
         </li>
     );
@@ -1578,23 +1774,65 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
         <>
             <div className="flex justify-content-center solid-custom-filter-wrapper relative">
                 <div className="solid-global-search-element">
-                    <ul className="">
-                        {currentSavedFilterData && <SavedFiltersChip />}
-                        {predefinedSearchChip && <PredefinedSearchChip />}
-                        {customFilter && <CustomChip />}
-                        {groupingRules.length > 0 && groupingRules.some(r => r.fieldName !== null) && <GroupingChip />}
-                        <SearchChip />
-                        <li ref={chipsRef}>
+                    <ul className="solid-global-search-chip-list">
+                        {visibleChipItems.map((chip) => (
+                            <li key={chip.id}>
+                                <div className={`search-filter-chip-type solid-chip-pill solid-chip-tone-${chip.type}`}>
+                                    <span className="custom-chip-value solid-chip-pill-label" title={chip.label}>
+                                        {chip.label}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        className="solid-chip-pill-remove"
+                                        onMouseDown={(e) => e.preventDefault()}
+                                        onClick={chip.onRemove}
+                                        aria-label={`Remove ${chip.label}`}
+                                    >
+                                        <X size={14} />
+                                    </button>
+                                </div>
+                            </li>
+                        ))}
+                        {hiddenChipCount > 0 && (
+                            <li>
+                                <button
+                                    type="button"
+                                    ref={chipManagerTriggerRef}
+                                    className="solid-chip-manage-trigger"
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={() => setShowChipManager((prev) => !prev)}
+                                >
+                                    +{hiddenChipCount} more
+                                </button>
+                            </li>
+                        )}
+                        {managedChipItems.length > 0 && hiddenChipCount === 0 && (
+                            <li>
+                                <button
+                                    type="button"
+                                    ref={chipManagerTriggerRef}
+                                    className="solid-chip-manage-trigger solid-chip-manage-trigger-secondary"
+                                    onMouseDown={(e) => e.preventDefault()}
+                                    onClick={() => setShowChipManager((prev) => !prev)}
+                                >
+                                    Manage
+                                </button>
+                            </li>
+                        )}
+                        <li ref={chipsRef} className="solid-global-search-input-item">
                             <div className="relative solid-global-search-element-wrapper">
-                                <InputText
+                                <SolidInput
+                                    className="solid-global-search-input"
                                     value={inputValue || ""}
                                     placeholder="Search."
                                     onChange={(e) => {
                                         setInputValue(e.target.value);
+                                        setShowChipManager(false);
                                         setShowOverlay(true);
                                         setFocusedIndex(-1);
                                     }}
                                     onFocus={() => {
+                                        setShowChipManager(false);
                                         if (inputValue?.trim()) setShowOverlay(true);
                                     }}
                                     onBlur={() => {
@@ -1604,144 +1842,266 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
 
                                     onKeyDown={handleKeyDown}
                                 />
-                                <Button
-                                    icon="pi pi-search"
-                                    style={{ fontSize: 10 }}
-                                    severity="secondary"
-                                    outlined size="small"
-                                    onClick={() => setShowOverlay(true)}
-                                    className="custom-filter-button"
-                                />
+                                <SolidButton
+                                    variant="outline"
+                                    size="sm"
+                                    onClick={() => {
+                                        setShowChipManager(false);
+                                        setShowOverlay(true);
+                                    }}
+                                    className="custom-filter-button solid-global-search-trigger"
+                                >
+                                    <Search size={14} />
+                                </SolidButton>
                             </div>
                         </li>
                     </ul>
                 </div>
 
-                {showOverlay && (
-                    <div ref={overlayRef} className="absolute w-full z-5 shadow-2 solid-search-overlay-pannel" style={{ top: 35, background: "var(--surface-0)", border: '1px solid var(--surface-300) !important', borderRadius: '6px' }}>
-                        {/* <div ref={overlayRef} className="absolute w-full z-5 surface-0 border-round border-1 border-300 shadow-2 solid-search-overlay-pannel" style={{ top: 35 }}> */}
-                        {inputValue ? (
-                            <>
-                                <div className="custom-filter-search-options px-3 py-2 flex flex-column">
-                                    <h6 className="my-1 font-bold">Search By Fields</h6>
-                                    {
-                                        searchableFields.map((value: any, index: any) => {
-                                            // console.log("value", value);
-
-                                            return (
-                                                <Button
-                                                    key={index}
-                                                    className={`p-2 flex gap-1 text-color ${focusedIndex === index ? 'surface-hover' : ''}`}
-                                                    // onClick={() => handleAddChip(value)}
-                                                    onMouseDown={(e) => {
-                                                        // Prevent focus loss from input
-                                                        e.preventDefault();
-                                                        const currentValue = inputValue?.trim();
-                                                        if (currentValue) {
-                                                            const values = currentValue.split(",").map((v) => v.trim()).filter((v) => v !== "");
-                                                            const chipsToAdd = values.map(v => ({
-                                                                columnName: value.fieldName,
-                                                                value: v,
-                                                                columnDisplayName: value.displayName,
-                                                                searchField: value.searchField,
-                                                                matchMode: value.matchMode
-                                                            }));
-                                                            setSearchChips((prev) => [...prev, ...chipsToAdd]);
-                                                            setInputValue("");
-                                                            setHasSearched(true);
-                                                            setRefreshKey((prev) => prev + 1)
-                                                            setShowOverlay(false);
-                                                        }
-                                                    }}
-                                                    text
-                                                    severity="secondary"
-                                                    size="small"
-                                                >
-                                                    Search <strong>{value.displayName}</strong> for: <span className="font-bold text-color">{inputValue}</span>
-                                                </Button>
-                                            )
-                                        })
+                {showChipManager && managedChipItems.length > 0 && (
+                    <div ref={chipManagerRef} className="absolute z-5 solid-chip-manager-panel">
+                        <div className="solid-chip-manager-header">
+                            <div className="solid-chip-manager-title">Applied chips ({managedChipItems.length})</div>
+                            <button type="button" className="solid-chip-manager-clear-btn" onClick={clearAllAppliedChips}>
+                                Clear all
+                            </button>
+                        </div>
+                        <div className="solid-chip-manager-body">
+                            {managedChipItems.map((chip) => (
+                                <div key={`manage-${chip.id}`} className={`solid-chip-manager-item solid-chip-tone-${chip.type}`} onClick={() => {
+                                    if (chip.id == "custom-filter" || chip.id == "grouping-rules") {
+                                        if(chip.onOpen){
+                                            chip.onOpen()
+                                        }
                                     }
+                                }
+                                }>
+                                    <span className="solid-chip-manager-item-label" title={chip.label}>
+                                        {chip.label}
+                                    </span>
+                                    <button
+                                        type="button"
+                                        className="solid-chip-manager-item-remove"
+                                        onClick={chip.onRemove}
+                                        aria-label={`Remove ${chip.label}`}
+                                    >
+                                        <X size={14} />
+                                    </button>
                                 </div>
-                                {predefinedSearches && predefinedSearches.length > 0 && (
-                                    <>
-                                        <Divider className="m-0" />
-                                        <div className="custom-filter-search-options px-3 py-2 flex flex-column">
-                                            <h6 className="my-1 font-bold">Predefined Searches</h6>
-                                            {predefinedSearches.map((predefinedSearch: any, index: number) => (
-                                                <Button
-                                                    key={index}
-                                                    className={`p-2 flex flex-column align-items-start gap-1 text-color ${focusedIndex === (index + searchableFields.length) ? 'surface-hover' : ''}`}
-                                                    onMouseDown={(e) => {
-                                                        e.preventDefault();
-                                                        handlePredefinedSearch(predefinedSearch);
+                            ))}
+                        </div>
+                    </div>
+                )}
+
+                {showOverlay && (
+                    <div ref={overlayRef} className="absolute w-full z-5 shadow-2 solid-search-overlay-pannel">
+                        <div className="solid-search-overlay-scroll">
+                            {inputValue ? (
+                                <>
+                                    <div className="custom-filter-search-options solid-search-overlay-section px-3 py-1 flex flex-column">
+                                        <h6 className="my-1 solid-search-overlay-heading solid-search-overlay-section-title solid-search-overlay-heading-with-icon">
+                                            <Search size={13} />
+                                            <span>Search by fields</span>
+                                        </h6>
+                                        {searchableFields.length > 0 ? (
+                                            searchableFields.map((value: any, index: number) => {
+                                                return (
+                                                    <SolidButton
+                                                        key={index}
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className={`flex gap-1 text-color solid-search-overlay-option ${focusedIndex === index ? "solid-search-overlay-option-active" : ""} justify-content-start`}
+                                                        onMouseDown={(e) => {
+                                                            e.preventDefault();
+                                                            const currentValue = inputValue?.trim();
+                                                            if (currentValue) {
+                                                                const values = currentValue.split(",").map((v) => v.trim()).filter((v) => v !== "");
+                                                                const chipsToAdd = values.map(v => ({
+                                                                    columnName: value.fieldName,
+                                                                    value: v,
+                                                                    columnDisplayName: value.displayName,
+                                                                    searchField: value.searchField,
+                                                                    matchMode: value.matchMode
+                                                                }));
+                                                                setSearchChips((prev) => [...prev, ...chipsToAdd]);
+                                                                setInputValue("");
+                                                                setHasSearched(true);
+                                                                setRefreshKey((prev) => prev + 1)
+                                                                setShowOverlay(false);
+                                                            }
+                                                        }}
+                                                        onMouseEnter={() => setFocusedIndex(index)}
+                                                    >
+                                                        Search <strong style={{paddingLeft:"2px"}}>{value.displayName}</strong> &nbsp; for:&nbsp; <span className="font-bold text-color">{inputValue}</span>
+                                                    </SolidButton>
+                                                )
+                                            })
+                                        ) : (
+                                            <div className="solid-search-overlay-no-fields">
+                                                <div className="solid-search-overlay-no-fields-icon">
+                                                    <SearchX size={14} />
+                                                </div>
+                                                <div className="solid-search-overlay-no-fields-text">
+                                                    No fields configured for search.
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                    {predefinedSearches && predefinedSearches.length > 0 && (
+                                        <>
+                                            <div className="solid-filter-dialog-sep" />
+                                            <div className="custom-filter-search-options solid-search-overlay-section px-3 py-1 flex flex-column">
+                                                <h6 className="my-1 solid-search-overlay-heading solid-search-overlay-section-title">Predefined searches</h6>
+                                                {predefinedSearches.map((predefinedSearch: any, index: number) => (
+                                                    <SolidButton
+                                                        key={index}
+                                                        variant="ghost"
+                                                        size="sm"
+                                                        className={`flex flex-column align-items-start gap-1 text-color solid-search-overlay-option solid-search-overlay-option-stacked ${focusedIndex === searchableFields.length + index ? "solid-search-overlay-option-active" : ""}`}
+                                                        onMouseDown={(e) => {
+                                                            e.preventDefault();
+                                                            handlePredefinedSearch(predefinedSearch);
+                                                        }}
+                                                        onMouseEnter={() => setFocusedIndex(searchableFields.length + index)}
+                                                    >
+                                                        <div className="flex gap-1 align-items-center">
+                                                            <strong>{predefinedSearch.name}:</strong>
+                                                            <span className="font-bold text-color">{inputValue}</span>
+                                                        </div>
+                                                        <div className="text-xs">{predefinedSearch.description}</div>
+                                                    </SolidButton>
+                                                ))}
+                                            </div>
+                                        </>
+                                    )}
+                                </>
+                            ) :
+                                <>
+                                    <div className="p-3 solid-search-overlay-empty">
+                                        <div className="solid-search-overlay-panel-callout">
+                                            <div className="solid-search-overlay-panel-callout-icon">
+                                                <Search size={13} />
+                                            </div>
+                                            <div className="solid-search-overlay-panel-callout-copy">
+                                                <div className="solid-search-overlay-empty-title">
+                                                    Start typing to search
+                                                </div>
+                                                <div className="solid-search-overlay-empty-subtitle">
+                                                    Start typing in search input to see all fields on which you can search {searchableEntityLabel} by.
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
+                                    <div className="solid-filter-dialog-sep" />
+                                </>
+                            }
+                            {savedFilters.length > 0 &&
+                                <>
+                                    <div className="p-3 solid-search-overlay-section">
+                                        <div className="solid-search-overlay-panel-callout solid-search-overlay-panel-callout-compact">
+                                            <div className="solid-search-overlay-panel-callout-icon">
+                                                <Bookmark size={13} />
+                                            </div>
+                                            <div className="solid-search-overlay-panel-callout-copy">
+                                                <p className="solid-search-overlay-heading solid-search-overlay-section-title">Saved filters</p>
+                                                <div className="solid-search-overlay-empty-subtitle">
+                                                    Reusable filter sets available for this view.
+                                                </div>
+                                            </div>
+                                        </div>
+                                        <div className="flex flex-column solid-search-overlay-saved-list">
+                                            {savedFilters.map((savedfilter: any, index: number) => (
+                                                <SavedFilterList
+                                                    key={savedfilter.id}
+                                                    savedfilter={savedfilter}
+                                                    activeSavedFilter={activeSavedFilter}
+                                                    applySavedFilter={applySavedFilter}
+                                                    openSavedCustomFilter={openSavedCustomFilter}
+                                                    setSavedFilterTobeDeleted={setSavedFilterTobeDeleted}
+                                                    setIsDeleteSQDialogVisible={setIsDeleteSQDialogVisible}
+                                                    isFocused={overlayOptions[focusedIndex]?.id === `saved:${savedfilter.id}`}
+                                                    onMouseEnter={() => {
+                                                        const optIndex = overlayOptions.findIndex(o => o.id === `saved:${savedfilter.id}`);
+                                                        if (optIndex !== -1) setFocusedIndex(optIndex);
                                                     }}
-                                                    text
-                                                    severity="secondary"
-                                                    size="small"
-                                                >
-                                                    <div className="flex gap-1 align-items-center">
-                                                        <strong>{predefinedSearch.name}:</strong>
-                                                        <span className="font-bold text-color">{inputValue}</span>
-                                                    </div>
-                                                    <div className="text-xs">{predefinedSearch.description}</div>
-                                                </Button>
+                                                />
                                             ))}
                                         </div>
-                                    </>
-                                )}
-                            </>
-                        ) :
-                            <>
-                                <div className="p-3 text-base">Search Here...</div>
-                                <Divider className="m-0" />
-                            </>
-                        }
-                        {savedFilters.length > 0 &&
-                            <>
-                                <div className="p-3">
-                                    <p className="font-medium">Saved Filters</p>
-                                    <div className="flex flex-column gap-2">
-                                        {savedFilters.map((savedfilter: any, idx: number) => {
-                                            const hasInput = !!inputValue?.trim();
-                                            const combinedOffset = (hasInput ? searchableFields.length : 0) + (hasInput ? (predefinedSearches?.length || 0) : 0);
-                                            return (
-                                                <SavedFilterList key={idx} savedfilter={savedfilter} activeSavedFilter={activeSavedFilter} applySavedFilter={applySavedFilter} openSavedCustomFilter={openSavedCustomFilter} setSavedFilterTobeDeleted={setSavedFilterTobeDeleted} setIsDeleteSQDialogVisible={setIsDeleteSQDialogVisible} isFocused={focusedIndex === combinedOffset + idx}></SavedFilterList>
-                                            )
-                                        })}
+                                    </div>
+                                </>
+                            }
+                        </div>
+
+                        <div className="solid-search-overlay-footer">
+                            <button
+                                type="button"
+                                className="px-3 py-2 flex flex-column solid-search-overlay-footer-action"
+                                onClick={openCustomFilterDialog}
+                            >
+                                <div className="solid-search-overlay-footer-action-main">
+                                    <div className="solid-search-overlay-panel-callout-icon">
+                                        <Filter size={14} />
+                                    </div>
+                                    <div className="solid-search-overlay-panel-callout-copy">
+                                        <div className="solid-search-overlay-footer-title solid-search-overlay-section-title">
+                                            Click here to apply custom filters
+                                        </div>
+                                        <div className="solid-search-overlay-footer-subtitle">
+                                            Use custom filters to apply conditions on any field using any operator.
+                                        </div>
                                     </div>
                                 </div>
-                                <Divider className="m-0" />
-                            </>
-                        }
-                        <div className="px-2 py-1 flex justify-content-between">
-                            <Button text size="small" label="Custom Filter" iconPos="left" icon='pi pi-plus' onClick={() => setShowGlobalSearchElement(true)} className="font-bold" />
-                            {viewType === "tree" &&
-                                <Button text size="small" label="Grouping" iconPos="left" icon='pi pi-plus' onClick={() => setShowGroupFilterElement(true)} className="font-bold" />
-                            }
+                            </button>
+                            {viewType === "tree" && (
+                                <button
+                                    type="button"
+                                    className="px-3 py-2 flex flex-column solid-search-overlay-footer-action solid-search-overlay-footer-action-secondary"
+                                    onClick={openGroupingDialog}
+                                >
+                                    <div className="solid-search-overlay-footer-action-main">
+                                        <div className="solid-search-overlay-panel-callout-icon">
+                                            <Plus size={14} />
+                                        </div>
+                                        <div className="solid-search-overlay-panel-callout-copy">
+                                            <div className="solid-search-overlay-footer-title solid-search-overlay-section-title">
+                                                Click here to do custom grouping
+                                            </div>
+                                            <div className="solid-search-overlay-footer-subtitle">
+                                                Configure grouping rules and aggregations for the tree view.
+                                            </div>
+                                        </div>
+                                    </div>
+                                </button>
+                            )}
                         </div>
                     </div>
                 )
                 }
-                <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={showGlobalSearchElement} style={{ width: '65vw' }} breakpoints={{ '1024px': '75vw', '991px': '90vw', '767px': '94w', '250px': '96vw' }} onHide={() => { if (!showGlobalSearchElement) return; setShowGlobalSearchElement(false); }}>
-                    <div className="flex align-items-center justify-content-between px-3">
-                        <h5 className="solid-custom-title m-0">Add Custom Filter</h5>
-                        <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setShowGlobalSearchElement(false)} />
-                    </div>
-                    <Divider className="m-0" />
-                    <div className="p-2 lg:p-2">
+                <SolidDialog open={showGlobalSearchElement} onOpenChange={setShowGlobalSearchElement} className="solid-global-search-filter solid-filter-dialog-shell" style={{ width: "min(960px, calc(100vw - 2rem))" }}>
+                    <SolidDialogHeader className="solid-filter-dialog-head">
+                        <div>
+                            <SolidDialogTitle className="solid-filter-dialog-title m-0">Add Custom Filter</SolidDialogTitle>
+                            <SolidDialogDescription className="solid-filter-dialog-subtitle m-0">Apply conditions on any field with operators.</SolidDialogDescription>
+                        </div>
+                        <SolidDialogClose className="solid-filter-dialog-close" />
+                    </SolidDialogHeader>
+                    <SolidDialogSeparator className="solid-filter-dialog-sep" />
+                    <SolidDialogBody className="solid-filter-dialog-body">
                         {fields.length > 0 &&
                             <FilterComponent viewData={viewData} fields={fields} filterRules={filterRules} setFilterRules={setFilterRules} transformFilterRules={transformCustomFilterRules} closeDialog={() => setShowGlobalSearchElement(false)}></FilterComponent>
                         }
-                    </div>
-                </Dialog>
-                <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={showGroupFilterElement} style={{ width: '20vw' }} breakpoints={{ '1024px': '75vw', '991px': '90vw', '767px': '94w', '250px': '96vw' }} onHide={() => { if (!showGroupFilterElement) return; setShowGroupFilterElement(false); }}>
-                    <div className="flex align-items-center justify-content-between px-3">
-                        <h5 className="solid-custom-title m-0"></h5>
-                        <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setShowGroupFilterElement(false)} />
-                    </div>
-                    <Divider className="m-0" />
-                    <div className="p-2 lg:p-2">
+                    </SolidDialogBody>
+                </SolidDialog>
+                <SolidDialog open={showGroupFilterElement} onOpenChange={setShowGroupFilterElement} className="solid-global-search-filter solid-filter-dialog-shell solid-filter-dialog-shell-grouping" style={{ width: "min(560px, calc(100vw - 2rem))" }}>
+                    <SolidDialogHeader className="solid-filter-dialog-head">
+                        <div>
+                            <SolidDialogTitle className="solid-filter-dialog-title m-0">Grouping</SolidDialogTitle>
+                            <SolidDialogDescription className="solid-filter-dialog-subtitle m-0">Configure grouping and aggregation.</SolidDialogDescription>
+                        </div>
+                        <SolidDialogClose className="solid-filter-dialog-close" />
+                    </SolidDialogHeader>
+                    <SolidDialogSeparator className="solid-filter-dialog-sep" />
+                    <SolidDialogBody className="solid-filter-dialog-body">
                         {groupableFields.length > 0 &&
                             <GroupingComponent
                                 viewData={viewData}
@@ -1754,51 +2114,58 @@ export const SolidGlobalSearchElement = forwardRef(({ viewData, viewType, handle
                                 closeDialog={() => setShowGroupFilterElement(false)}
                             ></GroupingComponent>
                         }
-                    </div>
-                </Dialog >
-                <Dialog header={false} className="solid-global-search-filter" showHeader={false} visible={showSavedFilterComponent} style={{ width: '65vw' }} breakpoints={{ '1024px': '75vw', '991px': '90vw', '767px': '94w', '250px': '96vw' }} onHide={() => { if (!showSavedFilterComponent) return; setShowSavedFilterComponent(false); }}>
-                    <div className="flex align-items-center justify-content-between px-3">
-                        <h5 className="solid-custom-title m-0">Saved Filter</h5>
-                        <Button icon="pi pi-times" rounded text aria-label="Cancel" type="reset" size="small" onClick={() => setShowSavedFilterComponent(false)} />
-                    </div>
-                    <Divider className="m-0" />
-                    <div className="p-2 lg:p-2">
+                    </SolidDialogBody>
+                </SolidDialog >
+                <SolidDialog open={showSavedFilterComponent} onOpenChange={setShowSavedFilterComponent} className="solid-global-search-filter solid-filter-dialog-shell" style={{ width: "min(960px, calc(100vw - 2rem))" }}>
+                    <SolidDialogHeader className="solid-filter-dialog-head">
+                        <div>
+                            <SolidDialogTitle className="solid-filter-dialog-title m-0">Saved Filter</SolidDialogTitle>
+                            <SolidDialogDescription className="solid-filter-dialog-subtitle m-0">Review and refine the saved filter conditions.</SolidDialogDescription>
+                        </div>
+                        <SolidDialogClose className="solid-filter-dialog-close" />
+                    </SolidDialogHeader>
+                    <SolidDialogSeparator className="solid-filter-dialog-sep" />
+                    <SolidDialogBody className="solid-filter-dialog-body">
                         {fields.length > 0 &&
                             <FilterComponent viewData={viewData} fields={fields} filterRules={currentSavedFilterRules} setFilterRules={setCurrentSavedFilterRules} transformFilterRules={transformSavedFilterRules} closeDialog={() => setShowSavedFilterComponent(false)}></FilterComponent>
                         }
-                    </div>
-                </Dialog>
-                <Dialog header="Save Custom Filter" className="solid-custom-filter-dialog" visible={showSaveFilterPopup} style={{ width: 500 }} onHide={() => { if (!showSaveFilterPopup) return; setShowSaveFilterPopup(false); }}>
-                    <SolidSaveCustomFilterForm currentSavedFilterData={currentSavedFilterData} handleSaveFilter={handleSaveFilter} closeDialog={setShowSaveFilterPopup}></SolidSaveCustomFilterForm>
-                </Dialog>
-
-                <Dialog
-                    visible={isDeleteSQDialogVisible}
-                    header="Confirm Delete"
-                    modal
-                    className="solid-confirm-dialog"
-                    footer={() => (
-                        <div className="flex justify-content-center">
-                            <Button label="Yes" icon="pi pi-check" className='small-button' severity="danger" autoFocus onClick={deleteSavedFilter} />
-                            <Button label="No" icon="pi pi-times" className='small-button' onClick={() => setIsDeleteSQDialogVisible(false)} />
+                    </SolidDialogBody>
+                </SolidDialog>
+                <SolidDialog open={showSaveFilterPopup} onOpenChange={setShowSaveFilterPopup} className="solid-custom-filter-dialog solid-save-filter-dialog" style={{ width: "min(420px, calc(100vw - 2rem))" }}>
+                    <SolidDialogHeader className="solid-filter-dialog-head">
+                        <div>
+                            <SolidDialogTitle className="solid-filter-dialog-title m-0">Save Custom Filter</SolidDialogTitle>
+                            <SolidDialogDescription className="solid-filter-dialog-subtitle m-0">Name this filter so you can reuse it later.</SolidDialogDescription>
                         </div>
-                    )}
-                    onHide={() => setIsDeleteSQDialogVisible(false)}
-                >
-                    <p>Are you sure you want to delete the {currentSavedFilterData?.name} saved query?</p>
-                </Dialog>
+                        <SolidDialogClose className="solid-filter-dialog-close" />
+                    </SolidDialogHeader>
+                    <SolidDialogSeparator className="solid-filter-dialog-sep" />
+                    <SolidDialogBody className="solid-filter-dialog-body">
+                        <SolidSaveCustomFilterForm currentSavedFilterData={currentSavedFilterData} handleSaveFilter={handleSaveFilter} closeDialog={() => setShowSaveFilterPopup(false)}></SolidSaveCustomFilterForm>
+                    </SolidDialogBody>
+                </SolidDialog>
+
+                <SolidDialog open={isDeleteSQDialogVisible} onOpenChange={setIsDeleteSQDialogVisible} className="solid-confirm-dialog" style={{ width: "min(420px, calc(100vw - 2rem))" }}>
+                    <SolidDialogHeader>
+                        <div>
+                            <SolidDialogTitle>Confirm Delete</SolidDialogTitle>
+                            <SolidDialogDescription>Are you sure you want to delete the {currentSavedFilterData?.name} saved query?</SolidDialogDescription>
+                        </div>
+                        <SolidDialogClose />
+                    </SolidDialogHeader>
+                    <SolidDialogSeparator />
+                    <SolidDialogFooter className="justify-content-center">
+                        <SolidButton variant="destructive" size="sm" onClick={deleteSavedFilter}>
+                            <Check size={14} />
+                            Yes
+                        </SolidButton>
+                        <SolidButton variant="outline" size="sm" onClick={() => setIsDeleteSQDialogVisible(false)}>
+                            <X size={14} />
+                            No
+                        </SolidButton>
+                    </SolidDialogFooter>
+                </SolidDialog>
             </div >
-            {/* <div>
-                <Button
-                    icon="pi pi-save"
-                    style={{ fontSize: 10 }}
-                    severity="secondary"
-                    outlined size="small"
-                    onClick={() => {
-                        setShowSaveFilterPopup(true)
-                    }}
-                />
-            </div> */}
         </>
     )
 });

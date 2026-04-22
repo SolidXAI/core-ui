@@ -1,15 +1,19 @@
 
 import { solidIcons } from "../../../../../helpers/solidIcons";
 import { SolidFormFieldWidgetProps } from "../../../../../types/solid-core";
-import { Button } from "primereact/button";
-import { Dialog } from "primereact/dialog";
-import { Dropdown } from "primereact/dropdown";
-import { InputText } from "primereact/inputtext";
+import { SolidButton } from "../../../../shad-cn-ui/SolidButton";
+import {
+    SolidDialog,
+    SolidDialogBody,
+    SolidDialogClose,
+    SolidDialogFooter,
+    SolidDialogHeader,
+    SolidDialogTitle,
+} from "../../../../shad-cn-ui/SolidDialog";
+import { SolidInput } from "../../../../shad-cn-ui/SolidInput";
 import { useEffect, useState } from "react";
 
 export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
-    console.log("SolidIconWidget", "formik : ", formik, "fieldContext : ", fieldContext);
-
     const fieldMetadata = fieldContext.fieldMetadata;
     const fieldLayoutInfo = fieldContext.field;
     const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
@@ -60,6 +64,12 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
         // formik.setFieldValue("iconVariant", null);
     };
 
+    const formatIconLabel = (icon: string) =>
+        icon
+            .split('_')
+            .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
+            .join(' ');
+
     return (
         <div>
             <label className="form-field-label">{fieldLabel}</label>
@@ -77,39 +87,46 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                                 {selectedIcon}
                             </span>
                             <p className="mb-0 text-center">
-                                {selectedIcon
-                                    .split('_')
-                                    .map((word: string) => word.charAt(0).toUpperCase() + word.slice(1))
-                                    .join(' ')
-                                }
+                                {formatIconLabel(selectedIcon)}
                             </p>
                         </div>
                     ) : (
-                        <Button
+                        <SolidButton
                             type="button"
-                            size="small"
-                            label="Select Icon"
+                            size="sm"
+                            variant="outline"
                             onClick={() => setOpenIconDialog(true)}
-                            outlined
-                        />
+                        >
+                            Select Icon
+                        </SolidButton>
                     )}
                 </div>
                 {selectedIcon && (
                     <div>
-                        <Button
+                        <SolidButton
                             type="button"
-                            label="Remove"
-                            className="p-button-text p-button-danger ml-2"
-                            onClick={() => {
-                                setSelectedIcon("");
-                                formik.setFieldValue(fieldName, "");
-                            }}
-                        />
+                            variant="ghost"
+                            className="ml-2"
+                            onClick={handleRemoveIcon}
+                        >
+                            Remove
+                        </SolidButton>
                     </div>
                 )}
             </div>
-            <Dialog contentClassName="p-0" className="solid-icon-dialog" contentStyle={{ borderRadius: 6 }} showHeader={false} header={false} closable={false} visible={openIconDialog} style={{ width: '70vw', height: '70vh' }} breakpoints={{ '1024px': '75vw','991px': '90vw','767px':'94w', '250px': '96vw'}} onHide={() => setOpenIconDialog(false)}>
-                <div>
+            <SolidDialog
+                open={openIconDialog}
+                onOpenChange={setOpenIconDialog}
+                className="solid-icon-dialog p-0"
+                style={{ width: '70vw', height: '70vh', borderRadius: 6 }}
+                showHeader={false}
+                breakpoints={{ '1024px': '75vw','991px': '90vw','767px':'94w', '250px': '96vw'}}
+            >
+                <SolidDialogHeader>
+                    <SolidDialogTitle>Select Icon</SolidDialogTitle>
+                    <SolidDialogClose />
+                </SolidDialogHeader>
+                <SolidDialogBody className="p-0">
                     <div className="grid m-0 flex-column md:flex-row ">
                         <div className="col-12 lg:col-3 p-0">
                             <div className="flex flex-column justify-content-between p-3 lg:p-4" style={{ height: '100%' }}>
@@ -129,30 +146,25 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                                     <p className="font-medium">Category</p>
                                     <div style={{ marginBottom: "1rem", display: "flex", gap: "1rem", flexWrap: "wrap" }} className="solid-icon-category-wrapper">
                                         {tabs.map((tab) => (
-                                            <Button
+                                            <SolidButton
                                                 type='button'
                                                 key={tab}
-                                                size="small"
+                                                size="sm"
                                                 onClick={() => {
                                                     setSelectedCategory(tab);
                                                     setSearchIcon("");
                                                 }}
-                                                outlined={selectedCategory === tab ? false : true}
+                                                variant={selectedCategory === tab ? "primary" : "outline"}
                                                 style={{
                                                     padding: "8px 16px",
                                                     fontSize: 12
                                                 }}
                                                 className="solid-icon-category"
-                                                severity="secondary"
                                             >
                                                 {tab}
-                                            </Button>
+                                            </SolidButton>
                                         ))}
                                     </div>
-                                </div>
-                                <div className="flex gap-3">
-                                    <Button type="button" size="small" label="Select" onClick={() => setOpenIconDialog(false)} />
-                                    <Button type="button" size="small" outlined label="Cancel" onClick={() => setOpenIconDialog(false)} />
                                 </div>
                             </div>
                         </div>
@@ -167,13 +179,7 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                                                 {selectedIcon}
                                             </span>
                                         </div>
-                                        <p className='mt-2 text-center'>
-                                            {selectedIcon
-                                                .split('_')
-                                                .map((word: any) => word.charAt(0).toUpperCase() + word.slice(1))
-                                                .join(' ')
-                                            }
-                                        </p>
+                                        <p className='mt-2 text-center'>{formatIconLabel(selectedIcon)}</p>
                                         {/* <code className="mt-2 d-block">
                                             {`<span class="material-symbols-${iconVariant || "outlined"}">${selectedIcon}</span>`}
                                         </code> */}
@@ -186,7 +192,7 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                             <div className="px-3 lg:px-4 pt-3 lg:pt-4">
                                 <div>
                                     <p className="font-medium">Select Icon</p>
-                                    <InputText
+                                    <SolidInput
                                         type="text"
                                         placeholder={`Search icons in "${selectedCategory}"`}
                                         value={searchIcon}
@@ -216,11 +222,7 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                                                         {icon}
                                                     </span>
                                                     <p className='mb-0 mt-1 text-center'>
-                                                        {icon
-                                                            .split('_')
-                                                            .map(word => word.charAt(0).toUpperCase() + word.slice(1))
-                                                            .join(' ')
-                                                        }
+                                                        {formatIconLabel(icon)}
                                                     </p>
                                                 </div>
                                             </div>
@@ -242,13 +244,7 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
                                                 {selectedIcon}
                                             </span>
                                         </div>
-                                        <p className='mt-2 text-center'>
-                                            {selectedIcon
-                                                .split('_')
-                                                .map((word: any) => word.charAt(0).toUpperCase() + word.slice(1))
-                                                .join(' ')
-                                            }
-                                        </p>
+                                        <p className='mt-2 text-center'>{formatIconLabel(selectedIcon)}</p>
                                         {/* <code className="mt-2 d-block">
                                             {`<span class="material-symbols-${iconVariant || "outlined"}">${selectedIcon}</span>`}
                                         </code> */}
@@ -258,8 +254,16 @@ export const SolidIconEditWidget = ({ formik, fieldContext }: SolidFormFieldWidg
 
                         </div>
                     </div>
-                </div>
-            </Dialog>
+                </SolidDialogBody>
+                <SolidDialogFooter className="gap-3">
+                    <SolidButton type="button" size="sm" onClick={() => setOpenIconDialog(false)}>
+                        Select
+                    </SolidButton>
+                    <SolidButton type="button" size="sm" variant="outline" onClick={() => setOpenIconDialog(false)}>
+                        Cancel
+                    </SolidButton>
+                </SolidDialogFooter>
+            </SolidDialog>
         </div>
     );
 };

@@ -6,12 +6,14 @@ type DateFieldViewProps = {
   value: unknown;
   format?: string; // dayjs format tokens (optional)
   fallback?: string; // optional fallback text (default: "-")
+  showTime?: boolean; // include time in default locale formatting
 };
 
 export const DateFieldViewComponent = ({
   value,
   format,
   fallback = "-",
+  showTime = false,
 }: DateFieldViewProps) => {
   if (!value) {
     return <>{fallback}</>;
@@ -32,5 +34,5 @@ export const DateFieldViewComponent = ({
   }
 
   // Default → browser locale
-  return <>{date.toLocaleDateString()}</>;
+  return <>{showTime ? date.toLocaleString() : date.toLocaleDateString()}</>;
 };

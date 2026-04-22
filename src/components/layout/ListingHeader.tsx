@@ -1,5 +1,4 @@
 
-import { Menu } from "primereact/menu";
 import React, { useRef, useState } from "react";
 import { useDispatch, useSelector } from "react-redux";
 // import { RootState } from "../../redux/store";
@@ -8,6 +7,7 @@ import { usePathname } from "../../hooks/usePathname";
 import { useRouter } from "../../hooks/useRouter";
 import { HeaderDynamicTitles } from "../common/HeaderDynamicTitles";
 import FilterMenu from "./FilterMenu";
+import { SolidIcon, parseSolidIconMeta } from "../shad-cn-ui/SolidIcon";
 
 const ListingHeader = () => {
   const dispatch = useDispatch();
@@ -19,7 +19,6 @@ const ListingHeader = () => {
     (state: any) => state.popup.visibleFieldsPopup
   );
 
-  const menu = useRef<Menu>(null);
   const items = [
     {
       label: "Settings",
@@ -105,7 +104,8 @@ const ListingHeader = () => {
   ];
 
   const justifyTemplate = (option: any) => {
-    return <i className={option.icon}></i>;
+    const m = parseSolidIconMeta(option.icon);
+    return m ? <SolidIcon name={m.name} spin={m.spin} /> : <i className={option.icon}></i>;
   };
 
 
@@ -125,12 +125,6 @@ const ListingHeader = () => {
     //     dispatch(showModulePopup());
     //     break;
     // }
-  };
-
-  const toggleMenu = (e: React.MouseEvent<HTMLButtonElement, MouseEvent>) => {
-    if (menu.current) {
-      menu.current.toggle(e);
-    }
   };
 
 

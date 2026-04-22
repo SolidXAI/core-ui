@@ -46,12 +46,27 @@ import { SolidAiInteractionMessageFieldFormWidget } from "../components/core/for
 import { SolidS3FileViewerWidget } from "../components/core/form/fields/widgets/SolidS3FileViewerWidget";
 import DeleteModuleRowAction from "../components/core/extension/solid-core/moduleMetadata/list/DeleteModuleRowAction";
 import hanldeModelSequenceFormViewChange from "../components/core/extension/solid-core/modelSequence/modelSequenceFormViewChangeHandler";
-import { DefaultDateTimeListWidget } from "../components/core/list/columns/SolidDateColumn";
+import { DefaultDateListWidget, DefaultDateTimeListWidget } from "../components/core/list/columns/SolidDateColumn";
 import dashboardFormViewChangeHandler from "../components/core/extension/solid-core/dashboard/dashboardFormViewChangeHandler";
 import dashboardQuestionFieldChangeHandler from "../components/core/extension/solid-core/dashboard/dashboardQuestionFieldChangeHandler";
 import dashboardQuestionOnFormLoadHandler from "../components/core/extension/solid-core/dashboard/dashboardQuestionOnFormLoadHandler";
+import MqMessageKanbanCardWidget from "../components/core/extension/solid-core/mqMessage/kanban/MqMessageKanbanCardWidget";
+import MediaCardWidget from "../components/core/extension/solid-core/media/card/MediaCardWidget";
+import { SolidChatterMessageCoModelEntityIdListViewWidget } from "../components/core/extension/solid-core/chatterMessage/list/SolidChatterMessageCoModelEntityIdListViewWidget";
+import { SolidMqMessageStageListViewWidget } from "../components/core/extension/solid-core/mqMessage/list/SolidMqMessageStageListViewWidget";
+import { SolidMqMessagesSummarizeListHeaderAction } from "../components/core/extension/solid-core/mqMessage/list/SolidMqMessagesSummarizeListHeaderAction";
+import { SolidChatterMessageCoModelEntityIdFormViewWidget } from "../components/core/extension/solid-core/chatterMessage/form/SolidChatterMessageCoModelEntityIdFormViewWidget";
+import { SolidLovTypeChangeFormEditWidget } from "../components/core/extension/solid-core/listOfValues/form/SolidLovTypeChangeFormEditWidget";
+import mqMessageOnFormLoadHandler from "../components/core/extension/solid-core/mqMessage/form/mqMessageOnFormLoadHandler";
+import { SolidMqMessageStageFormViewWIdget } from "../components/core/extension/solid-core/mqMessage/form/SolidMqMessageStageFormViewWIdget";
 
-type ExtensionComponentType = null | 'list_field_widget' | 'form_field_view_widget' | 'form_field_edit_widget' | 'list_row_action ' | 'list_header_action' | 'form_action' | 'form_widget';
+import {
+    ExtensionComponentTypes,
+    ExtensionFunctionTypes,
+    type ExtensionComponentType,
+    type ExtensionFunctionType,
+} from "../types/extension-registry";
+
 
 type ExtensionComponentMetadata = {
     component: React.ComponentType<any>;
@@ -59,10 +74,14 @@ type ExtensionComponentMetadata = {
     fieldType: string;
 }
 
+type ExtensionFunctionMetadata = {
+    fn: (...args: any[]) => any;
+    type: ExtensionFunctionType;
+}
 
 type ExtensionRegistry = {
     components: Record<string, ExtensionComponentMetadata>;
-    functions: Record<string, (...args: any[]) => any>;
+    functions: Record<string, ExtensionFunctionMetadata>;
 };
 
 const extensionRegistry: ExtensionRegistry = {
@@ -70,7 +89,7 @@ const extensionRegistry: ExtensionRegistry = {
     functions: {},
 };
 
-export const registerExtensionComponent = (name: string, component: React.ComponentType<any>, aliases: string[] = [], type: ExtensionComponentType = null, fieldType: string = '') => {
+export const registerExtensionComponent = (name: string, component: React.ComponentType<any>, type: ExtensionComponentType, aliases: string[] = [], fieldType: string = '') => {
     extensionRegistry.components[name] = { 'component': component, 'type': type, 'fieldType': fieldType };
     for (let i = 0; i < aliases.length; i++) {
         const alias = aliases[i];
@@ -78,8 +97,8 @@ export const registerExtensionComponent = (name: string, component: React.Compon
     }
 };
 
-export const registerExtensionFunction = (name: string, fn: (...args: any[]) => any) => {
-    extensionRegistry.functions[name] = fn;
+export const registerExtensionFunction = (name: string, fn: (...args: any[]) => any, type: ExtensionFunctionType) => {
+    extensionRegistry.functions[name] = { fn, type };
 };
 
 export const getExtensionComponent = (name: string): React.ComponentType<any> | null => {
@@ -102,147 +121,155 @@ export const getExtensionComponents = (type: ExtensionComponentType, fieldType: 
 };
 
 export const getExtensionFunction = (name: string) => {
-    return extensionRegistry.functions[name];
+    return extensionRegistry.functions[name]?.fn;
 };
 
 // # Extension components 
 // 1. list view columns field widget 
 // - shortText
-registerExtensionComponent("DefaultTextListWidget", DefaultTextListWidget, []);
+registerExtensionComponent("DefaultTextListWidget", DefaultTextListWidget, ExtensionComponentTypes.list_field_widget);
 
 // - shortText (image list)
-registerExtensionComponent("SolidShortTextFieldImageListWidget", SolidShortTextFieldImageListWidget, []);
+registerExtensionComponent("SolidShortTextFieldImageListWidget", SolidShortTextFieldImageListWidget, ExtensionComponentTypes.list_field_widget);
 
 // - longText
-registerExtensionComponent("SolidShortTextAvatarWidget", SolidShortTextAvatarWidget, []);
+registerExtensionComponent("SolidShortTextAvatarWidget", SolidShortTextAvatarWidget, ExtensionComponentTypes.list_field_widget);
 
 // - boolean
-registerExtensionComponent("DefaultBooleanListWidget", DefaultBooleanListWidget, []);
+registerExtensionComponent("DefaultBooleanListWidget", DefaultBooleanListWidget, ExtensionComponentTypes.list_field_widget);
 
 // - mediaSingle
-registerExtensionComponent("DefaultMediaSingleListWidget", DefaultMediaSingleListWidget, []);
+registerExtensionComponent("DefaultMediaSingleListWidget", DefaultMediaSingleListWidget, ExtensionComponentTypes.list_field_widget);
 
 // - mediaMultiple
-registerExtensionComponent("DefaultMediaMultipleListWidget", DefaultMediaMultipleListWidget, []);
+registerExtensionComponent("DefaultMediaMultipleListWidget", DefaultMediaMultipleListWidget, ExtensionComponentTypes.list_field_widget);
 
 // - relation.many2one
-registerExtensionComponent("DefaultRelationManyToOneListWidget", DefaultRelationManyToOneListWidget, []);
+registerExtensionComponent("DefaultRelationManyToOneListWidget", DefaultRelationManyToOneListWidget, ExtensionComponentTypes.list_field_widget);
 
 // - relation.many2one (avatar)
-registerExtensionComponent("SolidManyToOneRelationAvatarListWidget", SolidManyToOneRelationAvatarListWidget, []);
+registerExtensionComponent("SolidManyToOneRelationAvatarListWidget", SolidManyToOneRelationAvatarListWidget, ExtensionComponentTypes.list_field_widget);
 
 // - relation.many2many
-registerExtensionComponent("DefaultRelationManyToManyListWidget", DefaultRelationManyToManyListWidget, []);
+registerExtensionComponent("DefaultRelationManyToManyListWidget", DefaultRelationManyToManyListWidget, ExtensionComponentTypes.list_field_widget);
 
 // - relation.many2many (avatar)
-registerExtensionComponent("SolidManyToManyRelationAvatarListWidget", SolidManyToManyRelationAvatarListWidget, []);
+registerExtensionComponent("SolidManyToManyRelationAvatarListWidget", SolidManyToManyRelationAvatarListWidget, ExtensionComponentTypes.list_field_widget);
 
 // - relation.one2many
-registerExtensionComponent("DefaultRelationOneToManyListWidget", DefaultRelationOneToManyListWidget, []);
+registerExtensionComponent("DefaultRelationOneToManyListWidget", DefaultRelationOneToManyListWidget, ExtensionComponentTypes.list_field_widget);
 
 // - relation.datetime
-registerExtensionComponent('DefaultDateTimeListWidget', DefaultDateTimeListWidget, []);
+registerExtensionComponent('DefaultDateTimeListWidget', DefaultDateTimeListWidget, ExtensionComponentTypes.list_field_widget);
+// - date
+registerExtensionComponent('DefaultDateListWidget', DefaultDateListWidget, ExtensionComponentTypes.list_field_widget);
+// - datetime
+
+
+registerExtensionComponent("SolidChatterMessageCoModelEntityIdListViewWidget", SolidChatterMessageCoModelEntityIdListViewWidget, ExtensionComponentTypes.list_field_widget);
+registerExtensionComponent("SolidMqMessageStageListViewWidget", SolidMqMessageStageListViewWidget, ExtensionComponentTypes.list_field_widget);
+registerExtensionComponent("SolidMqMessagesSummarizeListHeaderAction", SolidMqMessagesSummarizeListHeaderAction, ExtensionComponentTypes.list_header_action);
 
 // ...
 
 
 // 2. form view field edit widget 
 // - shortText
-registerExtensionComponent("DefaultShortTextFormEditWidget", DefaultShortTextFormEditWidget, []);
+registerExtensionComponent("DefaultShortTextFormEditWidget", DefaultShortTextFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - shortText (masked)
-registerExtensionComponent("MaskedShortTextFormEditWidget", MaskedShortTextFormEditWidget, ["maskedShortTextEdit"]);
+registerExtensionComponent("MaskedShortTextFormEditWidget", MaskedShortTextFormEditWidget, ExtensionComponentTypes.form_field_edit_widget, ["maskedShortTextEdit"]);
 
 // - longText
-registerExtensionComponent("DefaultLongTextFormEditWidget", DefaultLongTextFormEditWidget, []);
+registerExtensionComponent("DefaultLongTextFormEditWidget", DefaultLongTextFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - longText (json editor)
-registerExtensionComponent("DynamicJsonEditorFormEditWidget", DynamicJsonEditorFormEditWidget, ["jsonEditor"]);
+registerExtensionComponent("DynamicJsonEditorFormEditWidget", DynamicJsonEditorFormEditWidget, ExtensionComponentTypes.form_field_edit_widget, ["jsonEditor"]);
 
 // - longText (json viewer)
-registerExtensionComponent("DynamicJsonEditorFormViewWidget", DynamicJsonEditorFormViewWidget, ["jsonViewer"]);
+registerExtensionComponent("DynamicJsonEditorFormViewWidget", DynamicJsonEditorFormViewWidget, ExtensionComponentTypes.form_field_view_widget, ["jsonViewer"]);
 
 // - longText (code editor)
-registerExtensionComponent("CodeEditorFormEditWidget", CodeEditorFormEditWidget, ["codeEditor"]);
+registerExtensionComponent("CodeEditorFormEditWidget", CodeEditorFormEditWidget, ExtensionComponentTypes.form_field_edit_widget, ["codeEditor"]);
 
 // - time
-registerExtensionComponent("DefaultTimeFormEditWidget", DefaultTimeFormEditWidget, []);
+registerExtensionComponent("DefaultTimeFormEditWidget", DefaultTimeFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - date
-registerExtensionComponent("DefaultDateFormEditWidget", DefaultDateFormEditWidget, []);
+registerExtensionComponent("DefaultDateFormEditWidget", DefaultDateFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - datetime
-registerExtensionComponent("DefaultDateTimeFormEditWidget", DefaultDateTimeFormEditWidget, []);
+registerExtensionComponent("DefaultDateTimeFormEditWidget", DefaultDateTimeFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - boolean
-registerExtensionComponent("DefaultBooleanFormEditWidget", DefaultBooleanFormEditWidget, ["booleanSelectbox"]);
+registerExtensionComponent("DefaultBooleanFormEditWidget", DefaultBooleanFormEditWidget, ExtensionComponentTypes.form_field_edit_widget, ["booleanSelectbox"]);
 
 // - boolean (checkbox)
-registerExtensionComponent("SolidBooleanCheckboxStyleFormEditWidget", SolidBooleanCheckboxStyleFormEditWidget, ["booleanCheckbox"]);
+registerExtensionComponent("SolidBooleanCheckboxStyleFormEditWidget", SolidBooleanCheckboxStyleFormEditWidget, ExtensionComponentTypes.form_field_edit_widget, ["booleanCheckbox"]);
 
 // - boolean (switch)
-registerExtensionComponent("SolidBooleanSwitchStyleFormEditWidget", SolidBooleanSwitchStyleFormEditWidget, []);
+registerExtensionComponent("SolidBooleanSwitchStyleFormEditWidget", SolidBooleanSwitchStyleFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - integer
-registerExtensionComponent("DefaultIntegerFormEditWidget", DefaultIntegerFormEditWidget, []);
+registerExtensionComponent("DefaultIntegerFormEditWidget", DefaultIntegerFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - integer (slider)
-registerExtensionComponent("SolidIntegerSliderStyleFormEditWidget", SolidIntegerSliderStyleFormEditWidget, ["integerSlider"]);
+registerExtensionComponent("SolidIntegerSliderStyleFormEditWidget", SolidIntegerSliderStyleFormEditWidget, ExtensionComponentTypes.form_field_edit_widget, ["integerSlider"]);
 
 // - decimal
-registerExtensionComponent("DefaultDecimalFormEditWidget", DefaultDecimalFormEditWidget, []);
+registerExtensionComponent("DefaultDecimalFormEditWidget", DefaultDecimalFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - email
-registerExtensionComponent("DefaultEmailFormEditWidget", DefaultEmailFormEditWidget, []);
+registerExtensionComponent("DefaultEmailFormEditWidget", DefaultEmailFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - json
-registerExtensionComponent("DefaultJsonFormEditWidget", DefaultJsonFormEditWidget, []);
+registerExtensionComponent("DefaultJsonFormEditWidget", DefaultJsonFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - password
-registerExtensionComponent("DefaultPasswordFormEditWidget", DefaultPasswordFormEditWidget, []);
+registerExtensionComponent("DefaultPasswordFormEditWidget", DefaultPasswordFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - password (create)
-registerExtensionComponent("DefaultPasswordFormCreateWidget", DefaultPasswordFormCreateWidget, []);
+registerExtensionComponent("DefaultPasswordFormCreateWidget", DefaultPasswordFormCreateWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - richText
-registerExtensionComponent("DefaultRichTextFormEditWidget", DefaultRichTextFormEditWidget, []);
+registerExtensionComponent("DefaultRichTextFormEditWidget", DefaultRichTextFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - selectionStatic (autocomplete)
-registerExtensionComponent("DefaultSelectionStaticAutocompleteFormEditWidget", DefaultSelectionStaticAutocompleteFormEditWidget, []);
+registerExtensionComponent("DefaultSelectionStaticAutocompleteFormEditWidget", DefaultSelectionStaticAutocompleteFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - selectionStatic (radio)
-registerExtensionComponent("SolidSelectionStaticRadioFormEditWidget", SolidSelectionStaticRadioFormEditWidget, []);
+registerExtensionComponent("SolidSelectionStaticRadioFormEditWidget", SolidSelectionStaticRadioFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - selectionStatic (selectButton)
-registerExtensionComponent("SolidSelectionStaticSelectButtonFormEditWidget", SolidSelectionStaticSelectButtonFormEditWidget, []);
+registerExtensionComponent("SolidSelectionStaticSelectButtonFormEditWidget", SolidSelectionStaticSelectButtonFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - selectionDynamic
-registerExtensionComponent("DefaultSelectionDynamicFormEditWidget", DefaultSelectionDynamicFormEditWidget, []);
+registerExtensionComponent("DefaultSelectionDynamicFormEditWidget", DefaultSelectionDynamicFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // mediaSingle
-registerExtensionComponent("DefaultMediaSingleFormEditWidget", DefaultMediaSingleFormEditWidget, []);
+registerExtensionComponent("DefaultMediaSingleFormEditWidget", DefaultMediaSingleFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // mediaMultiple
-registerExtensionComponent("DefaultMediaMultipleFormEditWidget", DefaultMediaMultipleFormEditWidget, []);
+registerExtensionComponent("DefaultMediaMultipleFormEditWidget", DefaultMediaMultipleFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - relation.many2one
-registerExtensionComponent("DefaultRelationManyToOneFormEditWidget", DefaultRelationManyToOneFormEditWidget, []);
+registerExtensionComponent("DefaultRelationManyToOneFormEditWidget", DefaultRelationManyToOneFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
-registerExtensionComponent("PseudoRelationManyToOneFormWidget", PseudoRelationManyToOneFormWidget, []);
+registerExtensionComponent("PseudoRelationManyToOneFormWidget", PseudoRelationManyToOneFormWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 
 // - relation.many2many (autocomplete)
-registerExtensionComponent("DefaultRelationManyToManyAutoCompleteFormEditWidget", DefaultRelationManyToManyAutoCompleteFormEditWidget, []);
+registerExtensionComponent("DefaultRelationManyToManyAutoCompleteFormEditWidget", DefaultRelationManyToManyAutoCompleteFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - relation.many2many (checkbox)
-registerExtensionComponent("DefaultRelationManyToManyCheckBoxFormEditWidget", DefaultRelationManyToManyCheckBoxFormEditWidget, []);
+registerExtensionComponent("DefaultRelationManyToManyCheckBoxFormEditWidget", DefaultRelationManyToManyCheckBoxFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - relation.many2many (list)
-registerExtensionComponent("DefaultRelationManyToManyListFormEditWidget", DefaultRelationManyToManyListFormEditWidget, []);
+registerExtensionComponent("DefaultRelationManyToManyListFormEditWidget", DefaultRelationManyToManyListFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // - relation.one2many
-registerExtensionComponent("DefaultRelationOneToManyFormEditWidget", DefaultRelationOneToManyFormEditWidget, []);
-registerExtensionComponent("PseudoRelationOneToManyFormWidget", PseudoRelationOneToManyFormWidget, []);
+registerExtensionComponent("DefaultRelationOneToManyFormEditWidget", DefaultRelationOneToManyFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
+registerExtensionComponent("PseudoRelationOneToManyFormWidget", PseudoRelationOneToManyFormWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // ...
 
@@ -253,102 +280,112 @@ registerExtensionComponent("PseudoRelationOneToManyFormWidget", PseudoRelationOn
 // - integer
 // - decimal
 // - email
-registerExtensionComponent("DefaultShortTextFormViewWidget", DefaultShortTextFormViewWidget, []);
+registerExtensionComponent("DefaultShortTextFormViewWidget", DefaultShortTextFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
 
 // - shortText (masked)
-registerExtensionComponent("MaskedShortTextFormViewWidget", MaskedShortTextFormViewWidget, ["maskedShortTextForm"]);
+registerExtensionComponent("MaskedShortTextFormViewWidget", MaskedShortTextFormViewWidget, ExtensionComponentTypes.form_field_view_widget, ["maskedShortTextForm"]);
 
 // - time
-registerExtensionComponent("DefaultTimeFormViewWidget", DefaultTimeFormViewWidget, []);
+registerExtensionComponent("DefaultTimeFormViewWidget", DefaultTimeFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
 
 // - date
-registerExtensionComponent("DefaultDateFormViewWidget", DefaultDateFormViewWidget, []);
+registerExtensionComponent("DefaultDateFormViewWidget", DefaultDateFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
 
 // - datetime
-registerExtensionComponent("DefaultDateTimeFormViewWidget", DefaultDateTimeFormViewWidget, []);
+registerExtensionComponent("DefaultDateTimeFormViewWidget", DefaultDateTimeFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
 
 // - boolean
-registerExtensionComponent("DefaultBooleanFormViewWidget", DefaultBooleanFormViewWidget, []);
+registerExtensionComponent("DefaultBooleanFormViewWidget", DefaultBooleanFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
 
 // - json
-registerExtensionComponent("DefaultJsonFormViewWidget", DefaultJsonFormViewWidget, []);
+registerExtensionComponent("DefaultJsonFormViewWidget", DefaultJsonFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
 
 // - password
-registerExtensionComponent("DefaultPasswordFormViewWidget", DefaultPasswordFormViewWidget, []);
+registerExtensionComponent("DefaultPasswordFormViewWidget", DefaultPasswordFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
 
 // - richText
-registerExtensionComponent("DefaultRichTextFormViewWidget", DefaultRichTextFormViewWidget, []);
+registerExtensionComponent("DefaultRichTextFormViewWidget", DefaultRichTextFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
 
 
 // - int
-registerExtensionComponent("DefaultIntegerFormViewWidget", DefaultIntegerFormViewWidget, []);
+registerExtensionComponent("DefaultIntegerFormViewWidget", DefaultIntegerFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
 
 // - Decimal
-registerExtensionComponent("DefaultDecimalFormViewWidget", DefaultDecimalFormViewWidget, []);
+registerExtensionComponent("DefaultDecimalFormViewWidget", DefaultDecimalFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
 
 // - selectionStatic
-registerExtensionComponent("DefaultSelectionStaticFormViewWidget", DefaultSelectionStaticFormViewWidget, []);
+registerExtensionComponent("DefaultSelectionStaticFormViewWidget", DefaultSelectionStaticFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
 
 // - selectionDynamic
-registerExtensionComponent("DefaultSelectionDynamicFormViewWidget", DefaultSelectionDynamicFormViewWidget, []);
+registerExtensionComponent("DefaultSelectionDynamicFormViewWidget", DefaultSelectionDynamicFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
 
 // mediaSingle
-registerExtensionComponent("DefaultMediaSingleFormViewWidget", DefaultMediaSingleFormViewWidget, []);
+registerExtensionComponent("DefaultMediaSingleFormViewWidget", DefaultMediaSingleFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
 
 //mediaMultiple
-registerExtensionComponent("DefaultMediaMultipleFormViewWidget", DefaultMediaMultipleFormViewWidget, []);
+registerExtensionComponent("DefaultMediaMultipleFormViewWidget", DefaultMediaMultipleFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
 
 // - relation.many2one
-registerExtensionComponent("DefaultRelationManyToOneFormViewWidget", DefaultRelationManyToOneFormViewWidget, []);
+registerExtensionComponent("DefaultRelationManyToOneFormViewWidget", DefaultRelationManyToOneFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
 
 // - relation.many2many
 // - relation.one2many
-registerExtensionComponent("DefaultRelationOneToManyFormViewWidget", DefaultRelationOneToManyFormViewWidget, []);
+registerExtensionComponent("DefaultRelationOneToManyFormViewWidget", DefaultRelationOneToManyFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
 
 // ...
 
 // 4. list row action 
-registerExtensionComponent("GenerateModelCodeRowAction", GenerateModelCodeRowAction, []);
-registerExtensionComponent("GenerateModuleCodeRowAction", GenerateModuleCodeRowAction, []);
-registerExtensionComponent("DeleteModelRowAction", DeleteModelRowAction, []);
-registerExtensionComponent("DeleteModuleRowAction", DeleteModuleRowAction, []);
+registerExtensionComponent("GenerateModelCodeRowAction", GenerateModelCodeRowAction, ExtensionComponentTypes.list_row_action);
+registerExtensionComponent("GenerateModuleCodeRowAction", GenerateModuleCodeRowAction, ExtensionComponentTypes.list_row_action);
+registerExtensionComponent("DeleteModelRowAction", DeleteModelRowAction, ExtensionComponentTypes.list_row_action);
+registerExtensionComponent("DeleteModuleRowAction", DeleteModuleRowAction, ExtensionComponentTypes.list_row_action);
 
 // 7. form widget 
-registerExtensionComponent("CustomHtml", CustomHtml, []);
+registerExtensionComponent("CustomHtml", CustomHtml, ExtensionComponentTypes.form_widget);
 
 // Common
-registerExtensionComponent("ChartFormPreviewWidget", ChartFormPreviewWidget, ["chart"]);
+registerExtensionComponent("ChartFormPreviewWidget", ChartFormPreviewWidget, ExtensionComponentTypes.form_widget, ["chart"]);
+
+registerExtensionComponent("SolidChatterMessageCoModelEntityIdFormViewWidget", SolidChatterMessageCoModelEntityIdFormViewWidget, ExtensionComponentTypes.form_field_view_widget);
+registerExtensionComponent("SolidLovTypeChangeFormEditWidget", SolidLovTypeChangeFormEditWidget, ExtensionComponentTypes.form_field_edit_widget);
 
 // Formview Default View widgets
-registerExtensionComponent("MaskedShortTextListViewWidget", MaskedShortTextListViewWidget, ["maskedShortTextList"]);
-registerExtensionComponent("PublishedStatusListViewWidget", PublishedStatusListViewWidget, ["publishedStatus"])
+registerExtensionComponent("MaskedShortTextListViewWidget", MaskedShortTextListViewWidget, ExtensionComponentTypes.list_field_widget, ["maskedShortTextList"]);
+registerExtensionComponent("PublishedStatusListViewWidget", PublishedStatusListViewWidget, ExtensionComponentTypes.list_field_widget, ["publishedStatus"])
 
 // Formview Custom view widgets
-registerExtensionComponent("SolidRelationFieldAvatarFormWidget", SolidRelationFieldAvatarFormWidget, []);
-registerExtensionComponent("SolidShortTextFieldAvatarWidget", SolidShortTextFieldAvatarWidget, []);
-registerExtensionComponent("SolidAiInteractionMetadataFieldFormWidget", SolidAiInteractionMetadataFieldFormWidget, []);
-registerExtensionComponent("SolidAiInteractionMessageFieldFormWidget", SolidAiInteractionMessageFieldFormWidget, []);
-registerExtensionComponent("SolidS3FileViewerWidget", SolidS3FileViewerWidget, []);
+registerExtensionComponent("SolidRelationFieldAvatarFormWidget", SolidRelationFieldAvatarFormWidget, ExtensionComponentTypes.form_field_view_widget);
+registerExtensionComponent("SolidShortTextFieldAvatarWidget", SolidShortTextFieldAvatarWidget, ExtensionComponentTypes.form_field_view_widget);
+registerExtensionComponent("SolidAiInteractionMetadataFieldFormWidget", SolidAiInteractionMetadataFieldFormWidget, ExtensionComponentTypes.form_field_view_widget);
+registerExtensionComponent("SolidAiInteractionMessageFieldFormWidget", SolidAiInteractionMessageFieldFormWidget, ExtensionComponentTypes.form_field_view_widget);
+registerExtensionComponent("SolidS3FileViewerWidget", SolidS3FileViewerWidget, ExtensionComponentTypes.form_field_view_widget);
 
 // RoleMetadata
-registerExtensionComponent("RolePermissionsManyToManyFieldWidget", RolePermissionsManyToManyFieldWidget, ["inputSwitch"]);
+registerExtensionComponent("RolePermissionsManyToManyFieldWidget", RolePermissionsManyToManyFieldWidget, ExtensionComponentTypes.form_field_edit_widget, ["inputSwitch"]);
 
 // Solid Google Material Symbols Icon
-registerExtensionComponent("SolidIconEditWidget", SolidIconEditWidget, []);
-registerExtensionComponent("SolidIconViewWidget", SolidIconViewWidget, []);
+registerExtensionComponent("SolidIconEditWidget", SolidIconEditWidget, ExtensionComponentTypes.form_field_edit_widget);
+registerExtensionComponent("SolidIconViewWidget", SolidIconViewWidget, ExtensionComponentTypes.form_field_view_widget);
+registerExtensionComponent("SolidMqMessageStageFormViewWIdget", SolidMqMessageStageFormViewWIdget, ExtensionComponentTypes.form_field_view_widget);
+
+// Kanban
+registerExtensionComponent("MqMessageKanbanCardWidget", MqMessageKanbanCardWidget, ExtensionComponentTypes.kanban_card_widget);
+registerExtensionComponent("MediaCardWidget", MediaCardWidget, ExtensionComponentTypes.card_widget);
+
 
 // # Extension functions 
 // Email Template
-registerExtensionFunction("emailFormTypeChangeHandler", hanldeEmailFormTypeChange);
-registerExtensionFunction("emailFormTypeLoad", hanldeEmailFormTypeLoad);
+registerExtensionFunction("emailFormTypeChangeHandler", hanldeEmailFormTypeChange, ExtensionFunctionTypes.onFieldChange);
+registerExtensionFunction("emailFormTypeLoad", hanldeEmailFormTypeLoad, ExtensionFunctionTypes.onFormLayoutLoad);
 
 // Dashboard
-registerExtensionFunction("dashboardFormViewChangeHandler", dashboardFormViewChangeHandler);
-registerExtensionFunction("dashboardQuestionFieldChangeHandler", dashboardQuestionFieldChangeHandler);
-registerExtensionFunction("dashboardQuestionOnFormLoadHandler", dashboardQuestionOnFormLoadHandler);
+registerExtensionFunction("dashboardFormViewChangeHandler", dashboardFormViewChangeHandler, ExtensionFunctionTypes.onFieldChange);
+registerExtensionFunction("dashboardQuestionFieldChangeHandler", dashboardQuestionFieldChangeHandler, ExtensionFunctionTypes.onFieldChange);
+registerExtensionFunction("dashboardQuestionOnFormLoadHandler", dashboardQuestionOnFormLoadHandler, ExtensionFunctionTypes.onFormLoad);
 
 // Model Sequence 
 // TODO: @Jyotsana you need to create an extension function which will be used "onFieldChange"
 // on change of module, apply a where clause on the model & field fields.. 
 // on change of model, apply a where clause on the field field...
-registerExtensionFunction("modelSequenceFormViewChangeHandler", hanldeModelSequenceFormViewChange);
+registerExtensionFunction("modelSequenceFormViewChangeHandler", hanldeModelSequenceFormViewChange, ExtensionFunctionTypes.onFieldChange);
+registerExtensionFunction("mqMessageOnFormLoadHandler", mqMessageOnFormLoadHandler, ExtensionFunctionTypes.onFormLoad);

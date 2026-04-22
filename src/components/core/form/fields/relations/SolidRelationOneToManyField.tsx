@@ -1,7 +1,6 @@
 
 import { SolidListView } from "../../../../../components/core/list/SolidListView";
 import { camelCase, capitalize } from "lodash";
-import { Dialog } from "primereact/dialog";
 import { useEffect, useState } from "react";
 import * as Yup from 'yup';
 import SolidFormView from '../../../../../components/core/form/SolidFormView';
@@ -10,13 +9,12 @@ import { usePathname } from "../../../../../hooks/usePathname";
 import { useRouter } from "../../../../../hooks/useRouter";
 import { getExtensionComponent } from "../../../../../helpers/registry";
 import { SolidFormFieldWidgetProps, SolidFormWidgetProps } from "../../../../../types/solid-core";
-import { Message } from "primereact/message";
-import FieldMetaData from "../../../../../components/core/model/FieldMetaData";
-import { Chip } from "primereact/chip";
 import { SolidFieldTooltip } from "../../../../../components/common/SolidFieldTooltip";
-import { Divider } from "primereact/divider";
-import { Button } from "primereact/button";
+import { SolidButton } from "../../../../shad-cn-ui/SolidButton";
+import { SolidDialog, SolidDialogBody, SolidDialogClose, SolidDialogHeader, SolidDialogTitle } from "../../../../shad-cn-ui/SolidDialog";
+import { SolidMessage } from "../../../../shad-cn-ui/SolidMessage";
 import { ERROR_MESSAGES } from "../../../../../constants/error-messages";
+import styles from "../solidFields.module.css";
 
 export type FormViewParams = {
     moduleName: any;
@@ -324,7 +322,7 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
         <div>
             {/* <div className="justify-content-center align-items-center"> */}
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
@@ -338,18 +336,35 @@ export const DefaultRelationOneToManyFormEditWidget = ({ formik, fieldContext }:
                 <RenderSolidFormEmbededView formik={formik} fieldContext={fieldContext} visibleCreateRelationEntity={visibleCreateRelationEntity} setvisibleCreateRelationEntity={setvisibleCreateRelationEntity} formViewParams={formViewParams} handlePopupClose={handlePopupClose}></RenderSolidFormEmbededView>
             }
 
-            <Dialog showHeader={false} headerClassName="py-2" contentClassName="px-0 pb-0" className="solid-confirm-dialog" contentStyle={{ borderRadius: 6 }} visible={showSaveParentEntityConfirmationPopup} style={{ width: '20vw' }} onHide={() => { if (!showSaveParentEntityConfirmationPopup) return; setShowSaveParentEntityConfirmationPopup(false); }}>
-                <div className="p-4">
-                    <p className="m-0 solid-primary-title" style={{ fontSize: 16 }}>
-                        Before Creating {fieldLabel} you need to save {solidFormViewMetaData?.data?.solidView?.model?.displayName ? solidFormViewMetaData?.data?.solidView?.model?.displayName : capitalize(fieldContext.modelName)}.
-                        Please click save if you wish to proceed ?
+            <SolidDialog
+                open={showSaveParentEntityConfirmationPopup}
+                onOpenChange={setShowSaveParentEntityConfirmationPopup}
+                className="solid-confirm-dialog solid-field-confirm-dialog"
+                style={{ width: "min(420px, calc(100vw - 2rem))" }}
+            >
+                <SolidDialogHeader className="solid-field-confirm-header">
+                    <SolidDialogTitle>Save Required</SolidDialogTitle>
+                    <SolidDialogClose />
+                </SolidDialogHeader>
+                <SolidDialogBody className="solid-field-confirm-dialog-body">
+                    <p className="solid-field-confirm-message">
+                        Before creating {fieldLabel}, you need to save{" "}
+                        {solidFormViewMetaData?.data?.solidView?.model?.displayName
+                            ? solidFormViewMetaData.data.solidView.model.displayName
+                            : capitalize(fieldContext.modelName)}
+                        . Please save first if you want to continue.
                     </p>
-                    <div className="flex align-items-center justify-content-start gap-2 mt-3">
-                        <Button label="Save" size="small" onClick={saveParentEntity} />
-                        <Button label="Cancel" size="small" onClick={() => setShowSaveParentEntityConfirmationPopup(false)} outlined className='bg-primary-reverse' />
-                    </div>
+                </SolidDialogBody>
+                <div className="solid-radix-dialog-footer solid-field-confirm-actions">
+                    <SolidButton label="Save" size="sm" onClick={saveParentEntity} autoFocus />
+                    <SolidButton
+                        label="Cancel"
+                        size="sm"
+                        onClick={() => setShowSaveParentEntityConfirmationPopup(false)}
+                        variant="outline"
+                    />
                 </div>
-            </Dialog>
+            </SolidDialog>
 
         </div>
     );
@@ -459,7 +474,7 @@ export const DefaultRelationOneToManyFormViewWidget = ({ formik, fieldContext }:
         <div>
             {/* <div className="justify-content-center align-items-center"> */}
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
                     {fieldMetadata.required && <span className="text-red-500"> *</span>}
                     <SolidFieldTooltip fieldContext={fieldContext} />
                 </label>
@@ -502,33 +517,29 @@ export const RenderSolidFormEmbededView = ({ fieldLayoutInfo, customCreateHandle
 
     return (
         <div className="many-to-many-add" >
-            {/* <Button icon="pi pi-plus"
+            {/* <Button icon="si si-plus"
                 rounded
                 outlined
                 aria-label="Filter"
                 type="button"
                 onClick={() => setvisibleCreateRelationEntity(true)}
             /> */}
-            <Dialog
-                header=""
-                showHeader={false}
-                visible={visibleCreateRelationEntity}
+            <SolidDialog
+                open={visibleCreateRelationEntity}
+                onOpenChange={setvisibleCreateRelationEntity}
                 className="solid-dialog"
                 style={{
                     width: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.width ?? "60vw",
                     height: fieldLayoutInfo?.attrs?.inlineCreateLayout?.attrs?.height ?? "auto"
                 }}
-                onHide={() => {
-                    if (!visibleCreateRelationEntity) return;
-                    setvisibleCreateRelationEntity(false);
-                }}
+                showHeader={false}
                 breakpoints={{ '1199px': '35rem', "767px": '85vw', "550px": '90vw' }}
 
             >
                 {params &&
                     <SolidFormView {...params} />
                 }
-            </Dialog>
+            </SolidDialog>
         </div>
     )
 }
@@ -672,7 +683,7 @@ export const PseudoRelationOneToManyFormWidget = ({ formData, field, fieldsMetad
         <div>
             {/* <div className="justify-content-center align-items-center"> */}
             {showFieldLabel != false &&
-                <label htmlFor={fieldLayoutInfo.attrs.name} className="form-field-label">{fieldLabel}
+                <label htmlFor={fieldLayoutInfo.attrs.name} className={`${styles.fieldLabel} form-field-label`}>{fieldLabel}
                     {/* {fieldMetadata.required && <span className="text-red-500"> *</span>} */}
                     {/* <SolidFieldTooltip fieldContext={fieldContext} /> */}
                 </label>

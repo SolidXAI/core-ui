@@ -69,9 +69,9 @@
 .SolidXAIListPanel {
     position: fixed !important;
     top: 0;
-    right: -380px;
+    right: -700px;
     /* Hidden by default */
-    width: 380px;
+    width: 700px;
     height: 100vh;
     transition: right 0.3s ease;
     z-index: 999;
