@@ -1,13 +1,13 @@
 export const ExtensionComponentTypes = {
-    list_field_widget: "list_field_widget",
-    list_row_action: "list_row_action",
-    list_header_action: "list_header_action",
-    form_field_view_widget: "form_field_view_widget",
-    form_field_edit_widget: "form_field_edit_widget",
-    form_action: "form_action",
-    form_widget: "form_widget",
-    kanban_card_widget: "kanban_card_widget",
-    card_widget: "card_widget",
+    listFieldWidget: "listFieldWidget",
+    listRowAction: "listRowAction",
+    listHeaderAction: "listHeaderAction",
+    formFieldViewWidget: "formFieldViewWidget",
+    formFieldEditWidget: "formFieldEditWidget",
+    formAction: "formAction",
+    formWidget: "formWidget",
+    kanbanCardWidget: "kanbanCardWidget",
+    cardWidget: "cardWidget",
 } as const;
 
 export type ExtensionComponentType =
