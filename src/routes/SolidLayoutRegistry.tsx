@@ -101,25 +101,62 @@ function resolveFirstChildTo(basePath: string, children: RouteObject[]): string 
   return `${basePath.replace(/\/$/, "")}/${concretePath}`;
 }
 
-function extractLayouts(routes: RouteObject[]): SolidLayoutEntry[] {
-  return routes
-    .filter((r) => !!r.path)
-    .map((r) => {
-      const handle = r.handle as SolidLayoutHandle | undefined;
+function inferPathFromChildren(children: RouteObject[]): string | undefined {
+  for (const child of children) {
+    // Absolute path → use root
+    if (child.path?.startsWith("/")) {
+      const root = child.path.split("/").filter(Boolean)[0];
+      return root ? `/${root}` : undefined;
+    }
 
-      const to = r.children?.length
-        ? resolveFirstChildTo(r.path!, r.children)
-        : r.path!; // 👈 fallback for standalone routes
+    // Relative path → use first segment
+    if (child.path) {
+      const root = child.path.split("/")[0];
+      return root ? `/${root}` : undefined;
+    }
 
-      return {
-        path: r.path!,
-        title: handle?.title ?? pathToTitle(r.path!),
-        description: handle?.description,
-        to,
-      };
-    });
+    // Nested
+    if (child.children?.length) {
+      const nested = inferPathFromChildren(child.children);
+      if (nested) return nested;
+    }
+  }
+
+  return undefined;
 }
 
+function extractLayouts(routes: RouteObject[]): SolidLayoutEntry[] {
+  const layouts: SolidLayoutEntry[] = [];
+  const seen = new Set<string>();
+
+  for (const route of routes) {
+    // ✅ Use explicit path OR infer from children
+    const basePath =
+      route.path ??
+      (route.children?.length
+        ? inferPathFromChildren(route.children)
+        : undefined);
+
+    if (!basePath || seen.has(basePath)) continue;
+
+    const handle = route.handle as SolidLayoutHandle | undefined;
+
+    const to = route.children?.length
+      ? resolveFirstChildTo(basePath, route.children)
+      : basePath;
+
+    layouts.push({
+      path: basePath,
+      title: handle?.title ?? pathToTitle(basePath),
+      description: handle?.description,
+      to,
+    });
+
+    seen.add(basePath);
+  }
+
+  return layouts;
+}
 // ── Provider (optional override) ──────────────────────────────────────────────
 
 /**
@@ -140,6 +177,8 @@ export function SolidLayoutRegistryProvider({
     </SolidLayoutRegistryContext.Provider>
   );
 }
+
+
 
 // ── Hook ──────────────────────────────────────────────────────────────────────
 
