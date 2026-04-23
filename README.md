@@ -5,8 +5,9 @@
 `@solidxai/core-ui` is the frontend counterpart to [`@solidxai/core`](https://www.npmjs.com/package/@solidxai/core). It ships a complete set of React components, Redux slices, RTK Query API integrations, route guards, and utility hooks designed to work with the SolidX backend platform — so you can build production-grade admin and data-management interfaces without rebuilding the same infrastructure on every project.
 
 [![npm version](https://img.shields.io/npm/v/@solidxai/core-ui)](https://www.npmjs.com/package/@solidxai/core-ui)
-[![License: BSL](https://img.shields.io/badge/License-BSL-blue.svg)](https://opensource.org/licenses/BSL-1.1)
+[![License: BSL-1.1](https://img.shields.io/badge/License-BSL--1.1-blue.svg)](https://mariadb.com/bsl11/)
 [![Documentation](https://img.shields.io/badge/docs-solidxai.com-blue)](https://docs.solidxai.com/docs)
+[![Discord](https://img.shields.io/badge/discord-online-brightgreen.svg)](https://discord.gg/yh4KZf8c)
 
 
 ## Why @solidxai/core-ui?
@@ -206,6 +207,7 @@ For full configuration options — environment variables, theming, extension poi
 | Website | [solidxai.com](https://solidxai.com) |
 | Documentation | [docs.solidxai.com](https://docs.solidxai.com/docs) |
 | Backend package | [@solidxai/core](https://www.npmjs.com/package/@solidxai/core) |
+| Discord | [discord.gg/yh4KZf8c](https://discord.gg/yh4KZf8c) |
 | Support | support@solidxai.com |
 
 ---

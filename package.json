@@ -12,7 +12,7 @@
   },
   "keywords": [],
   "author": "",
-  "license": "ISC",
+  "license": "BUSL-1.1",
   "description": "",
   "main": "dist/index.js",
   "types": "dist/index.d.ts",
