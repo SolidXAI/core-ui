@@ -13,7 +13,7 @@ import { DefaultDateTimeFormEditWidget, DefaultDateTimeFormViewWidget } from "..
 import { DefaultDecimalFormEditWidget, DefaultDecimalFormViewWidget } from "../components/core/form/fields/SolidDecimalField";
 import { DefaultEmailFormEditWidget } from "../components/core/form/fields/SolidEmailField";
 import { DefaultIntegerFormEditWidget, DefaultIntegerFormViewWidget, SolidIntegerSliderStyleFormEditWidget } from "../components/core/form/fields/SolidIntegerField";
-import { DefaultJsonFormEditWidget, DefaultJsonFormViewWidget } from "../components/core/form/fields/SolidJsonField";
+import { DefaultJsonFormEditWidget, DefaultJsonFormViewWidget, SolidJsonFormViewWidget } from "../components/core/form/fields/SolidJsonField";
 import { DefaultLongTextFormEditWidget, CodeEditorFormEditWidget, DynamicJsonEditorFormEditWidget, DynamicJsonEditorFormViewWidget, DynamicSelectionStaticEditWidget } from "../components/core/form/fields/SolidLongTextField";
 import { DefaultMediaMultipleFormEditWidget, DefaultMediaMultipleFormViewWidget } from "../components/core/form/fields/SolidMediaMultipleField";
 import { DefaultMediaSingleFormEditWidget, DefaultMediaSingleFormViewWidget } from "../components/core/form/fields/SolidMediaSingleField";
@@ -299,6 +299,7 @@ registerExtensionComponent("DefaultBooleanFormViewWidget", DefaultBooleanFormVie
 
 // - json
 registerExtensionComponent("DefaultJsonFormViewWidget", DefaultJsonFormViewWidget, ExtensionComponentTypes.formFieldViewWidget);
+registerExtensionComponent("SolidJsonFormViewWidget", SolidJsonFormViewWidget, ExtensionComponentTypes.formFieldViewWidget);
 
 // - password
 registerExtensionComponent("DefaultPasswordFormViewWidget", DefaultPasswordFormViewWidget, ExtensionComponentTypes.formFieldViewWidget);
