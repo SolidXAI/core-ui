@@ -3035,8 +3035,8 @@ body {
   left: -70px;
   background:
     radial-gradient(circle at center,
-      color-mix(in srgb, #a855f7 78%, #c084fc 22%) 0%,
-      color-mix(in srgb, #7c3aed 60%, transparent) 42%,
+      color-mix(in srgb, var(--primary-color, var(--primary)) 78%, white 22%) 0%,
+      color-mix(in srgb, var(--primary-color, var(--primary)) 60%, transparent) 42%,
       transparent 72%);
   opacity: 0.9;
 }
@@ -3048,8 +3048,8 @@ body {
   bottom: -170px;
   background:
     radial-gradient(circle at center,
-      color-mix(in srgb, #9333ea 68%, #6366f1 32%) 0%,
-      color-mix(in srgb, #6d28d9 58%, transparent) 46%,
+      color-mix(in srgb, var(--primary-color, var(--primary)) 68%, hsl(220 85% 60%) 32%) 0%,
+      color-mix(in srgb, var(--primary-color, var(--primary)) 58%, transparent) 46%,
       transparent 75%);
   opacity: 0.62;
 }
@@ -5328,15 +5328,15 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 }
 
 .solid-studio-home-card-icon--backend {
-  background: color-mix(in srgb, #722ED1 12%, transparent);
-  color: #722ED1;
-  border: 1px solid color-mix(in srgb, #722ED1 22%, transparent);
+  background: color-mix(in srgb, var(--primary-color, var(--primary)) 12%, transparent);
+  color: var(--primary-color, var(--primary));
+  border: 1px solid color-mix(in srgb, var(--primary-color, var(--primary)) 22%, transparent);
 }
 
 .solid-studio-home-card-icon--frontend {
-  background: color-mix(in srgb, #9043e0 12%, transparent);
-  color: #9043e0;
-  border: 1px solid color-mix(in srgb, #9043e0 22%, transparent);
+  background: color-mix(in srgb, var(--primary-color, var(--primary)) 14%, transparent);
+  color: color-mix(in srgb, var(--primary-color, var(--primary)) 84%, #0f172a);
+  border: 1px solid color-mix(in srgb, var(--primary-color, var(--primary)) 24%, transparent);
 }
 
 /* Text content */
@@ -6177,8 +6177,8 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 }
 
 .solid-field-selector-icon-violet {
-  background: color-mix(in srgb, #7c3aed 18%, transparent);
-  color: #4c1d95;
+  background: color-mix(in srgb, var(--primary-color, var(--primary)) 18%, transparent);
+  color: color-mix(in srgb, var(--primary-color, var(--primary)) 72%, #0f172a);
 }
 
 .solid-field-selector-icon-green {
