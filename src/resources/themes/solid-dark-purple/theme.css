@@ -7,8 +7,8 @@
   --surface-f: #18191D;
   --text-color: #FFFFFF;
   --text-color-secondary: rgba(255, 255, 255, 0.6);
-  --primary-color: #9B5AED;
-  --primary-color-text: #030712;
+  --primary-color: var(--primary);
+  --primary-color-text: var(--primary-foreground, #030712);
   --surface-0: #161616;
   --surface-50: #18191D;
   --surface-100: #374151;
@@ -39,7 +39,7 @@
   --surface-overlay: #18191D;
   --surface-border: rgba(255, 255, 255, 0.1);
   --surface-hover: rgba(255, 255, 255, 0.03);
-  --focus-ring: 0 0 0 0.2rem rgba(176, 126, 255, 0.4);
+  --focus-ring: 0 0 0 0.2rem var(--ring, rgba(96, 165, 250, 0.35));
   --maskbg: rgba(0, 0, 0, 0.4);
   --primary-light-color: rgba(216, 226, 234, 0.08);
   --highlight-bg: rgba(140, 100, 255, 0.18);
@@ -106,8 +106,8 @@
   --purple-100: #dbc4f5;
   --purple-200: #c299ee;
   --purple-300: #a96ee7;
-  --purple-400: #9043e0;
-  --purple-500: #722ED1;
+  --purple-400: color-mix(in srgb, var(--primary-color, var(--primary)) 84%, #0f172a);
+  --purple-500: var(--primary-color, var(--primary));
   --purple-600: #5f24b3;
   --purple-700: #4c1b94;
   --purple-800: #391275;
@@ -1410,7 +1410,7 @@
   }
 
   .p-radiobutton.p-highlight .p-radiobutton-box {
-    border-color: #722ED1;
+    border-color: var(--primary-color, var(--primary));
     background: #ffffff;
   }
 
