@@ -221,7 +221,7 @@ export const SolidFormStepper = (props: Props) => {
                                 <SolidIcon name="si-ellipsis-h" />
                             </button>
                         </SolidPopoverTrigger>
-                        <SolidPopoverContent className="solid-custom-overlay solid-form-stepper-overlay">
+                        <SolidPopoverContent align="start" className="solid-custom-overlay solid-form-stepper-overlay">
                             <div style={{ display: 'flex', flexDirection: 'column', gap: '0.25rem', padding: '0.5rem' }}>
                                 {previousSteps.map((step: any, index: number) => {
                                     const stepIndex = index;
