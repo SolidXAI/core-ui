@@ -1,7 +1,8 @@
 // @ts-nocheck
 import React from "react";
 import { useRouter } from "../../../hooks/useRouter";
-import { Draggable, DraggableProvided } from "@hello-pangea/dnd";
+import { DraggableProvided } from "@hello-pangea/dnd";
+import { CompatibleDraggable } from "../common/dndCompat";
 import {
   SolidDropdownMenu,
   SolidDropdownMenuContent,
@@ -72,7 +73,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
   }
 
   return (
-    <Draggable draggableId={String(data.id)} index={index} isDragDisabled={isDragDisabled}>
+    <CompatibleDraggable draggableId={String(data.id)} index={index} isDragDisabled={isDragDisabled}>
       {(provided: DraggableProvided, snapshot) => (
         <div
           className=""
@@ -116,7 +117,7 @@ const KanbanCard: React.FC<KanbanCardProps> = ({ data, solidKanbanViewMetaData, 
           </div>
         </div>
       )}
-    </Draggable>
+    </CompatibleDraggable>
   );
 };
 

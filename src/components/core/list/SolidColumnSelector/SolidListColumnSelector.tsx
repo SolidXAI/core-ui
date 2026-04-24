@@ -2,10 +2,11 @@ import { useFormik } from 'formik';
 import React, { useState } from 'react'
 import { useDispatch } from 'react-redux';
 import { createSolidEntityApi } from '../../../../redux/api/solidEntityApi';
-import { DragDropContext, Droppable, Draggable, DropResult } from '@hello-pangea/dnd';
+import { DragDropContext, DropResult } from '@hello-pangea/dnd';
 import styles from './SolidListColumnSelector.module.css'
 import { ERROR_MESSAGES } from '../../../../constants/error-messages';
 import { showToast } from '../../../../redux/features/toastSlice';
+import { asCompatibleReactNode, CompatibleDraggable, CompatibleDroppable } from '../../common/dndCompat';
 
 interface FieldMetadata {
     displayName: string;
@@ -101,11 +102,11 @@ export const SolidListColumnSelector = ({ listViewMetaData, onClose }: any) => {
                 .map(({ key }) => {
                     const existingChild = currentChildren.find((child: any) => child.attrs.name === key);
                     if (existingChild) return existingChild;
-                
+
                     // @ts-ignore
                     const fieldType = allFieldMeta[key]?.type;
-                    const isTextType = fieldType === "shortText" || fieldType === "longText" || fieldType ==="selectionStatic" || fieldType ==="selectionDynamic";
-                
+                    const isTextType = fieldType === "shortText" || fieldType === "longText" || fieldType === "selectionStatic" || fieldType === "selectionDynamic";
+
                     return {
                         type: 'field',
                         attrs: {
@@ -115,7 +116,7 @@ export const SolidListColumnSelector = ({ listViewMetaData, onClose }: any) => {
                         },
                     };
                 });
-                
+
             // Now build updated solidView
             const updatedView = {
                 layout: {
@@ -155,8 +156,8 @@ export const SolidListColumnSelector = ({ listViewMetaData, onClose }: any) => {
         <>
             <form onSubmit={formik.handleSubmit} className="flex flex-column gap-1 px-0">
                 <DragDropContext onDragEnd={onDragEnd} onDragStart={() => setIsDragging(true)}>
-                    <Droppable droppableId="columns">
-                        {(provided): React.ReactElement => (
+                    <CompatibleDroppable droppableId="columns">
+                        {(provided): any => (
                             <div
                                 {...provided.droppableProps}
                                 ref={provided.innerRef}
@@ -164,8 +165,8 @@ export const SolidListColumnSelector = ({ listViewMetaData, onClose }: any) => {
                                 style={{ maxHeight: 400, overflowY: 'auto' }}
                             >
                                 {fields.map((column, index) => (
-                                    <Draggable key={column.key} draggableId={column.key} index={index}>
-                                        {(provided, snapshot): React.ReactElement => (
+                                    <CompatibleDraggable key={column.key} draggableId={column.key} index={index}>
+                                        {(provided, snapshot): any => (
                                             <div
                                                 ref={provided.innerRef}
                                                 {...provided.draggableProps}
@@ -199,12 +200,12 @@ export const SolidListColumnSelector = ({ listViewMetaData, onClose }: any) => {
                                                 <DragActive active={snapshot.isDragging} />
                                             </div>
                                         )}
-                                    </Draggable>
+                                    </CompatibleDraggable>
                                 ))}
-                                {provided.placeholder}
+                                {asCompatibleReactNode(provided.placeholder)}
                             </div>
                         )}
-                    </Droppable>
+                    </CompatibleDroppable>
                 </DragDropContext>
                 <div className="solid-column-selector-actions">
                     <button type='submit' className="solid-compact-action-button solid-compact-action-button-primary">Apply</button>
