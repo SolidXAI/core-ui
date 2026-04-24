@@ -1553,6 +1553,10 @@ body {
   justify-content: flex-start;
 }
 
+.solid-tabs-list-inner {
+  width: 100%;
+}
+
 .solid-tabs--center .solid-tabs-list {
   justify-content: center;
 }
@@ -2407,7 +2411,7 @@ body {
 }
 
 .solid-auth-theme-wrapper .solid-auth-tabs-list {
-  display: grid !important;
+  /* display: grid !important; */
   grid-template-columns: 1fr 1fr !important;
   gap: 4px !important;
   padding: 3px !important;

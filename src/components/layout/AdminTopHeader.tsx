@@ -91,6 +91,32 @@ export const AdminTopHeader = () => {
     window.dispatchEvent(new CustomEvent(SIDEBAR_TOGGLE_EVENT));
   };
 
+  const handleBreadcrumbClick = (crumbIndex: number) => {
+    // When on a form view, clicking the model name (second crumb) should navigate back to list
+    // Index 1 is the model name in a breadcrumb like: Module > Model > Action
+    if (crumbIndex === 1 && showBack) {
+      if (typeof window !== "undefined") {
+        // First, try to use the full stored URL (preserves all query params)
+        const storedFullUrl = sessionStorage.getItem("fromViewUrl");
+        if (storedFullUrl) {
+          router.push(storedFullUrl);
+          return;
+        }
+      }
+      
+      // Fallback: construct URL from current path and stored view
+      const segments = pathname.split("/").filter(Boolean);
+      if (segments[0] === "admin" && segments[1] === "core") {
+        const moduleName = segments[2];
+        const modelName = segments[3];
+        const fromView = typeof window !== "undefined" 
+          ? sessionStorage.getItem("fromView") || "list" 
+          : "list";
+        router.push(`/admin/core/${moduleName}/${modelName}/${fromView}`);
+      }
+    }
+  };
+
   return (
     <header className="solid-admin-header">
       <div className="solid-admin-header-inner">
@@ -113,7 +139,18 @@ export const AdminTopHeader = () => {
           {crumbs.map((crumb, index) => (
             <span key={`${crumb}-${index}`} className="solid-admin-crumb">
               {index > 0 && <span className="solid-admin-crumb-sep">›</span>}
-              <span>{crumb}</span>
+              {index === 1 && showBack ? (
+                <button
+                  type="button"
+                  className="solid-admin-crumb-link"
+                  onClick={() => handleBreadcrumbClick(index)}
+                  style={{ background: "none", border: "none", cursor: "pointer", color: "inherit", textDecoration: "underline" }}
+                >
+                  {crumb}
+                </button>
+              ) : (
+                <span>{crumb}</span>
+              )}
             </span>
           ))}
         </nav>
