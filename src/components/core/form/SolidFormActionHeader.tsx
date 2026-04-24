@@ -317,7 +317,8 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     }
                                 </div>
                                 {params.embeded == true &&
-                                    actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) &&
+                                    (actionsAllowed.includes(`${permissionExpression(params.modelName, 'create')}`) || 
+                                    actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`)) &&
                                     !formViewLayout.attrs.readonly &&
                                     formik.dirty &&
                                     <div>
@@ -476,6 +477,37 @@ export const SolidFormActionHeader = ({ formik, params, actionsAllowed, formView
                                     <div>
                                         <SolidButton label="Save" size="sm" type="submit" className="hidden lg:flex" loading={isSubmitting} disabled={isSubmitting} />
                                         <SolidButton size="sm" type="submit" className="lg:hidden solid-icon-button" icon="si si-check" loading={isSubmitting} disabled={isSubmitting} />
+                                    </div>
+                                }
+
+                                {
+                                    params.embeded == true &&
+                                    actionsAllowed.includes(`${permissionExpression(params.modelName, 'update')}`) &&
+                                    !formViewLayout.attrs.readonly &&
+                                    formik.dirty &&
+                                    <div>
+                                        <SolidButton
+                                            label="Save"
+                                            size="sm"
+                                            onClick={() => {
+                                                setRedirectToList(params.redirectToPath ? true : false);
+                                            }}
+                                            type="submit"
+                                            className="hidden lg:flex"
+                                            loading={isSubmitting}
+                                            disabled={isSubmitting}
+                                        />
+                                        <SolidButton
+                                            size="sm"
+                                            onClick={() => {
+                                                setRedirectToList(params.redirectToPath ? true : false);
+                                            }}
+                                            type="submit"
+                                            className="lg:hidden solid-icon-button"
+                                            icon="si si-check"
+                                            loading={isSubmitting}
+                                            disabled={isSubmitting}
+                                        />
                                     </div>
                                 }
 

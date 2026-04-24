@@ -43,7 +43,7 @@ export function SolidTabGroup({
         role="tablist"
         style={extra ? { display: "flex", alignItems: "center", justifyContent: "space-between" } : undefined}
       >
-        <div style={extra ? { display: "flex" } : undefined}>
+        <div style={extra ? { display: "flex" } : undefined} className={listClassName + ' w-full'}>
         {tabs.map((tab) => {
           const isActive = tab.value === value;
           return (

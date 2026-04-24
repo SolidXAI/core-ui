@@ -2198,7 +2198,10 @@ li.header-li-px {
   border-radius: 8px;
   font-size: 0.76rem;
   font-weight: 500;
-  white-space: nowrap;
+  white-space: normal;
+  word-break: break-word;
+  overflow: visible;
+  text-overflow: clip;
 }
 
 .overlay-step-button:hover {
@@ -4353,8 +4356,8 @@ li.header-li-px {
 
 .solid-form-stepper-overlay {
   width: max-content;
-  min-width: 208px;
-  max-width: min(320px, calc(100vw - 40px));
+  min-width: 150px;
+  max-width: min(400px, calc(100vw - 40px));
 }
 
 .solid-form-stepper-overlay > div {

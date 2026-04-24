@@ -2407,7 +2407,7 @@ body {
 }
 
 .solid-auth-theme-wrapper .solid-auth-tabs-list {
-  display: grid !important;
+  /* display: grid !important; */
   grid-template-columns: 1fr 1fr !important;
   gap: 4px !important;
   padding: 3px !important;
