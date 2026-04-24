@@ -39,7 +39,7 @@ export { SolidDateField } from './components/core/form/fields/SolidDateField';
 export { SolidDateTimeField } from './components/core/form/fields/SolidDateTimeField';
 export { SolidDecimalField } from './components/core/form/fields/SolidDecimalField';
 export { SolidIntegerField } from './components/core/form/fields/SolidIntegerField';
-export { SolidJsonField } from './components/core/form/fields/SolidJsonField';
+export { SolidJsonField, SolidJsonFormViewWidget } from './components/core/form/fields/SolidJsonField';
 export { SolidLongTextField } from './components/core/form/fields/SolidLongTextField';
 export { SolidMediaMultipleField } from './components/core/form/fields/SolidMediaMultipleField';
 export { SolidMediaSingleField } from './components/core/form/fields/SolidMediaSingleField';

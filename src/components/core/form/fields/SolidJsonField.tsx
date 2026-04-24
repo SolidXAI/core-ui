@@ -184,3 +184,43 @@ export const DefaultJsonFormViewWidget = ({ formik, fieldContext }: SolidFormFie
         </div>
     );
 }
+
+
+const stringifyJsonValue = (value: any): string => {
+    if (value == null) return '';
+    if (typeof value === 'string') return value;
+    try {
+        return JSON.stringify(value, null, 2);
+    } catch {
+        return String(value);
+    }
+};
+
+export const SolidJsonFormViewWidget = ({ formik, fieldContext }: SolidFormFieldWidgetProps) => {
+    const fieldMetadata = fieldContext.fieldMetadata;
+    const fieldLayoutInfo = fieldContext.field;
+    const fieldLabel = fieldLayoutInfo.attrs.label ?? fieldMetadata.displayName;
+    const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
+    const text = stringifyJsonValue(formik.values[fieldLayoutInfo.attrs.name]);
+
+    return (
+        <div className={styles.fieldViewWrapper}>
+            {showFieldLabel !== false && (
+                <p className={`${styles.fieldViewLabel} form-field-label`}>{fieldLabel}</p>
+            )}
+            <pre
+                className={styles.fieldViewValue}
+                style={{
+                    whiteSpace: 'pre-wrap',
+                    wordBreak: 'break-word',
+                    overflowWrap: 'anywhere',
+                    maxWidth: '100%',
+                    margin: 0,
+                    fontFamily: 'inherit',
+                }}
+            >
+                {text}
+            </pre>
+        </div>
+    );
+}
