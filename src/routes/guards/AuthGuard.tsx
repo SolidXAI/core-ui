@@ -10,8 +10,20 @@ export function AuthGuard({ getLoginRoute }: AuthGuardProps) {
   const { status } = useSession();
 
   const defaultGetLoginRoute = (pathname: string) => {
-    // Always redirect to the standard login route
-    return "/auth/login";
+    const segments = pathname.split("/").filter(Boolean);
+
+    if (segments.length === 0) return "/auth/login";
+
+    const base = segments[0];
+
+    // routes that should NOT be treated as tenant
+    const systemRoutes = ["admin", "auth"];
+
+    if (systemRoutes.includes(base)) {
+      return "/auth/login";
+    }
+
+    return `/${base}/auth/login`;
   };
 
   const resolveLoginRoute = getLoginRoute || defaultGetLoginRoute;
