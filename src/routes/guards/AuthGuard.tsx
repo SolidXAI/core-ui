@@ -16,7 +16,12 @@ export function AuthGuard({ getLoginRoute }: AuthGuardProps) {
 
     const base = segments[0];
 
-    if (base === "auth") return "/auth/login";
+    // routes that should NOT be treated as tenant
+    const systemRoutes = ["admin", "auth"];
+
+    if (systemRoutes.includes(base)) {
+      return "/auth/login";
+    }
 
     return `/${base}/auth/login`;
   };
