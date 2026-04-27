@@ -115,6 +115,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 onBlur={formik.handleBlur}
                                 aria-invalid={!!isFormFieldValid(formik, "identifier")}
                                 className="w-full"
+                                autoComplete="off"
                             />
                             {isFormFieldValid(formik, "identifier") && (
                                 <SolidMessage
@@ -137,6 +138,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 toggle
                                 className="w-full"
                                 aria-invalid={!!isFormFieldValid(formik, "password")}
+                                autoComplete="off"
                             />
                             {isFormFieldValid(formik, "password") && (
                                 <SolidMessage
@@ -315,6 +317,7 @@ const SolidLogin = ({ signInValidatorLabel, signInValidatorPlaceholder }: any) =
                                 onBlur={formik.handleBlur}
                                 aria-invalid={!!isFormFieldValid(formik, "identifier")}
                                 className="w-full"
+                                autoComplete="off"
                             />
                             {isFormFieldValid(formik, "identifier") && (
                                 <SolidMessage
