@@ -1861,13 +1861,13 @@ li.header-li-px {
   background: color-mix(in srgb, var(--muted) 20%, var(--card) 80%);
   color: var(--muted-foreground);
   white-space: nowrap;
-  padding: 0.6rem 0.35rem;
+  padding: 0.6rem 0.38rem;
   border-radius: 999px;
   border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
   display: inline-block;
   writing-mode: vertical-rl;
   transform: rotate(180deg);
-  width: 24px;
+  width: 28px;
   cursor: pointer;
   transition: background 0.18s ease, color 0.18s ease, border-color 0.18s ease;
 }
@@ -2070,7 +2070,7 @@ li.header-li-px {
 
 .arrow-step-button {
   position: relative;
-  padding: 0.44rem 1.15rem;
+  padding: 0.55rem 1.30rem;
   border: none;
   background: color-mix(in srgb, var(--muted) 22%, var(--card) 78%);
   color: color-mix(in srgb, var(--foreground) 72%, transparent);
@@ -2079,7 +2079,7 @@ li.header-li-px {
   transition: all 0.3s ease;
   min-width: 96px;
   white-space: nowrap;
-  font-size: 0.72rem;
+  font-size: 0.75rem;
   line-height: 1.2;
   clip-path: polygon(0 0, calc(100% - 12px) 0, 100% 50%, calc(100% - 12px) 100%, 0 100%, 12px 50%);
   margin-right: -10px;
@@ -2156,7 +2156,7 @@ li.header-li-px {
 }
 
 .overflow-button {
-  padding: 0.35rem 0.5rem;
+  padding: 0.56rem 0.5rem;
   min-width: 2.25rem;
   height: 100%;
   border: 1px solid color-mix(in srgb, var(--border) 84%, transparent);
@@ -2188,7 +2188,7 @@ li.header-li-px {
 
 .overlay-step-button {
   width: 100%;
-  padding: 0.45rem 0.75rem;
+  padding: 0.70rem 0.85rem;
   border: none;
   background: transparent;
   text-align: left;
