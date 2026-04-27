@@ -170,6 +170,7 @@ const SolidRegister = () => {
                                             onChange={formik.handleChange}
                                             value={formik.values.firstName}
                                             aria-invalid={!!formik.errors.firstName}
+                                            autoComplete="off"
                                         />
                                         {isFormFieldValid(formik, "firstName") && (
                                             <SolidMessage severity="error" text={formik.errors.firstName?.toString()} />
@@ -185,6 +186,7 @@ const SolidRegister = () => {
                                             onChange={formik.handleChange}
                                             value={formik.values.lastName}
                                             aria-invalid={!!formik.errors.lastName}
+                                            autoComplete="off"
                                         />
                                         {isFormFieldValid(formik, "lastName") && (
                                             <SolidMessage severity="error" text={formik.errors.lastName?.toString()} />
@@ -205,6 +207,7 @@ const SolidRegister = () => {
                                             onChange={formik.handleChange}
                                             value={formik.values.username}
                                             aria-invalid={!!formik.errors.username}
+                                            autoComplete="off"
                                         />
                                     </div>
                                     {isFormFieldValid(formik, "username") &&
@@ -224,6 +227,7 @@ const SolidRegister = () => {
                                     onChange={formik.handleChange}
                                     value={formik.values.email}
                                     aria-invalid={!!formik.errors.email}
+                                    autoComplete="off"
                                 />
                             </div>
                             {isFormFieldValid(formik, "email") &&
@@ -242,6 +246,7 @@ const SolidRegister = () => {
                                     toggle
                                     className="w-full"
                                     aria-invalid={!!formik.errors.password}
+                                    autoComplete="off"
                                 />
                             </div>
                             {isFormFieldValid(formik, "password") &&
@@ -322,6 +327,7 @@ const SolidRegister = () => {
                                 onChange={formik.handleChange}
                                 value={formik.values.username}
                                 aria-invalid={!!formik.errors.username}
+                                autoComplete="off"
                             />
                             {isFormFieldValid(formik, "username") && <SolidMessage
                                 className="text-red-500 text-sm"
@@ -338,6 +344,7 @@ const SolidRegister = () => {
                                 onChange={formik.handleChange}
                                 value={formik.values.email}
                                 aria-invalid={!!formik.errors.email}
+                                autoComplete="off"
                             />
                             {isFormFieldValid(formik, "email") && <SolidMessage
                                 className="text-red-500 text-sm"
