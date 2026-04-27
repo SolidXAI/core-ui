@@ -60,7 +60,7 @@ export class SolidIntegerField implements ISolidField {
             schema = schema.min(fieldMetadata.min, ERROR_MESSAGES.FIELD_MINIMUM_CHARACTER(fieldLabel, fieldMetadata.min));
         }
         if (fieldMetadata.max && fieldMetadata.max > 0) {
-            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel,fieldMetadata.max));
+            schema = schema.max(fieldMetadata.max, ERROR_MESSAGES.FIELD_MAXIMUM_CHARACTER(fieldLabel, fieldMetadata.max));
         }
         return schema;
     }
@@ -147,6 +147,7 @@ export const DefaultIntegerFormEditWidget = ({ formik, fieldContext }: SolidForm
 
     const fieldDisabled = fieldLayoutInfo.attrs?.disabled;
     const fieldReadonly = fieldLayoutInfo.attrs?.readonly;
+    const autoComplete = fieldLayoutInfo?.attrs?.autoComplete || 'on';
 
     const formDisabled = solidFormViewMetaData.data.solidView?.layout?.attrs?.disabled;
     const formReadonly = solidFormViewMetaData.data.solidView?.layout?.attrs?.readonly;
@@ -171,6 +172,7 @@ export const DefaultIntegerFormEditWidget = ({ formik, fieldContext }: SolidForm
                         formik.setFieldValue(fieldLayoutInfo.attrs.name, nextVal);
                     }}
                     value={formik.values[fieldLayoutInfo.attrs.name] || ''}
+                    autoComplete={autoComplete}
                 />
             </div>
             {isFormFieldValid(formik, fieldLayoutInfo.attrs.name) && (
