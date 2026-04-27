@@ -74,6 +74,7 @@ const SolidForgotPassword = ({ signInValidatorLabel, signInValidatorPlaceholder 
                             value={formik.values.email}
                             onChange={formik.handleChange}
                             onBlur={formik.handleBlur}
+                            autoComplete="off"
                         />
                         {isFormFieldValid(formik, "email") && (
                             <SolidMessage
