@@ -8,7 +8,7 @@ type MqMessageStageBadgeProps = {
 
 const STAGE_TONES: Record<string, { backgroundColor: string; color: string; borderColor: string; dotColor: string }> = {
     pending: { backgroundColor: "#6b7280", color: "#fff", borderColor: "rgba(107, 114, 128, 0.18)", dotColor: "#d1d5db" },
-    scheduled: { backgroundColor: "#3b82f6", color: "#fff", borderColor: "rgba(59, 130, 246, 0.18)", dotColor: "#dbeafe" },
+    scheduled: { backgroundColor: "#722ED1", color: "#fff", borderColor: "rgba(114, 46, 209, 0.18)", dotColor: "#efdbff" },
     started: { backgroundColor: "#eab308", color: "#111827", borderColor: "rgba(234, 179, 8, 0.22)", dotColor: "#fef08a" },
     retry: { backgroundColor: "#f97316", color: "#fff", borderColor: "rgba(249, 115, 22, 0.18)", dotColor: "#fed7aa" },
     retrying: { backgroundColor: "#ea580c", color: "#fff", borderColor: "rgba(234, 88, 12, 0.18)", dotColor: "#fdba74" },

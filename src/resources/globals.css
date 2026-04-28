@@ -5784,7 +5784,7 @@ html.dark .solid-empty-listview-header,
 [data-theme="dark"] .solid-empty-listview-header {
   padding: 18px 22px 14px;
   border-bottom-color: color-mix(in srgb, var(--border) 70%, #334155 30%);
-  background: linear-gradient(180deg, rgba(96, 165, 250, 0.05), transparent);
+  background: linear-gradient(180deg, rgba(179, 127, 235, 0.05), transparent);
 }
 
 html.dark .solid-empty-listview-header-title,

@@ -81,8 +81,7 @@
 }
 
 .solidModuleHomeActionCard:hover {
-    background: var(--hightlight-bg-secondary);
-    box-shadow: 0px 4px 8px 1px rgba(167, 167, 167, 0.16);
+    background-color: var(--solid-surface-elevated);
 }
 
 .solidModuleHomeActionCardSvgWrapper {

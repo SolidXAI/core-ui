@@ -39,7 +39,7 @@
   --surface-overlay: #18191D;
   --surface-border: rgba(255, 255, 255, 0.1);
   --surface-hover: rgba(255, 255, 255, 0.03);
-  --focus-ring: 0 0 0 0.2rem var(--ring, rgba(96, 165, 250, 0.35));
+  --focus-ring: 0 0 0 0.2rem var(--ring, rgba(179, 127, 235, 0.35));
   --maskbg: rgba(0, 0, 0, 0.4);
   --primary-light-color: rgba(216, 226, 234, 0.08);
   --highlight-bg: rgba(140, 100, 255, 0.18);
@@ -102,16 +102,6 @@
   --yellow-700: #a47d06;
   --yellow-800: #816204;
   --yellow-900: #5e4803;
-  --purple-50: #f3fbfd;
-  --purple-100: #dbc4f5;
-  --purple-200: #c299ee;
-  --purple-300: #a96ee7;
-  --purple-400: color-mix(in srgb, var(--primary-color, var(--primary)) 84%, #0f172a);
-  --purple-500: var(--primary-color, var(--primary));
-  --purple-600: #5f24b3;
-  --purple-700: #4c1b94;
-  --purple-800: #391275;
-  --purple-900: #260955;
   --pink-50: #fef6fa;
   --pink-100: #fad3e7;
   --pink-200: #f7b0d3;
@@ -182,16 +172,16 @@
   --red-700: #b32b23;
   --red-800: #8c221c;
   --red-900: #661814;
-  --primary-50: #f4fdfe;
-  --primary-100: #caf4fb;
-  --primary-200: #a0ecf8;
-  --primary-300: #76e4f4;
-  --primary-400: #4cdbf1;
-  --primary-500: #9B5AED;
-  --primary-600: #1db3ca;
-  --primary-700: #1894a7;
-  --primary-800: #137483;
-  --primary-900: #0e545f;
+  --primary-50: #f9f0ff;
+  --primary-100: #efdbff;
+  --primary-200: #d3adf7;
+  --primary-300: #b37feb;
+  --primary-400: #9254de;
+  --primary-500: #722ED1;
+  --primary-600: #531dab;
+  --primary-700: #391085;
+  --primary-800: #22075e;
+  --primary-900: #120338;
 }
 
 .solid-primary-black-text {
@@ -333,7 +323,7 @@
   .p-link:focus-visible {
     outline: 0 none;
     outline-offset: 0;
-    box-shadow: 0 0 0 0.2rem rgba(176, 126, 255, 0.4);
+    box-shadow: none !important;
   }
 
   .p-autocomplete .p-autocomplete-multiple-container:not(.p-disabled):hover {
@@ -721,7 +711,7 @@
   .p-checkbox:not(.p-disabled):has(.p-checkbox-input:focus-visible) .p-checkbox-box {
     outline: 0 none;
     outline-offset: 0;
-    box-shadow: 0 0 0 0.2rem rgba(176, 126, 255, 0.4);
+    box-shadow: none !important;
     border-color: #9B5AED;
   }
 
@@ -784,7 +774,7 @@
   .p-chips:not(.p-disabled).p-focus .p-chips-multiple-container {
     outline: 0 none;
     outline-offset: 0;
-    box-shadow: 0 0 0 0.2rem rgba(176, 126, 255, 0.4);
+    box-shadow: none !important;
     border-color: #9B5AED;
   }
 
@@ -843,7 +833,7 @@
   .p-dropdown:not(.p-disabled).p-focus {
     outline: 0 none;
     outline-offset: 0;
-    box-shadow: 0 0 0 0.2rem rgba(176, 126, 255, 0.4);
+    box-shadow: none !important;
     border-color: #9B5AED;
   }
 
@@ -996,7 +986,7 @@
   .p-inputswitch:not(.p-disabled):has(.p-inputswitch-input:focus-visible) .p-inputswitch-slider {
     outline: 0 none;
     outline-offset: 0;
-    box-shadow: 0 0 0 0.2rem rgba(176, 126, 255, 0.4);
+    box-shadow: none !important;
   }
 
   .p-inputswitch.p-invalid>.p-inputswitch-slider {
@@ -1028,7 +1018,7 @@
   .p-inputtext:enabled:focus {
     outline: 0 none;
     outline-offset: 0;
-    /* box-shadow: 0 0 0 0.2rem rgba(176, 126, 255, 0.4); */
+    box-shadow: none !important;
     border-color: #9B5AED;
   }
 
@@ -1221,7 +1211,7 @@
   .p-multiselect:not(.p-disabled).p-focus {
     outline: 0 none;
     outline-offset: 0;
-    box-shadow: 0 0 0 0.2rem rgba(176, 126, 255, 0.4);
+    box-shadow: none !important;
     border-color: #9B5AED;
   }
 
@@ -1304,7 +1294,7 @@
   .p-multiselect-panel .p-multiselect-header .p-multiselect-close:focus-visible {
     outline: 0 none;
     outline-offset: 0;
-    box-shadow: 0 0 0 0.2rem rgba(176, 126, 255, 0.4);
+    box-shadow: none !important;
   }
 
   .p-multiselect-panel .p-multiselect-items .p-multiselect-item {
@@ -1430,7 +1420,7 @@
   .p-radiobutton:not(.p-disabled):has(.p-radiobutton-input:focus-visible) .p-radiobutton-box {
     outline: 0 none;
     outline-offset: 0;
-    box-shadow: 0 0 0 0.2rem rgba(176, 126, 255, 0.4);
+    box-shadow: none !important;
     border-color: #9B5AED;
   }
 
@@ -5470,7 +5460,7 @@
 
   .p-inline-message.p-inline-message-info {
     background: rgba(59, 130, 246, 0.2);
-    border: solid #3b82f6;
+    border: solid #722ED1;
     border-width: 1px;
     color: #93c5fd;
   }
@@ -5524,7 +5514,7 @@
 
   .p-message.p-message-info {
     background: rgba(59, 130, 246, 0.2);
-    border: solid #3b82f6;
+    border: solid #722ED1;
     border-width: 0 0 0 6px;
     color: #93c5fd;
   }
@@ -5594,7 +5584,7 @@
 
   .p-toast .p-toast-message.p-toast-message-info {
     background: rgba(59, 130, 246, 0.2);
-    border: solid #3b82f6;
+    border: solid #722ED1;
     border-width: 0 0 0 6px;
     color: #93c5fd;
   }
