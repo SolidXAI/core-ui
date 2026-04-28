@@ -276,6 +276,7 @@ body {
 .solid-workspace-switcher {
   position: relative;
   flex: 1;
+  max-width: 100%
 }
 
 .solid-workspace-trigger {
