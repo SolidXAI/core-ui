@@ -351,7 +351,7 @@ export const SolidCardView = (params: SolidCardViewParams) => {
       <div className="solid-list-content h-full flex flex-column flex-grow-1">
         <div className="solid-list-surface solid-card-surface flex flex-column flex-1 min-h-0">
           <div className="page-header solid-list-toolbar solid-card-toolbar flex-column lg:flex-row">
-            <div className="flex justify-content-between w-full solid-list-toolbar-row">
+            <div className="flex justify-content-between w-full">
               <div className="flex gap-3 align-items-center w-full solid-list-toolbar-left">
                 {params.embeded !== true && (
                   <div className="apps-icon block md:hidden cursor-pointer" onClick={toggleBothSidebars}>

@@ -1246,7 +1246,7 @@ export const SolidListView = forwardRef<SolidListViewHandle, SolidListViewParams
           {solidListViewInitialMetaData &&
             <div className="page-header solid-list-toolbar flex-column lg:flex-row">
               {/* <div> */}
-              <div className="flex justify-content-between w-full solid-list-toolbar-row">
+              <div className="flex justify-content-between w-full">
                 <div className="flex gap-3 align-items-center w-full solid-list-toolbar-left">
                   <div className='flex align-items-center gap-2'>
                     {params.embeded !== true &&
