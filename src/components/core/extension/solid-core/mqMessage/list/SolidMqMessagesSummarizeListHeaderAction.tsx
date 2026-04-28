@@ -20,7 +20,7 @@ import { Bar } from "react-chartjs-2";
 ChartJS.register(CategoryScale, LinearScale, BarElement, Tooltip, Legend);
 
 const CHART_COLORS = [
-    "#3b82f6",
+    "#722ED1",
     "#22c55e",
     "#f59e0b",
     "#ef4444",

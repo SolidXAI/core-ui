@@ -118,7 +118,7 @@ export const SolidAdmin = () => {
 
         .chat-button:not(:disabled):hover {
           transform: translateY(-1px);
-          box-shadow: 0 8px 15px rgba(17, 24, 39, 0.2);
+          opacity: 0.9;
         }
       `}</style>
 

@@ -9,8 +9,8 @@ const SolidDashboardNotAvailable = () => {
           style={{
             width: '80px',
             height: '80px',
-            backgroundColor: 'var(--blue-50)',
-            color: 'var(--blue-500)'
+            backgroundColor: 'var(--primary-50)',
+            color: 'var(--primary-500)'
           }}
         >
           <SolidIcon name="si-chart-bar" style={{ fontSize: '2.5rem' }} aria-hidden />

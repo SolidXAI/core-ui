@@ -94,7 +94,7 @@ export default function PDFViewer({ url }: any) {
                     <button
                         onClick={goToPrevPage}
                         disabled={pageNumber <= 1}
-                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        className="px-4 py-2 bg-primary text-white rounded hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed"
                     >
                         Previous
                     </button>
@@ -106,7 +106,7 @@ export default function PDFViewer({ url }: any) {
                     <button
                         onClick={goToNextPage}
                         disabled={pageNumber >= numPages}
-                        className="px-4 py-2 bg-blue-500 text-white rounded hover:bg-blue-600 disabled:bg-gray-300 disabled:cursor-not-allowed"
+                        className="px-4 py-2 bg-primary text-white rounded hover:opacity-90 disabled:bg-gray-300 disabled:cursor-not-allowed"
                     >
                         Next
                     </button>
