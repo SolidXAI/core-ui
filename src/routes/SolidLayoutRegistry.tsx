@@ -106,7 +106,9 @@ function inferPathFromChildren(children: RouteObject[]): string | undefined {
     // Absolute path → use root
     if (child.path?.startsWith("/")) {
       const root = child.path.split("/").filter(Boolean)[0];
-      return root ? `/${root}` : undefined;
+      // return root ? `/${root}` : undefined;
+      // treat absolute path with no segments as home..
+      return root ? `/${root}` : 'home'; 
     }
 
     // Relative path → use first segment
