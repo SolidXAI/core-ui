@@ -9,9 +9,9 @@
   --solid-text-muted: #64748b;
   --solid-border-default: #e2e8f0;
   --solid-border-strong: #cbd5e1;
-  --solid-interactive-bg: #2563eb;
+  --solid-interactive-bg: #722ED1;
   --solid-interactive-fg: #ffffff;
-  --solid-focus-ring: rgba(37, 99, 235, 0.35);
+  --solid-focus-ring: rgba(114, 46, 209, 0.35);
   --background: #f6f8fc;
   --foreground: #0f172a;
   --card: #ffffff;
@@ -21,15 +21,15 @@
   --muted-foreground: #475569;
   --accent: #eef2ff;
   --accent-foreground: #3730a3;
-  --primary: #2563eb;
+  --primary: #722ED1;
   --primary-foreground: #ffffff;
-  --ring: rgba(37, 99, 235, 0.35);
+  --ring: rgba(114, 46, 209, 0.35);
   --sidebar-background: #f8fafc;
   --sidebar-foreground: #0f172a;
   --sidebar-border: #e2e8f0;
   --sidebar-accent: #f1f5f9;
   --sidebar-accent-foreground: #0f172a;
-  --sidebar-primary: #2563eb;
+  --sidebar-primary: #722ED1;
   --sidebar-primary-foreground: #ffffff;
   --sidebar-width: 272px;
   --sidebar-width-collapsed: 76px;
@@ -53,9 +53,9 @@ html.dark,
   --solid-text-muted: #94a3b8;
   --solid-border-default: #1f2937;
   --solid-border-strong: #374151;
-  --solid-interactive-bg: #60a5fa;
+  --solid-interactive-bg: #b37feb;
   --solid-interactive-fg: #0b1220;
-  --solid-focus-ring: rgba(96, 165, 250, 0.35);
+  --solid-focus-ring: rgba(179, 127, 235, 0.35);
   --background: #090f1d;
   --foreground: #e5e7eb;
   --card: #111827;
@@ -65,16 +65,16 @@ html.dark,
   --muted-foreground: #cbd5e1;
   --accent: #172554;
   --accent-foreground: #dbeafe;
-  --primary: #60a5fa;
+  --primary: #b37feb;
   --primary-foreground: #0b1220;
-  --ring: rgba(96, 165, 250, 0.35);
+  --ring: rgba(179, 127, 235, 0.35);
   --sidebar-background: #020817;
   --sidebar-foreground: #e2e8f0;
   --sidebar-border: #111827;
   --sidebar-accent: #0f172a;
   --sidebar-accent-foreground: #f8fafc;
-  --sidebar-primary: #1d4ed8;
-  --sidebar-primary-foreground: #e5efff;
+  --sidebar-primary: #531dab;
+  --sidebar-primary-foreground: #f5f0ff;
   --shadow-soft: 0 18px 30px rgba(2, 6, 23, 0.6);
 }
 
@@ -88,7 +88,7 @@ body {
 
 .solid-shell {
   min-height: 100vh;
-  background: radial-gradient(circle at 0 0, rgba(37, 99, 235, 0.08), transparent 38%), var(--background);
+  background: radial-gradient(circle at 0 0, rgba(114, 46, 209, 0.08), transparent 38%), var(--background);
 }
 
 .solid-main {
@@ -138,8 +138,11 @@ body {
 
 .solid-admin-sidebar-trigger:hover,
 .solid-admin-sidebar-trigger:focus-visible {
-  box-shadow: 0 0 0 3px var(--ring);
   outline: none;
+}
+
+.solid-admin-sidebar-trigger:focus-visible {
+  box-shadow: 0 0 0 3px var(--ring);
 }
 
 .solid-admin-header-sep {
@@ -418,7 +421,7 @@ body {
 }
 
 .solid-sidebar-external-trigger:hover {
-  box-shadow: 0 0 0 3px var(--ring);
+  background: var(--accent);
 }
 
 .solid-sidebar-hotspot {
@@ -459,7 +462,7 @@ body {
   width: 100%;
   border: 1px solid var(--sidebar-border);
   background: var(--card);
-  color: var(--card-foreground);
+  color: var(--sidebar-foreground);
   border-radius: 9px;
   height: 34px;
   padding: 0 10px;
@@ -1176,7 +1179,6 @@ body {
 }
 
 .solid-btn:hover {
-  box-shadow: 0 0 0 3px var(--ring);
 }
 
 .solid-btn:focus-visible {
@@ -1300,8 +1302,7 @@ body {
 
 .solid-select:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 28%, transparent);
-  border-color: color-mix(in srgb, var(--ring) 56%, transparent);
+  border-color: var(--primary);
 }
 
 .solid-select:disabled {
@@ -1338,8 +1339,7 @@ body {
 
 .solid-input:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 28%, transparent);
-  border-color: color-mix(in srgb, var(--ring) 56%, transparent);
+  border-color: var(--primary);
 }
 
 .solid-input:disabled {
@@ -1370,8 +1370,7 @@ body {
 }
 
 .solid-autocomplete-chip-control.is-focused {
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 28%, transparent);
-  border-color: color-mix(in srgb, var(--ring) 56%, transparent);
+  border-color: var(--primary);
 }
 
 .solid-autocomplete-input {
@@ -1389,8 +1388,8 @@ body {
 }
 
 .solid-autocomplete-inline-input:focus-visible {
-  box-shadow: none;
-  border-color: transparent;
+  box-shadow: none !important;
+  border-color: var(--primary);
 }
 
 .solid-autocomplete-trigger {
@@ -2964,8 +2963,8 @@ body {
 .solid-auth-theme-wrapper .solid-auth-otp-input .solid-otp-input-field:focus,
 .solid-auth-theme-wrapper .solid-auth-otp-input.p-inputotp .p-inputotp-input:focus {
   outline: none;
-  border-color: var(--solid-border-strong) !important;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--solid-focus-ring) 60%, transparent);
+  border-color: var(--primary) !important;
+  box-shadow: none !important;
 }
 
 /* .solid-auth-theme-wrapper .solid-auth-otp-input .solid-otp-input-field:nth-child(3),
@@ -3187,8 +3186,8 @@ body {
 
 .solid-list-toolbar .solid-global-search-element:focus-within,
 .solid-kanban-toolbar .solid-global-search-element:focus-within {
-  border-color: color-mix(in srgb, var(--ring) 60%, var(--border) 40%);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 18%, transparent);
+  border-color: var(--primary);
+  box-shadow: none !important;
 }
 
 .solid-list-toolbar .solid-global-search-element-wrapper,
@@ -3237,8 +3236,8 @@ body {
 }
 
 .solid-tree-toolbar .solid-global-search-element:focus-within {
-  border-color: color-mix(in srgb, var(--ring) 60%, var(--border) 40%);
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--ring) 18%, transparent);
+  border-color: var(--primary);
+  box-shadow: none !important;
 }
 
 .solid-tree-toolbar .solid-global-search-element-wrapper {
@@ -3806,7 +3805,8 @@ html.dark .solid-data-table-root input[type="checkbox"]:hover,
 html.dark .solid-data-table-root input[type="checkbox"]:focus-visible,
 [data-theme="dark"] .solid-data-table-root input[type="checkbox"]:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 3px color-mix(in srgb, var(--ring) 34%, transparent);
+  border-color: var(--primary);
+  box-shadow: none !important;
 }
 
 html.dark .solid-data-table-root input[type="checkbox"]:checked,
@@ -4425,7 +4425,8 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-row-action-button:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 24%, transparent);
+  border-color: var(--primary);
+  box-shadow: none !important;
 }
 
 .solid-row-action-button.solid-row-action-button-danger {
@@ -4597,7 +4598,8 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-header-action-button:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary) 24%, transparent);
+  border-color: var(--primary);
+  box-shadow: none !important;
 }
 
 .solid-header-action-button-icon {
@@ -5307,7 +5309,6 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-studio-home-card:hover {
   border-color: var(--primary);
-  box-shadow: 0 4px 24px color-mix(in srgb, var(--primary) 16%, transparent), 0 0 0 3px color-mix(in srgb, var(--primary) 10%, transparent);
   transform: translateY(-2px);
 }
 
@@ -5641,12 +5642,11 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-studio-empty-cta-button:hover {
   transform: translateY(-1px);
-  box-shadow: 0 12px 22px rgba(17, 24, 39, 0.25);
+  opacity: 0.9;
 }
 
 .solid-studio-empty-cta-button:active {
   transform: translateY(0);
-  box-shadow: 0 6px 12px rgba(17, 24, 39, 0.2);
 }
 
 .solid-studio-landing-empty-divider {
@@ -6150,7 +6150,6 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-field-selector-card:hover {
   border-color: color-mix(in srgb, var(--primary-color, var(--primary)) 36%, var(--border));
-  box-shadow: 0 4px 16px rgba(15, 23, 42, 0.06);
   transform: translateY(-1px);
 }
 
@@ -6341,7 +6340,8 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 
 .solid-segmented-item:focus-visible {
   outline: none;
-  box-shadow: 0 0 0 2px color-mix(in srgb, var(--primary-color, #4f46e5) 35%, transparent);
+  border-color: var(--primary-color, var(--primary));
+  box-shadow: none !important;
 }
 
 .solid-segmented-item.is-disabled {

@@ -52,7 +52,7 @@ export const SolidChatterMessageCoModelEntityIdFormViewWidget = ({ formik, field
                             gap: '6px',
                             textDecoration: 'none',
                             fontSize: '12px',
-                            color: '#2563eb',
+                            color: '#722ED1',
                             fontWeight: 500
                         }}
                     >

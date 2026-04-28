@@ -75,12 +75,12 @@
 }
 
 :global(.solid-import-stepper-item:hover:not(:disabled)) {
-    box-shadow: 0 0 0 3px var(--ring);
+    background-color: color-mix(in srgb, var(--card) 90%, white 10%);
 }
 
 :global(.solid-import-stepper-item:focus-visible) {
     outline: none;
-    box-shadow: 0 0 0 3px var(--ring);
+    border-color: var(--primary);
 }
 
 :global(.solid-import-stepper-item:disabled) {
@@ -327,7 +327,6 @@
 
 :global(.solid-import-dropzone-shell:hover) {
     border-color: color-mix(in srgb, var(--primary) 52%, var(--border));
-    box-shadow: 0 0 0 3px var(--ring);
 }
 
 :global(.solid-import-dropzone-copy) {
@@ -568,7 +567,7 @@
 
 :global(.solid-import-mapping-remove:focus-visible) {
     outline: none;
-    box-shadow: 0 0 0 3px var(--ring);
+    border-color: #dc2626;
 }
 
 :global(.solid-import-mapping-remove-placeholder) {
