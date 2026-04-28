@@ -97,22 +97,24 @@ export const AuthLayout = ({ children }: { children: React.ReactNode }) => {
     };
 
     const authLogoSrc = normalizeAssetUrl(solidSettingsData?.data?.appLogo || "");
-    const appName = solidSettingsData?.data?.appTitle || "SolidX";
+    const appName = solidSettingsData?.data?.appTitle?.trim() || "";
 
-    const renderBrand = (align: "center" | "start" = "start") => (
-        <a href="#" className={`solid-auth-brand ${align === "center" ? "is-center" : ""}`} aria-label={appName}>
+    const renderBrand = (align: "center" | "start" = "start") => {
+        if (!authLogoSrc && !appName) return null;
+
+        const brandLabel = appName || "Application logo";
+
+        return (
+            <div className={`solid-auth-brand ${align === "center" ? "is-center" : ""}`} aria-label={brandLabel}>
                 {authLogoSrc ? (
                     <span className="solid-auth-brand-logo">
-                    <img src={authLogoSrc} alt={appName} />
+                        <img src={authLogoSrc} alt={brandLabel} />
                     </span>
-                ) : (
-                    <span className="solid-auth-brand-icon">
-                    <span className="solid-auth-brand-fallback">{appName.slice(0, 1).toUpperCase()}</span>
-                    <span className="solid-auth-brand-text">{appName}</span>
-                    </span>
-                )}
-        </a>
-    );
+                ) : null}
+                {appName ? <span className="solid-auth-brand-text">{appName}</span> : null}
+            </div>
+        );
+    };
 
     const authLayout = solidSettingsData?.data?.authPagesLayout || "center";
     const authTheme = solidSettingsData?.data?.authPagesTheme === "dark" ? "dark" : "light";
