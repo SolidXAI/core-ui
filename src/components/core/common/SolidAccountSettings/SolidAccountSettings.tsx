@@ -2,11 +2,16 @@ import { useEffect, useMemo, useState } from "react";
 import { SolidPersonalInfo } from "./SolidPersonalInfo";
 import { SolidChangePassword } from "./SolidChangePassword";
 import { SolidVersionInfo } from "./SolidVersionInfo";
-import styles from "./SolidAccountSettings.module.css";
+import { SolidApiKeys } from "./SolidApiKeys";
+import { useSession } from "../../../../hooks/useSession";
 import { useLazyGetSolidSettingsQuery } from "../../../../redux/api/solidSettingsApi";
+import styles from "./SolidAccountSettings.module.css";
 
 export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfileSettingsDialog }: any) => {
   const [settingKey, setSettingKey] = useState("personal_info");
+
+  const { data: session } = useSession() as any;
+  const canUseApiKeys = session?.user?.isAllowedToGenerateApiKeys ?? false;
 
   const [trigger, { data: solidSettingsData }] = useLazyGetSolidSettingsQuery();
   useEffect(() => {
@@ -16,8 +21,16 @@ export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfile
   const settings = [
     { label: "Personal Info", key: "personal_info" },
     { label: "Change Password", key: "change_password" },
+    ...(canUseApiKeys ? [{ label: "API Keys", key: "api_keys" }] : []),
     { label: "About", key: "about" },
   ];
+
+  // If the permission was revoked while the tab is open, snap back
+  useEffect(() => {
+    if (settingKey === "api_keys" && !canUseApiKeys) {
+      setSettingKey("personal_info");
+    }
+  }, [canUseApiKeys, settingKey]);
 
   const renderSettingComponent = useMemo(() => {
     switch (settingKey) {
@@ -25,6 +38,8 @@ export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfile
         return <SolidPersonalInfo />;
       case "change_password":
         return <SolidChangePassword solidSettingsData={solidSettingsData} />;
+      case "api_keys":
+        return <SolidApiKeys />;
       case "about":
         return <SolidVersionInfo />;
       default:
@@ -34,10 +49,12 @@ export const SolidAccountSettings = ({ showProfileSettingsDialog, setShowProfile
 
   if (!showProfileSettingsDialog) return null;
 
+  const isWide = settingKey === "api_keys";
+
   return (
     <div className={styles.backdrop} role="presentation" onClick={() => setShowProfileSettingsDialog(false)}>
       <section
-        className={styles.modal}
+        className={`${styles.modal} ${isWide ? styles.modalWide : ""}`}
         role="dialog"
         aria-modal="true"
         aria-labelledby="solid-account-settings-title"

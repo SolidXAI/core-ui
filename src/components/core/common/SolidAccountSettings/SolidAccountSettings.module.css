@@ -22,6 +22,10 @@
   overflow: hidden;
 }
 
+.modalWide {
+  width: min(860px, calc(100vw - 20px));
+}
+
 .header {
   min-height: 62px;
   border-bottom: 1px solid var(--border);

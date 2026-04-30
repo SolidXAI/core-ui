@@ -1,8 +1,6 @@
 import { useFormik } from 'formik';
 import { useCallback, useEffect, useState } from 'react'
 import { CancelButton } from './CancelButton';
-import { ApiKeysTab } from '../core/users/ApiKeysTab';
-import { useSession } from '../../hooks/useSession';
 import { SolidButton, SolidDivider, SolidInput, SolidSegmentedControl, SolidSwitch, SolidTabGroup, SolidTextarea } from '../shad-cn-ui';
 import { usePathname } from "../../hooks/usePathname";
 import SolidLogo from '../../resources/images/SolidXLogo.svg'
@@ -22,7 +20,6 @@ import { showToast } from '../../redux/features/toastSlice';
 
 
 export const GeneralSettings = () => {
-    const { data: session } = useSession();
     const [appLogoPreview, setAppLogoPreview] = useState<string | null>(null);
     const [companyLogoPreview, setCompanyLogoPreview] = useState<string | null>(null);
     const [authScreenRightBackgroundImagePreview, setAuthScreenRightBackgroundImagePreview] = useState<string | null>(null);
@@ -1012,12 +1009,7 @@ export const GeneralSettings = () => {
                                     onAiConfigChange={handleAiConfigChange}
                                 />
                             }
-                            {pathname.includes("api-keys") && session?.user?.id &&
-                                <ApiKeysTab
-                                    userId={session.user.id}
-                                    canCreate={session?.user?.isAllowedToGenerateApiKeys ?? false}
-                                />
-                            }
+
                         </div>
                     </form>
                 </div>
