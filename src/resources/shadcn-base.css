@@ -1467,7 +1467,6 @@ body {
 }
 
 .solid-autocomplete-chip-label {
-  max-width: 130px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
@@ -6351,5 +6350,5 @@ html.dark .solid-paginator-btn:hover:not(:disabled),
 }
 
 .solid-list-toolbar-row{
-  padding: 5px 10px 0 10px;
+  padding: 5px 15px 0 10px;
 }
