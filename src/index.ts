@@ -404,6 +404,8 @@ export { default as SolidChangeForcePassword } from './components/auth/SolidChan
 export { default as SolidInitialLoginOtp } from './components/auth/SolidInitialLoginOtp';
 export { default as SolidInitiateRegisterOtp } from './components/auth/SolidInitiateRegisterOtp';
 export { GoogleAuthChecking } from './components/auth/GoogleAuthChecking';
+export { FacebookAuthChecking } from './components/auth/FacebookAuthChecking';
+export { MicrosoftAuthChecking } from './components/auth/MicrosoftAuthChecking';
 export { ForgotPasswordThankYou } from './components/auth/ForgotPasswordThankYou';
 export { 
   SolidButton, 
@@ -556,6 +558,8 @@ export { ResetPasswordPage as AuthResetPasswordPage } from './routes/pages/auth/
 export { InitiateLoginPage as AuthInitiateLoginPage } from './routes/pages/auth/InitiateLoginPage';
 export { InitiateRegisterPage as AuthInitiateRegisterPage } from './routes/pages/auth/InitiateRegisterPage';
 export { InitiateGoogleOauthPage as AuthInitiateGoogleOauthPage } from './routes/pages/auth/InitiateGoogleOauthPage';
+export { InitiateFacebookOauthPage as AuthInitiateFacebookOauthPage } from './routes/pages/auth/InitiateFacebookOauthPage';
+export { InitiateMicrosoftOauthPage as AuthInitiateMicrosoftOauthPage } from './routes/pages/auth/InitiateMicrosoftOauthPage';
 export { SsoPage as AuthSsoPage } from './routes/pages/auth/SsoPage';
 export { ErrorPage } from './routes/pages/ErrorPage';
 export { NotFoundPage } from './routes/pages/NotFoundPage';
