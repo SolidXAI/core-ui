@@ -58,6 +58,7 @@ export function SolidTabGroup({
                   className={cx(
                     "solid-notebook-tab-trigger",
                     "solid-tabs-trigger",
+                    "w-full",
                     tab.hasError && "error",
                     isActive && "active",
                     isActive && "is-active",
@@ -83,6 +84,7 @@ export function SolidTabGroup({
                 className={cx(
                   "solid-notebook-tab-trigger",
                   "solid-tabs-trigger",
+                  "w-full",
                   tab.hasError && "error",
                   isActive && "active",
                   isActive && "is-active",
