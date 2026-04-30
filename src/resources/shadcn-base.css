@@ -1467,7 +1467,6 @@ body {
 }
 
 .solid-autocomplete-chip-label {
-  max-width: 130px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;

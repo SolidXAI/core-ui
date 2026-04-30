@@ -10,6 +10,7 @@ import { SolidFormFieldWidgetProps } from "../../../../types/solid-core";
 import { SolidFieldTooltip } from "../../../../components/common/SolidFieldTooltip";
 import { ERROR_MESSAGES } from "../../../../constants/error-messages";
 import { DateFieldViewComponent } from '../../../../components/core/common/DateFieldViewComponent';
+import dayjs from "dayjs";
 import styles from "./solidFields.module.css";
 
 const toDateValue = (value: any) => {
@@ -28,7 +29,9 @@ export class SolidDateTimeField implements ISolidField {
 
     updateFormData(value: any, formData: FormData): any {
         const fieldLayoutInfo = this.fieldContext.field;
-        if (value) {
+        if (value instanceof Date && !isNaN(value.getTime())) {
+            formData.append(fieldLayoutInfo.attrs.name, dayjs(value).format('YYYY-MM-DD HH:mm:ss'));
+        } else if (value) {
             formData.append(fieldLayoutInfo.attrs.name, value);
         }
     }

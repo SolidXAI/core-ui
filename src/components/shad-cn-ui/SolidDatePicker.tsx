@@ -20,12 +20,23 @@ function formatDateValue(value: Date | null | undefined, pattern?: string) {
     return value.toISOString();
   }
   const pad = (num: number, length = 2) => String(num).padStart(length, "0");
+  const hours = value.getHours();
+  const minutes = value.getMinutes();
+  const seconds = value.getSeconds();
+  const ampm = hours >= 12 ? "PM" : "AM";
+  const h12 = hours % 12 || 12;
+
   return pattern
     .replace(/yyyy/g, String(value.getFullYear()))
     .replace(/MM/g, pad(value.getMonth() + 1))
     .replace(/dd/g, pad(value.getDate()))
-    .replace(/HH/g, pad(value.getHours()))
-    .replace(/mm/g, pad(value.getMinutes()));
+    .replace(/HH/g, pad(hours))
+    .replace(/hh/g, pad(h12))
+    .replace(/h/g, String(h12))
+    .replace(/mm/g, pad(minutes))
+    .replace(/ss/g, pad(seconds))
+    .replace(/aa/g, ampm)
+    .replace(/a/g, ampm);
 }
 
 const SolidDatePickerInput = React.forwardRef<HTMLInputElement, SolidDatePickerInputProps>(
