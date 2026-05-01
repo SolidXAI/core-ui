@@ -126,10 +126,6 @@ export const SolidEmptyListViewPlaceholder = ({
                             )}
                         </div>
 
-                        <div className="solid-empty-listview-description">
-                            Click Create or Import to add {entityName} entities.
-                        </div>
-
                         <CustomActionButtons />
 
                         {(canCreate || canImport) && (
