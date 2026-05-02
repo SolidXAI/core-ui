@@ -2066,6 +2066,11 @@ li.header-li-px {
   width: 100%;
   position: relative;
   gap: 0;
+  pointer-events: none;
+}
+
+.arrow-stepper-container > * {
+  pointer-events: auto;
 }
 
 .arrow-step-button {
