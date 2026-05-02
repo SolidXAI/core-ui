@@ -192,7 +192,7 @@ export const DefaultDateTimeFormViewWidget = ({
                 </p>
             )}
             <p className={styles.fieldViewValue}>
-                <DateFieldViewComponent value={rawValue} format={format} fallback="-"></DateFieldViewComponent>
+                <DateFieldViewComponent value={rawValue} format={format} showTime={true} fallback="-"></DateFieldViewComponent>
             </p>
         </div>
     );
