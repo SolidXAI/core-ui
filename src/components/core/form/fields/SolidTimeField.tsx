@@ -222,7 +222,7 @@ export const DefaultTimeFormViewWidget = ({
     const showFieldLabel = fieldLayoutInfo?.attrs?.showLabel;
 
     const rawValue = formik.values[fieldName];
-    const format = fieldLayoutInfo.attrs?.format;
+    const format = fieldLayoutInfo.attrs?.format || "HH:mm:ss";
 
     const parsedTime = rawValue ? parseTimeStringToDate(rawValue) : null;
     const displayValue = parsedTime ? (format ? dayjs(parsedTime).format(format) : formatTime(parsedTime)) : "-";
